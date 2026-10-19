@@ -3,9 +3,12 @@
 ; island's client from the routes, so a route that changes is a build that
 ; fails where an island no longer matches it.
 
+; The store and the routes over it, each a module of its own.
+
 (library
- (name routes)
- (modules routes)
+ (name server)
+ (wrapped false)
+ (modules store routes)
  (libraries spindle wiretype)
  (preprocess
   (pps ppx_wiretype)))
@@ -13,9 +16,9 @@
 (executable
  (name notes)
  (modules notes)
- (libraries spindle spindle-cli routes))
+ (libraries spindle spindle-cli server))
 
 (executable
  (name serve)
  (modules serve)
- (libraries spindle routes eio_main))
+ (libraries spindle server eio_main))

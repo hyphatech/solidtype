@@ -41,6 +41,7 @@ export const CodeSchema = z.enum([
   "cross_origin",
   "internal",
   "invalid",
+  "not_found",
   "too_large",
   "unreadable",
   "unsupported_media_type",
