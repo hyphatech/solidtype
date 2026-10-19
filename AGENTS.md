@@ -1,12 +1,13 @@
 # AGENTS.md
 
-solidtype is Solid, typed: OCaml front ends on SolidJS and Kobalte,
-compiled by Melange. A component is written in OCaml's JSX (`.mlx`), and
-reaches the browser as the code Solid's own compiler emits for the same
-JSX. `ppx_solidtype` lowers the JSX; `vite-plugin-solidtype` hands it to
-Solid's compiler. Each JavaScript library bound is an opam package of
-its own: `solidtype` binds Solid, `solidtype-kobalte` Kobalte. This file is for anyone changing it, human or agent.
-Users start at [README.md](README.md).
+solidtype is an OCaml library of Hypha Stack: Solid, typed, for OCaml front
+ends on SolidJS and Kobalte, compiled by Melange. A component is written in
+OCaml's JSX (`.mlx`), and reaches the browser as the code Solid's own
+compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
+`vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
+library bound is an opam package of its own: `solidtype` binds Solid,
+`solidtype-kobalte` Kobalte. This file is for anyone changing it, human or
+agent. Users start at [README.md](README.md).
 
 ## Commands
 
@@ -243,33 +244,7 @@ break.
   to build the AST it writes. Symptom: `rg -n '\bopen ' src ppx example`
   finds any other.
 
-## House style
-
-The house style, the OCaml checklist and the OCaml tools are
-[OCAML.md](OCAML.md), the same in every Hypha OCaml repository and changed
-in all of them together, never in one. It is imported here, so it is read
-with this file:
-
-@OCAML.md
-
-## Git
-
-How work becomes a commit -- its format, where it happens, what is pushed
--- is [GIT.md](GIT.md), the same in every Hypha repository and changed in
-all of them together, never in one. It is imported here, so it is read
-with this file:
-
-@GIT.md
-
 ## Changes and releases
-
-How a change reaches the library's users -- its line in `CHANGES.md`, what
-is breaking, how a release is tagged and published -- is
-[LIBRARY.md](LIBRARY.md), the same in every Hypha library and changed in
-all of them together, never in one. It is imported here, so it is read
-with this file:
-
-@LIBRARY.md
 
 Its opam packages and the Vite plugin are released together, at one
 version, so a binding and the plugin that reads its markers never
