@@ -17,12 +17,13 @@
   compile.
 - Solid 1.9 bound whole: `Solid` -- signals, memos, effects, roots,
   ownership, errors as OCaml exceptions, transitions, resources, arrays,
-  observables, `merge_props` and `omit` -- `Web` -- rendering, hydration
-  and server rendering -- and `Store`, its state a record. Its
-  components are `For`, `Index`, `Show`, `Switch`, `Match`, `Suspense`,
-  `SuspenseList`, `ErrorBoundary`, `Dynamic`, `Portal`, `NoHydration`,
-  `Hydration`, `HydrationScript` and `Assets`, and `Context.Make` makes
-  a context. What Solid's compiler alone emits is not bound.
+  observables, `merge_props` and `omit` -- `Web` -- rendering and
+  hydration -- `Server` -- rendering on the server -- and `Store`, its
+  state a record. Its components are `For`, `Index`, `Show`, `Switch`,
+  `Match`, `Suspense`, `SuspenseList`, `ErrorBoundary`, `Dynamic`,
+  `Portal`, `NoHydration`, `Hydration`, `HydrationScript` and `Assets`,
+  and `Context.Make` makes a context. What Solid's compiler alone emits is
+  not bound.
 - `Show.Some` and `Match.Some` show an `option`, `Some 0` too, and
   `Show.Keyed` and `Match.Keyed` give their child the value.
 - A `Switch` whose only child is a thunk of a `match` shows the case that

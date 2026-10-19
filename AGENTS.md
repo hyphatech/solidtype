@@ -29,7 +29,9 @@ src/                 solidtype, for Melange alone
   jsx                the markers the ppx writes and the plugin rewrites
   check              the types of a component's props check
   solid              Solid's reactive core, solid-js
-  web                its renderer and server rendering, solid-js/web
+  web                its renderer in the browser, solid-js/web
+  server             its rendering on the server, a module of its own so a
+                     browser build never names what Solid's browser build lacks
   store              its stores, solid-js/store
   for index show switch match suspense suspenseList errorBoundary
   dynamic portal noHydration hydration hydrationScript assets
@@ -53,6 +55,8 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
                      the browser, hydratable, and for the server -- beside
                      its TSX twin
   test/rewrite       what the plugin writes for a marker form
+  test/browser       every module of the libraries built for the browser,
+                     each import found in Solid's and Kobalte's browser build
   test/astro         the example site built: its page holds the
                      prerendered island, and the client:only one's mount
 astro.config.mjs     the example site: Astro, its Solid integration and
