@@ -1,0 +1,48 @@
+module H = Harness
+module HoverCard = Solidtype.Kobalte.HoverCard
+
+let island () =
+  <HoverCard.Root openDelay=0. closeDelay=0.>
+    <HoverCard.Trigger href="https://example.com/ada">"Ada"</HoverCard.Trigger>
+    <HoverCard.Portal>
+      <HoverCard.Content>
+        <HoverCard.Arrow /> <p>"Ada wrote the first program."</p>
+      </HoverCard.Content>
+    </HoverCard.Portal>
+  </HoverCard.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/HoverCard.tsx"]
+
+let ( let* ) = H.( let* )
+
+external hover : H.user -> Dom.element -> unit Js.Promise.t = "hover"
+[@@mel.send]
+
+(* A hover card is for sighted pointer users, so its state is in its
+   trigger's data attributes rather than in ARIA. *)
+let is_open trigger = Option.is_some (H.attribute trigger "data-expanded")
+
+let () =
+  H.alike "HoverCard" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "link" (H.query ~name:"Ada" ()) in
+      if is_open trigger then Js.Exn.raiseError "the card is closed at first";
+      let* () = hover user trigger in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the card, the trigger hovered"
+              "Ada wrote the first program."
+              (H.text (H.by_text "Ada wrote the first program."));
+            if not (is_open trigger) then
+              Js.Exn.raiseError "the trigger is expanded, hovered")
+      in
+      let* () = H.keyboard user "{Escape}" in
+      let* () =
+        H.eventually (fun () ->
+            if is_open trigger then
+              Js.Exn.raiseError "the card closes on Escape")
+      in
+      let* () = H.tab user in
+      H.eventually (fun () ->
+          if not (is_open trigger) then
+            Js.Exn.raiseError "the card opens as the trigger takes focus"))

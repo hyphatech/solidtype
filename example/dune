@@ -1,0 +1,5 @@
+(melange.emit
+ (target out)
+ (libraries example example_test)
+ (module_systems
+  (es6 jsx)))

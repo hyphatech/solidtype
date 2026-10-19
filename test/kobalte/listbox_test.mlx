@@ -1,0 +1,79 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Listbox = K.Listbox
+module Node = K.Types.CollectionNode
+module Jsx = Solidtype.Jsx
+
+let island () =
+  <Listbox.Root
+    aria_label="Fruit"
+    options=(fun () ->
+              Array.map K.Types.Either.left [| "Apple"; "Banana"; "Cherry" |])
+    renderItem=(fun item ->
+                 <Listbox.Item item=(fun () -> item)>
+                   <Listbox.ItemLabel>
+                     (fun () -> Jsx.string (Node.raw_value item))
+                   </Listbox.ItemLabel>
+                   <Listbox.ItemDescription>
+                     (fun () -> Jsx.string (Node.raw_value item ^ " in season"))
+                   </Listbox.ItemDescription>
+                 </Listbox.Item>)
+  />
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/Listbox.tsx"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let ( let* ) = H.( let* )
+let option name = H.by_role_named "option" (H.query ~name ())
+let selected e = Option.value (H.attribute e "aria-selected") ~default:""
+
+let expect_focused ~what name =
+  if not (H.focused == option name) then
+    Js.Exn.raiseError (what ^ ": focus is on " ^ name)
+
+(* The text of the element an option's attribute names. *)
+let named_by e attribute =
+  match H.attribute e attribute with
+  | None -> ""
+  | Some id -> (
+      match Js.Null.toOption (by_id id) with
+      | None -> ""
+      | Some named -> H.text named)
+
+let () =
+  H.alike "Listbox" ~island ~twin (fun user ->
+      ignore (H.by_role_named "listbox" (H.query ~name:"Fruit" ()));
+      if Array.length (H.all_by_role "option") <> 3 then
+        Js.Exn.raiseError "three options";
+      H.expect_equal ~what:"an option, none chosen" "false"
+        (selected (option "Banana"));
+      H.expect_equal ~what:"the option's description" "Banana in season"
+        (named_by (option "Banana") "aria-describedby");
+      let* () = H.click user (option "Banana") in
+      H.expect_equal ~what:"the option clicked" "true"
+        (selected (option "Banana"));
+      expect_focused ~what:"the option clicked" "Banana";
+      let* () = H.keyboard user "{ArrowDown}" in
+      expect_focused ~what:"ArrowDown pressed" "Cherry";
+      H.expect_equal ~what:"the option clicked, ArrowDown pressed" "true"
+        (selected (option "Banana"));
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"the option Enter chose" "true"
+        (selected (option "Cherry"));
+      H.expect_equal ~what:"the option chosen before" "false"
+        (selected (option "Banana"));
+      let* () = H.keyboard user "{Home}" in
+      expect_focused ~what:"Home pressed" "Apple";
+      let* () = H.keyboard user "{ArrowUp}" in
+      expect_focused ~what:"ArrowUp pressed on the first" "Apple";
+      let* () = H.keyboard user "{End}" in
+      expect_focused ~what:"End pressed" "Cherry";
+      let* () = H.keyboard user "b" in
+      expect_focused ~what:"b typed" "Banana";
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"the option Space chose" "true"
+        (selected (option "Banana"));
+      Js.Promise.resolve ())

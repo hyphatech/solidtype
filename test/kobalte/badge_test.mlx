@@ -1,0 +1,15 @@
+module H = Harness
+module Badge = Solidtype.Kobalte.Badge
+
+let island () = <Badge.Root textValue="3 new messages">"3"</Badge.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Badge.tsx"]
+
+let () =
+  H.alike "Badge" ~island ~twin (fun _ ->
+      let badge =
+        H.by_role_named "status" (H.query ~name:"3 new messages" ())
+      in
+      H.expect_equal ~what:"the badge's text" "3" (H.text badge);
+      Js.Promise.resolve ())

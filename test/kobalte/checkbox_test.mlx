@@ -1,0 +1,76 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Checkbox = K.Checkbox
+module State = K.Types.CheckboxRootState
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  <div>
+    <Checkbox.Root>
+      (fun state ->
+        <div>
+          <Checkbox.Input />
+          <Checkbox.Label>"Subscribe"</Checkbox.Label>
+          <Checkbox.Description>"Once a week"</Checkbox.Description>
+          <Checkbox.Control>
+            <Checkbox.Indicator>
+              (fun () ->
+                Jsx.string (if S.get (State.checked state) then "on" else "off"))
+            </Checkbox.Indicator>
+          </Checkbox.Control>
+        </div>)
+    </Checkbox.Root>
+    <Checkbox.Root indeterminate=true>
+      <Checkbox.Input />
+      <Checkbox.Label>"Select all"</Checkbox.Label>
+      <Checkbox.Control />
+    </Checkbox.Root>
+    <Checkbox.Root required=true validationState=`invalid>
+      <Checkbox.Input />
+      <Checkbox.Label>"Accept the terms"</Checkbox.Label>
+      <Checkbox.ErrorMessage>"Accept them to go on"</Checkbox.ErrorMessage>
+      <Checkbox.Control />
+    </Checkbox.Root>
+  </div>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/Checkbox.tsx"]
+
+external indeterminate : Dom.element -> bool = "indeterminate" [@@mel.get]
+external id : Dom.element -> string = "id" [@@mel.get]
+
+let ( let* ) = H.( let* )
+
+(* Whether [element]'s aria-describedby names [description]'s id. *)
+let described_by element description =
+  Option.value (H.attribute element "aria-describedby") ~default:""
+  |> String.split_on_char ' '
+  |> List.exists (String.equal (id description))
+
+let () =
+  H.alike "Checkbox" ~island ~twin (fun user ->
+      let checkbox name = H.by_role_named "checkbox" (H.query ~name ()) in
+      let subscribe = checkbox "Subscribe" in
+      if not (described_by subscribe (H.by_text "Once a week")) then
+        Js.Exn.raiseError "the checkbox is described by its description";
+      if H.checked subscribe then Js.Exn.raiseError "the checkbox starts off";
+      let* () = H.click user subscribe in
+      if not (H.checked subscribe) then Js.Exn.raiseError "a click checks it";
+      H.expect_equal ~what:"the indicator, checked" "on"
+        (H.text (H.by_text "on"));
+      let* () = H.keyboard user " " in
+      if H.checked subscribe then Js.Exn.raiseError "Space unchecks it";
+      let* () = H.click user (H.by_text "Subscribe") in
+      if not (H.checked subscribe) then
+        Js.Exn.raiseError "a click on its label checks it";
+      if not (indeterminate (checkbox "Select all")) then
+        Js.Exn.raiseError "the indeterminate checkbox is mixed";
+      let terms = checkbox "Accept the terms" in
+      H.expect_equal ~what:"the invalid checkbox's aria-invalid" "true"
+        (Option.value (H.attribute terms "aria-invalid") ~default:"");
+      if Option.is_none (H.attribute terms "required") then
+        Js.Exn.raiseError "the required checkbox is required";
+      if not (described_by terms (H.by_text "Accept them to go on")) then
+        Js.Exn.raiseError "the invalid checkbox is described by its error";
+      Js.Promise.resolve ())

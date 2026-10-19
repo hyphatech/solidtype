@@ -1,0 +1,98 @@
+module H = Harness
+module ContextMenu = Solidtype.Kobalte.ContextMenu
+
+let island () =
+  <ContextMenu.Root>
+    <ContextMenu.Trigger>"Right-click the page"</ContextMenu.Trigger>
+    <ContextMenu.Portal>
+      <ContextMenu.Content>
+        <ContextMenu.Item>"Back"</ContextMenu.Item>
+        <ContextMenu.Item>"Reload"</ContextMenu.Item>
+        <ContextMenu.Separator />
+        <ContextMenu.Group>
+          <ContextMenu.GroupLabel>"Text size"</ContextMenu.GroupLabel>
+          <ContextMenu.RadioGroup defaultValue="Small">
+            <ContextMenu.RadioItem value="Small">"Small"</ContextMenu.RadioItem>
+            <ContextMenu.RadioItem value="Large">"Large"</ContextMenu.RadioItem>
+          </ContextMenu.RadioGroup>
+        </ContextMenu.Group>
+      </ContextMenu.Content>
+    </ContextMenu.Portal>
+  </ContextMenu.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ContextMenu.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+(* The text of the element whose id [e]'s attribute [name] holds. *)
+let text_of e name =
+  match Js.Null.toOption (by_id (attribute e name)) with
+  | Some e -> H.text e
+  | None -> ""
+
+type pointer_action
+
+external pointer_action :
+  keys:string -> target:Dom.element -> unit -> pointer_action = ""
+[@@mel.obj]
+
+external pointer : H.user -> pointer_action -> unit Js.Promise.t = "pointer"
+[@@mel.send]
+
+(* A context menu has no ARIA pattern for its trigger, which says it is open
+   in its data attributes. *)
+let is_open trigger = Option.is_some (H.attribute trigger "data-expanded")
+
+let focus_is what label =
+  H.eventually (fun () -> H.expect_equal ~what label (H.text H.focused))
+
+let checked name =
+  attribute (H.by_role_named "menuitemradio" (H.query ~name ())) "aria-checked"
+
+let () =
+  H.alike "ContextMenu" ~island ~twin (fun user ->
+      let trigger = H.by_text "Right-click the page" in
+      if is_open trigger then Js.Exn.raiseError "the menu is closed at first";
+      let* () =
+        pointer user (pointer_action ~keys:"[MouseRight]" ~target:trigger ())
+      in
+      let* () =
+        H.eventually (fun () ->
+            if not (is_open trigger) then
+              Js.Exn.raiseError "a right click opens the menu")
+      in
+      let menu = H.by_role "menu" in
+      H.expect_equal ~what:"the menu's items" "2"
+        (string_of_int (Array.length (H.all_by_role "menuitem")));
+      let group = H.by_role_named "group" (H.query ~name:"Text size" ()) in
+      H.expect_equal ~what:"the group's label" "Text size"
+        (text_of group "aria-labelledby");
+      H.expect_equal ~what:"the groups, the radio group one" "2"
+        (string_of_int (Array.length (H.all_by_role "group")));
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"focus, the menu opened by pointer"
+              (attribute menu "id") (attribute H.focused "id"))
+      in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown pressed" "Back" in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown pressed again" "Reload" in
+      let* () = H.keyboard user "{ArrowDown}{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown into the group" "Large" in
+      H.expect_equal ~what:"Small, at first" "true" (checked "Small");
+      H.expect_equal ~what:"Large, at first" "false" (checked "Large");
+      let* () = H.keyboard user "{Enter}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"Large, Enter pressed" "true" (checked "Large");
+            H.expect_equal ~what:"Small, Large chosen" "false" (checked "Small"))
+      in
+      let* () = H.keyboard user "{Escape}" in
+      H.eventually (fun () ->
+          if is_open trigger then Js.Exn.raiseError "Escape closes the menu"))

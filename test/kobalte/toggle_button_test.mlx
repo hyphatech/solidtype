@@ -1,0 +1,40 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module ToggleButton = K.ToggleButton
+module State = K.Types.ToggleButtonRootState
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  <ToggleButton.Root aria_label="Bold">
+    (fun state ->
+      <span>
+        (fun () ->
+          Jsx.string (if S.get (State.pressed state) then "On" else "Off"))
+      </span>)
+  </ToggleButton.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/ToggleButton.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "ToggleButton" ~island ~twin (fun user ->
+      let bold = H.by_role_named "button" (H.query ~name:"Bold" ()) in
+      let pressed what =
+        H.expect_equal ~what:("aria-pressed, " ^ what)
+          (Option.value (H.attribute bold "aria-pressed") ~default:"")
+      in
+      pressed "at first" "false";
+      H.expect_equal ~what:"the state its child reads" "Off" (H.text bold);
+      let* () = H.click user bold in
+      pressed "clicked" "true";
+      H.expect_equal ~what:"the state, clicked" "On" (H.text bold);
+      if Option.is_none (H.attribute bold "data-pressed") then
+        Js.Exn.raiseError "a pressed button has data-pressed";
+      let* () = H.keyboard user " " in
+      pressed "Space pressed" "false";
+      let* () = H.keyboard user "{Enter}" in
+      pressed "Enter pressed" "true";
+      Js.Promise.resolve ())

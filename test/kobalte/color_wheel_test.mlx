@@ -1,0 +1,66 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Wheel = K.ColorWheel
+
+(* jsdom has no ResizeObserver, by which the wheel's track measures itself;
+   one that never reports leaves the size unknown, as jsdom has no layout. *)
+type globals
+type observer
+
+external globals : globals = "globalThis"
+
+external observer :
+  observe:(unit -> unit) ->
+  unobserve:(unit -> unit) ->
+  disconnect:(unit -> unit) ->
+  unit ->
+  observer = ""
+[@@mel.obj]
+
+external set_resize_observer : globals -> (unit -> observer) -> unit
+  = "ResizeObserver"
+[@@mel.set]
+
+let () =
+  let ignored () = () in
+  set_resize_observer globals (fun () ->
+      observer ~observe:ignored ~unobserve:ignored ~disconnect:ignored ())
+
+(* The thumb holds no Input: axe finds the range input Kobalte nests in it
+   an interactive control inside a slider. *)
+let island () =
+  <Wheel.Root
+    defaultValue=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")
+    thickness=30.>
+    <Wheel.Label>"Hue"</Wheel.Label>
+    <Wheel.ValueLabel />
+    <Wheel.Track><Wheel.Thumb /></Wheel.Track>
+  </Wheel.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ColorWheel.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+let () =
+  H.alike "ColorWheel" ~island ~twin (fun user ->
+      let thumb = H.by_role_named "slider" (H.query ~name:"Hue" ()) in
+      let hue ~what now text =
+        H.expect_equal ~what now (attribute thumb "aria-valuenow");
+        H.expect_equal ~what text (attribute thumb "aria-valuetext")
+      in
+      H.expect_equal ~what:"the hue's range" "0 360"
+        (attribute thumb "aria-valuemin" ^ " " ^ attribute thumb "aria-valuemax");
+      hue ~what:"the hue at first" "0" {js|0°, Red|js};
+      let* () = H.tab user in
+      H.expect_equal ~what:"Tab's focus" "slider" (attribute H.focused "role");
+      let* () = H.keyboard user "{ArrowRight}" in
+      hue ~what:"ArrowRight" "1" {js|1°, Red|js};
+      let* () = H.keyboard user "{PageUp}" in
+      hue ~what:"PageUp" "15" {js|15°, red orange|js};
+      let* () = H.keyboard user "{ArrowDown}" in
+      hue ~what:"ArrowDown" "14" {js|14°, red orange|js};
+      let* () = H.keyboard user "{PageDown}" in
+      hue ~what:"PageDown" "0" {js|0°, Red|js};
+      Js.Promise.resolve ())

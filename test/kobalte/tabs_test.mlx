@@ -1,0 +1,75 @@
+module H = Harness
+module Tabs = Solidtype.Kobalte.Tabs
+
+let island () =
+  <Tabs.Root defaultValue="profile">
+    <Tabs.List aria_label="Settings">
+      <Tabs.Trigger value="profile">"Profile"</Tabs.Trigger>
+      <Tabs.Trigger value="account">"Account"</Tabs.Trigger>
+      <Tabs.Trigger value="billing">"Billing"</Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content value="profile">"Your name and photo."</Tabs.Content>
+    <Tabs.Content value="account">"Your email and password."</Tabs.Content>
+    <Tabs.Content value="billing">"Your plan and invoices."</Tabs.Content>
+  </Tabs.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Tabs.tsx"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let ( let* ) = H.( let* )
+let tab name = H.by_role_named "tab" (H.query ~name ())
+let selected e = Option.value (H.attribute e "aria-selected") ~default:""
+
+let panel_of tab =
+  let id = Option.value (H.attribute tab "aria-controls") ~default:"" in
+  match Js.Null.toOption (by_id id) with
+  | None -> Js.Exn.raiseError "a tab names the panel it controls"
+  | Some panel ->
+      H.expect_equal ~what:"the panel's role" "tabpanel"
+        (Option.value (H.attribute panel "role") ~default:"");
+      panel
+
+let () =
+  H.alike "Tabs" ~island ~twin (fun user ->
+      let list = H.by_role_named "tablist" (H.query ~name:"Settings" ()) in
+      H.expect_equal ~what:"the list's orientation" "horizontal"
+        (Option.value (H.attribute list "aria-orientation") ~default:"");
+      if Array.length (H.all_by_role "tab") <> 3 then
+        Js.Exn.raiseError "three tabs";
+      H.expect_equal ~what:"the first tab" "true" (selected (tab "Profile"));
+      H.expect_equal ~what:"the second tab" "false" (selected (tab "Account"));
+      H.expect_equal ~what:"the first panel" "Your name and photo."
+        (H.text (panel_of (tab "Profile")));
+      let* () = H.click user (tab "Account") in
+      H.expect_equal ~what:"the clicked tab" "true" (selected (tab "Account"));
+      H.expect_equal ~what:"the first tab, another clicked" "false"
+        (selected (tab "Profile"));
+      let account = panel_of (tab "Account") in
+      H.expect_equal ~what:"the clicked tab's panel" "Your email and password."
+        (H.text account);
+      (* Kobalte names the tab in a panel mounted after its tab, as this one
+         is; the panel shown first renders before the tabs register. *)
+      H.expect_equal ~what:"the tab the panel names"
+        (Option.value (H.attribute (tab "Account") "id") ~default:"tab")
+        (Option.value (H.attribute account "aria-labelledby") ~default:"");
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"focus, ArrowRight pressed" "Billing"
+        (H.focused_label ());
+      H.expect_equal ~what:"the tab ArrowRight reached" "true"
+        (selected (tab "Billing"));
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"focus, ArrowRight pressed on the last" "Profile"
+        (H.focused_label ());
+      let* () = H.keyboard user "{End}" in
+      H.expect_equal ~what:"focus, End pressed" "Billing" (H.focused_label ());
+      let* () = H.keyboard user "{ArrowLeft}" in
+      H.expect_equal ~what:"focus, ArrowLeft pressed" "Account"
+        (H.focused_label ());
+      let* () = H.keyboard user "{Home}" in
+      H.expect_equal ~what:"focus, Home pressed" "Profile" (H.focused_label ());
+      H.expect_equal ~what:"the tab Home reached" "true"
+        (selected (tab "Profile"));
+      Js.Promise.resolve ())

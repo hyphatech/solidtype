@@ -1,0 +1,76 @@
+module H = Harness
+module TextField = Solidtype.Kobalte.TextField
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  let name, set_name = S.create_signal "" in
+  <div>
+    <TextField.Root
+      value=(fun () -> S.get name)
+      onChange=(S.set set_name)
+      required=true
+      validationState=(fun () ->
+                        if String.equal (S.get name) "" then `invalid
+                        else `valid)>
+      <TextField.Label>"Name"</TextField.Label>
+      <TextField.Input />
+      <TextField.Description>"As on your passport"</TextField.Description>
+      <TextField.ErrorMessage>"A name is needed"</TextField.ErrorMessage>
+    </TextField.Root>
+    <output>(fun () -> Jsx.string (S.get name))</output>
+    <TextField.Root defaultValue="Hello">
+      <TextField.Label>"Notes"</TextField.Label> <TextField.TextArea />
+    </TextField.Root>
+  </div>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/TextField.tsx"]
+
+external value : Dom.element -> string = "value" [@@mel.get]
+external id : Dom.element -> string = "id" [@@mel.get]
+external tag : Dom.element -> string = "tagName" [@@mel.get]
+
+external all_by_text : string -> Dom.element array = "queryAllByText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let ( let* ) = H.( let* )
+
+(* Whether [element]'s aria-describedby names [description]'s id. *)
+let described_by element description =
+  Option.value (H.attribute element "aria-describedby") ~default:""
+  |> String.split_on_char ' '
+  |> List.exists (String.equal (id description))
+
+let () =
+  H.alike "TextField" ~island ~twin (fun user ->
+      let field = H.by_role_named "textbox" (H.query ~name:"Name" ()) in
+      let invalid () =
+        Option.value (H.attribute field "aria-invalid") ~default:"false"
+      in
+      if not (described_by field (H.by_text "As on your passport")) then
+        Js.Exn.raiseError "the field is described by its description";
+      if Option.is_none (H.attribute field "required") then
+        Js.Exn.raiseError "the required field is required";
+      H.expect_equal ~what:"aria-invalid, empty" "true" (invalid ());
+      if not (described_by field (H.by_text "A name is needed")) then
+        Js.Exn.raiseError "the invalid field is described by its error";
+      let* () = H.click user field in
+      let* () = H.keyboard user "Ada" in
+      H.expect_equal ~what:"the field's value, typed" "Ada" (value field);
+      H.expect_equal ~what:"the value onChange gave" "Ada"
+        (H.text (H.by_role "status"));
+      H.expect_equal ~what:"aria-invalid, filled" "false" (invalid ());
+      if Array.length (all_by_text "A name is needed") > 0 then
+        Js.Exn.raiseError "a valid field shows no error";
+      let* () = H.keyboard user "{Backspace}" in
+      H.expect_equal ~what:"the field's value, a letter deleted" "Ad"
+        (value field);
+      let notes = H.by_role_named "textbox" (H.query ~name:"Notes" ()) in
+      H.expect_equal ~what:"the text area's tag" "TEXTAREA" (tag notes);
+      H.expect_equal ~what:"the text area's default" "Hello" (value notes);
+      let* () = H.click user notes in
+      let* () = H.keyboard user " world" in
+      H.expect_equal ~what:"the text area's value, typed" "Hello world"
+        (value notes);
+      Js.Promise.resolve ())

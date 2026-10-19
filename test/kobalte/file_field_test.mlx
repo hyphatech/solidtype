@@ -1,0 +1,110 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Field = K.FileField
+module File = K.Types.File
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+(* The trigger is beside the dropzone, not in it: the dropzone is a button
+   itself, and axe refuses a button nested in one. *)
+let island () =
+  let report, set_report = S.create_signal "Nothing chosen" in
+  <Field.Root
+    multiple=true
+    maxFiles=5.
+    maxFileSize=100.
+    onFileAccept=(fun files ->
+                   S.set set_report
+                     (Printf.sprintf "Accepted %d" (Array.length files)))
+    onFileReject=(fun rejections ->
+                   S.set set_report
+                     (Printf.sprintf "Rejected %d" (Array.length rejections)))>
+    <Field.Label>"Attachments"</Field.Label>
+    <Field.Dropzone>"Drop files here"</Field.Dropzone>
+    <Field.Trigger>"Choose files"</Field.Trigger>
+    <Field.HiddenInput />
+    <Field.ItemList>
+      (fun file ->
+        <Field.Item>
+          <Field.ItemPreview type_="image/*">"An image"</Field.ItemPreview>
+          <Field.ItemName />
+          <Field.ItemSize />
+          <Field.ItemDeleteTrigger
+            aria_label=(fun () -> "Remove " ^ File.name file)>
+            "Remove"
+          </Field.ItemDeleteTrigger>
+        </Field.Item>)
+    </Field.ItemList>
+    <Field.Description>(fun () -> Jsx.string (S.get report))</Field.Description>
+  </Field.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/FileField.tsx"]
+
+let ( let* ) = H.( let* )
+
+type file_options
+
+external file_options : type_:(string[@mel.as "type"]) -> unit -> file_options
+  = ""
+[@@mel.obj]
+
+external file : string array -> string -> file_options -> File.t = "File"
+[@@mel.new]
+
+external upload : H.user -> Dom.element -> File.t array -> unit Js.Promise.t
+  = "upload"
+[@@mel.send]
+
+(* Kobalte gives the hidden input the root's id, so the label names the
+   group, and the input is found by its type. *)
+external query_selector : string -> Dom.element Js.null = "querySelector"
+[@@mel.scope "document"]
+
+let items () = Array.map H.text (H.all_by_role "listitem")
+
+let () =
+  H.alike "FileField" ~island ~twin (fun user ->
+      match Js.Null.toOption (query_selector "input[type=file]") with
+      | None -> Js.Exn.raiseError "a hidden file input"
+      | Some input ->
+          if Option.is_none (H.attribute input "multiple") then
+            Js.Exn.raiseError "the hidden input takes several files";
+          ignore (H.by_role_named "button" (H.query ~name:"dropzone" ()));
+          ignore (H.by_role_named "button" (H.query ~name:"Choose files" ()));
+          ignore (H.by_role "group");
+          let* () =
+            upload user input
+              [|
+                file [| "hello" |] "notes.txt"
+                  (file_options ~type_:"text/plain" ());
+                file [| "png" |] "photo.png"
+                  (file_options ~type_:"image/png" ());
+              |]
+          in
+          H.expect_equal ~what:"the files chosen"
+            "notes.txt5 BytesRemove | An imagephoto.png3 BytesRemove"
+            (String.concat " | " (Array.to_list (items ())));
+          H.expect_equal ~what:"onFileAccept" "Accepted 2"
+            (H.text (H.by_text "Accepted 2"));
+          let* () =
+            H.click user
+              (H.by_role_named "button" (H.query ~name:"Remove notes.txt" ()))
+          in
+          H.expect_equal ~what:"the files, one removed"
+            "An imagephoto.png3 BytesRemove"
+            (String.concat " | " (Array.to_list (items ())));
+          let* () =
+            upload user input
+              [|
+                file
+                  [| String.make 200 'x' |]
+                  "big.txt"
+                  (file_options ~type_:"text/plain" ());
+              |]
+          in
+          H.expect_equal ~what:"onFileReject, a file too large" "Rejected 1"
+            (H.text (H.by_text "Rejected 1"));
+          if Array.length (items ()) <> 1 then
+            Js.Exn.raiseError "a file rejected is not listed";
+          Js.Promise.resolve ())

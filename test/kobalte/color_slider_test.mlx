@@ -1,0 +1,48 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Slider = K.ColorSlider
+
+(* The thumb's first position is calc(NaN%), until it knows its index; a
+   browser drops the value, but jsdom's CSS parser throws on it, so the
+   thumb is placed by hand. The thumb holds no Input: axe finds the range
+   input Kobalte nests in it an interactive control inside a slider. *)
+let island () =
+  <Slider.Root
+    channel=`hue
+    defaultValue=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")>
+    <Slider.Label>"Hue"</Slider.Label>
+    <Slider.ValueLabel />
+    <Slider.Track><Slider.Thumb style="left: 0%" /></Slider.Track>
+  </Slider.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ColorSlider.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+let () =
+  H.alike "ColorSlider" ~island ~twin (fun user ->
+      let thumb = H.by_role_named "slider" (H.query ~name:"Hue" ()) in
+      let hue ~what now text =
+        H.expect_equal ~what now (attribute thumb "aria-valuenow");
+        H.expect_equal ~what text (attribute thumb "aria-valuetext")
+      in
+      H.expect_equal ~what:"the hue's range" "0 360"
+        (attribute thumb "aria-valuemin" ^ " " ^ attribute thumb "aria-valuemax");
+      hue ~what:"the hue at first" "0" {js|0°, Red|js};
+      if Array.length (H.all_by_role "slider") <> 1 then
+        Js.Exn.raiseError "one slider";
+      H.expect_equal ~what:"the value label" {js|0°|js}
+        (H.text (H.by_text {js|0°|js}));
+      let* () = H.tab user in
+      H.expect_equal ~what:"Tab's focus" "slider" (attribute H.focused "role");
+      let* () = H.keyboard user "{ArrowRight}" in
+      hue ~what:"ArrowRight" "1" {js|1°, Red|js};
+      H.expect_equal ~what:"the value label, ArrowRight pressed" {js|1°|js}
+        (H.text (H.by_text {js|1°|js}));
+      let* () = H.keyboard user "{End}" in
+      hue ~what:"End" "360" {js|360°, Red|js};
+      let* () = H.keyboard user "{Home}" in
+      hue ~what:"Home" "0" {js|0°, Red|js};
+      Js.Promise.resolve ())

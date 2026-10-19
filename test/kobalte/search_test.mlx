@@ -1,0 +1,112 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Search = K.Search
+module Node = K.Types.CollectionNode
+module Item_props = K.Types.ComboboxBaseItemComponentProps
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let fruits = [| "Apple"; "Banana"; "Blueberry"; "Cherry" |]
+
+(* The search is the page's to run: the fruits a query starts, none for an
+   empty one. *)
+let matching query =
+  if String.equal query "" then [||]
+  else
+    let prefix = String.lowercase_ascii query in
+    fruits |> Array.to_list
+    |> List.filter (fun f ->
+        String.starts_with ~prefix (String.lowercase_ascii f))
+    |> List.map K.Types.Either.left
+    |> Array.of_list
+
+let island () =
+  let options, set_options = S.create_signal [||] in
+  let chosen, set_chosen = S.create_signal "" in
+  <div>
+    <Search.Root
+      options=(fun () -> S.get options)
+      onInputChange=(fun query -> S.set set_options (matching query))
+      onChange=(fun fruit ->
+                 S.set set_chosen
+                   (Option.value (Js.Nullable.toOption fruit) ~default:""))
+      itemComponent=(fun props ->
+                      <Search.Item item=(fun () -> Item_props.item props)>
+                        <Search.ItemLabel>
+                          (fun () ->
+                            Jsx.string (Node.raw_value (Item_props.item props)))
+                        </Search.ItemLabel>
+                      </Search.Item>)>
+      <Search.Label>"Fruit"</Search.Label>
+      <Search.Control>
+        <Search.Indicator>"Find"</Search.Indicator> <Search.Input />
+      </Search.Control>
+      <Search.Portal>
+        <Search.Content>
+          <Search.Listbox /> <Search.NoResult>"No fruit"</Search.NoResult>
+        </Search.Content>
+      </Search.Portal>
+    </Search.Root>
+    <p>"Chosen: " (fun () -> Jsx.string (S.get chosen))</p>
+  </div>
+
+external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Search.tsx"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+let ( let* ) = H.( let* )
+let expanded e = Option.value (H.attribute e "aria-expanded") ~default:""
+
+let offered () =
+  H.all_by_role "option" |> Array.to_list |> List.map H.text
+  |> String.concat " "
+
+let active input =
+  match H.attribute input "aria-activedescendant" with
+  | None -> ""
+  | Some id -> (
+      match Js.Null.toOption (by_id id) with
+      | None -> ""
+      | Some option -> H.text option)
+
+let () =
+  H.alike "Search" ~island ~twin (fun user ->
+      let input = H.by_role_named "combobox" (H.query ~name:"Fruit" ()) in
+      H.expect_equal ~what:"the input, closed" "false" (expanded input);
+      H.expect_equal ~what:"the indicator, hidden" "true"
+        (Option.value
+           (H.attribute (H.by_text "Find") "aria-hidden")
+           ~default:"");
+      let* () = H.click user input in
+      let* () = H.keyboard user "b" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the options, b typed" "Banana Blueberry"
+              (offered ()))
+      in
+      H.expect_equal ~what:"the input, b typed" "true" (expanded input);
+      let* () = H.keyboard user "z" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the options, bz typed" "" (offered ()))
+      in
+      H.expect_equal ~what:"the message, nothing found" "No fruit"
+        (H.text (H.by_text "No fruit"));
+      let* () = H.keyboard user "{Backspace}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the options, z erased" "Banana Blueberry"
+              (offered ()))
+      in
+      let* () = H.keyboard user "{ArrowDown}{ArrowDown}" in
+      H.expect_equal ~what:"the active option, ArrowDown pressed twice"
+        "Blueberry" (active input);
+      let* () = H.keyboard user "{Enter}" in
+      ignore (H.by_text "Chosen: Blueberry");
+      H.expect_equal ~what:"the input, Enter pressed" "Blueberry" (value input);
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the input, an option chosen" "false"
+            (expanded input)))

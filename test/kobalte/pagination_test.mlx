@@ -1,0 +1,62 @@
+module H = Harness
+module Pagination = Solidtype.Kobalte.Pagination
+module Item_props = Solidtype.Kobalte.Types.Pagination_Root_ItemComponent
+module Jsx = Solidtype.Jsx
+
+(* [ellipsisComponent] takes no argument, yet is written [fun _ ->]: the ppx
+   reads [fun () ->] as a thunk and hands Kobalte what it returns. *)
+let island () =
+  <Pagination.Root
+    aria_label="Pages"
+    count=10.
+    itemComponent=(fun props ->
+                    <Pagination.Item page=(fun () -> Item_props.page props)>
+                      (fun () -> Jsx.int (Float.to_int (Item_props.page props)))
+                    </Pagination.Item>)
+    ellipsisComponent=(fun _ ->
+                        <Pagination.Ellipsis>{js|…|js}</Pagination.Ellipsis>)>
+    <Pagination.Previous>"Previous"</Pagination.Previous>
+    <Pagination.Items />
+    <Pagination.Next>"Next"</Pagination.Next>
+  </Pagination.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/Pagination.tsx"]
+
+let ( let* ) = H.( let* )
+let button name = H.by_role_named "button" (H.query ~name ())
+let current e = Option.value (H.attribute e "aria-current") ~default:""
+
+(* The pages offered, in order. The ellipsis is a JavaScript string, {js|…|js}:
+   an OCaml literal reaches the page as its UTF-8 bytes, one character each. *)
+let pages () =
+  H.all_by_role "listitem" |> Array.to_list |> List.map H.text
+  |> List.filter (fun t ->
+      not (String.equal t "Previous" || String.equal t "Next"))
+  |> String.concat " "
+
+let () =
+  H.alike "Pagination" ~island ~twin (fun user ->
+      ignore (H.by_role_named "navigation" (H.query ~name:"Pages" ()));
+      H.expect_equal ~what:"the pages offered" {js|1 2 … 10|js} (pages ());
+      H.expect_equal ~what:"the first page" "page" (current (button "1"));
+      H.expect_equal ~what:"Previous, on the first page" "true"
+        (Option.value
+           (H.attribute (button "Previous") "aria-disabled")
+           ~default:"");
+      let* () = H.click user (button "2") in
+      H.expect_equal ~what:"the page clicked" "page" (current (button "2"));
+      H.expect_equal ~what:"the first page, another clicked" ""
+        (current (button "1"));
+      H.expect_equal ~what:"the pages offered on the second" {js|1 2 3 … 10|js}
+        (pages ());
+      let* () = H.click user (button "Next") in
+      H.expect_equal ~what:"the page after Next" "page" (current (button "3"));
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"the page after Enter on Next" "page"
+        (current (button "4"));
+      let* () = H.click user (button "Previous") in
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"the page after Space on Previous" "page"
+        (current (button "2"));
+      Js.Promise.resolve ())

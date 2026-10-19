@@ -1,0 +1,6 @@
+(library
+ (name example_test)
+ (modes melange)
+ (libraries example solidtype melange-jest.jest melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))

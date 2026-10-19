@@ -1,0 +1,40 @@
+module H = Harness
+module Link = Solidtype.Kobalte.Link
+
+let island () =
+  <p>
+    <Link.Root href="#docs">"Docs"</Link.Root>
+    <Link.Root href="#archive" disabled=true>"Archive"</Link.Root>
+  </p>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Link.tsx"]
+
+external location : Dom.location = "location" [@@mel.scope "window"]
+external hash : Dom.location -> string = "hash" [@@mel.get]
+external set_hash : Dom.location -> string -> unit = "hash" [@@mel.set]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Link" ~island ~twin (fun user ->
+      set_hash location "";
+      let docs = H.by_role_named "link" (H.query ~name:"Docs" ()) in
+      let archive = H.by_role_named "link" (H.query ~name:"Archive" ()) in
+      H.expect_equal ~what:"the link's target" "#docs"
+        (Option.value (H.attribute docs "href") ~default:"");
+      if Option.is_some (H.attribute docs "aria-disabled") then
+        Js.Exn.raiseError "an enabled link is not marked disabled";
+      H.expect_equal ~what:"the disabled link" "true"
+        (Option.value (H.attribute archive "aria-disabled") ~default:"");
+      if Option.is_some (H.attribute archive "href") then
+        Js.Exn.raiseError "a disabled link has no target";
+      let* () = H.tab user in
+      H.expect_equal ~what:"focus, Tab pressed" "Docs" (H.focused_label ());
+      let* () = H.tab user in
+      if H.focused == archive then
+        Js.Exn.raiseError "Tab passes over the disabled link";
+      let* () = H.click user docs in
+      H.expect_equal ~what:"the location, the link clicked" "#docs"
+        (hash location);
+      Js.Promise.resolve ())

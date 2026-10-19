@@ -1,0 +1,102 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Combobox = K.Combobox
+module Node = K.Types.CollectionNode
+module Item_props = K.Types.ComboboxBaseItemComponentProps
+module Jsx = Solidtype.Jsx
+
+let island () =
+  <Combobox.Root
+    options=(fun () ->
+              Array.map K.Types.Either.left
+                [| "Apple"; "Banana"; "Blueberry"; "Cherry" |])
+    placeholder=(<span>"Pick a fruit"</span>)
+    itemComponent=(fun props ->
+                    <Combobox.Item item=(fun () -> Item_props.item props)>
+                      <Combobox.ItemLabel>
+                        (fun () ->
+                          Jsx.string (Node.raw_value (Item_props.item props)))
+                      </Combobox.ItemLabel>
+                    </Combobox.Item>)>
+    <Combobox.Label>"Fruit"</Combobox.Label>
+    <Combobox.Control>
+      <Combobox.Input /> <Combobox.Trigger><Combobox.Icon /></Combobox.Trigger>
+    </Combobox.Control>
+    <Combobox.Portal>
+      <Combobox.Content><Combobox.Listbox /></Combobox.Content>
+    </Combobox.Portal>
+  </Combobox.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/Combobox.tsx"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+let ( let* ) = H.( let* )
+let expanded e = Option.value (H.attribute e "aria-expanded") ~default:""
+
+let offered () =
+  H.all_by_role "option" |> Array.to_list |> List.map H.text
+  |> String.concat " "
+
+(* The text of the option the input says is active. *)
+let active input =
+  match H.attribute input "aria-activedescendant" with
+  | None -> ""
+  | Some id -> (
+      match Js.Null.toOption (by_id id) with
+      | None -> ""
+      | Some option -> H.text option)
+
+let () =
+  H.alike "Combobox" ~island ~twin (fun user ->
+      let input = H.by_role_named "combobox" (H.query ~name:"Fruit" ()) in
+      H.expect_equal ~what:"the input, closed" "false" (expanded input);
+      H.expect_equal ~what:"the input's completion" "list"
+        (Option.value (H.attribute input "aria-autocomplete") ~default:"");
+      let* () = H.click user input in
+      let* () = H.keyboard user "b" in
+      let* _ = H.settled () in
+      H.expect_equal ~what:"the input, b typed" "true" (expanded input);
+      H.expect_equal ~what:"the options, b typed" "Banana Blueberry"
+        (offered ());
+      let listbox = H.by_role "listbox" in
+      H.expect_equal ~what:"the listbox the input controls"
+        (Option.value (H.attribute listbox "id") ~default:"listbox")
+        (Option.value (H.attribute input "aria-controls") ~default:"");
+      let* () = H.keyboard user "l" in
+      H.expect_equal ~what:"the options, bl typed" "Blueberry" (offered ());
+      let* () = H.keyboard user "{Backspace}{ArrowDown}" in
+      H.expect_equal ~what:"the active option, ArrowDown pressed" "Banana"
+        (active input);
+      let* () = H.keyboard user "{ArrowDown}" in
+      H.expect_equal ~what:"the active option, ArrowDown pressed again"
+        "Blueberry" (active input);
+      if not (H.focused == input) then
+        Js.Exn.raiseError "focus stays in the input";
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"the input, Enter pressed" "Blueberry" (value input);
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the input, an option chosen" "false"
+              (expanded input))
+      in
+      let* () =
+        H.click user
+          (H.by_role_named "button" (H.query ~name:"Fruit Show suggestions" ()))
+      in
+      let* _ = H.settled () in
+      H.expect_equal ~what:"the input, the button clicked" "true"
+        (expanded input);
+      H.expect_equal ~what:"the options, the button clicked"
+        "Apple Banana Blueberry Cherry" (offered ());
+      let* () =
+        H.click user (H.by_role_named "option" (H.query ~name:"Cherry" ()))
+      in
+      H.expect_equal ~what:"the input, an option clicked" "Cherry" (value input);
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the input, an option clicked" "false"
+            (expanded input)))

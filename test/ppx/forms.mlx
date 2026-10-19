@@ -1,0 +1,41 @@
+let static = <div class_="x" />
+let handler = <button onClick=(fun _ -> ()) />
+let dynamic = <div class_=(fun () -> cls ()) />
+let spread = <input spread=props />
+let text = <p>"hello"</p>
+let nested = <ul><li>"one"</li></ul>
+let thunk = <p>(fun () -> Solidtype.Jsx.string (name ()))</p>
+let component = <Label text=(fun () -> "x") count=1 />
+let part = <Switch.Root checked=(fun () -> on ())><Switch.Thumb /></Switch.Root>
+let constructor = <Toggle pressed=true />
+let element_prop = <Show when_=(fun () -> ready ()) fallback=(<p>"wait"</p>) />
+
+let function_child =
+  <For each=(fun () -> items ())>
+    (fun item -> <li>(fun () -> Solidtype.Jsx.string item)</li>)
+  </For>
+
+let ref_callback = <div ref=(fun el -> keep el) />
+
+let%component make ~(text : string) ?(count : int = 0)
+    ?(onPick : (int -> unit) option) ~(children : 'a -> Solidtype.Jsx.element)
+    () =
+  <p>(fun () -> Solidtype.Jsx.int (count ()))</p>
+
+let namespaced =
+  <div
+    on_scroll=(fun _ -> ())
+    attr_title="t"
+    bool_hidden=true
+    prop_value=(fun () -> v ())
+    data_user_id="7"
+    aria_label="name"
+  />
+
+let switch =
+  <Switch>
+    (fun () ->
+      match answer () with
+      | Waiting -> <p>"wait"</p>
+      | Ready n -> <p>(fun () -> Solidtype.Jsx.int n)</p>)
+  </Switch>

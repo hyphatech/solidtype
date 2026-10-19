@@ -1,0 +1,8 @@
+(library
+ (name solidtype)
+ (public_name solidtype)
+ (modes melange)
+ (modules_without_implementation html)
+ (libraries melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype -internal)))

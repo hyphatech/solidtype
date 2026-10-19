@@ -1,0 +1,60 @@
+module H = Harness
+module Slider = Solidtype.Kobalte.Slider
+
+(* Slider.Input is left out: inside the thumb, as it must be, axe finds the
+   range input nested in the slider (nested-interactive), in TSX as in OCaml.
+   Before a thumb registers, Kobalte places it at [calc(NaN%)], which a browser
+   drops and jsdom's CSS parser throws on; the thumb's own [left] replaces it. *)
+let island () =
+  <Slider.Root defaultValue=(fun () -> [| 40. |])>
+    <Slider.Label>"Volume"</Slider.Label>
+    <Slider.ValueLabel />
+    <Slider.Track>
+      <Slider.Fill /> <Slider.Thumb style="left: 0" />
+    </Slider.Track>
+  </Slider.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Slider.tsx"]
+
+let ( let* ) = H.( let* )
+
+let value_now thumb =
+  Option.value (H.attribute thumb "aria-valuenow") ~default:""
+
+(* Dragging measures the track, which jsdom does not lay out, so the value is
+   moved by the keys alone. *)
+let () =
+  H.alike "Slider" ~island ~twin (fun user ->
+      let thumb = H.by_role_named "slider" (H.query ~name:"Volume" ()) in
+      H.expect_equal ~what:"the value" "40" (value_now thumb);
+      H.expect_equal ~what:"the minimum" "0"
+        (Option.value (H.attribute thumb "aria-valuemin") ~default:"");
+      H.expect_equal ~what:"the maximum" "100"
+        (Option.value (H.attribute thumb "aria-valuemax") ~default:"");
+      H.expect_equal ~what:"the value's text" "40"
+        (Option.value (H.attribute thumb "aria-valuetext") ~default:"");
+      H.expect_equal ~what:"the orientation" "horizontal"
+        (Option.value (H.attribute thumb "aria-orientation") ~default:"");
+      H.expect_equal ~what:"the group's orientation" "horizontal"
+        (Option.value
+           (H.attribute (H.by_role "group") "data-orientation")
+           ~default:"");
+      let* () = H.tab user in
+      H.expect_equal ~what:"Tab focuses the thumb" "slider"
+        (Option.value (H.attribute H.focused "role") ~default:"");
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"ArrowRight, a step up" "41" (value_now thumb);
+      let* () = H.keyboard user "{ArrowLeft}" in
+      H.expect_equal ~what:"ArrowLeft, a step down" "40" (value_now thumb);
+      let* () = H.keyboard user "{PageUp}" in
+      H.expect_equal ~what:"PageUp, a tenth of the range up" "50"
+        (value_now thumb);
+      H.expect_equal ~what:"the value label" "50" (H.text (H.by_text "50"));
+      let* () = H.keyboard user "{Home}" in
+      H.expect_equal ~what:"Home, the minimum" "0" (value_now thumb);
+      let* () = H.keyboard user "{End}" in
+      H.expect_equal ~what:"End, the maximum" "100" (value_now thumb);
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"ArrowRight at the maximum" "100" (value_now thumb);
+      Js.Promise.resolve ())

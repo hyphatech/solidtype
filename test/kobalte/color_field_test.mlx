@@ -1,0 +1,47 @@
+module H = Harness
+module Field = Solidtype.Kobalte.ColorField
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  let changed, set_changed = S.create_signal "" in
+  <Field.Root
+    defaultValue="#ff0000" onChange=(fun value -> S.set set_changed value)>
+    <Field.Label>"Colour"</Field.Label>
+    <Field.Input />
+    <Field.Description>
+      (fun () -> Jsx.string ("Changed to " ^ S.get changed))
+    </Field.Description>
+  </Field.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/ColorField.tsx"]
+
+let ( let* ) = H.( let* )
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+external clear : H.user -> Dom.element -> unit Js.Promise.t = "clear"
+[@@mel.send]
+
+external type_ : H.user -> Dom.element -> string -> unit Js.Promise.t = "type"
+[@@mel.send]
+
+let () =
+  H.alike "ColorField" ~island ~twin (fun user ->
+      let input = H.by_role_named "textbox" (H.query ~name:"Colour" ()) in
+      H.expect_equal ~what:"the value at first" "#FF0000" (value input);
+      let* () = clear user input in
+      let* () = type_ user input "0f0g" in
+      H.expect_equal ~what:"typed, a letter no hex digit refused" "0f0"
+        (value input);
+      H.expect_equal ~what:"onChange, typing" "Changed to 0f0"
+        (H.text (H.by_text "Changed to 0f0"));
+      let* () = H.tab user in
+      H.expect_equal ~what:"the value, blurred" "#00FF00" (value input);
+      let* () = clear user input in
+      let* () = type_ user input "12" in
+      let* () = H.tab user in
+      H.expect_equal ~what:"no colour typed, the last kept" "#00FF00"
+        (value input);
+      Js.Promise.resolve ())

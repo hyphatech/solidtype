@@ -1,0 +1,54 @@
+module H = Harness
+module Check = Solidtype.Check
+module Html = Solidtype.Html
+module Jsx = Solidtype.Jsx
+module SegmentedControl = Solidtype.Kobalte.SegmentedControl
+
+(* No Indicator: it measures the chosen item through a ResizeObserver, which
+   jsdom has none of. *)
+let island () =
+  <SegmentedControl.Root defaultValue="week">
+    <SegmentedControl.Label>"View"</SegmentedControl.Label>
+    <SegmentedControl.Item value="day">
+      <SegmentedControl.ItemInput />
+      <SegmentedControl.ItemLabel>"Day"</SegmentedControl.ItemLabel>
+    </SegmentedControl.Item>
+    <SegmentedControl.Item value="week">
+      <SegmentedControl.ItemInput />
+      <SegmentedControl.ItemLabel>"Week"</SegmentedControl.ItemLabel>
+    </SegmentedControl.Item>
+    <SegmentedControl.Item value="month">
+      <SegmentedControl.ItemInput />
+      <SegmentedControl.ItemLabel>"Month"</SegmentedControl.ItemLabel>
+    </SegmentedControl.Item>
+  </SegmentedControl.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/SegmentedControl.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  Css_escape.install ();
+  H.alike "SegmentedControl" ~island ~twin (fun user ->
+      let group = H.by_role_named "radiogroup" (H.query ~name:"View" ()) in
+      let radio name = H.by_role_named "radio" (H.query ~name ()) in
+      let chosen () =
+        List.filter
+          (fun name -> H.checked (radio name))
+          [ "Day"; "Week"; "Month" ]
+        |> String.concat ", "
+      in
+      H.expect_equal ~what:"the control's orientation" "horizontal"
+        (Option.value (H.attribute group "aria-orientation") ~default:"");
+      H.expect_equal ~what:"chosen, at first" "Week" (chosen ());
+      let* () = H.click user (radio "Month") in
+      H.expect_equal ~what:"chosen, Month clicked" "Month" (chosen ());
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"chosen, ArrowRight from the last" "Day" (chosen ());
+      let* () = H.keyboard user "{ArrowLeft}" in
+      H.expect_equal ~what:"chosen, ArrowLeft from the first" "Month"
+        (chosen ());
+      let* () = H.click user (H.by_text "Week") in
+      H.expect_equal ~what:"chosen, its label clicked" "Week" (chosen ());
+      Js.Promise.resolve ())

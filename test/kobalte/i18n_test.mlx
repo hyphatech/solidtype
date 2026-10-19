@@ -1,0 +1,79 @@
+module H = Harness
+module I18n = Solidtype.Kobalte.I18n
+module Types = Solidtype.Kobalte.Types
+module Use_locale = Types.I18n_UseLocale
+module Filter = Types.Filter
+module Jsx = Solidtype.Jsx
+module E = Jest.Expect
+
+let direction_name = function `ltr -> "ltr" | `rtl -> "rtl"
+
+module Shows_locale = struct
+  let%component make () =
+    let locale = I18n.use_locale () in
+    <p>
+      (fun () ->
+        Jsx.string
+          (Use_locale.locale locale ()
+          ^ " "
+          ^ direction_name (Use_locale.direction locale ())))
+    </p>
+end
+
+module Filters = struct
+  let%component make () =
+    let filter = I18n.create_filter None in
+    let says name holds = if holds then name else "not " ^ name in
+    <p>
+      (fun () ->
+        Jsx.string
+          (String.concat ", "
+             [
+               says "starts" (Filter.starts_with filter "Hello" "He");
+               says "contains" (Filter.contains filter "Hello" "ll");
+               says "ends" (Filter.ends_with filter "Hello" "lo");
+               says "starts with x" (Filter.starts_with filter "Hello" "x");
+             ]))
+    </p>
+end
+
+let () =
+  Jest.describe "i18n" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "useLocale reads the browser's locale, with a provider or none"
+        (fun () ->
+          H.render (fun () ->
+              <div>
+                <Shows_locale />
+                <I18n.I18nProvider><Shows_locale /></I18n.I18nProvider>
+              </div>);
+          E.(expect (H.text H.body) |> toBe "en-US ltren-US ltr"));
+      Jest.test "a provider's locale reaches useLocale, its direction too"
+        (fun () ->
+          H.render (fun () ->
+              <I18n.I18nProvider locale="ar-EG">
+                <Shows_locale />
+              </I18n.I18nProvider>);
+          E.(expect (H.text H.body) |> toBe "ar-EG rtl"));
+      Jest.test "the right-to-left languages hold Arabic, not English"
+        (fun () ->
+          E.(
+            expect
+              ( Js.Set.has ~value:"ar" I18n.rtl_langs,
+                Js.Set.has ~value:"en" I18n.rtl_langs )
+            |> toEqual (true, false)));
+      Jest.test "a filter matches the start, the middle and the end" (fun () ->
+          H.render (fun () -> <Filters />);
+          E.(
+            expect (H.text H.body)
+            |> toBe "starts, contains, ends, not starts with x"));
+      Jest.test "a locale's reading direction" (fun () ->
+          let default = I18n.get_default_locale () in
+          E.(
+            expect
+              ( I18n.is_rtl "ar-EG",
+                I18n.is_rtl "en-US",
+                direction_name (I18n.get_reading_direction "he"),
+                Types.Locale.locale default,
+                direction_name (Types.Locale.direction default) )
+            |> toEqual (true, false, "rtl", "en-US", "ltr"))))

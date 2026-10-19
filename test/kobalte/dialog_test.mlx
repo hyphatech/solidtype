@@ -1,0 +1,39 @@
+module H = Harness
+module Dialog = Solidtype.Kobalte.Dialog
+
+let island () =
+  <Dialog.Root>
+    <Dialog.Trigger>"Open"</Dialog.Trigger>
+    <Dialog.Portal>
+      <Dialog.Overlay />
+      <Dialog.Content>
+        <Dialog.Title>"Settings"</Dialog.Title>
+        <Dialog.Description>"Change how it works."</Dialog.Description>
+        <Dialog.CloseButton>"Close"</Dialog.CloseButton>
+      </Dialog.Content>
+    </Dialog.Portal>
+  </Dialog.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Dialog.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Dialog" ~island ~twin (fun user ->
+      let* () =
+        H.click user (H.by_role_named "button" (H.query ~name:"Open" ()))
+      in
+      let* _ = H.settled () in
+      let dialog = H.by_role "dialog" in
+      H.expect_equal ~what:"the dialog's label" "Settings"
+        (H.text (H.by_text "Settings"));
+      if Option.is_none (H.attribute dialog "aria-labelledby") then
+        Js.Exn.raiseError "the dialog is labelled by its title";
+      let trigger = H.by_text "Open" in
+      H.expect_equal ~what:"the trigger, the dialog open" "true"
+        (Option.value (H.attribute trigger "aria-expanded") ~default:"");
+      let* () = H.keyboard user "{Escape}" in
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the trigger, Escape pressed" "false"
+            (Option.value (H.attribute trigger "aria-expanded") ~default:"")))

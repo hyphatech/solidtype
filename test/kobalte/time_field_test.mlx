@@ -1,0 +1,95 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Field = K.TimeField
+module Time = K.Types.Time
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let part = function Some n -> Printf.sprintf "%.0f" n | None -> "-"
+
+let island () =
+  let changed, set_changed = S.create_signal "nothing" in
+  <Field.Root
+    defaultValue=(fun () -> Time.make ~hour:9. ~minute:30. ~second:0. ())
+    granularity=(fun () -> K.Types.Either.left `second)
+    onChange=(fun time ->
+               S.set set_changed
+                 (String.concat ":"
+                    [
+                      part (Time.hour time);
+                      part (Time.minute time);
+                      part (Time.second time);
+                    ]))>
+    <Field.Label>"Alarm"</Field.Label>
+    <Field.Input>
+      (fun segment -> <Field.Segment segment=(fun () -> S.get segment) />)
+    </Field.Input>
+    <Field.HiddenInput />
+    <Field.Description>
+      (fun () -> Jsx.string ("Changed to " ^ S.get changed))
+    </Field.Description>
+  </Field.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/TimeField.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+(* The hidden input is found by what it holds, and throws when none does. *)
+external by_display_value : string -> Dom.element = "getByDisplayValue"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let () =
+  H.alike "TimeField" ~island ~twin (fun user ->
+      H.expect_equal ~what:"the field's label" "Alarm"
+        (H.text (H.by_text "Alarm"));
+      if Option.is_none (H.attribute (H.by_role "group") "aria-labelledby") then
+        Js.Exn.raiseError "the field is labelled by its label";
+      match H.all_by_role "spinbutton" with
+      | [| hour; minute; second |] ->
+          let reads ~what h m s =
+            H.expect_equal ~what:(what ^ ", the segments")
+              (h ^ ":" ^ m ^ ":" ^ s)
+              (String.concat ":"
+                 [
+                   attribute hour "aria-valuenow";
+                   attribute minute "aria-valuenow";
+                   attribute second "aria-valuenow";
+                 ])
+          in
+          H.expect_equal ~what:"the segments' names" "hour minute second"
+            (String.concat " "
+               [
+                 attribute hour "aria-label";
+                 attribute minute "aria-label";
+                 attribute second "aria-label";
+               ]);
+          H.expect_equal ~what:"the hour's range" "0 23"
+            (attribute hour "aria-valuemin"
+            ^ " "
+            ^ attribute hour "aria-valuemax");
+          reads ~what:"at first" "9" "30" "0";
+          ignore (by_display_value "9:30:0");
+          let* () = H.tab user in
+          H.expect_equal ~what:"Tab's focus" "hour" (H.focused_label ());
+          let* () = H.keyboard user "{ArrowUp}" in
+          reads ~what:"ArrowUp" "10" "30" "0";
+          let* () = H.keyboard user "{PageUp}" in
+          reads ~what:"PageUp" "12" "30" "0";
+          let* () = H.tab user in
+          H.expect_equal ~what:"Tab's next focus" "minute" (H.focused_label ());
+          let* () = H.keyboard user "{ArrowDown}" in
+          reads ~what:"ArrowDown" "12" "29" "0";
+          let* () = H.keyboard user "{PageDown}" in
+          reads ~what:"PageDown" "12" "14" "0";
+          let* () = H.keyboard user "{Shift>}{Tab}{/Shift}" in
+          let* () = H.keyboard user "07" in
+          reads ~what:"07 typed in the hour" "7" "14" "0";
+          H.expect_equal ~what:"focus, the hour typed" "minute"
+            (H.focused_label ());
+          H.expect_equal ~what:"onChange" "Changed to 7:14:0"
+            (H.text (H.by_text "Changed to 7:14:0"));
+          ignore (by_display_value "7:14:0");
+          Js.Promise.resolve ()
+      | _ -> Js.Exn.raiseError "three segments, each a spinbutton")

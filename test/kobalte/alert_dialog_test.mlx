@@ -1,0 +1,80 @@
+module H = Harness
+module AlertDialog = Solidtype.Kobalte.AlertDialog
+
+let island () =
+  <AlertDialog.Root>
+    <AlertDialog.Trigger>"Delete"</AlertDialog.Trigger>
+    <AlertDialog.Portal>
+      <AlertDialog.Overlay />
+      <AlertDialog.Content>
+        <AlertDialog.Title>"Delete the file?"</AlertDialog.Title>
+        <AlertDialog.Description>
+          "It cannot be undone."
+        </AlertDialog.Description>
+        <AlertDialog.CloseButton>"Cancel"</AlertDialog.CloseButton>
+      </AlertDialog.Content>
+    </AlertDialog.Portal>
+  </AlertDialog.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/AlertDialog.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+(* The text of the element whose id [e]'s attribute [name] holds. *)
+let text_of e name =
+  match Js.Null.toOption (by_id (attribute e name)) with
+  | Some e -> H.text e
+  | None -> ""
+
+let () =
+  H.alike "AlertDialog" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "button" (H.query ~name:"Delete" ()) in
+      H.expect_equal ~what:"the trigger's popup" "dialog"
+        (attribute trigger "aria-haspopup");
+      H.expect_equal ~what:"the trigger, closed" "false"
+        (attribute trigger "aria-expanded");
+      let* () = H.click user trigger in
+      let* _ = H.settled () in
+      let dialog = H.by_role "alertdialog" in
+      H.expect_equal ~what:"the trigger controls the dialog"
+        (attribute dialog "id")
+        (attribute trigger "aria-controls");
+      H.expect_equal ~what:"the dialog's label" "Delete the file?"
+        (text_of dialog "aria-labelledby");
+      H.expect_equal ~what:"the dialog's description" "It cannot be undone."
+        (text_of dialog "aria-describedby");
+      H.expect_equal ~what:"the trigger, the dialog open" "true"
+        (attribute trigger "aria-expanded");
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"focus, the dialog open" "Cancel"
+              (H.text H.focused))
+      in
+      let* () = H.keyboard user "{Escape}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the trigger, Escape pressed" "false"
+              (attribute trigger "aria-expanded"))
+      in
+      (* Focus goes back to the trigger, and into the content once it opens
+         again, as the content mounts and unmounts, which jsdom's presence
+         never lets it do. *)
+      focus trigger;
+      let* () = H.keyboard user "{Enter}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the trigger, Enter pressed on it" "true"
+              (attribute trigger "aria-expanded"))
+      in
+      focus (H.by_text "Cancel");
+      let* () = H.keyboard user "{Enter}" in
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the trigger, Cancel pressed" "false"
+            (attribute trigger "aria-expanded")))

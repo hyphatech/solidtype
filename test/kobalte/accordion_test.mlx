@@ -1,0 +1,79 @@
+module H = Harness
+module Accordion = Solidtype.Kobalte.Accordion
+
+let island () =
+  <Accordion.Root>
+    <Accordion.Item value="shipping">
+      <Accordion.Header>
+        <Accordion.Trigger>"Shipping"</Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>"Two days."</Accordion.Content>
+    </Accordion.Item>
+    <Accordion.Item value="returns">
+      <Accordion.Header>
+        <Accordion.Trigger>"Returns"</Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>"Thirty days."</Accordion.Content>
+    </Accordion.Item>
+    <Accordion.Item value="warranty">
+      <Accordion.Header>
+        <Accordion.Trigger>"Warranty"</Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>"One year."</Accordion.Content>
+    </Accordion.Item>
+  </Accordion.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Accordion.tsx"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let ( let* ) = H.( let* )
+let header name = H.by_role_named "button" (H.query ~name ())
+let expanded e = Option.value (H.attribute e "aria-expanded") ~default:""
+
+let () =
+  H.alike "Accordion" ~island ~twin (fun user ->
+      if Array.length (H.all_by_role "heading") <> 3 then
+        Js.Exn.raiseError "each header is a heading";
+      H.expect_equal ~what:"the first header, closed" "false"
+        (expanded (header "Shipping"));
+      let* () = H.click user (header "Shipping") in
+      let shipping = header "Shipping" in
+      H.expect_equal ~what:"the first header, clicked" "true"
+        (expanded shipping);
+      let region =
+        match H.attribute shipping "aria-controls" with
+        | None -> Js.Exn.raiseError "an open header names its region"
+        | Some id -> (
+            match Js.Null.toOption (by_id id) with
+            | None -> Js.Exn.raiseError "the region the header names exists"
+            | Some region -> region)
+      in
+      H.expect_equal ~what:"the region's role" "region"
+        (Option.value (H.attribute region "role") ~default:"");
+      H.expect_equal ~what:"the header the region names"
+        (Option.value (H.attribute shipping "id") ~default:"header")
+        (Option.value (H.attribute region "aria-labelledby") ~default:"");
+      H.expect_equal ~what:"the region" "Two days." (H.text region);
+      let* () = H.click user shipping in
+      H.expect_equal ~what:"the open header, clicked again" "true"
+        (expanded shipping);
+      (* Kobalte 0.13's accordion moves its focused key on an arrow but not
+         the focus, so a header is reached by Tab. *)
+      let* () = H.tab user in
+      H.expect_equal ~what:"focus, Tab pressed" "Returns" (H.focused_label ());
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"the header Enter opened" "true"
+        (expanded (header "Returns"));
+      H.expect_equal ~what:"the first header, another opened" "false"
+        (expanded shipping);
+      let* () = H.keyboard user "{Shift>}{Tab}{/Shift}" in
+      H.expect_equal ~what:"focus, Shift+Tab pressed" "Shipping"
+        (H.focused_label ());
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"the header Space opened" "true" (expanded shipping);
+      H.expect_equal ~what:"the second header, another opened" "false"
+        (expanded (header "Returns"));
+      Js.Promise.resolve ())

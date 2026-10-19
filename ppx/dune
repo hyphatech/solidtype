@@ -1,0 +1,7 @@
+(library
+ (name ppx_solidtype)
+ (public_name ppx_solidtype)
+ (kind ppx_rewriter)
+ (libraries ppxlib)
+ (preprocess
+  (pps ppxlib.metaquot)))

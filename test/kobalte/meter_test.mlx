@@ -1,0 +1,33 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Meter = K.Meter
+module Params = K.Types.GetValueLabelParams
+
+let island () =
+  <Meter.Root
+    value=(fun () -> 40.)
+    getValueLabel=(fun params ->
+                    Js.Float.toString (Params.value params)
+                    ^ " of "
+                    ^ Js.Float.toString (Params.max params)
+                    ^ " GB")>
+    <Meter.Label>"Storage"</Meter.Label>
+    <Meter.ValueLabel />
+    <Meter.Track><Meter.Fill /></Meter.Track>
+  </Meter.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Meter.tsx"]
+
+let () =
+  H.alike "Meter" ~island ~twin (fun _ ->
+      let meter = H.by_role_named "meter" (H.query ~name:"Storage" ()) in
+      let attribute name = Option.value (H.attribute meter name) ~default:"" in
+      H.expect_equal ~what:"the value" "40" (attribute "aria-valuenow");
+      H.expect_equal ~what:"the minimum" "0" (attribute "aria-valuemin");
+      H.expect_equal ~what:"the maximum" "100" (attribute "aria-valuemax");
+      H.expect_equal ~what:"the value's text, from getValueLabel" "40 of 100 GB"
+        (attribute "aria-valuetext");
+      H.expect_equal ~what:"the value label" "40 of 100 GB"
+        (H.text (H.by_text "40 of 100 GB"));
+      Js.Promise.resolve ())

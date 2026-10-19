@@ -1,0 +1,66 @@
+module H = Harness
+module ToggleGroup = Solidtype.Kobalte.ToggleGroup
+
+let island () =
+  <div>
+    <ToggleGroup.Root aria_label="Alignment" defaultValue="left">
+      <ToggleGroup.Item value="left">"Left"</ToggleGroup.Item>
+      <ToggleGroup.Item value="center">"Center"</ToggleGroup.Item>
+      <ToggleGroup.Item value="right">"Right"</ToggleGroup.Item>
+    </ToggleGroup.Root>
+    <ToggleGroup.Root_multiple
+      aria_label="Style" multiple=true orientation=`vertical>
+      <ToggleGroup.Item value="bold">"Bold"</ToggleGroup.Item>
+      <ToggleGroup.Item value="italic">"Italic"</ToggleGroup.Item>
+    </ToggleGroup.Root_multiple>
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ToggleGroup.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "ToggleGroup" ~island ~twin (fun user ->
+      let group name = H.by_role_named "group" (H.query ~name ()) in
+      let item name = H.by_role_named "button" (H.query ~name ()) in
+      let pressed names =
+        List.filter
+          (fun name ->
+            String.equal "true"
+              (Option.value
+                 (H.attribute (item name) "aria-pressed")
+                 ~default:""))
+          names
+        |> String.concat ", "
+      in
+      let alignment = [ "Left"; "Center"; "Right" ] in
+      let style = [ "Bold"; "Italic" ] in
+      H.expect_equal ~what:"the alignment's orientation" "horizontal"
+        (Option.value
+           (H.attribute (group "Alignment") "data-orientation")
+           ~default:"");
+      H.expect_equal ~what:"the style's orientation" "vertical"
+        (Option.value
+           (H.attribute (group "Style") "data-orientation")
+           ~default:"");
+      H.expect_equal ~what:"alignment, at first" "Left" (pressed alignment);
+      let* () = H.click user (item "Center") in
+      H.expect_equal ~what:"alignment, Center clicked" "Center"
+        (pressed alignment);
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"focus, ArrowRight pressed" "Right"
+        (H.focused_label ());
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"alignment, Space on Right" "Right"
+        (pressed alignment);
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"alignment, Enter on Right again" ""
+        (pressed alignment);
+      let* () = H.click user (item "Bold") in
+      let* () = H.keyboard user "{ArrowDown}" in
+      H.expect_equal ~what:"focus, ArrowDown in the style" "Italic"
+        (H.focused_label ());
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"style, both pressed" "Bold, Italic" (pressed style);
+      Js.Promise.resolve ())

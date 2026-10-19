@@ -1,0 +1,18 @@
+module Raw = struct
+  module Props = struct
+    let check ~fallback:(_ : 'e -> ((unit -> unit)[@u]) -> Jsx.element)
+        ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+      ()
+  end
+
+  external component : unit Jsx.component = "ErrorBoundary"
+  [@@mel.module "solid-js"]
+end
+
+let%component make ~(fallback : exn -> (unit -> unit) -> Jsx.element)
+    ~(children : Jsx.content) () =
+  <Raw
+    fallback=(fun e reset ->
+               fallback (Solid.exn_of_thrown e) (fun () -> (reset () [@u])))>
+    (fun () -> children ())
+  </Raw>

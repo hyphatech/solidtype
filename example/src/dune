@@ -1,0 +1,14 @@
+(library
+ (name example)
+ (modes melange)
+ (libraries solidtype melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+; The notes island's client, printed from the server's routes as the build
+; runs, never kept: the routes are the one place it is written.
+
+(rule
+ (with-stdout-to
+  api.ml
+  (run ../server/print_client.exe)))

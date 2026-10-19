@@ -1,0 +1,31 @@
+module T = Testing
+
+let ( let* ) p f = Js.Promise.then_ f p
+let origin = T.inject "origin"
+
+(* Typed into the field and added, as a person does. *)
+let add text =
+  let field = T.by_label "New note" in
+  T.set_value field text;
+  T.input field;
+  T.click (T.by_role "button")
+
+let () =
+  Jest.describe "notes, against the example's server" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "a note added is listed, read back from the server"
+        (fun () ->
+          T.render (fun () -> <Example.Notes origin=(fun () -> origin) />);
+          add "milk";
+          let* item = T.find_by_text "milk" in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (T.text item, T.class_name item) |> toEqual ("milk", "open")));
+      Jest.testPromise "an empty note is refused before it is sent" (fun () ->
+          T.render (fun () -> <Example.Notes origin=(fun () -> origin) />);
+          add "";
+          let* said = T.find_by_text "A note is one to eighty characters." in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (T.text said)
+              |> toEqual "A note is one to eighty characters.")))

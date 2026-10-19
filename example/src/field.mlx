@@ -1,0 +1,10 @@
+module Props = struct
+  type t
+
+  let check ?spread:(_ : t option) () = ()
+end
+
+(* The props pass through untouched: Solid reads each one when the input
+   does, so a prop that changes is never copied stale. *)
+let make (props : Props.t) = <input class_="field" spread=props />
+let component = Solidtype.Jsx.component make

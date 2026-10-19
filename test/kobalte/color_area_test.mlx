@@ -1,0 +1,58 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Area = K.ColorArea
+
+let island () =
+  <Area.Root defaultValue=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")>
+    <Area.Label>"Colour"</Area.Label>
+    <Area.Background>
+      <Area.Thumb><Area.HiddenInputX /> <Area.HiddenInputY /></Area.Thumb>
+    </Area.Background>
+  </Area.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ColorArea.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+let () =
+  H.alike "ColorArea" ~island ~twin (fun user ->
+      match H.all_by_role "slider" with
+      | [| x; y |] ->
+          let channels ~what hue saturation =
+            H.expect_equal ~what:(what ^ ", the hue") hue
+              (attribute x "aria-valuetext");
+            H.expect_equal
+              ~what:(what ^ ", the saturation")
+              saturation
+              (attribute y "aria-valuetext")
+          in
+          H.expect_equal ~what:"the sliders' description" "2D slider"
+            (attribute x "aria-roledescription");
+          H.expect_equal ~what:"the sliders' orientations" "horizontal vertical"
+            (attribute x "aria-orientation"
+            ^ " "
+            ^ attribute y "aria-orientation");
+          channels ~what:"at first" {js|Hue 0°, vibrant Red|js}
+            {js|Saturation 100%, vibrant Red|js};
+          let* () = H.tab user in
+          H.expect_equal ~what:"Tab's focus"
+            {js|Hue 0°, Saturation 100%, vibrant Red|js} (H.focused_label ());
+          let* () = H.keyboard user "{ArrowRight}" in
+          channels ~what:"ArrowRight" {js|Hue 1°, vibrant Red|js}
+            {js|Saturation 100%, vibrant Red|js};
+          let* () = H.keyboard user "{ArrowDown}" in
+          channels ~what:"ArrowDown" {js|Hue 1°, vibrant Red|js}
+            {js|Saturation 99%, vibrant Red|js};
+          let* () = H.keyboard user "{Shift>}{ArrowRight}{/Shift}" in
+          let* () = H.keyboard user "{PageDown}" in
+          channels ~what:"Shift+ArrowRight, then PageDown"
+            {js|Hue 16°, vibrant red orange|js}
+            {js|Saturation 89%, vibrant red orange|js};
+          H.expect_equal ~what:"the hidden inputs' values" "16 89"
+            (value x ^ " " ^ value y);
+          Js.Promise.resolve ()
+      | _ -> Js.Exn.raiseError "two sliders, one for each axis")

@@ -1,0 +1,18 @@
+; Each Kobalte component in OCaml beside its TSX twin, tested alike: the
+; same queries, keys and accessibility scan on both.
+
+(library
+ (name kobalte_test)
+ (modes melange)
+ (libraries solidtype melange-jest.jest melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries kobalte_test)
+ (runtime_deps
+  (glob_files twins/*.tsx))
+ (module_systems
+  (es6 jsx)))

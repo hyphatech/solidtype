@@ -1,0 +1,51 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Select = K.Select
+module Node = K.Types.CollectionNode
+module Item_props = K.Types.SelectBaseItemComponentProps
+module Value_state = K.Types.SelectValueState
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  <Select.Root
+    options=(fun () -> Array.map K.Types.Either.left [| "Apple"; "Banana" |])
+    placeholder=(<span>"Pick a fruit"</span>)
+    itemComponent=(fun props ->
+                    <Select.Item item=(fun () -> Item_props.item props)>
+                      <Select.ItemLabel>
+                        (fun () ->
+                          Jsx.string (Node.raw_value (Item_props.item props)))
+                      </Select.ItemLabel>
+                    </Select.Item>)>
+    <Select.Label>"Fruit"</Select.Label>
+    <Select.Trigger>
+      <Select.Value>
+        (fun state ->
+          <span>
+            (fun () -> Jsx.string (S.get (Value_state.selected_option state)))
+          </span>)
+      </Select.Value>
+    </Select.Trigger>
+    <Select.Portal>
+      <Select.Content><Select.Listbox /></Select.Content>
+    </Select.Portal>
+  </Select.Root>
+
+external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Select.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Select" ~island ~twin (fun user ->
+      let trigger = H.by_role "button" in
+      H.expect_equal ~what:"the trigger's popup" "listbox"
+        (Option.value (H.attribute trigger "aria-haspopup") ~default:"");
+      let* () = H.click user trigger in
+      let options = H.all_by_role "option" in
+      if Array.length options <> 2 then Js.Exn.raiseError "two options open";
+      let* () =
+        H.click user (H.by_role_named "option" (H.query ~name:"Banana" ()))
+      in
+      H.expect_equal ~what:"the chosen value" "Banana" (H.text trigger);
+      Js.Promise.resolve ())

@@ -1,0 +1,76 @@
+module H = Harness
+module ColorMode = Solidtype.Kobalte.ColorMode
+module Context = Solidtype.Kobalte.Types.ColorModeContextType
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+module E = Jest.Expect
+
+let ( let* ) = H.( let* )
+let key = "solidtype-color-mode"
+let mode_name = function `light -> "light" | `dark -> "dark"
+
+external stored : string -> string Js.null = "getItem"
+[@@mel.scope "localStorage"]
+
+external store : string -> string -> unit = "setItem"
+[@@mel.scope "localStorage"]
+
+external forget : string -> unit = "removeItem" [@@mel.scope "localStorage"]
+external root : Dom.element = "documentElement" [@@mel.scope "document"]
+
+module Shows_mode = struct
+  let%component make () =
+    let mode = ColorMode.use_color_mode () in
+    <div>
+      <p>
+        (fun () -> Jsx.string (mode_name (S.get (Context.color_mode mode))))
+      </p>
+      <button onClick=(fun _ -> Context.toggle_color_mode mode ())>
+        "Toggle"
+      </button>
+      <button onClick=(fun _ -> Context.set_color_mode mode `dark)>
+        "Dark"
+      </button>
+    </div>
+end
+
+let island () =
+  <ColorMode.ColorModeProvider
+    initialColorMode=`dark
+    storageManager=(fun () -> ColorMode.create_local_storage_manager key)>
+    <Shows_mode />
+  </ColorMode.ColorModeProvider>
+
+let mode () = H.text (H.by_role "paragraph")
+let theme () = Option.value (H.attribute root "data-kb-theme") ~default:""
+let saved () = Option.value (Js.Null.toOption (stored key)) ~default:"nothing"
+
+let () =
+  Jest.describe "color mode" (fun () ->
+      Jest.beforeEach (fun () -> forget key);
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "useColorMode reads the provider's mode, and changes it"
+        (fun () ->
+          let user = H.setup () in
+          H.render island;
+          let first = (mode (), theme (), saved ()) in
+          let* () =
+            H.click user (H.by_role_named "button" (H.query ~name:"Toggle" ()))
+          in
+          let toggled = (mode (), theme (), saved ()) in
+          let* () =
+            H.click user (H.by_role_named "button" (H.query ~name:"Dark" ()))
+          in
+          Js.Promise.resolve
+            E.(
+              expect [ first; toggled; (mode (), theme (), saved ()) ]
+              |> toEqual
+                   [
+                     ("dark", "dark", "dark");
+                     ("light", "light", "light");
+                     ("dark", "dark", "dark");
+                   ]));
+      Jest.test "a mode stored wins over the initial one" (fun () ->
+          store key "light";
+          H.render island;
+          E.(expect (mode (), theme ()) |> toEqual ("light", "light"))))

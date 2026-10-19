@@ -1,0 +1,38 @@
+module H = Harness
+module Separator = Solidtype.Kobalte.Separator
+
+let island () =
+  <div>
+    <p>"Above"</p>
+    <Separator.Root />
+    <p>"Below"</p>
+    <Separator.Root orientation=`vertical />
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Separator.tsx"]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+let () =
+  H.alike "Separator" ~island ~twin (fun _ ->
+      match H.all_by_role "separator" with
+      | [| horizontal; vertical |] ->
+          H.expect_equal ~what:"a separator's element" "HR"
+            (tag_name horizontal);
+          H.expect_equal ~what:"an hr's role, implicit" "none"
+            (Option.value (H.attribute horizontal "role") ~default:"none");
+          H.expect_equal ~what:"horizontal, implicit" "none"
+            (Option.value
+               (H.attribute horizontal "aria-orientation")
+               ~default:"none");
+          H.expect_equal ~what:"the horizontal one's data" "horizontal"
+            (Option.value
+               (H.attribute horizontal "data-orientation")
+               ~default:"");
+          H.expect_equal ~what:"the vertical one's orientation" "vertical"
+            (Option.value (H.attribute vertical "aria-orientation") ~default:"");
+          H.expect_equal ~what:"the vertical one's data" "vertical"
+            (Option.value (H.attribute vertical "data-orientation") ~default:"");
+          Js.Promise.resolve ()
+      | _ -> Js.Exn.raiseError "two separators")

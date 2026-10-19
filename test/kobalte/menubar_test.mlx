@@ -1,0 +1,95 @@
+module H = Harness
+module Menubar = Solidtype.Kobalte.Menubar
+
+let island () =
+  <Menubar.Root>
+    <Menubar.Menu>
+      <Menubar.Trigger>"File"</Menubar.Trigger>
+      <Menubar.Portal>
+        <Menubar.Content>
+          <Menubar.Item>"New"</Menubar.Item> <Menubar.Item>"Open"</Menubar.Item>
+        </Menubar.Content>
+      </Menubar.Portal>
+    </Menubar.Menu>
+    <Menubar.Menu>
+      <Menubar.Trigger>"Edit"</Menubar.Trigger>
+      <Menubar.Portal>
+        <Menubar.Content>
+          <Menubar.Item>"Undo"</Menubar.Item>
+          <Menubar.Item>"Redo"</Menubar.Item>
+        </Menubar.Content>
+      </Menubar.Portal>
+    </Menubar.Menu>
+  </Menubar.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Menubar.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+let focus_is what label =
+  H.eventually (fun () -> H.expect_equal ~what label (H.text H.focused))
+
+let expanded what trigger value =
+  H.eventually (fun () ->
+      H.expect_equal ~what value (attribute trigger "aria-expanded"))
+
+let () =
+  H.alike "Menubar" ~island ~twin (fun user ->
+      let bar = H.by_role "menubar" in
+      let file = H.by_role_named "menuitem" (H.query ~name:"File" ()) in
+      let edit = H.by_role_named "menuitem" (H.query ~name:"Edit" ()) in
+      H.expect_equal ~what:"the menubar's orientation" "horizontal"
+        (attribute bar "aria-orientation");
+      H.expect_equal ~what:"File's popup" "true"
+        (attribute file "aria-haspopup");
+      H.expect_equal ~what:"File, closed" "false"
+        (attribute file "aria-expanded");
+      let* () = H.tab user in
+      let* () = focus_is "focus, tabbed into the menubar" "File" in
+
+      let* () = H.keyboard user "{ArrowRight}" in
+      let* () = focus_is "focus, ArrowRight pressed" "Edit" in
+
+      let* () = H.keyboard user "{ArrowLeft}" in
+      let* () = focus_is "focus, ArrowLeft pressed" "File" in
+      let* () = H.keyboard user "{Enter}" in
+      let* () = expanded "File, Enter pressed" file "true" in
+      let menu = H.by_role "menu" in
+      H.expect_equal ~what:"File controls its menu" (attribute menu "id")
+        (attribute file "aria-controls");
+      H.expect_equal ~what:"File's menu is labelled by File"
+        (attribute file "id")
+        (attribute menu "aria-labelledby");
+      (* Kobalte's menubar focuses the menu itself as it opens, where the
+         pattern would focus its first item. *)
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"focus, File's menu open" (attribute menu "id")
+              (attribute H.focused "id"))
+      in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown in the menu" "New" in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown again" "Open" in
+      let* () = H.keyboard user "{ArrowRight}" in
+      let* () =
+        expanded "Edit, ArrowRight pressed in File's menu" edit "true"
+      in
+      let* () = expanded "File, Edit's menu open" file "false" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"focus, Edit's menu open" (attribute edit "id")
+              (attribute H.focused "aria-labelledby"))
+      in
+      let* () = H.keyboard user "{Escape}" in
+      expanded "Edit, Escape pressed" edit "false");
+  H.alike "Menubar, by pointer" ~island ~twin (fun user ->
+      let file = H.by_role_named "menuitem" (H.query ~name:"File" ()) in
+      let* () = H.click user file in
+      let* () = expanded "File, clicked" file "true" in
+      let* () =
+        H.click user (H.by_role_named "menuitem" (H.query ~name:"New" ()))
+      in
+      expanded "File, an item clicked" file "false")

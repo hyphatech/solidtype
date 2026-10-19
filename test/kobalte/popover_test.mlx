@@ -1,0 +1,75 @@
+module H = Harness
+module Popover = Solidtype.Kobalte.Popover
+
+let island () =
+  <Popover.Root>
+    <Popover.Trigger>"Share"</Popover.Trigger>
+    <Popover.Portal>
+      <Popover.Content>
+        <Popover.Arrow />
+        <Popover.Title>"Share the page"</Popover.Title>
+        <Popover.Description>
+          "Anyone with the link can see it."
+        </Popover.Description>
+        <Popover.CloseButton>"Done"</Popover.CloseButton>
+      </Popover.Content>
+    </Popover.Portal>
+  </Popover.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Popover.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+(* The text of the element whose id [e]'s attribute [name] holds. *)
+let text_of e name =
+  match Js.Null.toOption (by_id (attribute e name)) with
+  | Some e -> H.text e
+  | None -> ""
+
+let () =
+  H.alike "Popover" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "button" (H.query ~name:"Share" ()) in
+      H.expect_equal ~what:"the trigger's popup" "dialog"
+        (attribute trigger "aria-haspopup");
+      H.expect_equal ~what:"the trigger, closed" "false"
+        (attribute trigger "aria-expanded");
+      let* () = H.click user trigger in
+      let* _ = H.settled () in
+      let dialog = H.by_role "dialog" in
+      H.expect_equal ~what:"the trigger, open" "true"
+        (attribute trigger "aria-expanded");
+      H.expect_equal ~what:"the trigger controls the popover"
+        (attribute dialog "id")
+        (attribute trigger "aria-controls");
+      H.expect_equal ~what:"the popover's label" "Share the page"
+        (text_of dialog "aria-labelledby");
+      H.expect_equal ~what:"the popover's description"
+        "Anyone with the link can see it."
+        (text_of dialog "aria-describedby");
+      let* () = H.keyboard user "{Escape}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the trigger, Escape pressed" "false"
+              (attribute trigger "aria-expanded"))
+      in
+      (* Focus moves to the trigger as the content unmounts, which jsdom's
+         presence never lets it do. *)
+      focus trigger;
+      let* () = H.keyboard user " " in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the trigger, Space pressed on it" "true"
+              (attribute trigger "aria-expanded"))
+      in
+      focus (H.by_text "Done");
+      let* () = H.keyboard user "{Enter}" in
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the trigger, Done pressed" "false"
+            (attribute trigger "aria-expanded")))

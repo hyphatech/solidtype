@@ -1,0 +1,2 @@
+let%component make ~(text : string) () =
+  <span class_="label">(fun () -> Solidtype.Jsx.string (text ()))</span>

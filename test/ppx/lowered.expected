@@ -1,0 +1,216 @@
+let static =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.s "class" ({js|x|js} : Solidtype.Html.Div.class_))|]
+    [||]
+let handler =
+  Solidtype.Jsx.el "button"
+    [|(Solidtype.Jsx.s "onClick"
+         (fun _ -> () : Solidtype.Html.Button.onClick))|] [||]
+let dynamic =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.d "class"
+         (fun () -> cls () : unit -> Solidtype.Html.Div.class_))|] [||]
+let spread = Solidtype.Jsx.el "input" [|(Solidtype.Jsx.spread props)|] [||]
+let text = Solidtype.Jsx.el "p" [||] [|(Solidtype.Jsx.text {js|hello|js})|]
+let nested =
+  Solidtype.Jsx.el "ul" [||]
+    [|(Solidtype.Jsx.node
+         (Solidtype.Jsx.el "li" [||] [|(Solidtype.Jsx.text {js|one|js})|]))|]
+let thunk =
+  Solidtype.Jsx.el "p" [||]
+    [|(Solidtype.Jsx.dynamic
+         (fun () -> Solidtype.Jsx.string (name ()) : unit ->
+                                                       Solidtype.Jsx.content))|]
+let component =
+  let solidtype__text : unit -> _ = fun () -> "x" in
+  if false
+  then
+    Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
+      ~count:(Solidtype.Check.literal 1) ();
+  Solidtype.Jsx.c Label.component
+    [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.s "count" 1)|]
+    [||]
+let part =
+  let solidtype__checked : unit -> _ = fun () -> on () in
+  if false
+  then
+    Switch.Root.Props.check
+      ~checked:(Solidtype.Check.thunk solidtype__checked)
+      ~children:(Solidtype.Check.nodes ()) ();
+  Solidtype.Jsx.c Switch.Root.component
+    [|(Solidtype.Jsx.d "checked" solidtype__checked)|]
+    [|(Solidtype.Jsx.node
+         (if false then Switch.Thumb.Props.check ();
+          Solidtype.Jsx.c Switch.Thumb.component [||] [||]))|]
+let constructor =
+  if false then Toggle.Props.check ~pressed:(Solidtype.Check.literal true) ();
+  Solidtype.Jsx.c Toggle.component [|(Solidtype.Jsx.s "pressed" true)|] [||]
+let element_prop =
+  let solidtype__when_ : unit -> _ = fun () -> ready () in
+  if false
+  then
+    Show.Props.check ~when_:(Solidtype.Check.thunk solidtype__when_)
+      ~fallback:(Solidtype.Check.element ()) ();
+  Solidtype.Jsx.c Show.component
+    [|(Solidtype.Jsx.d "when" solidtype__when_);(Solidtype.Jsx.s "fallback"
+                                                   (Solidtype.Jsx.el "p" 
+                                                      [||]
+                                                      [|(Solidtype.Jsx.text
+                                                           {js|wait|js})|]))|]
+    [||]
+let function_child =
+  let solidtype__each : unit -> _ = fun () -> items ()
+  and solidtype__children item =
+    Solidtype.Jsx.el "li" [||]
+      [|(Solidtype.Jsx.dynamic
+           (fun () -> Solidtype.Jsx.string item : unit ->
+                                                    Solidtype.Jsx.content))|] in
+  if false
+  then
+    For.Props.check ~each:(Solidtype.Check.thunk solidtype__each)
+      ~children:(Solidtype.Check.render solidtype__children) ();
+  Solidtype.Jsx.c For.component [|(Solidtype.Jsx.d "each" solidtype__each)|]
+    [|(Solidtype.Jsx.render solidtype__children)|]
+let ref_callback =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.s "ref" (fun el -> keep el : Solidtype.Html.Div.ref))|]
+    [||]
+include
+  struct
+    module Props =
+      struct
+        [@@@ocaml.warning "-32-37"]
+        type 'a t
+        external get_text : 'a t -> string = "text"[@@mel.get ]
+        external get_count : 'a t -> int option = "count"[@@mel.get ]
+        external get_onPick : 'a t -> ((int -> unit)[@u ]) option = "onPick"
+        [@@mel.get ]
+        external get_children :
+          'a t -> (('a -> Solidtype.Jsx.element)[@u ]) = "children"[@@mel.get
+                                                                    ]
+        external make :
+          text:string ->
+            ?count:int ->
+              ?onPick:(int -> unit) ->
+                children:('a -> Solidtype.Jsx.element) -> unit -> 'a t = ""
+        [@@mel.obj ]
+        let check ~text:(_ : string Solidtype.Check.value)
+          ?count:(_ : int Solidtype.Check.value option)
+          ?onPick:(_ : (int -> unit) option)
+          ~children:(_ :
+                      ('a -> Solidtype.Jsx.element, [ `render ])
+                        Solidtype.Check.children)
+          ?spread:(_ : 'a t option) () = ()
+        type name =
+          | Text 
+          | Count 
+          | OnPick 
+          | Children 
+        let omit (props : 'a t) (names : name array) :
+          'a t Solidtype.Solid.rest=
+          Solidtype.Solid.omit props
+            (Array.map
+               (function
+                | Text -> "text"
+                | Count -> "count"
+                | OnPick -> "onPick"
+                | Children -> "children") names)
+      end
+    let make (props : _ Props.t) =
+      let text () = Props.get_text props[@@inline ][@@ocaml.warning "-26-27"]
+      and count () =
+        match Props.get_count props with | Some v -> v | None -> 0[@@inline ]
+      [@@ocaml.warning "-26-27"]
+      and onPick solidtype__0 =
+        match Props.get_onPick props with
+        | Some f -> Some ((f solidtype__0)[@u ])
+        | None -> None[@@inline ][@@ocaml.warning "-26-27"]
+      and children solidtype__0 =
+        let f = Props.get_children props in ((f solidtype__0)[@u ])[@@inline
+                                                                    ]
+      [@@ocaml.warning "-26-27"] in
+      Solidtype.Jsx.el "p" [||]
+        [|(Solidtype.Jsx.dynamic
+             (fun () -> Solidtype.Jsx.int (count ()) : unit ->
+                                                         Solidtype.Jsx.content))|]
+    let component = Solidtype.Jsx.component make
+  end
+let namespaced =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.s "on:scroll" (fun _ -> () : Dom.event -> unit));(
+      Solidtype.Jsx.s "attr:title" ({js|t|js} : string));(Solidtype.Jsx.s
+                                                            "bool:hidden"
+                                                            (true : bool));(
+      Solidtype.Jsx.d "prop:value" (fun () -> v ()));(Solidtype.Jsx.s
+                                                        "data-user-id"
+                                                        ({js|7|js} : 
+                                                        string));(Solidtype.Jsx.s
+                                                                    "aria-label"
+                                                                    ({js|name|js} : 
+                                                                    Solidtype.Html.Div.aria_label))|]
+    [||]
+let switch =
+  if false
+  then (((match answer () with | Waiting -> () | Ready n -> ()))
+    [@ocaml.warning "-26-27"]);
+  if false then Switch.Props.check ~children:(Solidtype.Check.nodes ()) ();
+  Solidtype.Jsx.c Switch.component [||]
+    [|(Solidtype.Jsx.node
+         (let solidtype__when_ : unit -> _ =
+            fun () -> ((match answer () with | Waiting -> true | _ -> false)
+              [@ocaml.warning "-11"]) in
+          if false
+          then
+            Match.Props.check ~when_:(Solidtype.Check.thunk solidtype__when_)
+              ~children:(Solidtype.Check.nodes ()) ();
+          Solidtype.Jsx.c Match.component
+            [|(Solidtype.Jsx.d "when" solidtype__when_)|]
+            [|(Solidtype.Jsx.node
+                 (Solidtype.Jsx.el "p" [||]
+                    [|(Solidtype.Jsx.text {js|wait|js})|]))|]));(Solidtype.Jsx.node
+                                                                   (let solidtype__some
+                                                                    :
+                                                                    unit -> _
+                                                                    =
+                                                                    fun () ->
+                                                                    ((match 
+                                                                    answer ()
+                                                                    with
+                                                                    | Ready n
+                                                                    -> Some n
+                                                                    | _ ->
+                                                                    None)
+                                                                    [@ocaml.warning
+                                                                    "-11"])
+                                                                    and solidtype__children
+                                                                    n =
+                                                                    Solidtype.Jsx.el
+                                                                    "p" 
+                                                                    [||]
+                                                                    [|(
+                                                                    Solidtype.Jsx.dynamic
+                                                                    (fun ()
+                                                                    ->
+                                                                    Solidtype.Jsx.int
+                                                                    n : 
+                                                                    unit ->
+                                                                    Solidtype.Jsx.content))|] in
+                                                                    if false
+                                                                    then
+                                                                    Match.Keyed.Props.check
+                                                                    ~some:(
+                                                                    Solidtype.Check.thunk
+                                                                    solidtype__some)
+                                                                    ~children:(
+                                                                    Solidtype.Check.render
+                                                                    solidtype__children)
+                                                                    ();
+                                                                    Solidtype.Jsx.c
+                                                                    Match.Keyed.component
+                                                                    [|(
+                                                                    Solidtype.Jsx.d
+                                                                    "some"
+                                                                    solidtype__some)|]
+                                                                    [|(
+                                                                    Solidtype.Jsx.render
+                                                                    solidtype__children)|]))|]

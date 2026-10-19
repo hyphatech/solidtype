@@ -1,0 +1,63 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Field = K.ColorChannelField
+
+(* The red channel, a plain number: Kobalte writes a channel's formatted
+   text, a unit and all, into aria-valuenow once it changes, which axe
+   refuses for the hue's degrees and a percentage. *)
+let island () =
+  <Field.Root
+    channel=`red defaultValue=(fun () -> K.Colors.parse_color "rgb(0, 0, 0)")>
+    <Field.Label>"Red"</Field.Label>
+    <Field.Input />
+    <Field.IncrementTrigger aria_label="More" />
+    <Field.DecrementTrigger aria_label="Less" />
+  </Field.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ColorChannelField.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+external clear : H.user -> Dom.element -> unit Js.Promise.t = "clear"
+[@@mel.send]
+
+external type_ : H.user -> Dom.element -> string -> unit Js.Promise.t = "type"
+[@@mel.send]
+
+let () =
+  H.alike "ColorChannelField" ~island ~twin (fun user ->
+      let input = H.by_role_named "spinbutton" (H.query ~name:"Red" ()) in
+      let red ~what text =
+        H.expect_equal ~what text (value input);
+        H.expect_equal ~what text (attribute input "aria-valuetext")
+      in
+      H.expect_equal ~what:"the red channel's range" "0 255"
+        (attribute input "aria-valuemin" ^ " " ^ attribute input "aria-valuemax");
+      H.expect_equal ~what:"the value at first" "0" (value input);
+      let less = H.by_role_named "button" (H.query ~name:"Less" ()) in
+      if Option.is_none (H.attribute less "disabled") then
+        Js.Exn.raiseError "Less is disabled at the least red";
+      let* () = H.tab user in
+      let* () = H.keyboard user "{ArrowUp}" in
+      red ~what:"ArrowUp" "1";
+      let* () = H.keyboard user "{PageUp}" in
+      red ~what:"PageUp" "10";
+      let* () = H.keyboard user "{End}" in
+      red ~what:"End" "255";
+      let* () = H.keyboard user "{Home}" in
+      red ~what:"Home" "0";
+      let* () =
+        H.click user (H.by_role_named "button" (H.query ~name:"More" ()))
+      in
+      red ~what:"More clicked" "1";
+      let* () = H.click user less in
+      red ~what:"Less clicked" "0";
+      let* () = clear user input in
+      let* () = type_ user input "120" in
+      let* () = H.tab user in
+      red ~what:"120 typed" "120";
+      Js.Promise.resolve ())

@@ -1,0 +1,8 @@
+; does_not_compile.t builds islands against the installed library, which
+; dune puts on OCAMLPATH for a cram test that depends on its packages.
+
+(cram
+ (applies_to does_not_compile)
+ (deps
+  (package solidtype)
+  (package ppx_solidtype)))

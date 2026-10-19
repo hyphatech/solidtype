@@ -1,0 +1,25 @@
+module H = Harness
+module Switch = Solidtype.Kobalte.Switch
+
+let island () =
+  <Switch.Root>
+    <Switch.Input />
+    <Switch.Label>"Sound"</Switch.Label>
+    <Switch.Control><Switch.Thumb /></Switch.Control>
+  </Switch.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Switch.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Switch" ~island ~twin (fun user ->
+      let switch = H.by_role_named "switch" (H.query ~name:"Sound" ()) in
+      let before = H.checked switch in
+      let* () = H.click user switch in
+      let clicked = H.checked switch in
+      let* () = H.keyboard user " " in
+      if before || (not clicked) || H.checked switch then
+        Js.Exn.raiseError "the switch is off, a click turns it on, Space off"
+      else Js.Promise.resolve ())

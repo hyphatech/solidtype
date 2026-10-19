@@ -1,0 +1,39 @@
+module H = Harness
+module Progress = Solidtype.Kobalte.Progress
+module S = Solidtype.Solid
+
+let island () =
+  let value, set_value = S.create_signal 30. in
+  <div>
+    <Progress.Root value=(fun () -> S.get value) minValue=0. maxValue=60.>
+      <Progress.Label>"Uploading"</Progress.Label>
+      <Progress.ValueLabel />
+      <Progress.Track><Progress.Fill /></Progress.Track>
+    </Progress.Root>
+    <button type_=`button onClick=(fun _ -> S.set set_value 60.)>
+      "Finish"
+    </button>
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Progress.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Progress" ~island ~twin (fun user ->
+      let bar = H.by_role_named "progressbar" (H.query ~name:"Uploading" ()) in
+      let attribute name = Option.value (H.attribute bar name) ~default:"" in
+      H.expect_equal ~what:"the value" "30" (attribute "aria-valuenow");
+      H.expect_equal ~what:"the minimum" "0" (attribute "aria-valuemin");
+      H.expect_equal ~what:"the maximum" "60" (attribute "aria-valuemax");
+      H.expect_equal ~what:"the value's text, a share of the range" "50%"
+        (attribute "aria-valuetext");
+      H.expect_equal ~what:"under way" "loading" (attribute "data-progress");
+      let* () = H.click user (H.by_role "button") in
+      H.expect_equal ~what:"the value, finished" "60"
+        (attribute "aria-valuenow");
+      H.expect_equal ~what:"the value's text, finished" "100%"
+        (attribute "aria-valuetext");
+      H.expect_equal ~what:"finished" "complete" (attribute "data-progress");
+      Js.Promise.resolve ())

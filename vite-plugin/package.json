@@ -1,0 +1,20 @@
+{
+  "name": "vite-plugin-solidtype",
+  "version": "0.0.0",
+  "description": "Hands OCaml components compiled by Melange to Solid's own compiler",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./markers": "./src/markers.js"
+  },
+  "dependencies": {
+    "@babel/core": "^7.28.0"
+  },
+  "devDependencies": {
+    "@types/babel__core": "^7.20.5"
+  },
+  "peerDependencies": {
+    "vite": ">=7"
+  }
+}

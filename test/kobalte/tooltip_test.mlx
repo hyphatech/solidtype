@@ -1,0 +1,56 @@
+module H = Harness
+module Tooltip = Solidtype.Kobalte.Tooltip
+
+let island () =
+  <Tooltip.Root openDelay=0. closeDelay=0. ignoreSafeArea=true>
+    <Tooltip.Trigger>"Save"</Tooltip.Trigger>
+    <Tooltip.Portal>
+      <Tooltip.Content><Tooltip.Arrow /> "Save the draft"</Tooltip.Content>
+    </Tooltip.Portal>
+  </Tooltip.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Tooltip.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external hover : H.user -> Dom.element -> unit Js.Promise.t = "hover"
+[@@mel.send]
+
+external unhover : H.user -> Dom.element -> unit Js.Promise.t = "unhover"
+[@@mel.send]
+
+let () =
+  H.alike "Tooltip" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "button" (H.query ~name:"Save" ()) in
+      H.expect_equal ~what:"the trigger, closed" ""
+        (attribute trigger "aria-describedby");
+      let* () = H.tab user in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the tooltip, the trigger focused"
+              "Save the draft"
+              (H.text (H.by_role "tooltip")))
+      in
+      let tooltip = H.by_role "tooltip" in
+      H.expect_equal ~what:"the trigger is described by the tooltip"
+        (attribute tooltip "id")
+        (attribute trigger "aria-describedby");
+      let* () = H.keyboard user "{Escape}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the trigger, Escape pressed" ""
+              (attribute trigger "aria-describedby"))
+      in
+      let* () = H.tab user in
+      let* () = hover user trigger in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the trigger, hovered" (attribute tooltip "id")
+              (attribute trigger "aria-describedby"))
+      in
+      let* () = unhover user trigger in
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the trigger, left" ""
+            (attribute trigger "aria-describedby")))

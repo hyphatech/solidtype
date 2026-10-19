@@ -1,0 +1,12 @@
+; The notes twin's schemas, what Spindle prints from the server's routes,
+; compared with the copy committed here: `dune promote` takes the new one.
+
+(rule
+ (with-stdout-to
+  notes.gen.ts.printed
+  (run ../server/print_zod.exe)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff notes.gen.ts notes.gen.ts.printed)))

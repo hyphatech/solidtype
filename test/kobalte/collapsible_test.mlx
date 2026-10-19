@@ -1,0 +1,44 @@
+module H = Harness
+module Collapsible = Solidtype.Kobalte.Collapsible
+
+let island () =
+  <Collapsible.Root>
+    <Collapsible.Trigger>"Details"</Collapsible.Trigger>
+    <Collapsible.Content>"Shipped in two days."</Collapsible.Content>
+  </Collapsible.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Collapsible.tsx"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let ( let* ) = H.( let* )
+let expanded e = Option.value (H.attribute e "aria-expanded") ~default:""
+
+let () =
+  H.alike "Collapsible" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "button" (H.query ~name:"Details" ()) in
+      H.expect_equal ~what:"the trigger, closed" "false" (expanded trigger);
+      if Option.is_some (H.attribute trigger "aria-controls") then
+        Js.Exn.raiseError "a closed trigger controls nothing";
+      let* () = H.click user trigger in
+      H.expect_equal ~what:"the trigger, clicked" "true" (expanded trigger);
+      let content =
+        match H.attribute trigger "aria-controls" with
+        | None -> Js.Exn.raiseError "an open trigger names its content"
+        | Some id -> (
+            match Js.Null.toOption (by_id id) with
+            | None -> Js.Exn.raiseError "the content the trigger names exists"
+            | Some content -> content)
+      in
+      H.expect_equal ~what:"the content" "Shipped in two days." (H.text content);
+      if Option.is_none (H.attribute content "data-expanded") then
+        Js.Exn.raiseError "the open content is marked expanded";
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"the trigger, Enter pressed" "false"
+        (expanded trigger);
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"the trigger, Space pressed" "true"
+        (expanded trigger);
+      Js.Promise.resolve ())

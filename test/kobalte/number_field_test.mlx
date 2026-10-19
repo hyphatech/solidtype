@@ -1,0 +1,84 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module NumberField = K.NumberField
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  let raw, set_raw = S.create_signal 5. in
+  <div>
+    <NumberField.Root
+      defaultValue=(fun () -> K.Types.Either.right 5.)
+      onRawValueChange=(S.set set_raw)
+      minValue=0.
+      maxValue=10.
+      step=1.
+      largeStep=5.>
+      <NumberField.Label>"Quantity"</NumberField.Label>
+      <NumberField.HiddenInput />
+      <NumberField.DecrementTrigger aria_label="Decrease">
+        "-"
+      </NumberField.DecrementTrigger>
+      <NumberField.Input />
+      <NumberField.IncrementTrigger aria_label="Increase">
+        "+"
+      </NumberField.IncrementTrigger>
+      <NumberField.Description>"How many to order"</NumberField.Description>
+    </NumberField.Root>
+    <output>(fun () -> Jsx.string (Js.Float.toString (S.get raw)))</output>
+  </div>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/NumberField.tsx"]
+
+external value : Dom.element -> string = "value" [@@mel.get]
+external id : Dom.element -> string = "id" [@@mel.get]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "NumberField" ~island ~twin (fun user ->
+      let field = H.by_role_named "spinbutton" (H.query ~name:"Quantity" ()) in
+      let button name = H.by_role_named "button" (H.query ~name ()) in
+      let now what expected =
+        H.expect_equal ~what:("aria-valuenow, " ^ what) expected
+          (Option.value (H.attribute field "aria-valuenow") ~default:"");
+        H.expect_equal
+          ~what:("the input's value, " ^ what)
+          expected (value field)
+      in
+      let disabled name =
+        Option.is_some (H.attribute (button name) "disabled")
+      in
+      H.expect_equal ~what:"what Increase controls" (id field)
+        (Option.value
+           (H.attribute (button "Increase") "aria-controls")
+           ~default:"");
+      H.expect_equal ~what:"aria-valuemin" "0"
+        (Option.value (H.attribute field "aria-valuemin") ~default:"");
+      H.expect_equal ~what:"aria-valuemax" "10"
+        (Option.value (H.attribute field "aria-valuemax") ~default:"");
+      now "at first" "5";
+      let* () = H.click user (button "Increase") in
+      now "Increase clicked" "6";
+      H.expect_equal ~what:"the raw value onRawValueChange gave" "6"
+        (H.text (H.by_role "status"));
+      if not (field == H.focused) then
+        Js.Exn.raiseError "a trigger gives the input focus";
+      let* () = H.keyboard user "{ArrowUp}" in
+      now "ArrowUp pressed" "7";
+      let* () = H.keyboard user "{ArrowDown}" in
+      now "ArrowDown pressed" "6";
+      let* () = H.keyboard user "{PageUp}" in
+      now "PageUp pressed, past the maximum" "10";
+      if not (disabled "Increase") then
+        Js.Exn.raiseError "Increase is disabled at the maximum";
+      let* () = H.keyboard user "{Home}" in
+      now "Home pressed" "0";
+      if not (disabled "Decrease") then
+        Js.Exn.raiseError "Decrease is disabled at the minimum";
+      let* () = H.click user (button "Increase") in
+      let* () = H.keyboard user "{Backspace}3" in
+      let* () = H.tab user in
+      now "3 typed and the field left" "3";
+      Js.Promise.resolve ())

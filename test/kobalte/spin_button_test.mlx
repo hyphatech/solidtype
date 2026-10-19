@@ -1,0 +1,61 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module SpinButton = K.SpinButton
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  let volume, set_volume = S.create_signal 5 in
+  let change n = S.set set_volume (Int.max 0 (Int.min 10 n)) in
+  <SpinButton.Root
+    aria_label="Volume"
+    tabIndex="0"
+    value=(fun () -> K.Types.Either.right (float_of_int (S.get volume)))
+    textValue=(fun () -> string_of_int (S.get volume) ^ " of 10")
+    minValue=0.
+    maxValue=10.
+    onIncrement=(fun () -> change (S.get volume + 1))
+    onDecrement=(fun () -> change (S.get volume - 1))
+    onIncrementPage=(fun () -> change (S.get volume + 5))
+    onDecrementPage=(fun () -> change (S.get volume - 5))
+    onDecrementToMin=(fun () -> change 0)
+    onIncrementToMax=(fun () -> change 10)>
+    (fun () -> Jsx.int (S.get volume))
+  </SpinButton.Root>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/SpinButton.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "SpinButton" ~island ~twin (fun user ->
+      let spin = H.by_role_named "spinbutton" (H.query ~name:"Volume" ()) in
+      let aria name = Option.value (H.attribute spin name) ~default:"" in
+      let now what expected =
+        H.expect_equal ~what:("aria-valuenow, " ^ what) expected
+          (aria "aria-valuenow");
+        H.expect_equal
+          ~what:("aria-valuetext, " ^ what)
+          (expected ^ " of 10") (aria "aria-valuetext")
+      in
+      H.expect_equal ~what:"aria-valuemin" "0" (aria "aria-valuemin");
+      H.expect_equal ~what:"aria-valuemax" "10" (aria "aria-valuemax");
+      now "at first" "5";
+      let* () = H.click user spin in
+      if not (spin == H.focused) then Js.Exn.raiseError "a click focuses it";
+      let* () = H.keyboard user "{ArrowUp}" in
+      now "ArrowUp pressed" "6";
+      let* () = H.keyboard user "{ArrowDown}{ArrowDown}" in
+      now "ArrowDown pressed twice" "4";
+      let* () = H.keyboard user "{PageUp}" in
+      now "PageUp pressed" "9";
+      let* () = H.keyboard user "{PageDown}" in
+      now "PageDown pressed" "4";
+      let* () = H.keyboard user "{End}" in
+      now "End pressed" "10";
+      let* () = H.keyboard user "{ArrowUp}" in
+      now "ArrowUp at the maximum" "10";
+      let* () = H.keyboard user "{Home}" in
+      now "Home pressed" "0";
+      Js.Promise.resolve ())

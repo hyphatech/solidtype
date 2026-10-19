@@ -1,0 +1,72 @@
+(* Solid's Show itself, its condition any value Solid reads for truth: the
+   wrappers below give it a box. *)
+module Raw = struct
+  module Props = struct
+    let check ~when_:(_ : 'w Check.value) ?keyed:(_ : bool Check.value option)
+        ?fallback:(_ : Jsx.element Check.value option)
+        ?children:(_ : (_, _) Check.children option) () =
+      ()
+  end
+
+  external component : unit Jsx.component = "Show" [@@mel.module "solid-js"]
+end
+
+module Props = struct
+  let check ~when_:(_ : bool Check.value)
+      ?fallback:(_ : Jsx.element Check.value option)
+      ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+    ()
+end
+
+external component : unit Jsx.component = "Show" [@@mel.module "solid-js"]
+
+exception Stale_read
+
+(* An option as Solid reads it for truth: [Some 0] in a box, which is truthy,
+   where Melange writes it [0]. The box is kept while the value stays the
+   same, [==], as Solid's [===] keeps a value. *)
+type 'a box = { value : 'a }
+
+let boxed some =
+  Solid.create_memo
+    ~equals:
+      (Solid.By
+         (fun a b ->
+           match (a, b) with
+           | Option.Some x, Option.Some y -> x.value == y.value
+           | None, None -> true
+           | Option.Some _, None | None, Option.Some _ -> false))
+    (fun () ->
+      match some () with
+      | Option.Some value -> Option.Some { value }
+      | None -> None)
+
+module Some = struct
+  let%component make ~(some : 'a option) ?(fallback : Jsx.element option)
+      ~(children : 'a Solid.accessor -> Jsx.element) () =
+    let box = boxed some in
+    <Raw
+      when_=(fun () -> Solid.get box)
+      fallback=(fun () -> Option.value (fallback ()) ~default:Jsx.nothing)>
+      (fun b ->
+        children (fun[@u] () ->
+            match Solid.get b with
+            | Option.Some (box : _ box) -> box.value
+            | None -> raise Stale_read))
+    </Raw>
+end
+
+module Keyed = struct
+  let%component make ~(some : 'a option) ?(fallback : Jsx.element option)
+      ~(children : 'a -> Jsx.element) () =
+    let box = boxed some in
+    <Raw
+      when_=(fun () -> Solid.get box)
+      keyed=true
+      fallback=(fun () -> Option.value (fallback ()) ~default:Jsx.nothing)>
+      (fun b ->
+        match b with
+        | Option.Some (box : _ box) -> children box.value
+        | None -> Jsx.nothing)
+    </Raw>
+end

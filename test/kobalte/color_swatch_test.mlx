@@ -1,0 +1,29 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Swatch = K.ColorSwatch
+
+let island () =
+  <div>
+    <Swatch.Root value=(fun () -> K.Colors.parse_color "#ff0000") />
+    <Swatch.Root
+      value=(fun () -> K.Colors.parse_color "#0000ff") colorName="Ocean"
+    />
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/ColorSwatch.tsx"]
+
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+let () =
+  H.alike "ColorSwatch" ~island ~twin (fun _ ->
+      match H.all_by_role "img" with
+      | [| red; ocean |] ->
+          H.expect_equal ~what:"a swatch's name, from its colour" "vibrant Red"
+            (attribute red "aria-label");
+          H.expect_equal ~what:"a swatch's name, given" "Ocean"
+            (attribute ocean "aria-label");
+          H.expect_equal ~what:"a swatch's role description" "Color Swatch"
+            (attribute red "aria-roledescription");
+          Js.Promise.resolve ()
+      | _ -> Js.Exn.raiseError "two swatches, each an image")

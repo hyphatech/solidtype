@@ -1,0 +1,89 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Toast = K.Toast
+module Toaster = K.Types.Toast_Toaster
+module Toast_props = K.Types.ToastComponentProps
+
+let show () =
+  ignore
+    (Toaster.show Toast.toaster
+       (fun props ->
+         <Toast.Root toastId=(fun () -> Toast_props.toast_id props)>
+           <Toast.Title>"Saved"</Toast.Title>
+           <Toast.Description>"The draft is safe."</Toast.Description>
+           <Toast.CloseButton>"x"</Toast.CloseButton>
+         </Toast.Root>)
+       None)
+
+let island () =
+  <div>
+    <button type_=`button onClick=(fun _ -> show ())>"Save"</button>
+    <Toast.Region><Toast.List /></Toast.Region>
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Toast.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+(* The text of the element whose id [e]'s attribute [name] holds. *)
+let text_of e name =
+  match Js.Null.toOption (by_id (attribute e name)) with
+  | Some e -> H.text e
+  | None -> ""
+
+let () =
+  H.alike "Toast" ~island ~twin (fun user ->
+      let region = H.by_role "region" in
+      H.expect_equal ~what:"the region's label" "Notifications (alt+T)"
+        (attribute region "aria-label");
+      if Array.length (H.all_by_role "status") > 0 then
+        Js.Exn.raiseError "no toast before one is shown";
+      let* () =
+        H.click user (H.by_role_named "button" (H.query ~name:"Save" ()))
+      in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the toasts, one shown" "1"
+              (string_of_int (Array.length (H.all_by_role "status"))))
+      in
+      let toast = H.by_role "status" in
+      H.expect_equal ~what:"the toast's title" "Saved"
+        (text_of toast "aria-labelledby");
+      H.expect_equal ~what:"the toast's description" "The draft is safe."
+        (text_of toast "aria-describedby");
+      H.expect_equal
+        ~what:"the toast's politeness, its priority high by default" "assertive"
+        (attribute toast "aria-live");
+      let* () = H.keyboard user "{Alt>}[KeyT]{/Alt}" in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"focus, Alt+T pressed" "OL"
+              (tag_name H.focused))
+      in
+      (* A pointer on a toast starts a swipe, which needs pointer capture,
+         and jsdom has none: the close button is pressed from the
+         keyboard. *)
+      focus (H.by_role_named "button" (H.query ~name:"Close" ()));
+      let* () = H.keyboard user "{Enter}" in
+      (* A closed toast stays mounted under jsdom, its exit animation never
+         ending, and says it is closed. *)
+      let* () =
+        H.eventually (fun () ->
+            if Option.is_none (H.attribute toast "data-closed") then
+              Js.Exn.raiseError "the close button closes the toast")
+      in
+      (* Kobalte's toast is an item of a list with the role status, which
+         axe refuses: the toaster is cleared, which unmounts it, before axe
+         reads the page. *)
+      Toaster.clear Toast.toaster ();
+      H.eventually (fun () ->
+          H.expect_equal ~what:"the toasts, the toaster cleared" "0"
+            (string_of_int (Array.length (H.all_by_role "status")))))

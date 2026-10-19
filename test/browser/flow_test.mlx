@@ -1,0 +1,230 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Index = Solidtype.Index
+module Show = Solidtype.Show
+module Switch = Solidtype.Switch
+module Match = Solidtype.Match
+module ErrorBoundary = Solidtype.ErrorBoundary
+module Dynamic = Solidtype.Dynamic
+module Portal = Solidtype.Portal
+module Suspense = Solidtype.Suspense
+module E = Jest.Expect
+module T = Testing
+
+let ( let* ) p f = Js.Promise.then_ f p
+
+exception Broken
+
+type answer = Waiting | Ready of int | Refused of string
+
+module Theme = Solidtype.Context.Make (struct
+  type t = string
+
+  let default = "light"
+end)
+
+module User = Solidtype.Context.Make_optional (struct
+  type t = string
+end)
+
+module Shows_theme = struct
+  let%component make () =
+    let theme = Theme.use () in
+    <p>(fun () -> Jsx.string theme)</p>
+end
+
+module Shows_user = struct
+  let%component make () =
+    let user = User.use () in
+    <p>(fun () -> Jsx.string (Option.value user ~default:"nobody"))</p>
+end
+
+module Greeting = struct
+  let%component make ~(name : string) ?(greeting : string = "Hello") () =
+    <p>(fun () -> Jsx.string (greeting () ^ ", " ^ name ()))</p>
+end
+
+module Fails = struct
+  let%component make () = if true then raise Broken else <p>"fine"</p>
+end
+
+let () =
+  Jest.describe "lists" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "For renders each item, and an item added" (fun () ->
+          let items, set_items = S.create_signal [| "a"; "b" |] in
+          T.render (fun () ->
+              <ul>
+                <For each=(fun () -> S.get items)>
+                  (fun item i ->
+                    <li>
+                      (fun () -> Jsx.string (item ^ string_of_int (S.get i)))
+                    </li>)
+                </For>
+              </ul>);
+          let before = T.page () in
+          S.update set_items (fun xs -> Array.append [| "z" |] xs);
+          E.(expect (before, T.page ()) |> toEqual ("a0b1", "z0a1b2")));
+      Jest.test "For shows its fallback for no items" (fun () ->
+          T.render (fun () ->
+              <For each=(fun () -> [||]) fallback=(<p>"none"</p>)>
+                (fun item _ -> <li>(fun () -> Jsx.string item)</li>)
+              </For>);
+          E.(expect (T.page ()) |> toBe "none"));
+      Jest.test "Index tracks the item at each index" (fun () ->
+          let items, set_items = S.create_signal [| 1; 2 |] in
+          T.render (fun () ->
+              <ul>
+                <Index each=(fun () -> S.get items)>
+                  (fun item _ -> <li>(fun () -> Jsx.int (S.get item))</li>)
+                </Index>
+              </ul>);
+          S.set set_items [| 3; 4 |];
+          E.(expect (T.page ()) |> toBe "34")));
+  Jest.describe "conditions" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "Show shows its children while its condition holds" (fun () ->
+          let on, set_on = S.create_signal false in
+          T.render (fun () ->
+              <Show when_=(fun () -> S.get on) fallback=(<p>"off"</p>)>
+                <p>"on"</p>
+              </Show>);
+          let before = T.page () in
+          S.set set_on true;
+          E.(expect (before, T.page ()) |> toEqual ("off", "on")));
+      Jest.test "Show.Some shows Some 0, which JavaScript reads as false"
+        (fun () ->
+          let value, set_value = S.create_signal None in
+          T.render (fun () ->
+              <Show.Some
+                some=(fun () -> S.get value) fallback=(<p>"nothing"</p>)>
+                (fun v -> <p>(fun () -> Jsx.int (S.get v))</p>)
+              </Show.Some>);
+          let before = T.page () in
+          S.set set_value (Some 0);
+          let zero = T.page () in
+          S.set set_value (Some 5);
+          E.(expect (before, zero, T.page ()) |> toEqual ("nothing", "0", "5")));
+      Jest.test "Show.Keyed renders again for a new value" (fun () ->
+          let renders = ref 0 in
+          let value, set_value = S.create_signal (Some "a") in
+          T.render (fun () ->
+              <Show.Keyed some=(fun () -> S.get value)>
+                (fun v ->
+                  incr renders;
+                  <p>(fun () -> Jsx.string v)</p>)
+              </Show.Keyed>);
+          S.set set_value (Some "b");
+          E.(expect (T.page (), !renders) |> toEqual ("b", 2)));
+      Jest.test "a Switch over a match shows the case that holds" (fun () ->
+          let answer, set_answer = S.create_signal Waiting in
+          T.render (fun () ->
+              <Switch>
+                (fun () ->
+                  match S.get answer with
+                  | Waiting -> <p>"waiting"</p>
+                  | Ready n -> <p>(fun () -> Jsx.int n)</p>
+                  | Refused why -> <p>(fun () -> Jsx.string why)</p>)
+              </Switch>);
+          let waiting = T.page () in
+          S.set set_answer (Ready 3);
+          let ready = T.page () in
+          S.set set_answer (Ready 4);
+          let again = T.page () in
+          S.set set_answer (Refused "no");
+          E.(
+            expect (waiting, ready, again, T.page ())
+            |> toEqual ("waiting", "3", "4", "no")));
+      Jest.test
+        "a Switch of Matches shows the first that holds, else its fallback"
+        (fun () ->
+          let n, set_n = S.create_signal 0 in
+          T.render (fun () ->
+              <Switch fallback=(<p>"small"</p>)>
+                <Match when_=(fun () -> S.get n > 10)><p>"big"</p></Match>
+                <Match when_=(fun () -> S.get n > 5)><p>"middle"</p></Match>
+              </Switch>);
+          let small = T.page () in
+          S.set set_n 7;
+          let middle = T.page () in
+          S.set set_n 20;
+          E.(
+            expect (small, middle, T.page ())
+            |> toEqual ("small", "middle", "big"))));
+  Jest.describe "errors" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "ErrorBoundary gives its fallback the exception raised"
+        (fun () ->
+          T.render (fun () ->
+              <ErrorBoundary
+                fallback=(fun e _ ->
+                           <p>
+                             (fun () ->
+                               Jsx.string
+                                 (match e with
+                                 | Broken -> "broken"
+                                 | _ -> "another"))
+                           </p>)>
+                <Fails />
+              </ErrorBoundary>);
+          E.(expect (T.page ()) |> toBe "broken")));
+  Jest.describe "text" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "a text child and a literal prop reach the page as written"
+        (fun () ->
+          T.render (fun () -> <p title="…">"1 … 10, ü"</p>);
+          E.(expect (T.page ()) |> toBe {js|1 … 10, ü|js})));
+  Jest.describe "components" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "a component's props are read live, a default where absent"
+        (fun () ->
+          let name, set_name = S.create_signal "Ann" in
+          T.render (fun () -> <Greeting name=(fun () -> S.get name) />);
+          let before = T.page () in
+          S.set set_name "Bo";
+          E.(expect (before, T.page ()) |> toEqual ("Hello, Ann", "Hello, Bo")));
+      Jest.test "Dynamic renders the component chosen" (fun () ->
+          let props = Greeting.Props.make ~name:"Cy" () in
+          T.render (fun () ->
+              <Dynamic component=(fun () -> Greeting.component) spread=props />);
+          E.(expect (T.page ()) |> toBe "Hello, Cy"));
+      Jest.test "Portal mounts its children elsewhere" (fun () ->
+          T.render (fun () -> <div><Portal><p>"away"</p></Portal></div>);
+          E.(expect (T.page ()) |> toContainString "away"));
+      Jest.test "a context's provider reaches the components below it"
+        (fun () ->
+          T.render (fun () ->
+              <div>
+                <Shows_theme />
+                <Theme.Provider value=(fun () -> "dark")>
+                  <Shows_theme />
+                </Theme.Provider>
+              </div>);
+          E.(expect (T.page ()) |> toBe "lightdark"));
+      Jest.test "an optional context reads None with no provider" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Shows_user />
+                <User.Provider value=(fun () -> "Di")>
+                  <Shows_user />
+                </User.Provider>
+              </div>);
+          E.(expect (T.page ()) |> toBe "nobodyDi")));
+  Jest.describe "suspense" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "Suspense shows its fallback until a resource resolves"
+        (fun () ->
+          T.render (fun () ->
+              let r, _ =
+                S.create_resource (fun _ -> Js.Promise.resolve "loaded")
+              in
+              <Suspense fallback=(<p>"loading"</p>)>
+                <p>
+                  (fun () -> Jsx.string (Option.value (S.read r) ~default:""))
+                </p>
+              </Suspense>);
+          let before = T.page () in
+          let* _ = T.later () in
+          Js.Promise.resolve
+            E.(expect (before, T.page ()) |> toEqual ("loading", "loaded"))))

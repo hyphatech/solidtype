@@ -1,0 +1,13 @@
+module Jsx = Solidtype.Jsx
+module Solid = Solidtype.Solid
+
+let make () =
+  let count, set_count = Solid.create_signal 0 in
+  <button
+    type_=`button
+    onClick=(fun _ -> Solid.set set_count (Solid.get count + 1))
+    class_=(fun () -> if Solid.get count > 2 then "hot" else "cold")>
+    "Clicked "
+    (fun () -> Jsx.int (Solid.get count))
+    <Label text=(fun () -> if Solid.get count = 1 then "time" else "times") />
+  </button>

@@ -1,0 +1,53 @@
+module H = Harness
+module Breadcrumbs = Solidtype.Kobalte.Breadcrumbs
+
+let island () =
+  <Breadcrumbs.Root>
+    <ol>
+      <li>
+        <Breadcrumbs.Link href="#home">"Home"</Breadcrumbs.Link>
+        <Breadcrumbs.Separator />
+      </li>
+      <li>
+        <Breadcrumbs.Link href="#guides">"Guides"</Breadcrumbs.Link>
+        <Breadcrumbs.Separator />
+      </li>
+      <li><Breadcrumbs.Link current=true>"Install"</Breadcrumbs.Link></li>
+    </ol>
+  </Breadcrumbs.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Breadcrumbs.tsx"]
+
+external location : Dom.location = "location" [@@mel.scope "window"]
+external hash : Dom.location -> string = "hash" [@@mel.get]
+external set_hash : Dom.location -> string -> unit = "hash" [@@mel.set]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Breadcrumbs" ~island ~twin (fun user ->
+      set_hash location "";
+      let nav = H.by_role_named "navigation" (H.query ~name:"Breadcrumbs" ()) in
+      if Array.length (H.all_by_role "listitem") <> 3 then
+        Js.Exn.raiseError "the trail is a list of three";
+      let current = H.by_role_named "link" (H.query ~name:"Install" ()) in
+      H.expect_equal ~what:"the current page's link" "page"
+        (Option.value (H.attribute current "aria-current") ~default:"");
+      if Option.is_some (H.attribute current "href") then
+        Js.Exn.raiseError "the current page links nowhere";
+      let guides = H.by_role_named "link" (H.query ~name:"Guides" ()) in
+      if Option.is_some (H.attribute guides "aria-current") then
+        Js.Exn.raiseError "a page above is not current";
+      H.expect_equal ~what:"the trail's text" "Home/Guides/Install" (H.text nav);
+      let* () = H.tab user in
+      let* () = H.tab user in
+      H.expect_equal ~what:"focus, Tab pressed twice" "Guides"
+        (H.focused_label ());
+      let* () = H.tab user in
+      if H.focused == current then
+        Js.Exn.raiseError "Tab passes over the current page";
+      let* () = H.click user guides in
+      H.expect_equal ~what:"the location, a crumb clicked" "#guides"
+        (hash location);
+      Js.Promise.resolve ())

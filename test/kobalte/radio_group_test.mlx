@@ -1,0 +1,66 @@
+module H = Harness
+module RadioGroup = Solidtype.Kobalte.RadioGroup
+
+let island () =
+  <RadioGroup.Root defaultValue="medium" orientation=`vertical>
+    <RadioGroup.Label>"Size"</RadioGroup.Label>
+    <RadioGroup.Item value="small">
+      <RadioGroup.ItemInput />
+      <RadioGroup.ItemControl>
+        <RadioGroup.ItemIndicator />
+      </RadioGroup.ItemControl>
+      <RadioGroup.ItemLabel>"Small"</RadioGroup.ItemLabel>
+    </RadioGroup.Item>
+    <RadioGroup.Item value="medium">
+      <RadioGroup.ItemInput />
+      <RadioGroup.ItemControl>
+        <RadioGroup.ItemIndicator />
+      </RadioGroup.ItemControl>
+      <RadioGroup.ItemLabel>"Medium"</RadioGroup.ItemLabel>
+    </RadioGroup.Item>
+    <RadioGroup.Item value="large" disabled=true>
+      <RadioGroup.ItemInput />
+      <RadioGroup.ItemControl>
+        <RadioGroup.ItemIndicator />
+      </RadioGroup.ItemControl>
+      <RadioGroup.ItemLabel>"Large"</RadioGroup.ItemLabel>
+    </RadioGroup.Item>
+    <RadioGroup.Description>"The fit you wear"</RadioGroup.Description>
+  </RadioGroup.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/RadioGroup.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  Css_escape.install ();
+  H.alike "RadioGroup" ~island ~twin (fun user ->
+      let group = H.by_role_named "radiogroup" (H.query ~name:"Size" ()) in
+      let radio name = H.by_role_named "radio" (H.query ~name ()) in
+      let chosen () =
+        List.filter
+          (fun name -> H.checked (radio name))
+          [ "Small"; "Medium"; "Large" ]
+        |> String.concat ", "
+      in
+      H.expect_equal ~what:"the group's orientation" "vertical"
+        (Option.value (H.attribute group "aria-orientation") ~default:"");
+      if Option.is_none (H.attribute group "aria-describedby") then
+        Js.Exn.raiseError "the group is described by its description";
+      H.expect_equal ~what:"chosen, at first" "Medium" (chosen ());
+      if Option.is_none (H.attribute (radio "Large") "disabled") then
+        Js.Exn.raiseError "the disabled item's radio is disabled";
+      let* () = H.click user (radio "Small") in
+      H.expect_equal ~what:"chosen, Small clicked" "Small" (chosen ());
+      let* () = H.keyboard user "{ArrowDown}" in
+      H.expect_equal ~what:"chosen, ArrowDown pressed" "Medium" (chosen ());
+      let* () = H.keyboard user "{ArrowDown}" in
+      H.expect_equal ~what:"chosen, ArrowDown past a disabled item" "Small"
+        (chosen ());
+      let* () = H.click user (H.by_text "Medium") in
+      H.expect_equal ~what:"chosen, its label clicked" "Medium" (chosen ());
+      let* () = H.click user (radio "Large") in
+      H.expect_equal ~what:"chosen, the disabled item clicked" "Medium"
+        (chosen ());
+      Js.Promise.resolve ())

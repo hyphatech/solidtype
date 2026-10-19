@@ -1,0 +1,133 @@
+module H = Harness
+module DropdownMenu = Solidtype.Kobalte.DropdownMenu
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  let chosen, choose = S.create_signal "" in
+  <div>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>"Edit"</DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item onSelect=(fun () -> S.set choose "Cut")>
+            "Cut"
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onSelect=(fun () -> S.set choose "Copy")>
+            "Copy"
+          </DropdownMenu.Item>
+          <DropdownMenu.Item disabled=true>"Paste"</DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.CheckboxItem>
+            <DropdownMenu.ItemIndicator>"on"</DropdownMenu.ItemIndicator>
+            "Wrap lines"
+          </DropdownMenu.CheckboxItem>
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger>"Find"</DropdownMenu.SubTrigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.SubContent>
+                <DropdownMenu.Item>"Find next"</DropdownMenu.Item>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+    <p>"Chose " (fun () -> Jsx.string (S.get chosen))</p>
+  </div>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/DropdownMenu.tsx"]
+
+let ( let* ) = H.( let* )
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+let focus_is what label =
+  H.eventually (fun () -> H.expect_equal ~what label (H.text H.focused))
+
+let expanded what trigger value =
+  H.eventually (fun () ->
+      H.expect_equal ~what value (attribute trigger "aria-expanded"))
+
+let () =
+  H.alike "DropdownMenu" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "button" (H.query ~name:"Edit" ()) in
+      H.expect_equal ~what:"the trigger's popup" "true"
+        (attribute trigger "aria-haspopup");
+      H.expect_equal ~what:"the trigger, closed" "false"
+        (attribute trigger "aria-expanded");
+      focus trigger;
+      let* () = H.keyboard user "{Enter}" in
+      let* () = expanded "the trigger, Enter pressed" trigger "true" in
+      let menu = H.by_role "menu" in
+      H.expect_equal ~what:"the trigger controls the menu" (attribute menu "id")
+        (attribute trigger "aria-controls");
+      H.expect_equal ~what:"the menu is labelled by its trigger"
+        (attribute trigger "id")
+        (attribute menu "aria-labelledby");
+      H.expect_equal ~what:"the menu's items, the submenu's trigger one" "4"
+        (string_of_int (Array.length (H.all_by_role "menuitem")));
+      H.expect_equal ~what:"the disabled item" "true"
+        (attribute
+           (H.by_role_named "menuitem" (H.query ~name:"Paste" ()))
+           "aria-disabled");
+      let* () = focus_is "focus, the menu open" "Cut" in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown pressed" "Copy" in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown past a disabled item" "Wrap lines" in
+      let wrap = H.by_role "menuitemcheckbox" in
+      H.expect_equal ~what:"the checkbox item, at first" "false"
+        (attribute wrap "aria-checked");
+      let* () = H.keyboard user " " in
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the checkbox item, Space pressed" "true"
+              (attribute wrap "aria-checked"))
+      in
+      let* () = expanded "the trigger, an item checked" trigger "true" in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown to the submenu's trigger" "Find" in
+      let find = H.by_role_named "menuitem" (H.query ~name:"Find" ()) in
+      H.expect_equal ~what:"the submenu's trigger, its popup" "true"
+        (attribute find "aria-haspopup");
+      let* () = H.keyboard user "{ArrowRight}" in
+      let* () =
+        expanded "the submenu's trigger, ArrowRight pressed" find "true"
+      in
+      let* () = focus_is "focus, the submenu open" "Find next" in
+      let* () = H.keyboard user "{ArrowLeft}" in
+      let* () =
+        expanded "the submenu's trigger, ArrowLeft pressed" find "false"
+      in
+      let* () = focus_is "focus, the submenu closed" "Find" in
+      let* () = H.keyboard user "{ArrowUp}{ArrowUp}" in
+      let* () = focus_is "focus, ArrowUp past a disabled item" "Copy" in
+      let* () = H.keyboard user "{Enter}" in
+      let* () = expanded "the trigger, an item chosen" trigger "false" in
+      (* The choice is found by its text: the open menu hides the rest of
+         the page from the accessibility tree. *)
+      let* () = H.eventually (fun () -> ignore (H.by_text "Chose Copy")) in
+      (* Focus goes back to the trigger as the content unmounts, which
+         jsdom's presence never lets it do. *)
+      focus trigger;
+      let* () = H.keyboard user "{ArrowDown}" in
+      (* The content moves focus to its first item as it mounts, and under
+         jsdom it stays mounted once closed, so focus is checked on the
+         first opening alone. *)
+      let* () = expanded "the trigger, ArrowDown pressed" trigger "true" in
+      let* () = H.keyboard user "{Escape}" in
+      expanded "the trigger, Escape pressed" trigger "false");
+  (* A menu closed under jsdom stays mounted and leaves the page refusing
+     pointer events, so the pointer is tried on a menu of its own. *)
+  H.alike "DropdownMenu, by pointer" ~island ~twin (fun user ->
+      let trigger = H.by_role_named "button" (H.query ~name:"Edit" ()) in
+      let* () = H.click user trigger in
+      let* () = expanded "the trigger, clicked" trigger "true" in
+      let* () =
+        H.click user (H.by_role_named "menuitem" (H.query ~name:"Cut" ()))
+      in
+      let* () = expanded "the trigger, an item clicked" trigger "false" in
+      H.eventually (fun () -> ignore (H.by_text "Chose Cut")))

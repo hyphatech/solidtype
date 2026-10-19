@@ -1,0 +1,29 @@
+module H = Harness
+module Alert = Solidtype.Kobalte.Alert
+module Show = Solidtype.Show
+module S = Solidtype.Solid
+
+let island () =
+  let saved, set_saved = S.create_signal false in
+  <div>
+    <button type_=`button onClick=(fun _ -> S.set set_saved true)>
+      "Save"
+    </button>
+    <Show when_=(fun () -> S.get saved)>
+      <Alert.Root>"Your changes are saved."</Alert.Root>
+    </Show>
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Alert.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Alert" ~island ~twin (fun user ->
+      if not (Int.equal (Array.length (H.all_by_role "alert")) 0) then
+        Js.Exn.raiseError "no alert before saving";
+      let* () = H.click user (H.by_role "button") in
+      H.expect_equal ~what:"the alert" "Your changes are saved."
+        (H.text (H.by_role "alert"));
+      Js.Promise.resolve ())

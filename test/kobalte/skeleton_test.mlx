@@ -1,0 +1,40 @@
+module H = Harness
+module Skeleton = Solidtype.Kobalte.Skeleton
+
+let island () =
+  <div>
+    <Skeleton.Root height=40. radius=10.><p>"Ada Lovelace"</p></Skeleton.Root>
+    <Skeleton.Root visible=false animate=false circle=true height=24.>
+      <p>"AL"</p>
+    </Skeleton.Root>
+  </div>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/Skeleton.tsx"]
+
+type style
+
+external style : Dom.element -> style = "style" [@@mel.get]
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+
+let () =
+  H.alike "Skeleton" ~island ~twin (fun _ ->
+      match H.all_by_role "group" with
+      | [| text; avatar |] ->
+          let data e name = Option.value (H.attribute e name) ~default:"none" in
+          H.expect_equal ~what:"shown" "true" (data text "data-visible");
+          H.expect_equal ~what:"animated" "true" (data text "data-animate");
+          H.expect_equal ~what:"its height" "40px"
+            (property (style text) "height");
+          H.expect_equal ~what:"its width, the whole line" "100%"
+            (property (style text) "width");
+          H.expect_equal ~what:"its corners" "10px"
+            (property (style text) "border-radius");
+          H.expect_equal ~what:"hidden" "none" (data avatar "data-visible");
+          H.expect_equal ~what:"still" "none" (data avatar "data-animate");
+          H.expect_equal ~what:"a circle's width, its height" "24px"
+            (property (style avatar) "width");
+          H.expect_equal ~what:"a circle's corners" "9999px"
+            (property (style avatar) "border-radius");
+          Js.Promise.resolve ()
+      | _ -> Js.Exn.raiseError "two skeletons")

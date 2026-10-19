@@ -1,0 +1,97 @@
+module H = Harness
+module NavigationMenu = Solidtype.Kobalte.NavigationMenu
+
+(* The viewport is an item of the menubar's list that holds no menu item,
+   which axe refuses unless its role is presentation, as Kobalte gives its
+   triggers' items. *)
+let island () =
+  <NavigationMenu.Root>
+    <NavigationMenu.Menu>
+      <NavigationMenu.Trigger>"Learn"</NavigationMenu.Trigger>
+      <NavigationMenu.Portal>
+        <NavigationMenu.Content>
+          <NavigationMenu.Item href="/guide">"Guide"</NavigationMenu.Item>
+          <NavigationMenu.Item href="/api">"API"</NavigationMenu.Item>
+        </NavigationMenu.Content>
+      </NavigationMenu.Portal>
+    </NavigationMenu.Menu>
+    <NavigationMenu.Menu>
+      <NavigationMenu.Trigger>"Community"</NavigationMenu.Trigger>
+      <NavigationMenu.Portal>
+        <NavigationMenu.Content>
+          <NavigationMenu.Item href="/forum">"Forum"</NavigationMenu.Item>
+          <NavigationMenu.Item href="/chat">"Chat"</NavigationMenu.Item>
+        </NavigationMenu.Content>
+      </NavigationMenu.Portal>
+    </NavigationMenu.Menu>
+    <NavigationMenu.Viewport role=`presentation />
+  </NavigationMenu.Root>
+
+external twin : unit -> Solidtype.Jsx.element = "make"
+[@@mel.module "./twins/NavigationMenu.tsx"]
+
+let ( let* ) = H.( let* )
+
+(* jsdom has no ResizeObserver, which the viewport measures its menu with;
+   one that never reports stands in, as a page with no layout would. *)
+let () =
+  [%mel.raw
+    {|globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} }|}]
+
+let attribute e name = Option.value (H.attribute e name) ~default:""
+
+external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+
+let focus_is what label =
+  H.eventually (fun () -> H.expect_equal ~what label (H.text H.focused))
+
+let expanded what trigger value =
+  H.eventually (fun () ->
+      H.expect_equal ~what value (attribute trigger "aria-expanded"))
+
+let () =
+  H.alike "NavigationMenu" ~island ~twin (fun user ->
+      if not (contains (H.by_role "navigation") (H.by_role "menubar")) then
+        Js.Exn.raiseError "the menubar is a navigation landmark's";
+      let learn = H.by_role_named "menuitem" (H.query ~name:"Learn" ()) in
+      let community =
+        H.by_role_named "menuitem" (H.query ~name:"Community" ())
+      in
+      H.expect_equal ~what:"Learn's popup" "true"
+        (attribute learn "aria-haspopup");
+      H.expect_equal ~what:"Learn, closed" "false"
+        (attribute learn "aria-expanded");
+      let* () = H.tab user in
+      let* () = focus_is "focus, tabbed into the menu" "Learn" in
+      let* () = H.keyboard user "{ArrowRight}" in
+      let* () = focus_is "focus, ArrowRight pressed" "Community" in
+      let* () = H.keyboard user "{ArrowLeft}" in
+      let* () = focus_is "focus, ArrowLeft pressed" "Learn" in
+      let* () = H.keyboard user "{Enter}" in
+      let* () = expanded "Learn, Enter pressed" learn "true" in
+      let menu = H.by_role "menu" in
+      H.expect_equal ~what:"Learn controls its menu" (attribute menu "id")
+        (attribute learn "aria-controls");
+      H.expect_equal ~what:"Learn's menu is labelled by Learn"
+        (attribute learn "id")
+        (attribute menu "aria-labelledby");
+      let guide = H.by_role_named "menuitem" (H.query ~name:"Guide" ()) in
+      H.expect_equal ~what:"Guide's link" "/guide" (attribute guide "href");
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown in the menu" "Guide" in
+      let* () = H.keyboard user "{ArrowDown}" in
+      let* () = focus_is "focus, ArrowDown again" "API" in
+      let* () = H.keyboard user "{ArrowRight}" in
+      let* () =
+        expanded "Community, ArrowRight pressed in Learn's menu" community
+          "true"
+      in
+      let* () = expanded "Learn, Community's menu open" learn "false" in
+      let* () = H.keyboard user "{Escape}" in
+      expanded "Community, Escape pressed" community "false");
+  H.alike "NavigationMenu, by pointer" ~island ~twin (fun user ->
+      let learn = H.by_role_named "menuitem" (H.query ~name:"Learn" ()) in
+      let* () = H.click user learn in
+      let* () = expanded "Learn, clicked" learn "true" in
+      let* () = H.click user learn in
+      expanded "Learn, clicked again" learn "false")

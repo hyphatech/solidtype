@@ -1,0 +1,40 @@
+module H = Harness
+module Button = Solidtype.Kobalte.Button
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+let island () =
+  let saves, set_saves = S.create_signal 0 in
+  <div>
+    <Button.Root onClick=(fun _ -> S.set set_saves (S.get saves + 1))>
+      "Save"
+    </Button.Root>
+    <Button.Root
+      disabled=true onClick=(fun _ -> S.set set_saves (S.get saves + 1))>
+      "Delete"
+    </Button.Root>
+    <output>(fun () -> Jsx.int (S.get saves))</output>
+  </div>
+
+external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Button.tsx"]
+
+let ( let* ) = H.( let* )
+
+let () =
+  H.alike "Button" ~island ~twin (fun user ->
+      let save = H.by_role_named "button" (H.query ~name:"Save" ()) in
+      let delete = H.by_role_named "button" (H.query ~name:"Delete" ()) in
+      let saves () = H.text (H.by_role "status") in
+      H.expect_equal ~what:"a native button's type" "button"
+        (Option.value (H.attribute save "type") ~default:"");
+      if Option.is_none (H.attribute delete "disabled") then
+        Js.Exn.raiseError "the disabled button is disabled";
+      let* () = H.click user save in
+      H.expect_equal ~what:"saves, the button clicked" "1" (saves ());
+      let* () = H.keyboard user "{Enter}" in
+      H.expect_equal ~what:"saves, Enter pressed" "2" (saves ());
+      let* () = H.keyboard user " " in
+      H.expect_equal ~what:"saves, Space pressed" "3" (saves ());
+      let* () = H.click user delete in
+      H.expect_equal ~what:"saves, the disabled button clicked" "3" (saves ());
+      Js.Promise.resolve ())

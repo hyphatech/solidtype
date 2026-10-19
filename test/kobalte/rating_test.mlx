@@ -1,0 +1,90 @@
+module H = Harness
+module K = Solidtype.Kobalte
+module Rating = K.Rating
+module Item_state = K.Types.RatingItemState
+module For = Solidtype.For
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+(* Rating.HiddenInput is left out: axe asks for the text input it renders to be
+   labelled, and its binding takes none of an input's attributes. *)
+let island () =
+  <Rating.Root defaultValue=3.>
+    <Rating.Label>"Score"</Rating.Label>
+    <Rating.Control>
+      <For
+        each=(fun () ->
+               [| "1 star"; "2 stars"; "3 stars"; "4 stars"; "5 stars" |])>
+        (fun label _ ->
+          <Rating.Item>
+            <Rating.ItemControl>
+              (fun state ->
+                <span>
+                  (fun () ->
+                    Jsx.string
+                      (if S.get (Item_state.highlighted state) then {js|★|js}
+                       else {js|☆|js}))
+                </span>)
+            </Rating.ItemControl>
+            <Rating.ItemLabel>(fun () -> Jsx.string label)</Rating.ItemLabel>
+          </Rating.Item>)
+      </For>
+    </Rating.Control>
+  </Rating.Root>
+
+external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Rating.tsx"]
+
+let ( let* ) = H.( let* )
+
+(* The rating as its items draw it: each item's star, filled up to the value. *)
+let stars () =
+  String.concat ""
+    (Array.to_list
+       (Array.map
+          (fun item ->
+            if Js.String.startsWith ~prefix:{js|★|js} (H.text item) then
+              {js|★|js}
+            else {js|☆|js})
+          (H.all_by_role "radio")))
+
+(* The name of the one item checked, or of each if several are. *)
+let checked () =
+  String.concat ", "
+    (List.filter_map
+       (fun item ->
+         match H.attribute item "aria-checked" with
+         | Some "true" -> Some (H.text item)
+         | _ -> None)
+       (Array.to_list (H.all_by_role "radio")))
+
+let () =
+  H.alike "Rating" ~island ~twin (fun user ->
+      let group = H.by_role_named "radiogroup" (H.query ~name:"Score" ()) in
+      H.expect_equal ~what:"the orientation" "horizontal"
+        (Option.value (H.attribute group "aria-orientation") ~default:"");
+      let third = H.by_role_named "radio" (H.query ~name:"3 stars" ()) in
+      H.expect_equal ~what:"the item named by its label, checked" "true"
+        (Option.value (H.attribute third "aria-checked") ~default:"");
+      let* () =
+        H.eventually (fun () ->
+            H.expect_equal ~what:"the default value" {js|★★★☆☆|js} (stars ()))
+      in
+      H.expect_equal ~what:"the item checked" {js|★3 stars|js} (checked ());
+      let* () = H.tab user in
+      H.expect_equal ~what:"Tab reaches the checked item" {js|★3 stars|js}
+        (H.focused_label ());
+      let* () = H.keyboard user "{ArrowRight}" in
+      H.expect_equal ~what:"ArrowRight, one more" {js|★★★★☆|js} (stars ());
+      H.expect_equal ~what:"ArrowRight moves focus" {js|★4 stars|js}
+        (H.focused_label ());
+      H.expect_equal ~what:"ArrowRight checks the next item" {js|★4 stars|js}
+        (checked ());
+      let* () = H.keyboard user "{ArrowLeft}{ArrowLeft}" in
+      H.expect_equal ~what:"ArrowLeft twice, two fewer" {js|★★☆☆☆|js} (stars ());
+      let* () = H.keyboard user "{End}" in
+      H.expect_equal ~what:"End, the most" {js|★★★★★|js} (stars ());
+      let* () = H.keyboard user "{Home}" in
+      H.expect_equal ~what:"Home, the least" {js|★☆☆☆☆|js} (stars ());
+      H.expect_equal ~what:"Home checks the first item" {js|★1 star|js}
+        (checked ());
+      Js.Promise.resolve ())

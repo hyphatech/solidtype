@@ -1,0 +1,67 @@
+// FR-1: an OCaml component reaches the browser as the code Solid's own
+// compiler emits for the same JSX. Each example island, compiled by Melange
+// and rewritten, goes through babel-preset-solid beside its TSX twin, and
+// the two must agree once names are set aside -- the three ways Astro's
+// integration runs the compiler: for the browser, for the browser with
+// hydration, and for the server. A prerendered island hydrates because the
+// last two agree with the twin's.
+
+import { expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { transformAsync } from "@babel/core";
+import { rewrite } from "../src/rewrite.ts";
+
+const root = fileURLToPath(new URL("../../", import.meta.url));
+const melange = (name: string) =>
+  `${root}_build/default/example/out/example/src/${name}.jsx`;
+const twin = (name: string) => `${root}example/twin/${name}.tsx`;
+
+export const modes = {
+  dom: { generate: "dom" },
+  hydratable: { generate: "dom", hydratable: true },
+  ssr: { generate: "ssr", hydratable: true },
+} as const;
+
+type Mode = keyof typeof modes;
+
+async function solid(code: string, filename: string, mode: Mode): Promise<string> {
+  const presets: [string, object][] = [["babel-preset-solid", modes[mode]]];
+  if (filename.endsWith(".tsx")) presets.push(["@babel/preset-typescript", {}]);
+  const result = await transformAsync(code, { filename, cwd: root, babelrc: false, configFile: false, presets });
+  if (!result?.code) throw new Error(`Solid's compiler wrote nothing for ${filename}`);
+  return result.code;
+}
+
+// What Solid's compiler made, with names set aside: each template -- a
+// string for the browser, an array of fragments for the server -- and each
+// runtime call in order, by the helper it calls.
+function shape(code: string) {
+  const templates = [
+    ...[...code.matchAll(/_\$template\(`([^`]*)`/g)].map((m) => m[1]),
+    ...[...code.matchAll(/_tmpl\$\d* = (\[[\s\S]*?\]);/g)].map((m) => m[1]),
+  ];
+  const calls = [...code.matchAll(/_\$(\w+)\(/g)].map((m) => m[1]).filter((c) => c !== "template");
+  return { templates, calls };
+}
+
+export async function compiled(ml: string, tsx: string, mode: Mode = "dom") {
+  const rewritten = await rewrite(readFileSync(melange(ml), "utf8"), `${ml}.jsx`);
+  if (!rewritten) throw new Error(`the plugin rewrote nothing in ${ml}`);
+  return {
+    ocaml: await solid(rewritten.code, `${ml}.jsx`, mode),
+    tsx: await solid(readFileSync(twin(tsx), "utf8"), `${tsx}.tsx`, mode),
+  };
+}
+
+const islands = [["counter", "Counter"], ["label", "Label"], ["field", "Field"], ["settings", "Settings"], ["todos", "Todos"], ["notes", "Notes"]] as const;
+
+for (const [ml, tsx] of islands) {
+  for (const mode of Object.keys(modes) as Mode[]) {
+    test(`${ml}.mlx compiles as ${tsx}.tsx does, ${mode}`, async () => {
+      const { ocaml, tsx: expected } = await compiled(ml, tsx, mode);
+      if (process.env.SHOW) console.log(`--- ${ml}.mlx, ${mode}\n${ocaml}\n--- ${tsx}.tsx, ${mode}\n${expected}`);
+      expect(shape(ocaml)).toEqual(shape(expected));
+    });
+  }
+}
