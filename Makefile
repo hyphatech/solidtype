@@ -1,6 +1,5 @@
 SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
-PORT ?= 4321
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example serve generate
@@ -39,8 +38,8 @@ fmt: ## format the code
 example: build ## build the example site into _build/example-dist
 	bun --bun astro build
 
-serve: example ## serve the example site and its notes on http://localhost:$(PORT)
-	_build/default/example/server/serve.exe $(PORT) _build/example-dist
+serve: example ## serve the example site and its notes on http://localhost:4420
+	_build/default/example/server/serve.exe
 
 generate: ## write the bindings generated from Solid's and Kobalte's types
 	$(OPAM) bun generate/html.ts

@@ -16,7 +16,7 @@ make test     # the ppx's lowering, each island against its twin, the example's 
 make lint     # formatting, the plugin's types, the release build, and the generated bindings
 make fmt      # format in place
 make example  # the example site, built by Astro into _build/example-dist
-make serve    # the example site and its notes, served on http://localhost:4321
+make serve    # the example site and its notes, served on http://localhost:4420
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
