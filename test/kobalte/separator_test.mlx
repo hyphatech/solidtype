@@ -1,5 +1,5 @@
 module H = Harness
-module Separator = Solidtype.Kobalte.Separator
+module Separator = Solidtype_kobalte.Separator
 
 let island () =
   <div>

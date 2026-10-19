@@ -2,8 +2,10 @@
     [string]. Generated from the JSX types of solid-js 1.9.17 by
     [generate/html.ts]; never edited by hand.
 
-    An attribute named after an OCaml keyword takes a trailing underscore,
-    [class_], and a hyphen is an underscore, [aria_label]. *)
+    An attribute is named as Solid's JSX names it, by one rule: a capital is
+    an underscore and the lower case, [read_only], a hyphen an underscore,
+    [aria_label], and an OCaml keyword takes a trailing underscore,
+    [class_]. *)
 
 module type Dom_attributes = sig
   type element
@@ -61,243 +63,131 @@ module type Dom_attributes = sig
   type aria_valuenow = string
   type aria_valuetext = string
   type autofocus = bool
-  type classList = bool Js.Dict.t
   type class_ = string
+  type class_list = bool Js.Dict.t
   type elementtiming = string
   type id = string
-  type innerHTML = string
+  type inner_html = string
   type nonce = string
-  type onAbort = Dom.uiEvent -> unit
-  type onAnimationCancel = Dom.animationEvent -> unit
-  type onAnimationEnd = Dom.animationEvent -> unit
-  type onAnimationIteration = Dom.animationEvent -> unit
-  type onAnimationStart = Dom.animationEvent -> unit
-  type onAuxClick = Dom.pointerEvent -> unit
-  type onBeforeCopy = Dom.clipboardEvent -> unit
-  type onBeforeCut = Dom.clipboardEvent -> unit
-  type onBeforeInput = Dom.inputEvent -> unit
-  type onBeforeMatch = Dom.event -> unit
-  type onBeforePaste = Dom.clipboardEvent -> unit
-  type onBeforeToggle = Dom.event -> unit
-  type onBeforeXRSelect = Dom.event -> unit
-  type onBlur = Dom.focusEvent -> unit
-  type onCanPlay = Dom.event -> unit
-  type onCanPlayThrough = Dom.event -> unit
-  type onCancel = Dom.event -> unit
-  type onChange = Dom.event -> unit
-  type onClick = Dom.mouseEvent -> unit
-  type onClose = Dom.event -> unit
-  type onCommand = Dom.event -> unit
-  type onCompositionEnd = Dom.compositionEvent -> unit
-  type onCompositionStart = Dom.compositionEvent -> unit
-  type onCompositionUpdate = Dom.compositionEvent -> unit
-  type onContentVisibilityAutoStateChange = Dom.event -> unit
-  type onContextLost = Dom.event -> unit
-  type onContextMenu = Dom.pointerEvent -> unit
-  type onContextRestored = Dom.event -> unit
-  type onCopy = Dom.clipboardEvent -> unit
-  type onCueChange = Dom.event -> unit
-  type onCut = Dom.clipboardEvent -> unit
-  type onDblClick = Dom.mouseEvent -> unit
-  type onDrag = Dom.dragEvent -> unit
-  type onDragEnd = Dom.dragEvent -> unit
-  type onDragEnter = Dom.dragEvent -> unit
-  type onDragExit = Dom.dragEvent -> unit
-  type onDragLeave = Dom.dragEvent -> unit
-  type onDragOver = Dom.dragEvent -> unit
-  type onDragStart = Dom.dragEvent -> unit
-  type onDrop = Dom.dragEvent -> unit
-  type onDurationChange = Dom.event -> unit
-  type onEmptied = Dom.event -> unit
-  type onEnded = Dom.event -> unit
-  type onError = Dom.errorEvent -> unit
-  type onFocus = Dom.focusEvent -> unit
-  type onFocusIn = Dom.focusEvent -> unit
-  type onFocusOut = Dom.focusEvent -> unit
-  type onFormData = Dom.event -> unit
-  type onFullscreenChange = Dom.event -> unit
-  type onFullscreenError = Dom.event -> unit
-  type onGotPointerCapture = Dom.pointerEvent -> unit
-  type onInput = Dom.inputEvent -> unit
-  type onInvalid = Dom.event -> unit
-  type onKeyDown = Dom.keyboardEvent -> unit
-  type onKeyPress = Dom.keyboardEvent -> unit
-  type onKeyUp = Dom.keyboardEvent -> unit
-  type onLoad = Dom.event -> unit
-  type onLoadStart = Dom.event -> unit
-  type onLoadedData = Dom.event -> unit
-  type onLoadedMetadata = Dom.event -> unit
-  type onLostPointerCapture = Dom.pointerEvent -> unit
-  type onMouseDown = Dom.mouseEvent -> unit
-  type onMouseEnter = Dom.mouseEvent -> unit
-  type onMouseLeave = Dom.mouseEvent -> unit
-  type onMouseMove = Dom.mouseEvent -> unit
-  type onMouseOut = Dom.mouseEvent -> unit
-  type onMouseOver = Dom.mouseEvent -> unit
-  type onMouseUp = Dom.mouseEvent -> unit
-  type onPaste = Dom.clipboardEvent -> unit
-  type onPause = Dom.event -> unit
-  type onPlay = Dom.event -> unit
-  type onPlaying = Dom.event -> unit
-  type onPointerCancel = Dom.pointerEvent -> unit
-  type onPointerDown = Dom.pointerEvent -> unit
-  type onPointerEnter = Dom.pointerEvent -> unit
-  type onPointerLeave = Dom.pointerEvent -> unit
-  type onPointerMove = Dom.pointerEvent -> unit
-  type onPointerOut = Dom.pointerEvent -> unit
-  type onPointerOver = Dom.pointerEvent -> unit
-  type onPointerRawUpdate = Dom.pointerEvent -> unit
-  type onPointerUp = Dom.pointerEvent -> unit
-  type onProgress = Dom.progressEvent -> unit
-  type onRateChange = Dom.event -> unit
-  type onReset = Dom.event -> unit
-  type onResize = Dom.uiEvent -> unit
-  type onScroll = Dom.event -> unit
-  type onScrollEnd = Dom.event -> unit
-  type onScrollSnapChange = Dom.event -> unit
-  type onScrollSnapChanging = Dom.event -> unit
-  type onSecurityPolicyViolation = Dom.event -> unit
-  type onSeeked = Dom.event -> unit
-  type onSeeking = Dom.event -> unit
-  type onSelect = Dom.event -> unit
-  type onSelectStart = Dom.event -> unit
-  type onSelectionChange = Dom.event -> unit
-  type onSlotChange = Dom.event -> unit
-  type onStalled = Dom.event -> unit
-  type onSubmit = Dom.event -> unit
-  type onSuspend = Dom.event -> unit
-  type onTimeUpdate = Dom.event -> unit
-  type onToggle = Dom.event -> unit
-  type onTouchCancel = Dom.touchEvent -> unit
-  type onTouchEnd = Dom.touchEvent -> unit
-  type onTouchMove = Dom.touchEvent -> unit
-  type onTouchStart = Dom.touchEvent -> unit
-  type onTransitionCancel = Dom.transitionEvent -> unit
-  type onTransitionEnd = Dom.transitionEvent -> unit
-  type onTransitionRun = Dom.transitionEvent -> unit
-  type onTransitionStart = Dom.transitionEvent -> unit
-  type onVolumeChange = Dom.event -> unit
-  type onWaiting = Dom.event -> unit
-  type onWheel = Dom.wheelEvent -> unit
-  type onabort = Dom.uiEvent -> unit
-  type onanimationcancel = Dom.animationEvent -> unit
-  type onanimationend = Dom.animationEvent -> unit
-  type onanimationiteration = Dom.animationEvent -> unit
-  type onanimationstart = Dom.animationEvent -> unit
-  type onauxclick = Dom.pointerEvent -> unit
-  type onbeforecopy = Dom.clipboardEvent -> unit
-  type onbeforecut = Dom.clipboardEvent -> unit
-  type onbeforeinput = Dom.inputEvent -> unit
-  type onbeforematch = Dom.event -> unit
-  type onbeforepaste = Dom.clipboardEvent -> unit
-  type onbeforetoggle = Dom.event -> unit
-  type onbeforexrselect = Dom.event -> unit
-  type onblur = Dom.focusEvent -> unit
-  type oncancel = Dom.event -> unit
-  type oncanplay = Dom.event -> unit
-  type oncanplaythrough = Dom.event -> unit
-  type onchange = Dom.event -> unit
-  type onclick = Dom.mouseEvent -> unit
-  type onclose = Dom.event -> unit
-  type oncommand = Dom.event -> unit
-  type oncompositionend = Dom.compositionEvent -> unit
-  type oncompositionstart = Dom.compositionEvent -> unit
-  type oncompositionupdate = Dom.compositionEvent -> unit
-  type oncontentvisibilityautostatechange = Dom.event -> unit
-  type oncontextlost = Dom.event -> unit
-  type oncontextmenu = Dom.pointerEvent -> unit
-  type oncontextrestored = Dom.event -> unit
-  type oncopy = Dom.clipboardEvent -> unit
-  type oncuechange = Dom.event -> unit
-  type oncut = Dom.clipboardEvent -> unit
-  type ondblclick = Dom.mouseEvent -> unit
-  type ondrag = Dom.dragEvent -> unit
-  type ondragend = Dom.dragEvent -> unit
-  type ondragenter = Dom.dragEvent -> unit
-  type ondragexit = Dom.dragEvent -> unit
-  type ondragleave = Dom.dragEvent -> unit
-  type ondragover = Dom.dragEvent -> unit
-  type ondragstart = Dom.dragEvent -> unit
-  type ondrop = Dom.dragEvent -> unit
-  type ondurationchange = Dom.event -> unit
-  type onemptied = Dom.event -> unit
-  type onended = Dom.event -> unit
-  type onerror = Dom.errorEvent -> unit
-  type onfocus = Dom.focusEvent -> unit
-  type onfocusin = Dom.focusEvent -> unit
-  type onfocusout = Dom.focusEvent -> unit
-  type onformdata = Dom.event -> unit
-  type onfullscreenchange = Dom.event -> unit
-  type onfullscreenerror = Dom.event -> unit
-  type ongotpointercapture = Dom.pointerEvent -> unit
-  type oninput = Dom.inputEvent -> unit
-  type oninvalid = Dom.event -> unit
-  type onkeydown = Dom.keyboardEvent -> unit
-  type onkeypress = Dom.keyboardEvent -> unit
-  type onkeyup = Dom.keyboardEvent -> unit
-  type onload = Dom.event -> unit
-  type onloadeddata = Dom.event -> unit
-  type onloadedmetadata = Dom.event -> unit
-  type onloadstart = Dom.event -> unit
-  type onlostpointercapture = Dom.pointerEvent -> unit
-  type onmousedown = Dom.mouseEvent -> unit
-  type onmouseenter = Dom.mouseEvent -> unit
-  type onmouseleave = Dom.mouseEvent -> unit
-  type onmousemove = Dom.mouseEvent -> unit
-  type onmouseout = Dom.mouseEvent -> unit
-  type onmouseover = Dom.mouseEvent -> unit
-  type onmouseup = Dom.mouseEvent -> unit
-  type onpaste = Dom.clipboardEvent -> unit
-  type onpause = Dom.event -> unit
-  type onplay = Dom.event -> unit
-  type onplaying = Dom.event -> unit
-  type onpointercancel = Dom.pointerEvent -> unit
-  type onpointerdown = Dom.pointerEvent -> unit
-  type onpointerenter = Dom.pointerEvent -> unit
-  type onpointerleave = Dom.pointerEvent -> unit
-  type onpointermove = Dom.pointerEvent -> unit
-  type onpointerout = Dom.pointerEvent -> unit
-  type onpointerover = Dom.pointerEvent -> unit
-  type onpointerrawupdate = Dom.pointerEvent -> unit
-  type onpointerup = Dom.pointerEvent -> unit
-  type onprogress = Dom.progressEvent -> unit
-  type onratechange = Dom.event -> unit
-  type onreset = Dom.event -> unit
-  type onresize = Dom.uiEvent -> unit
-  type onscroll = Dom.event -> unit
-  type onscrollend = Dom.event -> unit
-  type onscrollsnapchange = Dom.event -> unit
-  type onscrollsnapchanging = Dom.event -> unit
-  type onsecuritypolicyviolation = Dom.event -> unit
-  type onseeked = Dom.event -> unit
-  type onseeking = Dom.event -> unit
-  type onselect = Dom.event -> unit
-  type onselectionchange = Dom.event -> unit
-  type onselectstart = Dom.event -> unit
-  type onslotchange = Dom.event -> unit
-  type onstalled = Dom.event -> unit
-  type onsubmit = Dom.event -> unit
-  type onsuspend = Dom.event -> unit
-  type ontimeupdate = Dom.event -> unit
-  type ontoggle = Dom.event -> unit
-  type ontouchcancel = Dom.touchEvent -> unit
-  type ontouchend = Dom.touchEvent -> unit
-  type ontouchmove = Dom.touchEvent -> unit
-  type ontouchstart = Dom.touchEvent -> unit
-  type ontransitioncancel = Dom.transitionEvent -> unit
-  type ontransitionend = Dom.transitionEvent -> unit
-  type ontransitionrun = Dom.transitionEvent -> unit
-  type ontransitionstart = Dom.transitionEvent -> unit
-  type onvolumechange = Dom.event -> unit
-  type onwaiting = Dom.event -> unit
-  type onwheel = Dom.wheelEvent -> unit
+  type on_abort = Dom.uiEvent -> unit
+  type on_animation_cancel = Dom.animationEvent -> unit
+  type on_animation_end = Dom.animationEvent -> unit
+  type on_animation_iteration = Dom.animationEvent -> unit
+  type on_animation_start = Dom.animationEvent -> unit
+  type on_aux_click = Dom.pointerEvent -> unit
+  type on_before_copy = Dom.clipboardEvent -> unit
+  type on_before_cut = Dom.clipboardEvent -> unit
+  type on_before_input = Dom.inputEvent -> unit
+  type on_before_match = Dom.event -> unit
+  type on_before_paste = Dom.clipboardEvent -> unit
+  type on_before_toggle = Dom.event -> unit
+  type on_before_xr_select = Dom.event -> unit
+  type on_blur = Dom.focusEvent -> unit
+  type on_can_play = Dom.event -> unit
+  type on_can_play_through = Dom.event -> unit
+  type on_cancel = Dom.event -> unit
+  type on_change = Dom.event -> unit
+  type on_click = Dom.mouseEvent -> unit
+  type on_close = Dom.event -> unit
+  type on_command = Dom.event -> unit
+  type on_composition_end = Dom.compositionEvent -> unit
+  type on_composition_start = Dom.compositionEvent -> unit
+  type on_composition_update = Dom.compositionEvent -> unit
+  type on_content_visibility_auto_state_change = Dom.event -> unit
+  type on_context_lost = Dom.event -> unit
+  type on_context_menu = Dom.pointerEvent -> unit
+  type on_context_restored = Dom.event -> unit
+  type on_copy = Dom.clipboardEvent -> unit
+  type on_cue_change = Dom.event -> unit
+  type on_cut = Dom.clipboardEvent -> unit
+  type on_dbl_click = Dom.mouseEvent -> unit
+  type on_drag = Dom.dragEvent -> unit
+  type on_drag_end = Dom.dragEvent -> unit
+  type on_drag_enter = Dom.dragEvent -> unit
+  type on_drag_exit = Dom.dragEvent -> unit
+  type on_drag_leave = Dom.dragEvent -> unit
+  type on_drag_over = Dom.dragEvent -> unit
+  type on_drag_start = Dom.dragEvent -> unit
+  type on_drop = Dom.dragEvent -> unit
+  type on_duration_change = Dom.event -> unit
+  type on_emptied = Dom.event -> unit
+  type on_ended = Dom.event -> unit
+  type on_error = Dom.errorEvent -> unit
+  type on_focus = Dom.focusEvent -> unit
+  type on_focus_in = Dom.focusEvent -> unit
+  type on_focus_out = Dom.focusEvent -> unit
+  type on_form_data = Dom.event -> unit
+  type on_fullscreen_change = Dom.event -> unit
+  type on_fullscreen_error = Dom.event -> unit
+  type on_got_pointer_capture = Dom.pointerEvent -> unit
+  type on_input = Dom.inputEvent -> unit
+  type on_invalid = Dom.event -> unit
+  type on_key_down = Dom.keyboardEvent -> unit
+  type on_key_press = Dom.keyboardEvent -> unit
+  type on_key_up = Dom.keyboardEvent -> unit
+  type on_load = Dom.event -> unit
+  type on_load_start = Dom.event -> unit
+  type on_loaded_data = Dom.event -> unit
+  type on_loaded_metadata = Dom.event -> unit
+  type on_lost_pointer_capture = Dom.pointerEvent -> unit
+  type on_mouse_down = Dom.mouseEvent -> unit
+  type on_mouse_enter = Dom.mouseEvent -> unit
+  type on_mouse_leave = Dom.mouseEvent -> unit
+  type on_mouse_move = Dom.mouseEvent -> unit
+  type on_mouse_out = Dom.mouseEvent -> unit
+  type on_mouse_over = Dom.mouseEvent -> unit
+  type on_mouse_up = Dom.mouseEvent -> unit
+  type on_paste = Dom.clipboardEvent -> unit
+  type on_pause = Dom.event -> unit
+  type on_play = Dom.event -> unit
+  type on_playing = Dom.event -> unit
+  type on_pointer_cancel = Dom.pointerEvent -> unit
+  type on_pointer_down = Dom.pointerEvent -> unit
+  type on_pointer_enter = Dom.pointerEvent -> unit
+  type on_pointer_leave = Dom.pointerEvent -> unit
+  type on_pointer_move = Dom.pointerEvent -> unit
+  type on_pointer_out = Dom.pointerEvent -> unit
+  type on_pointer_over = Dom.pointerEvent -> unit
+  type on_pointer_raw_update = Dom.pointerEvent -> unit
+  type on_pointer_up = Dom.pointerEvent -> unit
+  type on_progress = Dom.progressEvent -> unit
+  type on_rate_change = Dom.event -> unit
+  type on_reset = Dom.event -> unit
+  type on_resize = Dom.uiEvent -> unit
+  type on_scroll = Dom.event -> unit
+  type on_scroll_end = Dom.event -> unit
+  type on_scroll_snap_change = Dom.event -> unit
+  type on_scroll_snap_changing = Dom.event -> unit
+  type on_security_policy_violation = Dom.event -> unit
+  type on_seeked = Dom.event -> unit
+  type on_seeking = Dom.event -> unit
+  type on_select = Dom.event -> unit
+  type on_select_start = Dom.event -> unit
+  type on_selection_change = Dom.event -> unit
+  type on_slot_change = Dom.event -> unit
+  type on_stalled = Dom.event -> unit
+  type on_submit = Dom.event -> unit
+  type on_suspend = Dom.event -> unit
+  type on_time_update = Dom.event -> unit
+  type on_toggle = Dom.event -> unit
+  type on_touch_cancel = Dom.touchEvent -> unit
+  type on_touch_end = Dom.touchEvent -> unit
+  type on_touch_move = Dom.touchEvent -> unit
+  type on_touch_start = Dom.touchEvent -> unit
+  type on_transition_cancel = Dom.transitionEvent -> unit
+  type on_transition_end = Dom.transitionEvent -> unit
+  type on_transition_run = Dom.transitionEvent -> unit
+  type on_transition_start = Dom.transitionEvent -> unit
+  type on_volume_change = Dom.event -> unit
+  type on_waiting = Dom.event -> unit
+  type on_wheel = Dom.wheelEvent -> unit
   type ref = element -> unit
   type role = [ `none | `list | `link | `menu | `listbox | `tree | `grid | `dialog | `alert | `alertdialog | `application | `article | `banner | `button | `cell | `checkbox | `columnheader | `combobox | `complementary | `contentinfo | `definition | `directory | `document | `feed | `figure | `form | `gridcell | `group | `heading | `img | `listitem | `log | `main | `marquee | `math | `menubar | `menuitem | `menuitemcheckbox | `menuitemradio | `meter | `navigation | `note | `option | `presentation | `progressbar | `radio | `radiogroup | `region | `row | `rowgroup | `rowheader | `scrollbar | `search | `searchbox | `separator | `slider | `spinbutton | `status | `switch | `tab | `table | `tablist | `tabpanel | `term | `textbox | `timer | `toolbar | `tooltip | `treegrid | `treeitem ]
   type slot = string
   type style = string
-  type tabIndex = string
+  type tab_index = string
   type tabindex = string
-  type textContent = string
+  type text_content = string
   type 'r dom_check =
     ?aria_activedescendant:aria_activedescendant Check.value ->
     ?aria_atomic:aria_atomic Check.value ->
@@ -353,259 +243,147 @@ module type Dom_attributes = sig
     ?aria_valuenow:aria_valuenow Check.value ->
     ?aria_valuetext:aria_valuetext Check.value ->
     ?autofocus:autofocus Check.value ->
-    ?classList:classList Check.value ->
     ?class_:class_ Check.value ->
+    ?class_list:class_list Check.value ->
     ?elementtiming:elementtiming Check.value ->
     ?id:id Check.value ->
-    ?innerHTML:innerHTML Check.value ->
+    ?inner_html:inner_html Check.value ->
     ?nonce:nonce Check.value ->
-    ?onAbort:onAbort ->
-    ?onAnimationCancel:onAnimationCancel ->
-    ?onAnimationEnd:onAnimationEnd ->
-    ?onAnimationIteration:onAnimationIteration ->
-    ?onAnimationStart:onAnimationStart ->
-    ?onAuxClick:onAuxClick ->
-    ?onBeforeCopy:onBeforeCopy ->
-    ?onBeforeCut:onBeforeCut ->
-    ?onBeforeInput:onBeforeInput ->
-    ?onBeforeMatch:onBeforeMatch ->
-    ?onBeforePaste:onBeforePaste ->
-    ?onBeforeToggle:onBeforeToggle ->
-    ?onBeforeXRSelect:onBeforeXRSelect ->
-    ?onBlur:onBlur ->
-    ?onCanPlay:onCanPlay ->
-    ?onCanPlayThrough:onCanPlayThrough ->
-    ?onCancel:onCancel ->
-    ?onChange:onChange ->
-    ?onClick:onClick ->
-    ?onClose:onClose ->
-    ?onCommand:onCommand ->
-    ?onCompositionEnd:onCompositionEnd ->
-    ?onCompositionStart:onCompositionStart ->
-    ?onCompositionUpdate:onCompositionUpdate ->
-    ?onContentVisibilityAutoStateChange:onContentVisibilityAutoStateChange ->
-    ?onContextLost:onContextLost ->
-    ?onContextMenu:onContextMenu ->
-    ?onContextRestored:onContextRestored ->
-    ?onCopy:onCopy ->
-    ?onCueChange:onCueChange ->
-    ?onCut:onCut ->
-    ?onDblClick:onDblClick ->
-    ?onDrag:onDrag ->
-    ?onDragEnd:onDragEnd ->
-    ?onDragEnter:onDragEnter ->
-    ?onDragExit:onDragExit ->
-    ?onDragLeave:onDragLeave ->
-    ?onDragOver:onDragOver ->
-    ?onDragStart:onDragStart ->
-    ?onDrop:onDrop ->
-    ?onDurationChange:onDurationChange ->
-    ?onEmptied:onEmptied ->
-    ?onEnded:onEnded ->
-    ?onError:onError ->
-    ?onFocus:onFocus ->
-    ?onFocusIn:onFocusIn ->
-    ?onFocusOut:onFocusOut ->
-    ?onFormData:onFormData ->
-    ?onFullscreenChange:onFullscreenChange ->
-    ?onFullscreenError:onFullscreenError ->
-    ?onGotPointerCapture:onGotPointerCapture ->
-    ?onInput:onInput ->
-    ?onInvalid:onInvalid ->
-    ?onKeyDown:onKeyDown ->
-    ?onKeyPress:onKeyPress ->
-    ?onKeyUp:onKeyUp ->
-    ?onLoad:onLoad ->
-    ?onLoadStart:onLoadStart ->
-    ?onLoadedData:onLoadedData ->
-    ?onLoadedMetadata:onLoadedMetadata ->
-    ?onLostPointerCapture:onLostPointerCapture ->
-    ?onMouseDown:onMouseDown ->
-    ?onMouseEnter:onMouseEnter ->
-    ?onMouseLeave:onMouseLeave ->
-    ?onMouseMove:onMouseMove ->
-    ?onMouseOut:onMouseOut ->
-    ?onMouseOver:onMouseOver ->
-    ?onMouseUp:onMouseUp ->
-    ?onPaste:onPaste ->
-    ?onPause:onPause ->
-    ?onPlay:onPlay ->
-    ?onPlaying:onPlaying ->
-    ?onPointerCancel:onPointerCancel ->
-    ?onPointerDown:onPointerDown ->
-    ?onPointerEnter:onPointerEnter ->
-    ?onPointerLeave:onPointerLeave ->
-    ?onPointerMove:onPointerMove ->
-    ?onPointerOut:onPointerOut ->
-    ?onPointerOver:onPointerOver ->
-    ?onPointerRawUpdate:onPointerRawUpdate ->
-    ?onPointerUp:onPointerUp ->
-    ?onProgress:onProgress ->
-    ?onRateChange:onRateChange ->
-    ?onReset:onReset ->
-    ?onResize:onResize ->
-    ?onScroll:onScroll ->
-    ?onScrollEnd:onScrollEnd ->
-    ?onScrollSnapChange:onScrollSnapChange ->
-    ?onScrollSnapChanging:onScrollSnapChanging ->
-    ?onSecurityPolicyViolation:onSecurityPolicyViolation ->
-    ?onSeeked:onSeeked ->
-    ?onSeeking:onSeeking ->
-    ?onSelect:onSelect ->
-    ?onSelectStart:onSelectStart ->
-    ?onSelectionChange:onSelectionChange ->
-    ?onSlotChange:onSlotChange ->
-    ?onStalled:onStalled ->
-    ?onSubmit:onSubmit ->
-    ?onSuspend:onSuspend ->
-    ?onTimeUpdate:onTimeUpdate ->
-    ?onToggle:onToggle ->
-    ?onTouchCancel:onTouchCancel ->
-    ?onTouchEnd:onTouchEnd ->
-    ?onTouchMove:onTouchMove ->
-    ?onTouchStart:onTouchStart ->
-    ?onTransitionCancel:onTransitionCancel ->
-    ?onTransitionEnd:onTransitionEnd ->
-    ?onTransitionRun:onTransitionRun ->
-    ?onTransitionStart:onTransitionStart ->
-    ?onVolumeChange:onVolumeChange ->
-    ?onWaiting:onWaiting ->
-    ?onWheel:onWheel ->
-    ?onabort:onabort ->
-    ?onanimationcancel:onanimationcancel ->
-    ?onanimationend:onanimationend ->
-    ?onanimationiteration:onanimationiteration ->
-    ?onanimationstart:onanimationstart ->
-    ?onauxclick:onauxclick ->
-    ?onbeforecopy:onbeforecopy ->
-    ?onbeforecut:onbeforecut ->
-    ?onbeforeinput:onbeforeinput ->
-    ?onbeforematch:onbeforematch ->
-    ?onbeforepaste:onbeforepaste ->
-    ?onbeforetoggle:onbeforetoggle ->
-    ?onbeforexrselect:onbeforexrselect ->
-    ?onblur:onblur ->
-    ?oncancel:oncancel ->
-    ?oncanplay:oncanplay ->
-    ?oncanplaythrough:oncanplaythrough ->
-    ?onchange:onchange ->
-    ?onclick:onclick ->
-    ?onclose:onclose ->
-    ?oncommand:oncommand ->
-    ?oncompositionend:oncompositionend ->
-    ?oncompositionstart:oncompositionstart ->
-    ?oncompositionupdate:oncompositionupdate ->
-    ?oncontentvisibilityautostatechange:oncontentvisibilityautostatechange ->
-    ?oncontextlost:oncontextlost ->
-    ?oncontextmenu:oncontextmenu ->
-    ?oncontextrestored:oncontextrestored ->
-    ?oncopy:oncopy ->
-    ?oncuechange:oncuechange ->
-    ?oncut:oncut ->
-    ?ondblclick:ondblclick ->
-    ?ondrag:ondrag ->
-    ?ondragend:ondragend ->
-    ?ondragenter:ondragenter ->
-    ?ondragexit:ondragexit ->
-    ?ondragleave:ondragleave ->
-    ?ondragover:ondragover ->
-    ?ondragstart:ondragstart ->
-    ?ondrop:ondrop ->
-    ?ondurationchange:ondurationchange ->
-    ?onemptied:onemptied ->
-    ?onended:onended ->
-    ?onerror:onerror ->
-    ?onfocus:onfocus ->
-    ?onfocusin:onfocusin ->
-    ?onfocusout:onfocusout ->
-    ?onformdata:onformdata ->
-    ?onfullscreenchange:onfullscreenchange ->
-    ?onfullscreenerror:onfullscreenerror ->
-    ?ongotpointercapture:ongotpointercapture ->
-    ?oninput:oninput ->
-    ?oninvalid:oninvalid ->
-    ?onkeydown:onkeydown ->
-    ?onkeypress:onkeypress ->
-    ?onkeyup:onkeyup ->
-    ?onload:onload ->
-    ?onloadeddata:onloadeddata ->
-    ?onloadedmetadata:onloadedmetadata ->
-    ?onloadstart:onloadstart ->
-    ?onlostpointercapture:onlostpointercapture ->
-    ?onmousedown:onmousedown ->
-    ?onmouseenter:onmouseenter ->
-    ?onmouseleave:onmouseleave ->
-    ?onmousemove:onmousemove ->
-    ?onmouseout:onmouseout ->
-    ?onmouseover:onmouseover ->
-    ?onmouseup:onmouseup ->
-    ?onpaste:onpaste ->
-    ?onpause:onpause ->
-    ?onplay:onplay ->
-    ?onplaying:onplaying ->
-    ?onpointercancel:onpointercancel ->
-    ?onpointerdown:onpointerdown ->
-    ?onpointerenter:onpointerenter ->
-    ?onpointerleave:onpointerleave ->
-    ?onpointermove:onpointermove ->
-    ?onpointerout:onpointerout ->
-    ?onpointerover:onpointerover ->
-    ?onpointerrawupdate:onpointerrawupdate ->
-    ?onpointerup:onpointerup ->
-    ?onprogress:onprogress ->
-    ?onratechange:onratechange ->
-    ?onreset:onreset ->
-    ?onresize:onresize ->
-    ?onscroll:onscroll ->
-    ?onscrollend:onscrollend ->
-    ?onscrollsnapchange:onscrollsnapchange ->
-    ?onscrollsnapchanging:onscrollsnapchanging ->
-    ?onsecuritypolicyviolation:onsecuritypolicyviolation ->
-    ?onseeked:onseeked ->
-    ?onseeking:onseeking ->
-    ?onselect:onselect ->
-    ?onselectionchange:onselectionchange ->
-    ?onselectstart:onselectstart ->
-    ?onslotchange:onslotchange ->
-    ?onstalled:onstalled ->
-    ?onsubmit:onsubmit ->
-    ?onsuspend:onsuspend ->
-    ?ontimeupdate:ontimeupdate ->
-    ?ontoggle:ontoggle ->
-    ?ontouchcancel:ontouchcancel ->
-    ?ontouchend:ontouchend ->
-    ?ontouchmove:ontouchmove ->
-    ?ontouchstart:ontouchstart ->
-    ?ontransitioncancel:ontransitioncancel ->
-    ?ontransitionend:ontransitionend ->
-    ?ontransitionrun:ontransitionrun ->
-    ?ontransitionstart:ontransitionstart ->
-    ?onvolumechange:onvolumechange ->
-    ?onwaiting:onwaiting ->
-    ?onwheel:onwheel ->
+    ?on_abort:on_abort ->
+    ?on_animation_cancel:on_animation_cancel ->
+    ?on_animation_end:on_animation_end ->
+    ?on_animation_iteration:on_animation_iteration ->
+    ?on_animation_start:on_animation_start ->
+    ?on_aux_click:on_aux_click ->
+    ?on_before_copy:on_before_copy ->
+    ?on_before_cut:on_before_cut ->
+    ?on_before_input:on_before_input ->
+    ?on_before_match:on_before_match ->
+    ?on_before_paste:on_before_paste ->
+    ?on_before_toggle:on_before_toggle ->
+    ?on_before_xr_select:on_before_xr_select ->
+    ?on_blur:on_blur ->
+    ?on_can_play:on_can_play ->
+    ?on_can_play_through:on_can_play_through ->
+    ?on_cancel:on_cancel ->
+    ?on_change:on_change ->
+    ?on_click:on_click ->
+    ?on_close:on_close ->
+    ?on_command:on_command ->
+    ?on_composition_end:on_composition_end ->
+    ?on_composition_start:on_composition_start ->
+    ?on_composition_update:on_composition_update ->
+    ?on_content_visibility_auto_state_change:on_content_visibility_auto_state_change ->
+    ?on_context_lost:on_context_lost ->
+    ?on_context_menu:on_context_menu ->
+    ?on_context_restored:on_context_restored ->
+    ?on_copy:on_copy ->
+    ?on_cue_change:on_cue_change ->
+    ?on_cut:on_cut ->
+    ?on_dbl_click:on_dbl_click ->
+    ?on_drag:on_drag ->
+    ?on_drag_end:on_drag_end ->
+    ?on_drag_enter:on_drag_enter ->
+    ?on_drag_exit:on_drag_exit ->
+    ?on_drag_leave:on_drag_leave ->
+    ?on_drag_over:on_drag_over ->
+    ?on_drag_start:on_drag_start ->
+    ?on_drop:on_drop ->
+    ?on_duration_change:on_duration_change ->
+    ?on_emptied:on_emptied ->
+    ?on_ended:on_ended ->
+    ?on_error:on_error ->
+    ?on_focus:on_focus ->
+    ?on_focus_in:on_focus_in ->
+    ?on_focus_out:on_focus_out ->
+    ?on_form_data:on_form_data ->
+    ?on_fullscreen_change:on_fullscreen_change ->
+    ?on_fullscreen_error:on_fullscreen_error ->
+    ?on_got_pointer_capture:on_got_pointer_capture ->
+    ?on_input:on_input ->
+    ?on_invalid:on_invalid ->
+    ?on_key_down:on_key_down ->
+    ?on_key_press:on_key_press ->
+    ?on_key_up:on_key_up ->
+    ?on_load:on_load ->
+    ?on_load_start:on_load_start ->
+    ?on_loaded_data:on_loaded_data ->
+    ?on_loaded_metadata:on_loaded_metadata ->
+    ?on_lost_pointer_capture:on_lost_pointer_capture ->
+    ?on_mouse_down:on_mouse_down ->
+    ?on_mouse_enter:on_mouse_enter ->
+    ?on_mouse_leave:on_mouse_leave ->
+    ?on_mouse_move:on_mouse_move ->
+    ?on_mouse_out:on_mouse_out ->
+    ?on_mouse_over:on_mouse_over ->
+    ?on_mouse_up:on_mouse_up ->
+    ?on_paste:on_paste ->
+    ?on_pause:on_pause ->
+    ?on_play:on_play ->
+    ?on_playing:on_playing ->
+    ?on_pointer_cancel:on_pointer_cancel ->
+    ?on_pointer_down:on_pointer_down ->
+    ?on_pointer_enter:on_pointer_enter ->
+    ?on_pointer_leave:on_pointer_leave ->
+    ?on_pointer_move:on_pointer_move ->
+    ?on_pointer_out:on_pointer_out ->
+    ?on_pointer_over:on_pointer_over ->
+    ?on_pointer_raw_update:on_pointer_raw_update ->
+    ?on_pointer_up:on_pointer_up ->
+    ?on_progress:on_progress ->
+    ?on_rate_change:on_rate_change ->
+    ?on_reset:on_reset ->
+    ?on_resize:on_resize ->
+    ?on_scroll:on_scroll ->
+    ?on_scroll_end:on_scroll_end ->
+    ?on_scroll_snap_change:on_scroll_snap_change ->
+    ?on_scroll_snap_changing:on_scroll_snap_changing ->
+    ?on_security_policy_violation:on_security_policy_violation ->
+    ?on_seeked:on_seeked ->
+    ?on_seeking:on_seeking ->
+    ?on_select:on_select ->
+    ?on_select_start:on_select_start ->
+    ?on_selection_change:on_selection_change ->
+    ?on_slot_change:on_slot_change ->
+    ?on_stalled:on_stalled ->
+    ?on_submit:on_submit ->
+    ?on_suspend:on_suspend ->
+    ?on_time_update:on_time_update ->
+    ?on_toggle:on_toggle ->
+    ?on_touch_cancel:on_touch_cancel ->
+    ?on_touch_end:on_touch_end ->
+    ?on_touch_move:on_touch_move ->
+    ?on_touch_start:on_touch_start ->
+    ?on_transition_cancel:on_transition_cancel ->
+    ?on_transition_end:on_transition_end ->
+    ?on_transition_run:on_transition_run ->
+    ?on_transition_start:on_transition_start ->
+    ?on_volume_change:on_volume_change ->
+    ?on_waiting:on_waiting ->
+    ?on_wheel:on_wheel ->
     ?ref:ref ->
     ?role:role Check.value ->
     ?slot:slot Check.value ->
     ?style:style Check.value ->
-    ?tabIndex:tabIndex Check.value ->
+    ?tab_index:tab_index Check.value ->
     ?tabindex:tabindex Check.value ->
-    ?textContent:textContent Check.value ->
+    ?text_content:text_content Check.value ->
     'r
 end
 
 module type AnchorHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type attributionsrc = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type charset = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type coords = string
   type datatype = string
@@ -613,21 +391,21 @@ module type AnchorHTMLAttributes = sig
   type download = string
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type href = string
   type hreflang = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -640,7 +418,7 @@ module type AnchorHTMLAttributes = sig
   type popover = string
   type prefix = string
   type property = string
-  type referrerPolicy = string
+  type referrer_policy = string
   type referrerpolicy = string
   type rel = string
   type resource = string
@@ -655,16 +433,16 @@ module type AnchorHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?attributionsrc:attributionsrc Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?charset:charset Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?coords:coords Check.value ->
     ?datatype:datatype Check.value ->
@@ -672,21 +450,21 @@ module type AnchorHTMLAttributes = sig
     ?download:download Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?href:href Check.value ->
     ?hreflang:hreflang Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -699,7 +477,7 @@ module type AnchorHTMLAttributes = sig
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?referrerPolicy:referrerPolicy Check.value ->
+    ?referrer_policy:referrer_policy Check.value ->
     ?referrerpolicy:referrerpolicy Check.value ->
     ?rel:rel Check.value ->
     ?resource:resource Check.value ->
@@ -719,72 +497,66 @@ module type AnimateMotionSVGAttributes = sig
   include Dom_attributes
   type accumulate = [ `none | `sum ]
   type additive = [ `sum | `replace ]
-  type attributeName = string
+  type attribute_name = string
   type begin_ = string
   type by = string
-  type calcMode = [ `discrete | `linear | `paced | `spline ]
+  type calc_mode = [ `discrete | `linear | `paced | `spline ]
   type dur = string
   type end_ = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fill = [ `freeze | `remove ]
   type from = string
-  type keyPoints = string
-  type keySplines = string
-  type keyTimes = string
+  type key_points = string
+  type key_splines = string
+  type key_times = string
   type lang = string
   type max = string
   type min = string
-  type onBegin = Dom.event -> unit
-  type onEnd = Dom.event -> unit
-  type onRepeat = Dom.event -> unit
-  type onbegin = Dom.event -> unit
-  type onend = Dom.event -> unit
-  type onrepeat = Dom.event -> unit
+  type on_begin = Dom.event -> unit
+  type on_end = Dom.event -> unit
+  type on_repeat = Dom.event -> unit
   type origin = [ `default ]
   type path = string
-  type repeatCount = string
-  type repeatDur = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type repeat_count = string
+  type repeat_dur = string
+  type required_extensions = string
+  type required_features = string
   type restart = [ `always | `whenNotActive | `never ]
   type rotate = string
-  type systemLanguage = string
+  type system_language = string
   type to_ = string
   type values = string
   type xmlns = string
   type 'r check =
     ?accumulate:accumulate Check.value ->
     ?additive:additive Check.value ->
-    ?attributeName:attributeName Check.value ->
+    ?attribute_name:attribute_name Check.value ->
     ?begin_:begin_ Check.value ->
     ?by:by Check.value ->
-    ?calcMode:calcMode Check.value ->
+    ?calc_mode:calc_mode Check.value ->
     ?dur:dur Check.value ->
     ?end_:end_ Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fill:fill Check.value ->
     ?from:from Check.value ->
-    ?keyPoints:keyPoints Check.value ->
-    ?keySplines:keySplines Check.value ->
-    ?keyTimes:keyTimes Check.value ->
+    ?key_points:key_points Check.value ->
+    ?key_splines:key_splines Check.value ->
+    ?key_times:key_times Check.value ->
     ?lang:lang Check.value ->
     ?max:max Check.value ->
     ?min:min Check.value ->
-    ?onBegin:onBegin ->
-    ?onEnd:onEnd ->
-    ?onRepeat:onRepeat ->
-    ?onbegin:onbegin ->
-    ?onend:onend ->
-    ?onrepeat:onrepeat ->
+    ?on_begin:on_begin ->
+    ?on_end:on_end ->
+    ?on_repeat:on_repeat ->
     ?origin:origin Check.value ->
     ?path:path Check.value ->
-    ?repeatCount:repeatCount Check.value ->
-    ?repeatDur:repeatDur Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?repeat_count:repeat_count Check.value ->
+    ?repeat_dur:repeat_dur Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?restart:restart Check.value ->
     ?rotate:rotate Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?to_:to_ Check.value ->
     ?values:values Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -795,66 +567,60 @@ module type AnimateSVGAttributes = sig
   include Dom_attributes
   type accumulate = [ `none | `sum ]
   type additive = [ `sum | `replace ]
-  type attributeName = string
-  type attributeType = [ `auto | `CSS | `XML ]
+  type attribute_name = string
+  type attribute_type = [ `auto | `CSS | `XML ]
   type begin_ = string
   type by = string
-  type calcMode = [ `discrete | `linear | `paced | `spline ]
+  type calc_mode = [ `discrete | `linear | `paced | `spline ]
   type dur = string
   type end_ = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fill = [ `freeze | `remove ]
   type from = string
-  type keySplines = string
-  type keyTimes = string
+  type key_splines = string
+  type key_times = string
   type lang = string
   type max = string
   type min = string
-  type onBegin = Dom.event -> unit
-  type onEnd = Dom.event -> unit
-  type onRepeat = Dom.event -> unit
-  type onbegin = Dom.event -> unit
-  type onend = Dom.event -> unit
-  type onrepeat = Dom.event -> unit
-  type repeatCount = string
-  type repeatDur = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type on_begin = Dom.event -> unit
+  type on_end = Dom.event -> unit
+  type on_repeat = Dom.event -> unit
+  type repeat_count = string
+  type repeat_dur = string
+  type required_extensions = string
+  type required_features = string
   type restart = [ `always | `whenNotActive | `never ]
-  type systemLanguage = string
+  type system_language = string
   type to_ = string
   type values = string
   type xmlns = string
   type 'r check =
     ?accumulate:accumulate Check.value ->
     ?additive:additive Check.value ->
-    ?attributeName:attributeName Check.value ->
-    ?attributeType:attributeType Check.value ->
+    ?attribute_name:attribute_name Check.value ->
+    ?attribute_type:attribute_type Check.value ->
     ?begin_:begin_ Check.value ->
     ?by:by Check.value ->
-    ?calcMode:calcMode Check.value ->
+    ?calc_mode:calc_mode Check.value ->
     ?dur:dur Check.value ->
     ?end_:end_ Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fill:fill Check.value ->
     ?from:from Check.value ->
-    ?keySplines:keySplines Check.value ->
-    ?keyTimes:keyTimes Check.value ->
+    ?key_splines:key_splines Check.value ->
+    ?key_times:key_times Check.value ->
     ?lang:lang Check.value ->
     ?max:max Check.value ->
     ?min:min Check.value ->
-    ?onBegin:onBegin ->
-    ?onEnd:onEnd ->
-    ?onRepeat:onRepeat ->
-    ?onbegin:onbegin ->
-    ?onend:onend ->
-    ?onrepeat:onrepeat ->
-    ?repeatCount:repeatCount Check.value ->
-    ?repeatDur:repeatDur Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?on_begin:on_begin ->
+    ?on_end:on_end ->
+    ?on_repeat:on_repeat ->
+    ?repeat_count:repeat_count Check.value ->
+    ?repeat_dur:repeat_dur Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?restart:restart Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?to_:to_ Check.value ->
     ?values:values Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -865,33 +631,30 @@ module type AnimateTransformSVGAttributes = sig
   include Dom_attributes
   type accumulate = [ `none | `sum ]
   type additive = [ `sum | `replace ]
-  type attributeName = string
-  type attributeType = [ `auto | `CSS | `XML ]
+  type attribute_name = string
+  type attribute_type = [ `auto | `CSS | `XML ]
   type begin_ = string
   type by = string
-  type calcMode = [ `discrete | `linear | `paced | `spline ]
+  type calc_mode = [ `discrete | `linear | `paced | `spline ]
   type dur = string
   type end_ = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fill = [ `freeze | `remove ]
   type from = string
-  type keySplines = string
-  type keyTimes = string
+  type key_splines = string
+  type key_times = string
   type lang = string
   type max = string
   type min = string
-  type onBegin = Dom.event -> unit
-  type onEnd = Dom.event -> unit
-  type onRepeat = Dom.event -> unit
-  type onbegin = Dom.event -> unit
-  type onend = Dom.event -> unit
-  type onrepeat = Dom.event -> unit
-  type repeatCount = string
-  type repeatDur = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type on_begin = Dom.event -> unit
+  type on_end = Dom.event -> unit
+  type on_repeat = Dom.event -> unit
+  type repeat_count = string
+  type repeat_dur = string
+  type required_extensions = string
+  type required_features = string
   type restart = [ `always | `whenNotActive | `never ]
-  type systemLanguage = string
+  type system_language = string
   type to_ = string
   type type_ = [ `translate | `scale | `rotate | `skewX | `skewY ]
   type values = string
@@ -899,33 +662,30 @@ module type AnimateTransformSVGAttributes = sig
   type 'r check =
     ?accumulate:accumulate Check.value ->
     ?additive:additive Check.value ->
-    ?attributeName:attributeName Check.value ->
-    ?attributeType:attributeType Check.value ->
+    ?attribute_name:attribute_name Check.value ->
+    ?attribute_type:attribute_type Check.value ->
     ?begin_:begin_ Check.value ->
     ?by:by Check.value ->
-    ?calcMode:calcMode Check.value ->
+    ?calc_mode:calc_mode Check.value ->
     ?dur:dur Check.value ->
     ?end_:end_ Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fill:fill Check.value ->
     ?from:from Check.value ->
-    ?keySplines:keySplines Check.value ->
-    ?keyTimes:keyTimes Check.value ->
+    ?key_splines:key_splines Check.value ->
+    ?key_times:key_times Check.value ->
     ?lang:lang Check.value ->
     ?max:max Check.value ->
     ?min:min Check.value ->
-    ?onBegin:onBegin ->
-    ?onEnd:onEnd ->
-    ?onRepeat:onRepeat ->
-    ?onbegin:onbegin ->
-    ?onend:onend ->
-    ?onrepeat:onrepeat ->
-    ?repeatCount:repeatCount Check.value ->
-    ?repeatDur:repeatDur Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?on_begin:on_begin ->
+    ?on_end:on_end ->
+    ?on_repeat:on_repeat ->
+    ?repeat_count:repeat_count Check.value ->
+    ?repeat_dur:repeat_dur Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?restart:restart Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?to_:to_ Check.value ->
     ?type_:type_ Check.value ->
     ?values:values Check.value ->
@@ -936,16 +696,16 @@ end
 module type AreaHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type alt = string
   type attributionsrc = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type coords = string
   type datatype = string
@@ -953,20 +713,20 @@ module type AreaHTMLAttributes = sig
   type download = string
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type href = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -979,7 +739,7 @@ module type AreaHTMLAttributes = sig
   type popover = string
   type prefix = string
   type property = string
-  type referrerPolicy = string
+  type referrer_policy = string
   type referrerpolicy = string
   type rel = string
   type resource = string
@@ -992,16 +752,16 @@ module type AreaHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?alt:alt Check.value ->
     ?attributionsrc:attributionsrc Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?coords:coords Check.value ->
     ?datatype:datatype Check.value ->
@@ -1009,20 +769,20 @@ module type AreaHTMLAttributes = sig
     ?download:download Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?href:href Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1035,7 +795,7 @@ module type AreaHTMLAttributes = sig
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?referrerPolicy:referrerPolicy Check.value ->
+    ?referrer_policy:referrer_policy Check.value ->
     ?referrerpolicy:referrerpolicy Check.value ->
     ?rel:rel Check.value ->
     ?resource:resource Check.value ->
@@ -1052,38 +812,38 @@ end
 module type AudioHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type autoplay = bool
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type controls = bool
   type controlslist = string
-  type crossOrigin = string
+  type cross_origin = string
   type crossorigin = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disableremoteplayback = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1091,13 +851,11 @@ module type AudioHTMLAttributes = sig
   type itemtype = string
   type lang = string
   type loop = bool
-  type mediaGroup = string
+  type media_group = string
   type mediagroup = string
   type muted = bool
-  type onEncrypted = Dom.event -> unit
-  type onWaitingForKey = Dom.event -> unit
-  type onencrypted = Dom.event -> unit
-  type onwaitingforkey = Dom.event -> unit
+  type on_encrypted = Dom.event -> unit
+  type on_waiting_for_key = Dom.event -> unit
   type part = string
   type popover = string
   type prefix = string
@@ -1112,38 +870,38 @@ module type AudioHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?autoplay:autoplay Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?controls:controls Check.value ->
     ?controlslist:controlslist Check.value ->
-    ?crossOrigin:crossOrigin Check.value ->
+    ?cross_origin:cross_origin Check.value ->
     ?crossorigin:crossorigin Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disableremoteplayback:disableremoteplayback Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1151,13 +909,11 @@ module type AudioHTMLAttributes = sig
     ?itemtype:itemtype Check.value ->
     ?lang:lang Check.value ->
     ?loop:loop Check.value ->
-    ?mediaGroup:mediaGroup Check.value ->
+    ?media_group:media_group Check.value ->
     ?mediagroup:mediagroup Check.value ->
     ?muted:muted Check.value ->
-    ?onEncrypted:onEncrypted ->
-    ?onWaitingForKey:onWaitingForKey ->
-    ?onencrypted:onencrypted ->
-    ?onwaitingforkey:onwaitingforkey ->
+    ?on_encrypted:on_encrypted ->
+    ?on_waiting_for_key:on_waiting_for_key ->
     ?part:part Check.value ->
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
@@ -1176,33 +932,33 @@ end
 module type BaseHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type href = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1222,33 +978,33 @@ module type BaseHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?href:href Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1272,32 +1028,32 @@ end
 module type BdoHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1316,32 +1072,32 @@ module type BdoHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1364,33 +1120,33 @@ end
 module type BlockquoteHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type cite = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1409,33 +1165,33 @@ module type BlockquoteHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?cite:cite Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1458,78 +1214,58 @@ end
 module type BodyHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
   type itemscope = bool
   type itemtype = string
   type lang = string
-  type onAfterPrint = Dom.event -> unit
-  type onBeforePrint = Dom.event -> unit
-  type onBeforeUnload = Dom.beforeUnloadEvent -> unit
-  type onGamepadConnected = Dom.event -> unit
-  type onGamepadDisconnected = Dom.event -> unit
-  type onHashchange = Dom.event -> unit
-  type onLanguageChange = Dom.event -> unit
-  type onMessage = Dom.messageEvent -> unit
-  type onMessageError = Dom.messageEvent -> unit
-  type onOffline = Dom.event -> unit
-  type onOnline = Dom.event -> unit
-  type onPageHide = Dom.pageTransitionEvent -> unit
-  type onPageReveal = Dom.event -> unit
-  type onPageShow = Dom.pageTransitionEvent -> unit
-  type onPageSwap = Dom.event -> unit
-  type onPopstate = Dom.popStateEvent -> unit
-  type onRejectionHandled = Dom.event -> unit
-  type onStorage = Dom.storageEvent -> unit
-  type onUnhandledRejection = Dom.event -> unit
-  type onUnload = Dom.event -> unit
-  type onafterprint = Dom.event -> unit
-  type onbeforeprint = Dom.event -> unit
-  type onbeforeunload = Dom.beforeUnloadEvent -> unit
-  type ongamepadconnected = Dom.event -> unit
-  type ongamepaddisconnected = Dom.event -> unit
-  type onhashchange = Dom.event -> unit
-  type onlanguagechange = Dom.event -> unit
-  type onmessage = Dom.messageEvent -> unit
-  type onmessageerror = Dom.messageEvent -> unit
-  type onoffline = Dom.event -> unit
-  type ononline = Dom.event -> unit
-  type onpagehide = Dom.pageTransitionEvent -> unit
-  type onpagereveal = Dom.event -> unit
-  type onpageshow = Dom.pageTransitionEvent -> unit
-  type onpageswap = Dom.event -> unit
-  type onpopstate = Dom.popStateEvent -> unit
-  type onrejectionhandled = Dom.event -> unit
-  type onstorage = Dom.storageEvent -> unit
-  type onunhandledrejection = Dom.event -> unit
-  type onunload = Dom.event -> unit
+  type on_after_print = Dom.event -> unit
+  type on_before_print = Dom.event -> unit
+  type on_before_unload = Dom.beforeUnloadEvent -> unit
+  type on_gamepad_connected = Dom.event -> unit
+  type on_gamepad_disconnected = Dom.event -> unit
+  type on_hashchange = Dom.event -> unit
+  type on_language_change = Dom.event -> unit
+  type on_message = Dom.messageEvent -> unit
+  type on_message_error = Dom.messageEvent -> unit
+  type on_offline = Dom.event -> unit
+  type on_online = Dom.event -> unit
+  type on_page_hide = Dom.pageTransitionEvent -> unit
+  type on_page_reveal = Dom.event -> unit
+  type on_page_show = Dom.pageTransitionEvent -> unit
+  type on_page_swap = Dom.event -> unit
+  type on_popstate = Dom.popStateEvent -> unit
+  type on_rejection_handled = Dom.event -> unit
+  type on_storage = Dom.storageEvent -> unit
+  type on_unhandled_rejection = Dom.event -> unit
+  type on_unload = Dom.event -> unit
   type part = string
   type popover = string
   type prefix = string
@@ -1542,78 +1278,58 @@ module type BodyHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
     ?itemscope:itemscope Check.value ->
     ?itemtype:itemtype Check.value ->
     ?lang:lang Check.value ->
-    ?onAfterPrint:onAfterPrint ->
-    ?onBeforePrint:onBeforePrint ->
-    ?onBeforeUnload:onBeforeUnload ->
-    ?onGamepadConnected:onGamepadConnected ->
-    ?onGamepadDisconnected:onGamepadDisconnected ->
-    ?onHashchange:onHashchange ->
-    ?onLanguageChange:onLanguageChange ->
-    ?onMessage:onMessage ->
-    ?onMessageError:onMessageError ->
-    ?onOffline:onOffline ->
-    ?onOnline:onOnline ->
-    ?onPageHide:onPageHide ->
-    ?onPageReveal:onPageReveal ->
-    ?onPageShow:onPageShow ->
-    ?onPageSwap:onPageSwap ->
-    ?onPopstate:onPopstate ->
-    ?onRejectionHandled:onRejectionHandled ->
-    ?onStorage:onStorage ->
-    ?onUnhandledRejection:onUnhandledRejection ->
-    ?onUnload:onUnload ->
-    ?onafterprint:onafterprint ->
-    ?onbeforeprint:onbeforeprint ->
-    ?onbeforeunload:onbeforeunload ->
-    ?ongamepadconnected:ongamepadconnected ->
-    ?ongamepaddisconnected:ongamepaddisconnected ->
-    ?onhashchange:onhashchange ->
-    ?onlanguagechange:onlanguagechange ->
-    ?onmessage:onmessage ->
-    ?onmessageerror:onmessageerror ->
-    ?onoffline:onoffline ->
-    ?ononline:ononline ->
-    ?onpagehide:onpagehide ->
-    ?onpagereveal:onpagereveal ->
-    ?onpageshow:onpageshow ->
-    ?onpageswap:onpageswap ->
-    ?onpopstate:onpopstate ->
-    ?onrejectionhandled:onrejectionhandled ->
-    ?onstorage:onstorage ->
-    ?onunhandledrejection:onunhandledrejection ->
-    ?onunload:onunload ->
+    ?on_after_print:on_after_print ->
+    ?on_before_print:on_before_print ->
+    ?on_before_unload:on_before_unload ->
+    ?on_gamepad_connected:on_gamepad_connected ->
+    ?on_gamepad_disconnected:on_gamepad_disconnected ->
+    ?on_hashchange:on_hashchange ->
+    ?on_language_change:on_language_change ->
+    ?on_message:on_message ->
+    ?on_message_error:on_message_error ->
+    ?on_offline:on_offline ->
+    ?on_online:on_online ->
+    ?on_page_hide:on_page_hide ->
+    ?on_page_reveal:on_page_reveal ->
+    ?on_page_show:on_page_show ->
+    ?on_page_swap:on_page_swap ->
+    ?on_popstate:on_popstate ->
+    ?on_rejection_handled:on_rejection_handled ->
+    ?on_storage:on_storage ->
+    ?on_unhandled_rejection:on_unhandled_rejection ->
+    ?on_unload:on_unload ->
     ?part:part Check.value ->
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
@@ -1630,30 +1346,30 @@ end
 module type ButtonHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type command = string
   type commandfor = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
-  type formAction = string
-  type formEnctype = string
-  type formMethod = [ `dialog | `post | `get ]
-  type formNoValidate = bool
-  type formTarget = string
+  type form_action = string
+  type form_enctype = string
+  type form_method = [ `dialog | `post | `get ]
+  type form_no_validate = bool
+  type form_target = string
   type formaction = string
   type formenctype = string
   type formmethod = [ `dialog | `post | `get ]
@@ -1661,15 +1377,15 @@ module type ButtonHTMLAttributes = sig
   type formtarget = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1679,8 +1395,8 @@ module type ButtonHTMLAttributes = sig
   type name = string
   type part = string
   type popover = string
-  type popoverTarget = string
-  type popoverTargetAction = [ `hide | `show | `toggle ]
+  type popover_target = string
+  type popover_target_action = [ `hide | `show | `toggle ]
   type popovertarget = string
   type popovertargetaction = [ `hide | `show | `toggle ]
   type prefix = string
@@ -1695,30 +1411,30 @@ module type ButtonHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?command:command Check.value ->
     ?commandfor:commandfor Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
-    ?formAction:formAction Check.value ->
-    ?formEnctype:formEnctype Check.value ->
-    ?formMethod:formMethod Check.value ->
-    ?formNoValidate:formNoValidate Check.value ->
-    ?formTarget:formTarget Check.value ->
+    ?form_action:form_action Check.value ->
+    ?form_enctype:form_enctype Check.value ->
+    ?form_method:form_method Check.value ->
+    ?form_no_validate:form_no_validate Check.value ->
+    ?form_target:form_target Check.value ->
     ?formaction:formaction Check.value ->
     ?formenctype:formenctype Check.value ->
     ?formmethod:formmethod Check.value ->
@@ -1726,15 +1442,15 @@ module type ButtonHTMLAttributes = sig
     ?formtarget:formtarget Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1744,8 +1460,8 @@ module type ButtonHTMLAttributes = sig
     ?name:name Check.value ->
     ?part:part Check.value ->
     ?popover:popover Check.value ->
-    ?popoverTarget:popoverTarget Check.value ->
-    ?popoverTargetAction:popoverTargetAction Check.value ->
+    ?popover_target:popover_target Check.value ->
+    ?popover_target_action:popover_target_action Check.value ->
     ?popovertarget:popovertarget Check.value ->
     ?popovertargetaction:popovertargetaction Check.value ->
     ?prefix:prefix Check.value ->
@@ -1764,33 +1480,33 @@ end
 module type CanvasHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1811,33 +1527,33 @@ module type CanvasHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1862,33 +1578,33 @@ end
 module type CaptionHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `center | `right ]
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -1907,33 +1623,33 @@ module type CaptionHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -1959,9 +1675,9 @@ module type CircleSVGAttributes = sig
   type cy = string
   type lang = string
   type r = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
@@ -1969,9 +1685,9 @@ module type CircleSVGAttributes = sig
     ?cy:cy Check.value ->
     ?lang:lang Check.value ->
     ?r:r Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -1979,21 +1695,21 @@ end
 
 module type ClipPathSVGAttributes = sig
   include Dom_attributes
-  type clipPathUnits = [ `userSpaceOnUse | `objectBoundingBox ]
-  type externalResourcesRequired = bool
+  type clip_path_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type external_resources_required = bool
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
-    ?clipPathUnits:clipPathUnits Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?clip_path_units:clip_path_units Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -2002,36 +1718,36 @@ end
 module type ColHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `center | `right | `justify | `char ]
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type bgcolor = string
   type char = string
   type charoff = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -2053,36 +1769,36 @@ module type ColHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?bgcolor:bgcolor Check.value ->
     ?char:char Check.value ->
     ?charoff:charoff Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -2108,36 +1824,36 @@ end
 module type ColgroupHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `center | `right | `justify | `char ]
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type bgcolor = string
   type char = string
   type charoff = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -2159,36 +1875,36 @@ module type ColgroupHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?bgcolor:bgcolor Check.value ->
     ?char:char Check.value ->
     ?charoff:charoff Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -2214,32 +1930,32 @@ end
 module type DataHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -2259,32 +1975,32 @@ module type DataHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -2307,19 +2023,19 @@ end
 
 module type DefsSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -2338,32 +2054,32 @@ end
 module type DetailsHtmlAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -2384,32 +2100,32 @@ module type DetailsHtmlAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -2434,33 +2150,33 @@ end
 module type DialogHtmlAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type closedby = [ `none | `any | `closerequest ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -2480,33 +2196,33 @@ module type DialogHtmlAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?closedby:closedby Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -2531,25 +2247,25 @@ module type EllipseSVGAttributes = sig
   include Dom_attributes
   type cx = string
   type cy = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type required_extensions = string
+  type required_features = string
   type rx = string
   type ry = string
-  type systemLanguage = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
     ?cx:cx Check.value ->
     ?cy:cy Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?rx:rx Check.value ->
     ?ry:ry Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -2558,34 +2274,34 @@ end
 module type EmbedHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `center | `right | `justify ]
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -2608,34 +2324,34 @@ module type EmbedHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -2771,17 +2487,17 @@ module type FeConvolveMatrixSVGAttributes = sig
   include Dom_attributes
   type bias = string
   type divisor = string
-  type edgeMode = [ `none | `duplicate | `wrap ]
+  type edge_mode = [ `none | `duplicate | `wrap ]
   type height = string
   type in_ = string
-  type kernelMatrix = string
-  type kernelUnitLength = string
+  type kernel_matrix = string
+  type kernel_unit_length = string
   type lang = string
   type order = string
-  type preserveAlpha = bool
+  type preserve_alpha = bool
   type result = string
-  type targetX = string
-  type targetY = string
+  type target_x = string
+  type target_y = string
   type width = string
   type x = string
   type xmlns = string
@@ -2789,17 +2505,17 @@ module type FeConvolveMatrixSVGAttributes = sig
   type 'r check =
     ?bias:bias Check.value ->
     ?divisor:divisor Check.value ->
-    ?edgeMode:edgeMode Check.value ->
+    ?edge_mode:edge_mode Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
-    ?kernelMatrix:kernelMatrix Check.value ->
-    ?kernelUnitLength:kernelUnitLength Check.value ->
+    ?kernel_matrix:kernel_matrix Check.value ->
+    ?kernel_unit_length:kernel_unit_length Check.value ->
     ?lang:lang Check.value ->
     ?order:order Check.value ->
-    ?preserveAlpha:preserveAlpha Check.value ->
+    ?preserve_alpha:preserve_alpha Check.value ->
     ?result:result Check.value ->
-    ?targetX:targetX Check.value ->
-    ?targetY:targetY Check.value ->
+    ?target_x:target_x Check.value ->
+    ?target_y:target_y Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -2809,25 +2525,25 @@ end
 
 module type FeDiffuseLightingSVGAttributes = sig
   include Dom_attributes
-  type diffuseConstant = string
+  type diffuse_constant = string
   type height = string
   type in_ = string
-  type kernelUnitLength = string
+  type kernel_unit_length = string
   type lang = string
   type result = string
-  type surfaceScale = string
+  type surface_scale = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?diffuseConstant:diffuseConstant Check.value ->
+    ?diffuse_constant:diffuse_constant Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
-    ?kernelUnitLength:kernelUnitLength Check.value ->
+    ?kernel_unit_length:kernel_unit_length Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
-    ?surfaceScale:surfaceScale Check.value ->
+    ?surface_scale:surface_scale Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -2845,10 +2561,10 @@ module type FeDisplacementMapSVGAttributes = sig
   type scale = string
   type width = string
   type x = string
-  type xChannelSelector = [ `R | `G | `B | `A ]
+  type x_channel_selector = [ `R | `G | `B | `A ]
   type xmlns = string
   type y = string
-  type yChannelSelector = [ `R | `G | `B | `A ]
+  type y_channel_selector = [ `R | `G | `B | `A ]
   type 'r check =
     ?height:height Check.value ->
     ?in2:in2 Check.value ->
@@ -2858,10 +2574,10 @@ module type FeDisplacementMapSVGAttributes = sig
     ?scale:scale Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
-    ?xChannelSelector:xChannelSelector Check.value ->
+    ?x_channel_selector:x_channel_selector Check.value ->
     ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
-    ?yChannelSelector:yChannelSelector Check.value ->
+    ?y_channel_selector:y_channel_selector Check.value ->
     'r dom_check
 end
 
@@ -2886,7 +2602,7 @@ module type FeDropShadowSVGAttributes = sig
   type height = string
   type lang = string
   type result = string
-  type stdDeviation = string
+  type std_deviation = string
   type width = string
   type x = string
   type xmlns = string
@@ -2897,7 +2613,7 @@ module type FeDropShadowSVGAttributes = sig
     ?height:height Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
-    ?stdDeviation:stdDeviation Check.value ->
+    ?std_deviation:std_deviation Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -2933,7 +2649,7 @@ module type FeFuncSVGAttributes = sig
   type lang = string
   type offset = string
   type slope = string
-  type tableValues = string
+  type table_values = string
   type type_ = [ `table | `discrete | `linear | `identity | `gamma ]
   type xmlns = string
   type 'r check =
@@ -2943,7 +2659,7 @@ module type FeFuncSVGAttributes = sig
     ?lang:lang Check.value ->
     ?offset:offset Check.value ->
     ?slope:slope Check.value ->
-    ?tableValues:tableValues Check.value ->
+    ?table_values:table_values Check.value ->
     ?type_:type_ Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -2955,7 +2671,7 @@ module type FeGaussianBlurSVGAttributes = sig
   type in_ = string
   type lang = string
   type result = string
-  type stdDeviation = string
+  type std_deviation = string
   type width = string
   type x = string
   type xmlns = string
@@ -2965,7 +2681,7 @@ module type FeGaussianBlurSVGAttributes = sig
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
-    ?stdDeviation:stdDeviation Check.value ->
+    ?std_deviation:std_deviation Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -2975,22 +2691,22 @@ end
 
 module type FeImageSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type height = string
   type href = string
   type lang = string
-  type preserveAspectRatio = string
+  type preserve_aspect_ratio = string
   type result = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
     ?result:result Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
@@ -3103,12 +2819,12 @@ module type FeSpecularLightingSVGAttributes = sig
   include Dom_attributes
   type height = string
   type in_ = string
-  type kernelUnitLength = string
+  type kernel_unit_length = string
   type lang = string
   type result = string
-  type specularConstant = string
-  type specularExponent = string
-  type surfaceScale = string
+  type specular_constant = string
+  type specular_exponent = string
+  type surface_scale = string
   type width = string
   type x = string
   type xmlns = string
@@ -3116,12 +2832,12 @@ module type FeSpecularLightingSVGAttributes = sig
   type 'r check =
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
-    ?kernelUnitLength:kernelUnitLength Check.value ->
+    ?kernel_unit_length:kernel_unit_length Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
-    ?specularConstant:specularConstant Check.value ->
-    ?specularExponent:specularExponent Check.value ->
-    ?surfaceScale:surfaceScale Check.value ->
+    ?specular_constant:specular_constant Check.value ->
+    ?specular_exponent:specular_exponent Check.value ->
+    ?surface_scale:surface_scale Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -3132,22 +2848,22 @@ end
 module type FeSpotLightSVGAttributes = sig
   include Dom_attributes
   type lang = string
-  type limitingConeAngle = string
-  type pointsAtX = string
-  type pointsAtY = string
-  type pointsAtZ = string
-  type specularExponent = string
+  type limiting_cone_angle = string
+  type points_at_x = string
+  type points_at_y = string
+  type points_at_z = string
+  type specular_exponent = string
   type x = string
   type xmlns = string
   type y = string
   type z = string
   type 'r check =
     ?lang:lang Check.value ->
-    ?limitingConeAngle:limitingConeAngle Check.value ->
-    ?pointsAtX:pointsAtX Check.value ->
-    ?pointsAtY:pointsAtY Check.value ->
-    ?pointsAtZ:pointsAtZ Check.value ->
-    ?specularExponent:specularExponent Check.value ->
+    ?limiting_cone_angle:limiting_cone_angle Check.value ->
+    ?points_at_x:points_at_x Check.value ->
+    ?points_at_y:points_at_y Check.value ->
+    ?points_at_z:points_at_z Check.value ->
+    ?specular_exponent:specular_exponent Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
@@ -3179,26 +2895,26 @@ end
 
 module type FeTurbulanceSVGAttributes = sig
   include Dom_attributes
-  type baseFrequency = string
+  type base_frequency = string
   type height = string
   type lang = string
-  type numOctaves = string
+  type num_octaves = string
   type result = string
   type seed = string
-  type stitchTiles = [ `stitch | `noStitch ]
+  type stitch_tiles = [ `stitch | `noStitch ]
   type type_ = [ `fractalNoise | `turbulence ]
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?baseFrequency:baseFrequency Check.value ->
+    ?base_frequency:base_frequency Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
-    ?numOctaves:numOctaves Check.value ->
+    ?num_octaves:num_octaves Check.value ->
     ?result:result Check.value ->
     ?seed:seed Check.value ->
-    ?stitchTiles:stitchTiles Check.value ->
+    ?stitch_tiles:stitch_tiles Check.value ->
     ?type_:type_ Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
@@ -3210,34 +2926,34 @@ end
 module type FieldsetHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -3257,34 +2973,34 @@ module type FieldsetHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -3307,23 +3023,23 @@ end
 
 module type FilterSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
-  type filterRes = string
-  type filterUnits = [ `userSpaceOnUse | `objectBoundingBox ]
+  type external_resources_required = bool
+  type filter_res = string
+  type filter_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type height = string
   type lang = string
-  type primitiveUnits = [ `userSpaceOnUse | `objectBoundingBox ]
+  type primitive_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
-    ?filterRes:filterRes Check.value ->
-    ?filterUnits:filterUnits Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
+    ?filter_res:filter_res Check.value ->
+    ?filter_units:filter_units Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
-    ?primitiveUnits:primitiveUnits Check.value ->
+    ?primitive_units:primitive_units Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -3333,27 +3049,27 @@ end
 
 module type ForeignObjectSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type height = string
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
-  type viewBox = string
+  type view_box = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
-    ?viewBox:viewBox Check.value ->
+    ?view_box:view_box Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -3366,16 +3082,16 @@ module type FormHTMLAttributes = sig
   type about = string
   type accept = string
   type accept_charset = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type action = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocomplete = [ `off | `on ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
@@ -3383,19 +3099,19 @@ module type FormHTMLAttributes = sig
   type encoding = string
   type enctype = string
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -3404,7 +3120,7 @@ module type FormHTMLAttributes = sig
   type lang = string
   type method_ = [ `dialog | `post | `get ]
   type name = string
-  type noValidate = bool
+  type no_validate = bool
   type novalidate = bool
   type part = string
   type popover = string
@@ -3422,16 +3138,16 @@ module type FormHTMLAttributes = sig
     ?about:about Check.value ->
     ?accept:accept Check.value ->
     ?accept_charset:accept_charset Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?action:action Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocomplete:autocomplete Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
@@ -3439,19 +3155,19 @@ module type FormHTMLAttributes = sig
     ?encoding:encoding Check.value ->
     ?enctype:enctype Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -3460,7 +3176,7 @@ module type FormHTMLAttributes = sig
     ?lang:lang Check.value ->
     ?method_:method_ Check.value ->
     ?name:name Check.value ->
-    ?noValidate:noValidate Check.value ->
+    ?no_validate:no_validate Check.value ->
     ?novalidate:novalidate Check.value ->
     ?part:part Check.value ->
     ?popover:popover Check.value ->
@@ -3479,19 +3195,19 @@ end
 
 module type GSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -3500,32 +3216,32 @@ end
 module type HTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -3544,32 +3260,32 @@ module type HTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -3592,32 +3308,32 @@ end
 module type HTMLSlotElementAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -3637,32 +3353,32 @@ module type HTMLSlotElementAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -3686,7 +3402,7 @@ end
 module type IframeHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type adauctionheaders = bool
   type align = string
@@ -3694,13 +3410,13 @@ module type IframeHTMLAttributes = sig
   type allowfullscreen = bool
   type allowpaymentrequest = bool
   type allowtransparency = bool
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type browsingtopics = bool
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type credentialless = bool
   type csp = string
@@ -3708,21 +3424,21 @@ module type IframeHTMLAttributes = sig
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type frameborder = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -3739,7 +3455,7 @@ module type IframeHTMLAttributes = sig
   type prefix = string
   type privatetoken = string
   type property = string
-  type referrerPolicy = string
+  type referrer_policy = string
   type referrerpolicy = string
   type resource = string
   type sandbox = string
@@ -3756,7 +3472,7 @@ module type IframeHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?adauctionheaders:adauctionheaders Check.value ->
     ?align:align Check.value ->
@@ -3764,13 +3480,13 @@ module type IframeHTMLAttributes = sig
     ?allowfullscreen:allowfullscreen Check.value ->
     ?allowpaymentrequest:allowpaymentrequest Check.value ->
     ?allowtransparency:allowtransparency Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?browsingtopics:browsingtopics Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?credentialless:credentialless Check.value ->
     ?csp:csp Check.value ->
@@ -3778,21 +3494,21 @@ module type IframeHTMLAttributes = sig
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?frameborder:frameborder Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -3809,7 +3525,7 @@ module type IframeHTMLAttributes = sig
     ?prefix:prefix Check.value ->
     ?privatetoken:privatetoken Check.value ->
     ?property:property Check.value ->
-    ?referrerPolicy:referrerPolicy Check.value ->
+    ?referrer_policy:referrer_policy Check.value ->
     ?referrerpolicy:referrerpolicy Check.value ->
     ?resource:resource Check.value ->
     ?sandbox:sandbox Check.value ->
@@ -3832,12 +3548,12 @@ module type ImageSVGAttributes = sig
   type height = string
   type href = string
   type lang = string
-  type preserveAspectRatio = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type preserve_aspect_ratio = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
-  type viewBox = string
+  type view_box = string
   type width = string
   type x = string
   type xmlns = string
@@ -3846,12 +3562,12 @@ module type ImageSVGAttributes = sig
     ?height:height Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
-    ?viewBox:viewBox Check.value ->
+    ?view_box:view_box Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -3862,45 +3578,45 @@ end
 module type ImgHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `right | `bottom | `middle | `top ]
   type alt = string
   type attributionsrc = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type border = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
-  type crossOrigin = string
+  type cross_origin = string
   type crossorigin = string
   type datatype = string
   type decoding = [ `auto | `sync | `async ]
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type fetchpriority = [ `auto | `high | `low ]
   type height = string
   type hidden = string
   type hspace = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type intrinsicsize = string
   type is = string
-  type isMap = bool
+  type is_map = bool
   type ismap = bool
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -3915,64 +3631,64 @@ module type ImgHTMLAttributes = sig
   type popover = string
   type prefix = string
   type property = string
-  type referrerPolicy = string
+  type referrer_policy = string
   type referrerpolicy = string
   type resource = string
   type sharedstoragewritable = bool
   type sizes = string
   type spellcheck = bool
   type src = string
-  type srcSet = string
+  type src_set = string
   type srcset = string
   type title = string
   type translate = [ `yes | `no ]
   type typeof = string
-  type useMap = string
+  type use_map = string
   type usemap = string
   type vocab = string
   type vspace = string
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
     ?alt:alt Check.value ->
     ?attributionsrc:attributionsrc Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?border:border Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
-    ?crossOrigin:crossOrigin Check.value ->
+    ?cross_origin:cross_origin Check.value ->
     ?crossorigin:crossorigin Check.value ->
     ?datatype:datatype Check.value ->
     ?decoding:decoding Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?fetchpriority:fetchpriority Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?hspace:hspace Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?intrinsicsize:intrinsicsize Check.value ->
     ?is:is Check.value ->
-    ?isMap:isMap Check.value ->
+    ?is_map:is_map Check.value ->
     ?ismap:ismap Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -3987,19 +3703,19 @@ module type ImgHTMLAttributes = sig
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?referrerPolicy:referrerPolicy Check.value ->
+    ?referrer_policy:referrer_policy Check.value ->
     ?referrerpolicy:referrerpolicy Check.value ->
     ?resource:resource Check.value ->
     ?sharedstoragewritable:sharedstoragewritable Check.value ->
     ?sizes:sizes Check.value ->
     ?spellcheck:spellcheck Check.value ->
     ?src:src Check.value ->
-    ?srcSet:srcSet Check.value ->
+    ?src_set:src_set Check.value ->
     ?srcset:srcset Check.value ->
     ?title:title Check.value ->
     ?translate:translate Check.value ->
     ?typeof:typeof Check.value ->
-    ?useMap:useMap Check.value ->
+    ?use_map:use_map Check.value ->
     ?usemap:usemap Check.value ->
     ?vocab:vocab Check.value ->
     ?vspace:vspace Check.value ->
@@ -4011,21 +3727,21 @@ module type InputHTMLAttributes = sig
   include Dom_attributes
   type about = string
   type accept = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = string
   type alpha = bool
   type alt = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocomplete = string
   type autocorrect = [ `off | `on ]
   type capture = [ `user | `environment ]
   type checked = bool
   type colorspace = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
@@ -4033,14 +3749,14 @@ module type InputHTMLAttributes = sig
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
-  type formAction = string
-  type formEnctype = string
-  type formMethod = [ `dialog | `post | `get ]
-  type formNoValidate = bool
-  type formTarget = string
+  type form_action = string
+  type form_enctype = string
+  type form_method = [ `dialog | `post | `get ]
+  type form_no_validate = bool
+  type form_target = string
   type formaction = string
   type formenctype = string
   type formmethod = [ `dialog | `post | `get ]
@@ -4050,15 +3766,15 @@ module type InputHTMLAttributes = sig
   type hidden = string
   type incremental = bool
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4067,10 +3783,10 @@ module type InputHTMLAttributes = sig
   type lang = string
   type list = string
   type max = string
-  type maxLength = string
+  type max_length = string
   type maxlength = string
   type min = string
-  type minLength = string
+  type min_length = string
   type minlength = string
   type multiple = bool
   type name = string
@@ -4082,7 +3798,7 @@ module type InputHTMLAttributes = sig
   type popovertargetaction = [ `hide | `show | `toggle ]
   type prefix = string
   type property = string
-  type readOnly = bool
+  type read_only = bool
   type readonly = bool
   type required = bool
   type resource = string
@@ -4102,21 +3818,21 @@ module type InputHTMLAttributes = sig
   type 'r check =
     ?about:about Check.value ->
     ?accept:accept Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
     ?alpha:alpha Check.value ->
     ?alt:alt Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocomplete:autocomplete Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?capture:capture Check.value ->
     ?checked:checked Check.value ->
     ?colorspace:colorspace Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
@@ -4124,14 +3840,14 @@ module type InputHTMLAttributes = sig
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
-    ?formAction:formAction Check.value ->
-    ?formEnctype:formEnctype Check.value ->
-    ?formMethod:formMethod Check.value ->
-    ?formNoValidate:formNoValidate Check.value ->
-    ?formTarget:formTarget Check.value ->
+    ?form_action:form_action Check.value ->
+    ?form_enctype:form_enctype Check.value ->
+    ?form_method:form_method Check.value ->
+    ?form_no_validate:form_no_validate Check.value ->
+    ?form_target:form_target Check.value ->
     ?formaction:formaction Check.value ->
     ?formenctype:formenctype Check.value ->
     ?formmethod:formmethod Check.value ->
@@ -4141,15 +3857,15 @@ module type InputHTMLAttributes = sig
     ?hidden:hidden Check.value ->
     ?incremental:incremental Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4158,10 +3874,10 @@ module type InputHTMLAttributes = sig
     ?lang:lang Check.value ->
     ?list:list Check.value ->
     ?max:max Check.value ->
-    ?maxLength:maxLength Check.value ->
+    ?max_length:max_length Check.value ->
     ?maxlength:maxlength Check.value ->
     ?min:min Check.value ->
-    ?minLength:minLength Check.value ->
+    ?min_length:min_length Check.value ->
     ?minlength:minlength Check.value ->
     ?multiple:multiple Check.value ->
     ?name:name Check.value ->
@@ -4173,7 +3889,7 @@ module type InputHTMLAttributes = sig
     ?popovertargetaction:popovertargetaction Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?readOnly:readOnly Check.value ->
+    ?read_only:read_only Check.value ->
     ?readonly:readonly Check.value ->
     ?required:required Check.value ->
     ?resource:resource Check.value ->
@@ -4196,35 +3912,35 @@ end
 module type KeygenHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type challenge = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4246,35 +3962,35 @@ module type KeygenHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?challenge:challenge Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4300,33 +4016,33 @@ end
 module type LabelHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type for_ = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4345,33 +4061,33 @@ module type LabelHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?for_:for_ Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4394,32 +4110,32 @@ end
 module type LiHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4440,32 +4156,32 @@ module type LiHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4489,11 +4205,11 @@ end
 
 module type LineSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type x1 = string
   type x2 = string
@@ -4501,11 +4217,11 @@ module type LineSVGAttributes = sig
   type y1 = string
   type y2 = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?x1:x1 Check.value ->
     ?x2:x2 Check.value ->
@@ -4517,24 +4233,24 @@ end
 
 module type LinearGradientSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
-  type gradientTransform = string
-  type gradientUnits = [ `userSpaceOnUse | `objectBoundingBox ]
+  type external_resources_required = bool
+  type gradient_transform = string
+  type gradient_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type href = string
   type lang = string
-  type spreadMethod = [ `pad | `reflect | `repeat ]
+  type spread_method = [ `pad | `reflect | `repeat ]
   type x1 = string
   type x2 = string
   type xmlns = string
   type y1 = string
   type y2 = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
-    ?gradientTransform:gradientTransform Check.value ->
-    ?gradientUnits:gradientUnits Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
+    ?gradient_transform:gradient_transform Check.value ->
+    ?gradient_units:gradient_units Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
-    ?spreadMethod:spreadMethod Check.value ->
+    ?spread_method:spread_method Check.value ->
     ?x1:x1 Check.value ->
     ?x2:x2 Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -4546,27 +4262,27 @@ end
 module type LinkHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type as_ = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type blocking = [ `render ]
   type charset = string
   type color = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
-  type crossOrigin = string
+  type cross_origin = string
   type crossorigin = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type fetchpriority = [ `auto | `high | `low ]
   type hidden = string
@@ -4575,16 +4291,16 @@ module type LinkHTMLAttributes = sig
   type imagesizes = string
   type imagesrcset = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type integrity = string
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4596,7 +4312,7 @@ module type LinkHTMLAttributes = sig
   type popover = string
   type prefix = string
   type property = string
-  type referrerPolicy = string
+  type referrer_policy = string
   type referrerpolicy = string
   type rel = string
   type resource = string
@@ -4611,27 +4327,27 @@ module type LinkHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?as_:as_ Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?blocking:blocking Check.value ->
     ?charset:charset Check.value ->
     ?color:color Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
-    ?crossOrigin:crossOrigin Check.value ->
+    ?cross_origin:cross_origin Check.value ->
     ?crossorigin:crossorigin Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?fetchpriority:fetchpriority Check.value ->
     ?hidden:hidden Check.value ->
@@ -4640,16 +4356,16 @@ module type LinkHTMLAttributes = sig
     ?imagesizes:imagesizes Check.value ->
     ?imagesrcset:imagesrcset Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?integrity:integrity Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4661,7 +4377,7 @@ module type LinkHTMLAttributes = sig
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?referrerPolicy:referrerPolicy Check.value ->
+    ?referrer_policy:referrer_policy Check.value ->
     ?referrerpolicy:referrerpolicy Check.value ->
     ?rel:rel Check.value ->
     ?resource:resource Check.value ->
@@ -4690,32 +4406,32 @@ end
 module type MapHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4735,32 +4451,32 @@ module type MapHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4783,28 +4499,28 @@ end
 
 module type MarkerSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type markerHeight = string
-  type markerUnits = [ `userSpaceOnUse | `strokeWidth ]
-  type markerWidth = string
+  type marker_height = string
+  type marker_units = [ `userSpaceOnUse | `strokeWidth ]
+  type marker_width = string
   type orient = string
-  type preserveAspectRatio = string
-  type refX = string
-  type refY = string
-  type viewBox = string
+  type preserve_aspect_ratio = string
+  type ref_x = string
+  type ref_y = string
+  type view_box = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?markerHeight:markerHeight Check.value ->
-    ?markerUnits:markerUnits Check.value ->
-    ?markerWidth:markerWidth Check.value ->
+    ?marker_height:marker_height Check.value ->
+    ?marker_units:marker_units Check.value ->
+    ?marker_width:marker_width Check.value ->
     ?orient:orient Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
-    ?refX:refX Check.value ->
-    ?refY:refY Check.value ->
-    ?viewBox:viewBox Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
+    ?ref_x:ref_x Check.value ->
+    ?ref_y:ref_y Check.value ->
+    ?view_box:view_box Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -4812,27 +4528,27 @@ end
 module type MaskSVGAttributes = sig
   type element
   type class_ = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type height = string
-  type maskContentUnits = [ `userSpaceOnUse | `objectBoundingBox ]
-  type maskUnits = [ `userSpaceOnUse | `objectBoundingBox ]
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type mask_content_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type mask_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type required_extensions = string
+  type required_features = string
   type style = string
-  type systemLanguage = string
+  type system_language = string
   type width = string
   type x = string
   type y = string
   type 'r check =
     ?class_:class_ Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
-    ?maskContentUnits:maskContentUnits Check.value ->
-    ?maskUnits:maskUnits Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?mask_content_units:mask_content_units Check.value ->
+    ?mask_units:mask_units Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?style:style Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?y:y Check.value ->
@@ -4842,33 +4558,33 @@ end
 module type MenuHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type compact = bool
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4889,33 +4605,33 @@ module type MenuHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?compact:compact Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -4940,35 +4656,35 @@ end
 module type MetaHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type charset = string
   type content = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type http_equiv = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -4990,35 +4706,35 @@ module type MetaHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?charset:charset Check.value ->
     ?content:content Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?http_equiv:http_equiv Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5054,34 +4770,34 @@ end
 module type MeterHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
   type hidden = string
   type high = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5105,34 +4821,34 @@ module type MeterHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
     ?hidden:hidden Check.value ->
     ?high:high Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5160,35 +4876,35 @@ end
 module type ModHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type cite = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dateTime = string
+  type date_time = string
   type datetime = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5207,35 +4923,35 @@ module type ModHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?cite:cite Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
-    ?dateTime:dateTime Check.value ->
+    ?date_time:date_time Check.value ->
     ?datetime:datetime Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5258,11 +4974,11 @@ end
 module type ObjectHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = string
   type archive = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type border = string
@@ -5270,9 +4986,9 @@ module type ObjectHTMLAttributes = sig
   type code = string
   type codebase = string
   type codetype = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type data = string
   type datatype = string
@@ -5280,22 +4996,22 @@ module type ObjectHTMLAttributes = sig
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
   type height = string
   type hidden = string
   type hspace = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5315,18 +5031,18 @@ module type ObjectHTMLAttributes = sig
   type type_ = string
   type typemustmatch = bool
   type typeof = string
-  type useMap = string
+  type use_map = string
   type usemap = string
   type vocab = string
   type vspace = string
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
     ?archive:archive Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?border:border Check.value ->
@@ -5334,9 +5050,9 @@ module type ObjectHTMLAttributes = sig
     ?code:code Check.value ->
     ?codebase:codebase Check.value ->
     ?codetype:codetype Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?data:data Check.value ->
     ?datatype:datatype Check.value ->
@@ -5344,22 +5060,22 @@ module type ObjectHTMLAttributes = sig
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?hspace:hspace Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5379,7 +5095,7 @@ module type ObjectHTMLAttributes = sig
     ?type_:type_ Check.value ->
     ?typemustmatch:typemustmatch Check.value ->
     ?typeof:typeof Check.value ->
-    ?useMap:useMap Check.value ->
+    ?use_map:use_map Check.value ->
     ?usemap:usemap Check.value ->
     ?vocab:vocab Check.value ->
     ?vspace:vspace Check.value ->
@@ -5390,33 +5106,33 @@ end
 module type OlHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type compact = bool
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5438,33 +5154,33 @@ module type OlHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?compact:compact Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5490,33 +5206,33 @@ end
 module type OptgroupHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5536,33 +5252,33 @@ module type OptgroupHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5586,33 +5302,33 @@ end
 module type OptionHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5634,33 +5350,33 @@ module type OptionHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5686,34 +5402,34 @@ end
 module type OutputHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type for_ = string
   type form = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5733,34 +5449,34 @@ module type OutputHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?for_:for_ Check.value ->
     ?form:form Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5784,32 +5500,32 @@ end
 module type ParamHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -5832,32 +5548,32 @@ module type ParamHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -5884,22 +5600,22 @@ end
 module type PathSVGAttributes = sig
   include Dom_attributes
   type d = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type pathLength = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type path_length = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
     ?d:d Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?pathLength:pathLength Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?path_length:path_length Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -5907,35 +5623,35 @@ end
 
 module type PatternSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type height = string
   type href = string
   type lang = string
-  type patternContentUnits = [ `userSpaceOnUse | `objectBoundingBox ]
-  type patternTransform = string
-  type patternUnits = [ `userSpaceOnUse | `objectBoundingBox ]
-  type preserveAspectRatio = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
-  type viewBox = string
+  type pattern_content_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type pattern_transform = string
+  type pattern_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type preserve_aspect_ratio = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
+  type view_box = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
-    ?patternContentUnits:patternContentUnits Check.value ->
-    ?patternTransform:patternTransform Check.value ->
-    ?patternUnits:patternUnits Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
-    ?viewBox:viewBox Check.value ->
+    ?pattern_content_units:pattern_content_units Check.value ->
+    ?pattern_transform:pattern_transform Check.value ->
+    ?pattern_units:pattern_units Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
+    ?view_box:view_box Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -5945,21 +5661,21 @@ end
 
 module type PolygonSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
   type points = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
     ?points:points Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -5967,21 +5683,21 @@ end
 
 module type PolylineSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
   type points = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
     ?points:points Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -5990,32 +5706,32 @@ end
 module type ProgressHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -6036,32 +5752,32 @@ module type ProgressHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -6086,33 +5802,33 @@ end
 module type QuoteHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type cite = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -6131,33 +5847,33 @@ module type QuoteHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?cite:cite Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -6181,56 +5897,56 @@ module type RadialGradientSVGAttributes = sig
   include Dom_attributes
   type cx = string
   type cy = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fx = string
   type fy = string
-  type gradientTransform = string
-  type gradientUnits = [ `userSpaceOnUse | `objectBoundingBox ]
+  type gradient_transform = string
+  type gradient_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type href = string
   type lang = string
   type r = string
-  type spreadMethod = [ `pad | `reflect | `repeat ]
+  type spread_method = [ `pad | `reflect | `repeat ]
   type xmlns = string
   type 'r check =
     ?cx:cx Check.value ->
     ?cy:cy Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fx:fx Check.value ->
     ?fy:fy Check.value ->
-    ?gradientTransform:gradientTransform Check.value ->
-    ?gradientUnits:gradientUnits Check.value ->
+    ?gradient_transform:gradient_transform Check.value ->
+    ?gradient_units:gradient_units Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
     ?r:r Check.value ->
-    ?spreadMethod:spreadMethod Check.value ->
+    ?spread_method:spread_method Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type RectSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type height = string
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type required_extensions = string
+  type required_features = string
   type rx = string
   type ry = string
-  type systemLanguage = string
+  type system_language = string
   type transform = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?rx:rx Check.value ->
     ?ry:ry Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
@@ -6242,20 +5958,20 @@ end
 module type ScriptHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type async = bool
   type attributionsrc = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type blocking = [ `render ]
   type charset = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
-  type crossOrigin = string
+  type cross_origin = string
   type crossorigin = string
   type datatype = string
   type defer = bool
@@ -6263,21 +5979,21 @@ module type ScriptHTMLAttributes = sig
   type draggable = bool
   type enterkeyhint = string
   type event = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type fetchpriority = [ `auto | `high | `low ]
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type integrity = string
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -6285,13 +6001,13 @@ module type ScriptHTMLAttributes = sig
   type itemtype = string
   type lang = string
   type language = string
-  type noModule = bool
+  type no_module = bool
   type nomodule = bool
   type part = string
   type popover = string
   type prefix = string
   type property = string
-  type referrerPolicy = string
+  type referrer_policy = string
   type referrerpolicy = string
   type resource = string
   type spellcheck = bool
@@ -6303,20 +6019,20 @@ module type ScriptHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?async:async Check.value ->
     ?attributionsrc:attributionsrc Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?blocking:blocking Check.value ->
     ?charset:charset Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
-    ?crossOrigin:crossOrigin Check.value ->
+    ?cross_origin:cross_origin Check.value ->
     ?crossorigin:crossorigin Check.value ->
     ?datatype:datatype Check.value ->
     ?defer:defer Check.value ->
@@ -6324,21 +6040,21 @@ module type ScriptHTMLAttributes = sig
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
     ?event:event Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?fetchpriority:fetchpriority Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?integrity:integrity Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -6346,13 +6062,13 @@ module type ScriptHTMLAttributes = sig
     ?itemtype:itemtype Check.value ->
     ?lang:lang Check.value ->
     ?language:language Check.value ->
-    ?noModule:noModule Check.value ->
+    ?no_module:no_module Check.value ->
     ?nomodule:nomodule Check.value ->
     ?part:part Check.value ->
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?referrerPolicy:referrerPolicy Check.value ->
+    ?referrer_policy:referrer_policy Check.value ->
     ?referrerpolicy:referrerpolicy Check.value ->
     ?resource:resource Check.value ->
     ?spellcheck:spellcheck Check.value ->
@@ -6368,35 +6084,35 @@ end
 module type SelectHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocomplete = string
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -6420,35 +6136,35 @@ module type SelectHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocomplete:autocomplete Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -6478,45 +6194,39 @@ module type SetSVGAttributes = sig
   type begin_ = string
   type dur = string
   type end_ = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fill = [ `freeze | `remove ]
   type lang = string
   type max = string
   type min = string
-  type onBegin = Dom.event -> unit
-  type onEnd = Dom.event -> unit
-  type onRepeat = Dom.event -> unit
-  type onbegin = Dom.event -> unit
-  type onend = Dom.event -> unit
-  type onrepeat = Dom.event -> unit
-  type repeatCount = string
-  type repeatDur = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type on_begin = Dom.event -> unit
+  type on_end = Dom.event -> unit
+  type on_repeat = Dom.event -> unit
+  type repeat_count = string
+  type repeat_dur = string
+  type required_extensions = string
+  type required_features = string
   type restart = [ `always | `whenNotActive | `never ]
-  type systemLanguage = string
+  type system_language = string
   type xmlns = string
   type 'r check =
     ?begin_:begin_ Check.value ->
     ?dur:dur Check.value ->
     ?end_:end_ Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fill:fill Check.value ->
     ?lang:lang Check.value ->
     ?max:max Check.value ->
     ?min:min Check.value ->
-    ?onBegin:onBegin ->
-    ?onEnd:onEnd ->
-    ?onRepeat:onRepeat ->
-    ?onbegin:onbegin ->
-    ?onend:onend ->
-    ?onrepeat:onrepeat ->
-    ?repeatCount:repeatCount Check.value ->
-    ?repeatDur:repeatDur Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?on_begin:on_begin ->
+    ?on_end:on_end ->
+    ?on_repeat:on_repeat ->
+    ?repeat_count:repeat_count Check.value ->
+    ?repeat_dur:repeat_dur Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?restart:restart Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -6524,33 +6234,33 @@ end
 module type SourceHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -6575,33 +6285,33 @@ module type SourceHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -6642,33 +6352,33 @@ end
 module type StyleHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type blocking = [ `render ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -6690,33 +6400,33 @@ module type StyleHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?blocking:blocking Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -6742,7 +6452,7 @@ end
 module type SvgSVGAttributes = sig
   include Dom_attributes
   type alignment_baseline = string
-  type baseProfile = string
+  type base_profile = string
   type baseline_shift = string
   type clip = string
   type clip_path = string
@@ -6752,14 +6462,14 @@ module type SvgSVGAttributes = sig
   type color_interpolation_filters = string
   type color_profile = string
   type color_rendering = string
-  type contentScriptType = string
-  type contentStyleType = string
+  type content_script_type = string
+  type content_style_type = string
   type cursor = string
   type direction = string
   type display = string
   type dominant_baseline = string
   type enable_background = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fill = string
   type fill_opacity = string
   type fill_rule = string
@@ -6785,53 +6495,33 @@ module type SvgSVGAttributes = sig
   type marker_mid = string
   type marker_start = string
   type mask = string
-  type onAfterPrint = Dom.event -> unit
-  type onBeforePrint = Dom.event -> unit
-  type onBeforeUnload = Dom.beforeUnloadEvent -> unit
-  type onGamepadConnected = Dom.event -> unit
-  type onGamepadDisconnected = Dom.event -> unit
-  type onHashchange = Dom.event -> unit
-  type onLanguageChange = Dom.event -> unit
-  type onMessage = Dom.messageEvent -> unit
-  type onMessageError = Dom.messageEvent -> unit
-  type onOffline = Dom.event -> unit
-  type onOnline = Dom.event -> unit
-  type onPageHide = Dom.pageTransitionEvent -> unit
-  type onPageReveal = Dom.event -> unit
-  type onPageShow = Dom.pageTransitionEvent -> unit
-  type onPageSwap = Dom.event -> unit
-  type onPopstate = Dom.popStateEvent -> unit
-  type onRejectionHandled = Dom.event -> unit
-  type onStorage = Dom.storageEvent -> unit
-  type onUnhandledRejection = Dom.event -> unit
-  type onUnload = Dom.event -> unit
-  type onafterprint = Dom.event -> unit
-  type onbeforeprint = Dom.event -> unit
-  type onbeforeunload = Dom.beforeUnloadEvent -> unit
-  type ongamepadconnected = Dom.event -> unit
-  type ongamepaddisconnected = Dom.event -> unit
-  type onhashchange = Dom.event -> unit
-  type onlanguagechange = Dom.event -> unit
-  type onmessage = Dom.messageEvent -> unit
-  type onmessageerror = Dom.messageEvent -> unit
-  type onoffline = Dom.event -> unit
-  type ononline = Dom.event -> unit
-  type onpagehide = Dom.pageTransitionEvent -> unit
-  type onpagereveal = Dom.event -> unit
-  type onpageshow = Dom.pageTransitionEvent -> unit
-  type onpageswap = Dom.event -> unit
-  type onpopstate = Dom.popStateEvent -> unit
-  type onrejectionhandled = Dom.event -> unit
-  type onstorage = Dom.storageEvent -> unit
-  type onunhandledrejection = Dom.event -> unit
-  type onunload = Dom.event -> unit
+  type on_after_print = Dom.event -> unit
+  type on_before_print = Dom.event -> unit
+  type on_before_unload = Dom.beforeUnloadEvent -> unit
+  type on_gamepad_connected = Dom.event -> unit
+  type on_gamepad_disconnected = Dom.event -> unit
+  type on_hashchange = Dom.event -> unit
+  type on_language_change = Dom.event -> unit
+  type on_message = Dom.messageEvent -> unit
+  type on_message_error = Dom.messageEvent -> unit
+  type on_offline = Dom.event -> unit
+  type on_online = Dom.event -> unit
+  type on_page_hide = Dom.pageTransitionEvent -> unit
+  type on_page_reveal = Dom.event -> unit
+  type on_page_show = Dom.pageTransitionEvent -> unit
+  type on_page_swap = Dom.event -> unit
+  type on_popstate = Dom.popStateEvent -> unit
+  type on_rejection_handled = Dom.event -> unit
+  type on_storage = Dom.storageEvent -> unit
+  type on_unhandled_rejection = Dom.event -> unit
+  type on_unload = Dom.event -> unit
   type opacity = string
   type overflow = string
-  type pathLength = string
+  type path_length = string
   type pointer_events = string
-  type preserveAspectRatio = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type preserve_aspect_ratio = string
+  type required_extensions = string
+  type required_features = string
   type shape_rendering = string
   type stop_color = string
   type stop_opacity = string
@@ -6843,13 +6533,13 @@ module type SvgSVGAttributes = sig
   type stroke_miterlimit = string
   type stroke_opacity = string
   type stroke_width = string
-  type systemLanguage = string
+  type system_language = string
   type text_anchor = string
   type text_decoration = string
   type text_rendering = string
   type unicode_bidi = string
   type version = string
-  type viewBox = string
+  type view_box = string
   type visibility = string
   type width = string
   type word_spacing = string
@@ -6857,10 +6547,10 @@ module type SvgSVGAttributes = sig
   type x = string
   type xmlns = string
   type y = string
-  type zoomAndPan = [ `disable | `magnify ]
+  type zoom_and_pan = [ `disable | `magnify ]
   type 'r check =
     ?alignment_baseline:alignment_baseline Check.value ->
-    ?baseProfile:baseProfile Check.value ->
+    ?base_profile:base_profile Check.value ->
     ?baseline_shift:baseline_shift Check.value ->
     ?clip:clip Check.value ->
     ?clip_path:clip_path Check.value ->
@@ -6870,14 +6560,14 @@ module type SvgSVGAttributes = sig
     ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?color_profile:color_profile Check.value ->
     ?color_rendering:color_rendering Check.value ->
-    ?contentScriptType:contentScriptType Check.value ->
-    ?contentStyleType:contentStyleType Check.value ->
+    ?content_script_type:content_script_type Check.value ->
+    ?content_style_type:content_style_type Check.value ->
     ?cursor:cursor Check.value ->
     ?direction:direction Check.value ->
     ?display:display Check.value ->
     ?dominant_baseline:dominant_baseline Check.value ->
     ?enable_background:enable_background Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fill:fill Check.value ->
     ?fill_opacity:fill_opacity Check.value ->
     ?fill_rule:fill_rule Check.value ->
@@ -6903,53 +6593,33 @@ module type SvgSVGAttributes = sig
     ?marker_mid:marker_mid Check.value ->
     ?marker_start:marker_start Check.value ->
     ?mask:mask Check.value ->
-    ?onAfterPrint:onAfterPrint ->
-    ?onBeforePrint:onBeforePrint ->
-    ?onBeforeUnload:onBeforeUnload ->
-    ?onGamepadConnected:onGamepadConnected ->
-    ?onGamepadDisconnected:onGamepadDisconnected ->
-    ?onHashchange:onHashchange ->
-    ?onLanguageChange:onLanguageChange ->
-    ?onMessage:onMessage ->
-    ?onMessageError:onMessageError ->
-    ?onOffline:onOffline ->
-    ?onOnline:onOnline ->
-    ?onPageHide:onPageHide ->
-    ?onPageReveal:onPageReveal ->
-    ?onPageShow:onPageShow ->
-    ?onPageSwap:onPageSwap ->
-    ?onPopstate:onPopstate ->
-    ?onRejectionHandled:onRejectionHandled ->
-    ?onStorage:onStorage ->
-    ?onUnhandledRejection:onUnhandledRejection ->
-    ?onUnload:onUnload ->
-    ?onafterprint:onafterprint ->
-    ?onbeforeprint:onbeforeprint ->
-    ?onbeforeunload:onbeforeunload ->
-    ?ongamepadconnected:ongamepadconnected ->
-    ?ongamepaddisconnected:ongamepaddisconnected ->
-    ?onhashchange:onhashchange ->
-    ?onlanguagechange:onlanguagechange ->
-    ?onmessage:onmessage ->
-    ?onmessageerror:onmessageerror ->
-    ?onoffline:onoffline ->
-    ?ononline:ononline ->
-    ?onpagehide:onpagehide ->
-    ?onpagereveal:onpagereveal ->
-    ?onpageshow:onpageshow ->
-    ?onpageswap:onpageswap ->
-    ?onpopstate:onpopstate ->
-    ?onrejectionhandled:onrejectionhandled ->
-    ?onstorage:onstorage ->
-    ?onunhandledrejection:onunhandledrejection ->
-    ?onunload:onunload ->
+    ?on_after_print:on_after_print ->
+    ?on_before_print:on_before_print ->
+    ?on_before_unload:on_before_unload ->
+    ?on_gamepad_connected:on_gamepad_connected ->
+    ?on_gamepad_disconnected:on_gamepad_disconnected ->
+    ?on_hashchange:on_hashchange ->
+    ?on_language_change:on_language_change ->
+    ?on_message:on_message ->
+    ?on_message_error:on_message_error ->
+    ?on_offline:on_offline ->
+    ?on_online:on_online ->
+    ?on_page_hide:on_page_hide ->
+    ?on_page_reveal:on_page_reveal ->
+    ?on_page_show:on_page_show ->
+    ?on_page_swap:on_page_swap ->
+    ?on_popstate:on_popstate ->
+    ?on_rejection_handled:on_rejection_handled ->
+    ?on_storage:on_storage ->
+    ?on_unhandled_rejection:on_unhandled_rejection ->
+    ?on_unload:on_unload ->
     ?opacity:opacity Check.value ->
     ?overflow:overflow Check.value ->
-    ?pathLength:pathLength Check.value ->
+    ?path_length:path_length Check.value ->
     ?pointer_events:pointer_events Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?shape_rendering:shape_rendering Check.value ->
     ?stop_color:stop_color Check.value ->
     ?stop_opacity:stop_opacity Check.value ->
@@ -6961,13 +6631,13 @@ module type SvgSVGAttributes = sig
     ?stroke_miterlimit:stroke_miterlimit Check.value ->
     ?stroke_opacity:stroke_opacity Check.value ->
     ?stroke_width:stroke_width Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?text_anchor:text_anchor Check.value ->
     ?text_decoration:text_decoration Check.value ->
     ?text_rendering:text_rendering Check.value ->
     ?unicode_bidi:unicode_bidi Check.value ->
     ?version:version Check.value ->
-    ?viewBox:viewBox Check.value ->
+    ?view_box:view_box Check.value ->
     ?visibility:visibility Check.value ->
     ?width:width Check.value ->
     ?word_spacing:word_spacing Check.value ->
@@ -6975,25 +6645,25 @@ module type SvgSVGAttributes = sig
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
-    ?zoomAndPan:zoomAndPan Check.value ->
+    ?zoom_and_pan:zoom_and_pan Check.value ->
     'r dom_check
 end
 
 module type SwitchSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type requiredExtensions = string
-  type requiredFeatures = string
-  type systemLanguage = string
+  type required_extensions = string
+  type required_features = string
+  type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
+    ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
@@ -7001,25 +6671,25 @@ end
 
 module type SymbolSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type height = string
   type lang = string
-  type preserveAspectRatio = string
-  type refX = string
-  type refY = string
-  type viewBox = string
+  type preserve_aspect_ratio = string
+  type ref_x = string
+  type ref_y = string
+  type view_box = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
-    ?refX:refX Check.value ->
-    ?refY:refY Check.value ->
-    ?viewBox:viewBox Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
+    ?ref_x:ref_x Check.value ->
+    ?ref_y:ref_y Check.value ->
+    ?view_box:view_box Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -7031,28 +6701,28 @@ module type TSpanSVGAttributes = sig
   include Dom_attributes
   type dx = string
   type dy = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type lengthAdjust = [ `spacing | `spacingAndGlyphs ]
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type length_adjust = [ `spacing | `spacingAndGlyphs ]
+  type required_extensions = string
+  type required_features = string
   type rotate = string
-  type systemLanguage = string
-  type textLength = string
+  type system_language = string
+  type text_length = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
     ?dx:dx Check.value ->
     ?dy:dy Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?lengthAdjust:lengthAdjust Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?length_adjust:length_adjust Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?rotate:rotate Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
-    ?textLength:textLength Check.value ->
+    ?system_language:system_language Check.value ->
+    ?text_length:text_length Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
@@ -7063,41 +6733,41 @@ module type TdHTMLAttributes = sig
   include Dom_attributes
   type abbr = string
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `center | `right | `justify | `char ]
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type axis = string
   type bgcolor = string
   type char = string
   type charoff = string
-  type colSpan = string
+  type col_span = string
   type colspan = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type headers = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -7110,7 +6780,7 @@ module type TdHTMLAttributes = sig
   type prefix = string
   type property = string
   type resource = string
-  type rowSpan = string
+  type row_span = string
   type rowspan = string
   type scope = [ `row | `rowgroup | `col | `colgroup ]
   type spellcheck = bool
@@ -7123,41 +6793,41 @@ module type TdHTMLAttributes = sig
   type 'r check =
     ?abbr:abbr Check.value ->
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?axis:axis Check.value ->
     ?bgcolor:bgcolor Check.value ->
     ?char:char Check.value ->
     ?charoff:charoff Check.value ->
-    ?colSpan:colSpan Check.value ->
+    ?col_span:col_span Check.value ->
     ?colspan:colspan Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?headers:headers Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -7170,7 +6840,7 @@ module type TdHTMLAttributes = sig
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
     ?resource:resource Check.value ->
-    ?rowSpan:rowSpan Check.value ->
+    ?row_span:row_span Check.value ->
     ?rowspan:rowspan Check.value ->
     ?scope:scope Check.value ->
     ?spellcheck:spellcheck Check.value ->
@@ -7186,32 +6856,32 @@ end
 module type TemplateHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -7235,32 +6905,32 @@ module type TemplateHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -7287,26 +6957,26 @@ end
 
 module type TextPathSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type href = string
   type lang = string
   type method_ = [ `align | `stretch ]
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type required_extensions = string
+  type required_features = string
   type spacing = [ `auto | `exact ]
-  type startOffset = string
-  type systemLanguage = string
+  type start_offset = string
+  type system_language = string
   type xmlns = string
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
     ?method_:method_ Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?spacing:spacing Check.value ->
-    ?startOffset:startOffset Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?start_offset:start_offset Check.value ->
+    ?system_language:system_language Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -7315,14 +6985,14 @@ module type TextSVGAttributes = sig
   include Dom_attributes
   type dx = string
   type dy = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type lengthAdjust = [ `spacing | `spacingAndGlyphs ]
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type length_adjust = [ `spacing | `spacingAndGlyphs ]
+  type required_extensions = string
+  type required_features = string
   type rotate = string
-  type systemLanguage = string
-  type textLength = string
+  type system_language = string
+  type text_length = string
   type transform = string
   type x = string
   type xmlns = string
@@ -7330,14 +7000,14 @@ module type TextSVGAttributes = sig
   type 'r check =
     ?dx:dx Check.value ->
     ?dy:dy Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?lengthAdjust:lengthAdjust Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?length_adjust:length_adjust Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?rotate:rotate Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
-    ?textLength:textLength Check.value ->
+    ?system_language:system_language Check.value ->
+    ?text_length:text_length Check.value ->
     ?transform:transform Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -7348,16 +7018,16 @@ end
 module type TextareaHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocomplete = string
   type autocorrect = [ `off | `on ]
   type cols = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
@@ -7365,29 +7035,29 @@ module type TextareaHTMLAttributes = sig
   type disabled = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type form = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
   type itemscope = bool
   type itemtype = string
   type lang = string
-  type maxLength = string
+  type max_length = string
   type maxlength = string
-  type minLength = string
+  type min_length = string
   type minlength = string
   type name = string
   type part = string
@@ -7395,7 +7065,7 @@ module type TextareaHTMLAttributes = sig
   type popover = string
   type prefix = string
   type property = string
-  type readOnly = bool
+  type read_only = bool
   type readonly = bool
   type required = bool
   type resource = string
@@ -7409,16 +7079,16 @@ module type TextareaHTMLAttributes = sig
   type wrap = [ `off | `hard | `soft ]
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocomplete:autocomplete Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?cols:cols Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
@@ -7426,29 +7096,29 @@ module type TextareaHTMLAttributes = sig
     ?disabled:disabled Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?form:form Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
     ?itemscope:itemscope Check.value ->
     ?itemtype:itemtype Check.value ->
     ?lang:lang Check.value ->
-    ?maxLength:maxLength Check.value ->
+    ?max_length:max_length Check.value ->
     ?maxlength:maxlength Check.value ->
-    ?minLength:minLength Check.value ->
+    ?min_length:min_length Check.value ->
     ?minlength:minlength Check.value ->
     ?name:name Check.value ->
     ?part:part Check.value ->
@@ -7456,7 +7126,7 @@ module type TextareaHTMLAttributes = sig
     ?popover:popover Check.value ->
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
-    ?readOnly:readOnly Check.value ->
+    ?read_only:read_only Check.value ->
     ?readonly:readonly Check.value ->
     ?required:required Check.value ->
     ?resource:resource Check.value ->
@@ -7475,41 +7145,41 @@ module type ThHTMLAttributes = sig
   include Dom_attributes
   type abbr = string
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type align = [ `left | `center | `right | `justify | `char ]
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type axis = string
   type bgcolor = string
   type char = string
   type charoff = string
-  type colSpan = string
+  type col_span = string
   type colspan = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type headers = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -7522,7 +7192,7 @@ module type ThHTMLAttributes = sig
   type prefix = string
   type property = string
   type resource = string
-  type rowSpan = string
+  type row_span = string
   type rowspan = string
   type scope = [ `row | `rowgroup | `col | `colgroup ]
   type spellcheck = bool
@@ -7535,41 +7205,41 @@ module type ThHTMLAttributes = sig
   type 'r check =
     ?abbr:abbr Check.value ->
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?align:align Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?axis:axis Check.value ->
     ?bgcolor:bgcolor Check.value ->
     ?char:char Check.value ->
     ?charoff:charoff Check.value ->
-    ?colSpan:colSpan Check.value ->
+    ?col_span:col_span Check.value ->
     ?colspan:colspan Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?headers:headers Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -7582,7 +7252,7 @@ module type ThHTMLAttributes = sig
     ?prefix:prefix Check.value ->
     ?property:property Check.value ->
     ?resource:resource Check.value ->
-    ?rowSpan:rowSpan Check.value ->
+    ?row_span:row_span Check.value ->
     ?rowspan:rowspan Check.value ->
     ?scope:scope Check.value ->
     ?spellcheck:spellcheck Check.value ->
@@ -7598,34 +7268,34 @@ end
 module type TimeHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
-  type dateTime = string
+  type date_time = string
   type datetime = string
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -7644,34 +7314,34 @@ module type TimeHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
-    ?dateTime:dateTime Check.value ->
+    ?date_time:date_time Check.value ->
     ?datetime:datetime Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -7694,33 +7364,33 @@ end
 module type TrackHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type default = bool
   type dir = [ `ltr | `rtl | `auto ]
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -7729,7 +7399,7 @@ module type TrackHTMLAttributes = sig
   type kind = string
   type label = string
   type lang = string
-  type mediaGroup = string
+  type media_group = string
   type mediagroup = string
   type part = string
   type popover = string
@@ -7745,33 +7415,33 @@ module type TrackHTMLAttributes = sig
   type vocab = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?default:default Check.value ->
     ?dir:dir Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -7780,7 +7450,7 @@ module type TrackHTMLAttributes = sig
     ?kind:kind Check.value ->
     ?label:label Check.value ->
     ?lang:lang Check.value ->
-    ?mediaGroup:mediaGroup Check.value ->
+    ?media_group:media_group Check.value ->
     ?mediagroup:mediagroup Check.value ->
     ?part:part Check.value ->
     ?popover:popover Check.value ->
@@ -7814,7 +7484,7 @@ module type UseSVGAttributes = sig
   type display = string
   type dominant_baseline = string
   type enable_background = string
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type fill = string
   type fill_opacity = string
   type fill_rule = string
@@ -7843,10 +7513,10 @@ module type UseSVGAttributes = sig
   type mask = string
   type opacity = string
   type overflow = string
-  type pathLength = string
+  type path_length = string
   type pointer_events = string
-  type requiredExtensions = string
-  type requiredFeatures = string
+  type required_extensions = string
+  type required_features = string
   type shape_rendering = string
   type stop_color = string
   type stop_opacity = string
@@ -7858,7 +7528,7 @@ module type UseSVGAttributes = sig
   type stroke_miterlimit = string
   type stroke_opacity = string
   type stroke_width = string
-  type systemLanguage = string
+  type system_language = string
   type text_anchor = string
   type text_decoration = string
   type text_rendering = string
@@ -7887,7 +7557,7 @@ module type UseSVGAttributes = sig
     ?display:display Check.value ->
     ?dominant_baseline:dominant_baseline Check.value ->
     ?enable_background:enable_background Check.value ->
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?fill:fill Check.value ->
     ?fill_opacity:fill_opacity Check.value ->
     ?fill_rule:fill_rule Check.value ->
@@ -7916,10 +7586,10 @@ module type UseSVGAttributes = sig
     ?mask:mask Check.value ->
     ?opacity:opacity Check.value ->
     ?overflow:overflow Check.value ->
-    ?pathLength:pathLength Check.value ->
+    ?path_length:path_length Check.value ->
     ?pointer_events:pointer_events Check.value ->
-    ?requiredExtensions:requiredExtensions Check.value ->
-    ?requiredFeatures:requiredFeatures Check.value ->
+    ?required_extensions:required_extensions Check.value ->
+    ?required_features:required_features Check.value ->
     ?shape_rendering:shape_rendering Check.value ->
     ?stop_color:stop_color Check.value ->
     ?stop_opacity:stop_opacity Check.value ->
@@ -7931,7 +7601,7 @@ module type UseSVGAttributes = sig
     ?stroke_miterlimit:stroke_miterlimit Check.value ->
     ?stroke_opacity:stroke_opacity Check.value ->
     ?stroke_width:stroke_width Check.value ->
-    ?systemLanguage:systemLanguage Check.value ->
+    ?system_language:system_language Check.value ->
     ?text_anchor:text_anchor Check.value ->
     ?text_decoration:text_decoration Check.value ->
     ?text_rendering:text_rendering Check.value ->
@@ -7950,19 +7620,19 @@ end
 module type VideoHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type autoplay = bool
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type controls = bool
   type controlslist = string
-  type crossOrigin = string
+  type cross_origin = string
   type crossorigin = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
@@ -7970,20 +7640,20 @@ module type VideoHTMLAttributes = sig
   type disableremoteplayback = bool
   type draggable = bool
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type height = string
   type hidden = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -7991,17 +7661,13 @@ module type VideoHTMLAttributes = sig
   type itemtype = string
   type lang = string
   type loop = bool
-  type mediaGroup = string
+  type media_group = string
   type mediagroup = string
   type muted = bool
-  type onEncrypted = Dom.event -> unit
-  type onEnterPictureInPicture = Dom.event -> unit
-  type onLeavePictureInPicture = Dom.event -> unit
-  type onWaitingForKey = Dom.event -> unit
-  type onencrypted = Dom.event -> unit
-  type onenterpictureinpicture = Dom.event -> unit
-  type onleavepictureinpicture = Dom.event -> unit
-  type onwaitingforkey = Dom.event -> unit
+  type on_encrypted = Dom.event -> unit
+  type on_enter_picture_in_picture = Dom.event -> unit
+  type on_leave_picture_in_picture = Dom.event -> unit
+  type on_waiting_for_key = Dom.event -> unit
   type part = string
   type playsinline = bool
   type popover = string
@@ -8019,19 +7685,19 @@ module type VideoHTMLAttributes = sig
   type width = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?autoplay:autoplay Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?controls:controls Check.value ->
     ?controlslist:controlslist Check.value ->
-    ?crossOrigin:crossOrigin Check.value ->
+    ?cross_origin:cross_origin Check.value ->
     ?crossorigin:crossorigin Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
@@ -8039,20 +7705,20 @@ module type VideoHTMLAttributes = sig
     ?disableremoteplayback:disableremoteplayback Check.value ->
     ?draggable:draggable Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?height:height Check.value ->
     ?hidden:hidden Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->
@@ -8060,17 +7726,13 @@ module type VideoHTMLAttributes = sig
     ?itemtype:itemtype Check.value ->
     ?lang:lang Check.value ->
     ?loop:loop Check.value ->
-    ?mediaGroup:mediaGroup Check.value ->
+    ?media_group:media_group Check.value ->
     ?mediagroup:mediagroup Check.value ->
     ?muted:muted Check.value ->
-    ?onEncrypted:onEncrypted ->
-    ?onEnterPictureInPicture:onEnterPictureInPicture ->
-    ?onLeavePictureInPicture:onLeavePictureInPicture ->
-    ?onWaitingForKey:onWaitingForKey ->
-    ?onencrypted:onencrypted ->
-    ?onenterpictureinpicture:onenterpictureinpicture ->
-    ?onleavepictureinpicture:onleavepictureinpicture ->
-    ?onwaitingforkey:onwaitingforkey ->
+    ?on_encrypted:on_encrypted ->
+    ?on_enter_picture_in_picture:on_enter_picture_in_picture ->
+    ?on_leave_picture_in_picture:on_leave_picture_in_picture ->
+    ?on_waiting_for_key:on_waiting_for_key ->
     ?part:part Check.value ->
     ?playsinline:playsinline Check.value ->
     ?popover:popover Check.value ->
@@ -8091,39 +7753,39 @@ end
 
 module type ViewSVGAttributes = sig
   include Dom_attributes
-  type externalResourcesRequired = bool
+  type external_resources_required = bool
   type lang = string
-  type preserveAspectRatio = string
-  type viewBox = string
-  type viewTarget = string
+  type preserve_aspect_ratio = string
+  type view_box = string
+  type view_target = string
   type xmlns = string
-  type zoomAndPan = [ `disable | `magnify ]
+  type zoom_and_pan = [ `disable | `magnify ]
   type 'r check =
-    ?externalResourcesRequired:externalResourcesRequired Check.value ->
+    ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
-    ?preserveAspectRatio:preserveAspectRatio Check.value ->
-    ?viewBox:viewBox Check.value ->
-    ?viewTarget:viewTarget Check.value ->
+    ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
+    ?view_box:view_box Check.value ->
+    ?view_target:view_target Check.value ->
     ?xmlns:xmlns Check.value ->
-    ?zoomAndPan:zoomAndPan Check.value ->
+    ?zoom_and_pan:zoom_and_pan Check.value ->
     'r dom_check
 end
 
 module type WebViewHTMLAttributes = sig
   include Dom_attributes
   type about = string
-  type accessKey = string
+  type access_key = string
   type accesskey = string
   type allowfullscreen = bool
   type allowpopups = bool
-  type autoCapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
+  type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocapitalize = [ `none | `off | `on | `sentences | `words | `characters ]
   type autocorrect = [ `off | `on ]
   type autosize = bool
   type blinkfeatures = string
-  type contentEditable = string
+  type content_editable = string
   type contenteditable = string
-  type contextMenu = string
+  type context_menu = string
   type contextmenu = string
   type datatype = string
   type dir = [ `ltr | `rtl | `auto ]
@@ -8133,21 +7795,21 @@ module type WebViewHTMLAttributes = sig
   type draggable = bool
   type enableblinkfeatures = string
   type enterkeyhint = string
-  type exportParts = string
+  type export_parts = string
   type exportparts = string
   type guestinstance = string
   type hidden = string
   type httpreferrer = string
   type inert = bool
-  type innerText = string
-  type inputMode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
+  type inner_text = string
+  type input_mode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type inputmode = [ `none | `text | `search | `decimal | `email | `numeric | `tel | `url ]
   type is = string
-  type itemId = string
-  type itemProp = string
-  type itemRef = string
-  type itemScope = bool
-  type itemType = string
+  type item_id = string
+  type item_prop = string
+  type item_ref = string
+  type item_scope = bool
+  type item_type = string
   type itemid = string
   type itemprop = string
   type itemref = string
@@ -8174,18 +7836,18 @@ module type WebViewHTMLAttributes = sig
   type webpreferences = string
   type 'r check =
     ?about:about Check.value ->
-    ?accessKey:accessKey Check.value ->
+    ?access_key:access_key Check.value ->
     ?accesskey:accesskey Check.value ->
     ?allowfullscreen:allowfullscreen Check.value ->
     ?allowpopups:allowpopups Check.value ->
-    ?autoCapitalize:autoCapitalize Check.value ->
+    ?auto_capitalize:auto_capitalize Check.value ->
     ?autocapitalize:autocapitalize Check.value ->
     ?autocorrect:autocorrect Check.value ->
     ?autosize:autosize Check.value ->
     ?blinkfeatures:blinkfeatures Check.value ->
-    ?contentEditable:contentEditable Check.value ->
+    ?content_editable:content_editable Check.value ->
     ?contenteditable:contenteditable Check.value ->
-    ?contextMenu:contextMenu Check.value ->
+    ?context_menu:context_menu Check.value ->
     ?contextmenu:contextmenu Check.value ->
     ?datatype:datatype Check.value ->
     ?dir:dir Check.value ->
@@ -8195,21 +7857,21 @@ module type WebViewHTMLAttributes = sig
     ?draggable:draggable Check.value ->
     ?enableblinkfeatures:enableblinkfeatures Check.value ->
     ?enterkeyhint:enterkeyhint Check.value ->
-    ?exportParts:exportParts Check.value ->
+    ?export_parts:export_parts Check.value ->
     ?exportparts:exportparts Check.value ->
     ?guestinstance:guestinstance Check.value ->
     ?hidden:hidden Check.value ->
     ?httpreferrer:httpreferrer Check.value ->
     ?inert:inert Check.value ->
-    ?innerText:innerText Check.value ->
-    ?inputMode:inputMode Check.value ->
+    ?inner_text:inner_text Check.value ->
+    ?input_mode:input_mode Check.value ->
     ?inputmode:inputmode Check.value ->
     ?is:is Check.value ->
-    ?itemId:itemId Check.value ->
-    ?itemProp:itemProp Check.value ->
-    ?itemRef:itemRef Check.value ->
-    ?itemScope:itemScope Check.value ->
-    ?itemType:itemType Check.value ->
+    ?item_id:item_id Check.value ->
+    ?item_prop:item_prop Check.value ->
+    ?item_ref:item_ref Check.value ->
+    ?item_scope:item_scope Check.value ->
+    ?item_type:item_type Check.value ->
     ?itemid:itemid Check.value ->
     ?itemprop:itemprop Check.value ->
     ?itemref:itemref Check.value ->

@@ -1,6 +1,7 @@
 # Publishes a release to Hypha's opam repository: uploads the source
-# archive to the GitHub release once, and pushes the opam files that name
-# it on a release/ branch, which that repository's CI checks and lands.
+# archive and the packed Vite plugin to the GitHub release once, and pushes
+# the opam files that name the archive on a release/ branch, which that
+# repository's CI checks and lands.
 # Run by hand with a tag to publish a release again; nothing published
 # changes.
 name: release
@@ -39,6 +40,17 @@ jobs:
             git archive --format=tar --prefix="$repo-$TAG/" "$TAG" \
               | gzip -n -9 > "$RUNNER_TEMP/dist/$archive"
             gh release upload "$TAG" "$RUNNER_TEMP/dist/$archive"
+          fi
+      # The Vite plugin, compiled, is an asset of the same release, which an
+      # application names by its URL; one already uploaded is never replaced.
+      - uses: oven-sh/setup-bun@v2
+      - name: Upload the Vite plugin
+        run: |
+          plugin=vite-plugin-solidtype-$TAG.tgz
+          if ! gh release download "$TAG" -p "$plugin" -D "$RUNNER_TEMP/plugin"; then
+            bun install --frozen-lockfile
+            bun vite-plugin/pack.ts "$TAG" "$RUNNER_TEMP/plugin"
+            gh release upload "$TAG" "$RUNNER_TEMP/plugin/$plugin"
           fi
       - name: Write the opam files
         run: |

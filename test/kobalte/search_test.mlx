@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Search = K.Search
 module Node = K.Types.CollectionNode
 module Item_props = K.Types.ComboboxBaseItemComponentProps
@@ -26,17 +26,17 @@ let island () =
   <div>
     <Search.Root
       options=(fun () -> S.get options)
-      onInputChange=(fun query -> S.set set_options (matching query))
-      onChange=(fun fruit ->
-                 S.set set_chosen
-                   (Option.value (Js.Nullable.toOption fruit) ~default:""))
-      itemComponent=(fun props ->
-                      <Search.Item item=(fun () -> Item_props.item props)>
-                        <Search.ItemLabel>
-                          (fun () ->
-                            Jsx.string (Node.raw_value (Item_props.item props)))
-                        </Search.ItemLabel>
-                      </Search.Item>)>
+      on_input_change=(fun query -> S.set set_options (matching query))
+      on_change=(fun fruit ->
+                  S.set set_chosen
+                    (Option.value (Js.Nullable.toOption fruit) ~default:""))
+      item_component=(fun props ->
+                       <Search.Item item=(fun () -> Item_props.item props)>
+                         <Search.ItemLabel>
+                           (fun () ->
+                             Jsx.string (Node.raw_value (Item_props.item props)))
+                         </Search.ItemLabel>
+                       </Search.Item>)>
       <Search.Label>"Fruit"</Search.Label>
       <Search.Control>
         <Search.Indicator>"Find"</Search.Indicator> <Search.Input />

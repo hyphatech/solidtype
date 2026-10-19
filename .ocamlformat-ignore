@@ -1,2 +1,4 @@
 src/html.mli
-src/kobalte.ml
+kobalte/solidtype_kobalte.ml
+ppx/html_names.ml
+ppx/kobalte_names.ml

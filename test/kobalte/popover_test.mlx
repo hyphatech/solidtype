@@ -1,5 +1,5 @@
 module H = Harness
-module Popover = Solidtype.Kobalte.Popover
+module Popover = Solidtype_kobalte.Popover
 
 let island () =
   <Popover.Root>

@@ -1,5 +1,5 @@
 module H = Harness
-module Breadcrumbs = Solidtype.Kobalte.Breadcrumbs
+module Breadcrumbs = Solidtype_kobalte.Breadcrumbs
 
 let island () =
   <Breadcrumbs.Root>

@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Field = K.ColorChannelField
 
 (* The red channel, a plain number: Kobalte writes a channel's formatted
@@ -7,7 +7,7 @@ module Field = K.ColorChannelField
    refuses for the hue's degrees and a percentage. *)
 let island () =
   <Field.Root
-    channel=`red defaultValue=(fun () -> K.Colors.parse_color "rgb(0, 0, 0)")>
+    channel=`red default_value=(fun () -> K.Colors.parse_color "rgb(0, 0, 0)")>
     <Field.Label>"Red"</Field.Label>
     <Field.Input />
     <Field.IncrementTrigger aria_label="More" />

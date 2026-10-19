@@ -29,9 +29,16 @@
   holds, and a case left out is the compiler's warning.
 - Each element's attributes are typed, generated from Solid's JSX types:
   an attribute the element does not take does not compile, and a closed
-  set of values is a polymorphic variant, ``type_=`button``. A label's
-  underscore is a hyphen, `aria_label`; `on_`, `attr_`, `prop_`, `bool_`
-  and `data_` name Solid's namespaces and data attributes.
+  set of values is a polymorphic variant, ``type_=`button``, and a
+  handler takes its event's type, `on_click` a `Dom.mouseEvent`.
+- Every name a user writes is snake case, made by one rule from Solid's
+  or Kobalte's: a capital is an underscore and the lower case, a hyphen
+  an underscore, and a keyword takes a trailing underscore -- `on_click`,
+  `read_only`, `aria_label`, `default_value`, `class_list`. One of
+  Solid's namespaces wraps the value: `on_click=(Jsx.native f)` is
+  `on:click`, and `Jsx.capture`, `Jsx.prop`, `Jsx.attr` and `Jsx.bool`
+  name the others; `Jsx.listen` and `Jsx.named` give a name the rule
+  cannot keep.
 - `let%component` also writes `Props.make`, a component's props as a
   value, and `Props.omit`, which names the props it leaves out by a
   variant.
@@ -39,8 +46,11 @@
   component part by part, its check its own options, then its children,
   then its element's attributes; its `use…Context` hooks, `toaster`,
   colors, i18n and color mode; and the types they name, under
-  `Kobalte.Types`. A Select, Combobox or ToggleGroup of many values is
-  `Root_multiple`.
+  `Types`. It is a package of its own, `solidtype-kobalte`, its module
+  `Solidtype_kobalte`. A Select, Combobox or ToggleGroup of many values
+  is `Root_multiple`.
+- `vite-plugin-solidtype` is compiled to JavaScript and attached to each
+  GitHub release, released with the opam packages at one version.
 - A component's props are checked: a prop left out, a prop the
   component does not take, and props that disagree on a type do not
   compile. `let%component make ~(text : string) ?(count : int = 0) ()`

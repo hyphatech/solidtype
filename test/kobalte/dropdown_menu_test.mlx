@@ -1,5 +1,5 @@
 module H = Harness
-module DropdownMenu = Solidtype.Kobalte.DropdownMenu
+module DropdownMenu = Solidtype_kobalte.DropdownMenu
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 
@@ -10,10 +10,10 @@ let island () =
       <DropdownMenu.Trigger>"Edit"</DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content>
-          <DropdownMenu.Item onSelect=(fun () -> S.set choose "Cut")>
+          <DropdownMenu.Item on_select=(fun () -> S.set choose "Cut")>
             "Cut"
           </DropdownMenu.Item>
-          <DropdownMenu.Item onSelect=(fun () -> S.set choose "Copy")>
+          <DropdownMenu.Item on_select=(fun () -> S.set choose "Copy")>
             "Copy"
           </DropdownMenu.Item>
           <DropdownMenu.Item disabled=true>"Paste"</DropdownMenu.Item>

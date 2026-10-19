@@ -1,7 +1,7 @@
 (library
  (name example)
  (modes melange)
- (libraries solidtype melange.dom)
+ (libraries solidtype solidtype-kobalte melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

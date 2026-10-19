@@ -1,6 +1,6 @@
 module H = Harness
-module ColorMode = Solidtype.Kobalte.ColorMode
-module Context = Solidtype.Kobalte.Types.ColorModeContextType
+module ColorMode = Solidtype_kobalte.ColorMode
+module Context = Solidtype_kobalte.Types.ColorModeContextType
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 module E = Jest.Expect
@@ -25,10 +25,10 @@ module Shows_mode = struct
       <p>
         (fun () -> Jsx.string (mode_name (S.get (Context.color_mode mode))))
       </p>
-      <button onClick=(fun _ -> Context.toggle_color_mode mode ())>
+      <button on_click=(fun _ -> Context.toggle_color_mode mode ())>
         "Toggle"
       </button>
-      <button onClick=(fun _ -> Context.set_color_mode mode `dark)>
+      <button on_click=(fun _ -> Context.set_color_mode mode `dark)>
         "Dark"
       </button>
     </div>
@@ -36,8 +36,8 @@ end
 
 let island () =
   <ColorMode.ColorModeProvider
-    initialColorMode=`dark
-    storageManager=(fun () -> ColorMode.create_local_storage_manager key)>
+    initial_color_mode=`dark
+    storage_manager=(fun () -> ColorMode.create_local_storage_manager key)>
     <Shows_mode />
   </ColorMode.ColorModeProvider>
 

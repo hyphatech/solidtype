@@ -1,8 +1,8 @@
 module H = Harness
-module Tooltip = Solidtype.Kobalte.Tooltip
+module Tooltip = Solidtype_kobalte.Tooltip
 
 let island () =
-  <Tooltip.Root openDelay=0. closeDelay=0. ignoreSafeArea=true>
+  <Tooltip.Root open_delay=0. close_delay=0. ignore_safe_area=true>
     <Tooltip.Trigger>"Save"</Tooltip.Trigger>
     <Tooltip.Portal>
       <Tooltip.Content><Tooltip.Arrow /> "Save the draft"</Tooltip.Content>

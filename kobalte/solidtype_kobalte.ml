@@ -362,10 +362,10 @@ module Types = struct
 
   module AccordionContextValue = struct
     type t = t_accordion_context_value
-    external list_state : t -> t_list_state Solid.accessor = "listState" [@@mel.get]
+    external list_state : t -> t_list_state Solidtype.Solid.accessor = "listState" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
-    external make : list_state:(t_list_state Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
+    external make : list_state:(t_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module AlertDialog_Portal_Ref = struct
@@ -400,27 +400,27 @@ module Types = struct
 
   module BreadcrumbsContextValue = struct
     type t = t_breadcrumbs_context_value
-    external separator_js : t -> ((unit -> Jsx.element) [@u]) = "separator" [@@mel.get]
+    external separator_js : t -> ((unit -> Solidtype.Jsx.element) [@u]) = "separator" [@@mel.get]
     let separator o () = (separator_js o) () [@u]
-    external make : separator:((unit -> Jsx.element) [@mel.as "separator"]) -> unit -> t = "" [@@mel.obj]
+    external make : separator:((unit -> Solidtype.Jsx.element) [@mel.as "separator"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module CheckboxRootState = struct
     type t = t_checkbox_root_state
     (** Whether the checkbox is checked or not. *)
-    external checked : t -> bool Solid.accessor = "checked" [@@mel.get]
+    external checked : t -> bool Solidtype.Solid.accessor = "checked" [@@mel.get]
     (** Whether the checkbox is in an indeterminate state. *)
-    external indeterminate : t -> bool Solid.accessor = "indeterminate" [@@mel.get]
-    external make : checked:(bool Solid.accessor [@mel.as "checked"]) -> indeterminate:(bool Solid.accessor [@mel.as "indeterminate"]) -> unit -> t = "" [@@mel.obj]
+    external indeterminate : t -> bool Solidtype.Solid.accessor = "indeterminate" [@@mel.get]
+    external make : checked:(bool Solidtype.Solid.accessor [@mel.as "checked"]) -> indeterminate:(bool Solidtype.Solid.accessor [@mel.as "indeterminate"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module CheckboxContextValue = struct
     type t = t_checkbox_context_value
-    external value : t -> string Solid.accessor = "value" [@@mel.get]
-    external dataset : t -> t_checkbox_data_set Solid.accessor = "dataset" [@@mel.get]
-    external checked : t -> bool Solid.accessor = "checked" [@@mel.get]
-    external indeterminate : t -> bool Solid.accessor = "indeterminate" [@@mel.get]
-    external input_ref : t -> Dom.htmlInputElement option Solid.accessor = "inputRef" [@@mel.get]
+    external value : t -> string Solidtype.Solid.accessor = "value" [@@mel.get]
+    external dataset : t -> t_checkbox_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external checked : t -> bool Solidtype.Solid.accessor = "checked" [@@mel.get]
+    external indeterminate : t -> bool Solidtype.Solid.accessor = "indeterminate" [@@mel.get]
+    external input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "inputRef" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external toggle_js : t -> ((unit -> unit) [@u]) = "toggle" [@@mel.get]
@@ -431,23 +431,23 @@ module Types = struct
     let set_is_focused o x0 = (set_is_focused_js o) x0 [@u]
     external set_input_ref_js : t -> ((Dom.htmlInputElement -> unit) [@u]) = "setInputRef" [@@mel.get]
     let set_input_ref o x0 = (set_input_ref_js o) x0 [@u]
-    external make : value:(string Solid.accessor [@mel.as "value"]) -> dataset:(t_checkbox_data_set Solid.accessor [@mel.as "dataset"]) -> checked:(bool Solid.accessor [@mel.as "checked"]) -> indeterminate:(bool Solid.accessor [@mel.as "indeterminate"]) -> input_ref:(Dom.htmlInputElement option Solid.accessor [@mel.as "inputRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> set_is_checked:((bool -> unit) [@mel.as "setIsChecked"]) -> set_is_focused:((bool -> unit) [@mel.as "setIsFocused"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> unit -> t = "" [@@mel.obj]
+    external make : value:(string Solidtype.Solid.accessor [@mel.as "value"]) -> dataset:(t_checkbox_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> checked:(bool Solidtype.Solid.accessor [@mel.as "checked"]) -> indeterminate:(bool Solidtype.Solid.accessor [@mel.as "indeterminate"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> set_is_checked:((bool -> unit) [@mel.as "setIsChecked"]) -> set_is_focused:((bool -> unit) [@mel.as "setIsFocused"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module CollapsibleContextValue = struct
     type t = t_collapsible_context_value
-    external dataset : t -> t_collapsible_data_set Solid.accessor = "dataset" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external disabled : t -> bool Solid.accessor = "disabled" [@@mel.get]
-    external should_mount : t -> bool Solid.accessor = "shouldMount" [@@mel.get]
-    external content_id : t -> string option Solid.accessor = "contentId" [@@mel.get]
+    external dataset : t -> t_collapsible_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external disabled : t -> bool Solidtype.Solid.accessor = "disabled" [@@mel.get]
+    external should_mount : t -> bool Solidtype.Solid.accessor = "shouldMount" [@@mel.get]
+    external content_id : t -> string option Solidtype.Solid.accessor = "contentId" [@@mel.get]
     external toggle_js : t -> ((unit -> unit) [@u]) = "toggle" [@@mel.get]
     let toggle o () = (toggle_js o) () [@u]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external register_content_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerContentId" [@@mel.get]
     let register_content_id o x0 = let r = (register_content_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : dataset:(t_collapsible_data_set Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> disabled:(bool Solid.accessor [@mel.as "disabled"]) -> should_mount:(bool Solid.accessor [@mel.as "shouldMount"]) -> content_id:(string option Solid.accessor [@mel.as "contentId"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_collapsible_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> disabled:(bool Solidtype.Solid.accessor [@mel.as "disabled"]) -> should_mount:(bool Solidtype.Solid.accessor [@mel.as "shouldMount"]) -> content_id:(string option Solidtype.Solid.accessor [@mel.as "contentId"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ColorArea_Root_Translations = struct
@@ -480,25 +480,25 @@ module Types = struct
   module ColorAreaContextValue = struct
     type t = t_color_area_context_value
     external state : t -> t_color_area_state = "state" [@@mel.get]
-    external x_name : t -> string option Solid.accessor = "xName" [@@mel.get]
-    external y_name : t -> string option Solid.accessor = "yName" [@@mel.get]
+    external x_name : t -> string option Solidtype.Solid.accessor = "xName" [@@mel.get]
+    external y_name : t -> string option Solidtype.Solid.accessor = "yName" [@@mel.get]
     external on_drag_start : t -> ((float array -> unit) option) = "onDragStart" [@@mel.get]
     external on_drag : t -> ((t_color_area_context_value_on_drag -> unit) option) = "onDrag" [@@mel.get]
     external on_drag_end : t -> ((unit -> unit) option) = "onDragEnd" [@@mel.get]
-    external translations : t -> t_color_area_root_translations Solid.accessor = "translations" [@@mel.get]
+    external translations : t -> t_color_area_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
     external get_display_color_js : t -> ((unit -> t_color) [@u]) = "getDisplayColor" [@@mel.get]
     let get_display_color o () = (get_display_color_js o) () [@u]
     external on_step_key_down_js : t -> ((Dom.keyboardEvent -> unit) [@u]) = "onStepKeyDown" [@@mel.get]
     let on_step_key_down o x0 = (on_step_key_down_js o) x0 [@u]
-    external thumb_ref : t -> Dom.htmlElement option Solid.accessor = "thumbRef" [@@mel.get]
+    external thumb_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "thumbRef" [@@mel.get]
     external set_thumb_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setThumbRef" [@@mel.get]
     let set_thumb_ref o x0 = (set_thumb_ref_js o) x0 [@u]
-    external background_ref : t -> Dom.htmlElement option Solid.accessor = "backgroundRef" [@@mel.get]
+    external background_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "backgroundRef" [@@mel.get]
     external set_background_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setBackgroundRef" [@@mel.get]
     let set_background_ref o x0 = (set_background_ref_js o) x0 [@u]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
-    external make : state:(t_color_area_state [@mel.as "state"]) -> x_name:(string option Solid.accessor [@mel.as "xName"]) -> y_name:(string option Solid.accessor [@mel.as "yName"]) -> on_drag_start:(((float array -> unit) option) [@mel.as "onDragStart"]) -> on_drag:(((t_color_area_context_value_on_drag -> unit) option) [@mel.as "onDrag"]) -> on_drag_end:(((unit -> unit) option) [@mel.as "onDragEnd"]) -> translations:(t_color_area_root_translations Solid.accessor [@mel.as "translations"]) -> get_display_color:((unit -> t_color) [@mel.as "getDisplayColor"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> background_ref:(Dom.htmlElement option Solid.accessor [@mel.as "backgroundRef"]) -> set_background_ref:((Dom.htmlElement -> unit) [@mel.as "setBackgroundRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
+    external make : state:(t_color_area_state [@mel.as "state"]) -> x_name:(string option Solidtype.Solid.accessor [@mel.as "xName"]) -> y_name:(string option Solidtype.Solid.accessor [@mel.as "yName"]) -> on_drag_start:(((float array -> unit) option) [@mel.as "onDragStart"]) -> on_drag:(((t_color_area_context_value_on_drag -> unit) option) [@mel.as "onDrag"]) -> on_drag_end:(((unit -> unit) option) [@mel.as "onDragEnd"]) -> translations:(t_color_area_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> get_display_color:((unit -> t_color) [@mel.as "getDisplayColor"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> background_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "backgroundRef"]) -> set_background_ref:((Dom.htmlElement -> unit) [@mel.as "setBackgroundRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ColorChannelField_Root_Translations = struct
@@ -516,20 +516,20 @@ module Types = struct
   module Context = struct
     type 't t = 't t_context
     external id : 't t -> t_context_id = "id" [@@mel.get]
-    external provider_js : 't t -> (((t_context_provider, Jsx.element) t_flow_props -> Jsx.element) [@u]) = "Provider" [@@mel.get]
+    external provider_js : 't t -> (((t_context_provider, Solidtype.Jsx.element) t_flow_props -> Solidtype.Jsx.element) [@u]) = "Provider" [@@mel.get]
     let provider o x0 = (provider_js o) x0 [@u]
     external default_value : 't t -> 't = "defaultValue" [@@mel.get]
-    external make : id:(t_context_id [@mel.as "id"]) -> provider:(((t_context_provider, Jsx.element) t_flow_props -> Jsx.element) [@mel.as "Provider"]) -> default_value:('t [@mel.as "defaultValue"]) -> unit -> 't t = "" [@@mel.obj]
+    external make : id:(t_context_id [@mel.as "id"]) -> provider:(((t_context_provider, Solidtype.Jsx.element) t_flow_props -> Solidtype.Jsx.element) [@mel.as "Provider"]) -> default_value:('t [@mel.as "defaultValue"]) -> unit -> 't t = "" [@@mel.obj]
   end
 
   module ColorModeContextType = struct
     type t = t_color_mode_context_type
-    external color_mode : t -> [ `light | `dark ] Solid.accessor = "colorMode" [@@mel.get]
+    external color_mode : t -> [ `light | `dark ] Solidtype.Solid.accessor = "colorMode" [@@mel.get]
     external set_color_mode_js : t -> (([ `light | `dark | `system ] -> unit) [@u]) = "setColorMode" [@@mel.get]
     let set_color_mode o x0 = (set_color_mode_js o) x0 [@u]
     external toggle_color_mode_js : t -> ((unit -> unit) [@u]) = "toggleColorMode" [@@mel.get]
     let toggle_color_mode o () = (toggle_color_mode_js o) () [@u]
-    external make : color_mode:([ `light | `dark ] Solid.accessor [@mel.as "colorMode"]) -> set_color_mode:(([ `light | `dark | `system ] -> unit) [@mel.as "setColorMode"]) -> toggle_color_mode:((unit -> unit) [@mel.as "toggleColorMode"]) -> unit -> t = "" [@@mel.obj]
+    external make : color_mode:([ `light | `dark ] Solidtype.Solid.accessor [@mel.as "colorMode"]) -> set_color_mode:(([ `light | `dark | `system ] -> unit) [@mel.as "setColorMode"]) -> toggle_color_mode:((unit -> unit) [@mel.as "toggleColorMode"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ColorModeStorageManager = struct
@@ -581,12 +581,12 @@ module Types = struct
 
   module ColorSliderContextValue = struct
     type t = t_color_slider_context_value
-    external value : t -> t_color Solid.accessor = "value" [@@mel.get]
-    external channel : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solid.accessor = "channel" [@@mel.get]
+    external value : t -> t_color Solidtype.Solid.accessor = "value" [@@mel.get]
+    external channel : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Solid.accessor = "channel" [@@mel.get]
     external get_display_color_js : t -> ((unit -> t_color) [@u]) = "getDisplayColor" [@@mel.get]
     let get_display_color o () = (get_display_color_js o) () [@u]
-    external translations : t -> t_color_slider_root_translations Solid.accessor = "translations" [@@mel.get]
-    external make : value:(t_color Solid.accessor [@mel.as "value"]) -> channel:([ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solid.accessor [@mel.as "channel"]) -> get_display_color:((unit -> t_color) [@mel.as "getDisplayColor"]) -> translations:(t_color_slider_root_translations Solid.accessor [@mel.as "translations"]) -> unit -> t = "" [@@mel.obj]
+    external translations : t -> t_color_slider_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
+    external make : value:(t_color Solidtype.Solid.accessor [@mel.as "value"]) -> channel:([ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Solid.accessor [@mel.as "channel"]) -> get_display_color:((unit -> t_color) [@mel.as "getDisplayColor"]) -> translations:(t_color_slider_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ColorSwatch_Root_Translations = struct
@@ -599,8 +599,8 @@ module Types = struct
   module ColorWheelContextValue = struct
     type t = t_color_wheel_context_value
     external state : t -> t_color_wheel_state = "state" [@@mel.get]
-    external outer_radius : t -> float option Solid.accessor = "outerRadius" [@@mel.get]
-    external thickness : t -> float Solid.accessor = "thickness" [@@mel.get]
+    external outer_radius : t -> float option Solidtype.Solid.accessor = "outerRadius" [@@mel.get]
+    external thickness : t -> float Solidtype.Solid.accessor = "thickness" [@@mel.get]
     external on_drag_start : t -> ((float array -> unit) option) = "onDragStart" [@@mel.get]
     external on_drag : t -> ((t_color_wheel_context_value_on_drag -> unit) option) = "onDrag" [@@mel.get]
     external on_drag_end : t -> ((unit -> unit) option) = "onDragEnd" [@@mel.get]
@@ -610,28 +610,28 @@ module Types = struct
     let get_value_label o x0 = (get_value_label_js o) x0 [@u]
     external on_step_key_down_js : t -> ((Dom.keyboardEvent -> unit) [@u]) = "onStepKeyDown" [@@mel.get]
     let on_step_key_down o x0 = (on_step_key_down_js o) x0 [@u]
-    external thumb_ref : t -> Dom.htmlElement option Solid.accessor = "thumbRef" [@@mel.get]
+    external thumb_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "thumbRef" [@@mel.get]
     external set_thumb_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setThumbRef" [@@mel.get]
     let set_thumb_ref o x0 = (set_thumb_ref_js o) x0 [@u]
-    external track_ref : t -> Dom.htmlElement option Solid.accessor = "trackRef" [@@mel.get]
+    external track_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "trackRef" [@@mel.get]
     external set_track_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setTrackRef" [@@mel.get]
     let set_track_ref o x0 = (set_track_ref_js o) x0 [@u]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
-    external make : state:(t_color_wheel_state [@mel.as "state"]) -> outer_radius:(float option Solid.accessor [@mel.as "outerRadius"]) -> thickness:(float Solid.accessor [@mel.as "thickness"]) -> on_drag_start:(((float array -> unit) option) [@mel.as "onDragStart"]) -> on_drag:(((t_color_wheel_context_value_on_drag -> unit) option) [@mel.as "onDrag"]) -> on_drag_end:(((unit -> unit) option) [@mel.as "onDragEnd"]) -> get_thumb_value_label:((unit -> string) [@mel.as "getThumbValueLabel"]) -> get_value_label:((t_color -> string) [@mel.as "getValueLabel"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> track_ref:(Dom.htmlElement option Solid.accessor [@mel.as "trackRef"]) -> set_track_ref:((Dom.htmlElement -> unit) [@mel.as "setTrackRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
+    external make : state:(t_color_wheel_state [@mel.as "state"]) -> outer_radius:(float option Solidtype.Solid.accessor [@mel.as "outerRadius"]) -> thickness:(float Solidtype.Solid.accessor [@mel.as "thickness"]) -> on_drag_start:(((float array -> unit) option) [@mel.as "onDragStart"]) -> on_drag:(((t_color_wheel_context_value_on_drag -> unit) option) [@mel.as "onDrag"]) -> on_drag_end:(((unit -> unit) option) [@mel.as "onDragEnd"]) -> get_thumb_value_label:((unit -> string) [@mel.as "getThumbValueLabel"]) -> get_value_label:((t_color -> string) [@mel.as "getValueLabel"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> track_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "trackRef"]) -> set_track_ref:((Dom.htmlElement -> unit) [@mel.as "setTrackRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ComboboxControlState = struct
     type 'option t = 'option t_combobox_control_state
     (** The selected options. *)
-    external selected_options : 'option t -> 'option array Solid.accessor = "selectedOptions" [@@mel.get]
+    external selected_options : 'option t -> 'option array Solidtype.Solid.accessor = "selectedOptions" [@@mel.get]
     (** A function to remove an option from the selection. *)
     external remove_js : 'option t -> (('option -> unit) [@u]) = "remove" [@@mel.get]
     let remove o x0 = (remove_js o) x0 [@u]
     (** A function to clear the selection. *)
     external clear_js : 'option t -> ((unit -> unit) [@u]) = "clear" [@@mel.get]
     let clear o () = (clear_js o) () [@u]
-    external make : selected_options:('option array Solid.accessor [@mel.as "selectedOptions"]) -> remove:(('option -> unit) [@mel.as "remove"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> 'option t = "" [@@mel.obj]
+    external make : selected_options:('option array Solidtype.Solid.accessor [@mel.as "selectedOptions"]) -> remove:(('option -> unit) [@mel.as "remove"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> 'option t = "" [@@mel.obj]
   end
 
   module CollectionNode = struct
@@ -749,31 +749,31 @@ module Types = struct
 
   module ComboboxContextValue = struct
     type t = t_combobox_context_value
-    external dataset : t -> t_combobox_data_set Solid.accessor = "dataset" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external is_multiple : t -> bool Solid.accessor = "isMultiple" [@@mel.get]
-    external is_virtualized : t -> bool Solid.accessor = "isVirtualized" [@@mel.get]
-    external is_modal : t -> bool Solid.accessor = "isModal" [@@mel.get]
-    external prevent_scroll : t -> bool Solid.accessor = "preventScroll" [@@mel.get]
-    external is_input_focused : t -> bool Solid.accessor = "isInputFocused" [@@mel.get]
-    external allows_empty_collection : t -> bool Solid.accessor = "allowsEmptyCollection" [@@mel.get]
-    external should_focus_wrap : t -> bool Solid.accessor = "shouldFocusWrap" [@@mel.get]
-    external remove_on_backspace : t -> bool Solid.accessor = "removeOnBackspace" [@@mel.get]
-    external content_present : t -> bool Solid.accessor = "contentPresent" [@@mel.get]
-    external auto_focus : t -> ([ `first | `last ], bool) either Solid.accessor = "autoFocus" [@@mel.get]
-    external active_descendant : t -> string option Solid.accessor = "activeDescendant" [@@mel.get]
-    external input_value : t -> string option Solid.accessor = "inputValue" [@@mel.get]
-    external trigger_mode : t -> [ `focus | `input | `manual ] Solid.accessor = "triggerMode" [@@mel.get]
-    external control_ref : t -> Dom.htmlElement option Solid.accessor = "controlRef" [@@mel.get]
-    external input_ref : t -> Dom.htmlInputElement option Solid.accessor = "inputRef" [@@mel.get]
-    external trigger_ref : t -> Dom.htmlElement option Solid.accessor = "triggerRef" [@@mel.get]
-    external content_ref : t -> Dom.htmlElement option Solid.accessor = "contentRef" [@@mel.get]
-    external listbox_id : t -> string option Solid.accessor = "listboxId" [@@mel.get]
-    external trigger_aria_label : t -> string option Solid.accessor = "triggerAriaLabel" [@@mel.get]
-    external listbox_aria_label : t -> string option Solid.accessor = "listboxAriaLabel" [@@mel.get]
-    external list_state : t -> t_list_state Solid.accessor = "listState" [@@mel.get]
-    external keyboard_delegate : t -> t_keyboard_delegate Solid.accessor = "keyboardDelegate" [@@mel.get]
+    external dataset : t -> t_combobox_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external is_multiple : t -> bool Solidtype.Solid.accessor = "isMultiple" [@@mel.get]
+    external is_virtualized : t -> bool Solidtype.Solid.accessor = "isVirtualized" [@@mel.get]
+    external is_modal : t -> bool Solidtype.Solid.accessor = "isModal" [@@mel.get]
+    external prevent_scroll : t -> bool Solidtype.Solid.accessor = "preventScroll" [@@mel.get]
+    external is_input_focused : t -> bool Solidtype.Solid.accessor = "isInputFocused" [@@mel.get]
+    external allows_empty_collection : t -> bool Solidtype.Solid.accessor = "allowsEmptyCollection" [@@mel.get]
+    external should_focus_wrap : t -> bool Solidtype.Solid.accessor = "shouldFocusWrap" [@@mel.get]
+    external remove_on_backspace : t -> bool Solidtype.Solid.accessor = "removeOnBackspace" [@@mel.get]
+    external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
+    external auto_focus : t -> ([ `first | `last ], bool) either Solidtype.Solid.accessor = "autoFocus" [@@mel.get]
+    external active_descendant : t -> string option Solidtype.Solid.accessor = "activeDescendant" [@@mel.get]
+    external input_value : t -> string option Solidtype.Solid.accessor = "inputValue" [@@mel.get]
+    external trigger_mode : t -> [ `focus | `input | `manual ] Solidtype.Solid.accessor = "triggerMode" [@@mel.get]
+    external control_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "controlRef" [@@mel.get]
+    external input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "inputRef" [@@mel.get]
+    external trigger_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "triggerRef" [@@mel.get]
+    external content_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "contentRef" [@@mel.get]
+    external listbox_id : t -> string option Solidtype.Solid.accessor = "listboxId" [@@mel.get]
+    external trigger_aria_label : t -> string option Solidtype.Solid.accessor = "triggerAriaLabel" [@@mel.get]
+    external listbox_aria_label : t -> string option Solidtype.Solid.accessor = "listboxAriaLabel" [@@mel.get]
+    external list_state : t -> t_list_state Solidtype.Solid.accessor = "listState" [@@mel.get]
+    external keyboard_delegate : t -> t_keyboard_delegate Solidtype.Solid.accessor = "keyboardDelegate" [@@mel.get]
     external reset_input_value_js : t -> ((string Js.Set.t -> unit) [@u]) = "resetInputValue" [@@mel.get]
     let reset_input_value o x0 = (reset_input_value_js o) x0 [@u]
     external set_is_input_focused_js : t -> ((bool -> unit) [@u]) = "setIsInputFocused" [@@mel.get]
@@ -796,46 +796,46 @@ module Types = struct
     let close o () = (close_js o) () [@u]
     external toggle_js : t -> ((([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) [@u]) = "toggle" [@@mel.get]
     let toggle o x0 x1 = (toggle_js o) x0 x1 [@u]
-    external placeholder : t -> Jsx.element Solid.accessor = "placeholder" [@@mel.get]
-    external render_item_js : t -> ((_ t_collection_node -> Jsx.element) [@u]) = "renderItem" [@@mel.get]
+    external placeholder : t -> Solidtype.Jsx.element Solidtype.Solid.accessor = "placeholder" [@@mel.get]
+    external render_item_js : t -> ((_ t_collection_node -> Solidtype.Jsx.element) [@u]) = "renderItem" [@@mel.get]
     let render_item o x0 = (render_item_js o) x0 [@u]
-    external render_section_js : t -> ((_ t_collection_node -> Jsx.element) [@u]) = "renderSection" [@@mel.get]
+    external render_section_js : t -> ((_ t_collection_node -> Solidtype.Jsx.element) [@u]) = "renderSection" [@@mel.get]
     let render_section o x0 = (render_section_js o) x0 [@u]
     external on_input_key_down : t -> ((t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either) = "onInputKeyDown" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external register_listbox_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerListboxId" [@@mel.get]
     let register_listbox_id o x0 = let r = (register_listbox_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : dataset:(t_combobox_data_set Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> is_multiple:(bool Solid.accessor [@mel.as "isMultiple"]) -> is_virtualized:(bool Solid.accessor [@mel.as "isVirtualized"]) -> is_modal:(bool Solid.accessor [@mel.as "isModal"]) -> prevent_scroll:(bool Solid.accessor [@mel.as "preventScroll"]) -> is_input_focused:(bool Solid.accessor [@mel.as "isInputFocused"]) -> allows_empty_collection:(bool Solid.accessor [@mel.as "allowsEmptyCollection"]) -> should_focus_wrap:(bool Solid.accessor [@mel.as "shouldFocusWrap"]) -> remove_on_backspace:(bool Solid.accessor [@mel.as "removeOnBackspace"]) -> content_present:(bool Solid.accessor [@mel.as "contentPresent"]) -> auto_focus:(([ `first | `last ], bool) either Solid.accessor [@mel.as "autoFocus"]) -> active_descendant:(string option Solid.accessor [@mel.as "activeDescendant"]) -> input_value:(string option Solid.accessor [@mel.as "inputValue"]) -> trigger_mode:([ `focus | `input | `manual ] Solid.accessor [@mel.as "triggerMode"]) -> control_ref:(Dom.htmlElement option Solid.accessor [@mel.as "controlRef"]) -> input_ref:(Dom.htmlInputElement option Solid.accessor [@mel.as "inputRef"]) -> trigger_ref:(Dom.htmlElement option Solid.accessor [@mel.as "triggerRef"]) -> content_ref:(Dom.htmlElement option Solid.accessor [@mel.as "contentRef"]) -> listbox_id:(string option Solid.accessor [@mel.as "listboxId"]) -> trigger_aria_label:(string option Solid.accessor [@mel.as "triggerAriaLabel"]) -> listbox_aria_label:(string option Solid.accessor [@mel.as "listboxAriaLabel"]) -> list_state:(t_list_state Solid.accessor [@mel.as "listState"]) -> keyboard_delegate:(t_keyboard_delegate Solid.accessor [@mel.as "keyboardDelegate"]) -> reset_input_value:((string Js.Set.t -> unit) [@mel.as "resetInputValue"]) -> set_is_input_focused:((bool -> unit) [@mel.as "setIsInputFocused"]) -> set_input_value:((string -> unit) [@mel.as "setInputValue"]) -> set_control_ref:((Dom.htmlElement -> unit) [@mel.as "setControlRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> set_listbox_ref:((Dom.htmlElement -> unit) [@mel.as "setListboxRef"]) -> open_:((([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) [@mel.as "open"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) [@mel.as "toggle"]) -> placeholder:(Jsx.element Solid.accessor [@mel.as "placeholder"]) -> render_item:((_ t_collection_node -> Jsx.element) [@mel.as "renderItem"]) -> render_section:((_ t_collection_node -> Jsx.element) [@mel.as "renderSection"]) -> on_input_key_down:(((t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either) [@mel.as "onInputKeyDown"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_listbox_id:((string -> (unit -> unit)) [@mel.as "registerListboxId"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_combobox_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> is_multiple:(bool Solidtype.Solid.accessor [@mel.as "isMultiple"]) -> is_virtualized:(bool Solidtype.Solid.accessor [@mel.as "isVirtualized"]) -> is_modal:(bool Solidtype.Solid.accessor [@mel.as "isModal"]) -> prevent_scroll:(bool Solidtype.Solid.accessor [@mel.as "preventScroll"]) -> is_input_focused:(bool Solidtype.Solid.accessor [@mel.as "isInputFocused"]) -> allows_empty_collection:(bool Solidtype.Solid.accessor [@mel.as "allowsEmptyCollection"]) -> should_focus_wrap:(bool Solidtype.Solid.accessor [@mel.as "shouldFocusWrap"]) -> remove_on_backspace:(bool Solidtype.Solid.accessor [@mel.as "removeOnBackspace"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> auto_focus:(([ `first | `last ], bool) either Solidtype.Solid.accessor [@mel.as "autoFocus"]) -> active_descendant:(string option Solidtype.Solid.accessor [@mel.as "activeDescendant"]) -> input_value:(string option Solidtype.Solid.accessor [@mel.as "inputValue"]) -> trigger_mode:([ `focus | `input | `manual ] Solidtype.Solid.accessor [@mel.as "triggerMode"]) -> control_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "controlRef"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> trigger_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "triggerRef"]) -> content_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "contentRef"]) -> listbox_id:(string option Solidtype.Solid.accessor [@mel.as "listboxId"]) -> trigger_aria_label:(string option Solidtype.Solid.accessor [@mel.as "triggerAriaLabel"]) -> listbox_aria_label:(string option Solidtype.Solid.accessor [@mel.as "listboxAriaLabel"]) -> list_state:(t_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> keyboard_delegate:(t_keyboard_delegate Solidtype.Solid.accessor [@mel.as "keyboardDelegate"]) -> reset_input_value:((string Js.Set.t -> unit) [@mel.as "resetInputValue"]) -> set_is_input_focused:((bool -> unit) [@mel.as "setIsInputFocused"]) -> set_input_value:((string -> unit) [@mel.as "setInputValue"]) -> set_control_ref:((Dom.htmlElement -> unit) [@mel.as "setControlRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> set_listbox_ref:((Dom.htmlElement -> unit) [@mel.as "setListboxRef"]) -> open_:((([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) [@mel.as "open"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) [@mel.as "toggle"]) -> placeholder:(Solidtype.Jsx.element Solidtype.Solid.accessor [@mel.as "placeholder"]) -> render_item:((_ t_collection_node -> Solidtype.Jsx.element) [@mel.as "renderItem"]) -> render_section:((_ t_collection_node -> Solidtype.Jsx.element) [@mel.as "renderSection"]) -> on_input_key_down:(((t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either) [@mel.as "onInputKeyDown"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_listbox_id:((string -> (unit -> unit)) [@mel.as "registerListboxId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ContextMenuContextValue = struct
     type t = t_context_menu_context_value
-    external set_anchor_rect : t -> t_context_menu_context_value_set_anchor_rect Solid.setter = "setAnchorRect" [@@mel.get]
-    external make : set_anchor_rect:(t_context_menu_context_value_set_anchor_rect Solid.setter [@mel.as "setAnchorRect"]) -> unit -> t = "" [@@mel.obj]
+    external set_anchor_rect : t -> t_context_menu_context_value_set_anchor_rect Solidtype.Solid.setter = "setAnchorRect" [@@mel.get]
+    external make : set_anchor_rect:(t_context_menu_context_value_set_anchor_rect Solidtype.Solid.setter [@mel.as "setAnchorRect"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module DialogContextValue = struct
     type t = t_dialog_context_value
-    external translations : t -> t_alert_dialog_root_translations Solid.accessor = "translations" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external modal : t -> bool Solid.accessor = "modal" [@@mel.get]
-    external prevent_scroll : t -> bool Solid.accessor = "preventScroll" [@@mel.get]
-    external content_id : t -> string option Solid.accessor = "contentId" [@@mel.get]
-    external title_id : t -> string option Solid.accessor = "titleId" [@@mel.get]
-    external description_id : t -> string option Solid.accessor = "descriptionId" [@@mel.get]
-    external trigger_ref : t -> Dom.htmlElement option Solid.accessor = "triggerRef" [@@mel.get]
-    external overlay_ref : t -> Dom.htmlElement option Solid.accessor = "overlayRef" [@@mel.get]
-    external set_overlay_ref : t -> Dom.htmlElement option Solid.setter = "setOverlayRef" [@@mel.get]
-    external content_ref : t -> Dom.htmlElement option Solid.accessor = "contentRef" [@@mel.get]
-    external set_content_ref : t -> Dom.htmlElement option Solid.setter = "setContentRef" [@@mel.get]
-    external overlay_present : t -> bool Solid.accessor = "overlayPresent" [@@mel.get]
-    external content_present : t -> bool Solid.accessor = "contentPresent" [@@mel.get]
+    external translations : t -> t_alert_dialog_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external modal : t -> bool Solidtype.Solid.accessor = "modal" [@@mel.get]
+    external prevent_scroll : t -> bool Solidtype.Solid.accessor = "preventScroll" [@@mel.get]
+    external content_id : t -> string option Solidtype.Solid.accessor = "contentId" [@@mel.get]
+    external title_id : t -> string option Solidtype.Solid.accessor = "titleId" [@@mel.get]
+    external description_id : t -> string option Solidtype.Solid.accessor = "descriptionId" [@@mel.get]
+    external trigger_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "triggerRef" [@@mel.get]
+    external overlay_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "overlayRef" [@@mel.get]
+    external set_overlay_ref : t -> Dom.htmlElement option Solidtype.Solid.setter = "setOverlayRef" [@@mel.get]
+    external content_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "contentRef" [@@mel.get]
+    external set_content_ref : t -> Dom.htmlElement option Solidtype.Solid.setter = "setContentRef" [@@mel.get]
+    external overlay_present : t -> bool Solidtype.Solid.accessor = "overlayPresent" [@@mel.get]
+    external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
     external close_js : t -> ((unit -> unit) [@u]) = "close" [@@mel.get]
     let close o () = (close_js o) () [@u]
     external toggle_js : t -> ((unit -> unit) [@u]) = "toggle" [@@mel.get]
     let toggle o () = (toggle_js o) () [@u]
-    external set_trigger_ref : t -> Dom.htmlElement option Solid.setter = "setTriggerRef" [@@mel.get]
+    external set_trigger_ref : t -> Dom.htmlElement option Solidtype.Solid.setter = "setTriggerRef" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external register_content_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerContentId" [@@mel.get]
@@ -844,28 +844,28 @@ module Types = struct
     let register_title_id o x0 = let r = (register_title_id_js o) x0 [@u] in fun () -> r () [@u]
     external register_description_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerDescriptionId" [@@mel.get]
     let register_description_id o x0 = let r = (register_description_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : translations:(t_alert_dialog_root_translations Solid.accessor [@mel.as "translations"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> modal:(bool Solid.accessor [@mel.as "modal"]) -> prevent_scroll:(bool Solid.accessor [@mel.as "preventScroll"]) -> content_id:(string option Solid.accessor [@mel.as "contentId"]) -> title_id:(string option Solid.accessor [@mel.as "titleId"]) -> description_id:(string option Solid.accessor [@mel.as "descriptionId"]) -> trigger_ref:(Dom.htmlElement option Solid.accessor [@mel.as "triggerRef"]) -> overlay_ref:(Dom.htmlElement option Solid.accessor [@mel.as "overlayRef"]) -> set_overlay_ref:(Dom.htmlElement option Solid.setter [@mel.as "setOverlayRef"]) -> content_ref:(Dom.htmlElement option Solid.accessor [@mel.as "contentRef"]) -> set_content_ref:(Dom.htmlElement option Solid.setter [@mel.as "setContentRef"]) -> overlay_present:(bool Solid.accessor [@mel.as "overlayPresent"]) -> content_present:(bool Solid.accessor [@mel.as "contentPresent"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> set_trigger_ref:(Dom.htmlElement option Solid.setter [@mel.as "setTriggerRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> register_title_id:((string -> (unit -> unit)) [@mel.as "registerTitleId"]) -> register_description_id:((string -> (unit -> unit)) [@mel.as "registerDescriptionId"]) -> unit -> t = "" [@@mel.obj]
+    external make : translations:(t_alert_dialog_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> modal:(bool Solidtype.Solid.accessor [@mel.as "modal"]) -> prevent_scroll:(bool Solidtype.Solid.accessor [@mel.as "preventScroll"]) -> content_id:(string option Solidtype.Solid.accessor [@mel.as "contentId"]) -> title_id:(string option Solidtype.Solid.accessor [@mel.as "titleId"]) -> description_id:(string option Solidtype.Solid.accessor [@mel.as "descriptionId"]) -> trigger_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "triggerRef"]) -> overlay_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "overlayRef"]) -> set_overlay_ref:(Dom.htmlElement option Solidtype.Solid.setter [@mel.as "setOverlayRef"]) -> content_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "contentRef"]) -> set_content_ref:(Dom.htmlElement option Solidtype.Solid.setter [@mel.as "setContentRef"]) -> overlay_present:(bool Solidtype.Solid.accessor [@mel.as "overlayPresent"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> set_trigger_ref:(Dom.htmlElement option Solidtype.Solid.setter [@mel.as "setTriggerRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> register_title_id:((string -> (unit -> unit)) [@mel.as "registerTitleId"]) -> register_description_id:((string -> (unit -> unit)) [@mel.as "registerDescriptionId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module FileFieldContextValue = struct
     type t = t_file_field_context_value
-    external translations : t -> t_file_field_root_translations Solid.accessor = "translations" [@@mel.get]
-    external input_id : t -> string Solid.accessor = "inputId" [@@mel.get]
-    external file_input_ref : t -> Dom.htmlInputElement option Solid.accessor = "fileInputRef" [@@mel.get]
-    external set_file_input_ref : t -> Dom.htmlInputElement option Solid.setter = "setFileInputRef" [@@mel.get]
-    external dropzone_ref : t -> Dom.htmlElement option Solid.accessor = "dropzoneRef" [@@mel.get]
-    external set_dropzone_ref : t -> Dom.htmlElement option Solid.setter = "setDropzoneRef" [@@mel.get]
-    external disabled : t -> bool option Solid.accessor = "disabled" [@@mel.get]
-    external multiple : t -> bool option Solid.accessor = "multiple" [@@mel.get]
-    external accept : t -> string option Solid.accessor = "accept" [@@mel.get]
-    external allow_drag_and_drop : t -> bool option Solid.accessor = "allowDragAndDrop" [@@mel.get]
+    external translations : t -> t_file_field_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
+    external input_id : t -> string Solidtype.Solid.accessor = "inputId" [@@mel.get]
+    external file_input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "fileInputRef" [@@mel.get]
+    external set_file_input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.setter = "setFileInputRef" [@@mel.get]
+    external dropzone_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "dropzoneRef" [@@mel.get]
+    external set_dropzone_ref : t -> Dom.htmlElement option Solidtype.Solid.setter = "setDropzoneRef" [@@mel.get]
+    external disabled : t -> bool option Solidtype.Solid.accessor = "disabled" [@@mel.get]
+    external multiple : t -> bool option Solidtype.Solid.accessor = "multiple" [@@mel.get]
+    external accept : t -> string option Solidtype.Solid.accessor = "accept" [@@mel.get]
+    external allow_drag_and_drop : t -> bool option Solidtype.Solid.accessor = "allowDragAndDrop" [@@mel.get]
     external process_files_js : t -> ((t_file array -> unit) [@u]) = "processFiles" [@@mel.get]
     let process_files o x0 = (process_files_js o) x0 [@u]
     external accepted_files : t -> t_file array = "acceptedFiles" [@@mel.get]
     external rejected_files : t -> t_file_rejection array = "rejectedFiles" [@@mel.get]
     external remove_file_js : t -> ((t_file -> unit) [@u]) = "removeFile" [@@mel.get]
     let remove_file o x0 = (remove_file_js o) x0 [@u]
-    external make : translations:(t_file_field_root_translations Solid.accessor [@mel.as "translations"]) -> input_id:(string Solid.accessor [@mel.as "inputId"]) -> file_input_ref:(Dom.htmlInputElement option Solid.accessor [@mel.as "fileInputRef"]) -> set_file_input_ref:(Dom.htmlInputElement option Solid.setter [@mel.as "setFileInputRef"]) -> dropzone_ref:(Dom.htmlElement option Solid.accessor [@mel.as "dropzoneRef"]) -> set_dropzone_ref:(Dom.htmlElement option Solid.setter [@mel.as "setDropzoneRef"]) -> disabled:(bool option Solid.accessor [@mel.as "disabled"]) -> multiple:(bool option Solid.accessor [@mel.as "multiple"]) -> accept:(string option Solid.accessor [@mel.as "accept"]) -> allow_drag_and_drop:(bool option Solid.accessor [@mel.as "allowDragAndDrop"]) -> process_files:((t_file array -> unit) [@mel.as "processFiles"]) -> accepted_files:(t_file array [@mel.as "acceptedFiles"]) -> rejected_files:(t_file_rejection array [@mel.as "rejectedFiles"]) -> remove_file:((t_file -> unit) [@mel.as "removeFile"]) -> unit -> t = "" [@@mel.obj]
+    external make : translations:(t_file_field_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> input_id:(string Solidtype.Solid.accessor [@mel.as "inputId"]) -> file_input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "fileInputRef"]) -> set_file_input_ref:(Dom.htmlInputElement option Solidtype.Solid.setter [@mel.as "setFileInputRef"]) -> dropzone_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "dropzoneRef"]) -> set_dropzone_ref:(Dom.htmlElement option Solidtype.Solid.setter [@mel.as "setDropzoneRef"]) -> disabled:(bool option Solidtype.Solid.accessor [@mel.as "disabled"]) -> multiple:(bool option Solidtype.Solid.accessor [@mel.as "multiple"]) -> accept:(string option Solidtype.Solid.accessor [@mel.as "accept"]) -> allow_drag_and_drop:(bool option Solidtype.Solid.accessor [@mel.as "allowDragAndDrop"]) -> process_files:((t_file array -> unit) [@mel.as "processFiles"]) -> accepted_files:(t_file array [@mel.as "acceptedFiles"]) -> rejected_files:(t_file_rejection array [@mel.as "rejectedFiles"]) -> remove_file:((t_file -> unit) [@mel.as "removeFile"]) -> unit -> t = "" [@@mel.obj]
   end
 
   (** The **`File`** interface provides information about files and allows JavaScript in a web page to access their content.
@@ -930,9 +930,9 @@ module Types = struct
 
   module HoverCardContextValue = struct
     type t = t_hover_card_context_value
-    external dataset : t -> t_hover_card_data_set Solid.accessor = "dataset" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external content_present : t -> bool Solid.accessor = "contentPresent" [@@mel.get]
+    external dataset : t -> t_hover_card_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
     external open_with_delay_js : t -> ((unit -> unit) [@u]) = "openWithDelay" [@@mel.get]
     let open_with_delay o () = (open_with_delay_js o) () [@u]
     external close_with_delay_js : t -> ((unit -> unit) [@u]) = "closeWithDelay" [@@mel.get]
@@ -949,7 +949,7 @@ module Types = struct
     let set_trigger_ref o x0 = (set_trigger_ref_js o) x0 [@u]
     external set_content_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setContentRef" [@@mel.get]
     let set_content_ref o x0 = (set_content_ref_js o) x0 [@u]
-    external make : dataset:(t_hover_card_data_set Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> content_present:(bool Solid.accessor [@mel.as "contentPresent"]) -> open_with_delay:((unit -> unit) [@mel.as "openWithDelay"]) -> close_with_delay:((unit -> unit) [@mel.as "closeWithDelay"]) -> cancel_opening:((unit -> unit) [@mel.as "cancelOpening"]) -> cancel_closing:((unit -> unit) [@mel.as "cancelClosing"]) -> close:((unit -> unit) [@mel.as "close"]) -> is_target_on_hover_card:((Dom.node Js.Nullable.t -> bool) [@mel.as "isTargetOnHoverCard"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_hover_card_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> open_with_delay:((unit -> unit) [@mel.as "openWithDelay"]) -> close_with_delay:((unit -> unit) [@mel.as "closeWithDelay"]) -> cancel_opening:((unit -> unit) [@mel.as "cancelOpening"]) -> cancel_closing:((unit -> unit) [@mel.as "cancelClosing"]) -> close:((unit -> unit) [@mel.as "close"]) -> is_target_on_hover_card:((Dom.node Js.Nullable.t -> bool) [@mel.as "isTargetOnHoverCard"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module CollatorOptions = struct
@@ -1067,44 +1067,44 @@ module Types = struct
 
   module ImageContextValue = struct
     type t = t_image_context_value
-    external fallback_delay : t -> float option Solid.accessor = "fallbackDelay" [@@mel.get]
-    external image_loading_status : t -> [ `idle | `loading | `loaded | `error ] Solid.accessor = "imageLoadingStatus" [@@mel.get]
+    external fallback_delay : t -> float option Solidtype.Solid.accessor = "fallbackDelay" [@@mel.get]
+    external image_loading_status : t -> [ `idle | `loading | `loaded | `error ] Solidtype.Solid.accessor = "imageLoadingStatus" [@@mel.get]
     external on_image_loading_status_change_js : t -> (([ `idle | `loading | `loaded | `error ] -> unit) [@u]) = "onImageLoadingStatusChange" [@@mel.get]
     let on_image_loading_status_change o x0 = (on_image_loading_status_change_js o) x0 [@u]
-    external make : fallback_delay:(float option Solid.accessor [@mel.as "fallbackDelay"]) -> image_loading_status:([ `idle | `loading | `loaded | `error ] Solid.accessor [@mel.as "imageLoadingStatus"]) -> on_image_loading_status_change:(([ `idle | `loading | `loaded | `error ] -> unit) [@mel.as "onImageLoadingStatusChange"]) -> unit -> t = "" [@@mel.obj]
+    external make : fallback_delay:(float option Solidtype.Solid.accessor [@mel.as "fallbackDelay"]) -> image_loading_status:([ `idle | `loading | `loaded | `error ] Solidtype.Solid.accessor [@mel.as "imageLoadingStatus"]) -> on_image_loading_status_change:(([ `idle | `loading | `loaded | `error ] -> unit) [@mel.as "onImageLoadingStatusChange"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ListState = struct
     type t = t_list_state
     (** A collection of items in the list. *)
-    external collection : t -> _ t_collection_node t_collection Solid.accessor = "collection" [@@mel.get]
+    external collection : t -> _ t_collection_node t_collection Solidtype.Solid.accessor = "collection" [@@mel.get]
     (** A selection manager to read and update multiple selection state. *)
-    external selection_manager : t -> t_selection_manager Solid.accessor = "selectionManager" [@@mel.get]
-    external make : collection:(_ t_collection_node t_collection Solid.accessor [@mel.as "collection"]) -> selection_manager:(t_selection_manager Solid.accessor [@mel.as "selectionManager"]) -> unit -> t = "" [@@mel.obj]
+    external selection_manager : t -> t_selection_manager Solidtype.Solid.accessor = "selectionManager" [@@mel.get]
+    external make : collection:(_ t_collection_node t_collection Solidtype.Solid.accessor [@mel.as "collection"]) -> selection_manager:(t_selection_manager Solidtype.Solid.accessor [@mel.as "selectionManager"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ListboxContextValue = struct
     type t = t_listbox_context_value
-    external list_state : t -> t_list_state Solid.accessor = "listState" [@@mel.get]
+    external list_state : t -> t_list_state Solidtype.Solid.accessor = "listState" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
-    external should_use_virtual_focus : t -> bool option Solid.accessor = "shouldUseVirtualFocus" [@@mel.get]
-    external should_select_on_press_up : t -> bool option Solid.accessor = "shouldSelectOnPressUp" [@@mel.get]
-    external should_focus_on_hover : t -> bool option Solid.accessor = "shouldFocusOnHover" [@@mel.get]
-    external is_virtualized : t -> bool option Solid.accessor = "isVirtualized" [@@mel.get]
-    external make : list_state:(t_list_state Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> should_use_virtual_focus:(bool option Solid.accessor [@mel.as "shouldUseVirtualFocus"]) -> should_select_on_press_up:(bool option Solid.accessor [@mel.as "shouldSelectOnPressUp"]) -> should_focus_on_hover:(bool option Solid.accessor [@mel.as "shouldFocusOnHover"]) -> is_virtualized:(bool option Solid.accessor [@mel.as "isVirtualized"]) -> unit -> t = "" [@@mel.obj]
+    external should_use_virtual_focus : t -> bool option Solidtype.Solid.accessor = "shouldUseVirtualFocus" [@@mel.get]
+    external should_select_on_press_up : t -> bool option Solidtype.Solid.accessor = "shouldSelectOnPressUp" [@@mel.get]
+    external should_focus_on_hover : t -> bool option Solidtype.Solid.accessor = "shouldFocusOnHover" [@@mel.get]
+    external is_virtualized : t -> bool option Solidtype.Solid.accessor = "isVirtualized" [@@mel.get]
+    external make : list_state:(t_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> should_use_virtual_focus:(bool option Solidtype.Solid.accessor [@mel.as "shouldUseVirtualFocus"]) -> should_select_on_press_up:(bool option Solidtype.Solid.accessor [@mel.as "shouldSelectOnPressUp"]) -> should_focus_on_hover:(bool option Solidtype.Solid.accessor [@mel.as "shouldFocusOnHover"]) -> is_virtualized:(bool option Solidtype.Solid.accessor [@mel.as "isVirtualized"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module MenubarContextValue = struct
     type t = t_menubar_context_value
-    external dataset : t -> t_menubar_data_set Solid.accessor = "dataset" [@@mel.get]
-    external value : t -> string Js.Nullable.t Solid.accessor = "value" [@@mel.get]
+    external dataset : t -> t_menubar_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external value : t -> string Js.Nullable.t Solidtype.Solid.accessor = "value" [@@mel.get]
     external set_value_js : t -> ((((string, string Js.Nullable.t -> string option) either Js.Nullable.t) -> unit) [@u]) = "setValue" [@@mel.get]
     let set_value o x0 = (set_value_js o) x0 [@u]
-    external menus : t -> string Js.Set.t Solid.accessor = "menus" [@@mel.get]
-    external menu_refs : t -> Dom.htmlElement array Solid.accessor = "menuRefs" [@@mel.get]
-    external menu_ref_map : t -> (string, Dom.htmlElement array) Js.Map.t Solid.accessor = "menuRefMap" [@@mel.get]
-    external last_value : t -> string option Solid.accessor = "lastValue" [@@mel.get]
+    external menus : t -> string Js.Set.t Solidtype.Solid.accessor = "menus" [@@mel.get]
+    external menu_refs : t -> Dom.htmlElement array Solidtype.Solid.accessor = "menuRefs" [@@mel.get]
+    external menu_ref_map : t -> (string, Dom.htmlElement array) Js.Map.t Solidtype.Solid.accessor = "menuRefMap" [@@mel.get]
+    external last_value : t -> string option Solidtype.Solid.accessor = "lastValue" [@@mel.get]
     external set_last_value_js : t -> (((((string, string option -> string option) either) option) -> unit) [@u]) = "setLastValue" [@@mel.get]
     let set_last_value o x0 = (set_last_value_js o) x0 [@u]
     external register_menu_js : t -> ((string -> Dom.htmlElement array -> unit) [@u]) = "registerMenu" [@@mel.get]
@@ -1117,12 +1117,12 @@ module Types = struct
     let previous_menu o () = (previous_menu_js o) () [@u]
     external close_menu_js : t -> ((unit -> unit) [@u]) = "closeMenu" [@@mel.get]
     let close_menu o () = (close_menu_js o) () [@u]
-    external set_auto_focus_menu : t -> bool Solid.setter = "setAutoFocusMenu" [@@mel.get]
-    external auto_focus_menu : t -> bool Solid.accessor = "autoFocusMenu" [@@mel.get]
+    external set_auto_focus_menu : t -> bool Solidtype.Solid.setter = "setAutoFocusMenu" [@@mel.get]
+    external auto_focus_menu : t -> bool Solidtype.Solid.accessor = "autoFocusMenu" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
-    external orientation : t -> [ `horizontal | `vertical ] Solid.accessor = "orientation" [@@mel.get]
-    external make : dataset:(t_menubar_data_set Solid.accessor [@mel.as "dataset"]) -> value:(string Js.Nullable.t Solid.accessor [@mel.as "value"]) -> set_value:((((string, string Js.Nullable.t -> string option) either Js.Nullable.t) -> unit) [@mel.as "setValue"]) -> menus:(string Js.Set.t Solid.accessor [@mel.as "menus"]) -> menu_refs:(Dom.htmlElement array Solid.accessor [@mel.as "menuRefs"]) -> menu_ref_map:((string, Dom.htmlElement array) Js.Map.t Solid.accessor [@mel.as "menuRefMap"]) -> last_value:(string option Solid.accessor [@mel.as "lastValue"]) -> set_last_value:(((((string, string option -> string option) either) option) -> unit) [@mel.as "setLastValue"]) -> register_menu:((string -> Dom.htmlElement array -> unit) [@mel.as "registerMenu"]) -> unregister_menu:((string -> unit) [@mel.as "unregisterMenu"]) -> next_menu:((unit -> unit) [@mel.as "nextMenu"]) -> previous_menu:((unit -> unit) [@mel.as "previousMenu"]) -> close_menu:((unit -> unit) [@mel.as "closeMenu"]) -> set_auto_focus_menu:(bool Solid.setter [@mel.as "setAutoFocusMenu"]) -> auto_focus_menu:(bool Solid.accessor [@mel.as "autoFocusMenu"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> orientation:([ `horizontal | `vertical ] Solid.accessor [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
+    external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
+    external make : dataset:(t_menubar_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> value:(string Js.Nullable.t Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:((((string, string Js.Nullable.t -> string option) either Js.Nullable.t) -> unit) [@mel.as "setValue"]) -> menus:(string Js.Set.t Solidtype.Solid.accessor [@mel.as "menus"]) -> menu_refs:(Dom.htmlElement array Solidtype.Solid.accessor [@mel.as "menuRefs"]) -> menu_ref_map:((string, Dom.htmlElement array) Js.Map.t Solidtype.Solid.accessor [@mel.as "menuRefMap"]) -> last_value:(string option Solidtype.Solid.accessor [@mel.as "lastValue"]) -> set_last_value:(((((string, string option -> string option) either) option) -> unit) [@mel.as "setLastValue"]) -> register_menu:((string -> Dom.htmlElement array -> unit) [@mel.as "registerMenu"]) -> unregister_menu:((string -> unit) [@mel.as "unregisterMenu"]) -> next_menu:((unit -> unit) [@mel.as "nextMenu"]) -> previous_menu:((unit -> unit) [@mel.as "previousMenu"]) -> close_menu:((unit -> unit) [@mel.as "closeMenu"]) -> set_auto_focus_menu:(bool Solidtype.Solid.setter [@mel.as "setAutoFocusMenu"]) -> auto_focus_menu:(bool Solidtype.Solid.accessor [@mel.as "autoFocusMenu"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> orientation:([ `horizontal | `vertical ] Solidtype.Solid.accessor [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module GetValueLabelParams = struct
@@ -1135,39 +1135,39 @@ module Types = struct
 
   module MeterContextValue = struct
     type t = t_meter_context_value
-    external dataset : t -> t_meter_data_set Solid.accessor = "dataset" [@@mel.get]
-    external value : t -> float Solid.accessor = "value" [@@mel.get]
-    external value_percent : t -> float Solid.accessor = "valuePercent" [@@mel.get]
-    external value_label : t -> string option Solid.accessor = "valueLabel" [@@mel.get]
-    external meter_fill_width : t -> string option Solid.accessor = "meterFillWidth" [@@mel.get]
-    external label_id : t -> string option Solid.accessor = "labelId" [@@mel.get]
+    external dataset : t -> t_meter_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external value : t -> float Solidtype.Solid.accessor = "value" [@@mel.get]
+    external value_percent : t -> float Solidtype.Solid.accessor = "valuePercent" [@@mel.get]
+    external value_label : t -> string option Solidtype.Solid.accessor = "valueLabel" [@@mel.get]
+    external meter_fill_width : t -> string option Solidtype.Solid.accessor = "meterFillWidth" [@@mel.get]
+    external label_id : t -> string option Solidtype.Solid.accessor = "labelId" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external register_label_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerLabelId" [@@mel.get]
     let register_label_id o x0 = let r = (register_label_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : dataset:(t_meter_data_set Solid.accessor [@mel.as "dataset"]) -> value:(float Solid.accessor [@mel.as "value"]) -> value_percent:(float Solid.accessor [@mel.as "valuePercent"]) -> value_label:(string option Solid.accessor [@mel.as "valueLabel"]) -> meter_fill_width:(string option Solid.accessor [@mel.as "meterFillWidth"]) -> label_id:(string option Solid.accessor [@mel.as "labelId"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_label_id:((string -> (unit -> unit)) [@mel.as "registerLabelId"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_meter_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> value:(float Solidtype.Solid.accessor [@mel.as "value"]) -> value_percent:(float Solidtype.Solid.accessor [@mel.as "valuePercent"]) -> value_label:(string option Solidtype.Solid.accessor [@mel.as "valueLabel"]) -> meter_fill_width:(string option Solidtype.Solid.accessor [@mel.as "meterFillWidth"]) -> label_id:(string option Solidtype.Solid.accessor [@mel.as "labelId"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_label_id:((string -> (unit -> unit)) [@mel.as "registerLabelId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module NavigationMenuContextValue = struct
     type t = t_navigation_menu_context_value
-    external dataset : t -> t_navigation_menu_data_set Solid.accessor = "dataset" [@@mel.get]
-    external delay_duration : t -> float Solid.accessor = "delayDuration" [@@mel.get]
-    external skip_delay_duration : t -> float Solid.accessor = "skipDelayDuration" [@@mel.get]
-    external auto_focus_menu : t -> bool Solid.accessor = "autoFocusMenu" [@@mel.get]
-    external set_auto_focus_menu : t -> bool Solid.setter = "setAutoFocusMenu" [@@mel.get]
+    external dataset : t -> t_navigation_menu_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external delay_duration : t -> float Solidtype.Solid.accessor = "delayDuration" [@@mel.get]
+    external skip_delay_duration : t -> float Solidtype.Solid.accessor = "skipDelayDuration" [@@mel.get]
+    external auto_focus_menu : t -> bool Solidtype.Solid.accessor = "autoFocusMenu" [@@mel.get]
+    external set_auto_focus_menu : t -> bool Solidtype.Solid.setter = "setAutoFocusMenu" [@@mel.get]
     external start_leave_timer_js : t -> ((unit -> unit) [@u]) = "startLeaveTimer" [@@mel.get]
     let start_leave_timer o () = (start_leave_timer_js o) () [@u]
     external cancel_leave_timer_js : t -> ((unit -> unit) [@u]) = "cancelLeaveTimer" [@@mel.get]
     let cancel_leave_timer o () = (cancel_leave_timer_js o) () [@u]
-    external root_ref : t -> Dom.htmlElement option Solid.accessor = "rootRef" [@@mel.get]
-    external set_root_ref : t -> Dom.htmlElement Solid.setter = "setRootRef" [@@mel.get]
-    external viewport_ref : t -> Dom.htmlElement option Solid.accessor = "viewportRef" [@@mel.get]
-    external set_viewport_ref : t -> Dom.htmlElement Solid.setter = "setViewportRef" [@@mel.get]
-    external viewport_present : t -> bool Solid.accessor = "viewportPresent" [@@mel.get]
-    external current_placement : t -> string Solid.accessor = "currentPlacement" [@@mel.get]
-    external previous_menu : t -> string option Solid.accessor = "previousMenu" [@@mel.get]
-    external set_previous_menu : t -> string option Solid.setter = "setPreviousMenu" [@@mel.get]
-    external make : dataset:(t_navigation_menu_data_set Solid.accessor [@mel.as "dataset"]) -> delay_duration:(float Solid.accessor [@mel.as "delayDuration"]) -> skip_delay_duration:(float Solid.accessor [@mel.as "skipDelayDuration"]) -> auto_focus_menu:(bool Solid.accessor [@mel.as "autoFocusMenu"]) -> set_auto_focus_menu:(bool Solid.setter [@mel.as "setAutoFocusMenu"]) -> start_leave_timer:((unit -> unit) [@mel.as "startLeaveTimer"]) -> cancel_leave_timer:((unit -> unit) [@mel.as "cancelLeaveTimer"]) -> root_ref:(Dom.htmlElement option Solid.accessor [@mel.as "rootRef"]) -> set_root_ref:(Dom.htmlElement Solid.setter [@mel.as "setRootRef"]) -> viewport_ref:(Dom.htmlElement option Solid.accessor [@mel.as "viewportRef"]) -> set_viewport_ref:(Dom.htmlElement Solid.setter [@mel.as "setViewportRef"]) -> viewport_present:(bool Solid.accessor [@mel.as "viewportPresent"]) -> current_placement:(string Solid.accessor [@mel.as "currentPlacement"]) -> previous_menu:(string option Solid.accessor [@mel.as "previousMenu"]) -> set_previous_menu:(string option Solid.setter [@mel.as "setPreviousMenu"]) -> unit -> t = "" [@@mel.obj]
+    external root_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "rootRef" [@@mel.get]
+    external set_root_ref : t -> Dom.htmlElement Solidtype.Solid.setter = "setRootRef" [@@mel.get]
+    external viewport_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "viewportRef" [@@mel.get]
+    external set_viewport_ref : t -> Dom.htmlElement Solidtype.Solid.setter = "setViewportRef" [@@mel.get]
+    external viewport_present : t -> bool Solidtype.Solid.accessor = "viewportPresent" [@@mel.get]
+    external current_placement : t -> string Solidtype.Solid.accessor = "currentPlacement" [@@mel.get]
+    external previous_menu : t -> string option Solidtype.Solid.accessor = "previousMenu" [@@mel.get]
+    external set_previous_menu : t -> string option Solidtype.Solid.setter = "setPreviousMenu" [@@mel.get]
+    external make : dataset:(t_navigation_menu_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> delay_duration:(float Solidtype.Solid.accessor [@mel.as "delayDuration"]) -> skip_delay_duration:(float Solidtype.Solid.accessor [@mel.as "skipDelayDuration"]) -> auto_focus_menu:(bool Solidtype.Solid.accessor [@mel.as "autoFocusMenu"]) -> set_auto_focus_menu:(bool Solidtype.Solid.setter [@mel.as "setAutoFocusMenu"]) -> start_leave_timer:((unit -> unit) [@mel.as "startLeaveTimer"]) -> cancel_leave_timer:((unit -> unit) [@mel.as "cancelLeaveTimer"]) -> root_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "rootRef"]) -> set_root_ref:(Dom.htmlElement Solidtype.Solid.setter [@mel.as "setRootRef"]) -> viewport_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "viewportRef"]) -> set_viewport_ref:(Dom.htmlElement Solidtype.Solid.setter [@mel.as "setViewportRef"]) -> viewport_present:(bool Solidtype.Solid.accessor [@mel.as "viewportPresent"]) -> current_placement:(string Solidtype.Solid.accessor [@mel.as "currentPlacement"]) -> previous_menu:(string option Solidtype.Solid.accessor [@mel.as "previousMenu"]) -> set_previous_menu:(string option Solidtype.Solid.setter [@mel.as "setPreviousMenu"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module NumberFormatOptions2 = struct
@@ -1194,10 +1194,10 @@ module Types = struct
 
   module NumberFieldContextValue = struct
     type t = t_number_field_context_value
-    external value : t -> (string, float) either option Solid.accessor = "value" [@@mel.get]
+    external value : t -> (string, float) either option Solidtype.Solid.accessor = "value" [@@mel.get]
     external set_value_js : t -> (((string, float) either -> unit) [@u]) = "setValue" [@@mel.get]
     let set_value o x0 = (set_value_js o) x0 [@u]
-    external raw_value : t -> float Solid.accessor = "rawValue" [@@mel.get]
+    external raw_value : t -> float Solidtype.Solid.accessor = "rawValue" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external format_number_js : t -> ((float -> string) [@u]) = "formatNumber" [@@mel.get]
@@ -1205,22 +1205,22 @@ module Types = struct
     external format_js : t -> ((unit -> unit) [@u]) = "format" [@@mel.get]
     let format o () = (format_js o) () [@u]
     external on_input : t -> ((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either) = "onInput" [@@mel.get]
-    external text_value : t -> string option Solid.accessor = "textValue" [@@mel.get]
-    external min_value : t -> float Solid.accessor = "minValue" [@@mel.get]
-    external max_value : t -> float Solid.accessor = "maxValue" [@@mel.get]
-    external step : t -> float Solid.accessor = "step" [@@mel.get]
-    external large_step : t -> float Solid.accessor = "largeStep" [@@mel.get]
-    external change_on_wheel : t -> bool Solid.accessor = "changeOnWheel" [@@mel.get]
-    external translations : t -> t_color_channel_field_root_translations option Solid.accessor = "translations" [@@mel.get]
-    external input_ref : t -> Dom.htmlInputElement option Solid.accessor = "inputRef" [@@mel.get]
+    external text_value : t -> string option Solidtype.Solid.accessor = "textValue" [@@mel.get]
+    external min_value : t -> float Solidtype.Solid.accessor = "minValue" [@@mel.get]
+    external max_value : t -> float Solidtype.Solid.accessor = "maxValue" [@@mel.get]
+    external step : t -> float Solidtype.Solid.accessor = "step" [@@mel.get]
+    external large_step : t -> float Solidtype.Solid.accessor = "largeStep" [@@mel.get]
+    external change_on_wheel : t -> bool Solidtype.Solid.accessor = "changeOnWheel" [@@mel.get]
+    external translations : t -> t_color_channel_field_root_translations option Solidtype.Solid.accessor = "translations" [@@mel.get]
+    external input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "inputRef" [@@mel.get]
     external set_input_ref_js : t -> ((Dom.htmlInputElement -> unit) [@u]) = "setInputRef" [@@mel.get]
     let set_input_ref o x0 = (set_input_ref_js o) x0 [@u]
-    external hidden_input_ref : t -> Dom.htmlInputElement option Solid.accessor = "hiddenInputRef" [@@mel.get]
+    external hidden_input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "hiddenInputRef" [@@mel.get]
     external set_hidden_input_ref_js : t -> ((Dom.htmlInputElement -> unit) [@u]) = "setHiddenInputRef" [@@mel.get]
     let set_hidden_input_ref o x0 = (set_hidden_input_ref_js o) x0 [@u]
     external vary_value_js : t -> ((float -> unit) [@u]) = "varyValue" [@@mel.get]
     let vary_value o x0 = (vary_value_js o) x0 [@u]
-    external make : value:((string, float) either option Solid.accessor [@mel.as "value"]) -> set_value:(((string, float) either -> unit) [@mel.as "setValue"]) -> raw_value:(float Solid.accessor [@mel.as "rawValue"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> format_number:((float -> string) [@mel.as "formatNumber"]) -> format:((unit -> unit) [@mel.as "format"]) -> on_input:(((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either) [@mel.as "onInput"]) -> text_value:(string option Solid.accessor [@mel.as "textValue"]) -> min_value:(float Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solid.accessor [@mel.as "maxValue"]) -> step:(float Solid.accessor [@mel.as "step"]) -> large_step:(float Solid.accessor [@mel.as "largeStep"]) -> change_on_wheel:(bool Solid.accessor [@mel.as "changeOnWheel"]) -> translations:(t_color_channel_field_root_translations option Solid.accessor [@mel.as "translations"]) -> input_ref:(Dom.htmlInputElement option Solid.accessor [@mel.as "inputRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> hidden_input_ref:(Dom.htmlInputElement option Solid.accessor [@mel.as "hiddenInputRef"]) -> set_hidden_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setHiddenInputRef"]) -> vary_value:((float -> unit) [@mel.as "varyValue"]) -> unit -> t = "" [@@mel.obj]
+    external make : value:((string, float) either option Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:(((string, float) either -> unit) [@mel.as "setValue"]) -> raw_value:(float Solidtype.Solid.accessor [@mel.as "rawValue"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> format_number:((float -> string) [@mel.as "formatNumber"]) -> format:((unit -> unit) [@mel.as "format"]) -> on_input:(((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either) [@mel.as "onInput"]) -> text_value:(string option Solidtype.Solid.accessor [@mel.as "textValue"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> step:(float Solidtype.Solid.accessor [@mel.as "step"]) -> large_step:(float Solidtype.Solid.accessor [@mel.as "largeStep"]) -> change_on_wheel:(bool Solidtype.Solid.accessor [@mel.as "changeOnWheel"]) -> translations:(t_color_channel_field_root_translations option Solidtype.Solid.accessor [@mel.as "translations"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> hidden_input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "hiddenInputRef"]) -> set_hidden_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setHiddenInputRef"]) -> vary_value:((float -> unit) [@mel.as "varyValue"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module Pagination_Root_ItemComponent = struct
@@ -1231,19 +1231,19 @@ module Types = struct
 
   module PaginationContextValue = struct
     type t = t_pagination_context_value
-    external count : t -> float Solid.accessor = "count" [@@mel.get]
-    external sibling_count : t -> float Solid.accessor = "siblingCount" [@@mel.get]
-    external show_first : t -> bool Solid.accessor = "showFirst" [@@mel.get]
-    external show_last : t -> bool Solid.accessor = "showLast" [@@mel.get]
-    external fixed_items : t -> (string, bool) either Solid.accessor = "fixedItems" [@@mel.get]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external render_item_js : t -> ((float -> Jsx.element) [@u]) = "renderItem" [@@mel.get]
+    external count : t -> float Solidtype.Solid.accessor = "count" [@@mel.get]
+    external sibling_count : t -> float Solidtype.Solid.accessor = "siblingCount" [@@mel.get]
+    external show_first : t -> bool Solidtype.Solid.accessor = "showFirst" [@@mel.get]
+    external show_last : t -> bool Solidtype.Solid.accessor = "showLast" [@@mel.get]
+    external fixed_items : t -> (string, bool) either Solidtype.Solid.accessor = "fixedItems" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external render_item_js : t -> ((float -> Solidtype.Jsx.element) [@u]) = "renderItem" [@@mel.get]
     let render_item o x0 = (render_item_js o) x0 [@u]
-    external render_ellipsis_js : t -> ((unit -> Jsx.element) [@u]) = "renderEllipsis" [@@mel.get]
+    external render_ellipsis_js : t -> ((unit -> Solidtype.Jsx.element) [@u]) = "renderEllipsis" [@@mel.get]
     let render_ellipsis o () = (render_ellipsis_js o) () [@u]
-    external page : t -> float Solid.accessor = "page" [@@mel.get]
-    external set_page : t -> float Solid.setter = "setPage" [@@mel.get]
-    external make : count:(float Solid.accessor [@mel.as "count"]) -> sibling_count:(float Solid.accessor [@mel.as "siblingCount"]) -> show_first:(bool Solid.accessor [@mel.as "showFirst"]) -> show_last:(bool Solid.accessor [@mel.as "showLast"]) -> fixed_items:((string, bool) either Solid.accessor [@mel.as "fixedItems"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> render_item:((float -> Jsx.element) [@mel.as "renderItem"]) -> render_ellipsis:((unit -> Jsx.element) [@mel.as "renderEllipsis"]) -> page:(float Solid.accessor [@mel.as "page"]) -> set_page:(float Solid.setter [@mel.as "setPage"]) -> unit -> t = "" [@@mel.obj]
+    external page : t -> float Solidtype.Solid.accessor = "page" [@@mel.get]
+    external set_page : t -> float Solidtype.Solid.setter = "setPage" [@@mel.get]
+    external make : count:(float Solidtype.Solid.accessor [@mel.as "count"]) -> sibling_count:(float Solidtype.Solid.accessor [@mel.as "siblingCount"]) -> show_first:(bool Solidtype.Solid.accessor [@mel.as "showFirst"]) -> show_last:(bool Solidtype.Solid.accessor [@mel.as "showLast"]) -> fixed_items:((string, bool) either Solidtype.Solid.accessor [@mel.as "fixedItems"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> render_item:((float -> Solidtype.Jsx.element) [@mel.as "renderItem"]) -> render_ellipsis:((unit -> Solidtype.Jsx.element) [@mel.as "renderEllipsis"]) -> page:(float Solidtype.Solid.accessor [@mel.as "page"]) -> set_page:(float Solidtype.Solid.setter [@mel.as "setPage"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module Popover_Root_Translations = struct
@@ -1254,16 +1254,16 @@ module Types = struct
 
   module PopoverContextValue = struct
     type t = t_popover_context_value
-    external translations : t -> t_popover_root_translations Solid.accessor = "translations" [@@mel.get]
-    external dataset : t -> t_popover_data_set Solid.accessor = "dataset" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external is_modal : t -> bool Solid.accessor = "isModal" [@@mel.get]
-    external prevent_scroll : t -> bool Solid.accessor = "preventScroll" [@@mel.get]
-    external content_present : t -> bool Solid.accessor = "contentPresent" [@@mel.get]
-    external trigger_ref : t -> Dom.htmlElement option Solid.accessor = "triggerRef" [@@mel.get]
-    external content_id : t -> string option Solid.accessor = "contentId" [@@mel.get]
-    external title_id : t -> string option Solid.accessor = "titleId" [@@mel.get]
-    external description_id : t -> string option Solid.accessor = "descriptionId" [@@mel.get]
+    external translations : t -> t_popover_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
+    external dataset : t -> t_popover_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external is_modal : t -> bool Solidtype.Solid.accessor = "isModal" [@@mel.get]
+    external prevent_scroll : t -> bool Solidtype.Solid.accessor = "preventScroll" [@@mel.get]
+    external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
+    external trigger_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "triggerRef" [@@mel.get]
+    external content_id : t -> string option Solidtype.Solid.accessor = "contentId" [@@mel.get]
+    external title_id : t -> string option Solidtype.Solid.accessor = "titleId" [@@mel.get]
+    external description_id : t -> string option Solidtype.Solid.accessor = "descriptionId" [@@mel.get]
     external set_default_anchor_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setDefaultAnchorRef" [@@mel.get]
     let set_default_anchor_ref o x0 = (set_default_anchor_ref_js o) x0 [@u]
     external set_trigger_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setTriggerRef" [@@mel.get]
@@ -1282,61 +1282,61 @@ module Types = struct
     let register_title_id o x0 = let r = (register_title_id_js o) x0 [@u] in fun () -> r () [@u]
     external register_description_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerDescriptionId" [@@mel.get]
     let register_description_id o x0 = let r = (register_description_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : translations:(t_popover_root_translations Solid.accessor [@mel.as "translations"]) -> dataset:(t_popover_data_set Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> is_modal:(bool Solid.accessor [@mel.as "isModal"]) -> prevent_scroll:(bool Solid.accessor [@mel.as "preventScroll"]) -> content_present:(bool Solid.accessor [@mel.as "contentPresent"]) -> trigger_ref:(Dom.htmlElement option Solid.accessor [@mel.as "triggerRef"]) -> content_id:(string option Solid.accessor [@mel.as "contentId"]) -> title_id:(string option Solid.accessor [@mel.as "titleId"]) -> description_id:(string option Solid.accessor [@mel.as "descriptionId"]) -> set_default_anchor_ref:((Dom.htmlElement -> unit) [@mel.as "setDefaultAnchorRef"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> register_title_id:((string -> (unit -> unit)) [@mel.as "registerTitleId"]) -> register_description_id:((string -> (unit -> unit)) [@mel.as "registerDescriptionId"]) -> unit -> t = "" [@@mel.obj]
+    external make : translations:(t_popover_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> dataset:(t_popover_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> is_modal:(bool Solidtype.Solid.accessor [@mel.as "isModal"]) -> prevent_scroll:(bool Solidtype.Solid.accessor [@mel.as "preventScroll"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> trigger_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "triggerRef"]) -> content_id:(string option Solidtype.Solid.accessor [@mel.as "contentId"]) -> title_id:(string option Solidtype.Solid.accessor [@mel.as "titleId"]) -> description_id:(string option Solidtype.Solid.accessor [@mel.as "descriptionId"]) -> set_default_anchor_ref:((Dom.htmlElement -> unit) [@mel.as "setDefaultAnchorRef"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> register_title_id:((string -> (unit -> unit)) [@mel.as "registerTitleId"]) -> register_description_id:((string -> (unit -> unit)) [@mel.as "registerDescriptionId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ProgressContextValue = struct
     type t = t_progress_context_value
-    external dataset : t -> t_progress_data_set Solid.accessor = "dataset" [@@mel.get]
-    external progress_fill_width : t -> string option Solid.accessor = "progressFillWidth" [@@mel.get]
-    external value : t -> float Solid.accessor = "value" [@@mel.get]
-    external value_percent : t -> float Solid.accessor = "valuePercent" [@@mel.get]
-    external value_label : t -> string option Solid.accessor = "valueLabel" [@@mel.get]
-    external label_id : t -> string option Solid.accessor = "labelId" [@@mel.get]
+    external dataset : t -> t_progress_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external progress_fill_width : t -> string option Solidtype.Solid.accessor = "progressFillWidth" [@@mel.get]
+    external value : t -> float Solidtype.Solid.accessor = "value" [@@mel.get]
+    external value_percent : t -> float Solidtype.Solid.accessor = "valuePercent" [@@mel.get]
+    external value_label : t -> string option Solidtype.Solid.accessor = "valueLabel" [@@mel.get]
+    external label_id : t -> string option Solidtype.Solid.accessor = "labelId" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external register_label_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerLabelId" [@@mel.get]
     let register_label_id o x0 = let r = (register_label_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : dataset:(t_progress_data_set Solid.accessor [@mel.as "dataset"]) -> progress_fill_width:(string option Solid.accessor [@mel.as "progressFillWidth"]) -> value:(float Solid.accessor [@mel.as "value"]) -> value_percent:(float Solid.accessor [@mel.as "valuePercent"]) -> value_label:(string option Solid.accessor [@mel.as "valueLabel"]) -> label_id:(string option Solid.accessor [@mel.as "labelId"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_label_id:((string -> (unit -> unit)) [@mel.as "registerLabelId"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_progress_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> progress_fill_width:(string option Solidtype.Solid.accessor [@mel.as "progressFillWidth"]) -> value:(float Solidtype.Solid.accessor [@mel.as "value"]) -> value_percent:(float Solidtype.Solid.accessor [@mel.as "valuePercent"]) -> value_label:(string option Solidtype.Solid.accessor [@mel.as "valueLabel"]) -> label_id:(string option Solidtype.Solid.accessor [@mel.as "labelId"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_label_id:((string -> (unit -> unit)) [@mel.as "registerLabelId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module RadioGroupContextValue = struct
     type t = t_radio_group_context_value
-    external aria_described_by : t -> string option Solid.accessor = "ariaDescribedBy" [@@mel.get]
+    external aria_described_by : t -> string option Solidtype.Solid.accessor = "ariaDescribedBy" [@@mel.get]
     external is_default_value_js : t -> ((string -> bool) [@u]) = "isDefaultValue" [@@mel.get]
     let is_default_value o x0 = (is_default_value_js o) x0 [@u]
     external is_selected_value_js : t -> ((string -> bool) [@u]) = "isSelectedValue" [@@mel.get]
     let is_selected_value o x0 = (is_selected_value_js o) x0 [@u]
     external set_selected_value_js : t -> ((string -> unit) [@u]) = "setSelectedValue" [@@mel.get]
     let set_selected_value o x0 = (set_selected_value_js o) x0 [@u]
-    external make : aria_described_by:(string option Solid.accessor [@mel.as "ariaDescribedBy"]) -> is_default_value:((string -> bool) [@mel.as "isDefaultValue"]) -> is_selected_value:((string -> bool) [@mel.as "isSelectedValue"]) -> set_selected_value:((string -> unit) [@mel.as "setSelectedValue"]) -> unit -> t = "" [@@mel.obj]
+    external make : aria_described_by:(string option Solidtype.Solid.accessor [@mel.as "ariaDescribedBy"]) -> is_default_value:((string -> bool) [@mel.as "isDefaultValue"]) -> is_selected_value:((string -> bool) [@mel.as "isSelectedValue"]) -> set_selected_value:((string -> unit) [@mel.as "setSelectedValue"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module RatingItemState = struct
     type t = t_rating_item_state
-    external half : t -> bool Solid.accessor = "half" [@@mel.get]
-    external highlighted : t -> bool Solid.accessor = "highlighted" [@@mel.get]
-    external make : half:(bool Solid.accessor [@mel.as "half"]) -> highlighted:(bool Solid.accessor [@mel.as "highlighted"]) -> unit -> t = "" [@@mel.obj]
+    external half : t -> bool Solidtype.Solid.accessor = "half" [@@mel.get]
+    external highlighted : t -> bool Solidtype.Solid.accessor = "highlighted" [@@mel.get]
+    external make : half:(bool Solidtype.Solid.accessor [@mel.as "half"]) -> highlighted:(bool Solidtype.Solid.accessor [@mel.as "highlighted"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module SearchContextValue = struct
     type t = t_search_context_value
     (** No results found *)
-    external no_result : t -> bool Solid.accessor = "noResult" [@@mel.get]
+    external no_result : t -> bool Solidtype.Solid.accessor = "noResult" [@@mel.get]
     (** Are we currently loading suggestions? *)
-    external is_loading_suggestions : t -> bool Solid.accessor = "isLoadingSuggestions" [@@mel.get]
-    external make : no_result:(bool Solid.accessor [@mel.as "noResult"]) -> is_loading_suggestions:(bool Solid.accessor [@mel.as "isLoadingSuggestions"]) -> unit -> t = "" [@@mel.obj]
+    external is_loading_suggestions : t -> bool Solidtype.Solid.accessor = "isLoadingSuggestions" [@@mel.get]
+    external make : no_result:(bool Solidtype.Solid.accessor [@mel.as "noResult"]) -> is_loading_suggestions:(bool Solidtype.Solid.accessor [@mel.as "isLoadingSuggestions"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module SegmentedControlContextValue = struct
     type t = t_segmented_control_context_value
-    external value : t -> string option Solid.accessor = "value" [@@mel.get]
-    external default_value : t -> string option Solid.accessor = "defaultValue" [@@mel.get]
-    external orientation : t -> [ `horizontal | `vertical ] option Solid.accessor = "orientation" [@@mel.get]
-    external root : t -> Dom.htmlElement option Solid.accessor = "root" [@@mel.get]
-    external selected_item : t -> Dom.htmlElement option Solid.accessor = "selectedItem" [@@mel.get]
-    external set_selected_item : t -> Dom.htmlElement option Solid.setter = "setSelectedItem" [@@mel.get]
-    external make : value:(string option Solid.accessor [@mel.as "value"]) -> default_value:(string option Solid.accessor [@mel.as "defaultValue"]) -> orientation:([ `horizontal | `vertical ] option Solid.accessor [@mel.as "orientation"]) -> root:(Dom.htmlElement option Solid.accessor [@mel.as "root"]) -> selected_item:(Dom.htmlElement option Solid.accessor [@mel.as "selectedItem"]) -> set_selected_item:(Dom.htmlElement option Solid.setter [@mel.as "setSelectedItem"]) -> unit -> t = "" [@@mel.obj]
+    external value : t -> string option Solidtype.Solid.accessor = "value" [@@mel.get]
+    external default_value : t -> string option Solidtype.Solid.accessor = "defaultValue" [@@mel.get]
+    external orientation : t -> [ `horizontal | `vertical ] option Solidtype.Solid.accessor = "orientation" [@@mel.get]
+    external root : t -> Dom.htmlElement option Solidtype.Solid.accessor = "root" [@@mel.get]
+    external selected_item : t -> Dom.htmlElement option Solidtype.Solid.accessor = "selectedItem" [@@mel.get]
+    external set_selected_item : t -> Dom.htmlElement option Solidtype.Solid.setter = "setSelectedItem" [@@mel.get]
+    external make : value:(string option Solidtype.Solid.accessor [@mel.as "value"]) -> default_value:(string option Solidtype.Solid.accessor [@mel.as "defaultValue"]) -> orientation:([ `horizontal | `vertical ] option Solidtype.Solid.accessor [@mel.as "orientation"]) -> root:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "root"]) -> selected_item:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "selectedItem"]) -> set_selected_item:(Dom.htmlElement option Solidtype.Solid.setter [@mel.as "setSelectedItem"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module SelectBaseItemComponentProps = struct
@@ -1356,39 +1356,39 @@ module Types = struct
   module SelectValueState = struct
     type 'option t = 'option t_select_value_state
     (** The first (or only, in case of single select) selected option. *)
-    external selected_option : 'option t -> 'option Solid.accessor = "selectedOption" [@@mel.get]
+    external selected_option : 'option t -> 'option Solidtype.Solid.accessor = "selectedOption" [@@mel.get]
     (** An array of selected options. It will contain only one value in case of single select. *)
-    external selected_options : 'option t -> 'option array Solid.accessor = "selectedOptions" [@@mel.get]
+    external selected_options : 'option t -> 'option array Solidtype.Solid.accessor = "selectedOptions" [@@mel.get]
     (** A function to remove an option from the selection. *)
     external remove_js : 'option t -> (('option -> unit) [@u]) = "remove" [@@mel.get]
     let remove o x0 = (remove_js o) x0 [@u]
     (** A function to clear the selection. *)
     external clear_js : 'option t -> ((unit -> unit) [@u]) = "clear" [@@mel.get]
     let clear o () = (clear_js o) () [@u]
-    external make : selected_option:('option Solid.accessor [@mel.as "selectedOption"]) -> selected_options:('option array Solid.accessor [@mel.as "selectedOptions"]) -> remove:(('option -> unit) [@mel.as "remove"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> 'option t = "" [@@mel.obj]
+    external make : selected_option:('option Solidtype.Solid.accessor [@mel.as "selectedOption"]) -> selected_options:('option array Solidtype.Solid.accessor [@mel.as "selectedOptions"]) -> remove:(('option -> unit) [@mel.as "remove"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> 'option t = "" [@@mel.obj]
   end
 
   module SelectContextValue = struct
     type t = t_select_context_value
-    external dataset : t -> t_select_data_set Solid.accessor = "dataset" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external is_multiple : t -> bool Solid.accessor = "isMultiple" [@@mel.get]
-    external is_virtualized : t -> bool Solid.accessor = "isVirtualized" [@@mel.get]
-    external is_modal : t -> bool Solid.accessor = "isModal" [@@mel.get]
-    external prevent_scroll : t -> bool Solid.accessor = "preventScroll" [@@mel.get]
-    external disallow_type_ahead : t -> bool Solid.accessor = "disallowTypeAhead" [@@mel.get]
-    external should_focus_wrap : t -> bool Solid.accessor = "shouldFocusWrap" [@@mel.get]
-    external content_present : t -> bool Solid.accessor = "contentPresent" [@@mel.get]
-    external auto_focus : t -> ([ `first | `last ], bool) either Solid.accessor = "autoFocus" [@@mel.get]
-    external trigger_ref : t -> Dom.htmlElement option Solid.accessor = "triggerRef" [@@mel.get]
-    external trigger_id : t -> string option Solid.accessor = "triggerId" [@@mel.get]
-    external value_id : t -> string option Solid.accessor = "valueId" [@@mel.get]
-    external listbox_id : t -> string option Solid.accessor = "listboxId" [@@mel.get]
-    external listbox_aria_labelled_by : t -> string option Solid.accessor = "listboxAriaLabelledBy" [@@mel.get]
-    external list_state : t -> t_list_state Solid.accessor = "listState" [@@mel.get]
-    external keyboard_delegate : t -> t_keyboard_delegate Solid.accessor = "keyboardDelegate" [@@mel.get]
-    external set_listbox_aria_labelled_by : t -> string option Solid.setter = "setListboxAriaLabelledBy" [@@mel.get]
+    external dataset : t -> t_select_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external is_multiple : t -> bool Solidtype.Solid.accessor = "isMultiple" [@@mel.get]
+    external is_virtualized : t -> bool Solidtype.Solid.accessor = "isVirtualized" [@@mel.get]
+    external is_modal : t -> bool Solidtype.Solid.accessor = "isModal" [@@mel.get]
+    external prevent_scroll : t -> bool Solidtype.Solid.accessor = "preventScroll" [@@mel.get]
+    external disallow_type_ahead : t -> bool Solidtype.Solid.accessor = "disallowTypeAhead" [@@mel.get]
+    external should_focus_wrap : t -> bool Solidtype.Solid.accessor = "shouldFocusWrap" [@@mel.get]
+    external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
+    external auto_focus : t -> ([ `first | `last ], bool) either Solidtype.Solid.accessor = "autoFocus" [@@mel.get]
+    external trigger_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "triggerRef" [@@mel.get]
+    external trigger_id : t -> string option Solidtype.Solid.accessor = "triggerId" [@@mel.get]
+    external value_id : t -> string option Solidtype.Solid.accessor = "valueId" [@@mel.get]
+    external listbox_id : t -> string option Solidtype.Solid.accessor = "listboxId" [@@mel.get]
+    external listbox_aria_labelled_by : t -> string option Solidtype.Solid.accessor = "listboxAriaLabelledBy" [@@mel.get]
+    external list_state : t -> t_list_state Solidtype.Solid.accessor = "listState" [@@mel.get]
+    external keyboard_delegate : t -> t_keyboard_delegate Solidtype.Solid.accessor = "keyboardDelegate" [@@mel.get]
+    external set_listbox_aria_labelled_by : t -> string option Solidtype.Solid.setter = "setListboxAriaLabelledBy" [@@mel.get]
     external set_trigger_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setTriggerRef" [@@mel.get]
     let set_trigger_ref o x0 = (set_trigger_ref_js o) x0 [@u]
     external set_content_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setContentRef" [@@mel.get]
@@ -1401,10 +1401,10 @@ module Types = struct
     let close o () = (close_js o) () [@u]
     external toggle_js : t -> ((([ `first | `last ], bool) either -> unit) [@u]) = "toggle" [@@mel.get]
     let toggle o x0 = (toggle_js o) x0 [@u]
-    external placeholder : t -> Jsx.element Solid.accessor = "placeholder" [@@mel.get]
-    external render_item_js : t -> ((_ t_collection_node -> Jsx.element) [@u]) = "renderItem" [@@mel.get]
+    external placeholder : t -> Solidtype.Jsx.element Solidtype.Solid.accessor = "placeholder" [@@mel.get]
+    external render_item_js : t -> ((_ t_collection_node -> Solidtype.Jsx.element) [@u]) = "renderItem" [@@mel.get]
     let render_item o x0 = (render_item_js o) x0 [@u]
-    external render_section_js : t -> ((_ t_collection_node -> Jsx.element) [@u]) = "renderSection" [@@mel.get]
+    external render_section_js : t -> ((_ t_collection_node -> Solidtype.Jsx.element) [@u]) = "renderSection" [@@mel.get]
     let render_section o x0 = (render_section_js o) x0 [@u]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
@@ -1414,7 +1414,7 @@ module Types = struct
     let register_value_id o x0 = let r = (register_value_id_js o) x0 [@u] in fun () -> r () [@u]
     external register_listbox_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerListboxId" [@@mel.get]
     let register_listbox_id o x0 = let r = (register_listbox_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : dataset:(t_select_data_set Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> is_multiple:(bool Solid.accessor [@mel.as "isMultiple"]) -> is_virtualized:(bool Solid.accessor [@mel.as "isVirtualized"]) -> is_modal:(bool Solid.accessor [@mel.as "isModal"]) -> prevent_scroll:(bool Solid.accessor [@mel.as "preventScroll"]) -> disallow_type_ahead:(bool Solid.accessor [@mel.as "disallowTypeAhead"]) -> should_focus_wrap:(bool Solid.accessor [@mel.as "shouldFocusWrap"]) -> content_present:(bool Solid.accessor [@mel.as "contentPresent"]) -> auto_focus:(([ `first | `last ], bool) either Solid.accessor [@mel.as "autoFocus"]) -> trigger_ref:(Dom.htmlElement option Solid.accessor [@mel.as "triggerRef"]) -> trigger_id:(string option Solid.accessor [@mel.as "triggerId"]) -> value_id:(string option Solid.accessor [@mel.as "valueId"]) -> listbox_id:(string option Solid.accessor [@mel.as "listboxId"]) -> listbox_aria_labelled_by:(string option Solid.accessor [@mel.as "listboxAriaLabelledBy"]) -> list_state:(t_list_state Solid.accessor [@mel.as "listState"]) -> keyboard_delegate:(t_keyboard_delegate Solid.accessor [@mel.as "keyboardDelegate"]) -> set_listbox_aria_labelled_by:(string option Solid.setter [@mel.as "setListboxAriaLabelledBy"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> set_listbox_ref:((Dom.htmlElement -> unit) [@mel.as "setListboxRef"]) -> open_:((([ `first | `last ], bool) either -> unit) [@mel.as "open"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((([ `first | `last ], bool) either -> unit) [@mel.as "toggle"]) -> placeholder:(Jsx.element Solid.accessor [@mel.as "placeholder"]) -> render_item:((_ t_collection_node -> Jsx.element) [@mel.as "renderItem"]) -> render_section:((_ t_collection_node -> Jsx.element) [@mel.as "renderSection"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_trigger_id:((string -> (unit -> unit)) [@mel.as "registerTriggerId"]) -> register_value_id:((string -> (unit -> unit)) [@mel.as "registerValueId"]) -> register_listbox_id:((string -> (unit -> unit)) [@mel.as "registerListboxId"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_select_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> is_multiple:(bool Solidtype.Solid.accessor [@mel.as "isMultiple"]) -> is_virtualized:(bool Solidtype.Solid.accessor [@mel.as "isVirtualized"]) -> is_modal:(bool Solidtype.Solid.accessor [@mel.as "isModal"]) -> prevent_scroll:(bool Solidtype.Solid.accessor [@mel.as "preventScroll"]) -> disallow_type_ahead:(bool Solidtype.Solid.accessor [@mel.as "disallowTypeAhead"]) -> should_focus_wrap:(bool Solidtype.Solid.accessor [@mel.as "shouldFocusWrap"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> auto_focus:(([ `first | `last ], bool) either Solidtype.Solid.accessor [@mel.as "autoFocus"]) -> trigger_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "triggerRef"]) -> trigger_id:(string option Solidtype.Solid.accessor [@mel.as "triggerId"]) -> value_id:(string option Solidtype.Solid.accessor [@mel.as "valueId"]) -> listbox_id:(string option Solidtype.Solid.accessor [@mel.as "listboxId"]) -> listbox_aria_labelled_by:(string option Solidtype.Solid.accessor [@mel.as "listboxAriaLabelledBy"]) -> list_state:(t_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> keyboard_delegate:(t_keyboard_delegate Solidtype.Solid.accessor [@mel.as "keyboardDelegate"]) -> set_listbox_aria_labelled_by:(string option Solidtype.Solid.setter [@mel.as "setListboxAriaLabelledBy"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> set_listbox_ref:((Dom.htmlElement -> unit) [@mel.as "setListboxRef"]) -> open_:((([ `first | `last ], bool) either -> unit) [@mel.as "open"]) -> close:((unit -> unit) [@mel.as "close"]) -> toggle:((([ `first | `last ], bool) either -> unit) [@mel.as "toggle"]) -> placeholder:(Solidtype.Jsx.element Solidtype.Solid.accessor [@mel.as "placeholder"]) -> render_item:((_ t_collection_node -> Solidtype.Jsx.element) [@mel.as "renderItem"]) -> render_section:((_ t_collection_node -> Solidtype.Jsx.element) [@mel.as "renderSection"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_trigger_id:((string -> (unit -> unit)) [@mel.as "registerTriggerId"]) -> register_value_id:((string -> (unit -> unit)) [@mel.as "registerValueId"]) -> register_listbox_id:((string -> (unit -> unit)) [@mel.as "registerListboxId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module GetValueLabelParams2 = struct
@@ -1427,10 +1427,10 @@ module Types = struct
 
   module SliderContextValue = struct
     type t = t_slider_context_value
-    external dataset : t -> t_slider_data_set Solid.accessor = "dataset" [@@mel.get]
+    external dataset : t -> t_slider_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
     external state : t -> t_slider_state = "state" [@@mel.get]
-    external thumbs : t -> t_collection_item_with_ref array Solid.accessor = "thumbs" [@@mel.get]
-    external set_thumbs : t -> t_collection_item_with_ref array Solid.setter = "setThumbs" [@@mel.get]
+    external thumbs : t -> t_collection_item_with_ref array Solidtype.Solid.accessor = "thumbs" [@@mel.get]
+    external set_thumbs : t -> t_collection_item_with_ref array Solidtype.Solid.setter = "setThumbs" [@@mel.get]
     external on_slide_start : t -> ((float -> float -> unit) option) = "onSlideStart" [@@mel.get]
     external on_slide_move : t -> ((t_slider_context_value_on_slide_move -> unit) option) = "onSlideMove" [@@mel.get]
     external on_slide_end : t -> ((unit -> unit) option) = "onSlideEnd" [@@mel.get]
@@ -1440,33 +1440,33 @@ module Types = struct
     let is_sliding_from_left o () = (is_sliding_from_left_js o) () [@u]
     external is_sliding_from_bottom_js : t -> ((unit -> bool) [@u]) = "isSlidingFromBottom" [@@mel.get]
     let is_sliding_from_bottom o () = (is_sliding_from_bottom_js o) () [@u]
-    external track_ref : t -> Dom.htmlElement option Solid.accessor = "trackRef" [@@mel.get]
-    external start_edge : t -> [ `top | `bottom | `left | `right ] Solid.accessor = "startEdge" [@@mel.get]
-    external end_edge : t -> [ `top | `bottom | `left | `right ] Solid.accessor = "endEdge" [@@mel.get]
-    external min_value : t -> float Solid.accessor = "minValue" [@@mel.get]
-    external max_value : t -> float Solid.accessor = "maxValue" [@@mel.get]
-    external inverted : t -> bool Solid.accessor = "inverted" [@@mel.get]
+    external track_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "trackRef" [@@mel.get]
+    external start_edge : t -> [ `top | `bottom | `left | `right ] Solidtype.Solid.accessor = "startEdge" [@@mel.get]
+    external end_edge : t -> [ `top | `bottom | `left | `right ] Solidtype.Solid.accessor = "endEdge" [@@mel.get]
+    external min_value : t -> float Solidtype.Solid.accessor = "minValue" [@@mel.get]
+    external max_value : t -> float Solidtype.Solid.accessor = "maxValue" [@@mel.get]
+    external inverted : t -> bool Solidtype.Solid.accessor = "inverted" [@@mel.get]
     external register_track_js : t -> ((Dom.htmlElement -> unit) [@u]) = "registerTrack" [@@mel.get]
     let register_track o x0 = (register_track_js o) x0 [@u]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external get_value_label : t -> ((t_get_value_label_params2 -> string) option) = "getValueLabel" [@@mel.get]
-    external make : dataset:(t_slider_data_set Solid.accessor [@mel.as "dataset"]) -> state:(t_slider_state [@mel.as "state"]) -> thumbs:(t_collection_item_with_ref array Solid.accessor [@mel.as "thumbs"]) -> set_thumbs:(t_collection_item_with_ref array Solid.setter [@mel.as "setThumbs"]) -> on_slide_start:(((float -> float -> unit) option) [@mel.as "onSlideStart"]) -> on_slide_move:(((t_slider_context_value_on_slide_move -> unit) option) [@mel.as "onSlideMove"]) -> on_slide_end:(((unit -> unit) option) [@mel.as "onSlideEnd"]) -> on_step_key_down:((Dom.keyboardEvent -> float -> unit) [@mel.as "onStepKeyDown"]) -> is_sliding_from_left:((unit -> bool) [@mel.as "isSlidingFromLeft"]) -> is_sliding_from_bottom:((unit -> bool) [@mel.as "isSlidingFromBottom"]) -> track_ref:(Dom.htmlElement option Solid.accessor [@mel.as "trackRef"]) -> start_edge:([ `top | `bottom | `left | `right ] Solid.accessor [@mel.as "startEdge"]) -> end_edge:([ `top | `bottom | `left | `right ] Solid.accessor [@mel.as "endEdge"]) -> min_value:(float Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solid.accessor [@mel.as "maxValue"]) -> inverted:(bool Solid.accessor [@mel.as "inverted"]) -> register_track:((Dom.htmlElement -> unit) [@mel.as "registerTrack"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> get_value_label:(((t_get_value_label_params2 -> string) option) [@mel.as "getValueLabel"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_slider_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> state:(t_slider_state [@mel.as "state"]) -> thumbs:(t_collection_item_with_ref array Solidtype.Solid.accessor [@mel.as "thumbs"]) -> set_thumbs:(t_collection_item_with_ref array Solidtype.Solid.setter [@mel.as "setThumbs"]) -> on_slide_start:(((float -> float -> unit) option) [@mel.as "onSlideStart"]) -> on_slide_move:(((t_slider_context_value_on_slide_move -> unit) option) [@mel.as "onSlideMove"]) -> on_slide_end:(((unit -> unit) option) [@mel.as "onSlideEnd"]) -> on_step_key_down:((Dom.keyboardEvent -> float -> unit) [@mel.as "onStepKeyDown"]) -> is_sliding_from_left:((unit -> bool) [@mel.as "isSlidingFromLeft"]) -> is_sliding_from_bottom:((unit -> bool) [@mel.as "isSlidingFromBottom"]) -> track_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "trackRef"]) -> start_edge:([ `top | `bottom | `left | `right ] Solidtype.Solid.accessor [@mel.as "startEdge"]) -> end_edge:([ `top | `bottom | `left | `right ] Solidtype.Solid.accessor [@mel.as "endEdge"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> inverted:(bool Solidtype.Solid.accessor [@mel.as "inverted"]) -> register_track:((Dom.htmlElement -> unit) [@mel.as "registerTrack"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> get_value_label:(((t_get_value_label_params2 -> string) option) [@mel.as "getValueLabel"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module SwitchRootState = struct
     type t = t_switch_root_state
     (** Whether the switch is checked or not. *)
-    external checked : t -> bool Solid.accessor = "checked" [@@mel.get]
-    external make : checked:(bool Solid.accessor [@mel.as "checked"]) -> unit -> t = "" [@@mel.obj]
+    external checked : t -> bool Solidtype.Solid.accessor = "checked" [@@mel.get]
+    external make : checked:(bool Solidtype.Solid.accessor [@mel.as "checked"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module SwitchContextValue = struct
     type t = t_switch_context_value
-    external value : t -> string Solid.accessor = "value" [@@mel.get]
-    external dataset : t -> t_switch_data_set Solid.accessor = "dataset" [@@mel.get]
-    external checked : t -> bool Solid.accessor = "checked" [@@mel.get]
-    external input_ref : t -> Dom.htmlInputElement option Solid.accessor = "inputRef" [@@mel.get]
+    external value : t -> string Solidtype.Solid.accessor = "value" [@@mel.get]
+    external dataset : t -> t_switch_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external checked : t -> bool Solidtype.Solid.accessor = "checked" [@@mel.get]
+    external input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "inputRef" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external toggle_js : t -> ((unit -> unit) [@u]) = "toggle" [@@mel.get]
@@ -1477,33 +1477,33 @@ module Types = struct
     let set_is_focused o x0 = (set_is_focused_js o) x0 [@u]
     external set_input_ref_js : t -> ((Dom.htmlInputElement -> unit) [@u]) = "setInputRef" [@@mel.get]
     let set_input_ref o x0 = (set_input_ref_js o) x0 [@u]
-    external make : value:(string Solid.accessor [@mel.as "value"]) -> dataset:(t_switch_data_set Solid.accessor [@mel.as "dataset"]) -> checked:(bool Solid.accessor [@mel.as "checked"]) -> input_ref:(Dom.htmlInputElement option Solid.accessor [@mel.as "inputRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> set_is_checked:((bool -> unit) [@mel.as "setIsChecked"]) -> set_is_focused:((bool -> unit) [@mel.as "setIsFocused"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> unit -> t = "" [@@mel.obj]
+    external make : value:(string Solidtype.Solid.accessor [@mel.as "value"]) -> dataset:(t_switch_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> checked:(bool Solidtype.Solid.accessor [@mel.as "checked"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> toggle:((unit -> unit) [@mel.as "toggle"]) -> set_is_checked:((bool -> unit) [@mel.as "setIsChecked"]) -> set_is_focused:((bool -> unit) [@mel.as "setIsFocused"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module TabsContextValue = struct
     type t = t_tabs_context_value
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external orientation : t -> [ `horizontal | `vertical ] Solid.accessor = "orientation" [@@mel.get]
-    external activation_mode : t -> [ `manual | `automatic ] Solid.accessor = "activationMode" [@@mel.get]
-    external trigger_ids_map : t -> (string, string) Js.Map.t Solid.accessor = "triggerIdsMap" [@@mel.get]
-    external content_ids_map : t -> (string, string) Js.Map.t Solid.accessor = "contentIdsMap" [@@mel.get]
-    external list_state : t -> t_single_select_list_state Solid.accessor = "listState" [@@mel.get]
-    external selected_tab : t -> Dom.htmlElement option Solid.accessor = "selectedTab" [@@mel.get]
-    external set_selected_tab : t -> Dom.htmlElement option Solid.setter = "setSelectedTab" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
+    external activation_mode : t -> [ `manual | `automatic ] Solidtype.Solid.accessor = "activationMode" [@@mel.get]
+    external trigger_ids_map : t -> (string, string) Js.Map.t Solidtype.Solid.accessor = "triggerIdsMap" [@@mel.get]
+    external content_ids_map : t -> (string, string) Js.Map.t Solidtype.Solid.accessor = "contentIdsMap" [@@mel.get]
+    external list_state : t -> t_single_select_list_state Solidtype.Solid.accessor = "listState" [@@mel.get]
+    external selected_tab : t -> Dom.htmlElement option Solidtype.Solid.accessor = "selectedTab" [@@mel.get]
+    external set_selected_tab : t -> Dom.htmlElement option Solidtype.Solid.setter = "setSelectedTab" [@@mel.get]
     external generate_trigger_id_js : t -> ((string -> string) [@u]) = "generateTriggerId" [@@mel.get]
     let generate_trigger_id o x0 = (generate_trigger_id_js o) x0 [@u]
     external generate_content_id_js : t -> ((string -> string) [@u]) = "generateContentId" [@@mel.get]
     let generate_content_id o x0 = (generate_content_id_js o) x0 [@u]
-    external make : is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> orientation:([ `horizontal | `vertical ] Solid.accessor [@mel.as "orientation"]) -> activation_mode:([ `manual | `automatic ] Solid.accessor [@mel.as "activationMode"]) -> trigger_ids_map:((string, string) Js.Map.t Solid.accessor [@mel.as "triggerIdsMap"]) -> content_ids_map:((string, string) Js.Map.t Solid.accessor [@mel.as "contentIdsMap"]) -> list_state:(t_single_select_list_state Solid.accessor [@mel.as "listState"]) -> selected_tab:(Dom.htmlElement option Solid.accessor [@mel.as "selectedTab"]) -> set_selected_tab:(Dom.htmlElement option Solid.setter [@mel.as "setSelectedTab"]) -> generate_trigger_id:((string -> string) [@mel.as "generateTriggerId"]) -> generate_content_id:((string -> string) [@mel.as "generateContentId"]) -> unit -> t = "" [@@mel.obj]
+    external make : is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> orientation:([ `horizontal | `vertical ] Solidtype.Solid.accessor [@mel.as "orientation"]) -> activation_mode:([ `manual | `automatic ] Solidtype.Solid.accessor [@mel.as "activationMode"]) -> trigger_ids_map:((string, string) Js.Map.t Solidtype.Solid.accessor [@mel.as "triggerIdsMap"]) -> content_ids_map:((string, string) Js.Map.t Solidtype.Solid.accessor [@mel.as "contentIdsMap"]) -> list_state:(t_single_select_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> selected_tab:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "selectedTab"]) -> set_selected_tab:(Dom.htmlElement option Solidtype.Solid.setter [@mel.as "setSelectedTab"]) -> generate_trigger_id:((string -> string) [@mel.as "generateTriggerId"]) -> generate_content_id:((string -> string) [@mel.as "generateContentId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module TextFieldContextValue = struct
     type t = t_text_field_context_value
-    external value : t -> string option Solid.accessor = "value" [@@mel.get]
+    external value : t -> string option Solidtype.Solid.accessor = "value" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external on_input : t -> ((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either) = "onInput" [@@mel.get]
-    external make : value:(string option Solid.accessor [@mel.as "value"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> on_input:(((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either) [@mel.as "onInput"]) -> unit -> t = "" [@@mel.obj]
+    external make : value:(string option Solidtype.Solid.accessor [@mel.as "value"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> on_input:(((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either) [@mel.as "onInput"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module Time = struct
@@ -1632,62 +1632,62 @@ module Types = struct
 
   module Toast_Toaster = struct
     type t = t_toast_toaster
-    external show_js : t -> (((t_toast_component_props -> Jsx.element) -> t_show_toast_options option -> float) [@u]) = "show" [@@mel.get]
+    external show_js : t -> (((t_toast_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@u]) = "show" [@@mel.get]
     let show o x0 x1 = (show_js o) x0 x1 [@u]
-    external update_js : t -> ((float -> (t_toast_component_props -> Jsx.element) -> unit) [@u]) = "update" [@@mel.get]
+    external update_js : t -> ((float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit) [@u]) = "update" [@@mel.get]
     let update o x0 x1 = (update_js o) x0 x1 [@u]
-    external promise_js : t -> (((('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Jsx.element) -> t_show_toast_options option -> float) [@u]) = "promise" [@@mel.get]
+    external promise_js : t -> (((('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@u]) = "promise" [@@mel.get]
     let promise o x0 x1 x2 = (promise_js o) x0 x1 x2 [@u]
     external dismiss_js : t -> ((float -> float) [@u]) = "dismiss" [@@mel.get]
     let dismiss o x0 = (dismiss_js o) x0 [@u]
     external clear_js : t -> ((unit -> unit) [@u]) = "clear" [@@mel.get]
     let clear o () = (clear_js o) () [@u]
-    external make : show:(((t_toast_component_props -> Jsx.element) -> t_show_toast_options option -> float) [@mel.as "show"]) -> update:((float -> (t_toast_component_props -> Jsx.element) -> unit) [@mel.as "update"]) -> promise:(((('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Jsx.element) -> t_show_toast_options option -> float) [@mel.as "promise"]) -> dismiss:((float -> float) [@mel.as "dismiss"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> t = "" [@@mel.obj]
+    external make : show:(((t_toast_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "show"]) -> update:((float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit) [@mel.as "update"]) -> promise:(((('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "promise"]) -> dismiss:((float -> float) [@mel.as "dismiss"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ToastContextValue = struct
     type t = t_toast_context_value
-    external translations : t -> t_toast_root_translations Solid.accessor = "translations" [@@mel.get]
+    external translations : t -> t_toast_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
     external close_js : t -> ((unit -> unit) [@u]) = "close" [@@mel.get]
     let close o () = (close_js o) () [@u]
-    external duration : t -> float Solid.accessor = "duration" [@@mel.get]
-    external is_persistent : t -> bool Solid.accessor = "isPersistent" [@@mel.get]
-    external close_timer_start_time : t -> float Solid.accessor = "closeTimerStartTime" [@@mel.get]
+    external duration : t -> float Solidtype.Solid.accessor = "duration" [@@mel.get]
+    external is_persistent : t -> bool Solidtype.Solid.accessor = "isPersistent" [@@mel.get]
+    external close_timer_start_time : t -> float Solidtype.Solid.accessor = "closeTimerStartTime" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
     external register_title_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerTitleId" [@@mel.get]
     let register_title_id o x0 = let r = (register_title_id_js o) x0 [@u] in fun () -> r () [@u]
     external register_description_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerDescriptionId" [@@mel.get]
     let register_description_id o x0 = let r = (register_description_id_js o) x0 [@u] in fun () -> r () [@u]
-    external make : translations:(t_toast_root_translations Solid.accessor [@mel.as "translations"]) -> close:((unit -> unit) [@mel.as "close"]) -> duration:(float Solid.accessor [@mel.as "duration"]) -> is_persistent:(bool Solid.accessor [@mel.as "isPersistent"]) -> close_timer_start_time:(float Solid.accessor [@mel.as "closeTimerStartTime"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_title_id:((string -> (unit -> unit)) [@mel.as "registerTitleId"]) -> register_description_id:((string -> (unit -> unit)) [@mel.as "registerDescriptionId"]) -> unit -> t = "" [@@mel.obj]
+    external make : translations:(t_toast_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> close:((unit -> unit) [@mel.as "close"]) -> duration:(float Solidtype.Solid.accessor [@mel.as "duration"]) -> is_persistent:(bool Solidtype.Solid.accessor [@mel.as "isPersistent"]) -> close_timer_start_time:(float Solidtype.Solid.accessor [@mel.as "closeTimerStartTime"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_title_id:((string -> (unit -> unit)) [@mel.as "registerTitleId"]) -> register_description_id:((string -> (unit -> unit)) [@mel.as "registerDescriptionId"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ToggleButtonRootState = struct
     type t = t_toggle_button_root_state
     (** Whether the toggle button is on (pressed) or off (not pressed). *)
-    external pressed : t -> bool Solid.accessor = "pressed" [@@mel.get]
-    external make : pressed:(bool Solid.accessor [@mel.as "pressed"]) -> unit -> t = "" [@@mel.obj]
+    external pressed : t -> bool Solidtype.Solid.accessor = "pressed" [@@mel.get]
+    external make : pressed:(bool Solidtype.Solid.accessor [@mel.as "pressed"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ToggleGroupContextValue = struct
     type t = t_toggle_group_context_value
-    external is_multiple : t -> bool Solid.accessor = "isMultiple" [@@mel.get]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external list_state : t -> t_list_state Solid.accessor = "listState" [@@mel.get]
+    external is_multiple : t -> bool Solidtype.Solid.accessor = "isMultiple" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external list_state : t -> t_list_state Solidtype.Solid.accessor = "listState" [@@mel.get]
     external generate_id_js : t -> ((string -> string) [@u]) = "generateId" [@@mel.get]
     let generate_id o x0 = (generate_id_js o) x0 [@u]
-    external orientation : t -> [ `horizontal | `vertical ] Solid.accessor = "orientation" [@@mel.get]
-    external make : is_multiple:(bool Solid.accessor [@mel.as "isMultiple"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> list_state:(t_list_state Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> orientation:([ `horizontal | `vertical ] Solid.accessor [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
+    external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
+    external make : is_multiple:(bool Solidtype.Solid.accessor [@mel.as "isMultiple"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> list_state:(t_list_state Solidtype.Solid.accessor [@mel.as "listState"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> orientation:([ `horizontal | `vertical ] Solidtype.Solid.accessor [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module TooltipContextValue = struct
     type t = t_tooltip_context_value
-    external dataset : t -> t_tooltip_data_set Solid.accessor = "dataset" [@@mel.get]
-    external is_open : t -> bool Solid.accessor = "isOpen" [@@mel.get]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external trigger_on_focus_only : t -> bool Solid.accessor = "triggerOnFocusOnly" [@@mel.get]
-    external content_id : t -> string option Solid.accessor = "contentId" [@@mel.get]
-    external content_present : t -> bool Solid.accessor = "contentPresent" [@@mel.get]
+    external dataset : t -> t_tooltip_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
+    external is_open : t -> bool Solidtype.Solid.accessor = "isOpen" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external trigger_on_focus_only : t -> bool Solidtype.Solid.accessor = "triggerOnFocusOnly" [@@mel.get]
+    external content_id : t -> string option Solidtype.Solid.accessor = "contentId" [@@mel.get]
+    external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
     external open_tooltip_js : t -> ((bool option -> unit) [@u]) = "openTooltip" [@@mel.get]
     let open_tooltip o x0 = (open_tooltip_js o) x0 [@u]
     external hide_tooltip_js : t -> ((bool option -> unit) [@u]) = "hideTooltip" [@@mel.get]
@@ -1704,7 +1704,7 @@ module Types = struct
     let set_trigger_ref o x0 = (set_trigger_ref_js o) x0 [@u]
     external set_content_ref_js : t -> ((Dom.htmlElement -> unit) [@u]) = "setContentRef" [@@mel.get]
     let set_content_ref o x0 = (set_content_ref_js o) x0 [@u]
-    external make : dataset:(t_tooltip_data_set Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solid.accessor [@mel.as "isOpen"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> trigger_on_focus_only:(bool Solid.accessor [@mel.as "triggerOnFocusOnly"]) -> content_id:(string option Solid.accessor [@mel.as "contentId"]) -> content_present:(bool Solid.accessor [@mel.as "contentPresent"]) -> open_tooltip:((bool option -> unit) [@mel.as "openTooltip"]) -> hide_tooltip:((bool option -> unit) [@mel.as "hideTooltip"]) -> cancel_opening:((unit -> unit) [@mel.as "cancelOpening"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> is_target_on_tooltip:((Dom.node Js.Nullable.t -> bool) [@mel.as "isTargetOnTooltip"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> unit -> t = "" [@@mel.obj]
+    external make : dataset:(t_tooltip_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> is_open:(bool Solidtype.Solid.accessor [@mel.as "isOpen"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> trigger_on_focus_only:(bool Solidtype.Solid.accessor [@mel.as "triggerOnFocusOnly"]) -> content_id:(string option Solidtype.Solid.accessor [@mel.as "contentId"]) -> content_present:(bool Solidtype.Solid.accessor [@mel.as "contentPresent"]) -> open_tooltip:((bool option -> unit) [@mel.as "openTooltip"]) -> hide_tooltip:((bool option -> unit) [@mel.as "hideTooltip"]) -> cancel_opening:((unit -> unit) [@mel.as "cancelOpening"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> register_content_id:((string -> (unit -> unit)) [@mel.as "registerContentId"]) -> is_target_on_tooltip:((Dom.node Js.Nullable.t -> bool) [@mel.as "isTargetOnTooltip"]) -> set_trigger_ref:((Dom.htmlElement -> unit) [@mel.as "setTriggerRef"]) -> set_content_ref:((Dom.htmlElement -> unit) [@mel.as "setContentRef"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module CheckboxDataSet = struct
@@ -1745,23 +1745,23 @@ module Types = struct
 
   module ColorAreaState = struct
     type t = t_color_area_state
-    external value : t -> t_color Solid.accessor = "value" [@@mel.get]
+    external value : t -> t_color Solidtype.Solid.accessor = "value" [@@mel.get]
     external set_value_js : t -> ((t_color -> unit) [@u]) = "setValue" [@@mel.get]
     let set_value o x0 = (set_value_js o) x0 [@u]
-    external x_value : t -> float Solid.accessor = "xValue" [@@mel.get]
-    external y_value : t -> float Solid.accessor = "yValue" [@@mel.get]
+    external x_value : t -> float Solidtype.Solid.accessor = "xValue" [@@mel.get]
+    external y_value : t -> float Solidtype.Solid.accessor = "yValue" [@@mel.get]
     external set_x_value_js : t -> ((float -> unit) [@u]) = "setXValue" [@@mel.get]
     let set_x_value o x0 = (set_x_value_js o) x0 [@u]
     external set_y_value_js : t -> ((float -> unit) [@u]) = "setYValue" [@@mel.get]
     let set_y_value o x0 = (set_y_value_js o) x0 [@u]
-    external x_step : t -> float Solid.accessor = "xStep" [@@mel.get]
-    external y_step : t -> float Solid.accessor = "yStep" [@@mel.get]
-    external x_page_size : t -> float Solid.accessor = "xPageSize" [@@mel.get]
-    external y_page_size : t -> float Solid.accessor = "yPageSize" [@@mel.get]
-    external x_max_value : t -> float Solid.accessor = "xMaxValue" [@@mel.get]
-    external y_max_value : t -> float Solid.accessor = "yMaxValue" [@@mel.get]
-    external x_min_value : t -> float Solid.accessor = "xMinValue" [@@mel.get]
-    external y_min_value : t -> float Solid.accessor = "yMinValue" [@@mel.get]
+    external x_step : t -> float Solidtype.Solid.accessor = "xStep" [@@mel.get]
+    external y_step : t -> float Solidtype.Solid.accessor = "yStep" [@@mel.get]
+    external x_page_size : t -> float Solidtype.Solid.accessor = "xPageSize" [@@mel.get]
+    external y_page_size : t -> float Solidtype.Solid.accessor = "yPageSize" [@@mel.get]
+    external x_max_value : t -> float Solidtype.Solid.accessor = "xMaxValue" [@@mel.get]
+    external y_max_value : t -> float Solidtype.Solid.accessor = "yMaxValue" [@@mel.get]
+    external x_min_value : t -> float Solidtype.Solid.accessor = "xMinValue" [@@mel.get]
+    external y_min_value : t -> float Solidtype.Solid.accessor = "yMinValue" [@@mel.get]
     external increment_x_js : t -> ((float -> unit) [@u]) = "incrementX" [@@mel.get]
     let increment_x o x0 = (increment_x_js o) x0 [@u]
     external increment_y_js : t -> ((float -> unit) [@u]) = "incrementY" [@@mel.get]
@@ -1772,10 +1772,10 @@ module Types = struct
     let decrement_y o x0 = (decrement_y_js o) x0 [@u]
     external get_thumb_position_js : t -> ((unit -> t_color_area_state_get_thumb_position) [@u]) = "getThumbPosition" [@@mel.get]
     let get_thumb_position o () = (get_thumb_position_js o) () [@u]
-    external is_dragging : t -> bool Solid.accessor = "isDragging" [@@mel.get]
+    external is_dragging : t -> bool Solidtype.Solid.accessor = "isDragging" [@@mel.get]
     external set_is_dragging_js : t -> ((bool -> unit) [@u]) = "setIsDragging" [@@mel.get]
     let set_is_dragging o x0 = (set_is_dragging_js o) x0 [@u]
-    external channels : t -> t_color_area_state_channels Solid.accessor = "channels" [@@mel.get]
+    external channels : t -> t_color_area_state_channels Solidtype.Solid.accessor = "channels" [@@mel.get]
     external reset_value_js : t -> ((unit -> unit) [@u]) = "resetValue" [@@mel.get]
     let reset_value o () = (reset_value_js o) () [@u]
     external get_thumb_percent_js : t -> ((unit -> t_color_area_state_get_thumb_percent) [@u]) = "getThumbPercent" [@@mel.get]
@@ -1784,8 +1784,8 @@ module Types = struct
     let set_thumb_percent o x0 = (set_thumb_percent_js o) x0 [@u]
     external set_thumb_value_js : t -> ((t_color_area_state_set_thumb_value -> unit) [@u]) = "setThumbValue" [@@mel.get]
     let set_thumb_value o x0 = (set_thumb_value_js o) x0 [@u]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external make : value:(t_color Solid.accessor [@mel.as "value"]) -> set_value:((t_color -> unit) [@mel.as "setValue"]) -> x_value:(float Solid.accessor [@mel.as "xValue"]) -> y_value:(float Solid.accessor [@mel.as "yValue"]) -> set_x_value:((float -> unit) [@mel.as "setXValue"]) -> set_y_value:((float -> unit) [@mel.as "setYValue"]) -> x_step:(float Solid.accessor [@mel.as "xStep"]) -> y_step:(float Solid.accessor [@mel.as "yStep"]) -> x_page_size:(float Solid.accessor [@mel.as "xPageSize"]) -> y_page_size:(float Solid.accessor [@mel.as "yPageSize"]) -> x_max_value:(float Solid.accessor [@mel.as "xMaxValue"]) -> y_max_value:(float Solid.accessor [@mel.as "yMaxValue"]) -> x_min_value:(float Solid.accessor [@mel.as "xMinValue"]) -> y_min_value:(float Solid.accessor [@mel.as "yMinValue"]) -> increment_x:((float -> unit) [@mel.as "incrementX"]) -> increment_y:((float -> unit) [@mel.as "incrementY"]) -> decrement_x:((float -> unit) [@mel.as "decrementX"]) -> decrement_y:((float -> unit) [@mel.as "decrementY"]) -> get_thumb_position:((unit -> t_color_area_state_get_thumb_position) [@mel.as "getThumbPosition"]) -> is_dragging:(bool Solid.accessor [@mel.as "isDragging"]) -> set_is_dragging:((bool -> unit) [@mel.as "setIsDragging"]) -> channels:(t_color_area_state_channels Solid.accessor [@mel.as "channels"]) -> reset_value:((unit -> unit) [@mel.as "resetValue"]) -> get_thumb_percent:((unit -> t_color_area_state_get_thumb_percent) [@mel.as "getThumbPercent"]) -> set_thumb_percent:((t_color_area_state_set_thumb_percent -> unit) [@mel.as "setThumbPercent"]) -> set_thumb_value:((t_color_area_state_set_thumb_value -> unit) [@mel.as "setThumbValue"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> unit -> t = "" [@@mel.obj]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external make : value:(t_color Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:((t_color -> unit) [@mel.as "setValue"]) -> x_value:(float Solidtype.Solid.accessor [@mel.as "xValue"]) -> y_value:(float Solidtype.Solid.accessor [@mel.as "yValue"]) -> set_x_value:((float -> unit) [@mel.as "setXValue"]) -> set_y_value:((float -> unit) [@mel.as "setYValue"]) -> x_step:(float Solidtype.Solid.accessor [@mel.as "xStep"]) -> y_step:(float Solidtype.Solid.accessor [@mel.as "yStep"]) -> x_page_size:(float Solidtype.Solid.accessor [@mel.as "xPageSize"]) -> y_page_size:(float Solidtype.Solid.accessor [@mel.as "yPageSize"]) -> x_max_value:(float Solidtype.Solid.accessor [@mel.as "xMaxValue"]) -> y_max_value:(float Solidtype.Solid.accessor [@mel.as "yMaxValue"]) -> x_min_value:(float Solidtype.Solid.accessor [@mel.as "xMinValue"]) -> y_min_value:(float Solidtype.Solid.accessor [@mel.as "yMinValue"]) -> increment_x:((float -> unit) [@mel.as "incrementX"]) -> increment_y:((float -> unit) [@mel.as "incrementY"]) -> decrement_x:((float -> unit) [@mel.as "decrementX"]) -> decrement_y:((float -> unit) [@mel.as "decrementY"]) -> get_thumb_position:((unit -> t_color_area_state_get_thumb_position) [@mel.as "getThumbPosition"]) -> is_dragging:(bool Solidtype.Solid.accessor [@mel.as "isDragging"]) -> set_is_dragging:((bool -> unit) [@mel.as "setIsDragging"]) -> channels:(t_color_area_state_channels Solidtype.Solid.accessor [@mel.as "channels"]) -> reset_value:((unit -> unit) [@mel.as "resetValue"]) -> get_thumb_percent:((unit -> t_color_area_state_get_thumb_percent) [@mel.as "getThumbPercent"]) -> set_thumb_percent:((t_color_area_state_set_thumb_percent -> unit) [@mel.as "setThumbPercent"]) -> set_thumb_value:((t_color_area_state_set_thumb_value -> unit) [@mel.as "setThumbValue"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ColorAreaContextValue_OnDrag = struct
@@ -1827,8 +1827,8 @@ module Types = struct
   module FlowProps = struct
     type ('p, 'c) t = ('p, 'c) t_flow_props
     external value : ('p, 'c) t -> 't = "value" [@@mel.get]
-    external children : ('p, 'c) t -> Jsx.element = "children" [@@mel.get]
-    external make : value:('t [@mel.as "value"]) -> children:(Jsx.element [@mel.as "children"]) -> unit -> ('p, 'c) t = "" [@@mel.obj]
+    external children : ('p, 'c) t -> Solidtype.Jsx.element = "children" [@@mel.get]
+    external make : value:('t [@mel.as "value"]) -> children:(Solidtype.Jsx.element [@mel.as "children"]) -> unit -> ('p, 'c) t = "" [@@mel.obj]
   end
 
   module Context_Provider = struct
@@ -1839,16 +1839,16 @@ module Types = struct
 
   module ColorWheelState = struct
     type t = t_color_wheel_state
-    external value : t -> t_color Solid.accessor = "value" [@@mel.get]
+    external value : t -> t_color Solidtype.Solid.accessor = "value" [@@mel.get]
     external set_value_js : t -> ((t_color -> unit) [@u]) = "setValue" [@@mel.get]
     let set_value o x0 = (set_value_js o) x0 [@u]
-    external hue : t -> float Solid.accessor = "hue" [@@mel.get]
+    external hue : t -> float Solidtype.Solid.accessor = "hue" [@@mel.get]
     external set_hue_js : t -> ((float -> unit) [@u]) = "setHue" [@@mel.get]
     let set_hue o x0 = (set_hue_js o) x0 [@u]
-    external step : t -> float Solid.accessor = "step" [@@mel.get]
-    external page_size : t -> float Solid.accessor = "pageSize" [@@mel.get]
-    external max_value : t -> float Solid.accessor = "maxValue" [@@mel.get]
-    external min_value : t -> float Solid.accessor = "minValue" [@@mel.get]
+    external step : t -> float Solidtype.Solid.accessor = "step" [@@mel.get]
+    external page_size : t -> float Solidtype.Solid.accessor = "pageSize" [@@mel.get]
+    external max_value : t -> float Solidtype.Solid.accessor = "maxValue" [@@mel.get]
+    external min_value : t -> float Solidtype.Solid.accessor = "minValue" [@@mel.get]
     external increment_js : t -> ((float -> unit) [@u]) = "increment" [@@mel.get]
     let increment o x0 = (increment_js o) x0 [@u]
     external decrement_js : t -> ((float -> unit) [@u]) = "decrement" [@@mel.get]
@@ -1857,13 +1857,13 @@ module Types = struct
     let get_thumb_position o () = (get_thumb_position_js o) () [@u]
     external set_thumb_value_js : t -> ((float -> float -> float -> unit) [@u]) = "setThumbValue" [@@mel.get]
     let set_thumb_value o x0 x1 x2 = (set_thumb_value_js o) x0 x1 x2 [@u]
-    external is_dragging : t -> bool Solid.accessor = "isDragging" [@@mel.get]
+    external is_dragging : t -> bool Solidtype.Solid.accessor = "isDragging" [@@mel.get]
     external set_is_dragging_js : t -> ((bool -> unit) [@u]) = "setIsDragging" [@@mel.get]
     let set_is_dragging o x0 = (set_is_dragging_js o) x0 [@u]
     external reset_value_js : t -> ((unit -> unit) [@u]) = "resetValue" [@@mel.get]
     let reset_value o () = (reset_value_js o) () [@u]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
-    external make : value:(t_color Solid.accessor [@mel.as "value"]) -> set_value:((t_color -> unit) [@mel.as "setValue"]) -> hue:(float Solid.accessor [@mel.as "hue"]) -> set_hue:((float -> unit) [@mel.as "setHue"]) -> step:(float Solid.accessor [@mel.as "step"]) -> page_size:(float Solid.accessor [@mel.as "pageSize"]) -> max_value:(float Solid.accessor [@mel.as "maxValue"]) -> min_value:(float Solid.accessor [@mel.as "minValue"]) -> increment:((float -> unit) [@mel.as "increment"]) -> decrement:((float -> unit) [@mel.as "decrement"]) -> get_thumb_position:((unit -> t_color_wheel_state_get_thumb_position) [@mel.as "getThumbPosition"]) -> set_thumb_value:((float -> float -> float -> unit) [@mel.as "setThumbValue"]) -> is_dragging:(bool Solid.accessor [@mel.as "isDragging"]) -> set_is_dragging:((bool -> unit) [@mel.as "setIsDragging"]) -> reset_value:((unit -> unit) [@mel.as "resetValue"]) -> is_disabled:(bool Solid.accessor [@mel.as "isDisabled"]) -> unit -> t = "" [@@mel.obj]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
+    external make : value:(t_color Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:((t_color -> unit) [@mel.as "setValue"]) -> hue:(float Solidtype.Solid.accessor [@mel.as "hue"]) -> set_hue:((float -> unit) [@mel.as "setHue"]) -> step:(float Solidtype.Solid.accessor [@mel.as "step"]) -> page_size:(float Solidtype.Solid.accessor [@mel.as "pageSize"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> increment:((float -> unit) [@mel.as "increment"]) -> decrement:((float -> unit) [@mel.as "decrement"]) -> get_thumb_position:((unit -> t_color_wheel_state_get_thumb_position) [@mel.as "getThumbPosition"]) -> set_thumb_value:((float -> float -> float -> unit) [@mel.as "setThumbValue"]) -> is_dragging:(bool Solidtype.Solid.accessor [@mel.as "isDragging"]) -> set_is_dragging:((bool -> unit) [@mel.as "setIsDragging"]) -> reset_value:((unit -> unit) [@mel.as "resetValue"]) -> is_disabled:(bool Solidtype.Solid.accessor [@mel.as "isDisabled"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module ColorWheelContextValue_OnDrag = struct
@@ -1987,7 +1987,7 @@ module Types = struct
     external is_selection_equal : t -> string Js.Set.t -> bool = "isSelectionEqual" [@@mel.send]
     external can_select_item : t -> string -> bool = "canSelectItem" [@@mel.send]
     external is_disabled : t -> string -> bool = "isDisabled" [@@mel.send]
-    external make : _ t_collection_node t_collection Solid.accessor -> t_multiple_selection_state -> t = "SelectionManager" [@@mel.new] [@@mel.module "@kobalte/core"]
+    external make : _ t_collection_node t_collection Solidtype.Solid.accessor -> t_multiple_selection_state -> t = "SelectionManager" [@@mel.new] [@@mel.module "@kobalte/core"]
   end
 
   module MenubarDataSet = struct
@@ -2033,14 +2033,14 @@ module Types = struct
 
   module SliderState = struct
     type t = t_slider_state
-    external values : t -> float array Solid.accessor = "values" [@@mel.get]
+    external values : t -> float array Solidtype.Solid.accessor = "values" [@@mel.get]
     external get_thumb_value : t -> float -> float = "getThumbValue" [@@mel.send]
     external set_thumb_value : t -> float -> float -> unit = "setThumbValue" [@@mel.send]
     external get_thumb_percent : t -> float -> float = "getThumbPercent" [@@mel.send]
     external set_thumb_percent : t -> float -> float -> unit = "setThumbPercent" [@@mel.send]
     external is_thumb_dragging : t -> float -> bool = "isThumbDragging" [@@mel.send]
     external set_thumb_dragging : t -> float -> bool -> unit = "setThumbDragging" [@@mel.send]
-    external focused_thumb : t -> float option Solid.accessor = "focusedThumb" [@@mel.get]
+    external focused_thumb : t -> float option Solidtype.Solid.accessor = "focusedThumb" [@@mel.get]
     external set_focused_thumb : t -> float option -> unit = "setFocusedThumb" [@@mel.send]
     external get_value_percent : t -> float -> float = "getValuePercent" [@@mel.send]
     external get_thumb_value_label : t -> float -> string = "getThumbValueLabel" [@@mel.send]
@@ -2052,10 +2052,10 @@ module Types = struct
     external set_thumb_editable : t -> float -> bool -> unit = "setThumbEditable" [@@mel.send]
     external increment_thumb : t -> float -> float option -> unit = "incrementThumb" [@@mel.send]
     external decrement_thumb : t -> float -> float option -> unit = "decrementThumb" [@@mel.send]
-    external step : t -> float Solid.accessor = "step" [@@mel.get]
-    external page_size : t -> float Solid.accessor = "pageSize" [@@mel.get]
-    external orientation : t -> [ `horizontal | `vertical ] Solid.accessor = "orientation" [@@mel.get]
-    external is_disabled : t -> bool Solid.accessor = "isDisabled" [@@mel.get]
+    external step : t -> float Solidtype.Solid.accessor = "step" [@@mel.get]
+    external page_size : t -> float Solidtype.Solid.accessor = "pageSize" [@@mel.get]
+    external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
+    external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
     external set_values_js : t -> ((((float array, float array -> float array) either) -> unit) [@u]) = "setValues" [@@mel.get]
     let set_values o x0 = (set_values_js o) x0 [@u]
     external reset_values_js : t -> ((unit -> unit) [@u]) = "resetValues" [@@mel.get]
@@ -2072,8 +2072,8 @@ module Types = struct
     external text_value : t -> string = "textValue" [@@mel.get]
     (** Whether the item is disabled. *)
     external disabled : t -> bool = "disabled" [@@mel.get]
-    external ref : t -> Dom.element option Solid.accessor = "ref" [@@mel.get]
-    external make : type_:([ `section | `item ] [@mel.as "type"]) -> key:(string [@mel.as "key"]) -> text_value:(string [@mel.as "textValue"]) -> disabled:(bool [@mel.as "disabled"]) -> ref:(Dom.element option Solid.accessor [@mel.as "ref"]) -> unit -> t = "" [@@mel.obj]
+    external ref : t -> Dom.element option Solidtype.Solid.accessor = "ref" [@@mel.get]
+    external make : type_:([ `section | `item ] [@mel.as "type"]) -> key:(string [@mel.as "key"]) -> text_value:(string [@mel.as "textValue"]) -> disabled:(bool [@mel.as "disabled"]) -> ref:(Dom.element option Solidtype.Solid.accessor [@mel.as "ref"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module SliderContextValue_OnSlideMove = struct
@@ -2090,14 +2090,14 @@ module Types = struct
   module SingleSelectListState = struct
     type t = t_single_select_list_state
     (** The value of the currently selected item. *)
-    external selected_item : t -> _ t_collection_node option Solid.accessor = "selectedItem" [@@mel.get]
+    external selected_item : t -> _ t_collection_node option Solidtype.Solid.accessor = "selectedItem" [@@mel.get]
     (** The key for the currently selected item. *)
-    external selected_key : t -> string option Solid.accessor = "selectedKey" [@@mel.get]
+    external selected_key : t -> string option Solidtype.Solid.accessor = "selectedKey" [@@mel.get]
     external set_selected_key : t -> string -> unit = "setSelectedKey" [@@mel.send]
     (** A collection of items in the list. *)
-    external collection : t -> _ t_collection_node t_collection Solid.accessor = "collection" [@@mel.get]
+    external collection : t -> _ t_collection_node t_collection Solidtype.Solid.accessor = "collection" [@@mel.get]
     (** A selection manager to read and update multiple selection state. *)
-    external selection_manager : t -> t_selection_manager Solid.accessor = "selectionManager" [@@mel.get]
+    external selection_manager : t -> t_selection_manager Solidtype.Solid.accessor = "selectionManager" [@@mel.get]
   end
 
   module TextFieldContextValue_OnInput = struct
@@ -2444,19 +2444,19 @@ module Types = struct
   module MultipleSelectionState = struct
     type t = t_multiple_selection_state
     (** The type of selection that is allowed in the collection. *)
-    external selection_mode : t -> [ `none | `single | `multiple ] Solid.accessor = "selectionMode" [@@mel.get]
+    external selection_mode : t -> [ `none | `single | `multiple ] Solidtype.Solid.accessor = "selectionMode" [@@mel.get]
     (** The selection behavior for the collection. *)
-    external selection_behavior : t -> [ `toggle | `replace ] Solid.accessor = "selectionBehavior" [@@mel.get]
+    external selection_behavior : t -> [ `toggle | `replace ] Solidtype.Solid.accessor = "selectionBehavior" [@@mel.get]
     external set_selection_behavior : t -> [ `toggle | `replace ] -> unit = "setSelectionBehavior" [@@mel.send]
     (** Whether the collection allows empty selection. *)
-    external disallow_empty_selection : t -> bool Solid.accessor = "disallowEmptySelection" [@@mel.get]
+    external disallow_empty_selection : t -> bool Solidtype.Solid.accessor = "disallowEmptySelection" [@@mel.get]
     (** The currently selected keys in the collection. *)
-    external selected_keys : t -> string Js.Set.t Solid.accessor = "selectedKeys" [@@mel.get]
+    external selected_keys : t -> string Js.Set.t Solidtype.Solid.accessor = "selectedKeys" [@@mel.get]
     external set_selected_keys : t -> string Js.Set.t -> unit = "setSelectedKeys" [@@mel.send]
     (** Whether the collection is currently focused. *)
-    external is_focused : t -> bool Solid.accessor = "isFocused" [@@mel.get]
+    external is_focused : t -> bool Solidtype.Solid.accessor = "isFocused" [@@mel.get]
     (** The current focused key in the collection. *)
-    external focused_key : t -> string option Solid.accessor = "focusedKey" [@@mel.get]
+    external focused_key : t -> string option Solidtype.Solid.accessor = "focusedKey" [@@mel.get]
     external set_focused : t -> bool -> unit = "setFocused" [@@mel.send]
     external set_focused_key : t -> string option -> unit = "setFocusedKey" [@@mel.send]
   end
@@ -2827,11 +2827,11 @@ module Accordion = struct
   module Content = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/accordion"]
   end
 
@@ -2840,11 +2840,11 @@ module Accordion = struct
   module Header = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.H3.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H3.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Header"
+    external component : unit Solidtype.Jsx.component = "Header"
     [@@mel.module "@kobalte/core/accordion"]
   end
 
@@ -2852,14 +2852,14 @@ module Accordion = struct
   module Item = struct
     module Props = struct
       external check :
-        value:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/accordion"]
   end
 
@@ -2867,17 +2867,17 @@ module Accordion = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:string array Check.value ->
-        ?defaultValue:string array Check.value ->
-        ?onChange:(string array -> unit) ->
-        ?multiple:bool Check.value ->
-        ?collapsible:bool Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string array Solidtype.Check.value ->
+        ?default_value:string array Solidtype.Check.value ->
+        ?on_change:(string array -> unit) ->
+        ?multiple:bool Solidtype.Check.value ->
+        ?collapsible:bool Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/accordion"]
   end
 
@@ -2885,11 +2885,11 @@ module Accordion = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/accordion"]
   end
 
@@ -2903,11 +2903,11 @@ module Alert = struct
   module Root = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/alert"]
   end
 end
@@ -2917,11 +2917,11 @@ module AlertDialog = struct
   module CloseButton = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CloseButton"
+    external component : unit Solidtype.Jsx.component = "CloseButton"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -2929,17 +2929,17 @@ module AlertDialog = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -2947,11 +2947,11 @@ module AlertDialog = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.P.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -2959,11 +2959,11 @@ module AlertDialog = struct
   module Overlay = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Overlay"
+    external component : unit Solidtype.Jsx.component = "Overlay"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -2971,14 +2971,14 @@ module AlertDialog = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -2986,19 +2986,19 @@ module AlertDialog = struct
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.AlertDialog_Root_Translations.t Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?id:string Check.value ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?translations:Types.AlertDialog_Root_Translations.t Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -3006,11 +3006,11 @@ module AlertDialog = struct
   module Title = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.H2.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Title"
+    external component : unit Solidtype.Jsx.component = "Title"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 
@@ -3018,11 +3018,11 @@ module AlertDialog = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/alert-dialog"]
   end
 end
@@ -3031,12 +3031,12 @@ module Badge = struct
   module Root = struct
     module Props = struct
       external check :
-        ?textValue:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        ?text_value:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/badge"]
   end
 end
@@ -3046,12 +3046,12 @@ module Breadcrumbs = struct
   module Link = struct
     module Props = struct
       external check :
-        ?current:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.A.check = "check"
+        ?current:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Link"
+    external component : unit Solidtype.Jsx.component = "Link"
     [@@mel.module "@kobalte/core/breadcrumbs"]
   end
 
@@ -3059,13 +3059,13 @@ module Breadcrumbs = struct
   module Root = struct
     module Props = struct
       external check :
-        ?separator:Jsx.element Check.value ->
-        ?translations:Types.Breadcrumbs_Root_Translations.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Nav.check = "check"
+        ?separator:Solidtype.Jsx.element Solidtype.Check.value ->
+        ?translations:Types.Breadcrumbs_Root_Translations.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/breadcrumbs"]
   end
 
@@ -3074,11 +3074,11 @@ module Breadcrumbs = struct
   module Separator = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Separator"
+    external component : unit Solidtype.Jsx.component = "Separator"
     [@@mel.module "@kobalte/core/breadcrumbs"]
   end
 
@@ -3093,11 +3093,11 @@ module Button = struct
   module Root = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/button"]
   end
 end
@@ -3107,11 +3107,11 @@ module Checkbox = struct
   module Control = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Control"
+    external component : unit Solidtype.Jsx.component = "Control"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3119,12 +3119,12 @@ module Checkbox = struct
   module Description = struct
     module Props = struct
       external check :
-        ?id:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?id:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3132,13 +3132,13 @@ module Checkbox = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        ?id:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3147,12 +3147,12 @@ module Checkbox = struct
   module Indicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Indicator"
+    external component : unit Solidtype.Jsx.component = "Indicator"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3160,11 +3160,11 @@ module Checkbox = struct
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3172,11 +3172,11 @@ module Checkbox = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3184,21 +3184,21 @@ module Checkbox = struct
   module Root = struct
     module Props = struct
       external check :
-        ?checked:bool Check.value ->
-        ?defaultChecked:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        ?indeterminate:bool Check.value ->
-        ?value:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:(Types.CheckboxRootState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?indeterminate:bool Solidtype.Check.value ->
+        ?value:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:(Types.CheckboxRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/checkbox"]
   end
 
@@ -3211,11 +3211,11 @@ module Collapsible = struct
   module Content = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/collapsible"]
   end
 
@@ -3223,16 +3223,16 @@ module Collapsible = struct
   module Root = struct
     module Props = struct
       external check :
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?disabled:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/collapsible"]
   end
 
@@ -3240,11 +3240,11 @@ module Collapsible = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/collapsible"]
   end
 
@@ -3256,11 +3256,11 @@ module ColorArea = struct
   module Background = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Background"
+    external component : unit Solidtype.Jsx.component = "Background"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
@@ -3268,11 +3268,11 @@ module ColorArea = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
@@ -3280,34 +3280,34 @@ module ColorArea = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
   module HiddenInputX = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInputX"
+    external component : unit Solidtype.Jsx.component = "HiddenInputX"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
   module HiddenInputY = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInputY"
+    external component : unit Solidtype.Jsx.component = "HiddenInputY"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
@@ -3315,49 +3315,49 @@ module ColorArea = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.ColorArea_Root_Translations.t Check.value ->
-        ?value:Types.Color.t Check.value ->
-        ?defaultValue:Types.Color.t Check.value ->
-        ?onChange:(Types.Color.t -> unit) ->
-        ?onChangeEnd:(Types.Color.t -> unit) ->
-        ?xChannel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Check.value ->
-        ?yChannel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Check.value ->
-        ?colorSpace:[ `rgb | `hsl | `hsb ] Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?xName:string Check.value ->
-        ?yName:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?translations:Types.ColorArea_Root_Translations.t Solidtype.Check.value ->
+        ?value:Types.Color.t Solidtype.Check.value ->
+        ?default_value:Types.Color.t Solidtype.Check.value ->
+        ?on_change:(Types.Color.t -> unit) ->
+        ?on_change_end:(Types.Color.t -> unit) ->
+        ?x_channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
+        ?y_channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
+        ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?x_name:string Solidtype.Check.value ->
+        ?y_name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
   module Thumb = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Thumb"
+    external component : unit Solidtype.Jsx.component = "Thumb"
     [@@mel.module "@kobalte/core/color-area"]
   end
 
@@ -3369,11 +3369,11 @@ module ColorChannelField = struct
   module DecrementTrigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "DecrementTrigger"
+    external component : unit Solidtype.Jsx.component = "DecrementTrigger"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
@@ -3381,11 +3381,11 @@ module ColorChannelField = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
@@ -3393,45 +3393,45 @@ module ColorChannelField = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
   module HiddenInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInput"
+    external component : unit Solidtype.Jsx.component = "HiddenInput"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
   module IncrementTrigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "IncrementTrigger"
+    external component : unit Solidtype.Jsx.component = "IncrementTrigger"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
@@ -3439,41 +3439,41 @@ module ColorChannelField = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:Types.Color.t Check.value ->
-        ?defaultValue:Types.Color.t Check.value ->
-        ?onChange:(Types.Color.t -> unit) ->
-        channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Check.value ->
-        ?colorSpace:[ `rgb | `hsl | `hsb ] Check.value ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?translations:Types.ColorChannelField_Root_Translations.t Check.value ->
-        ?minValue:float Check.value ->
-        ?maxValue:float Check.value ->
-        ?step:float Check.value ->
-        ?largeStep:float Check.value ->
-        ?changeOnWheel:bool Check.value ->
-        ?format:bool Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:Types.Color.t Solidtype.Check.value ->
+        ?default_value:Types.Color.t Solidtype.Check.value ->
+        ?on_change:(Types.Color.t -> unit) ->
+        channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
+        ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+        ?min_value:float Solidtype.Check.value ->
+        ?max_value:float Solidtype.Check.value ->
+        ?step:float Solidtype.Check.value ->
+        ?large_step:float Solidtype.Check.value ->
+        ?change_on_wheel:bool Solidtype.Check.value ->
+        ?format:bool Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/color-channel-field"]
   end
 end
@@ -3483,11 +3483,11 @@ module ColorField = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/color-field"]
   end
 
@@ -3495,23 +3495,23 @@ module ColorField = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/color-field"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/color-field"]
   end
 
@@ -3519,31 +3519,31 @@ module ColorField = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/color-field"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Check.value ->
-        ?defaultValue:string Check.value ->
-        ?onChange:(string -> unit) ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?on_change:(string -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/color-field"]
   end
 
@@ -3563,29 +3563,29 @@ module ColorMode = struct
   module ColorModeProvider = struct
     module Props = struct
       external check :
-        ?initialColorMode:[ `light | `dark | `system ] Check.value ->
-        ?disableTransitionOnChange:bool Check.value ->
-        ?storageManager:Types.ColorModeStorageManager.t Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?initial_color_mode:[ `light | `dark | `system ] Solidtype.Check.value ->
+        ?disable_transition_on_change:bool Solidtype.Check.value ->
+        ?storage_manager:Types.ColorModeStorageManager.t Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ColorModeProvider"
+    external component : unit Solidtype.Jsx.component = "ColorModeProvider"
     [@@mel.module "@kobalte/core/color-mode"]
   end
 
   module ColorModeScript = struct
     module Props = struct
       external check :
-        ?initialColorMode:[ `light | `dark | `system ] Check.value ->
-        ?storageType:[ `localStorage | `cookie ] Check.value ->
-        ?storageKey:string Check.value ->
-        ?nonce:string Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?initial_color_mode:[ `light | `dark | `system ] Solidtype.Check.value ->
+        ?storage_type:[ `localStorage | `cookie ] Solidtype.Check.value ->
+        ?storage_key:string Solidtype.Check.value ->
+        ?nonce:string Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ColorModeScript"
+    external component : unit Solidtype.Jsx.component = "ColorModeScript"
     [@@mel.module "@kobalte/core/color-mode"]
   end
 
@@ -3610,7 +3610,7 @@ module ColorMode = struct
   [@@mel.module "@kobalte/core/color-mode"]
 
   (** Change value based on color mode. *)
-  external use_color_mode_value : 't_light -> 't_dark -> ('t_light, 't_dark) Types.Either.t Solid.accessor = "useColorModeValue"
+  external use_color_mode_value : 't_light -> 't_dark -> ('t_light, 't_dark) Types.Either.t Solidtype.Solid.accessor = "useColorModeValue"
   [@@mel.module "@kobalte/core/color-mode"]
 end
 
@@ -3619,11 +3619,11 @@ module ColorSlider = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
@@ -3631,12 +3631,12 @@ module ColorSlider = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
@@ -3644,12 +3644,12 @@ module ColorSlider = struct
   module Input = struct
     module Props = struct
       external check :
-        ?style:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        ?style:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
@@ -3657,59 +3657,59 @@ module ColorSlider = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:Types.Color.t Check.value ->
-        ?defaultValue:Types.Color.t Check.value ->
-        ?onChange:(Types.Color.t -> unit) ->
-        ?onChangeEnd:(Types.Color.t -> unit) ->
-        channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Check.value ->
-        ?colorSpace:[ `rgb | `hsl | `hsb ] Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?getValueLabel:(Types.Color.t -> string) ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?translations:Types.ColorSlider_Root_Translations.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:Types.Color.t Solidtype.Check.value ->
+        ?default_value:Types.Color.t Solidtype.Check.value ->
+        ?on_change:(Types.Color.t -> unit) ->
+        ?on_change_end:(Types.Color.t -> unit) ->
+        channel:[ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] Solidtype.Check.value ->
+        ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?get_value_label:(Types.Color.t -> string) ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?translations:Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
   module Thumb = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Thumb"
+    external component : unit Solidtype.Jsx.component = "Thumb"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
   module Track = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Track"
+    external component : unit Solidtype.Jsx.component = "Track"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
@@ -3717,11 +3717,11 @@ module ColorSlider = struct
   module ValueLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ValueLabel"
+    external component : unit Solidtype.Jsx.component = "ValueLabel"
     [@@mel.module "@kobalte/core/color-slider"]
   end
 
@@ -3733,14 +3733,14 @@ module ColorSwatch = struct
   module Root = struct
     module Props = struct
       external check :
-        value:Types.Color.t Check.value ->
-        ?colorName:string Check.value ->
-        ?translations:Types.ColorSwatch_Root_Translations.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:Types.Color.t Solidtype.Check.value ->
+        ?color_name:string Solidtype.Check.value ->
+        ?translations:Types.ColorSwatch_Root_Translations.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/color-swatch"]
   end
 end
@@ -3750,11 +3750,11 @@ module ColorWheel = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
@@ -3762,24 +3762,24 @@ module ColorWheel = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        ?style:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        ?style:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
@@ -3787,68 +3787,68 @@ module ColorWheel = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.ColorSlider_Root_Translations.t Check.value ->
-        ?value:Types.Color.t Check.value ->
-        ?defaultValue:Types.Color.t Check.value ->
-        ?thickness:float Check.value ->
-        ?onChange:(Types.Color.t -> unit) ->
-        ?onChangeEnd:(Types.Color.t -> unit) ->
-        ?getValueLabel:(Types.Color.t -> string) ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?translations:Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
+        ?value:Types.Color.t Solidtype.Check.value ->
+        ?default_value:Types.Color.t Solidtype.Check.value ->
+        ?thickness:float Solidtype.Check.value ->
+        ?on_change:(Types.Color.t -> unit) ->
+        ?on_change_end:(Types.Color.t -> unit) ->
+        ?get_value_label:(Types.Color.t -> string) ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
   module Thumb = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Thumb"
+    external component : unit Solidtype.Jsx.component = "Thumb"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
   module Track = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Track"
+    external component : unit Solidtype.Jsx.component = "Track"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
   module ValueLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ValueLabel"
+    external component : unit Solidtype.Jsx.component = "ValueLabel"
     [@@mel.module "@kobalte/core/color-wheel"]
   end
 
@@ -3882,12 +3882,12 @@ module Combobox = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3895,15 +3895,15 @@ module Combobox = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3911,11 +3911,11 @@ module Combobox = struct
   module Control = struct
     module Props = struct
       external check :
-        (?children:('option Types.ComboboxControlState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Control"
+    external component : unit Solidtype.Jsx.component = "Control"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3923,11 +3923,11 @@ module Combobox = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3935,23 +3935,23 @@ module Combobox = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
   module HiddenSelect = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Select.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenSelect"
+    external component : unit Solidtype.Jsx.component = "HiddenSelect"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3960,22 +3960,22 @@ module Combobox = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3983,12 +3983,12 @@ module Combobox = struct
   module Item = struct
     module Props = struct
       external check :
-        item:_ Types.CollectionNode.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        item:_ Types.CollectionNode.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -3997,11 +3997,11 @@ module Combobox = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4010,12 +4010,12 @@ module Combobox = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4024,11 +4024,11 @@ module Combobox = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4036,11 +4036,11 @@ module Combobox = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4048,13 +4048,13 @@ module Combobox = struct
   module Listbox = struct
     module Props = struct
       external check :
-        ?scrollRef:Dom.htmlElement option Solid.accessor Check.value ->
-        ?scrollToItem:(string -> unit) ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solid.accessor -> Jsx.element, [ `render ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?scroll_to_item:(string -> unit) ->
+        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Listbox"
+    external component : unit Solidtype.Jsx.component = "Listbox"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4062,139 +4062,139 @@ module Combobox = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:'option Js.Nullable.t Check.value ->
-        ?defaultValue:'option Check.value ->
-        ?onChange:('option Js.Nullable.t -> unit) ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?translations:Types.Combobox_Root_Translations.t Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?noResetInputOnBlur:bool Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> [ `focus | `input | `manual ] option -> unit) ->
-        ?onInputChange:(string -> unit) ->
-        ?triggerMode:[ `focus | `input | `manual ] Check.value ->
-        ?placeholder:Jsx.element Check.value ->
-        options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> (string, float) Types.Either.t) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionLabel:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:string Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?defaultFilter:(([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t) Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?allowsEmptyCollection:bool Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?closeOnSelection:bool Check.value ->
-        ?removeOnBackspace:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?itemComponent:('option Types.ComboboxBaseItemComponentProps.t -> Jsx.element) ->
-        ?sectionComponent:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Jsx.element) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'option Js.Nullable.t Solidtype.Check.value ->
+        ?default_value:'option Solidtype.Check.value ->
+        ?on_change:('option Js.Nullable.t -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?no_reset_input_on_blur:bool Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> [ `focus | `input | `manual ] option -> unit) ->
+        ?on_input_change:(string -> unit) ->
+        ?trigger_mode:[ `focus | `input | `manual ] Solidtype.Check.value ->
+        ?placeholder:Solidtype.Jsx.element Solidtype.Check.value ->
+        options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> (string, float) Types.Either.t) ->
+        ?option_text_value:('option -> string) ->
+        ?option_label:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:string Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?default_filter:(([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t) Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?allows_empty_collection:bool Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?close_on_selection:bool Solidtype.Check.value ->
+        ?remove_on_backspace:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
+        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
   module Root_multiple = struct
     module Props = struct
       external check :
-        ?value:'option array Check.value ->
-        ?defaultValue:'option array Check.value ->
-        ?onChange:('option array -> unit) ->
-        multiple:bool Check.value ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?translations:Types.Combobox_Root_Translations.t Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?noResetInputOnBlur:bool Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> [ `focus | `input | `manual ] option -> unit) ->
-        ?onInputChange:(string -> unit) ->
-        ?triggerMode:[ `focus | `input | `manual ] Check.value ->
-        ?placeholder:Jsx.element Check.value ->
-        options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> (string, float) Types.Either.t) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionLabel:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:string Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?defaultFilter:(([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t) Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?allowsEmptyCollection:bool Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?closeOnSelection:bool Check.value ->
-        ?removeOnBackspace:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?itemComponent:('option Types.ComboboxBaseItemComponentProps.t -> Jsx.element) ->
-        ?sectionComponent:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Jsx.element) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'option array Solidtype.Check.value ->
+        ?default_value:'option array Solidtype.Check.value ->
+        ?on_change:('option array -> unit) ->
+        multiple:bool Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?no_reset_input_on_blur:bool Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> [ `focus | `input | `manual ] option -> unit) ->
+        ?on_input_change:(string -> unit) ->
+        ?trigger_mode:[ `focus | `input | `manual ] Solidtype.Check.value ->
+        ?placeholder:Solidtype.Jsx.element Solidtype.Check.value ->
+        options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> (string, float) Types.Either.t) ->
+        ?option_text_value:('option -> string) ->
+        ?option_label:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:string Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?default_filter:(([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t) Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?allows_empty_collection:bool Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?close_on_selection:bool Solidtype.Check.value ->
+        ?remove_on_backspace:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
+        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4203,22 +4203,22 @@ module Combobox = struct
   module Section = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Section"
+    external component : unit Solidtype.Jsx.component = "Section"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/combobox"]
   end
 
@@ -4232,12 +4232,12 @@ module ContextMenu = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4245,36 +4245,36 @@ module ContextMenu = struct
   module CheckboxItem = struct
     module Props = struct
       external check :
-        ?checked:bool Check.value ->
-        ?defaultChecked:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?indeterminate:bool Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?indeterminate:bool Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CheckboxItem"
+    external component : unit Solidtype.Jsx.component = "CheckboxItem"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4282,11 +4282,11 @@ module ContextMenu = struct
   module Group = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Group"
+    external component : unit Solidtype.Jsx.component = "Group"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4295,11 +4295,11 @@ module ContextMenu = struct
   module GroupLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "GroupLabel"
+    external component : unit Solidtype.Jsx.component = "GroupLabel"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4308,11 +4308,11 @@ module ContextMenu = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4320,15 +4320,15 @@ module ContextMenu = struct
   module Item = struct
     module Props = struct
       external check :
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4337,11 +4337,11 @@ module ContextMenu = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4350,12 +4350,12 @@ module ContextMenu = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4364,11 +4364,11 @@ module ContextMenu = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4376,14 +4376,14 @@ module ContextMenu = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4391,15 +4391,15 @@ module ContextMenu = struct
   module RadioGroup = struct
     module Props = struct
       external check :
-        ?value:'t_value Check.value ->
-        ?defaultValue:'t_value Check.value ->
-        ?onChange:('t_value -> unit) ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'t_value Solidtype.Check.value ->
+        ?default_value:'t_value Solidtype.Check.value ->
+        ?on_change:('t_value -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioGroup"
+    external component : unit Solidtype.Jsx.component = "RadioGroup"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4407,16 +4407,16 @@ module ContextMenu = struct
   module RadioItem = struct
     module Props = struct
       external check :
-        value:'t_value Check.value ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:'t_value Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioItem"
+    external component : unit Solidtype.Jsx.component = "RadioItem"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4424,30 +4424,30 @@ module ContextMenu = struct
   module Root = struct
     module Props = struct
       external check :
-        ?id:string Check.value ->
-        ?value:string Check.value ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?id:string Solidtype.Check.value ->
+        ?value:string Solidtype.Check.value ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4455,12 +4455,12 @@ module ContextMenu = struct
   module Separator = struct
     module Props = struct
       external check :
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Hr.check = "check"
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Separator"
+    external component : unit Solidtype.Jsx.component = "Separator"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4468,24 +4468,24 @@ module ContextMenu = struct
   module Sub = struct
     module Props = struct
       external check :
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Sub"
+    external component : unit Solidtype.Jsx.component = "Sub"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4493,15 +4493,15 @@ module ContextMenu = struct
   module SubContent = struct
     module Props = struct
       external check :
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubContent"
+    external component : unit Solidtype.Jsx.component = "SubContent"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4509,25 +4509,25 @@ module ContextMenu = struct
   module SubTrigger = struct
     module Props = struct
       external check :
-        ?textValue:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?text_value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubTrigger"
+    external component : unit Solidtype.Jsx.component = "SubTrigger"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
   module Trigger = struct
     module Props = struct
       external check :
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/context-menu"]
   end
 
@@ -4540,11 +4540,11 @@ module Dialog = struct
   module CloseButton = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CloseButton"
+    external component : unit Solidtype.Jsx.component = "CloseButton"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4552,17 +4552,17 @@ module Dialog = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4570,11 +4570,11 @@ module Dialog = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.P.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4582,11 +4582,11 @@ module Dialog = struct
   module Overlay = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Overlay"
+    external component : unit Solidtype.Jsx.component = "Overlay"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4594,14 +4594,14 @@ module Dialog = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4609,19 +4609,19 @@ module Dialog = struct
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.AlertDialog_Root_Translations.t Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?id:string Check.value ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?translations:Types.AlertDialog_Root_Translations.t Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4629,11 +4629,11 @@ module Dialog = struct
   module Title = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.H2.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Title"
+    external component : unit Solidtype.Jsx.component = "Title"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4641,11 +4641,11 @@ module Dialog = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/dialog"]
   end
 
@@ -4659,12 +4659,12 @@ module DropdownMenu = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4672,19 +4672,19 @@ module DropdownMenu = struct
   module CheckboxItem = struct
     module Props = struct
       external check :
-        ?checked:bool Check.value ->
-        ?defaultChecked:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?indeterminate:bool Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?indeterminate:bool Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CheckboxItem"
+    external component : unit Solidtype.Jsx.component = "CheckboxItem"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4692,17 +4692,17 @@ module DropdownMenu = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4710,11 +4710,11 @@ module DropdownMenu = struct
   module Group = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Group"
+    external component : unit Solidtype.Jsx.component = "Group"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4723,11 +4723,11 @@ module DropdownMenu = struct
   module GroupLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "GroupLabel"
+    external component : unit Solidtype.Jsx.component = "GroupLabel"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4736,11 +4736,11 @@ module DropdownMenu = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4748,15 +4748,15 @@ module DropdownMenu = struct
   module Item = struct
     module Props = struct
       external check :
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4765,11 +4765,11 @@ module DropdownMenu = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4778,12 +4778,12 @@ module DropdownMenu = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4792,11 +4792,11 @@ module DropdownMenu = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4804,14 +4804,14 @@ module DropdownMenu = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4819,15 +4819,15 @@ module DropdownMenu = struct
   module RadioGroup = struct
     module Props = struct
       external check :
-        ?value:'t_value Check.value ->
-        ?defaultValue:'t_value Check.value ->
-        ?onChange:('t_value -> unit) ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'t_value Solidtype.Check.value ->
+        ?default_value:'t_value Solidtype.Check.value ->
+        ?on_change:('t_value -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioGroup"
+    external component : unit Solidtype.Jsx.component = "RadioGroup"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4835,16 +4835,16 @@ module DropdownMenu = struct
   module RadioItem = struct
     module Props = struct
       external check :
-        value:'t_value Check.value ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:'t_value Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioItem"
+    external component : unit Solidtype.Jsx.component = "RadioItem"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4852,33 +4852,33 @@ module DropdownMenu = struct
   module Root = struct
     module Props = struct
       external check :
-        ?id:string Check.value ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?value:string Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?id:string Solidtype.Check.value ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?value:string Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4886,12 +4886,12 @@ module DropdownMenu = struct
   module Separator = struct
     module Props = struct
       external check :
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Hr.check = "check"
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Separator"
+    external component : unit Solidtype.Jsx.component = "Separator"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4899,24 +4899,24 @@ module DropdownMenu = struct
   module Sub = struct
     module Props = struct
       external check :
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Sub"
+    external component : unit Solidtype.Jsx.component = "Sub"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4924,15 +4924,15 @@ module DropdownMenu = struct
   module SubContent = struct
     module Props = struct
       external check :
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubContent"
+    external component : unit Solidtype.Jsx.component = "SubContent"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4940,13 +4940,13 @@ module DropdownMenu = struct
   module SubTrigger = struct
     module Props = struct
       external check :
-        ?textValue:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?text_value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubTrigger"
+    external component : unit Solidtype.Jsx.component = "SubTrigger"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 
@@ -4954,11 +4954,11 @@ module DropdownMenu = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/dropdown-menu"]
   end
 end
@@ -4971,22 +4971,22 @@ module FileField = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module Dropzone = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Dropzone"
+    external component : unit Solidtype.Jsx.component = "Dropzone"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
@@ -4994,152 +4994,152 @@ module FileField = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module HiddenInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInput"
+    external component : unit Solidtype.Jsx.component = "HiddenInput"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module Item = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module ItemDeleteTrigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDeleteTrigger"
+    external component : unit Solidtype.Jsx.component = "ItemDeleteTrigger"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module ItemList = struct
     module Props = struct
       external check :
-        (children:(Types.File.t -> Jsx.element, [ `render ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        (children:(Types.File.t -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemList"
+    external component : unit Solidtype.Jsx.component = "ItemList"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module ItemName = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemName"
+    external component : unit Solidtype.Jsx.component = "ItemName"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module ItemPreview = struct
     module Props = struct
       external check :
-        type_:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        type_:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemPreview"
+    external component : unit Solidtype.Jsx.component = "ItemPreview"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module ItemPreviewImage = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Img.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemPreviewImage"
+    external component : unit Solidtype.Jsx.component = "ItemPreviewImage"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module ItemSize = struct
     module Props = struct
       external check :
-        ?precision:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        ?precision:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemSize"
+    external component : unit Solidtype.Jsx.component = "ItemSize"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.FileField_Root_Translations.t Check.value ->
-        ?multiple:bool Check.value ->
-        ?accept:(string, string array) Types.Either.t Check.value ->
-        ?maxFiles:float Check.value ->
-        ?allowDragAndDrop:bool Check.value ->
-        ?maxFileSize:float Check.value ->
-        ?minFileSize:float Check.value ->
-        ?onFileAccept:(Types.File.t array -> unit) ->
-        ?onFileReject:(Types.FileRejection.t array -> unit) ->
-        ?onFileChange:(Types.Details.t -> unit) ->
+        ?translations:Types.FileField_Root_Translations.t Solidtype.Check.value ->
+        ?multiple:bool Solidtype.Check.value ->
+        ?accept:(string, string array) Types.Either.t Solidtype.Check.value ->
+        ?max_files:float Solidtype.Check.value ->
+        ?allow_drag_and_drop:bool Solidtype.Check.value ->
+        ?max_file_size:float Solidtype.Check.value ->
+        ?min_file_size:float Solidtype.Check.value ->
+        ?on_file_accept:(Types.File.t array -> unit) ->
+        ?on_file_reject:(Types.FileRejection.t array -> unit) ->
+        ?on_file_change:(Types.Details.t -> unit) ->
         ?validate:(Types.File.t -> [ `TOO_MANY_FILES | `FILE_INVALID_TYPE | `FILE_TOO_LARGE | `FILE_TOO_SMALL ] array Js.Nullable.t) ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/file-field"]
   end
 
@@ -5153,12 +5153,12 @@ module HoverCard = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
@@ -5166,11 +5166,11 @@ module HoverCard = struct
   module Content = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
@@ -5178,14 +5178,14 @@ module HoverCard = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
@@ -5193,32 +5193,32 @@ module HoverCard = struct
   module Root = struct
     module Props = struct
       external check :
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?openDelay:float Check.value ->
-        ?closeDelay:float Check.value ->
-        ?ignoreSafeArea:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?id:string Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?open_delay:float Solidtype.Check.value ->
+        ?close_delay:float Solidtype.Check.value ->
+        ?ignore_safe_area:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
@@ -5226,11 +5226,11 @@ module HoverCard = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.A.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/hover-card"]
   end
 
@@ -5243,12 +5243,12 @@ module I18n = struct
   module I18nProvider = struct
     module Props = struct
       external check :
-        ?locale:string Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?locale:string Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "I18nProvider"
+    external component : unit Solidtype.Jsx.component = "I18nProvider"
     [@@mel.module "@kobalte/core/i18n"]
   end
 
@@ -5257,12 +5257,12 @@ module I18n = struct
 
   (** Provides localized string collation for the current locale. Automatically updates when the locale changes,
       and handles caching of the collator for performance. *)
-  external create_collator : Types.CollatorOptions.t option -> Types.Collator.t Solid.accessor = "createCollator"
+  external create_collator : Types.CollatorOptions.t option -> Types.Collator.t Solidtype.Solid.accessor = "createCollator"
   [@@mel.module "@kobalte/core/i18n"]
 
   (** Provides localized date formatting for the current locale. Automatically updates when the locale changes,
       and handles caching of the date formatter for performance. *)
-  external create_date_formatter : (Types.DateTimeFormatOptions.t, Types.DateTimeFormatOptions.t Solid.accessor) Types.Either.t -> Types.DateTimeFormat.t Solid.accessor = "createDateFormatter"
+  external create_date_formatter : (Types.DateTimeFormatOptions.t, Types.DateTimeFormatOptions.t Solidtype.Solid.accessor) Types.Either.t -> Types.DateTimeFormat.t Solidtype.Solid.accessor = "createDateFormatter"
   [@@mel.module "@kobalte/core/i18n"]
 
   (** Returns an accessor for the current browser/system language, and updates when it changes. *)
@@ -5276,7 +5276,7 @@ module I18n = struct
 
   (** Provides localized number formatting for the current locale. Automatically updates when the locale changes,
       and handles caching of the number formatter for performance. *)
-  external create_number_formatter : (Types.NumberFormatOptions.t, Types.NumberFormatOptions.t Solid.accessor) Types.Either.t -> Types.NumberFormat.t Solid.accessor = "createNumberFormatter"
+  external create_number_formatter : (Types.NumberFormatOptions.t, Types.NumberFormatOptions.t Solidtype.Solid.accessor) Types.Either.t -> Types.NumberFormat.t Solidtype.Solid.accessor = "createNumberFormatter"
   [@@mel.module "@kobalte/core/i18n"]
 
   (** Gets the locale setting of the browser. *)
@@ -5302,11 +5302,11 @@ module Image = struct
   module Fallback = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Fallback"
+    external component : unit Solidtype.Jsx.component = "Fallback"
     [@@mel.module "@kobalte/core/image"]
   end
 
@@ -5314,11 +5314,11 @@ module Image = struct
   module Img = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Img.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Img"
+    external component : unit Solidtype.Jsx.component = "Img"
     [@@mel.module "@kobalte/core/image"]
   end
 
@@ -5326,13 +5326,13 @@ module Image = struct
   module Root = struct
     module Props = struct
       external check :
-        ?fallbackDelay:float Check.value ->
-        ?onLoadingStatusChange:([ `idle | `loading | `loaded | `error ] -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        ?fallback_delay:float Solidtype.Check.value ->
+        ?on_loading_status_change:([ `idle | `loading | `loaded | `error ] -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/image"]
   end
 
@@ -5345,12 +5345,12 @@ module Link = struct
   module Root = struct
     module Props = struct
       external check :
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.A.check = "check"
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/link"]
   end
 end
@@ -5360,12 +5360,12 @@ module Listbox = struct
   module Item = struct
     module Props = struct
       external check :
-        item:_ Types.CollectionNode.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        item:_ Types.CollectionNode.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/listbox"]
   end
 
@@ -5374,11 +5374,11 @@ module Listbox = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/listbox"]
   end
 
@@ -5387,12 +5387,12 @@ module Listbox = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/listbox"]
   end
 
@@ -5401,11 +5401,11 @@ module Listbox = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/listbox"]
   end
 
@@ -5413,38 +5413,38 @@ module Listbox = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:string array Check.value ->
-        ?defaultValue:string array Check.value ->
-        ?onChange:(string Js.Set.t -> unit) ->
-        ?options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> string) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:('opt_group -> 'option array) ->
-        ?state:Types.ListState.t Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?autoFocus:([ `first | `last ], bool) Types.Either.t Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?shouldUseVirtualFocus:bool Check.value ->
-        ?shouldSelectOnPressUp:bool Check.value ->
-        ?shouldFocusOnHover:bool Check.value ->
-        ?scrollRef:Dom.htmlElement option Solid.accessor Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?selectionMode:[ `none | `single | `multiple ] Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?selectOnFocus:bool Check.value ->
-        ?disallowTypeAhead:bool Check.value ->
-        ?allowsTabNavigation:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?renderItem:('option Types.CollectionNode.t -> Jsx.element) ->
-        ?renderSection:('opt_group Types.CollectionNode.t -> Jsx.element) ->
-        ?scrollToItem:(string -> unit) ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solid.accessor -> Jsx.element, [ `render ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        ?value:string array Solidtype.Check.value ->
+        ?default_value:string array Solidtype.Check.value ->
+        ?on_change:(string Js.Set.t -> unit) ->
+        ?options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> string) ->
+        ?option_text_value:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:('opt_group -> 'option array) ->
+        ?state:Types.ListState.t Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?auto_focus:([ `first | `last ], bool) Types.Either.t Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?should_use_virtual_focus:bool Solidtype.Check.value ->
+        ?should_select_on_press_up:bool Solidtype.Check.value ->
+        ?should_focus_on_hover:bool Solidtype.Check.value ->
+        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?select_on_focus:bool Solidtype.Check.value ->
+        ?disallow_type_ahead:bool Solidtype.Check.value ->
+        ?allows_tab_navigation:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?render_item:('option Types.CollectionNode.t -> Solidtype.Jsx.element) ->
+        ?render_section:('opt_group Types.CollectionNode.t -> Solidtype.Jsx.element) ->
+        ?scroll_to_item:(string -> unit) ->
+        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/listbox"]
   end
 
@@ -5453,11 +5453,11 @@ module Listbox = struct
   module Section = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Section"
+    external component : unit Solidtype.Jsx.component = "Section"
     [@@mel.module "@kobalte/core/listbox"]
   end
 
@@ -5471,12 +5471,12 @@ module Menubar = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5484,36 +5484,36 @@ module Menubar = struct
   module CheckboxItem = struct
     module Props = struct
       external check :
-        ?checked:bool Check.value ->
-        ?defaultChecked:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?indeterminate:bool Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?indeterminate:bool Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CheckboxItem"
+    external component : unit Solidtype.Jsx.component = "CheckboxItem"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5521,11 +5521,11 @@ module Menubar = struct
   module Group = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Group"
+    external component : unit Solidtype.Jsx.component = "Group"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5534,11 +5534,11 @@ module Menubar = struct
   module GroupLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "GroupLabel"
+    external component : unit Solidtype.Jsx.component = "GroupLabel"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5547,11 +5547,11 @@ module Menubar = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5559,15 +5559,15 @@ module Menubar = struct
   module Item = struct
     module Props = struct
       external check :
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5576,11 +5576,11 @@ module Menubar = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5589,12 +5589,12 @@ module Menubar = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5603,11 +5603,11 @@ module Menubar = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5615,33 +5615,33 @@ module Menubar = struct
   module Menu = struct
     module Props = struct
       external check :
-        ?id:string Check.value ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?value:string Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?id:string Solidtype.Check.value ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?value:string Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Menu"
+    external component : unit Solidtype.Jsx.component = "Menu"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5649,14 +5649,14 @@ module Menubar = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5664,15 +5664,15 @@ module Menubar = struct
   module RadioGroup = struct
     module Props = struct
       external check :
-        ?value:'t_value Check.value ->
-        ?defaultValue:'t_value Check.value ->
-        ?onChange:('t_value -> unit) ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'t_value Solidtype.Check.value ->
+        ?default_value:'t_value Solidtype.Check.value ->
+        ?on_change:('t_value -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioGroup"
+    external component : unit Solidtype.Jsx.component = "RadioGroup"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5680,16 +5680,16 @@ module Menubar = struct
   module RadioItem = struct
     module Props = struct
       external check :
-        value:'t_value Check.value ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:'t_value Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioItem"
+    external component : unit Solidtype.Jsx.component = "RadioItem"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5697,19 +5697,19 @@ module Menubar = struct
   module Root = struct
     module Props = struct
       external check :
-        ?defaultValue:string Check.value ->
-        ?value:string Js.Nullable.t Check.value ->
-        ?onValueChange:(string Js.Nullable.t -> unit) ->
-        ?loop:bool Check.value ->
-        ?focusOnAlt:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?autoFocusMenu:bool Check.value ->
-        ?onAutoFocusMenuChange:bool Solid.setter Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?default_value:string Solidtype.Check.value ->
+        ?value:string Js.Nullable.t Solidtype.Check.value ->
+        ?on_value_change:(string Js.Nullable.t -> unit) ->
+        ?loop:bool Solidtype.Check.value ->
+        ?focus_on_alt:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?auto_focus_menu:bool Solidtype.Check.value ->
+        ?on_auto_focus_menu_change:bool Solidtype.Solid.setter Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5717,12 +5717,12 @@ module Menubar = struct
   module Separator = struct
     module Props = struct
       external check :
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Hr.check = "check"
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Separator"
+    external component : unit Solidtype.Jsx.component = "Separator"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5730,24 +5730,24 @@ module Menubar = struct
   module Sub = struct
     module Props = struct
       external check :
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Sub"
+    external component : unit Solidtype.Jsx.component = "Sub"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5755,15 +5755,15 @@ module Menubar = struct
   module SubContent = struct
     module Props = struct
       external check :
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubContent"
+    external component : unit Solidtype.Jsx.component = "SubContent"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5771,13 +5771,13 @@ module Menubar = struct
   module SubTrigger = struct
     module Props = struct
       external check :
-        ?textValue:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?text_value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubTrigger"
+    external component : unit Solidtype.Jsx.component = "SubTrigger"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5785,11 +5785,11 @@ module Menubar = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/menubar"]
   end
 
@@ -5803,11 +5803,11 @@ module Meter = struct
   module Fill = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Fill"
+    external component : unit Solidtype.Jsx.component = "Fill"
     [@@mel.module "@kobalte/core/meter"]
   end
 
@@ -5815,11 +5815,11 @@ module Meter = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/meter"]
   end
 
@@ -5827,15 +5827,15 @@ module Meter = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:float Check.value ->
-        ?minValue:float Check.value ->
-        ?maxValue:float Check.value ->
-        ?getValueLabel:(Types.GetValueLabelParams.t -> string) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:float Solidtype.Check.value ->
+        ?min_value:float Solidtype.Check.value ->
+        ?max_value:float Solidtype.Check.value ->
+        ?get_value_label:(Types.GetValueLabelParams.t -> string) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/meter"]
   end
 
@@ -5844,11 +5844,11 @@ module Meter = struct
   module Track = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Track"
+    external component : unit Solidtype.Jsx.component = "Track"
     [@@mel.module "@kobalte/core/meter"]
   end
 
@@ -5856,11 +5856,11 @@ module Meter = struct
   module ValueLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ValueLabel"
+    external component : unit Solidtype.Jsx.component = "ValueLabel"
     [@@mel.module "@kobalte/core/meter"]
   end
 
@@ -5874,12 +5874,12 @@ module NavigationMenu = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5887,36 +5887,36 @@ module NavigationMenu = struct
   module CheckboxItem = struct
     module Props = struct
       external check :
-        ?checked:bool Check.value ->
-        ?defaultChecked:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?indeterminate:bool Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?indeterminate:bool Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CheckboxItem"
+    external component : unit Solidtype.Jsx.component = "CheckboxItem"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5924,11 +5924,11 @@ module NavigationMenu = struct
   module Group = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Group"
+    external component : unit Solidtype.Jsx.component = "Group"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5937,11 +5937,11 @@ module NavigationMenu = struct
   module GroupLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "GroupLabel"
+    external component : unit Solidtype.Jsx.component = "GroupLabel"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5950,11 +5950,11 @@ module NavigationMenu = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5962,15 +5962,15 @@ module NavigationMenu = struct
   module Item = struct
     module Props = struct
       external check :
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.A.check = "check"
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5979,11 +5979,11 @@ module NavigationMenu = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -5992,12 +5992,12 @@ module NavigationMenu = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6006,11 +6006,11 @@ module NavigationMenu = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6018,33 +6018,33 @@ module NavigationMenu = struct
   module Menu = struct
     module Props = struct
       external check :
-        ?id:string Check.value ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?value:string Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?id:string Solidtype.Check.value ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?value:string Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Menu"
+    external component : unit Solidtype.Jsx.component = "Menu"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6052,14 +6052,14 @@ module NavigationMenu = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6067,15 +6067,15 @@ module NavigationMenu = struct
   module RadioGroup = struct
     module Props = struct
       external check :
-        ?value:'t_value Check.value ->
-        ?defaultValue:'t_value Check.value ->
-        ?onChange:('t_value -> unit) ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'t_value Solidtype.Check.value ->
+        ?default_value:'t_value Solidtype.Check.value ->
+        ?on_change:('t_value -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioGroup"
+    external component : unit Solidtype.Jsx.component = "RadioGroup"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6083,16 +6083,16 @@ module NavigationMenu = struct
   module RadioItem = struct
     module Props = struct
       external check :
-        value:'t_value Check.value ->
-        ?disabled:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?closeOnSelect:bool Check.value ->
-        ?onSelect:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:'t_value Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?close_on_select:bool Solidtype.Check.value ->
+        ?on_select:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "RadioItem"
+    external component : unit Solidtype.Jsx.component = "RadioItem"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6100,35 +6100,35 @@ module NavigationMenu = struct
   module Root = struct
     module Props = struct
       external check :
-        ?delayDuration:float Check.value ->
-        ?skipDelayDuration:float Check.value ->
-        ?forceMount:bool Check.value ->
-        ?autoFocusMenu:bool Check.value ->
-        ?onAutoFocusMenuChange:bool Solid.setter Check.value ->
-        ?defaultValue:string Check.value ->
-        ?value:string Js.Nullable.t Check.value ->
-        ?onValueChange:(string Js.Nullable.t -> unit) ->
-        ?loop:bool Check.value ->
-        ?focusOnAlt:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        ?delay_duration:float Solidtype.Check.value ->
+        ?skip_delay_duration:float Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?auto_focus_menu:bool Solidtype.Check.value ->
+        ?on_auto_focus_menu_change:bool Solidtype.Solid.setter Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?value:string Js.Nullable.t Solidtype.Check.value ->
+        ?on_value_change:(string Js.Nullable.t -> unit) ->
+        ?loop:bool Solidtype.Check.value ->
+        ?focus_on_alt:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6136,12 +6136,12 @@ module NavigationMenu = struct
   module Separator = struct
     module Props = struct
       external check :
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Hr.check = "check"
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Separator"
+    external component : unit Solidtype.Jsx.component = "Separator"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6149,24 +6149,24 @@ module NavigationMenu = struct
   module Sub = struct
     module Props = struct
       external check :
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Sub"
+    external component : unit Solidtype.Jsx.component = "Sub"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6174,15 +6174,15 @@ module NavigationMenu = struct
   module SubContent = struct
     module Props = struct
       external check :
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubContent"
+    external component : unit Solidtype.Jsx.component = "SubContent"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6190,13 +6190,13 @@ module NavigationMenu = struct
   module SubTrigger = struct
     module Props = struct
       external check :
-        ?textValue:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?text_value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "SubTrigger"
+    external component : unit Solidtype.Jsx.component = "SubTrigger"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6204,26 +6204,26 @@ module NavigationMenu = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
   module Viewport = struct
     module Props = struct
       external check :
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Viewport"
+    external component : unit Solidtype.Jsx.component = "Viewport"
     [@@mel.module "@kobalte/core/navigation-menu"]
   end
 
@@ -6235,11 +6235,11 @@ module NumberField = struct
   module DecrementTrigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "DecrementTrigger"
+    external component : unit Solidtype.Jsx.component = "DecrementTrigger"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
@@ -6247,11 +6247,11 @@ module NumberField = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
@@ -6259,45 +6259,45 @@ module NumberField = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
   module HiddenInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInput"
+    external component : unit Solidtype.Jsx.component = "HiddenInput"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
   module IncrementTrigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "IncrementTrigger"
+    external component : unit Solidtype.Jsx.component = "IncrementTrigger"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
@@ -6305,11 +6305,11 @@ module NumberField = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
@@ -6317,32 +6317,32 @@ module NumberField = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:(string, float) Types.Either.t Check.value ->
-        ?defaultValue:(string, float) Types.Either.t Check.value ->
-        ?onChange:(string -> unit) ->
-        ?rawValue:float Check.value ->
-        ?onRawValueChange:(float -> unit) ->
-        ?minValue:float Check.value ->
-        ?maxValue:float Check.value ->
-        ?step:float Check.value ->
-        ?largeStep:float Check.value ->
-        ?changeOnWheel:bool Check.value ->
-        ?format:bool Check.value ->
-        ?formatOptions:Types.NumberFormatOptions2.t Check.value ->
-        ?allowedInput:Js.Re.t Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?textValue:string Check.value ->
-        ?translations:Types.ColorChannelField_Root_Translations.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:(string, float) Types.Either.t Solidtype.Check.value ->
+        ?default_value:(string, float) Types.Either.t Solidtype.Check.value ->
+        ?on_change:(string -> unit) ->
+        ?raw_value:float Solidtype.Check.value ->
+        ?on_raw_value_change:(float -> unit) ->
+        ?min_value:float Solidtype.Check.value ->
+        ?max_value:float Solidtype.Check.value ->
+        ?step:float Solidtype.Check.value ->
+        ?large_step:float Solidtype.Check.value ->
+        ?change_on_wheel:bool Solidtype.Check.value ->
+        ?format:bool Solidtype.Check.value ->
+        ?format_options:Types.NumberFormatOptions2.t Solidtype.Check.value ->
+        ?allowed_input:Js.Re.t Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/number-field"]
   end
 
@@ -6354,56 +6354,56 @@ module Pagination = struct
   module Ellipsis = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Ellipsis"
+    external component : unit Solidtype.Jsx.component = "Ellipsis"
     [@@mel.module "@kobalte/core/pagination"]
   end
 
   module Item = struct
     module Props = struct
       external check :
-        page:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        page:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/pagination"]
   end
 
   module Items = struct
     module Props = struct
       external check :
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Items"
+    external component : unit Solidtype.Jsx.component = "Items"
     [@@mel.module "@kobalte/core/pagination"]
   end
 
   module Next = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Next"
+    external component : unit Solidtype.Jsx.component = "Next"
     [@@mel.module "@kobalte/core/pagination"]
   end
 
   module Previous = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Previous"
+    external component : unit Solidtype.Jsx.component = "Previous"
     [@@mel.module "@kobalte/core/pagination"]
   end
 
@@ -6411,22 +6411,22 @@ module Pagination = struct
   module Root = struct
     module Props = struct
       external check :
-        ?page:float Check.value ->
-        ?defaultPage:float Check.value ->
-        ?onPageChange:(float -> unit) ->
-        count:float Check.value ->
-        ?siblingCount:float Check.value ->
-        ?showFirst:bool Check.value ->
-        ?showLast:bool Check.value ->
-        ?fixedItems:(string, bool) Types.Either.t Check.value ->
-        itemComponent:(Types.Pagination_Root_ItemComponent.t -> Jsx.element) ->
-        ellipsisComponent:(unit -> Jsx.element) ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Nav.check = "check"
+        ?page:float Solidtype.Check.value ->
+        ?default_page:float Solidtype.Check.value ->
+        ?on_page_change:(float -> unit) ->
+        count:float Solidtype.Check.value ->
+        ?sibling_count:float Solidtype.Check.value ->
+        ?show_first:bool Solidtype.Check.value ->
+        ?show_last:bool Solidtype.Check.value ->
+        ?fixed_items:(string, bool) Types.Either.t Solidtype.Check.value ->
+        item_component:(Types.Pagination_Root_ItemComponent.t -> Solidtype.Jsx.element) ->
+        ellipsis_component:(unit -> Solidtype.Jsx.element) ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/pagination"]
   end
 
@@ -6440,11 +6440,11 @@ module Popover = struct
   module Anchor = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Anchor"
+    external component : unit Solidtype.Jsx.component = "Anchor"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6453,12 +6453,12 @@ module Popover = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6466,11 +6466,11 @@ module Popover = struct
   module CloseButton = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CloseButton"
+    external component : unit Solidtype.Jsx.component = "CloseButton"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6478,17 +6478,17 @@ module Popover = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onOpenAutoFocus:(Dom.event -> unit) ->
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_open_auto_focus:(Dom.event -> unit) ->
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6496,11 +6496,11 @@ module Popover = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.P.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6508,14 +6508,14 @@ module Popover = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6523,33 +6523,33 @@ module Popover = struct
   module Root = struct
     module Props = struct
       external check :
-        ?anchorRef:Dom.htmlElement option Solid.accessor Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?id:string Check.value ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?translations:Types.Popover_Root_Translations.t Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?anchor_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?translations:Types.Popover_Root_Translations.t Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6557,11 +6557,11 @@ module Popover = struct
   module Title = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.H2.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Title"
+    external component : unit Solidtype.Jsx.component = "Title"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6569,11 +6569,11 @@ module Popover = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/popover"]
   end
 
@@ -6587,11 +6587,11 @@ module Progress = struct
   module Fill = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Fill"
+    external component : unit Solidtype.Jsx.component = "Fill"
     [@@mel.module "@kobalte/core/progress"]
   end
 
@@ -6599,11 +6599,11 @@ module Progress = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/progress"]
   end
 
@@ -6611,16 +6611,16 @@ module Progress = struct
   module Root = struct
     module Props = struct
       external check :
-        ?indeterminate:bool Check.value ->
-        ?value:float Check.value ->
-        ?minValue:float Check.value ->
-        ?maxValue:float Check.value ->
-        ?getValueLabel:(Types.GetValueLabelParams.t -> string) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?indeterminate:bool Solidtype.Check.value ->
+        ?value:float Solidtype.Check.value ->
+        ?min_value:float Solidtype.Check.value ->
+        ?max_value:float Solidtype.Check.value ->
+        ?get_value_label:(Types.GetValueLabelParams.t -> string) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/progress"]
   end
 
@@ -6629,11 +6629,11 @@ module Progress = struct
   module Track = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Track"
+    external component : unit Solidtype.Jsx.component = "Track"
     [@@mel.module "@kobalte/core/progress"]
   end
 
@@ -6641,11 +6641,11 @@ module Progress = struct
   module ValueLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ValueLabel"
+    external component : unit Solidtype.Jsx.component = "ValueLabel"
     [@@mel.module "@kobalte/core/progress"]
   end
 
@@ -6658,11 +6658,11 @@ module RadioGroup = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6670,12 +6670,12 @@ module RadioGroup = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6683,13 +6683,13 @@ module RadioGroup = struct
   module Item = struct
     module Props = struct
       external check :
-        value:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6697,11 +6697,11 @@ module RadioGroup = struct
   module ItemControl = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemControl"
+    external component : unit Solidtype.Jsx.component = "ItemControl"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6709,11 +6709,11 @@ module RadioGroup = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6722,12 +6722,12 @@ module RadioGroup = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6735,11 +6735,11 @@ module RadioGroup = struct
   module ItemInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemInput"
+    external component : unit Solidtype.Jsx.component = "ItemInput"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6747,11 +6747,11 @@ module RadioGroup = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6759,11 +6759,11 @@ module RadioGroup = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6772,21 +6772,21 @@ module RadioGroup = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Check.value ->
-        ?defaultValue:string Check.value ->
-        ?onChange:(string -> unit) ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?on_change:(string -> unit) ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/radio-group"]
   end
 
@@ -6798,11 +6798,11 @@ module Rating = struct
   module Control = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Control"
+    external component : unit Solidtype.Jsx.component = "Control"
     [@@mel.module "@kobalte/core/rating"]
   end
 
@@ -6810,11 +6810,11 @@ module Rating = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/rating"]
   end
 
@@ -6822,100 +6822,100 @@ module Rating = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module HiddenInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInput"
+    external component : unit Solidtype.Jsx.component = "HiddenInput"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module Item = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module ItemControl = struct
     module Props = struct
       external check :
-        (?children:(Types.RatingItemState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:(Types.RatingItemState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemControl"
+    external component : unit Solidtype.Jsx.component = "ItemControl"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/rating"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:float Check.value ->
-        ?defaultValue:float Check.value ->
-        ?onChange:(float -> unit) ->
-        ?allowHalf:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:float Solidtype.Check.value ->
+        ?default_value:float Solidtype.Check.value ->
+        ?on_change:(float -> unit) ->
+        ?allow_half:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/rating"]
   end
 end
@@ -6926,12 +6926,12 @@ module Search = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -6939,15 +6939,15 @@ module Search = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -6955,11 +6955,11 @@ module Search = struct
   module Control = struct
     module Props = struct
       external check :
-        (?children:('option Types.ComboboxControlState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Control"
+    external component : unit Solidtype.Jsx.component = "Control"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -6967,22 +6967,22 @@ module Search = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/search"]
   end
 
   module HiddenSelect = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Select.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenSelect"
+    external component : unit Solidtype.Jsx.component = "HiddenSelect"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -6991,34 +6991,34 @@ module Search = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/search"]
   end
 
   module Indicator = struct
     module Props = struct
       external check :
-        ?loadingComponent:Jsx.element Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?loading_component:Solidtype.Jsx.element Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Indicator"
+    external component : unit Solidtype.Jsx.component = "Indicator"
     [@@mel.module "@kobalte/core/search"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7026,12 +7026,12 @@ module Search = struct
   module Item = struct
     module Props = struct
       external check :
-        item:_ Types.CollectionNode.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        item:_ Types.CollectionNode.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7040,11 +7040,11 @@ module Search = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7053,11 +7053,11 @@ module Search = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7065,11 +7065,11 @@ module Search = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7077,13 +7077,13 @@ module Search = struct
   module Listbox = struct
     module Props = struct
       external check :
-        ?scrollRef:Dom.htmlElement option Solid.accessor Check.value ->
-        ?scrollToItem:(string -> unit) ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solid.accessor -> Jsx.element, [ `render ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?scroll_to_item:(string -> unit) ->
+        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Listbox"
+    external component : unit Solidtype.Jsx.component = "Listbox"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7091,11 +7091,11 @@ module Search = struct
   module NoResult = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "NoResult"
+    external component : unit Solidtype.Jsx.component = "NoResult"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7103,139 +7103,139 @@ module Search = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/search"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:'option Js.Nullable.t Check.value ->
-        ?defaultValue:'option Check.value ->
-        ?onChange:('option Js.Nullable.t -> unit) ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?translations:Types.Combobox_Root_Translations.t Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?noResetInputOnBlur:bool Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> [ `focus | `input | `manual ] option -> unit) ->
-        ?onInputChange:(string -> unit) ->
-        ?triggerMode:[ `focus | `input | `manual ] Check.value ->
-        ?placeholder:Jsx.element Check.value ->
-        options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> (string, float) Types.Either.t) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionLabel:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:string Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?allowsEmptyCollection:bool Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?closeOnSelection:bool Check.value ->
-        ?removeOnBackspace:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?itemComponent:('option Types.ComboboxBaseItemComponentProps.t -> Jsx.element) ->
-        ?sectionComponent:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Jsx.element) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?debounceOptionsMillisecond:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'option Js.Nullable.t Solidtype.Check.value ->
+        ?default_value:'option Solidtype.Check.value ->
+        ?on_change:('option Js.Nullable.t -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?no_reset_input_on_blur:bool Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> [ `focus | `input | `manual ] option -> unit) ->
+        ?on_input_change:(string -> unit) ->
+        ?trigger_mode:[ `focus | `input | `manual ] Solidtype.Check.value ->
+        ?placeholder:Solidtype.Jsx.element Solidtype.Check.value ->
+        options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> (string, float) Types.Either.t) ->
+        ?option_text_value:('option -> string) ->
+        ?option_label:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:string Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?allows_empty_collection:bool Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?close_on_selection:bool Solidtype.Check.value ->
+        ?remove_on_backspace:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
+        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?debounce_options_millisecond:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/search"]
   end
 
   module Root_multiple = struct
     module Props = struct
       external check :
-        ?value:'option array Check.value ->
-        ?defaultValue:'option array Check.value ->
-        ?onChange:('option array -> unit) ->
-        multiple:bool Check.value ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?translations:Types.Combobox_Root_Translations.t Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?noResetInputOnBlur:bool Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> [ `focus | `input | `manual ] option -> unit) ->
-        ?onInputChange:(string -> unit) ->
-        ?triggerMode:[ `focus | `input | `manual ] Check.value ->
-        ?placeholder:Jsx.element Check.value ->
-        options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> (string, float) Types.Either.t) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionLabel:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:string Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?allowsEmptyCollection:bool Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?closeOnSelection:bool Check.value ->
-        ?removeOnBackspace:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?itemComponent:('option Types.ComboboxBaseItemComponentProps.t -> Jsx.element) ->
-        ?sectionComponent:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Jsx.element) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?debounceOptionsMillisecond:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'option array Solidtype.Check.value ->
+        ?default_value:'option array Solidtype.Check.value ->
+        ?on_change:('option array -> unit) ->
+        multiple:bool Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?translations:Types.Combobox_Root_Translations.t Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?no_reset_input_on_blur:bool Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> [ `focus | `input | `manual ] option -> unit) ->
+        ?on_input_change:(string -> unit) ->
+        ?trigger_mode:[ `focus | `input | `manual ] Solidtype.Check.value ->
+        ?placeholder:Solidtype.Jsx.element Solidtype.Check.value ->
+        options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> (string, float) Types.Either.t) ->
+        ?option_text_value:('option -> string) ->
+        ?option_label:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:string Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?allows_empty_collection:bool Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?close_on_selection:bool Solidtype.Check.value ->
+        ?remove_on_backspace:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?item_component:('option Types.ComboboxBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
+        ?section_component:('opt_group Types.ComboboxBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?debounce_options_millisecond:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7244,11 +7244,11 @@ module Search = struct
   module Section = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Section"
+    external component : unit Solidtype.Jsx.component = "Section"
     [@@mel.module "@kobalte/core/search"]
   end
 
@@ -7261,11 +7261,11 @@ module SegmentedControl = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7273,36 +7273,36 @@ module SegmentedControl = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
   module Indicator = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Indicator"
+    external component : unit Solidtype.Jsx.component = "Indicator"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
   module Item = struct
     module Props = struct
       external check :
-        value:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7310,11 +7310,11 @@ module SegmentedControl = struct
   module ItemControl = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemControl"
+    external component : unit Solidtype.Jsx.component = "ItemControl"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7322,11 +7322,11 @@ module SegmentedControl = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7335,23 +7335,23 @@ module SegmentedControl = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
   module ItemInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemInput"
+    external component : unit Solidtype.Jsx.component = "ItemInput"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7359,11 +7359,11 @@ module SegmentedControl = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7371,33 +7371,33 @@ module SegmentedControl = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Check.value ->
-        ?defaultValue:string Check.value ->
-        ?onChange:(string -> unit) ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?ref:((Dom.htmlElement, Dom.htmlElement -> unit) Types.Either.t) Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?on_change:(string -> unit) ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?ref:((Dom.htmlElement, Dom.htmlElement -> unit) Types.Either.t) Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/segmented-control"]
   end
 
@@ -7411,12 +7411,12 @@ module Select = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7424,15 +7424,15 @@ module Select = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onCloseAutoFocus:(Dom.event -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        ?onFocusOutside:(Dom.customEvent -> unit) ->
-        ?onInteractOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_close_auto_focus:(Dom.event -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        ?on_focus_outside:(Dom.customEvent -> unit) ->
+        ?on_interact_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7440,11 +7440,11 @@ module Select = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7452,23 +7452,23 @@ module Select = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/select"]
   end
 
   module HiddenSelect = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Select.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenSelect"
+    external component : unit Solidtype.Jsx.component = "HiddenSelect"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7477,11 +7477,11 @@ module Select = struct
   module Icon = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Icon"
+    external component : unit Solidtype.Jsx.component = "Icon"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7489,12 +7489,12 @@ module Select = struct
   module Item = struct
     module Props = struct
       external check :
-        item:_ Types.CollectionNode.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        item:_ Types.CollectionNode.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7503,11 +7503,11 @@ module Select = struct
   module ItemDescription = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemDescription"
+    external component : unit Solidtype.Jsx.component = "ItemDescription"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7516,12 +7516,12 @@ module Select = struct
   module ItemIndicator = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemIndicator"
+    external component : unit Solidtype.Jsx.component = "ItemIndicator"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7530,11 +7530,11 @@ module Select = struct
   module ItemLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ItemLabel"
+    external component : unit Solidtype.Jsx.component = "ItemLabel"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7542,11 +7542,11 @@ module Select = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7554,13 +7554,13 @@ module Select = struct
   module Listbox = struct
     module Props = struct
       external check :
-        ?scrollRef:Dom.htmlElement option Solid.accessor Check.value ->
-        ?scrollToItem:(string -> unit) ->
-        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solid.accessor -> Jsx.element, [ `render ]) Check.children -> unit -> unit) Html.Ul.check = "check"
+        ?scroll_ref:Dom.htmlElement option Solidtype.Solid.accessor Solidtype.Check.value ->
+        ?scroll_to_item:(string -> unit) ->
+        (?children:(('option, 'opt_group) Types.Either.t Types.CollectionNode.t Types.Collection.t Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Listbox"
+    external component : unit Solidtype.Jsx.component = "Listbox"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7568,125 +7568,125 @@ module Select = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/select"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:'option Js.Nullable.t Check.value ->
-        ?defaultValue:'option Check.value ->
-        ?onChange:('option Js.Nullable.t -> unit) ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?placeholder:Jsx.element Check.value ->
-        options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> (string, float) Types.Either.t) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:string Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?closeOnSelection:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?itemComponent:('option Types.SelectBaseItemComponentProps.t -> Jsx.element) ->
-        ?sectionComponent:('opt_group Types.SelectBaseSectionComponentProps.t -> Jsx.element) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?disallowTypeAhead:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'option Js.Nullable.t Solidtype.Check.value ->
+        ?default_value:'option Solidtype.Check.value ->
+        ?on_change:('option Js.Nullable.t -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?placeholder:Solidtype.Jsx.element Solidtype.Check.value ->
+        options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> (string, float) Types.Either.t) ->
+        ?option_text_value:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:string Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?close_on_selection:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?item_component:('option Types.SelectBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
+        ?section_component:('opt_group Types.SelectBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?disallow_type_ahead:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/select"]
   end
 
   module Root_multiple = struct
     module Props = struct
       external check :
-        ?value:'option array Check.value ->
-        ?defaultValue:'option array Check.value ->
-        ?onChange:('option array -> unit) ->
-        multiple:bool Check.value ->
-        ?id:string Check.value ->
-        ?disabled:bool Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?placeholder:Jsx.element Check.value ->
-        options:('option, 'opt_group) Types.Either.t array Check.value ->
-        ?optionValue:('option -> (string, float) Types.Either.t) ->
-        ?optionTextValue:('option -> string) ->
-        ?optionDisabled:('option -> bool) ->
-        ?optionGroupChildren:string Check.value ->
-        ?keyboardDelegate:Types.KeyboardDelegate.t Check.value ->
-        ?shouldFocusWrap:bool Check.value ->
-        ?selectionBehavior:[ `toggle | `replace ] Check.value ->
-        ?allowDuplicateSelectionEvents:bool Check.value ->
-        ?disallowEmptySelection:bool Check.value ->
-        ?closeOnSelection:bool Check.value ->
-        ?virtualized:bool Check.value ->
-        ?itemComponent:('option Types.SelectBaseItemComponentProps.t -> Jsx.element) ->
-        ?sectionComponent:('opt_group Types.SelectBaseSectionComponentProps.t -> Jsx.element) ->
-        ?modal:bool Check.value ->
-        ?preventScroll:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?disallowTypeAhead:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:'option array Solidtype.Check.value ->
+        ?default_value:'option array Solidtype.Check.value ->
+        ?on_change:('option array -> unit) ->
+        multiple:bool Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?placeholder:Solidtype.Jsx.element Solidtype.Check.value ->
+        options:('option, 'opt_group) Types.Either.t array Solidtype.Check.value ->
+        ?option_value:('option -> (string, float) Types.Either.t) ->
+        ?option_text_value:('option -> string) ->
+        ?option_disabled:('option -> bool) ->
+        ?option_group_children:string Solidtype.Check.value ->
+        ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
+        ?should_focus_wrap:bool Solidtype.Check.value ->
+        ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+        ?allow_duplicate_selection_events:bool Solidtype.Check.value ->
+        ?disallow_empty_selection:bool Solidtype.Check.value ->
+        ?close_on_selection:bool Solidtype.Check.value ->
+        ?virtualized:bool Solidtype.Check.value ->
+        ?item_component:('option Types.SelectBaseItemComponentProps.t -> Solidtype.Jsx.element) ->
+        ?section_component:('opt_group Types.SelectBaseSectionComponentProps.t -> Solidtype.Jsx.element) ->
+        ?modal:bool Solidtype.Check.value ->
+        ?prevent_scroll:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?disallow_type_ahead:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7695,22 +7695,22 @@ module Select = struct
   module Section = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Section"
+    external component : unit Solidtype.Jsx.component = "Section"
     [@@mel.module "@kobalte/core/select"]
   end
 
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7718,11 +7718,11 @@ module Select = struct
   module Value = struct
     module Props = struct
       external check :
-        (?children:('option Types.SelectValueState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('option Types.SelectValueState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Value"
+    external component : unit Solidtype.Jsx.component = "Value"
     [@@mel.module "@kobalte/core/select"]
   end
 
@@ -7735,12 +7735,12 @@ module Separator = struct
   module Root = struct
     module Props = struct
       external check :
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Hr.check = "check"
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/separator"]
   end
 end
@@ -7749,17 +7749,17 @@ module Skeleton = struct
   module Root = struct
     module Props = struct
       external check :
-        ?visible:bool Check.value ->
-        ?width:float Check.value ->
-        ?height:float Check.value ->
-        ?circle:bool Check.value ->
-        ?radius:float Check.value ->
-        ?animate:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?visible:bool Solidtype.Check.value ->
+        ?width:float Solidtype.Check.value ->
+        ?height:float Solidtype.Check.value ->
+        ?circle:bool Solidtype.Check.value ->
+        ?radius:float Solidtype.Check.value ->
+        ?animate:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/skeleton"]
   end
 end
@@ -7769,11 +7769,11 @@ module Slider = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7781,12 +7781,12 @@ module Slider = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7795,11 +7795,11 @@ module Slider = struct
   module Fill = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Fill"
+    external component : unit Solidtype.Jsx.component = "Fill"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7807,12 +7807,12 @@ module Slider = struct
   module Input = struct
     module Props = struct
       external check :
-        ?style:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        ?style:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7820,50 +7820,50 @@ module Slider = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/slider"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:float array Check.value ->
-        ?defaultValue:float array Check.value ->
-        ?onChange:(float array -> unit) ->
-        ?onChangeEnd:(float array -> unit) ->
-        ?inverted:bool Check.value ->
-        ?minValue:float Check.value ->
-        ?maxValue:float Check.value ->
-        ?step:float Check.value ->
-        ?minStepsBetweenThumbs:float Check.value ->
-        ?getValueLabel:(Types.GetValueLabelParams2.t -> string) ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:float array Solidtype.Check.value ->
+        ?default_value:float array Solidtype.Check.value ->
+        ?on_change:(float array -> unit) ->
+        ?on_change_end:(float array -> unit) ->
+        ?inverted:bool Solidtype.Check.value ->
+        ?min_value:float Solidtype.Check.value ->
+        ?max_value:float Solidtype.Check.value ->
+        ?step:float Solidtype.Check.value ->
+        ?min_steps_between_thumbs:float Solidtype.Check.value ->
+        ?get_value_label:(Types.GetValueLabelParams2.t -> string) ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/slider"]
   end
 
   module Thumb = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Thumb"
+    external component : unit Solidtype.Jsx.component = "Thumb"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7872,11 +7872,11 @@ module Slider = struct
   module Track = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Track"
+    external component : unit Solidtype.Jsx.component = "Track"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7884,11 +7884,11 @@ module Slider = struct
   module ValueLabel = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ValueLabel"
+    external component : unit Solidtype.Jsx.component = "ValueLabel"
     [@@mel.module "@kobalte/core/slider"]
   end
 
@@ -7900,26 +7900,26 @@ module SpinButton = struct
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.ColorChannelField_Root_Translations.t Check.value ->
-        ?value:(string, float) Types.Either.t Check.value ->
-        ?textValue:string Check.value ->
-        ?minValue:float Check.value ->
-        ?maxValue:float Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?onIncrement:(unit -> unit) ->
-        ?onIncrementPage:(unit -> unit) ->
-        ?onDecrement:(unit -> unit) ->
-        ?onDecrementPage:(unit -> unit) ->
-        ?onDecrementToMin:(unit -> unit) ->
-        ?onIncrementToMax:(unit -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+        ?value:(string, float) Types.Either.t Solidtype.Check.value ->
+        ?text_value:string Solidtype.Check.value ->
+        ?min_value:float Solidtype.Check.value ->
+        ?max_value:float Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?on_increment:(unit -> unit) ->
+        ?on_increment_page:(unit -> unit) ->
+        ?on_decrement:(unit -> unit) ->
+        ?on_decrement_page:(unit -> unit) ->
+        ?on_decrement_to_min:(unit -> unit) ->
+        ?on_increment_to_max:(unit -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/spin-button"]
   end
 end
@@ -7929,11 +7929,11 @@ module Switch = struct
   module Control = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Control"
+    external component : unit Solidtype.Jsx.component = "Control"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -7941,11 +7941,11 @@ module Switch = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -7953,12 +7953,12 @@ module Switch = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -7966,11 +7966,11 @@ module Switch = struct
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -7978,11 +7978,11 @@ module Switch = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -7990,20 +7990,20 @@ module Switch = struct
   module Root = struct
     module Props = struct
       external check :
-        ?checked:bool Check.value ->
-        ?defaultChecked:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        ?value:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:(Types.SwitchRootState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?value:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:(Types.SwitchRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -8011,11 +8011,11 @@ module Switch = struct
   module Thumb = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Thumb"
+    external component : unit Solidtype.Jsx.component = "Thumb"
     [@@mel.module "@kobalte/core/switch"]
   end
 
@@ -8028,13 +8028,13 @@ module Tabs = struct
   module Content = struct
     module Props = struct
       external check :
-        value:string Check.value ->
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        value:string Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/tabs"]
   end
 
@@ -8043,11 +8043,11 @@ module Tabs = struct
   module Indicator = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Indicator"
+    external component : unit Solidtype.Jsx.component = "Indicator"
     [@@mel.module "@kobalte/core/tabs"]
   end
 
@@ -8055,11 +8055,11 @@ module Tabs = struct
   module List = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "List"
+    external component : unit Solidtype.Jsx.component = "List"
     [@@mel.module "@kobalte/core/tabs"]
   end
 
@@ -8068,17 +8068,17 @@ module Tabs = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Check.value ->
-        ?defaultValue:string Check.value ->
-        ?onChange:(string -> unit) ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        ?activationMode:[ `manual | `automatic ] Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?on_change:(string -> unit) ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        ?activation_mode:[ `manual | `automatic ] Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/tabs"]
   end
 
@@ -8086,13 +8086,13 @@ module Tabs = struct
   module Trigger = struct
     module Props = struct
       external check :
-        value:string Check.value ->
-        ?disabled:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        value:string Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/tabs"]
   end
 
@@ -8105,11 +8105,11 @@ module TextField = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/text-field"]
   end
 
@@ -8117,23 +8117,23 @@ module TextField = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/text-field"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/text-field"]
   end
 
@@ -8141,11 +8141,11 @@ module TextField = struct
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Label.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/text-field"]
   end
 
@@ -8153,20 +8153,20 @@ module TextField = struct
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Check.value ->
-        ?defaultValue:string Check.value ->
-        ?onChange:(string -> unit) ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?on_change:(string -> unit) ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/text-field"]
   end
 
@@ -8174,13 +8174,13 @@ module TextField = struct
   module TextArea = struct
     module Props = struct
       external check :
-        ?autoResize:bool Check.value ->
-        ?submitOnEnter:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Textarea.check = "check"
+        ?auto_resize:bool Solidtype.Check.value ->
+        ?submit_on_enter:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Textarea.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "TextArea"
+    external component : unit Solidtype.Jsx.component = "TextArea"
     [@@mel.module "@kobalte/core/text-field"]
   end
 
@@ -8193,11 +8193,11 @@ module TimeField = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/time-field"]
   end
 
@@ -8205,84 +8205,84 @@ module TimeField = struct
   module ErrorMessage = struct
     module Props = struct
       external check :
-        ?forceMount:bool Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?force_mount:bool Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ErrorMessage"
+    external component : unit Solidtype.Jsx.component = "ErrorMessage"
     [@@mel.module "@kobalte/core/time-field"]
   end
 
   module HiddenInput = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Input.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "HiddenInput"
+    external component : unit Solidtype.Jsx.component = "HiddenInput"
     [@@mel.module "@kobalte/core/time-field"]
   end
 
   module Input = struct
     module Props = struct
       external check :
-        (?children:([ `hour | `minute | `second | `dayPeriod ] Solid.accessor -> Jsx.element, [ `render ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:([ `hour | `minute | `second | `dayPeriod ] Solidtype.Solid.accessor -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Input"
+    external component : unit Solidtype.Jsx.component = "Input"
     [@@mel.module "@kobalte/core/time-field"]
   end
 
   module Label = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Span.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Label"
+    external component : unit Solidtype.Jsx.component = "Label"
     [@@mel.module "@kobalte/core/time-field"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:Types.Time.t Check.value ->
-        ?defaultValue:Types.Time.t Check.value ->
-        ?onChange:(Types.Time.t -> unit) ->
-        ?hourCycle:float Check.value ->
-        ?granularity:([ `hour | `minute | `second ], Types.TimeField_Root_Granularity.t) Types.Either.t Check.value ->
-        ?forceLeadingZeros:bool Check.value ->
-        ?placeholder:Types.Time.t Check.value ->
-        ?min:Types.Time.t Check.value ->
-        ?max:Types.Time.t Check.value ->
-        ?id:string Check.value ->
-        ?name:string Check.value ->
-        ?validationState:[ `valid | `invalid ] Check.value ->
-        ?required:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?readOnly:bool Check.value ->
-        ?translations:Types.TimeField_Root_Translations.t Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:Types.Time.t Solidtype.Check.value ->
+        ?default_value:Types.Time.t Solidtype.Check.value ->
+        ?on_change:(Types.Time.t -> unit) ->
+        ?hour_cycle:float Solidtype.Check.value ->
+        ?granularity:([ `hour | `minute | `second ], Types.TimeField_Root_Granularity.t) Types.Either.t Solidtype.Check.value ->
+        ?force_leading_zeros:bool Solidtype.Check.value ->
+        ?placeholder:Types.Time.t Solidtype.Check.value ->
+        ?min:Types.Time.t Solidtype.Check.value ->
+        ?max:Types.Time.t Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        ?translations:Types.TimeField_Root_Translations.t Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/time-field"]
   end
 
   module Segment = struct
     module Props = struct
       external check :
-        segment:[ `hour | `minute | `second | `dayPeriod ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        segment:[ `hour | `minute | `second | `dayPeriod ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Segment"
+    external component : unit Solidtype.Jsx.component = "Segment"
     [@@mel.module "@kobalte/core/time-field"]
   end
 end
@@ -8292,11 +8292,11 @@ module Toast = struct
   module CloseButton = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "CloseButton"
+    external component : unit Solidtype.Jsx.component = "CloseButton"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8304,11 +8304,11 @@ module Toast = struct
   module Description = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Description"
+    external component : unit Solidtype.Jsx.component = "Description"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8317,11 +8317,11 @@ module Toast = struct
   module List = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Ol.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ol.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "List"
+    external component : unit Solidtype.Jsx.component = "List"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8330,11 +8330,11 @@ module Toast = struct
   module ProgressFill = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ProgressFill"
+    external component : unit Solidtype.Jsx.component = "ProgressFill"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8343,11 +8343,11 @@ module Toast = struct
   module ProgressTrack = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "ProgressTrack"
+    external component : unit Solidtype.Jsx.component = "ProgressTrack"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8356,44 +8356,44 @@ module Toast = struct
   module Region = struct
     module Props = struct
       external check :
-        ?translations:Types.Toast_Region_Translations.t Check.value ->
-        ?hotkey:string array Check.value ->
-        ?duration:float Check.value ->
-        ?limit:float Check.value ->
-        ?swipeDirection:[ `left | `right | `up | `down ] Check.value ->
-        ?swipeThreshold:float Check.value ->
-        ?pauseOnInteraction:bool Check.value ->
-        ?pauseOnPageIdle:bool Check.value ->
-        ?topLayer:bool Check.value ->
-        ?regionId:string Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?translations:Types.Toast_Region_Translations.t Solidtype.Check.value ->
+        ?hotkey:string array Solidtype.Check.value ->
+        ?duration:float Solidtype.Check.value ->
+        ?limit:float Solidtype.Check.value ->
+        ?swipe_direction:[ `left | `right | `up | `down ] Solidtype.Check.value ->
+        ?swipe_threshold:float Solidtype.Check.value ->
+        ?pause_on_interaction:bool Solidtype.Check.value ->
+        ?pause_on_page_idle:bool Solidtype.Check.value ->
+        ?top_layer:bool Solidtype.Check.value ->
+        ?region_id:string Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Region"
+    external component : unit Solidtype.Jsx.component = "Region"
     [@@mel.module "@kobalte/core/toast"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?translations:Types.Toast_Root_Translations.t Check.value ->
-        toastId:float Check.value ->
-        ?priority:[ `high | `low ] Check.value ->
-        ?duration:float Check.value ->
-        ?persistent:bool Check.value ->
-        ?onPause:(unit -> unit) ->
-        ?onResume:(unit -> unit) ->
-        ?onSwipeStart:(Types.SwipeEvent.t -> unit) ->
-        ?onSwipeMove:(Types.SwipeEvent.t -> unit) ->
-        ?onSwipeCancel:(Types.SwipeEvent.t -> unit) ->
-        ?onSwipeEnd:(Types.SwipeEvent.t -> unit) ->
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Li.check = "check"
+        ?translations:Types.Toast_Root_Translations.t Solidtype.Check.value ->
+        toast_id:float Solidtype.Check.value ->
+        ?priority:[ `high | `low ] Solidtype.Check.value ->
+        ?duration:float Solidtype.Check.value ->
+        ?persistent:bool Solidtype.Check.value ->
+        ?on_pause:(unit -> unit) ->
+        ?on_resume:(unit -> unit) ->
+        ?on_swipe_start:(Types.SwipeEvent.t -> unit) ->
+        ?on_swipe_move:(Types.SwipeEvent.t -> unit) ->
+        ?on_swipe_cancel:(Types.SwipeEvent.t -> unit) ->
+        ?on_swipe_end:(Types.SwipeEvent.t -> unit) ->
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8401,11 +8401,11 @@ module Toast = struct
   module Title = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Title"
+    external component : unit Solidtype.Jsx.component = "Title"
     [@@mel.module "@kobalte/core/toast"]
   end
 
@@ -8422,14 +8422,14 @@ module ToggleButton = struct
   module Root = struct
     module Props = struct
       external check :
-        ?pressed:bool Check.value ->
-        ?defaultPressed:bool Check.value ->
-        ?onChange:(bool -> unit) ->
-        (?children:(Types.ToggleButtonRootState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        ?pressed:bool Solidtype.Check.value ->
+        ?default_pressed:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/toggle-button"]
   end
 end
@@ -8438,45 +8438,45 @@ module ToggleGroup = struct
   module Item = struct
     module Props = struct
       external check :
-        value:string Check.value ->
-        (?children:(Types.ToggleButtonRootState.t -> Jsx.element, [ `nodes | `render ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        value:string Solidtype.Check.value ->
+        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Item"
+    external component : unit Solidtype.Jsx.component = "Item"
     [@@mel.module "@kobalte/core/toggle-group"]
   end
 
   module Root = struct
     module Props = struct
       external check :
-        ?value:string Js.Nullable.t Check.value ->
-        ?defaultValue:string Check.value ->
-        ?onChange:(string Js.Nullable.t -> unit) ->
-        ?disabled:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string Js.Nullable.t Solidtype.Check.value ->
+        ?default_value:string Solidtype.Check.value ->
+        ?on_change:(string Js.Nullable.t -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/toggle-group"]
   end
 
   module Root_multiple = struct
     module Props = struct
       external check :
-        ?value:string array Check.value ->
-        ?defaultValue:string array Check.value ->
-        ?onChange:(string array -> unit) ->
-        multiple:bool Check.value ->
-        ?disabled:bool Check.value ->
-        ?orientation:[ `horizontal | `vertical ] Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?value:string array Solidtype.Check.value ->
+        ?default_value:string array Solidtype.Check.value ->
+        ?on_change:(string array -> unit) ->
+        multiple:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/toggle-group"]
   end
 
@@ -8490,12 +8490,12 @@ module Tooltip = struct
   module Arrow = struct
     module Props = struct
       external check :
-        ?size:float Check.value ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?size:float Solidtype.Check.value ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Arrow"
+    external component : unit Solidtype.Jsx.component = "Arrow"
     [@@mel.module "@kobalte/core/tooltip"]
   end
 
@@ -8503,13 +8503,13 @@ module Tooltip = struct
   module Content = struct
     module Props = struct
       external check :
-        ?onEscapeKeyDown:(Dom.keyboardEvent -> unit) ->
-        ?onPointerDownOutside:(Dom.customEvent -> unit) ->
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Div.check = "check"
+        ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
+        ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Content"
+    external component : unit Solidtype.Jsx.component = "Content"
     [@@mel.module "@kobalte/core/tooltip"]
   end
 
@@ -8517,14 +8517,14 @@ module Tooltip = struct
   module Portal = struct
     module Props = struct
       external check :
-        ?mount:Dom.node Check.value ->
-        ?useShadow:bool Check.value ->
-        ?isSVG:bool Check.value ->
-        children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?mount:Dom.node Solidtype.Check.value ->
+        ?use_shadow:bool Solidtype.Check.value ->
+        ?is_svg:bool Solidtype.Check.value ->
+        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Portal"
+    external component : unit Solidtype.Jsx.component = "Portal"
     [@@mel.module "@kobalte/core/tooltip"]
   end
 
@@ -8533,36 +8533,36 @@ module Tooltip = struct
   module Root = struct
     module Props = struct
       external check :
-        ?open_:bool Check.value ->
-        ?defaultOpen:bool Check.value ->
-        ?onOpenChange:(bool -> unit) ->
-        ?disabled:bool Check.value ->
-        ?triggerOnFocusOnly:bool Check.value ->
-        ?openDelay:float Check.value ->
-        ?closeDelay:float Check.value ->
-        ?skipDelayDuration:float Check.value ->
-        ?ignoreSafeArea:bool Check.value ->
-        ?forceMount:bool Check.value ->
-        ?id:string Check.value ->
-        ?onCurrentPlacementChange:(string -> unit) ->
-        ?getAnchorRect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
-        ?placement:string Check.value ->
-        ?gutter:float Check.value ->
-        ?shift:float Check.value ->
-        ?flip:(string, bool) Types.Either.t Check.value ->
-        ?slide:bool Check.value ->
-        ?overlap:bool Check.value ->
-        ?sameWidth:bool Check.value ->
-        ?fitViewport:bool Check.value ->
-        ?hideWhenDetached:bool Check.value ->
-        ?detachedPadding:float Check.value ->
-        ?arrowPadding:float Check.value ->
-        ?overflowPadding:float Check.value ->
-        ?children:('f, [ `nodes ]) Check.children -> unit -> unit = "check"
+        ?open_:bool Solidtype.Check.value ->
+        ?default_open:bool Solidtype.Check.value ->
+        ?on_open_change:(bool -> unit) ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?trigger_on_focus_only:bool Solidtype.Check.value ->
+        ?open_delay:float Solidtype.Check.value ->
+        ?close_delay:float Solidtype.Check.value ->
+        ?skip_delay_duration:float Solidtype.Check.value ->
+        ?ignore_safe_area:bool Solidtype.Check.value ->
+        ?force_mount:bool Solidtype.Check.value ->
+        ?id:string Solidtype.Check.value ->
+        ?on_current_placement_change:(string -> unit) ->
+        ?get_anchor_rect:(Dom.htmlElement option -> Types.AnchorRect.t option) ->
+        ?placement:string Solidtype.Check.value ->
+        ?gutter:float Solidtype.Check.value ->
+        ?shift:float Solidtype.Check.value ->
+        ?flip:(string, bool) Types.Either.t Solidtype.Check.value ->
+        ?slide:bool Solidtype.Check.value ->
+        ?overlap:bool Solidtype.Check.value ->
+        ?same_width:bool Solidtype.Check.value ->
+        ?fit_viewport:bool Solidtype.Check.value ->
+        ?hide_when_detached:bool Solidtype.Check.value ->
+        ?detached_padding:float Solidtype.Check.value ->
+        ?arrow_padding:float Solidtype.Check.value ->
+        ?overflow_padding:float Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Root"
+    external component : unit Solidtype.Jsx.component = "Root"
     [@@mel.module "@kobalte/core/tooltip"]
   end
 
@@ -8570,11 +8570,11 @@ module Tooltip = struct
   module Trigger = struct
     module Props = struct
       external check :
-        (?children:('f, [ `nodes ]) Check.children -> unit -> unit) Html.Button.check = "check"
+        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
-    external component : unit Jsx.component = "Trigger"
+    external component : unit Solidtype.Jsx.component = "Trigger"
     [@@mel.module "@kobalte/core/tooltip"]
   end
 

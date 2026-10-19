@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Rating = K.Rating
 module Item_state = K.Types.RatingItemState
 module For = Solidtype.For
@@ -9,7 +9,7 @@ module S = Solidtype.Solid
 (* Rating.HiddenInput is left out: axe asks for the text input it renders to be
    labelled, and its binding takes none of an input's attributes. *)
 let island () =
-  <Rating.Root defaultValue=3.>
+  <Rating.Root default_value=3.>
     <Rating.Label>"Score"</Rating.Label>
     <Rating.Control>
       <For

@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Listbox = K.Listbox
 module Node = K.Types.CollectionNode
 module Jsx = Solidtype.Jsx
@@ -9,15 +9,16 @@ let island () =
     aria_label="Fruit"
     options=(fun () ->
               Array.map K.Types.Either.left [| "Apple"; "Banana"; "Cherry" |])
-    renderItem=(fun item ->
-                 <Listbox.Item item=(fun () -> item)>
-                   <Listbox.ItemLabel>
-                     (fun () -> Jsx.string (Node.raw_value item))
-                   </Listbox.ItemLabel>
-                   <Listbox.ItemDescription>
-                     (fun () -> Jsx.string (Node.raw_value item ^ " in season"))
-                   </Listbox.ItemDescription>
-                 </Listbox.Item>)
+    render_item=(fun item ->
+                  <Listbox.Item item=(fun () -> item)>
+                    <Listbox.ItemLabel>
+                      (fun () -> Jsx.string (Node.raw_value item))
+                    </Listbox.ItemLabel>
+                    <Listbox.ItemDescription>
+                      (fun () ->
+                        Jsx.string (Node.raw_value item ^ " in season"))
+                    </Listbox.ItemDescription>
+                  </Listbox.Item>)
   />
 
 external twin : unit -> Jsx.element = "make"

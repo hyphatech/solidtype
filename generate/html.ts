@@ -1,15 +1,18 @@
 // Writes src/html.mli -- each element's attributes, as OCaml types -- from
 // Solid's own JSX types, so an attribute's type is Solid's and is never typed
-// by hand. `make generate` writes it; the test run's `--check` fails when the
-// file differs from what Solid's types give.
+// by hand, and ppx/html_names.ml, the attributes whose JavaScript name the
+// ppx cannot spell back by rule. `make generate` writes them; the test run's
+// `--check` fails when a file differs from what Solid's types give.
 
 import ts from "typescript";
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { keywords, record, table } from "./names.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const jsx = `${root}node_modules/solid-js/types/jsx.d.ts`;
 const out = `${root}src/html.mli`;
+const namesOut = `${root}ppx/html_names.ml`;
 const solid = JSON.parse(readFileSync(`${root}node_modules/solid-js/package.json`, "utf8")).version as string;
 
 // The types Melange's Dom module has, which an event or an element maps to,
@@ -21,14 +24,6 @@ const domTypes = new Set(
     .match(/^type [a-zA-Z_]+/gm)
     ?.map((t) => t.slice(5)) ?? [],
 );
-
-const keywords = new Set([
-  "and", "as", "assert", "begin", "class", "constraint", "do", "done", "downto", "effect", "else",
-  "end", "exception", "external", "false", "for", "fun", "function", "functor", "if", "in", "include",
-  "inherit", "initializer", "lazy", "let", "match", "method", "module", "mutable", "new", "nonrec",
-  "object", "of", "open", "or", "private", "rec", "sig", "struct", "then", "to", "true", "try", "type",
-  "val", "virtual", "when", "while", "with",
-]);
 
 const program = ts.createProgram([jsx], { strict: true, skipLibCheck: true, noEmit: true });
 const checker = program.getTypeChecker();
@@ -47,12 +42,16 @@ if (!ns?.body || !ts.isModuleBlock(ns.body)) throw new Error("no JSX namespace")
 const interfaces = new Map<string, ts.InterfaceDeclaration>();
 for (const s of ns.body.statements) if (ts.isInterfaceDeclaration(s)) interfaces.set(s.name.text, s);
 
-// An attribute's OCaml name: a keyword takes a trailing underscore, and a
-// hyphen is an underscore, which ppx_solidtype writes back.
+// Each attribute's name as a user writes it, with its JavaScript name.
+const names = new Map<string, string>();
+
+// An attribute's OCaml name, by the one spelling rule. A handler Solid also
+// takes in lower case, onclick beside onClick, is the same handler, so it
+// has the one name, on_click.
 function label(name: string): string | null {
   if (!/^[a-z][A-Za-z0-9-]*$/.test(name)) return null;
-  const l = name.replace(/-/g, "_");
-  return keywords.has(l) ? `${l}_` : l;
+  if (/^on[a-z]/.test(name)) return null;
+  return record(names, name);
 }
 
 const eventUnions = new Set([
@@ -184,8 +183,10 @@ let text = `(** Each element's attributes, as their types: [Html.Div.class_] is
     [string]. Generated from the JSX types of solid-js ${solid} by
     [generate/html.ts]; never edited by hand.
 
-    An attribute named after an OCaml keyword takes a trailing underscore,
-    [class_], and a hyphen is an underscore, [aria_label]. *)
+    An attribute is named as Solid's JSX names it, by one rule: a capital is
+    an underscore and the lower case, [read_only], a hyphen an underscore,
+    [aria_label], and an OCaml keyword takes a trailing underscore,
+    [class_]. *)
 
 module type Dom_attributes = sig
 ${signature(common, false, true)}
@@ -204,11 +205,15 @@ if (unmapped.size > 0 && process.argv.includes("--unmapped")) {
   for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 }
 
+const namesText = table(names, "generate/html.ts");
 if (process.argv.includes("--check")) {
-  if (readFileSync(out, "utf8") !== text) {
-    console.error(`${out} is not what Solid's types give: run make generate`);
-    process.exit(1);
+  for (const [file, want] of [[out, text], [namesOut, namesText]] as const) {
+    if (readFileSync(file, "utf8") !== want) {
+      console.error(`${file} is not what Solid's types give: run make generate`);
+      process.exit(1);
+    }
   }
 } else {
   writeFileSync(out, text);
+  writeFileSync(namesOut, namesText);
 }

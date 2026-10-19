@@ -1,18 +1,21 @@
-// Writes src/kobalte.ml -- every Kobalte component, part by part, its hooks
-// and utilities, and the types they name -- from Kobalte's own declarations,
-// so a binding is Kobalte's types and is never typed by hand. `make
-// generate` writes it; the test run's `--check` fails when the file differs
-// from what Kobalte's types give.
+// Writes kobalte/solidtype_kobalte.ml -- every Kobalte component, part by
+// part, its hooks and utilities, and the types they name -- from Kobalte's
+// own declarations, so a binding is Kobalte's types and is never typed by
+// hand, and ppx/kobalte_names.ml, the props whose JavaScript name the ppx
+// cannot spell back by rule. `make generate` writes them; the test run's
+// `--check` fails when a file differs from what Kobalte's types give.
 
 import ts from "typescript";
 import { readdirSync, existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { keywords, label, record, snake, table } from "./names.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 // Kobalte's real path: a package manager that links each package's
 // dependencies beside it, as Bun does, is resolved from there.
 const dist = realpathSync(`${root}node_modules/@kobalte/core/dist`);
-const out = `${root}src/kobalte.ml`;
+const out = `${root}kobalte/solidtype_kobalte.ml`;
+const namesOut = `${root}ppx/kobalte_names.ml`;
 const kobalte = JSON.parse(readFileSync(`${root}node_modules/@kobalte/core/package.json`, "utf8")).version as string;
 
 // The building blocks Kobalte's components are made of, which its
@@ -29,13 +32,6 @@ const htmlModules = new Set(
   readFileSync(`${root}src/html.mli`, "utf8").match(/^module [A-Z][A-Za-z0-9]* :/gm)?.map((m) => m.slice(7, -2)) ?? [],
 );
 
-const keywords = new Set([
-  "and", "as", "assert", "begin", "class", "constraint", "do", "done", "downto", "effect", "else",
-  "end", "exception", "external", "false", "for", "fun", "function", "functor", "if", "in", "include",
-  "inherit", "initializer", "lazy", "let", "match", "method", "module", "mutable", "new", "nonrec",
-  "object", "of", "open", "or", "private", "rec", "sig", "struct", "then", "to", "true", "try", "type",
-  "val", "virtual", "when", "while", "with",
-]);
 
 const entries = readdirSync(dist)
   .filter((d) => existsSync(`${dist}/${d}/index.d.ts`) && !blocks.has(d))
@@ -52,12 +48,13 @@ const checker = program.getTypeChecker();
 
 const pascal = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
 const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-const snake = (s: string) =>
-  s.replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/([A-Z])([A-Z][a-z])/g, "$1_$2").toLowerCase();
 const value = (name: string) => (keywords.has(name) ? `${name}_` : name);
 const named = (name: string) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
 
 const unmapped = new Map<string, string>();
+
+// Each prop's name as a user writes it, with its JavaScript name.
+const names = new Map<string, string>();
 
 // The named object types the bindings reach, each a module of Types.
 type Named = {
@@ -165,7 +162,7 @@ const isElement = (t: ts.Type) => t.aliasSymbol?.name === "Element" && moduleOf(
 // anywhere else -- a callback's argument, a result -- it is an option.
 function map(t: ts.Type, vars: Vars, where: string, absent = false): string | null {
   if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
-  if (isElement(t)) return "Jsx.element";
+  if (isElement(t)) return "Solidtype.Jsx.element";
   // Exclude<Option, null> and its kind: the type it narrows.
   if (t.flags & ts.TypeFlags.Conditional) return map((t as ts.ConditionalType).checkType, vars, where);
   if (t.flags & ts.TypeFlags.Substitution) return map((t as ts.SubstitutionType).baseType, vars, where);
@@ -213,9 +210,9 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): string | null 
       (m) => !isJsxMember(m) && !isString(m) && !m.isStringLiteral() &&
         !(m.flags & (ts.TypeFlags.NumberLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Null)),
     );
-    if (rest.length === 0) return "Jsx.element";
+    if (rest.length === 0) return "Solidtype.Jsx.element";
     const others = mapUnion(rest, vars, where);
-    return others ? `(Jsx.element, ${others}) §Either§` : null;
+    return others ? `(Solidtype.Jsx.element, ${others}) §Either§` : null;
   }
   if (members.some(isString)) {
     const others = members.filter((m) => !isString(m) && !m.isStringLiteral());
@@ -269,17 +266,17 @@ function mapOne(t: ts.Type, vars: Vars, where: string): string | null {
   if (alias?.name === "Accessor") {
     const arg = t.aliasTypeArguments?.[0];
     const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} Solid.accessor` : null;
+    return a ? `${a} Solidtype.Solid.accessor` : null;
   }
   if (alias?.name === "Setter") {
     const arg = t.aliasTypeArguments?.[0];
     const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} Solid.setter` : null;
+    return a ? `${a} Solidtype.Solid.setter` : null;
   }
   const symbol = t.getSymbol();
   const name = symbol?.name ?? "";
-  if (name === "Element" && moduleOf(symbol!) === "solid-js") return "Jsx.element";
-  if (alias?.name === "Element" || /JSX\.Element/.test(checker.typeToString(t))) return "Jsx.element";
+  if (name === "Element" && moduleOf(symbol!) === "solid-js") return "Solidtype.Jsx.element";
+  if (alias?.name === "Element" || /JSX\.Element/.test(checker.typeToString(t))) return "Solidtype.Jsx.element";
   if (checker.isArrayType(t)) {
     const arg = checker.getTypeArguments(t as ts.TypeReference)[0];
     const a = arg ? map(arg, vars, where) : null;
@@ -447,7 +444,7 @@ function part(entry: string, name: string, decl: ts.SignatureDeclaration, option
   // ComponentProps<"input">, and its options are that interface's own.
   const fixed = polymorphic ? null : fixedElement(decl);
   const element = polymorphic ?? fixed?.element ?? null;
-  const commons = commonProps(decl).filter((p) => !attributeNames.has(p.name) && !attributeNames.has(`${p.name}_`));
+  const commons = commonProps(decl).filter((p) => !attributeNames.has(label(p.name)));
   // A part with neither options nor an element, I18nProvider, takes the
   // props its signature declares.
   const declaredProps = (): ts.Symbol[] => {
@@ -456,7 +453,7 @@ function part(entry: string, name: string, decl: ts.SignatureDeclaration, option
   };
   const own = [...(options ? checker.getPropertiesOfType(options) : (fixed?.own ?? (polymorphic ? [] : declaredProps()))), ...commons];
   const args: string[] = [];
-  let children = "?children:('f, [ `nodes ]) Check.children ->";
+  let children = "?children:('f, [ `nodes ]) Solidtype.Check.children ->";
   for (const p of own) {
     if (!named(p.name)) continue;
     const pt = checker.getTypeOfSymbol(p);
@@ -471,22 +468,22 @@ function part(entry: string, name: string, decl: ts.SignatureDeclaration, option
     }
     if (p.name === "children") {
       // Children: elements, a function of the part's own, or either.
-      const either = t.match(/^\(Jsx\.element, (.*)\) §Either§$/);
+      const either = t.match(/^\(Solidtype\.Jsx\.element, (.*)\) §Either§$/);
       const q = optional ? "?" : "";
       children = either
-        ? `${q}children:(${either[1]}, [ \`nodes | \`render ]) Check.children ->`
+        ? `${q}children:(${either[1]}, [ \`nodes | \`render ]) Solidtype.Check.children ->`
         : topArrow(t)
-          ? `${q}children:(${t}, [ \`render ]) Check.children ->`
-          : `${q}children:('f, [ \`nodes ]) Check.children ->`;
+          ? `${q}children:(${t}, [ \`render ]) Solidtype.Check.children ->`
+          : `${q}children:('f, [ \`nodes ]) Solidtype.Check.children ->`;
       continue;
     }
-    const label = value(p.name);
-    const checked = topArrow(t) ? wrap(t) : `${wrap(t)} Check.value`;
-    args.push(`${optional ? "?" : ""}${label}:${checked} ->`);
+    const name = record(names, p.name);
+    const checked = topArrow(t) ? wrap(t) : `${wrap(t)} Solidtype.Check.value`;
+    args.push(`${optional ? "?" : ""}${name}:${checked} ->`);
   }
   const html = element ? element.charAt(0).toUpperCase() + element.slice(1) : null;
   const tail = `${children} unit -> unit`;
-  const check = html && htmlModules.has(html) ? `(${tail}) Html.${html}.check` : tail;
+  const check = html && htmlModules.has(html) ? `(${tail}) Solidtype.Html.${html}.check` : tail;
   return [
     `    module Props = struct`,
     `      external check :`,
@@ -495,7 +492,7 @@ function part(entry: string, name: string, decl: ts.SignatureDeclaration, option
     `      [@@mel.module "vite-plugin-solidtype/markers"]`,
     `    end`,
     ``,
-    `    external component : unit Jsx.component = "${js}"`,
+    `    external component : unit Solidtype.Jsx.component = "${js}"`,
     `    [@@mel.module "@kobalte/core/${entry}"]`,
   ].join("\n");
 }
@@ -725,11 +722,15 @@ ${outside(body)}`;
 
 if (process.argv.includes("--unmapped")) for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 
+const namesText = table(names, "generate/kobalte.ts");
 if (process.argv.includes("--check")) {
-  if (readFileSync(out, "utf8") !== text) {
-    console.error(`${out} is not what Kobalte's types give: run make generate`);
-    process.exit(1);
+  for (const [file, want] of [[out, text], [namesOut, namesText]] as const) {
+    if (readFileSync(file, "utf8") !== want) {
+      console.error(`${file} is not what Kobalte's types give: run make generate`);
+      process.exit(1);
+    }
   }
 } else {
   writeFileSync(out, text);
+  writeFileSync(namesOut, namesText);
 }

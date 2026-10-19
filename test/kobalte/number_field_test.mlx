@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module NumberField = K.NumberField
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
@@ -8,12 +8,12 @@ let island () =
   let raw, set_raw = S.create_signal 5. in
   <div>
     <NumberField.Root
-      defaultValue=(fun () -> K.Types.Either.right 5.)
-      onRawValueChange=(S.set set_raw)
-      minValue=0.
-      maxValue=10.
+      default_value=(fun () -> K.Types.Either.right 5.)
+      on_raw_value_change=(S.set set_raw)
+      min_value=0.
+      max_value=10.
       step=1.
-      largeStep=5.>
+      large_step=5.>
       <NumberField.Label>"Quantity"</NumberField.Label>
       <NumberField.HiddenInput />
       <NumberField.DecrementTrigger aria_label="Decrease">

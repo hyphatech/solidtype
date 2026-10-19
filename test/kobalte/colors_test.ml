@@ -1,5 +1,5 @@
-module Colors = Solidtype.Kobalte.Colors
-module Types = Solidtype.Kobalte.Types
+module Colors = Solidtype_kobalte.Colors
+module Types = Solidtype_kobalte.Types
 module Color = Types.Color
 module Range = Types.ColorChannelRange
 module E = Jest.Expect

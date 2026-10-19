@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Field = K.TimeField
 module Time = K.Types.Time
 module Jsx = Solidtype.Jsx
@@ -10,16 +10,16 @@ let part = function Some n -> Printf.sprintf "%.0f" n | None -> "-"
 let island () =
   let changed, set_changed = S.create_signal "nothing" in
   <Field.Root
-    defaultValue=(fun () -> Time.make ~hour:9. ~minute:30. ~second:0. ())
+    default_value=(fun () -> Time.make ~hour:9. ~minute:30. ~second:0. ())
     granularity=(fun () -> K.Types.Either.left `second)
-    onChange=(fun time ->
-               S.set set_changed
-                 (String.concat ":"
-                    [
-                      part (Time.hour time);
-                      part (Time.minute time);
-                      part (Time.second time);
-                    ]))>
+    on_change=(fun time ->
+                S.set set_changed
+                  (String.concat ":"
+                     [
+                       part (Time.hour time);
+                       part (Time.minute time);
+                       part (Time.second time);
+                     ]))>
     <Field.Label>"Alarm"</Field.Label>
     <Field.Input>
       (fun segment -> <Field.Segment segment=(fun () -> S.get segment) />)

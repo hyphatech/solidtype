@@ -1,8 +1,8 @@
 module H = Harness
-module Tabs = Solidtype.Kobalte.Tabs
+module Tabs = Solidtype_kobalte.Tabs
 
 let island () =
-  <Tabs.Root defaultValue="profile">
+  <Tabs.Root default_value="profile">
     <Tabs.List aria_label="Settings">
       <Tabs.Trigger value="profile">"Profile"</Tabs.Trigger>
       <Tabs.Trigger value="account">"Account"</Tabs.Trigger>

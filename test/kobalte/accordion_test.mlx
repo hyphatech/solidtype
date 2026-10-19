@@ -1,5 +1,5 @@
 module H = Harness
-module Accordion = Solidtype.Kobalte.Accordion
+module Accordion = Solidtype_kobalte.Accordion
 
 let island () =
   <Accordion.Root>

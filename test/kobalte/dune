@@ -4,7 +4,7 @@
 (library
  (name kobalte_test)
  (modes melange)
- (libraries solidtype melange-jest.jest melange.dom)
+ (libraries solidtype solidtype-kobalte melange-jest.jest melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

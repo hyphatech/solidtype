@@ -1,12 +1,12 @@
 module H = Harness
-module Slider = Solidtype.Kobalte.Slider
+module Slider = Solidtype_kobalte.Slider
 
 (* Slider.Input is left out: inside the thumb, as it must be, axe finds the
    range input nested in the slider (nested-interactive), in TSX as in OCaml.
    Before a thumb registers, Kobalte places it at [calc(NaN%)], which a browser
    drops and jsdom's CSS parser throws on; the thumb's own [left] replaces it. *)
 let island () =
-  <Slider.Root defaultValue=(fun () -> [| 40. |])>
+  <Slider.Root default_value=(fun () -> [| 40. |])>
     <Slider.Label>"Volume"</Slider.Label>
     <Slider.ValueLabel />
     <Slider.Track>

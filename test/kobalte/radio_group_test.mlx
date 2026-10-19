@@ -1,8 +1,8 @@
 module H = Harness
-module RadioGroup = Solidtype.Kobalte.RadioGroup
+module RadioGroup = Solidtype_kobalte.RadioGroup
 
 let island () =
-  <RadioGroup.Root defaultValue="medium" orientation=`vertical>
+  <RadioGroup.Root default_value="medium" orientation=`vertical>
     <RadioGroup.Label>"Size"</RadioGroup.Label>
     <RadioGroup.Item value="small">
       <RadioGroup.ItemInput />

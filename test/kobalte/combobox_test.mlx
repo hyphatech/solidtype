@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Combobox = K.Combobox
 module Node = K.Types.CollectionNode
 module Item_props = K.Types.ComboboxBaseItemComponentProps
@@ -11,13 +11,13 @@ let island () =
               Array.map K.Types.Either.left
                 [| "Apple"; "Banana"; "Blueberry"; "Cherry" |])
     placeholder=(<span>"Pick a fruit"</span>)
-    itemComponent=(fun props ->
-                    <Combobox.Item item=(fun () -> Item_props.item props)>
-                      <Combobox.ItemLabel>
-                        (fun () ->
-                          Jsx.string (Node.raw_value (Item_props.item props)))
-                      </Combobox.ItemLabel>
-                    </Combobox.Item>)>
+    item_component=(fun props ->
+                     <Combobox.Item item=(fun () -> Item_props.item props)>
+                       <Combobox.ItemLabel>
+                         (fun () ->
+                           Jsx.string (Node.raw_value (Item_props.item props)))
+                       </Combobox.ItemLabel>
+                     </Combobox.Item>)>
     <Combobox.Label>"Fruit"</Combobox.Label>
     <Combobox.Control>
       <Combobox.Input /> <Combobox.Trigger><Combobox.Icon /></Combobox.Trigger>

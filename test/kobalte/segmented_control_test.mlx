@@ -2,12 +2,12 @@ module H = Harness
 module Check = Solidtype.Check
 module Html = Solidtype.Html
 module Jsx = Solidtype.Jsx
-module SegmentedControl = Solidtype.Kobalte.SegmentedControl
+module SegmentedControl = Solidtype_kobalte.SegmentedControl
 
 (* No Indicator: it measures the chosen item through a ResizeObserver, which
    jsdom has none of. *)
 let island () =
-  <SegmentedControl.Root defaultValue="week">
+  <SegmentedControl.Root default_value="week">
     <SegmentedControl.Label>"View"</SegmentedControl.Label>
     <SegmentedControl.Item value="day">
       <SegmentedControl.ItemInput />

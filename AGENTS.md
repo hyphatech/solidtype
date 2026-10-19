@@ -4,7 +4,8 @@ solidtype is Solid, typed: OCaml front ends on SolidJS and Kobalte,
 compiled by Melange. A component is written in OCaml's JSX (`.mlx`), and
 reaches the browser as the code Solid's own compiler emits for the same
 JSX. `ppx_solidtype` lowers the JSX; `vite-plugin-solidtype` hands it to
-Solid's compiler. This file is for anyone changing it, human or agent.
+Solid's compiler. Each JavaScript library bound is an opam package of
+its own: `solidtype` binds Solid, `solidtype-kobalte` Kobalte. This file is for anyone changing it, human or agent.
 Users start at [README.md](README.md).
 
 ## Commands
@@ -36,14 +37,18 @@ src/                 solidtype, for Melange alone
                      names them
   context            a context, as a module made by a functor
   html               each element's attributes, generated
-  kobalte            Kobalte's components part by part, its hooks, values
-                     and the types they name, generated
+kobalte/             solidtype-kobalte: Kobalte's components part by part,
+                     its hooks, values and the types they name, generated
 generate/            what writes the generated bindings from Solid's and
                      Kobalte's own types: `make generate`
+  names              the one spelling of a name, shared by both
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
+  html_names         the attributes and props whose JavaScript name the
+  kobalte_names      rule's inverse does not give, generated
 vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   src/rewrite        the markers rewritten into Solid's JSX
   src/markers        what a build without the plugin reaches: an error
+  pack               the plugin compiled and packed, as a release ships it
   test/twin          each example island through Solid's compiler -- for
                      the browser, hydratable, and for the server -- beside
                      its TSX twin
@@ -79,8 +84,10 @@ module.
 
 MLX parses `.mlx` into OCaml with each element marked `[@JSX]`.
 `ppx_solidtype` lowers each one to a call of `Solidtype.Jsx`: a literal,
-an element, a handler or a function static, anything else a thunk, so a
-read outside a thunk does not compile; a function prop that takes no
+an element, a handler (`on_` and its event) or a function static,
+anything else a thunk, so a read outside a thunk does not compile; a
+name is given back its JavaScript spelling, and a value wrapped in one
+of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
 argument is therefore written `(fun _ -> ...)`. A string literal becomes a
 JavaScript string, `{js|...|js}`, since Melange reads an OCaml one as
 bytes. An element's attributes are
@@ -162,12 +169,30 @@ break.
   variant, which Melange writes as those strings; a boolean, alone or as
   `"true"` and `"false"`, is `bool`; a number alone is `int`; a handler
   takes Melange's `Dom` event type, its generic one when Melange has
-  none. Each element's signature also gives `'r check`, its attributes
+  none, and one Solid also takes in lower case, `onclick`, is bound once,
+  `on_click`. Each element's signature also gives `'r check`, its attributes
   as optional arguments before `'r`, the tail of a check for a
   component that passes them on. Why: a hand-typed copy drifts from the
   version it binds. Test: `make test` runs the generator with `--check`.
+- **Every name a user writes is snake case, made by one rule** from the
+  name in Solid's or Kobalte's documentation: a capital is an underscore
+  and the lower case, a run of capitals one word, a hyphen an
+  underscore, and a keyword takes a trailing underscore. The ppx gives a
+  name back by the rule's inverse -- a capital after each underscore,
+  but a hyphen after `aria_` and `data_` -- and by the tables the
+  generators write of the names the inverse does not give,
+  `stroke_width` and `is_svg`; a hand-written check names its props so
+  too. Why: one convention reads as OCaml, and one rule lets the
+  documentation read across. Test: the generators fail on a name two
+  JavaScript names share, and `test/ppx` holds what each is given back.
+- **A namespace of Solid's wraps the value, never the name**:
+  `on_click=(Jsx.native f)` is `on:click={f}`, read by the ppx where it
+  is written, in an element's attribute; each wrapper types its value.
+  Why: a wrapper left out is Solid's default, never another namespace,
+  and a label that spelt the namespace would let a slip change it
+  unseen. Test: `test/does_not_compile.t`.
 - **Kobalte's binding is generated from its declarations**, by
-  `generate/kobalte.ts` into `src/kobalte.ml`, read with TypeScript's
+  `generate/kobalte.ts` into `kobalte/solidtype_kobalte.ml`, read with TypeScript's
   checker from Kobalte's real path, so a package manager that keeps
   dependencies beside each package resolves them. A part is a module of
   its component and its check: its own options, then its children by
@@ -195,7 +220,8 @@ break.
   a twin imports Kobalte's namespace, `import * as Switch`, whose
   members are the parts. Why: the library promises Kobalte's behaviour
   and accessibility, which only a running component shows. Symptom: a
-  component of `src/kobalte.ml` with no `test/kobalte/*_test.mlx`.
+  component of `kobalte/solidtype_kobalte.ml` with no
+  `test/kobalte/*_test.mlx`.
 - **A component is a value.** A binding's part is an `external` of type
   `_ Jsx.component`, never a function type, and an OCaml component is
   `Jsx.component make`. Why: Melange wraps an external function used as
@@ -238,6 +264,8 @@ with this file:
 
 @LIBRARY.md
 
-Its two opam packages and its npm package are released together, at one
+Its opam packages and the Vite plugin are released together, at one
 version, so a binding and the plugin that reads its markers never
-disagree.
+disagree. The plugin is compiled and packed by `vite-plugin/pack.ts` and
+attached to the GitHub release by `.github/workflows/release.yml`, which
+an application names by its URL.

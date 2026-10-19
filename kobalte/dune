@@ -1,0 +1,7 @@
+(library
+ (name solidtype_kobalte)
+ (public_name solidtype-kobalte)
+ (modes melange)
+ (libraries solidtype melange.dom)
+ (preprocess
+  (pps melange.ppx)))

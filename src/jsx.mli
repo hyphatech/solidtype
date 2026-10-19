@@ -47,3 +47,39 @@ external render : 'f -> child = "%identity"
 
 external dynamic : (unit -> content) -> child = "dynamic"
 [@@mel.module "vite-plugin-solidtype/markers"]
+
+(** {1 Solid's namespaces}
+
+    A namespace wraps an attribute's value, never its name: Solid's
+    [ns:name={v}] is [name=(Jsx.ns v)]. [ppx_solidtype] reads the wrapper where
+    it is written, in an element's attribute, and writes the namespace; a
+    wrapper left out is Solid's default. *)
+
+type 'a namespaced
+
+external native : 'a -> 'a namespaced = "%identity"
+(** [on_click=(Jsx.native f)] is [on:click={f}]: a listener on the element
+    itself, never delegated. *)
+
+external capture : 'a -> 'a namespaced = "%identity"
+(** [on_click=(Jsx.capture f)] is [oncapture:click={f}]: a listener in the
+    capture phase. *)
+
+external prop : 'a -> 'a namespaced = "%identity"
+(** [value=(Jsx.prop v)] is [prop:value={v}]: set as the element's property. *)
+
+external attr : 'a -> 'a namespaced = "%identity"
+(** [title=(Jsx.attr s)] is [attr:title={s}]: set as an attribute, a [string].
+*)
+
+external bool : 'a -> 'a namespaced = "%identity"
+(** [hidden=(Jsx.bool b)] is [bool:hidden={b}]: an attribute present while [b]
+    is [true]. *)
+
+val listen : string -> 'a -> 'a namespaced
+(** [on=(Jsx.listen "myEvent" f)] is [on:myEvent={f}]: a listener for an event
+    whose name the spelling rule cannot keep, a custom one. *)
+
+val named : string -> 'a -> 'a namespaced
+(** [attr=(Jsx.named "data-x" s)] is [data-x={s}]: an attribute whose name the
+    spelling rule cannot keep. *)

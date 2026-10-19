@@ -5,4 +5,5 @@
  (applies_to does_not_compile)
  (deps
   (package solidtype)
+  (package solidtype-kobalte)
   (package ppx_solidtype)))

@@ -1,16 +1,16 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Meter = K.Meter
 module Params = K.Types.GetValueLabelParams
 
 let island () =
   <Meter.Root
     value=(fun () -> 40.)
-    getValueLabel=(fun params ->
-                    Js.Float.toString (Params.value params)
-                    ^ " of "
-                    ^ Js.Float.toString (Params.max params)
-                    ^ " GB")>
+    get_value_label=(fun params ->
+                      Js.Float.toString (Params.value params)
+                      ^ " of "
+                      ^ Js.Float.toString (Params.max params)
+                      ^ " GB")>
     <Meter.Label>"Storage"</Meter.Label>
     <Meter.ValueLabel />
     <Meter.Track><Meter.Fill /></Meter.Track>

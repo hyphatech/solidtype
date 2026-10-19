@@ -2,7 +2,7 @@
    reads. *)
 module Props = struct
   let check
-      ~revealOrder:(_ : [ `forwards | `backwards | `together ] Check.value)
+      ~reveal_order:(_ : [ `forwards | `backwards | `together ] Check.value)
       ?tail:(_ : [ `collapsed | `hidden ] Check.value option)
       ?children:(_ : (_, [ `nodes ]) Check.children option) () =
     ()

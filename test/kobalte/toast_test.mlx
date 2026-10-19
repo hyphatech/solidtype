@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Toast = K.Toast
 module Toaster = K.Types.Toast_Toaster
 module Toast_props = K.Types.ToastComponentProps
@@ -8,7 +8,7 @@ let show () =
   ignore
     (Toaster.show Toast.toaster
        (fun props ->
-         <Toast.Root toastId=(fun () -> Toast_props.toast_id props)>
+         <Toast.Root toast_id=(fun () -> Toast_props.toast_id props)>
            <Toast.Title>"Saved"</Toast.Title>
            <Toast.Description>"The draft is safe."</Toast.Description>
            <Toast.CloseButton>"x"</Toast.CloseButton>
@@ -17,7 +17,7 @@ let show () =
 
 let island () =
   <div>
-    <button type_=`button onClick=(fun _ -> show ())>"Save"</button>
+    <button type_=`button on_click=(fun _ -> show ())>"Save"</button>
     <Toast.Region><Toast.List /></Toast.Region>
   </div>
 

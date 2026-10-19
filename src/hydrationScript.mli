@@ -4,7 +4,7 @@
 module Props : sig
   val check :
     ?nonce:string Check.value ->
-    ?eventNames:string array Check.value ->
+    ?event_names:string array Check.value ->
     unit ->
     unit
 end

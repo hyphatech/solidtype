@@ -1,5 +1,5 @@
 let static = <div class_="x" />
-let handler = <button onClick=(fun _ -> ()) />
+let handler = <button on_click=(fun _ -> ()) />
 let dynamic = <div class_=(fun () -> cls ()) />
 let spread = <input spread=props />
 let text = <p>"hello"</p>
@@ -18,18 +18,31 @@ let function_child =
 let ref_callback = <div ref=(fun el -> keep el) />
 
 let%component make ~(text : string) ?(count : int = 0)
-    ?(onPick : (int -> unit) option) ~(children : 'a -> Solidtype.Jsx.element)
+    ?(on_pick : (int -> unit) option) ~(children : 'a -> Solidtype.Jsx.element)
     () =
   <p>(fun () -> Solidtype.Jsx.int (count ()))</p>
 
+let names =
+  <input
+    read_only=true
+    tab_index="0"
+    class_list=(fun () -> classes ())
+    accept_charset="utf-8"
+    aria_label="name"
+    data_user_id="7"
+  />
+
+let svg_names = <svg view_box="0 0 1 1" stroke_width="2" />
+
 let namespaced =
   <div
-    on_scroll=(fun _ -> ())
-    attr_title="t"
-    bool_hidden=true
-    prop_value=(fun () -> v ())
-    data_user_id="7"
-    aria_label="name"
+    on_scroll=(Solidtype.Jsx.native (fun _ -> ()))
+    on_click=(Solidtype.Jsx.capture handle)
+    title=(Solidtype.Jsx.attr "t")
+    hidden=(Solidtype.Jsx.bool (fun () -> closed ()))
+    value=(Solidtype.Jsx.prop (fun () -> v ()))
+    on=(Solidtype.Jsx.listen "myEvent" (fun _ -> ()))
+    attr=(Solidtype.Jsx.named "data-x" "y")
   />
 
 let switch =

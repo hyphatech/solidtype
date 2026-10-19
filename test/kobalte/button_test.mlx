@@ -1,16 +1,16 @@
 module H = Harness
-module Button = Solidtype.Kobalte.Button
+module Button = Solidtype_kobalte.Button
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 
 let island () =
   let saves, set_saves = S.create_signal 0 in
   <div>
-    <Button.Root onClick=(fun _ -> S.set set_saves (S.get saves + 1))>
+    <Button.Root on_click=(fun _ -> S.set set_saves (S.get saves + 1))>
       "Save"
     </Button.Root>
     <Button.Root
-      disabled=true onClick=(fun _ -> S.set set_saves (S.get saves + 1))>
+      disabled=true on_click=(fun _ -> S.set set_saves (S.get saves + 1))>
       "Delete"
     </Button.Root>
     <output>(fun () -> Jsx.int (S.get saves))</output>

@@ -1,7 +1,7 @@
 module Props = struct
   let check ?mount:(_ : Dom.element Check.value option)
-      ?useShadow:(_ : bool Check.value option)
-      ?isSVG:(_ : bool Check.value option)
+      ?use_shadow:(_ : bool Check.value option)
+      ?is_svg:(_ : bool Check.value option)
       ?ref:(_ : (Dom.element -> unit) option)
       ?children:(_ : (_, [ `nodes ]) Check.children option) () =
     ()

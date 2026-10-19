@@ -15,7 +15,7 @@ against the installed library, with the error a user reads.
   > (library
   >  (name cases)
   >  (modes melange)
-  >  (libraries solidtype melange.dom)
+  >  (libraries solidtype solidtype-kobalte melange.dom)
   >  (preprocess
   >   (pps melange.ppx ppx_solidtype)))
   > EOF
@@ -49,6 +49,21 @@ A correct island compiles.
   >     <Label text=(fun () -> "times") count=(fun () -> Solidtype.Solid.get count) />
   >     <Each each=(fun () -> [| "a"; "b" |])>(fun s -> <li>(fun () -> Solidtype.Jsx.string s)</li>)</Each>
   >   </div>
+  > EOF
+  $ build
+
+So does each namespace, a handler typed by its event.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () =
+  >   <input
+  >     on_click=(Solidtype.Jsx.native (fun (e : Dom.mouseEvent) -> ignore e))
+  >     on_input=(Solidtype.Jsx.capture (fun (e : Dom.inputEvent) -> ignore e))
+  >     value=(Solidtype.Jsx.prop (fun () -> "x"))
+  >     title=(Solidtype.Jsx.attr "t")
+  >     hidden=(Solidtype.Jsx.bool false)
+  >     on=(Solidtype.Jsx.listen "custom-event" (fun _ -> ()))
+  >     attr=(Solidtype.Jsx.named "data-X" "y") />
   > EOF
   $ build
 
@@ -210,6 +225,54 @@ An attribute the element does not take.
   Error: Unbound type constructor Solidtype.Html.Div.href
   Hint:              Did you mean Solidtype.Html.Div.ref?
 
+An attribute named as JavaScript spells it, not by the spelling rule.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <div contentEditable="true" />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 35-41:
+  1 | let make () = <div contentEditable="true" />
+                                         ^^^^^^
+  Error: Unbound type constructor Solidtype.Html.Div.contentEditable
+  Hint:              Did you mean Solidtype.Html.Div.contenteditable?
+
+A value its namespace's wrapper does not take: bool:hidden takes a bool.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <div hidden=(Solidtype.Jsx.bool "yes") />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 46-51:
+  1 | let make () = <div hidden=(Solidtype.Jsx.bool "yes") />
+                                                    ^^^^^
+  Error: This constant has type string but an expression was expected of type
+           bool
+
+A native listener given to an attribute that is no handler.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <div title=(Solidtype.Jsx.native (fun _ -> ())) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 25-61:
+  1 | let make () = <div title=(Solidtype.Jsx.native (fun _ -> ())) />
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Jsx.native wraps a handler, on_<event>=(Jsx.native f)
+
+A namespace given to a component, whose props have none.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Label text=(Solidtype.Jsx.attr "x") />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 26-50:
+  1 | let make () = <Label text=(Solidtype.Jsx.attr "x") />
+                                ^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop,
+         Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's
+         attribute
+
 A value an attribute's closed set does not hold.
 
   $ cat > case.mlx <<'EOF'
@@ -272,7 +335,7 @@ A Switch over a match that leaves a case out.
 A prop a Kobalte part does not take.
 
   $ cat > case.mlx <<'EOF'
-  > module Switch = Solidtype.Kobalte.Switch
+  > module Switch = Solidtype_kobalte.Switch
   > let make () = <Switch.Root checkedd=(fun () -> true) />
   > EOF
   $ brief
@@ -284,7 +347,7 @@ A prop a Kobalte part does not take.
 A Kobalte part given an attribute its element does not take.
 
   $ cat > case.mlx <<'EOF'
-  > module Switch = Solidtype.Kobalte.Switch
+  > module Switch = Solidtype_kobalte.Switch
   > let make () = <Switch.Control href="/x" />
   > EOF
   $ brief
@@ -296,33 +359,33 @@ A Kobalte part given an attribute its element does not take.
 A single-value Select given a list for its value.
 
   $ cat > case.mlx <<'EOF'
-  > module Select = Solidtype.Kobalte.Select
+  > module Select = Solidtype_kobalte.Select
   > let make () =
-  >   <Select.Root options=(fun () -> [| Solidtype.Kobalte.Types.Either.left "a" |])
+  >   <Select.Root options=(fun () -> [| Solidtype_kobalte.Types.Either.left "a" |])
   >     value=(fun () -> Js.Nullable.return [| "a" |]) />
   > EOF
   $ build
   File "case.mlx", line 3, characters 23-80:
-  3 |   <Select.Root options=(fun () -> [| Solidtype.Kobalte.Types.Either.left "a" |])
+  3 |   <Select.Root options=(fun () -> [| Solidtype_kobalte.Types.Either.left "a" |])
                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: This expression has type
-           (string, 'a) Solidtype.Kobalte.Types.either array
+           (string, 'a) Solidtype_kobalte.Types.either array
            Solidtype.Check.value
          but an expression was expected of type
-           (string array, 'b) Solidtype.Kobalte.Types.either array
+           (string array, 'b) Solidtype_kobalte.Types.either array
            Solidtype.Check.value
          Type string is not compatible with type string array
 
 A Select of many values without multiple, which Kobalte reads to choose.
 
   $ cat > case.mlx <<'EOF'
-  > module Select = Solidtype.Kobalte.Select
+  > module Select = Solidtype_kobalte.Select
   > let make () =
-  >   <Select.Root_multiple options=(fun () -> [| Solidtype.Kobalte.Types.Either.left "a" |]) />
+  >   <Select.Root_multiple options=(fun () -> [| Solidtype_kobalte.Types.Either.left "a" |]) />
   > EOF
   $ build
   File "case.mlx", line 3, characters 2-92:
-  3 |   <Select.Root_multiple options=(fun () -> [| Solidtype.Kobalte.Types.Either.left "a" |]) />
+  3 |   <Select.Root_multiple options=(fun () -> [| Solidtype_kobalte.Types.Either.left "a" |]) />
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: This expression has type multiple:bool Solidtype.Check.value -> unit
          but an expression was expected of type unit

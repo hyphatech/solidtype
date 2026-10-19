@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Slider = K.ColorSlider
 
 (* The thumb's first position is calc(NaN%), until it knows its index; a
@@ -9,7 +9,7 @@ module Slider = K.ColorSlider
 let island () =
   <Slider.Root
     channel=`hue
-    defaultValue=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")>
+    default_value=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")>
     <Slider.Label>"Hue"</Slider.Label>
     <Slider.ValueLabel />
     <Slider.Track><Slider.Thumb style="left: 0%" /></Slider.Track>

@@ -30,9 +30,9 @@
 
 (package
  (name solidtype)
- (synopsis "Solid, typed: OCaml front ends on SolidJS and Kobalte, through Melange")
+ (synopsis "Solid, typed: OCaml front ends on SolidJS, through Melange")
  (description
-  "Bindings to Solid and Kobalte for Melange, written in OCaml's JSX, where a reactive read in the wrong place does not compile. The JSX reaches the browser as the code Solid's own compiler emits for it.")
+  "Bindings to Solid for Melange, written in OCaml's JSX, where a reactive read in the wrong place does not compile. The JSX reaches the browser as the code Solid's own compiler emits for it.")
  (depends
   (ocaml
    (>= 5.5))
@@ -78,6 +78,19 @@
    (and
     :with-dev-setup
     (= 0.29.0.1)))))
+
+(package
+ (name solidtype-kobalte)
+ (synopsis "Kobalte for solidtype: Solid's accessible components, typed")
+ (description
+  "Every component of Kobalte 0.13, part by part, its hooks and utilities, for OCaml front ends on Solid written with solidtype. Generated from Kobalte's own declarations.")
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))
+  (solidtype
+   (= :version))))
 
 (package
  (name ppx_solidtype)

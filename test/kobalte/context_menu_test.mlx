@@ -1,5 +1,5 @@
 module H = Harness
-module ContextMenu = Solidtype.Kobalte.ContextMenu
+module ContextMenu = Solidtype_kobalte.ContextMenu
 
 let island () =
   <ContextMenu.Root>
@@ -11,7 +11,7 @@ let island () =
         <ContextMenu.Separator />
         <ContextMenu.Group>
           <ContextMenu.GroupLabel>"Text size"</ContextMenu.GroupLabel>
-          <ContextMenu.RadioGroup defaultValue="Small">
+          <ContextMenu.RadioGroup default_value="Small">
             <ContextMenu.RadioItem value="Small">"Small"</ContextMenu.RadioItem>
             <ContextMenu.RadioItem value="Large">"Large"</ContextMenu.RadioItem>
           </ContextMenu.RadioGroup>

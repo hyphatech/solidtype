@@ -4,8 +4,8 @@
 module Props : sig
   val check :
     ?mount:Dom.element Check.value ->
-    ?useShadow:bool Check.value ->
-    ?isSVG:bool Check.value ->
+    ?use_shadow:bool Check.value ->
+    ?is_svg:bool Check.value ->
     ?ref:(Dom.element -> unit) ->
     ?children:('f, [ `nodes ]) Check.children ->
     unit ->

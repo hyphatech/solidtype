@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Checkbox = K.Checkbox
 module State = K.Types.CheckboxRootState
 module Jsx = Solidtype.Jsx
@@ -26,7 +26,7 @@ let island () =
       <Checkbox.Label>"Select all"</Checkbox.Label>
       <Checkbox.Control />
     </Checkbox.Root>
-    <Checkbox.Root required=true validationState=`invalid>
+    <Checkbox.Root required=true validation_state=`invalid>
       <Checkbox.Input />
       <Checkbox.Label>"Accept the terms"</Checkbox.Label>
       <Checkbox.ErrorMessage>"Accept them to go on"</Checkbox.ErrorMessage>

@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "description": "Hands OCaml components compiled by Melange to Solid's own compiler",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyphatech/solidtype.git",
+    "directory": "vite-plugin"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

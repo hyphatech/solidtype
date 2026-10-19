@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module ToggleButton = K.ToggleButton
 module State = K.Types.ToggleButtonRootState
 module Jsx = Solidtype.Jsx

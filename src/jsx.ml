@@ -2,6 +2,7 @@ type element
 type prop
 type child
 type content
+type 'a namespaced = 'a
 type 'props component
 
 external component : ('props -> element) -> 'props component = "%identity"
@@ -34,3 +35,12 @@ external render : 'f -> child = "%identity"
 
 external dynamic : (unit -> content) -> child = "dynamic"
 [@@mel.module "vite-plugin-solidtype/markers"]
+
+external native : 'a -> 'a namespaced = "%identity"
+external capture : 'a -> 'a namespaced = "%identity"
+external prop : 'a -> 'a namespaced = "%identity"
+external attr : 'a -> 'a namespaced = "%identity"
+external bool : 'a -> 'a namespaced = "%identity"
+
+let listen (_ : string) v = v
+let named (_ : string) v = v

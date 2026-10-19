@@ -1,5 +1,5 @@
 module H = Harness
-module AlertDialog = Solidtype.Kobalte.AlertDialog
+module AlertDialog = Solidtype_kobalte.AlertDialog
 
 let island () =
   <AlertDialog.Root>

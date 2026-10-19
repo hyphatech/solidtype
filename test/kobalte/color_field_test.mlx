@@ -1,12 +1,12 @@
 module H = Harness
-module Field = Solidtype.Kobalte.ColorField
+module Field = Solidtype_kobalte.ColorField
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 
 let island () =
   let changed, set_changed = S.create_signal "" in
   <Field.Root
-    defaultValue="#ff0000" onChange=(fun value -> S.set set_changed value)>
+    default_value="#ff0000" on_change=(fun value -> S.set set_changed value)>
     <Field.Label>"Colour"</Field.Label>
     <Field.Input />
     <Field.Description>

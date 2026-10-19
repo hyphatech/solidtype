@@ -1,5 +1,5 @@
 module H = Harness
-module Image = Solidtype.Kobalte.Image
+module Image = Solidtype_kobalte.Image
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 
@@ -13,7 +13,7 @@ let island () =
   let status, set_status = S.create_signal "idle" in
   <div>
     <Image.Root
-      onLoadingStatusChange=(fun s -> S.set set_status (status_name s))>
+      on_loading_status_change=(fun s -> S.set set_status (status_name s))>
       <Image.Img src="/avatar.png" alt="Ada Lovelace" />
       <Image.Fallback>"AL"</Image.Fallback>
     </Image.Root>

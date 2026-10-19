@@ -1,9 +1,9 @@
 module H = Harness
-module ToggleGroup = Solidtype.Kobalte.ToggleGroup
+module ToggleGroup = Solidtype_kobalte.ToggleGroup
 
 let island () =
   <div>
-    <ToggleGroup.Root aria_label="Alignment" defaultValue="left">
+    <ToggleGroup.Root aria_label="Alignment" default_value="left">
       <ToggleGroup.Item value="left">"Left"</ToggleGroup.Item>
       <ToggleGroup.Item value="center">"Center"</ToggleGroup.Item>
       <ToggleGroup.Item value="right">"Right"</ToggleGroup.Item>

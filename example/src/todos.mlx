@@ -15,7 +15,7 @@ let make () =
         </For>
       </ul>
     </Show>
-    <button type_=`button onClick=(fun _ -> S.set set_items [||])>
+    <button type_=`button on_click=(fun _ -> S.set set_items [||])>
       "Clear"
     </button>
   </section>

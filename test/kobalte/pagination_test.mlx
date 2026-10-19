@@ -1,6 +1,6 @@
 module H = Harness
-module Pagination = Solidtype.Kobalte.Pagination
-module Item_props = Solidtype.Kobalte.Types.Pagination_Root_ItemComponent
+module Pagination = Solidtype_kobalte.Pagination
+module Item_props = Solidtype_kobalte.Types.Pagination_Root_ItemComponent
 module Jsx = Solidtype.Jsx
 
 (* [ellipsisComponent] takes no argument, yet is written [fun _ ->]: the ppx
@@ -9,12 +9,13 @@ let island () =
   <Pagination.Root
     aria_label="Pages"
     count=10.
-    itemComponent=(fun props ->
-                    <Pagination.Item page=(fun () -> Item_props.page props)>
-                      (fun () -> Jsx.int (Float.to_int (Item_props.page props)))
-                    </Pagination.Item>)
-    ellipsisComponent=(fun _ ->
-                        <Pagination.Ellipsis>{js|…|js}</Pagination.Ellipsis>)>
+    item_component=(fun props ->
+                     <Pagination.Item page=(fun () -> Item_props.page props)>
+                       (fun () ->
+                         Jsx.int (Float.to_int (Item_props.page props)))
+                     </Pagination.Item>)
+    ellipsis_component=(fun _ ->
+                         <Pagination.Ellipsis>{js|…|js}</Pagination.Ellipsis>)>
     <Pagination.Previous>"Previous"</Pagination.Previous>
     <Pagination.Items />
     <Pagination.Next>"Next"</Pagination.Next>

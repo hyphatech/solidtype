@@ -71,11 +71,24 @@ function make() {
   expect(code).not.toContain("Markers");
 });
 
-test("a namespaced attribute is JSX's namespaced name", async () => {
+test("each namespace the ppx writes is JSX's namespaced name", async () => {
   const code = await written(`
 function make() {
-  return Markers.el("div", [Markers.s("on:scroll", f), Markers.s("aria-label", "x")], []);
+  return Markers.el("div", [
+    Markers.s("on:scroll", f),
+    Markers.s("oncapture:click", g),
+    Markers.d("prop:value", function (param) { return v(); }),
+    Markers.s("attr:title", "t"),
+    Markers.d("bool:hidden", function (param) { return closed(); }),
+    Markers.s("on:my-event", h),
+    Markers.s("aria-label", "x"),
+  ], []);
 }`);
   expect(code).toContain("on:scroll={f}");
+  expect(code).toContain("oncapture:click={g}");
+  expect(code).toContain("prop:value={v()}");
+  expect(code).toContain('attr:title="t"');
+  expect(code).toContain("bool:hidden={closed()}");
+  expect(code).toContain("on:my-event={h}");
   expect(code).toContain('aria-label="x"');
 });

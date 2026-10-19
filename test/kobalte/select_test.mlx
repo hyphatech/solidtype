@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Select = K.Select
 module Node = K.Types.CollectionNode
 module Item_props = K.Types.SelectBaseItemComponentProps
@@ -11,13 +11,13 @@ let island () =
   <Select.Root
     options=(fun () -> Array.map K.Types.Either.left [| "Apple"; "Banana" |])
     placeholder=(<span>"Pick a fruit"</span>)
-    itemComponent=(fun props ->
-                    <Select.Item item=(fun () -> Item_props.item props)>
-                      <Select.ItemLabel>
-                        (fun () ->
-                          Jsx.string (Node.raw_value (Item_props.item props)))
-                      </Select.ItemLabel>
-                    </Select.Item>)>
+    item_component=(fun props ->
+                     <Select.Item item=(fun () -> Item_props.item props)>
+                       <Select.ItemLabel>
+                         (fun () ->
+                           Jsx.string (Node.raw_value (Item_props.item props)))
+                       </Select.ItemLabel>
+                     </Select.Item>)>
     <Select.Label>"Fruit"</Select.Label>
     <Select.Trigger>
       <Select.Value>

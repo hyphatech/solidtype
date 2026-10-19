@@ -10,17 +10,53 @@ let is_jsx (e : expression) =
     (fun (a : attribute) -> String.equal a.attr_name.txt "JSX")
     e.pexp_attributes
 
-(* A trailing underscore lets an attribute be named after an OCaml keyword,
-   [class_] and [type_]; Solid's JSX knows it by the plain word, *)
-let attribute_name label =
-  let n = String.length label in
-  let label =
-    if n > 1 && Char.equal label.[n - 1] '_' then String.sub label 0 (n - 1)
-    else label
-  in
-  (* and a hyphen is an underscore, [aria_label], which a component passes on
-     to the element it renders. *)
-  String.map (function '_' -> '-' | c -> c) label
+(* A name a user writes is Solid's or Kobalte's by one rule: a capital is an
+   underscore and the lower case, a hyphen an underscore, and a keyword takes
+   a trailing underscore. Its JavaScript name comes back from the tables the
+   generators write, where the rule's inverse would not give it, *)
+let names =
+  let t = Hashtbl.create 64 in
+  List.iter
+    (fun (l, js) -> Hashtbl.replace t l js)
+    (Html_names.names @ Kobalte_names.names);
+  t
+
+let starts_with ~prefix s =
+  String.length s >= String.length prefix
+  && String.equal (String.sub s 0 (String.length prefix)) prefix
+
+(* and otherwise from that inverse: the keyword's underscore dropped, a hyphen
+   after [aria_] and [data_], and a capital after any other underscore. *)
+let js_name label =
+  match Hashtbl.find_opt names label with
+  | Some js -> js
+  | None ->
+      let n = String.length label in
+      let bare =
+        if n > 1 && Char.equal label.[n - 1] '_' then String.sub label 0 (n - 1)
+        else label
+      in
+      if starts_with ~prefix:"aria_" bare || starts_with ~prefix:"data_" bare
+      then String.map (function '_' -> '-' | c -> c) bare
+      else
+        let b = Buffer.create (String.length bare) in
+        let raise_next = ref false in
+        String.iteri
+          (fun i c ->
+            let next_is_word =
+              i + 1 < String.length bare
+              &&
+              match bare.[i + 1] with
+              | 'a' .. 'z' | '0' .. '9' -> true
+              | _ -> false
+            in
+            if Char.equal c '_' && next_is_word then raise_next := true
+            else (
+              Buffer.add_char b
+                (if !raise_next then Char.uppercase_ascii c else c);
+              raise_next := false))
+          bare;
+        Buffer.contents b
 
 (* A string written in JSX is text for the page, so it is a JavaScript
    string, {js|...|js}: Melange reads a plain OCaml string as bytes, and
@@ -31,10 +67,10 @@ let js_string (e : expression) =
       { e with pexp_desc = Pexp_constant (Pconst_string (s, loc, Some "js")) }
   | _ -> e
 
+let last = function Ldot (_, name) | Lident name -> name | Lapply _ -> ""
+
 let is_handler label =
-  String.length label > 2
-  && String.equal (String.sub label 0 2) "on"
-  && Char.equal (Char.uppercase_ascii label.[2]) label.[2]
+  String.length label > 3 && starts_with ~prefix:"on_" label
 
 let is_unit (p : pattern) =
   match p.ppat_desc with
@@ -57,12 +93,12 @@ let is_function (e : expression) =
    annotated, and a component's props go through its check. *)
 type kind = Literal | Element | Function | Thunk
 
-let kind_of label (e : expression) =
+let kind_of ~handler (e : expression) =
   match e.pexp_desc with
   | Pexp_constant _ | Pexp_construct (_, None) | Pexp_variant (_, None) ->
       Literal
   | _ when is_jsx e -> Element
-  | _ when is_handler label || is_function e -> Function
+  | _ when handler || is_function e -> Function
   | _ -> Thunk
 
 let error ~loc message =
@@ -123,43 +159,95 @@ let child map (e : expression) =
         [%expr
           Solidtype.Jsx.dynamic ([%e map e] : unit -> Solidtype.Jsx.content)]
 
-(* An element's attribute, from its OCaml label: a prefix MLX can parse
-   names one of Solid's namespaces, and an underscore is a hyphen. Its type is
-   the element's own in [Solidtype.Html], or the namespace's. *)
-let dom_attribute ~loc ~tag label =
-  let hyphens s = String.map (function '_' -> '-' | c -> c) s in
-  let prefixed prefix =
-    let n = String.length prefix in
-    if String.length label > n && String.equal (String.sub label 0 n) prefix
-    then Some (String.sub label n (String.length label - n))
-    else None
+(* A namespace of Solid's is a wrapper of the value, never a part of the
+   name: [on_click=(Jsx.native f)] is [on:click={f}]. The ppx reads the
+   wrapper by its syntax, so a wrapper left out is Solid's default. *)
+type namespace = Native | Capture | Prop | Attr | Bool
+
+type wrapped =
+  | Namespaced of namespace * expression
+  | Listen of string * expression  (** [on=(Jsx.listen "myEvent" f)] *)
+  | Named of string * expression  (** [attr=(Jsx.named "data-x" s)] *)
+
+let wrapped (e : expression) =
+  let string_literal (e : expression) =
+    match e.pexp_desc with
+    | Pexp_constant (Pconst_string (s, _, _)) -> Some s
+    | _ -> None
   in
-  let element = String.capitalize_ascii tag in
+  match e.pexp_desc with
+  | Pexp_apply
+      ({ pexp_desc = Pexp_ident { txt = Ldot (path, name); _ }; _ }, args)
+    when String.equal (last path) "Jsx" -> (
+      match (name, args) with
+      | "native", [ (Nolabel, v) ] -> Some (Ok (Namespaced (Native, v)))
+      | "capture", [ (Nolabel, v) ] -> Some (Ok (Namespaced (Capture, v)))
+      | "prop", [ (Nolabel, v) ] -> Some (Ok (Namespaced (Prop, v)))
+      | "attr", [ (Nolabel, v) ] -> Some (Ok (Namespaced (Attr, v)))
+      | "bool", [ (Nolabel, v) ] -> Some (Ok (Namespaced (Bool, v)))
+      | ("listen" | "named"), [ (Nolabel, n); (Nolabel, v) ] -> (
+          match (name, string_literal n) with
+          | "listen", Some n -> Some (Ok (Listen (n, v)))
+          | _, Some n -> Some (Ok (Named (n, v)))
+          | _, None ->
+              Some
+                (Error
+                   ( n.pexp_loc,
+                     Printf.sprintf "Jsx.%s takes a name as a string literal"
+                       name )))
+      | _ -> None)
+  | _ -> None
+
+(* An element's attribute, from its OCaml label and its value: its
+   JavaScript name, its type -- the element's own in [Solidtype.Html], or the
+   namespace's -- and the value the wrapper held. *)
+let dom_attribute ~loc ~tag label (value : expression) =
   let html =
     B.ptyp_constr ~loc
       {
-        txt = Ldot (Ldot (Ldot (Lident "Solidtype", "Html"), element), label);
+        txt =
+          Ldot
+            ( Ldot
+                (Ldot (Lident "Solidtype", "Html"), String.capitalize_ascii tag),
+              label );
         loc;
       }
       []
   in
-  match
-    List.find_map
-      (fun (prefix, namespace, t) ->
-        Option.map (fun rest -> (namespace ^ rest, t)) (prefixed prefix))
-      [
-        ("on_", "on:", Some [%type: Dom.event -> unit]);
-        ("oncapture_", "oncapture:", Some [%type: Dom.event -> unit]);
-        ("attr_", "attr:", Some [%type: string]);
-        ("bool_", "bool:", Some [%type: bool]);
-        ("prop_", "prop:", None);
-      ]
-  with
-  | Some (name, t) -> (name, t)
-  | None -> (
-      match prefixed "data_" with
-      | Some rest -> ("data-" ^ hyphens rest, Some [%type: string])
-      | None -> (attribute_name label, Some html))
+  (* A handler's event is its name after [on], as the DOM names it. *)
+  let event () =
+    let js = js_name label in
+    String.lowercase_ascii (String.sub js 2 (String.length js - 2))
+  in
+  match wrapped value with
+  | None when starts_with ~prefix:"data_" label ->
+      Ok (js_name label, Some [%type: string], value, false)
+  | None -> Ok (js_name label, Some html, value, is_handler label)
+  | Some (Error e) -> Error e
+  | Some (Ok (Namespaced (((Native | Capture) as ns), v))) ->
+      if is_handler label then
+        let prefix = match ns with Native -> "on:" | _ -> "oncapture:" in
+        Ok (prefix ^ event (), Some html, v, true)
+      else
+        Error
+          ( value.pexp_loc,
+            Printf.sprintf "Jsx.%s wraps a handler, on_<event>=(Jsx.%s f)"
+              (match ns with Native -> "native" | _ -> "capture")
+              (match ns with Native -> "native" | _ -> "capture") )
+  | Some (Ok (Namespaced (Prop, v))) ->
+      Ok ("prop:" ^ js_name label, None, v, false)
+  | Some (Ok (Namespaced (Attr, v))) ->
+      Ok ("attr:" ^ js_name label, Some [%type: string], v, false)
+  | Some (Ok (Namespaced (Bool, v))) ->
+      Ok ("bool:" ^ js_name label, Some [%type: bool], v, false)
+  | Some (Ok (Listen (name, v))) when String.equal label "on" ->
+      Ok ("on:" ^ name, Some [%type: Dom.event -> unit], v, true)
+  | Some (Ok (Named (name, v))) when String.equal label "attr" ->
+      Ok (name, Some [%type: string], v, false)
+  | Some (Ok (Listen _)) ->
+      Error (value.pexp_loc, "Jsx.listen is given as on=(Jsx.listen \"name\" f)")
+  | Some (Ok (Named _)) ->
+      Error (value.pexp_loc, "Jsx.named is given as attr=(Jsx.named \"name\" s)")
 
 let element map ~loc name args =
   let prop (label, (value : expression)) =
@@ -167,20 +255,21 @@ let element map ~loc name args =
     match label with
     | Labelled "spread" -> Ok [%expr Solidtype.Jsx.spread [%e map value]]
     | _ ->
-        Result.map
-          (fun label ->
-            let js, t = dom_attribute ~loc ~tag:name label in
-            let js = B.estring ~loc js in
-            let value = js_string (map value) in
-            match (kind_of label value, t) with
-            | Thunk, Some t ->
-                [%expr Solidtype.Jsx.d [%e js] ([%e value] : unit -> [%t t])]
-            | Thunk, None -> [%expr Solidtype.Jsx.d [%e js] [%e value]]
-            | (Literal | Element | Function), Some t ->
-                [%expr Solidtype.Jsx.s [%e js] ([%e value] : [%t t])]
-            | (Literal | Element | Function), None ->
-                [%expr Solidtype.Jsx.s [%e js] [%e value]])
-          (labelled ~loc label)
+        Result.bind (labelled ~loc label) (fun label ->
+            Result.map
+              (fun (js, t, value, handler) ->
+                let js = B.estring ~loc js in
+                let value = js_string (map value) in
+                match (kind_of ~handler value, t) with
+                | Thunk, Some t ->
+                    [%expr
+                      Solidtype.Jsx.d [%e js] ([%e value] : unit -> [%t t])]
+                | Thunk, None -> [%expr Solidtype.Jsx.d [%e js] [%e value]]
+                | (Literal | Element | Function), Some t ->
+                    [%expr Solidtype.Jsx.s [%e js] ([%e value] : [%t t])]
+                | (Literal | Element | Function), None ->
+                    [%expr Solidtype.Jsx.s [%e js] [%e value]])
+              (dom_attribute ~loc ~tag:name label value))
   in
   match split args with
   | Error (loc, m) -> error ~loc m
@@ -210,12 +299,18 @@ let component map ~loc path args =
           ( Some (bound "spread", (None, map value)),
             (Labelled "spread", x),
             [%expr Solidtype.Jsx.spread [%e x]] )
+    | _ when Option.is_some (wrapped value) ->
+        Error
+          ( loc,
+            "a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop, \
+             Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's \
+             attribute" )
     | _ ->
         Result.map
           (fun label ->
-            let name = B.estring ~loc (attribute_name label) in
+            let name = B.estring ~loc (js_name label) in
             let x = B.evar ~loc (bound label) in
-            match kind_of label value with
+            match kind_of ~handler:(is_handler label) value with
             | Literal ->
                 let value = js_string value in
                 ( None,
@@ -295,8 +390,6 @@ let component map ~loc path args =
 (* A [Switch] whose only child is a thunk of a [match]: each case becomes a
    [Match], a case with variables a [Match.Keyed] given them, so the case's
    body sees their values as they are. *)
-
-let last = function Ldot (_, name) | Lident name -> name | Lapply _ -> ""
 
 let with_last path name =
   match path with
@@ -548,7 +641,7 @@ let props_module ~loc props =
       B.value_description ~loc
         ~name:{ txt = "get_" ^ p.label; loc }
         ~type_:[%type: [%t t] -> [%t field]]
-        ~prim:[ attribute_name p.label ]
+        ~prim:[ js_name p.label ]
     in
     B.pstr_primitive ~loc
       { description with pval_attributes = [ attribute ~loc "mel.get" ] }
@@ -557,7 +650,7 @@ let props_module ~loc props =
   let constructor =
     let arg p =
       let typ =
-        if String.equal (attribute_name p.label) p.label then p.typ
+        if String.equal (js_name p.label) p.label then p.typ
         else
           {
             p.typ with
@@ -567,9 +660,7 @@ let props_module ~loc props =
                   ~payload:
                     (PStr
                        [
-                         B.pstr_eval ~loc
-                           (B.estring ~loc (attribute_name p.label))
-                           [];
+                         B.pstr_eval ~loc (B.estring ~loc (js_name p.label)) [];
                        ]);
               ];
           }
@@ -650,7 +741,7 @@ let props_module ~loc props =
                         { txt = Lident (constructor p); loc }
                         None)
                    ~guard:None
-                   ~rhs:(B.estring ~loc (attribute_name p.label)))
+                   ~rhs:(B.estring ~loc (js_name p.label)))
                props)
         in
         [

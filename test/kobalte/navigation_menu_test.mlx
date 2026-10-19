@@ -1,5 +1,5 @@
 module H = Harness
-module NavigationMenu = Solidtype.Kobalte.NavigationMenu
+module NavigationMenu = Solidtype_kobalte.NavigationMenu
 
 (* The viewport is an item of the menubar's list that holds no menu item,
    which axe refuses unless its role is presentation, as Kobalte gives its

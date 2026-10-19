@@ -1,5 +1,5 @@
 module H = Harness
-module Skeleton = Solidtype.Kobalte.Skeleton
+module Skeleton = Solidtype_kobalte.Skeleton
 
 let island () =
   <div>

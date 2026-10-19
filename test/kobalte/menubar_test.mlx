@@ -1,5 +1,5 @@
 module H = Harness
-module Menubar = Solidtype.Kobalte.Menubar
+module Menubar = Solidtype_kobalte.Menubar
 
 let island () =
   <Menubar.Root>

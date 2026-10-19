@@ -5,7 +5,7 @@ let static =
 let handler =
   Solidtype.Jsx.el "button"
     [|(Solidtype.Jsx.s "onClick"
-         (fun _ -> () : Solidtype.Html.Button.onClick))|] [||]
+         (fun _ -> () : Solidtype.Html.Button.on_click))|] [||]
 let dynamic =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.d "class"
@@ -83,7 +83,7 @@ include
         type 'a t
         external get_text : 'a t -> string = "text"[@@mel.get ]
         external get_count : 'a t -> int option = "count"[@@mel.get ]
-        external get_onPick : 'a t -> ((int -> unit)[@u ]) option = "onPick"
+        external get_on_pick : 'a t -> ((int -> unit)[@u ]) option = "onPick"
         [@@mel.get ]
         external get_children :
           'a t -> (('a -> Solidtype.Jsx.element)[@u ]) = "children"[@@mel.get
@@ -91,12 +91,12 @@ include
         external make :
           text:string ->
             ?count:int ->
-              ?onPick:(int -> unit) ->
+              ?on_pick:((int -> unit)[@mel.as "onPick"]) ->
                 children:('a -> Solidtype.Jsx.element) -> unit -> 'a t = ""
         [@@mel.obj ]
         let check ~text:(_ : string Solidtype.Check.value)
           ?count:(_ : int Solidtype.Check.value option)
-          ?onPick:(_ : (int -> unit) option)
+          ?on_pick:(_ : (int -> unit) option)
           ~children:(_ :
                       ('a -> Solidtype.Jsx.element, [ `render ])
                         Solidtype.Check.children)
@@ -104,7 +104,7 @@ include
         type name =
           | Text 
           | Count 
-          | OnPick 
+          | On_pick 
           | Children 
         let omit (props : 'a t) (names : name array) :
           'a t Solidtype.Solid.rest=
@@ -113,7 +113,7 @@ include
                (function
                 | Text -> "text"
                 | Count -> "count"
-                | OnPick -> "onPick"
+                | On_pick -> "onPick"
                 | Children -> "children") names)
       end
     let make (props : _ Props.t) =
@@ -121,8 +121,8 @@ include
       and count () =
         match Props.get_count props with | Some v -> v | None -> 0[@@inline ]
       [@@ocaml.warning "-26-27"]
-      and onPick solidtype__0 =
-        match Props.get_onPick props with
+      and on_pick solidtype__0 =
+        match Props.get_on_pick props with
         | Some f -> Some ((f solidtype__0)[@u ])
         | None -> None[@@inline ][@@ocaml.warning "-26-27"]
       and children solidtype__0 =
@@ -135,19 +135,45 @@ include
                                                          Solidtype.Jsx.content))|]
     let component = Solidtype.Jsx.component make
   end
+let names =
+  Solidtype.Jsx.el "input"
+    [|(Solidtype.Jsx.s "readOnly" (true : Solidtype.Html.Input.read_only));(
+      Solidtype.Jsx.s "tabIndex" ({js|0|js} : Solidtype.Html.Input.tab_index));(
+      Solidtype.Jsx.d "classList"
+        (fun () -> classes () : unit -> Solidtype.Html.Input.class_list));(
+      Solidtype.Jsx.s "accept-charset"
+        ({js|utf-8|js} : Solidtype.Html.Input.accept_charset));(Solidtype.Jsx.s
+                                                                  "aria-label"
+                                                                  ({js|name|js} : 
+                                                                  Solidtype.Html.Input.aria_label));(
+      Solidtype.Jsx.s "data-user-id" ({js|7|js} : string))|] [||]
+let svg_names =
+  Solidtype.Jsx.el "svg"
+    [|(Solidtype.Jsx.s "viewBox"
+         ({js|0 0 1 1|js} : Solidtype.Html.Svg.view_box));(Solidtype.Jsx.s
+                                                             "stroke-width"
+                                                             ({js|2|js} : 
+                                                             Solidtype.Html.Svg.stroke_width))|]
+    [||]
 let namespaced =
   Solidtype.Jsx.el "div"
-    [|(Solidtype.Jsx.s "on:scroll" (fun _ -> () : Dom.event -> unit));(
-      Solidtype.Jsx.s "attr:title" ({js|t|js} : string));(Solidtype.Jsx.s
+    [|(Solidtype.Jsx.s "on:scroll"
+         (fun _ -> () : Solidtype.Html.Div.on_scroll));(Solidtype.Jsx.s
+                                                          "oncapture:click"
+                                                          (handle : Solidtype.Html.Div.on_click));(
+      Solidtype.Jsx.s "attr:title" ({js|t|js} : string));(Solidtype.Jsx.d
                                                             "bool:hidden"
-                                                            (true : bool));(
+                                                            (fun () ->
+                                                               closed () : 
+                                                            unit -> bool));(
       Solidtype.Jsx.d "prop:value" (fun () -> v ()));(Solidtype.Jsx.s
-                                                        "data-user-id"
-                                                        ({js|7|js} : 
-                                                        string));(Solidtype.Jsx.s
-                                                                    "aria-label"
-                                                                    ({js|name|js} : 
-                                                                    Solidtype.Html.Div.aria_label))|]
+                                                        "on:myEvent"
+                                                        (fun _ -> () : 
+                                                        Dom.event -> 
+                                                          unit));(Solidtype.Jsx.s
+                                                                    "data-x"
+                                                                    ({js|y|js} : 
+                                                                    string))|]
     [||]
 let switch =
   if false

@@ -1,6 +1,6 @@
 module Props = struct
   let check ?nonce:(_ : string Check.value option)
-      ?eventNames:(_ : string array Check.value option) () =
+      ?event_names:(_ : string array Check.value option) () =
     ()
 end
 

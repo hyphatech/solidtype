@@ -1,12 +1,12 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Swatch = K.ColorSwatch
 
 let island () =
   <div>
     <Swatch.Root value=(fun () -> K.Colors.parse_color "#ff0000") />
     <Swatch.Root
-      value=(fun () -> K.Colors.parse_color "#0000ff") colorName="Ocean"
+      value=(fun () -> K.Colors.parse_color "#0000ff") color_name="Ocean"
     />
   </div>
 

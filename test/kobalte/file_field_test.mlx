@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Field = K.FileField
 module File = K.Types.File
 module Jsx = Solidtype.Jsx
@@ -11,14 +11,14 @@ let island () =
   let report, set_report = S.create_signal "Nothing chosen" in
   <Field.Root
     multiple=true
-    maxFiles=5.
-    maxFileSize=100.
-    onFileAccept=(fun files ->
-                   S.set set_report
-                     (Printf.sprintf "Accepted %d" (Array.length files)))
-    onFileReject=(fun rejections ->
-                   S.set set_report
-                     (Printf.sprintf "Rejected %d" (Array.length rejections)))>
+    max_files=5.
+    max_file_size=100.
+    on_file_accept=(fun files ->
+                     S.set set_report
+                       (Printf.sprintf "Accepted %d" (Array.length files)))
+    on_file_reject=(fun rejections ->
+                     S.set set_report
+                       (Printf.sprintf "Rejected %d" (Array.length rejections)))>
     <Field.Label>"Attachments"</Field.Label>
     <Field.Dropzone>"Drop files here"</Field.Dropzone>
     <Field.Trigger>"Choose files"</Field.Trigger>

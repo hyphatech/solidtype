@@ -1,12 +1,12 @@
 module H = Harness
-module Alert = Solidtype.Kobalte.Alert
+module Alert = Solidtype_kobalte.Alert
 module Show = Solidtype.Show
 module S = Solidtype.Solid
 
 let island () =
   let saved, set_saved = S.create_signal false in
   <div>
-    <button type_=`button onClick=(fun _ -> S.set set_saved true)>
+    <button type_=`button on_click=(fun _ -> S.set set_saved true)>
       "Save"
     </button>
     <Show when_=(fun () -> S.get saved)>

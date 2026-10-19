@@ -1,11 +1,11 @@
 module Solid = Solidtype.Solid
-module Switch = Solidtype.Kobalte.Switch
+module Switch = Solidtype_kobalte.Switch
 
 let make () =
   let on, set_on = Solid.create_signal false in
   <div class_="settings">
     <Switch.Root
-      checked=(fun () -> Solid.get on) onChange=(fun v -> Solid.set set_on v)>
+      checked=(fun () -> Solid.get on) on_change=(fun v -> Solid.set set_on v)>
       <Switch.Input />
       <Switch.Label>"Sound"</Switch.Label>
       <Switch.Control class_="track">

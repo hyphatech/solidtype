@@ -55,8 +55,8 @@ let%component make ?(origin : string = "") () =
     <input
       aria_label="New note"
       value=(fun () -> S.get draft)
-      onInput=(fun e -> S.set set_draft (typed e))
+      on_input=(fun e -> S.set set_draft (typed e))
     />
-    <button type_=`button onClick=add>"Add"</button>
+    <button type_=`button on_click=add>"Add"</button>
     <p role=`status>(fun () -> Jsx.string (S.get problem))</p>
   </section>

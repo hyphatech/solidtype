@@ -1,16 +1,16 @@
 module H = Harness
-module Progress = Solidtype.Kobalte.Progress
+module Progress = Solidtype_kobalte.Progress
 module S = Solidtype.Solid
 
 let island () =
   let value, set_value = S.create_signal 30. in
   <div>
-    <Progress.Root value=(fun () -> S.get value) minValue=0. maxValue=60.>
+    <Progress.Root value=(fun () -> S.get value) min_value=0. max_value=60.>
       <Progress.Label>"Uploading"</Progress.Label>
       <Progress.ValueLabel />
       <Progress.Track><Progress.Fill /></Progress.Track>
     </Progress.Root>
-    <button type_=`button onClick=(fun _ -> S.set set_value 60.)>
+    <button type_=`button on_click=(fun _ -> S.set set_value 60.)>
       "Finish"
     </button>
   </div>

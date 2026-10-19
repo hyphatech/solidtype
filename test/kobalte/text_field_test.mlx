@@ -1,5 +1,5 @@
 module H = Harness
-module TextField = Solidtype.Kobalte.TextField
+module TextField = Solidtype_kobalte.TextField
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 
@@ -8,18 +8,18 @@ let island () =
   <div>
     <TextField.Root
       value=(fun () -> S.get name)
-      onChange=(S.set set_name)
+      on_change=(S.set set_name)
       required=true
-      validationState=(fun () ->
-                        if String.equal (S.get name) "" then `invalid
-                        else `valid)>
+      validation_state=(fun () ->
+                         if String.equal (S.get name) "" then `invalid
+                         else `valid)>
       <TextField.Label>"Name"</TextField.Label>
       <TextField.Input />
       <TextField.Description>"As on your passport"</TextField.Description>
       <TextField.ErrorMessage>"A name is needed"</TextField.ErrorMessage>
     </TextField.Root>
     <output>(fun () -> Jsx.string (S.get name))</output>
-    <TextField.Root defaultValue="Hello">
+    <TextField.Root default_value="Hello">
       <TextField.Label>"Notes"</TextField.Label> <TextField.TextArea />
     </TextField.Root>
   </div>

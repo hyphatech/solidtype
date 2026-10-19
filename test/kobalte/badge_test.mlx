@@ -1,7 +1,7 @@
 module H = Harness
-module Badge = Solidtype.Kobalte.Badge
+module Badge = Solidtype_kobalte.Badge
 
-let island () = <Badge.Root textValue="3 new messages">"3"</Badge.Root>
+let island () = <Badge.Root text_value="3 new messages">"3"</Badge.Root>
 
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Badge.tsx"]

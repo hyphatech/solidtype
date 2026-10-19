@@ -1,5 +1,5 @@
 module H = Harness
-module Switch = Solidtype.Kobalte.Switch
+module Switch = Solidtype_kobalte.Switch
 
 let island () =
   <Switch.Root>

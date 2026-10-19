@@ -1,5 +1,5 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module SpinButton = K.SpinButton
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
@@ -9,17 +9,17 @@ let island () =
   let change n = S.set set_volume (Int.max 0 (Int.min 10 n)) in
   <SpinButton.Root
     aria_label="Volume"
-    tabIndex="0"
+    tab_index="0"
     value=(fun () -> K.Types.Either.right (float_of_int (S.get volume)))
-    textValue=(fun () -> string_of_int (S.get volume) ^ " of 10")
-    minValue=0.
-    maxValue=10.
-    onIncrement=(fun () -> change (S.get volume + 1))
-    onDecrement=(fun () -> change (S.get volume - 1))
-    onIncrementPage=(fun () -> change (S.get volume + 5))
-    onDecrementPage=(fun () -> change (S.get volume - 5))
-    onDecrementToMin=(fun () -> change 0)
-    onIncrementToMax=(fun () -> change 10)>
+    text_value=(fun () -> string_of_int (S.get volume) ^ " of 10")
+    min_value=0.
+    max_value=10.
+    on_increment=(fun () -> change (S.get volume + 1))
+    on_decrement=(fun () -> change (S.get volume - 1))
+    on_increment_page=(fun () -> change (S.get volume + 5))
+    on_decrement_page=(fun () -> change (S.get volume - 5))
+    on_decrement_to_min=(fun () -> change 0)
+    on_increment_to_max=(fun () -> change 10)>
     (fun () -> Jsx.int (S.get volume))
   </SpinButton.Root>
 

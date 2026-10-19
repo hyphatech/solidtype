@@ -1,9 +1,9 @@
 module H = Harness
-module K = Solidtype.Kobalte
+module K = Solidtype_kobalte
 module Area = K.ColorArea
 
 let island () =
-  <Area.Root defaultValue=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")>
+  <Area.Root default_value=(fun () -> K.Colors.parse_color "hsl(0, 100%, 50%)")>
     <Area.Label>"Colour"</Area.Label>
     <Area.Background>
       <Area.Thumb><Area.HiddenInputX /> <Area.HiddenInputY /></Area.Thumb>

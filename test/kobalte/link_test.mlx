@@ -1,5 +1,5 @@
 module H = Harness
-module Link = Solidtype.Kobalte.Link
+module Link = Solidtype_kobalte.Link
 
 let island () =
   <p>
