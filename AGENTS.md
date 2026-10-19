@@ -13,7 +13,7 @@ Users start at [README.md](README.md).
 ```sh
 make setup    # once: the switch hypha-solidtype, all dependencies, and Bun's
 make test     # the ppx's lowering, each island against its twin, the example's tests
-make lint     # formatting, the plugin's types, and the release build
+make lint     # formatting, the plugin's types, the release build, and the generated bindings
 make fmt      # format in place
 make example  # the example site, built by Astro into _build/example-dist
 make serve    # the example site and its notes, served on http://localhost:4321
@@ -173,7 +173,7 @@ break.
   `on_click`. Each element's signature also gives `'r check`, its attributes
   as optional arguments before `'r`, the tail of a check for a
   component that passes them on. Why: a hand-typed copy drifts from the
-  version it binds. Test: `make test` runs the generator with `--check`.
+  version it binds. Test: `make lint` runs the generator with `--check`.
 - **Every name a user writes is snake case, made by one rule** from the
   name in Solid's or Kobalte's documentation: a capital is an underscore
   and the lower case, a run of capitals one word, a hyphen an
@@ -212,7 +212,7 @@ break.
   methods nor a class. A member typed `any` is not bound, and nor are
   Kobalte's building blocks, menu, popper, dismissable-layer and
   polymorphic. Why: Kobalte's parts are hundreds, and a binding by hand
-  would be a second copy of its types. Test: `make test` runs the
+  would be a second copy of its types. Test: `make lint` runs the
   generator with `--check`.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --

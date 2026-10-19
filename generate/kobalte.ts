@@ -2,13 +2,14 @@
 // part, its hooks and utilities, and the types they name -- from Kobalte's
 // own declarations, so a binding is Kobalte's types and is never typed by
 // hand, and ppx/kobalte_names.ml, the props whose JavaScript name the ppx
-// cannot spell back by rule. `make generate` writes them; the test run's
+// cannot spell back by rule. `make generate` writes them; `make lint`'s
 // `--check` fails when a file differs from what Kobalte's types give.
 
 import ts from "typescript";
 import { readdirSync, existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { keywords, label, record, snake, table } from "./names.ts";
+import { switchPrefix } from "./opam.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 // Kobalte's real path: a package manager that links each package's
@@ -22,8 +23,7 @@ const kobalte = JSON.parse(readFileSync(`${root}node_modules/@kobalte/core/packa
 // documentation does not offer as components.
 const blocks = new Set(["menu", "popper", "dismissable-layer", "polymorphic"]);
 
-const prefix = process.env.OPAM_SWITCH_PREFIX;
-if (!prefix) throw new Error("run through opam exec, or make generate, so Melange's Dom is found");
+const prefix = switchPrefix();
 const domTypes = new Set(
   readFileSync(`${prefix}/lib/melange/dom/melange/dom.ml`, "utf8").match(/^type [a-zA-Z_]+/gm)?.map((t) => t.slice(5)) ?? [],
 );

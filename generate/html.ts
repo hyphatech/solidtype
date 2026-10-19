@@ -1,13 +1,14 @@
 // Writes src/html.mli -- each element's attributes, as OCaml types -- from
 // Solid's own JSX types, so an attribute's type is Solid's and is never typed
 // by hand, and ppx/html_names.ml, the attributes whose JavaScript name the
-// ppx cannot spell back by rule. `make generate` writes them; the test run's
+// ppx cannot spell back by rule. `make generate` writes them; `make lint`'s
 // `--check` fails when a file differs from what Solid's types give.
 
 import ts from "typescript";
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { keywords, record, table } from "./names.ts";
+import { switchPrefix } from "./opam.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const jsx = `${root}node_modules/solid-js/types/jsx.d.ts`;
@@ -17,8 +18,7 @@ const solid = JSON.parse(readFileSync(`${root}node_modules/solid-js/package.json
 
 // The types Melange's Dom module has, which an event or an element maps to,
 // read from the switch the build uses: `make generate` runs this inside it.
-const prefix = process.env.OPAM_SWITCH_PREFIX;
-if (!prefix) throw new Error("run through opam exec, or make generate, so Melange's Dom is found");
+const prefix = switchPrefix();
 const domTypes = new Set(
   readFileSync(`${prefix}/lib/melange/dom/melange/dom.ml`, "utf8")
     .match(/^type [a-zA-Z_]+/gm)

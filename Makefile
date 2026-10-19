@@ -23,15 +23,15 @@ build: ## build everything
 # comes first.
 test: build ## run the tests
 	$(OPAM) dune test --force
-	$(OPAM) bun generate/html.ts --check
-	$(OPAM) bun generate/kobalte.ts --check
 	bun run test
 
 # Release is the profile opam installs with.
-lint: ## check formatting, the plugin's types and the release build
+lint: ## check formatting, the plugin's types, the release build and the generated bindings
 	$(OPAM) dune build @all @fmt
 	$(OPAM) dune build --profile release @all
 	bun run tsc -p vite-plugin
+	$(OPAM) bun generate/html.ts --check
+	$(OPAM) bun generate/kobalte.ts --check
 
 fmt: ## format the code
 	$(OPAM) dune fmt
