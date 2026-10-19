@@ -37,7 +37,8 @@ an OCaml keyword takes a trailing underscore.
 | `readOnly` | `read_only` |
 | `aria-label` | `aria_label` |
 | `defaultValue` | `default_value` |
-| `class`, `classList` | `class_`, `class_list` |
+| `classList` | `class_list` |
+| a keyword: `class`, `type`, `for`, `open` | `class_`, `type_`, `for_`, `open_` |
 
 A handler takes the event its element and name give it: `on_click` a
 `Dom.mouseEvent`, `on_input` a `Dom.inputEvent`.
