@@ -66,8 +66,10 @@ example/
                      island from Melange's output
   src/               islands in .mlx, and api.ml, the notes' client printed
                      from server/ as the build runs
-  server/            the notes, a Spindle app: what the notes island is
-                     printed from and called against, and `make serve`
+  server/            the notes, a Spindle app: their routes, what the
+                     notes island is called against and `make serve`
+                     serves, and their command line, Spindle's, which
+                     prints the island's client and the twin's schemas
   twin/              each island's TSX twin, read by the twin test alone;
                      notes.gen.ts, the server's Zod schemas, compared
   test/              the islands' behaviour, in OCaml, run by vitest, the

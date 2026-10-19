@@ -1,24 +1,21 @@
 ; The example's server: Spindle, serving the notes the island calls and the
-; built site beside them, on one origin. Its routes are printed as the
-; island's client, so a route that changes is a build that fails where an
-; island no longer matches it.
+; built site beside them, on one origin. Its command line prints the
+; island's client from the routes, so a route that changes is a build that
+; fails where an island no longer matches it.
 
 (library
- (name notes)
- (modules notes)
- (libraries spindle wiretype))
+ (name routes)
+ (modules routes)
+ (libraries spindle wiretype)
+ (preprocess
+  (pps ppx_wiretype)))
 
 (executable
- (name print_client)
- (modules print_client)
- (libraries spindle notes))
+ (name notes)
+ (modules notes)
+ (libraries spindle spindle-cli routes))
 
 (executable
  (name serve)
  (modules serve)
- (libraries spindle notes eio_main))
-
-(executable
- (name print_zod)
- (modules print_zod)
- (libraries spindle notes))
+ (libraries spindle routes eio_main))

@@ -1,6 +1,6 @@
 (* The example served: the notes on [PORT], and, given [SITE], the built
-   site beside them. It prints where it listens once it does, which is what
-   a test waits for. *)
+   site beside them. A test starts it on a port free at the time, and waits
+   for the line Spindle prints once it listens. *)
 
 let () =
   let port, site =
@@ -16,11 +16,8 @@ let () =
   | Some port ->
       Eio_main.run @@ fun env ->
       Spindle.serve env ~port
-        ~resources:[ Notes.resource (Notes.create ()) ]
-        ~ready:(fun where ->
-          print_endline where;
-          flush stdout)
-        (Notes.routes
+        ~resources:[ Routes.resource (Routes.create ()) ]
+        (Routes.routes
         @ Option.fold ~none:[]
             ~some:(fun dir -> [ Spindle.Static.directory dir ])
             site)

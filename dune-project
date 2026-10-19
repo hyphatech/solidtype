@@ -58,6 +58,16 @@
     :with-test
     (>= 0.6.0)
     (< 0.7.0)))
+  (ppx_wiretype
+   (and
+    :with-test
+    (>= 0.6.0)
+    (< 0.7.0)))
+  (spindle-cli
+   (and
+    :with-test
+    (>= 0.8.0)
+    (< 0.9.0)))
   (eio_main
    (and
     :with-test

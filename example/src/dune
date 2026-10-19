@@ -11,4 +11,4 @@
 (rule
  (with-stdout-to
   api.ml
-  (run ../server/print_client.exe)))
+  (run %{exe:../server/notes.exe} api melange)))

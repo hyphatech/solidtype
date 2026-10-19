@@ -1,4 +1,4 @@
-/* Printed from example/server/notes.ml. Do not edit: run dune promote. */
+/* Generated from Notes's routes. Do not edit: change the routes, and generate it again. */
 
 import { z } from "zod/mini";
 

@@ -1,4 +1,4 @@
-// The example's server for the island tests: notes.ml served on a port free
+// The example's server for the island tests: routes.ml served on a port free
 // when the run starts, its origin handed to each test as "origin" once the
 // server says it listens, and stopped when the run ends. It is the real
 // server, as an island calls it.
