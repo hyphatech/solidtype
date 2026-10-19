@@ -19,10 +19,7 @@ against the installed library, with the error a user reads.
   >  (preprocess
   >   (pps melange.ppx ppx_solidtype)))
   > EOF
-Colour stays off even where the environment forces it, as CI's does, so an
-error reads alike wherever the test runs.
-
-  $ build () { env -u CLICOLOR_FORCE dune build --root . 2>&1 | sed -n '/^File/,$p'; }
+  $ build () { dune build --root . 2>&1; }
 
 A Kobalte part's check lists every attribute of its element, which the
 compiler prints whole; [brief] keeps where and what, its last line.
@@ -84,6 +81,7 @@ A read passed as an attribute's value, not inside a thunk.
   Error: This constant has type string but an expression was expected of type
            unit -> string
          Hint: Did you forget to wrap the expression using fun () ->?
+  [1]
 
 A read passed as a child's value.
 
@@ -99,6 +97,7 @@ A read passed as a child's value.
   Error: This expression has type Solidtype.Jsx.content
          but an expression was expected of type unit -> Solidtype.Jsx.content
          Hint: Did you forget to wrap the expression using fun () ->?
+  [1]
 
 A read passed as a component's prop.
 
@@ -114,6 +113,7 @@ A read passed as a component's prop.
   Error: This constant has type string but an expression was expected of type
            unit -> 'a
          Hint: Did you forget to wrap the expression using fun () ->?
+  [1]
 
 A misspelt attribute.
 
@@ -126,6 +126,7 @@ A misspelt attribute.
                                 ^^^
   Error: Unbound type constructor Solidtype.Html.Div.klass_
   Hint:              Did you mean Solidtype.Html.Div.class_?
+  [1]
 
 A required prop left out.
 
@@ -140,6 +141,7 @@ A required prop left out.
          but an expression was expected of type unit
          because it is in the result of a conditional with no else branch
   Hint: This function application is partial, maybe some arguments are missing.
+  [1]
 
 A prop the component does not take.
 
@@ -153,6 +155,7 @@ A prop the component does not take.
   Error: The function applied to this argument has type
            ?count:int Solidtype.Check.value -> ?spread:Label.Props.t -> unit
   This argument cannot be applied with label ~colour
+  [1]
 
 Children given to a component that takes none.
 
@@ -166,6 +169,7 @@ Children given to a component that takes none.
   Error: The function applied to this argument has type
            ?count:int Solidtype.Check.value -> ?spread:Label.Props.t -> unit
   This argument cannot be applied with label ~children
+  [1]
 
 Children whose type does not agree with another prop's.
 
@@ -184,6 +188,7 @@ Children whose type does not agree with another prop's.
            (string -> Solidtype.Jsx.element, [ `render ])
            Solidtype.Check.children
          Type int is not compatible with type string
+  [1]
 
 A function passed by name where a prop takes a function, which would be
 called as a thunk.
@@ -203,6 +208,7 @@ called as a thunk.
            (string -> Solidtype.Jsx.element, [ `render ])
            Solidtype.Check.children
          The second variant type does not allow tag(s) `nodes
+  [1]
 
 A function given to an element as a child.
 
@@ -215,6 +221,7 @@ A function given to an element as a child.
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: a child is a string, an element or a thunk, (fun () -> ...); a
          function is a component's only child
+  [1]
 
 An attribute the element does not take.
 
@@ -227,6 +234,7 @@ An attribute the element does not take.
                               ^^^^^^^
   Error: Unbound type constructor Solidtype.Html.Div.href
   Hint:              Did you mean Solidtype.Html.Div.ref?
+  [1]
 
 An attribute named as JavaScript spells it, not by the spelling rule.
 
@@ -239,6 +247,7 @@ An attribute named as JavaScript spells it, not by the spelling rule.
                                          ^^^^^^
   Error: Unbound type constructor Solidtype.Html.Div.contentEditable
   Hint:              Did you mean Solidtype.Html.Div.contenteditable?
+  [1]
 
 A value its namespace's wrapper does not take: bool:hidden takes a bool.
 
@@ -251,6 +260,7 @@ A value its namespace's wrapper does not take: bool:hidden takes a bool.
                                                     ^^^^^
   Error: This constant has type string but an expression was expected of type
            bool
+  [1]
 
 A native listener given to an attribute that is no handler.
 
@@ -262,6 +272,7 @@ A native listener given to an attribute that is no handler.
   1 | let make () = <div title=(Solidtype.Jsx.native (fun _ -> ())) />
                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: Jsx.native wraps a handler, on_<event>=(Jsx.native f)
+  [1]
 
 A namespace given to a component, whose props have none.
 
@@ -275,6 +286,7 @@ A namespace given to a component, whose props have none.
   Error: a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop,
          Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's
          attribute
+  [1]
 
 A value an attribute's closed set does not hold.
 
@@ -288,6 +300,7 @@ A value an attribute's closed set does not hold.
   Error: The constructor `sumbit has type [> `sumbit ]
          but an expression was expected of type Solidtype.Html.Button.type_
          The second variant type does not allow tag(s) `sumbit
+  [1]
 
 An option given to Show, which Solid would read for truth.
 
@@ -302,6 +315,7 @@ An option given to Show, which Solid would read for truth.
   Error: This expression has type string option Solidtype.Check.value
          but an expression was expected of type bool Solidtype.Check.value
          Type string option is not compatible with type bool
+  [1]
 
 A prop omit is given that the component does not have.
 
@@ -313,6 +327,7 @@ A prop omit is given that the component does not have.
   1 | let rest props = Label.Props.omit props [| Label.Props.Colour |]
                                                  ^^^^^^^^^^^^^^^^^^
   Error: Unbound constructor Label.Props.Colour
+  [1]
 
 A Switch over a match that leaves a case out.
 
@@ -334,6 +349,7 @@ A Switch over a match that leaves a case out.
   7 |       | Ready n -> <p>(fun () -> Solidtype.Jsx.int n)</p>)
   Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
     Here is an example of a case that is not matched: Refused
+  [1]
 
 A prop a Kobalte part does not take.
 
@@ -378,6 +394,7 @@ A single-value Select given a list for its value.
            (string array, 'b) Solidtype_kobalte.Types.either array
            Solidtype.Check.value
          Type string is not compatible with type string array
+  [1]
 
 A Select of many values without multiple, which Kobalte reads to choose.
 
@@ -394,3 +411,4 @@ A Select of many values without multiple, which Kobalte reads to choose.
          but an expression was expected of type unit
          because it is in the result of a conditional with no else branch
   Hint: This function application is partial, maybe some arguments are missing.
+  [1]

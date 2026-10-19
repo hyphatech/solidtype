@@ -7,3 +7,11 @@
   (package solidtype)
   (package solidtype-kobalte)
   (package ppx_solidtype)))
+
+; Its errors are compared as text, so colour stays off even where the
+; environment forces it, as CI's does.
+
+(env
+ (_
+  (env-vars
+   (CLICOLOR_FORCE 0))))
