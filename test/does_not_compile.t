@@ -19,7 +19,10 @@ against the installed library, with the error a user reads.
   >  (preprocess
   >   (pps melange.ppx ppx_solidtype)))
   > EOF
-  $ build () { dune build --root . 2>&1 | sed -n '/^File/,$p'; }
+Colour stays off even where the environment forces it, as CI's does, so an
+error reads alike wherever the test runs.
+
+  $ build () { env -u CLICOLOR_FORCE dune build --root . 2>&1 | sed -n '/^File/,$p'; }
 
 A Kobalte part's check lists every attribute of its element, which the
 compiler prints whole; [brief] keeps where and what, its last line.
