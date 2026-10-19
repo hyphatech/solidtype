@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.1.0 (2026-10-19)
 
 - The example is a whole stack: a notes island typed from a client
   Spindle prints from the example's own routes as the build runs, so a
