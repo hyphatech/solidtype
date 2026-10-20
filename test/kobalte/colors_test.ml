@@ -32,9 +32,9 @@ let () =
           let c = red () in
           E.(
             expect
-              ( Color.to_string c (Some `hex),
-                Color.to_string c (Some `rgb),
-                Color.to_string (Color.to_format c `hsl) (Some `hsl),
+              ( Color.to_string c ~format:`hex (),
+                Color.to_string c ~format:`rgb (),
+                Color.to_string (Color.to_format c `hsl) ~format:`hsl (),
                 Color.to_hex_int c () )
             |> toEqual
                  ("#FF0000", "rgb(255, 0, 0)", "hsl(0 100% 50%)", 16711680.)));
@@ -50,7 +50,7 @@ let () =
           E.(
             expect
               ( Color.get_channel_value green `hue,
-                Color.to_string (Color.to_format green `rgb) (Some `hex),
+                Color.to_string (Color.to_format green `rgb) ~format:`hex (),
                 refused )
             |> toEqual (120., "#00FF00", true)));
       Jest.test "a channel set gives a new colour, and leaves the first"
@@ -59,7 +59,7 @@ let () =
           let faded = Color.with_channel_value c `alpha 0.5 in
           E.(
             expect
-              ( Color.to_string faded (Some `rgba),
+              ( Color.to_string faded ~format:`rgba (),
                 Color.get_channel_value c `alpha )
             |> toEqual ("rgba(255, 0, 0, 0.5)", 1.)));
       Jest.test "a colour knows its space and its channels" (fun () ->
@@ -105,8 +105,8 @@ let () =
           in
           E.(
             expect
-              ( Color.to_string from_string (Some `hex),
-                Color.to_string from_colour (Some `hex) )
+              ( Color.to_string from_string ~format:`hex (),
+                Color.to_string from_colour ~format:`hex () )
             |> toEqual ("#0000FF", "#FF0000")));
       Jest.test "a string that is no colour is refused, saying so" (fun () ->
           let refused =
@@ -122,7 +122,7 @@ let () =
           E.(
             expect
               ( Option.map
-                  (fun c -> Color.to_string c (Some `hex))
+                  (fun c -> Color.to_string c ~format:`hex ())
                   (Colors.parse_color_opt "#00ff00"),
                 Colors.parse_color_opt "not a colour" )
             |> toEqual (Some "#00FF00", None)));

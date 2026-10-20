@@ -363,12 +363,32 @@ function reference(n: Named, t: ts.Type, alias: ts.Symbol | undefined, vars: Var
   return `${applied}§${n.module}§`;
 }
 
-function mapFunction(sig: ts.Signature, vars: Vars, where: string): string | null {
-  const params = sig.getParameters().map((p) => map(checker.getTypeOfSymbol(p), vars, where));
+// Whether a parameter may be left out: optional, or with a default, but not
+// a rest of them.
+function leftOut(q: ts.Symbol): boolean {
+  const d = q.valueDeclaration;
+  return !!d && ts.isParameter(d) && !d.dotDotDotToken && (d.questionToken !== undefined || d.initializer !== undefined);
+}
+
+// A function's OCaml type. [labelled], for a function the user calls, an
+// external, writes a parameter that may be left out as an optional argument,
+// ?name, followed by unit, as the stdlib does; a function JavaScript calls
+// takes its arguments by position, so there it is an option.
+function mapFunction(sig: ts.Signature, vars: Vars, where: string, labelled = false): string | null {
+  const ps = sig.getParameters();
+  const params = ps.map((q) => {
+    const optional = labelled && leftOut(q);
+    const t = checker.getTypeOfSymbol(q);
+    const m = map(optional ? checker.getNonNullableType(t) : t, vars, where);
+    if (m === null) return null;
+    const a = m.includes("->") ? `(${m})` : m;
+    return optional ? `?${value(snake(q.name))}:${a}` : a;
+  });
   if (params.some((p) => p === null)) return null;
   const result = map(sig.getReturnType(), vars, where);
   if (!result) return null;
-  const args = params.length === 0 ? ["unit"] : (params as string[]).map((p) => (p.includes("->") ? `(${p})` : p));
+  const args = params.length === 0 ? ["unit"] : (params as string[]);
+  if (labelled && ps.some(leftOut)) args.push("unit");
   // A function returned is parenthesized, so it is not taken for more
   // arguments.
   return `${args.join(" -> ")} -> ${topArrow(result) ? `(${result})` : result}`;
@@ -573,10 +593,14 @@ function splitArrow(t: string): { args: string[]; result: string } {
 
 // The OCaml function over [js], an external that may throw, of [type], in
 // module [where]: [self] its object where it is a method, and [opt] whether
-// an _opt is written beside.
-function guarded(indent: string, where: string, name: string, type: string, js: string, arity: number, self: boolean, opt: boolean): string[] {
+// an _opt is written beside. It takes [sig]'s arguments as the external
+// does: by position, and one that may be left out as ?name, then ().
+function guarded(indent: string, where: string, name: string, type: string, js: string, sig: ts.Signature, self: boolean, opt: boolean): string[] {
   vals.set(`${where}.${name}`, type);
-  const xs = arity === 0 ? "()" : Array.from({ length: arity }, (_, i) => `x${i}`).join(" ");
+  const ps = sig.getParameters();
+  const named = ps.map((q, i) => (leftOut(q) ? `?${value(snake(q.name))}` : `x${i}`));
+  if (ps.some(leftOut)) named.push("()");
+  const xs = named.length === 0 ? "()" : named.join(" ");
   const args = self ? `o ${xs}` : xs;
   const lines = [
     `${indent}let ${name} ${args} =`,
@@ -644,7 +668,7 @@ for (const entry of entries) {
       lines.push(`  end`, ``);
     } else if ((r.flags & ts.SymbolFlags.Function) && ts.isFunctionDeclaration(decl)) {
       const sig = checker.getSignaturesOfType(checker.getTypeOfSymbol(r), ts.SignatureKind.Call)[0];
-      const t = sig ? mapFunction(sig, new Map(), `${entry}.${sym.name}`) : null;
+      const t = sig ? mapFunction(sig, new Map(), `${entry}.${sym.name}`, true) : null;
       if (!t) {
         unmapped.set(`${entry}.${sym.name}`, sig ? checker.signatureToString(sig) : "?");
         continue;
@@ -654,7 +678,7 @@ for (const entry of entries) {
         lines.push(`  external ${name}_js : ${t} = "${sym.name}"`);
         lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`);
         lines.push(...doc(r, "  ", true));
-        lines.push(...guarded("  ", component, name, t, `${name}_js`, sig.getParameters().length, false, true), ``);
+        lines.push(...guarded("  ", component, name, t, `${name}_js`, sig, false, true), ``);
         continue;
       }
       lines.push(...doc(r, "  "));
@@ -720,7 +744,7 @@ while (queue.length > 0) {
       // The standard library's methods are Melange's to bind.
       if (library) continue;
       const sig = pt.getCallSignatures()[0];
-      const f = sig ? mapFunction(sig, vars, `${n.module}.${p.name}`) : null;
+      const f = sig ? mapFunction(sig, vars, `${n.module}.${p.name}`, true) : null;
       if (!f || unbound(f, params)) {
         unmapped.set(`${n.module}.${p.name}()`, sig ? checker.signatureToString(sig) : "?");
         continue;
@@ -730,7 +754,7 @@ while (queue.length > 0) {
       if (sig && throws(p, `${n.module}.${p.name}`)) {
         lines.push(`    external ${name}_js : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
         lines.push(...doc(p, "    ", true));
-        lines.push(...guarded("    ", n.module, name, `${t} -> ${f}`, `${name}_js`, sig.getParameters().length, true, false));
+        lines.push(...guarded("    ", n.module, name, `${t} -> ${f}`, `${name}_js`, sig, true, false));
         continue;
       }
       lines.push(`    external ${name} : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
@@ -781,7 +805,7 @@ while (queue.length > 0) {
         // Called as a method of the object that holds it: an external is
         // called directly from another library, where a [let] in a nested
         // module goes through Curry, its arity lost.
-        lines.push(`    external ${value(snake(p.name))} : ${t} -> ${fn} = "${p.name}" [@@mel.send]`);
+        lines.push(`    external ${value(snake(p.name))} : ${t} -> ${mapFunction(sig, vars, `${n.module}.${p.name}`, true) ?? fn} = "${p.name}" [@@mel.send]`);
       }
     } else {
       lines.push(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${wrap(ft)} option` : wrap(ft)} = "${p.name}" [@@mel.get]`);
@@ -814,7 +838,7 @@ while (queue.length > 0) {
   if (isClass && n.symbol?.valueDeclaration) {
     const mod = moduleOf(n.symbol);
     const ctor = checker.getTypeOfSymbolAtLocation(n.symbol, n.symbol.valueDeclaration).getConstructSignatures()[0];
-    const f = ctor ? mapFunction(ctor, vars, `${n.module}.constructor`) : null;
+    const f = ctor ? mapFunction(ctor, vars, `${n.module}.constructor`, true) : null;
     if (f && mod) {
       lines.push(`    external make : ${f.replace(/-> [^>]*$/, `-> ${t}`)} = "${n.module}" [@@mel.new] [@@mel.module "${mod}"]`);
     }

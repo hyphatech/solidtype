@@ -40,5 +40,5 @@ let () =
       Jest.test "is initialised again by initEvent, a method, not an event"
         (fun () ->
           let e = swipe () in
-          Swipe.init_event e "swipe.end" None None;
+          Swipe.init_event e "swipe.end" ();
           E.(expect (Swipe.type_ e) |> toBe "swipe.end")))

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Breaking: a Kobalte function's parameter that may be left out is an
+  optional argument, as the stdlib's are: `I18n.create_filter ()`,
+  ``Color.to_string c ~format:`hex ()``, `Toaster.show toaster render ()`,
+  where each was a positional `option` a caller wrote `None` for.
 - Breaking: a Kobalte value's conversion to its DOM type is named as the
   stdlib names one, `to_html_div_element`, `to_focus_event`, where it was
   `htmlDivElement`, `focusEvent`, the one camel-case name a user wrote.

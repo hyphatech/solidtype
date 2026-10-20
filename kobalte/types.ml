@@ -455,7 +455,7 @@ module Color = struct
     match to_format_js o x0 with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("to_format: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external to_string : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba | `css ] option -> string = "toString" [@@mel.send]
+  external to_string : t -> ?format:[ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba | `css ] -> unit -> string = "toString" [@@mel.send]
   external clone : t -> unit -> t_color = "clone" [@@mel.send]
   external to_hex_int : t -> unit -> float = "toHexInt" [@@mel.send]
   external get_channel_value_js : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float = "getChannelValue" [@@mel.send]
@@ -541,7 +541,7 @@ module ColorModeStorageManager = struct
   (** Whether it's an SSR environment. *)
   external ssr : t -> bool option = "ssr" [@@mel.get]
   (** Get the color mode from the storage. *)
-  external get : t -> [ `light | `dark | `system ] option -> [ `light | `dark | `system ] option = "get" [@@mel.send]
+  external get : t -> ?fallback:[ `light | `dark | `system ] -> unit -> [ `light | `dark | `system ] option = "get" [@@mel.send]
   (** Save the color mode in the storage. *)
   external set : t -> [ `light | `dark | `system ] -> unit = "set" [@@mel.send]
   external make : type_:([ `localStorage | `cookie ] [@mel.as "type"]) -> ?ssr:(bool [@mel.as "ssr"]) -> get:(([ `light | `dark | `system ] option -> [ `light | `dark | `system ] option) [@mel.as "get"]) -> set:(([ `light | `dark | `system ] -> unit) [@mel.as "set"]) -> unit -> t = "" [@@mel.obj]
@@ -760,9 +760,9 @@ module ComboboxContextValue = struct
   external set_trigger_ref : t -> Dom.htmlElement -> unit = "setTriggerRef" [@@mel.send]
   external set_content_ref : t -> Dom.htmlElement -> unit = "setContentRef" [@@mel.send]
   external set_listbox_ref : t -> Dom.htmlElement -> unit = "setListboxRef" [@@mel.send]
-  external open_ : t -> ([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit = "open" [@@mel.send]
+  external open_ : t -> ([ `first | `last ], bool) either -> ?trigger_mode:[ `focus | `input | `manual ] -> unit -> unit = "open" [@@mel.send]
   external close : t -> unit -> unit = "close" [@@mel.send]
-  external toggle : t -> ([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit = "toggle" [@@mel.send]
+  external toggle : t -> ([ `first | `last ], bool) either -> ?trigger_mode:[ `focus | `input | `manual ] -> unit -> unit = "toggle" [@@mel.send]
   external placeholder : t -> Solidtype.Jsx.element Solidtype.Solid.accessor = "placeholder" [@@mel.get]
   external render_item : t -> _ t_collection_node -> Solidtype.Jsx.element = "renderItem" [@@mel.send]
   external render_section : t -> _ t_collection_node -> Solidtype.Jsx.element = "renderSection" [@@mel.send]
@@ -858,10 +858,10 @@ module File = struct
   external type_ : t -> string = "type" [@@mel.get]
   external array_buffer : t -> unit -> t_array_buffer Js.Promise.t = "arrayBuffer" [@@mel.send]
   external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
-  external slice : t -> float option -> float option -> string option -> t_blob = "slice" [@@mel.send]
+  external slice : t -> ?start:float -> ?end_:float -> ?content_type:string -> unit -> t_blob = "slice" [@@mel.send]
   external stream : t -> unit -> t_readable_stream = "stream" [@@mel.send]
   external text : t -> unit -> string Js.Promise.t = "text" [@@mel.send]
-  external image : t -> t_constructor_options option -> t_image = "image" [@@mel.send]
+  external image : t -> ?options:t_constructor_options -> unit -> t_image = "image" [@@mel.send]
   external form_data : t -> unit -> t_form_data Js.Promise.t = "formData" [@@mel.send]
 end
 
@@ -949,9 +949,9 @@ end
 
 module DateTimeFormat = struct
   type t = t_date_time_format
-  external format : t -> (float, Js.Date.t) either option -> string = "format" [@@mel.send]
+  external format : t -> ?date:(float, Js.Date.t) either -> unit -> string = "format" [@@mel.send]
   external resolved_options : t -> unit -> t_resolved_date_time_format_options = "resolvedOptions" [@@mel.send]
-  external format_to_parts : t -> (float, Js.Date.t) either option -> t_date_time_format_part array = "formatToParts" [@@mel.send]
+  external format_to_parts : t -> ?date:(float, Js.Date.t) either -> unit -> t_date_time_format_part array = "formatToParts" [@@mel.send]
 end
 
 module I18n_CreateDefaultLocale = struct
@@ -995,7 +995,7 @@ module NumberFormat = struct
   type t = t_number_format
   external format : t -> float -> string = "format" [@@mel.send]
   external resolved_options : t -> unit -> t_resolved_number_format_options = "resolvedOptions" [@@mel.send]
-  external format_to_parts : t -> (float, t_number_format_format_to_parts) either option -> t_number_format_part array = "formatToParts" [@@mel.send]
+  external format_to_parts : t -> ?number:(float, t_number_format_format_to_parts) either -> unit -> t_number_format_part array = "formatToParts" [@@mel.send]
 end
 
 module Locale = struct
@@ -1456,7 +1456,7 @@ module SwipeEvent = struct
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail)
       Any custom data the event was created with. Typically used for synthetic events. *)
   external detail : t -> t_swipe_event_detail = "detail" [@@mel.get]
-  external init_custom_event : t -> string -> bool option -> bool option -> t_swipe_event_detail option -> unit = "initCustomEvent" [@@mel.send]
+  external init_custom_event : t -> string -> ?bubbles:bool -> ?cancelable:bool -> ?detail:t_swipe_event_detail -> unit -> unit = "initCustomEvent" [@@mel.send]
   (** The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/bubbles) *)
@@ -1496,7 +1496,7 @@ module SwipeEvent = struct
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/timeStamp) *)
   external time_stamp : t -> float = "timeStamp" [@@mel.get]
   external composed_path : t -> unit -> Dom.eventTarget array = "composedPath" [@@mel.send]
-  external init_event : t -> string -> bool option -> bool option -> unit = "initEvent" [@@mel.send]
+  external init_event : t -> string -> ?bubbles:bool -> ?cancelable:bool -> unit -> unit = "initEvent" [@@mel.send]
   external prevent_default : t -> unit -> unit = "preventDefault" [@@mel.send]
   external stop_immediate_propagation : t -> unit -> unit = "stopImmediatePropagation" [@@mel.send]
   external stop_propagation : t -> unit -> unit = "stopPropagation" [@@mel.send]
@@ -1508,9 +1508,9 @@ end
 
 module Toast_Toaster = struct
   type t = t_toast_toaster
-  external show : t -> (t_toast_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float = "show" [@@mel.send]
+  external show : t -> (t_toast_component_props -> Solidtype.Jsx.element) -> ?options:t_show_toast_options -> unit -> float = "show" [@@mel.send]
   external update : t -> float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit = "update" [@@mel.send]
-  external promise : t -> (('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float = "promise" [@@mel.send]
+  external promise : t -> (('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> ?options:t_show_toast_options -> unit -> float = "promise" [@@mel.send]
   external dismiss : t -> float -> float = "dismiss" [@@mel.send]
   external clear : t -> unit -> unit = "clear" [@@mel.send]
   external make : show:(((t_toast_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "show"]) -> update:((float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit) [@mel.as "update"]) -> promise:(((('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "promise"]) -> dismiss:((float -> float) [@mel.as "dismiss"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> t = "" [@@mel.obj]
@@ -1557,8 +1557,8 @@ module TooltipContextValue = struct
   external trigger_on_focus_only : t -> bool Solidtype.Solid.accessor = "triggerOnFocusOnly" [@@mel.get]
   external content_id : t -> string option Solidtype.Solid.accessor = "contentId" [@@mel.get]
   external content_present : t -> bool Solidtype.Solid.accessor = "contentPresent" [@@mel.get]
-  external open_tooltip : t -> bool option -> unit = "openTooltip" [@@mel.send]
-  external hide_tooltip : t -> bool option -> unit = "hideTooltip" [@@mel.send]
+  external open_tooltip : t -> ?immediate:bool -> unit -> unit = "openTooltip" [@@mel.send]
+  external hide_tooltip : t -> ?immediate:bool -> unit -> unit = "hideTooltip" [@@mel.send]
   external cancel_opening : t -> unit -> unit = "cancelOpening" [@@mel.send]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   external register_content_id_js : t -> (string -> (unit -> unit [@u]) [@u]) = "registerContentId" [@@mel.get]
@@ -1765,21 +1765,21 @@ end
     images don't shift colour. *)
 module Image = struct
   type t = t_image
-  external resize : t -> float -> float option -> t_resize_options option -> t_image = "resize" [@@mel.send]
+  external resize : t -> float -> ?height:float -> ?options:t_resize_options -> unit -> t_image = "resize" [@@mel.send]
   external rotate : t -> float -> t_image = "rotate" [@@mel.send]
   external flip : t -> unit -> t_image = "flip" [@@mel.send]
   external flop : t -> unit -> t_image = "flop" [@@mel.send]
   external modulate : t -> t_modulate_options -> t_image = "modulate" [@@mel.send]
-  external jpeg : t -> t_image_jpeg option -> t_image = "jpeg" [@@mel.send]
-  external png : t -> t_image_png option -> t_image = "png" [@@mel.send]
-  external webp : t -> t_image_webp option -> t_image = "webp" [@@mel.send]
-  external heic : t -> t_image_heic option -> t_image = "heic" [@@mel.send]
-  external avif : t -> t_image_avif option -> t_image = "avif" [@@mel.send]
+  external jpeg : t -> ?options:t_image_jpeg -> unit -> t_image = "jpeg" [@@mel.send]
+  external png : t -> ?options:t_image_png -> unit -> t_image = "png" [@@mel.send]
+  external webp : t -> ?options:t_image_webp -> unit -> t_image = "webp" [@@mel.send]
+  external heic : t -> ?options:t_image_heic -> unit -> t_image = "heic" [@@mel.send]
+  external avif : t -> ?options:t_image_avif -> unit -> t_image = "avif" [@@mel.send]
   external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
   external buffer : t -> unit -> (t_array_buffer, t_shared_array_buffer) either t_buffer Js.Promise.t = "buffer" [@@mel.send]
   external to_buffer : t -> unit -> (t_array_buffer, t_shared_array_buffer) either t_buffer Js.Promise.t = "toBuffer" [@@mel.send]
   external dataurl : t -> unit -> string Js.Promise.t = "dataurl" [@@mel.send]
-  external placeholder : t -> [ `dataurl ] option -> string Js.Promise.t = "placeholder" [@@mel.send]
+  external placeholder : t -> ?as_:[ `dataurl ] -> unit -> string Js.Promise.t = "placeholder" [@@mel.send]
   external blob : t -> unit -> t_blob Js.Promise.t = "blob" [@@mel.send]
   external to_base64 : t -> unit -> string Js.Promise.t = "toBase64" [@@mel.send]
   external metadata : t -> unit -> t_metadata Js.Promise.t = "metadata" [@@mel.send]
@@ -1795,7 +1795,7 @@ end
 
 module NumberFormat_FormatToParts = struct
   type t = t_number_format_format_to_parts
-  external to_string : t -> float option -> string = "toString" [@@mel.send]
+  external to_string : t -> ?radix:float -> unit -> string = "toString" [@@mel.send]
   external value_of : t -> unit -> t_number_format_format_to_parts = "valueOf" [@@mel.send]
 end
 
@@ -1809,7 +1809,7 @@ module SelectionManager = struct
   external is_focused : t -> unit -> bool = "isFocused" [@@mel.send]
   external set_focused : t -> bool -> unit = "setFocused" [@@mel.send]
   external focused_key : t -> unit -> string option = "focusedKey" [@@mel.send]
-  external set_focused_key : t -> string option -> unit = "setFocusedKey" [@@mel.send]
+  external set_focused_key : t -> ?key:string -> unit -> unit = "setFocusedKey" [@@mel.send]
   external selected_keys : t -> unit -> string Js.Set.t = "selectedKeys" [@@mel.send]
   external is_selected : t -> string -> bool = "isSelected" [@@mel.send]
   external is_empty : t -> unit -> bool = "isEmpty" [@@mel.send]
@@ -1823,7 +1823,7 @@ module SelectionManager = struct
   external select_all : t -> unit -> unit = "selectAll" [@@mel.send]
   external clear_selection : t -> unit -> unit = "clearSelection" [@@mel.send]
   external toggle_select_all : t -> unit -> unit = "toggleSelectAll" [@@mel.send]
-  external select : t -> string -> Dom.pointerEvent option -> unit = "select" [@@mel.send]
+  external select : t -> string -> ?e:Dom.pointerEvent -> unit -> unit = "select" [@@mel.send]
   external is_selection_equal : t -> string Js.Set.t -> bool = "isSelectionEqual" [@@mel.send]
   external can_select_item : t -> string -> bool = "canSelectItem" [@@mel.send]
   external is_disabled : t -> string -> bool = "isDisabled" [@@mel.send]
@@ -1890,8 +1890,8 @@ module SliderState = struct
   external get_percent_value : t -> float -> float = "getPercentValue" [@@mel.send]
   external is_thumb_editable : t -> float -> bool = "isThumbEditable" [@@mel.send]
   external set_thumb_editable : t -> float -> bool -> unit = "setThumbEditable" [@@mel.send]
-  external increment_thumb : t -> float -> float option -> unit = "incrementThumb" [@@mel.send]
-  external decrement_thumb : t -> float -> float option -> unit = "decrementThumb" [@@mel.send]
+  external increment_thumb : t -> float -> ?step_size:float -> unit -> unit = "incrementThumb" [@@mel.send]
+  external decrement_thumb : t -> float -> ?step_size:float -> unit -> unit = "decrementThumb" [@@mel.send]
   external step : t -> float Solidtype.Solid.accessor = "step" [@@mel.get]
   external page_size : t -> float Solidtype.Solid.accessor = "pageSize" [@@mel.get]
   external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
@@ -2096,32 +2096,32 @@ end
 
 module Buffer = struct
   type 't_array_buffer t = 't_array_buffer t_buffer
-  external slice : 't_array_buffer t -> float option -> float option -> t_array_buffer t_buffer = "slice" [@@mel.send]
-  external subarray : 't_array_buffer t -> float option -> float option -> 't_array_buffer t_buffer = "subarray" [@@mel.send]
-  external write : 't_array_buffer t -> string -> string option -> float = "write" [@@mel.send]
-  external to_string : 't_array_buffer t -> string option -> float option -> float option -> string = "toString" [@@mel.send]
+  external slice : 't_array_buffer t -> ?start:float -> ?end_:float -> unit -> t_array_buffer t_buffer = "slice" [@@mel.send]
+  external subarray : 't_array_buffer t -> ?start:float -> ?end_:float -> unit -> 't_array_buffer t_buffer = "subarray" [@@mel.send]
+  external write : 't_array_buffer t -> string -> ?encoding:string -> unit -> float = "write" [@@mel.send]
+  external to_string : 't_array_buffer t -> ?encoding:string -> ?start:float -> ?end_:float -> unit -> string = "toString" [@@mel.send]
   external to_json : 't_array_buffer t -> unit -> t_buffer_to_json = "toJSON" [@@mel.send]
   external equals : 't_array_buffer t -> t_uint8_array -> bool = "equals" [@@mel.send]
-  external compare : 't_array_buffer t -> t_uint8_array -> float option -> float option -> float option -> float option -> float = "compare" [@@mel.send]
-  external copy : 't_array_buffer t -> t_uint8_array -> float option -> float option -> float option -> float = "copy" [@@mel.send]
-  external write_big_int64_be : 't_array_buffer t -> t_number_format_format_to_parts -> float option -> float = "writeBigInt64BE" [@@mel.send]
-  external write_big_int64_le : 't_array_buffer t -> t_number_format_format_to_parts -> float option -> float = "writeBigInt64LE" [@@mel.send]
-  external write_big_u_int64_be : 't_array_buffer t -> t_number_format_format_to_parts -> float option -> float = "writeBigUInt64BE" [@@mel.send]
-  external write_big_uint64_be : 't_array_buffer t -> t_number_format_format_to_parts -> float option -> float = "writeBigUint64BE" [@@mel.send]
-  external write_big_u_int64_le : 't_array_buffer t -> t_number_format_format_to_parts -> float option -> float = "writeBigUInt64LE" [@@mel.send]
-  external write_big_uint64_le : 't_array_buffer t -> t_number_format_format_to_parts -> float option -> float = "writeBigUint64LE" [@@mel.send]
+  external compare : 't_array_buffer t -> t_uint8_array -> ?target_start:float -> ?target_end:float -> ?source_start:float -> ?source_end:float -> unit -> float = "compare" [@@mel.send]
+  external copy : 't_array_buffer t -> t_uint8_array -> ?target_start:float -> ?source_start:float -> ?source_end:float -> unit -> float = "copy" [@@mel.send]
+  external write_big_int64_be : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigInt64BE" [@@mel.send]
+  external write_big_int64_le : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigInt64LE" [@@mel.send]
+  external write_big_u_int64_be : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUInt64BE" [@@mel.send]
+  external write_big_uint64_be : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUint64BE" [@@mel.send]
+  external write_big_u_int64_le : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUInt64LE" [@@mel.send]
+  external write_big_uint64_le : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUint64LE" [@@mel.send]
   external write_u_int_le : 't_array_buffer t -> float -> float -> float -> float = "writeUIntLE" [@@mel.send]
   external write_uint_le : 't_array_buffer t -> float -> float -> float -> float = "writeUintLE" [@@mel.send]
   external write_u_int_be : 't_array_buffer t -> float -> float -> float -> float = "writeUIntBE" [@@mel.send]
   external write_uint_be : 't_array_buffer t -> float -> float -> float -> float = "writeUintBE" [@@mel.send]
   external write_int_le : 't_array_buffer t -> float -> float -> float -> float = "writeIntLE" [@@mel.send]
   external write_int_be : 't_array_buffer t -> float -> float -> float -> float = "writeIntBE" [@@mel.send]
-  external read_big_u_int64_be : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigUInt64BE" [@@mel.send]
-  external read_big_uint64_be : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigUint64BE" [@@mel.send]
-  external read_big_u_int64_le : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigUInt64LE" [@@mel.send]
-  external read_big_uint64_le : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigUint64LE" [@@mel.send]
-  external read_big_int64_be : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigInt64BE" [@@mel.send]
-  external read_big_int64_le : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigInt64LE" [@@mel.send]
+  external read_big_u_int64_be : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUInt64BE" [@@mel.send]
+  external read_big_uint64_be : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUint64BE" [@@mel.send]
+  external read_big_u_int64_le : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUInt64LE" [@@mel.send]
+  external read_big_uint64_le : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUint64LE" [@@mel.send]
+  external read_big_int64_be : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigInt64BE" [@@mel.send]
+  external read_big_int64_le : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigInt64LE" [@@mel.send]
   external read_u_int_le : 't_array_buffer t -> float -> float -> float = "readUIntLE" [@@mel.send]
   external read_uint_le : 't_array_buffer t -> float -> float -> float = "readUintLE" [@@mel.send]
   external read_u_int_be_js : 't_array_buffer t -> float -> float -> float = "readUIntBE" [@@mel.send]
@@ -2170,7 +2170,7 @@ module Buffer = struct
     match read_int_be_js o x0 x1 with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_int_be: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_u_int8_js : 't_array_buffer t -> float option -> float = "readUInt8" [@@mel.send]
+  external read_u_int8_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt8" [@@mel.send]
   (** Reads an unsigned 8-bit integer from `buf` at the specified `offset`.
       
       This function is also available under the `readUint8` alias.
@@ -2189,12 +2189,12 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_u_int8 o x0 =
-    match read_u_int8_js o x0 with
+  let read_u_int8 o ?offset () =
+    match read_u_int8_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_u_int8: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_uint8 : 't_array_buffer t -> float option -> float = "readUint8" [@@mel.send]
-  external read_u_int16_le_js : 't_array_buffer t -> float option -> float = "readUInt16LE" [@@mel.send]
+  external read_uint8 : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint8" [@@mel.send]
+  external read_u_int16_le_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt16LE" [@@mel.send]
   (** Reads an unsigned, little-endian 16-bit integer from `buf` at the specified `offset`.
       
       This function is also available under the `readUint16LE` alias.
@@ -2213,14 +2213,14 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_u_int16_le o x0 =
-    match read_u_int16_le_js o x0 with
+  let read_u_int16_le o ?offset () =
+    match read_u_int16_le_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_u_int16_le: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_uint16_le : 't_array_buffer t -> float option -> float = "readUint16LE" [@@mel.send]
-  external read_u_int16_be : 't_array_buffer t -> float option -> float = "readUInt16BE" [@@mel.send]
-  external read_uint16_be : 't_array_buffer t -> float option -> float = "readUint16BE" [@@mel.send]
-  external read_u_int32_le_js : 't_array_buffer t -> float option -> float = "readUInt32LE" [@@mel.send]
+  external read_uint16_le : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint16LE" [@@mel.send]
+  external read_u_int16_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt16BE" [@@mel.send]
+  external read_uint16_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint16BE" [@@mel.send]
+  external read_u_int32_le_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt32LE" [@@mel.send]
   (** Reads an unsigned, little-endian 32-bit integer from `buf` at the specified`offset`.
       
       This function is also available under the `readUint32LE` alias.
@@ -2237,14 +2237,14 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_u_int32_le o x0 =
-    match read_u_int32_le_js o x0 with
+  let read_u_int32_le o ?offset () =
+    match read_u_int32_le_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_u_int32_le: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_uint32_le : 't_array_buffer t -> float option -> float = "readUint32LE" [@@mel.send]
-  external read_u_int32_be : 't_array_buffer t -> float option -> float = "readUInt32BE" [@@mel.send]
-  external read_uint32_be : 't_array_buffer t -> float option -> float = "readUint32BE" [@@mel.send]
-  external read_int8_js : 't_array_buffer t -> float option -> float = "readInt8" [@@mel.send]
+  external read_uint32_le : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint32LE" [@@mel.send]
+  external read_u_int32_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt32BE" [@@mel.send]
+  external read_uint32_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint32BE" [@@mel.send]
+  external read_int8_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt8" [@@mel.send]
   (** Reads a signed 8-bit integer from `buf` at the specified `offset`.
       
       Integers read from a `Buffer` are interpreted as two's complement signed values.
@@ -2263,11 +2263,11 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_int8 o x0 =
-    match read_int8_js o x0 with
+  let read_int8 o ?offset () =
+    match read_int8_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_int8: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_int16_le_js : 't_array_buffer t -> float option -> float = "readInt16LE" [@@mel.send]
+  external read_int16_le_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt16LE" [@@mel.send]
   (** Reads a signed, little-endian 16-bit integer from `buf` at the specified`offset`.
       
       Integers read from a `Buffer` are interpreted as two's complement signed values.
@@ -2284,12 +2284,12 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_int16_le o x0 =
-    match read_int16_le_js o x0 with
+  let read_int16_le o ?offset () =
+    match read_int16_le_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_int16_le: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_int16_be : 't_array_buffer t -> float option -> float = "readInt16BE" [@@mel.send]
-  external read_int32_le_js : 't_array_buffer t -> float option -> float = "readInt32LE" [@@mel.send]
+  external read_int16_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt16BE" [@@mel.send]
+  external read_int32_le_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt32LE" [@@mel.send]
   (** Reads a signed, little-endian 32-bit integer from `buf` at the specified`offset`.
       
       Integers read from a `Buffer` are interpreted as two's complement signed values.
@@ -2306,12 +2306,12 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_int32_le o x0 =
-    match read_int32_le_js o x0 with
+  let read_int32_le o ?offset () =
+    match read_int32_le_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_int32_le: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_int32_be : 't_array_buffer t -> float option -> float = "readInt32BE" [@@mel.send]
-  external read_float_le_js : 't_array_buffer t -> float option -> float = "readFloatLE" [@@mel.send]
+  external read_int32_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt32BE" [@@mel.send]
+  external read_float_le_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readFloatLE" [@@mel.send]
   (** Reads a 32-bit, little-endian float from `buf` at the specified `offset`.
       
       ```js
@@ -2326,12 +2326,12 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_float_le o x0 =
-    match read_float_le_js o x0 with
+  let read_float_le o ?offset () =
+    match read_float_le_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_float_le: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_float_be : 't_array_buffer t -> float option -> float = "readFloatBE" [@@mel.send]
-  external read_double_le_js : 't_array_buffer t -> float option -> float = "readDoubleLE" [@@mel.send]
+  external read_float_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readFloatBE" [@@mel.send]
+  external read_double_le_js : 't_array_buffer t -> ?offset:float -> unit -> float = "readDoubleLE" [@@mel.send]
   (** Reads a 64-bit, little-endian double from `buf` at the specified `offset`.
       
       ```js
@@ -2346,11 +2346,11 @@ module Buffer = struct
       ```
       
       @raise Invalid_argument with Kobalte's message, where it throws. *)
-  let read_double_le o x0 =
-    match read_double_le_js o x0 with
+  let read_double_le o ?offset () =
+    match read_double_le_js o ?offset () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("read_double_le: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external read_double_be : 't_array_buffer t -> float option -> float = "readDoubleBE" [@@mel.send]
+  external read_double_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readDoubleBE" [@@mel.send]
   external reverse : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "reverse" [@@mel.send]
   external swap16_js : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap16" [@@mel.send]
   (** Interprets `buf` as an array of unsigned 16-bit integers and swaps the
@@ -2446,25 +2446,25 @@ module Buffer = struct
     match swap64_js o () with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("swap64: " ^ Option.value (Js.Exn.message e) ~default:"")
-  external write_u_int8 : 't_array_buffer t -> float -> float option -> float = "writeUInt8" [@@mel.send]
-  external write_uint8 : 't_array_buffer t -> float -> float option -> float = "writeUint8" [@@mel.send]
-  external write_u_int16_le : 't_array_buffer t -> float -> float option -> float = "writeUInt16LE" [@@mel.send]
-  external write_uint16_le : 't_array_buffer t -> float -> float option -> float = "writeUint16LE" [@@mel.send]
-  external write_u_int16_be : 't_array_buffer t -> float -> float option -> float = "writeUInt16BE" [@@mel.send]
-  external write_uint16_be : 't_array_buffer t -> float -> float option -> float = "writeUint16BE" [@@mel.send]
-  external write_u_int32_le : 't_array_buffer t -> float -> float option -> float = "writeUInt32LE" [@@mel.send]
-  external write_uint32_le : 't_array_buffer t -> float -> float option -> float = "writeUint32LE" [@@mel.send]
-  external write_u_int32_be : 't_array_buffer t -> float -> float option -> float = "writeUInt32BE" [@@mel.send]
-  external write_uint32_be : 't_array_buffer t -> float -> float option -> float = "writeUint32BE" [@@mel.send]
-  external write_int8 : 't_array_buffer t -> float -> float option -> float = "writeInt8" [@@mel.send]
-  external write_int16_le : 't_array_buffer t -> float -> float option -> float = "writeInt16LE" [@@mel.send]
-  external write_int16_be : 't_array_buffer t -> float -> float option -> float = "writeInt16BE" [@@mel.send]
-  external write_int32_le : 't_array_buffer t -> float -> float option -> float = "writeInt32LE" [@@mel.send]
-  external write_int32_be : 't_array_buffer t -> float -> float option -> float = "writeInt32BE" [@@mel.send]
-  external write_float_le : 't_array_buffer t -> float -> float option -> float = "writeFloatLE" [@@mel.send]
-  external write_float_be : 't_array_buffer t -> float -> float option -> float = "writeFloatBE" [@@mel.send]
-  external write_double_le : 't_array_buffer t -> float -> float option -> float = "writeDoubleLE" [@@mel.send]
-  external write_double_be : 't_array_buffer t -> float -> float option -> float = "writeDoubleBE" [@@mel.send]
+  external write_u_int8 : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt8" [@@mel.send]
+  external write_uint8 : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint8" [@@mel.send]
+  external write_u_int16_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt16LE" [@@mel.send]
+  external write_uint16_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint16LE" [@@mel.send]
+  external write_u_int16_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt16BE" [@@mel.send]
+  external write_uint16_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint16BE" [@@mel.send]
+  external write_u_int32_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt32LE" [@@mel.send]
+  external write_uint32_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint32LE" [@@mel.send]
+  external write_u_int32_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt32BE" [@@mel.send]
+  external write_uint32_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint32BE" [@@mel.send]
+  external write_int8 : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt8" [@@mel.send]
+  external write_int16_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt16LE" [@@mel.send]
+  external write_int16_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt16BE" [@@mel.send]
+  external write_int32_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt32LE" [@@mel.send]
+  external write_int32_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt32BE" [@@mel.send]
+  external write_float_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeFloatLE" [@@mel.send]
+  external write_float_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeFloatBE" [@@mel.send]
+  external write_double_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeDoubleLE" [@@mel.send]
+  external write_double_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeDoubleBE" [@@mel.send]
   (** The size in bytes of each element in the array. *)
   external bytes_per_element : 't_array_buffer t -> float = "BYTES_PER_ELEMENT" [@@mel.get]
   (** The ArrayBuffer instance referenced by the array. *)
@@ -2473,21 +2473,21 @@ module Buffer = struct
   external byte_length : 't_array_buffer t -> float = "byteLength" [@@mel.get]
   (** The offset in bytes of the array. *)
   external byte_offset : 't_array_buffer t -> float = "byteOffset" [@@mel.get]
-  external copy_within : 't_array_buffer t -> float -> float -> float option -> 't_array_buffer t_buffer = "copyWithin" [@@mel.send]
-  external join : 't_array_buffer t -> string option -> string = "join" [@@mel.send]
+  external copy_within : 't_array_buffer t -> float -> float -> ?end_:float -> unit -> 't_array_buffer t_buffer = "copyWithin" [@@mel.send]
+  external join : 't_array_buffer t -> ?separator:string -> unit -> string = "join" [@@mel.send]
   (** The length of the array. *)
   external length : 't_array_buffer t -> float = "length" [@@mel.get]
   external reduce : 't_array_buffer t -> (float -> float -> float -> 't_array_buffer t_buffer -> float) -> float = "reduce" [@@mel.send]
   external reduce_right : 't_array_buffer t -> (float -> float -> float -> 't_array_buffer t_buffer -> float) -> float = "reduceRight" [@@mel.send]
-  external set : 't_array_buffer t -> t_array_like -> float option -> unit = "set" [@@mel.send]
-  external sort : 't_array_buffer t -> ((float -> float -> float) option) -> 't_array_buffer t_buffer = "sort" [@@mel.send]
+  external set : 't_array_buffer t -> t_array_like -> ?offset:float -> unit -> unit = "set" [@@mel.send]
+  external sort : 't_array_buffer t -> ?compare_fn:(float -> float -> float) -> unit -> 't_array_buffer t_buffer = "sort" [@@mel.send]
   external to_locale_string : 't_array_buffer t -> unit -> string = "toLocaleString" [@@mel.send]
   external value_of : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "valueOf" [@@mel.send]
   external entries : 't_array_buffer t -> unit -> t_array_iterator = "entries" [@@mel.send]
   external keys : 't_array_buffer t -> unit -> t_array_iterator = "keys" [@@mel.send]
   external values : 't_array_buffer t -> unit -> t_array_iterator = "values" [@@mel.send]
-  external to_base64 : 't_array_buffer t -> t_buffer_to_base64 option -> string = "toBase64" [@@mel.send]
-  external set_from_base64 : 't_array_buffer t -> string -> float option -> t_buffer_set_from_base64 = "setFromBase64" [@@mel.send]
+  external to_base64 : 't_array_buffer t -> ?options:t_buffer_to_base64 -> unit -> string = "toBase64" [@@mel.send]
+  external set_from_base64 : 't_array_buffer t -> string -> ?offset:float -> unit -> t_buffer_set_from_base64 = "setFromBase64" [@@mel.send]
   external to_hex : 't_array_buffer t -> unit -> string = "toHex" [@@mel.send]
   external set_from_hex : 't_array_buffer t -> string -> t_buffer_set_from_hex = "setFromHex" [@@mel.send]
 end
@@ -2500,8 +2500,8 @@ end
     - `type` is auto-set based on the file extension when possible *)
 module BunFile = struct
   type t = t_bun_file
-  external slice : t -> float option -> float option -> string option -> t_bun_file = "slice" [@@mel.send]
-  external writer : t -> t_bun_file_writer option -> t_file_sink = "writer" [@@mel.send]
+  external slice : t -> ?begin_:float -> ?end_:float -> ?content_type:string -> unit -> t_bun_file = "slice" [@@mel.send]
+  external writer : t -> ?options:t_bun_file_writer -> unit -> t_file_sink = "writer" [@@mel.send]
   (** A UNIX timestamp indicating when the file was last modified. *)
   external last_modified : t -> float = "lastModified" [@@mel.get]
   (** The name or path of the file, as specified in the constructor. *)
@@ -2524,7 +2524,7 @@ module BunFile = struct
   external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
   external stream : t -> unit -> t_readable_stream = "stream" [@@mel.send]
   external text : t -> unit -> string Js.Promise.t = "text" [@@mel.send]
-  external image : t -> t_constructor_options option -> t_image = "image" [@@mel.send]
+  external image : t -> ?options:t_constructor_options -> unit -> t_image = "image" [@@mel.send]
   external form_data : t -> unit -> t_form_data Js.Promise.t = "formData" [@@mel.send]
 end
 
@@ -2532,8 +2532,8 @@ end
     Extends the Blob interface for compatibility with web APIs. *)
 module S3File = struct
   type t = t_s3_file
-  external slice : t -> float option -> float option -> string option -> t_s3_file = "slice" [@@mel.send]
-  external writer : t -> t_s3_options option -> t_network_sink = "writer" [@@mel.send]
+  external slice : t -> ?begin_:float -> ?end_:float -> ?content_type:string -> unit -> t_s3_file = "slice" [@@mel.send]
+  external writer : t -> ?options:t_s3_options -> unit -> t_network_sink = "writer" [@@mel.send]
   (** Gets a readable stream of the file's content.
       Useful for processing large files without loading them entirely into memory. *)
   external readable : t -> t_readable_stream = "readable" [@@mel.get]
@@ -2543,7 +2543,7 @@ module S3File = struct
   (** The bucket name containing the file. *)
   external bucket : t -> string option = "bucket" [@@mel.get]
   external exists : t -> unit -> bool Js.Promise.t = "exists" [@@mel.send]
-  external presign : t -> t_s3_file_presign_options option -> string = "presign" [@@mel.send]
+  external presign : t -> ?options:t_s3_file_presign_options -> unit -> string = "presign" [@@mel.send]
   external delete : t -> unit -> unit Js.Promise.t = "delete" [@@mel.send]
   (** Alias for `delete()`, matching the Node.js `fs` API naming. *)
   external unlink : t -> unit -> unit Js.Promise.t = "unlink" [@@mel.send]
@@ -2561,7 +2561,7 @@ module S3File = struct
   external array_buffer : t -> unit -> t_array_buffer Js.Promise.t = "arrayBuffer" [@@mel.send]
   external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
   external text : t -> unit -> string Js.Promise.t = "text" [@@mel.send]
-  external image : t -> t_constructor_options option -> t_image = "image" [@@mel.send]
+  external image : t -> ?options:t_constructor_options -> unit -> t_image = "image" [@@mel.send]
   external form_data : t -> unit -> t_form_data Js.Promise.t = "formData" [@@mel.send]
 end
 
@@ -2590,7 +2590,7 @@ module MultipleSelectionState = struct
   (** The current focused key in the collection. *)
   external focused_key : t -> string option Solidtype.Solid.accessor = "focusedKey" [@@mel.get]
   external set_focused : t -> bool -> unit = "setFocused" [@@mel.send]
-  external set_focused_key : t -> string option -> unit = "setFocusedKey" [@@mel.send]
+  external set_focused_key : t -> ?key:string -> unit -> unit = "setFocusedKey" [@@mel.send]
 end
 
 module SwipeEvent_Detail_Delta = struct
@@ -2646,8 +2646,8 @@ end
 module FileSink = struct
   type t = t_file_sink
   external flush : t -> unit -> (float, float Js.Promise.t) either = "flush" [@@mel.send]
-  external end_ : t -> t_error option -> (float, float Js.Promise.t) either = "end" [@@mel.send]
-  external start : t -> t_file_sink_start option -> unit = "start" [@@mel.send]
+  external end_ : t -> ?error:t_error -> unit -> (float, float Js.Promise.t) either = "end" [@@mel.send]
+  external start : t -> ?options:t_file_sink_start -> unit -> unit = "start" [@@mel.send]
   external ref : t -> unit -> unit = "ref" [@@mel.send]
   external unref : t -> unit -> unit = "unref" [@@mel.send]
 end
@@ -2812,9 +2812,9 @@ end
 module NetworkSink = struct
   type t = t_network_sink
   external flush : t -> unit -> (float, float Js.Promise.t) either = "flush" [@@mel.send]
-  external end_ : t -> t_error option -> (float, float Js.Promise.t) either = "end" [@@mel.send]
+  external end_ : t -> ?error:t_error -> unit -> (float, float Js.Promise.t) either = "end" [@@mel.send]
   external stat : t -> unit -> t_stats Js.Promise.t = "stat" [@@mel.send]
-  external start : t -> t_file_sink_start option -> unit = "start" [@@mel.send]
+  external start : t -> ?options:t_file_sink_start -> unit -> unit = "start" [@@mel.send]
   external ref : t -> unit -> unit = "ref" [@@mel.send]
   external unref : t -> unit -> unit = "unref" [@@mel.send]
 end
@@ -2825,10 +2825,10 @@ end
     archive so you can extract it to disk or memory. *)
 module Archive = struct
   type t = t_archive
-  external extract : t -> string -> t_archive_extract_options option -> float Js.Promise.t = "extract" [@@mel.send]
+  external extract : t -> string -> ?options:t_archive_extract_options -> unit -> float Js.Promise.t = "extract" [@@mel.send]
   external blob : t -> unit -> t_blob Js.Promise.t = "blob" [@@mel.send]
   external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
-  external files : t -> (string, string array) either option -> (string, t_file) Js.Map.t Js.Promise.t = "files" [@@mel.send]
+  external files : t -> ?glob:(string, string array) either -> unit -> (string, t_file) Js.Map.t Js.Promise.t = "files" [@@mel.send]
 end
 
 (** Options for generating presigned URLs *)

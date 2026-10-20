@@ -22,7 +22,7 @@ end
 
 module Filters = struct
   let%component make () =
-    let filter = I18n.create_filter None in
+    let filter = I18n.create_filter () in
     let says name holds = if holds then name else "not " ^ name in
     <p>
       (fun () ->

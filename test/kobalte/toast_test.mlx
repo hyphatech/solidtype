@@ -14,7 +14,7 @@ let show () =
            <Toast.Description>"The draft is safe."</Toast.Description>
            <Toast.CloseButton>"x"</Toast.CloseButton>
          </Toast.Root>)
-       None)
+       ())
 
 let island () =
   <div>

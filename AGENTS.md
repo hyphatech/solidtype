@@ -232,7 +232,8 @@ break.
   number is a `float`, since a slider's value is fractional; `null` is
   `Js.Nullable.t`, since Kobalte reads `undefined` as uncontrolled and
   `null` as controlled and empty; `undefined` is absence for an optional
-  prop and an `option` anywhere else; members of different JavaScript
+  prop, an optional argument, `?name`, then `()`, for a function the user
+  calls, and an `option` anywhere else; members of different JavaScript
   kinds are `Types.Either.t`, built by `left` and `right`, which is each
   value as it is; an option accessor that takes a key or a function
   takes the function, and one that takes only a key,

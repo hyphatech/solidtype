@@ -781,7 +781,7 @@ module ColorMode = struct
   external cookie_storage_manager_ssr : string -> Types.ColorModeStorageManager.t = "cookieStorageManagerSSR"
   [@@mel.module "@kobalte/core/color-mode"]
 
-  external create_cookie_storage_manager : string -> string option -> Types.ColorModeStorageManager.t = "createCookieStorageManager"
+  external create_cookie_storage_manager : string -> ?cookie:string -> unit -> Types.ColorModeStorageManager.t = "createCookieStorageManager"
   [@@mel.module "@kobalte/core/color-mode"]
 
   external create_local_storage_manager : string -> Types.ColorModeStorageManager.t = "createLocalStorageManager"
@@ -2450,7 +2450,7 @@ module I18n = struct
 
   (** Provides localized string collation for the current locale. Automatically updates when the locale changes,
       and handles caching of the collator for performance. *)
-  external create_collator : Types.CollatorOptions.t option -> Types.Collator.t Solidtype.Solid.accessor = "createCollator"
+  external create_collator : ?options:Types.CollatorOptions.t -> unit -> Types.Collator.t Solidtype.Solid.accessor = "createCollator"
   [@@mel.module "@kobalte/core/i18n"]
 
   (** Provides localized date formatting for the current locale. Automatically updates when the locale changes,
@@ -2464,7 +2464,7 @@ module I18n = struct
 
   (** Provides localized string search functionality that is useful for filtering or matching items
       in a list. Options can be provided to adjust the sensitivity to case, diacritics, and other parameters. *)
-  external create_filter : Types.CollatorOptions.t option -> Types.Filter.t = "createFilter"
+  external create_filter : ?options:Types.CollatorOptions.t -> unit -> Types.Filter.t = "createFilter"
   [@@mel.module "@kobalte/core/i18n"]
 
   (** Provides localized number formatting for the current locale. Automatically updates when the locale changes,

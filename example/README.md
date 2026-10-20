@@ -97,5 +97,4 @@ What surprised or slowed down writing this, as a user of the libraries.
 12. **Small ones.** `Dialog.Root`'s check names
     `Types.AlertDialog_Root_Translations.t`; `Select` takes its options
     wrapped in `Types.Either.left`, and an item's text is read back
-    through `Node.raw_value (Item_props.item props)`; a `Toaster.show`
-    ends in `None` for its options.
+    through `Node.raw_value (Item_props.item props)`.
