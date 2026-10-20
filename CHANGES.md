@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- \`Store.track\` subscribes the computation that calls it to every field of
+  the store, as Solid's \`$TRACK\` does: Melange had dropped its read, so it
+  did nothing.
 - Breaking: a toast's \`SwipeEvent\` binds \`init_event\` and
   \`init_custom_event\` as the methods they are, where reading either gave
   a function typed as an event, and has no \`make\`, since an event is

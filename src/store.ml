@@ -44,7 +44,12 @@ external unwrap : 's -> 's = "unwrap" [@@mel.module "solid-js/store"]
 
 type key
 
-external track_key : key = "$TRACK" [@@mel.module "solid-js"]
-external read_key : 's -> key -> unit = "" [@@mel.get_index]
+(* What reading [$TRACK] gives, which nothing uses: the read itself is what
+   subscribes. Melange drops a property read whose value is unused as one
+   with no effect, so the read is a call, [Reflect.get], which it keeps. *)
+type tracked
 
-let track s = read_key s track_key
+external track_key : key = "$TRACK" [@@mel.module "solid-js"]
+external read_key : 's -> key -> tracked = "get" [@@mel.scope "Reflect"]
+
+let track s = ignore (read_key s track_key : tracked)
