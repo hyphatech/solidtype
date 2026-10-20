@@ -10,6 +10,12 @@ let is_jsx (e : expression) =
     (fun (a : attribute) -> String.equal a.attr_name.txt "JSX")
     e.pexp_attributes
 
+(* A spread is the attribute [props=p], as MLX has no syntax for one, so
+   [props] is the name of no prop: an element reads it as a spread, a
+   component's check takes it beside the props, and a component's parameter
+   may not take it. *)
+let spread = "props"
+
 (* A name a user writes is Solid's or Kobalte's by one rule: a capital is an
    underscore and the lower case, a hyphen an underscore, and a keyword takes
    a trailing underscore. Its JavaScript name comes back from the tables the
@@ -258,7 +264,8 @@ let element map ~loc name args =
   let prop (label, (value : expression)) =
     let loc = value.pexp_loc in
     match label with
-    | Labelled "spread" -> Ok [%expr Solidtype.Jsx.spread [%e map value]]
+    | Labelled l when String.equal l spread ->
+        Ok [%expr Solidtype.Jsx.spread [%e map value]]
     | _ ->
         Result.bind (labelled ~loc label) (fun label ->
             Result.map
@@ -298,11 +305,11 @@ let component map ~loc path args =
   let prop (label, (value : expression)) =
     let loc = value.pexp_loc in
     match label with
-    | Labelled "spread" ->
-        let x = B.evar ~loc (bound "spread") in
+    | Labelled l when String.equal l spread ->
+        let x = B.evar ~loc (bound spread) in
         Ok
-          ( Some (bound "spread", (None, map value)),
-            (Labelled "spread", x),
+          ( Some (bound spread, (None, map value)),
+            (Labelled spread, x),
             [%expr Solidtype.Jsx.spread [%e x]] )
     | _ when Option.is_some (wrapped value) ->
         Error
@@ -559,7 +566,12 @@ let rec type_vars (t : core_type) =
 let prop_of (p : function_param) =
   let loc = p.pparam_loc in
   let prop label typ presence =
-    Result.map (fun arity -> { label; typ; presence; arity }) (arity typ)
+    if String.equal label spread then
+      Error
+        ( loc,
+          "props=p spreads a component's props, so no prop is named props: \
+           give this one another name" )
+    else Result.map (fun arity -> { label; typ; presence; arity }) (arity typ)
   in
   match p.pparam_desc with
   | Pparam_val
@@ -706,7 +718,7 @@ let props_module ~loc props =
     B.pexp_function ~loc
       (List.map check_param props
       @ [
-          B.pparam_val ~loc (Optional "spread") None
+          B.pparam_val ~loc (Optional spread) None
             (B.ppat_constraint ~loc (B.ppat_any ~loc) [%type: [%t t] option]);
           B.pparam_val ~loc Nolabel None [%pat? ()];
         ])

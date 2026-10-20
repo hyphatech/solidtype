@@ -209,6 +209,14 @@ break.
   Why: a wrapper left out is Solid's default, never another namespace,
   and a label that spelt the namespace would let a slip change it
   unseen. Test: `test/does_not_compile.t`.
+- **A spread is `props=p`, and no prop is named `props`.** MLX has no
+  syntax for TSX's `{...p}` and writes every attribute as an OCaml label,
+  so a spread takes one name: the ppx reads it as a spread on an element
+  or a component, each check takes it beside the props, `Dynamic` is
+  given its component's props by it, and a component's parameter may not
+  take it. Why: one name kept from props, as JSX keeps `key` and `ref`,
+  lets a spread read as JSX; a prop of the same name would be a duplicate
+  label, reported far from its cause. Test: `test/does_not_compile.t`.
 - **Kobalte's binding is generated from its declarations**, by
   `generate/kobalte.ts` into `kobalte/solidtype_kobalte.ml`, read with TypeScript's
   checker from Kobalte's real path, so a package manager that keeps

@@ -9,7 +9,7 @@ module Props : sig
   val check :
     fallback:(exn -> (unit -> unit) -> Jsx.element) ->
     children:('f, [ `nodes ]) Check.children ->
-    ?spread:t ->
+    ?props:t ->
     unit ->
     unit
 end

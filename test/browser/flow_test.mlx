@@ -186,7 +186,7 @@ let () =
       Jest.test "Dynamic renders the component chosen" (fun () ->
           let props = Greeting.Props.make ~name:"Cy" () in
           T.render (fun () ->
-              <Dynamic component=(fun () -> Greeting.component) spread=props />);
+              <Dynamic component=(fun () -> Greeting.component) props />);
           E.(expect (T.page ()) |> toBe "Hello, Cy"));
       Jest.test "Portal mounts its children elsewhere" (fun () ->
           T.render (fun () -> <div><Portal><p>"away"</p></Portal></div>);

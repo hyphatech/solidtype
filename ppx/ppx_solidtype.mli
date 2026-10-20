@@ -21,12 +21,13 @@
 
     A component's element also applies [Counter.Props.check] to its props under
     [if false], so a prop left out or not taken is a compile error, and Melange
-    writes none of it. [~spread:p] spreads [p] without copying it. A child is a
-    string literal, an element, or a thunk of [Solidtype.Jsx.content]; a
-    component's only child may be a function the component calls. A [Switch]
-    whose only child is a thunk of a [match] gets a [Match] per case, a
-    [Match.Keyed] where the case binds variables, and the [match] is also
-    checked whole, so a case left out is the compiler's warning.
+    writes none of it. [props=p] spreads [p] without copying it, TSX's [{...p}],
+    so no prop is named [props]. A child is a string literal, an element, or a
+    thunk of [Solidtype.Jsx.content]; a component's only child may be a function
+    the component calls. A [Switch] whose only child is a thunk of a [match]
+    gets a [Match] per case, a [Match.Keyed] where the case binds variables, and
+    the [match] is also checked whole, so a case left out is the compiler's
+    warning.
 
     [let%component make ~(text : string) ?(count : int = 0) () = body] writes
     the module's [Props] -- its type, a getter per prop, [make], which builds

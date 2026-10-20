@@ -10,7 +10,7 @@ let dynamic =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.d "class"
          (fun () -> cls () : unit -> Solidtype.Html.Div.class_))|] [||]
-let spread = Solidtype.Jsx.el "input" [|(Solidtype.Jsx.spread props)|] [||]
+let spread = Solidtype.Jsx.el "input" [|(Solidtype.Jsx.spread attrs)|] [||]
 let text = Solidtype.Jsx.el "p" [||] [|(Solidtype.Jsx.text {js|hello|js})|]
 let nested =
   Solidtype.Jsx.el "ul" [||]
@@ -100,7 +100,7 @@ include
           ~children:(_ :
                       ('a -> Solidtype.Jsx.element, [ `render ])
                         Solidtype.Check.children)
-          ?spread:(_ : 'a t option) () = ()
+          ?props:(_ : 'a t option) () = ()
         type name =
           | Text 
           | Count 

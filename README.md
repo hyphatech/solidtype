@@ -58,6 +58,14 @@ is `name=(Jsx.ns v)`.
 
 The last two are for a name whose case or spelling the rule cannot keep.
 
+A spread, TSX's `{...props}`, is the attribute `props`, and so no prop is
+named `props`:
+
+```ocaml
+let make (props : Props.t) = <input class_="field" props />
+<Dynamic component=(fun () -> Greeting.component) props />
+```
+
 ## Getting started
 
 The OCaml side, from Hypha's opam repository:

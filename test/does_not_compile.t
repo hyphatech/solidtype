@@ -153,8 +153,23 @@ A prop the component does not take.
   1 | let make () = <Label text=(fun () -> "x") colour="red" />
                                                        ^^^^^
   Error: The function applied to this argument has type
-           ?count:int Solidtype.Check.value -> ?spread:Label.Props.t -> unit
+           ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
   This argument cannot be applied with label ~colour
+  [1]
+
+A component's prop named props, the name a component's props take as one
+value, spread.
+
+  $ cat > case.mlx <<'EOF'
+  > let%component make ~(props : string) () =
+  >   <span>(fun () -> Solidtype.Jsx.string (props ()))</span>
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 21-35:
+  1 | let%component make ~(props : string) () =
+                           ^^^^^^^^^^^^^^
+  Error: props=p spreads a component's props, so no prop is named props: give
+         this one another name
   [1]
 
 Children given to a component that takes none.
@@ -167,7 +182,7 @@ Children given to a component that takes none.
   1 | let make () = <Label text=(fun () -> "x")>"more"</Label>
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: The function applied to this argument has type
-           ?count:int Solidtype.Check.value -> ?spread:Label.Props.t -> unit
+           ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
   This argument cannot be applied with label ~children
   [1]
 

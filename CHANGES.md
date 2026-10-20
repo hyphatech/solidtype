@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Breaking: a spread is written `props=p`, TSX's `{...p}`, where it was
+  `spread=p`, and `props` is the name of no prop: a component's
+  parameter named `props` is refused, saying so, where a prop named
+  `spread` was a duplicate label far from its cause.
 - A string in JSX reaches the page as it reads in OCaml: a backslash, as
   in `"C:\\new"`, is no longer read again as an escape, nor is a lone one
   a build error; text quoted `{|...|}` is no longer bytes; and an
