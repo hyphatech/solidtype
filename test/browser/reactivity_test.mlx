@@ -1,0 +1,161 @@
+(* The parts of Solid's reactive core no other test reaches, each run as an
+   application runs it: what it computes, and when it runs again. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Suspense = Solidtype.Suspense
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+exception Broken
+
+(* Runs [f] in a root, and gives back what disposes of it. *)
+let rooted f =
+  S.create_root (fun dispose ->
+      f ();
+      dispose)
+
+module Counted = struct
+  let%component make ~(children : Jsx.content) () =
+    let resolved = S.children (fun () -> children ()) in
+    <p>(fun () -> Jsx.int (Array.length (S.to_array (S.get resolved))))</p>
+end
+
+module Greeting = struct
+  let%component make ~(name : string) () =
+    <p>(fun () -> Jsx.string ("Hello, " ^ name ()))</p>
+end
+
+(* Greeting, loaded when it is first rendered. *)
+module Later = struct
+  module Props = Greeting.Props
+
+  let component = S.lazy_ (fun () -> Js.Promise.resolve Greeting.component)
+end
+
+module Mounted = struct
+  let%component make ~(seen : string -> unit) () =
+    S.on_mount (fun () -> seen (T.page ()));
+    <p>"mounted"</p>
+end
+
+let () =
+  Jest.describe "reactivity" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "create_computed_from carries its value to its next run"
+        (fun () ->
+          let n, set_n = S.create_signal 1 in
+          let total = ref 0 in
+          let dispose =
+            rooted (fun () ->
+                S.create_computed_from ~init:0 (fun acc ->
+                    let acc = acc + S.get n in
+                    total := acc;
+                    acc))
+          in
+          S.set set_n 2;
+          S.set set_n 3;
+          dispose ();
+          E.(expect !total |> toBe 6));
+      Jest.test "create_render_effect runs at once, and again on a change"
+        (fun () ->
+          let n, set_n = S.create_signal 0 in
+          let seen = ref [] in
+          let dispose =
+            rooted (fun () ->
+                S.create_render_effect (fun () -> seen := S.get n :: !seen))
+          in
+          let at_once = !seen in
+          S.set set_n 1;
+          dispose ();
+          E.(expect (at_once, !seen) |> toEqual ([ 0 ], [ 1; 0 ])));
+      Jest.test "create_render_effect_from carries its value too" (fun () ->
+          let n, set_n = S.create_signal "a" in
+          let joined = ref "" in
+          let dispose =
+            rooted (fun () ->
+                S.create_render_effect_from ~init:"" (fun acc ->
+                    let acc = acc ^ S.get n in
+                    joined := acc;
+                    acc))
+          in
+          S.set set_n "b";
+          dispose ();
+          E.(expect !joined |> toBe "ab"));
+      Jest.test "on_from runs on its input alone, given the one before"
+        (fun () ->
+          let n, set_n = S.create_signal 1 in
+          let other, set_other = S.create_signal 0 in
+          let pairs = ref [] in
+          let dispose =
+            rooted (fun () ->
+                S.create_computed_from ~init:()
+                  (S.on_from
+                     (fun () -> S.get n)
+                     (fun input previous () ->
+                       ignore (S.get other : int);
+                       pairs := (input, previous) :: !pairs)))
+          in
+          S.set set_other 1;
+          S.set set_n 2;
+          dispose ();
+          E.(expect !pairs |> toEqual [ (2, Some 1); (1, None) ]));
+      Jest.testPromise "create_deferred follows its source once its time is up"
+        (fun () ->
+          let n, set_n = S.create_signal 0 in
+          let deferred = ref (fun () -> 0) in
+          let dispose =
+            rooted (fun () ->
+                let d = S.create_deferred ~timeout_ms:10 (fun () -> S.get n) in
+                deferred := fun () -> S.get d)
+          in
+          S.set set_n 5;
+          let at_once = !deferred () in
+          let* (_ : bool) = T.after 50 in
+          let later = !deferred () in
+          dispose ();
+          Js.Promise.resolve E.(expect (at_once, later) |> toEqual (0, 5)));
+      Jest.test "on_error is given what a computation raises later" (fun () ->
+          let n, set_n = S.create_signal 0 in
+          let caught = ref "" in
+          let dispose =
+            rooted (fun () ->
+                S.on_error (fun e ->
+                    caught := match e with Broken -> "broken" | _ -> "other");
+                S.create_computed (fun () -> if S.get n > 0 then raise Broken))
+          in
+          S.set set_n 1;
+          dispose ();
+          E.(expect !caught |> toBe "broken"));
+      Jest.test "from_observable follows what the observable gives" (fun () ->
+          let n, set_n = S.create_signal 1 in
+          let read = ref (fun () -> None) in
+          let dispose =
+            rooted (fun () ->
+                let followed = S.from_observable (S.observable n) in
+                read := fun () -> S.get followed)
+          in
+          let before = !read () in
+          S.set set_n 2;
+          let after = !read () in
+          dispose ();
+          E.(expect (before, after) |> toEqual (Some 1, Some 2)));
+      Jest.test "on_mount runs once the element is on the page" (fun () ->
+          let seen = ref "" in
+          T.render (fun () -> <Mounted seen=(fun s -> seen := s) />);
+          E.(expect !seen |> toBe "mounted"));
+      Jest.test "children resolves what a component is given, to count it"
+        (fun () ->
+          T.render (fun () -> <Counted><i /> <i /> <i /></Counted>);
+          E.(expect (T.page ()) |> toBe "3"));
+      Jest.testPromise "lazy_ renders the component once it has loaded"
+        (fun () ->
+          T.render (fun () ->
+              <Suspense fallback=(<p>"loading"</p>)>
+                <Later name="Lu" />
+              </Suspense>);
+          let before = T.page () in
+          let* (_ : bool) = T.later () in
+          Js.Promise.resolve
+            E.(expect (before, T.page ()) |> toEqual ("loading", "Hello, Lu"))))

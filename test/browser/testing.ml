@@ -47,3 +47,10 @@ let first_element () = Js.Null.toOption (query_opt "body > div > *")
 
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external class_name : Dom.element -> string = "className" [@@mel.get]
+
+(* Resolves after [ms] milliseconds, for what waits on a timer of its own. *)
+let after ms =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      ignore
+        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
+          : Js.Global.timeoutId))
