@@ -1,0 +1,55 @@
+(* Hydration through the binding: the server's HTML on the page, the same
+   island hydrated over it, its nodes kept and its handlers live. The text a
+   handler's change rewrites is not read: jsdom under Bun does not apply
+   Solid's update to a text node claimed by hydration, a plain Solid island's
+   no more than ours, though its signal and effects run; a browser does. *)
+
+module Web = Solidtype.Web
+module E = Jest.Expect
+
+external inject : string -> string = "inject" [@@mel.module "vitest"]
+external body : Dom.element = "body" [@@mel.scope "document"]
+
+external set_inner_html : Dom.element -> string -> unit = "innerHTML"
+[@@mel.set]
+
+external query : string -> Dom.element = "querySelector"
+[@@mel.scope "document"]
+
+type node_list
+
+external query_all : string -> node_list = "querySelectorAll"
+[@@mel.scope "document"]
+
+external length : node_list -> int = "length" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external click : Dom.element -> unit = "click" [@@mel.send]
+
+(* A function of the script's text, the script Solid generated: jsdom runs no
+   script of a page in the test's own global, which the script sets up. *)
+external function_of : string -> (unit -> unit[@u]) = "Function" [@@mel.new]
+
+(* The hydration script, run as the page would run it: its body, between the
+   tags the server wrote around it. *)
+let run_script tagged =
+  let start = Option.map succ (String.index_opt tagged '>') in
+  let stop = Js.String.indexOf ~search:"</script>" tagged in
+  match start with
+  | Some start when start <= stop ->
+      (function_of (String.sub tagged start (stop - start))) () [@u]
+  | Some _ | None -> ()
+
+let () =
+  Jest.describe "hydrate" (fun () ->
+      Jest.test "keeps the server's nodes, and makes its handlers live"
+        (fun () ->
+          run_script (inject "script");
+          set_inner_html body ("<div id=\"root\">" ^ inject "html" ^ "</div>");
+          let button = query "button" in
+          let unmount = Web.hydrate Island.make (query "#root") in
+          let buttons = length (query_all "button") in
+          let kept = query "button" == button in
+          click button;
+          let handled = !Island.clicks in
+          unmount ();
+          E.(expect (buttons, kept, handled) |> toEqual (1, true, 1))))

@@ -1,0 +1,16 @@
+; An island rendered on the server and hydrated in the browser, through
+; Solid's hydratable compile: the setup renders it, the test hydrates it.
+
+(library
+ (name hydration_test)
+ (modes melange)
+ (libraries solidtype melange-jest.jest melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries hydration_test)
+ (module_systems
+  (es6 jsx)))

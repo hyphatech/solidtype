@@ -29,6 +29,21 @@ export default defineConfig({
         },
       },
       {
+        // An island the setup renders on the server, through Vite's own
+        // server-side loading, and the test hydrates: Solid's hydratable
+        // compile, for both sides.
+        plugins: [solidtype(), solid({ ssr: true })],
+        resolve: { conditions: ["browser", "development"] },
+        ssr: { resolve: { conditions: ["node"], externalConditions: ["node"] } },
+        test: {
+          name: "hydration",
+          environment: "jsdom",
+          globalSetup: ["test/hydration/setup.ts"],
+          globals: true,
+          include: ["_build/default/test/hydration/out/test/hydration/*_test.jsx"],
+        },
+      },
+      {
         plugins: [solidtype(), solid({ ssr: true })],
         resolve: { conditions: ["node"] },
         test: {

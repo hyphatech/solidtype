@@ -1,0 +1,20 @@
+(* The island both sides render: a count and the button that raises it.
+   [clicks] counts what its handler handled, for the test to read. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+let clicks = ref 0
+
+let make () =
+  let count, set_count = S.create_signal 0 in
+  <div>
+    <button
+      type_=`button
+      on_click=(fun _ ->
+                   incr clicks;
+                   S.update set_count succ)>
+      "add"
+    </button>
+    <p>(fun () -> Jsx.int (S.get count))</p>
+  </div>

@@ -87,6 +87,9 @@ test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
 test/server/         Solid's rendering on the server, in OCaml, run by vitest
                      in Node
+test/hydration/      an island rendered on the server and hydrated by
+                     Web.hydrate, in a vitest project of Solid's hydratable
+                     compile; setup.ts renders it through Vite's server loading
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/ppx/            what the ppx writes for each JSX form
