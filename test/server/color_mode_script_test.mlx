@@ -1,0 +1,34 @@
+(* Kobalte's ColorModeScript, which a page rendered on the server carries in
+   its head, so the stored mode is set before the page paints: the OCaml
+   island and its TSX twin render the same HTML. *)
+
+module ColorMode = Solidtype_kobalte.ColorMode
+module Jsx = Solidtype.Jsx
+module Server = Solidtype.Server
+module E = Jest.Expect
+
+let island () =
+  <div>
+    <ColorMode.ColorModeScript
+      initial_color_mode=`dark storage_key="solidtype-color-mode"
+    />
+  </div>
+
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./ColorModeScript.tsx"]
+
+let contains part s = Js.String.includes ~search:part s
+
+let () =
+  Jest.describe "ColorModeScript" (fun () ->
+      Jest.test "renders as its twin does: the script, its key and its mode"
+        (fun () ->
+          let ours = Server.render_to_string island in
+          let theirs = Server.render_to_string twin in
+          E.(
+            expect
+              ( String.equal ours theirs,
+                contains "<script" ours,
+                contains "solidtype-color-mode" ours,
+                contains "dark" ours )
+            |> toEqual (true, true, true, true))))

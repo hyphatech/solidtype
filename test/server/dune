@@ -4,7 +4,7 @@
 (library
  (name server_test)
  (modes melange)
- (libraries solidtype melange-jest.jest)
+ (libraries solidtype solidtype-kobalte melange-jest.jest)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 
@@ -12,5 +12,7 @@
  (target out)
  (modules)
  (libraries server_test)
+ (runtime_deps
+  (glob_files *.tsx))
  (module_systems
   (es6 jsx)))

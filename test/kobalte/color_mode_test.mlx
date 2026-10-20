@@ -45,31 +45,26 @@ let mode () = H.text (H.by_role "paragraph")
 let theme () = Option.value (H.attribute root "data-kb-theme") ~default:""
 let saved () = Option.value (Js.Null.toOption (stored key)) ~default:"nothing"
 
+external twin : unit -> Jsx.element = "make"
+[@@mel.module "./twins/ColorMode.tsx"]
+
+let state () = String.concat " " [ mode (); theme (); saved () ]
+let press user name = H.click user (H.by_role_named "button" (H.query ~name ()))
+
 let () =
+  H.alike "ColorModeProvider" ~island ~twin (fun user ->
+      let first = state () in
+      let* () = press user "Toggle" in
+      let toggled = state () in
+      let* () = press user "Dark" in
+      H.expect_equal ~what:"before, toggled, then dark"
+        "dark dark dark, light light light, dark dark dark"
+        (String.concat ", " [ first; toggled; state () ]);
+      forget key;
+      Js.Promise.resolve ());
   Jest.describe "color mode" (fun () ->
       Jest.beforeEach (fun () -> forget key);
       Jest.afterEach H.cleanup;
-      Jest.testPromise "useColorMode reads the provider's mode, and changes it"
-        (fun () ->
-          let user = H.setup () in
-          H.render island;
-          let first = (mode (), theme (), saved ()) in
-          let* () =
-            H.click user (H.by_role_named "button" (H.query ~name:"Toggle" ()))
-          in
-          let toggled = (mode (), theme (), saved ()) in
-          let* () =
-            H.click user (H.by_role_named "button" (H.query ~name:"Dark" ()))
-          in
-          Js.Promise.resolve
-            E.(
-              expect [ first; toggled; (mode (), theme (), saved ()) ]
-              |> toEqual
-                   [
-                     ("dark", "dark", "dark");
-                     ("light", "light", "light");
-                     ("dark", "dark", "dark");
-                   ]));
       Jest.test "a mode stored wins over the initial one" (fun () ->
           store key "light";
           H.render island;

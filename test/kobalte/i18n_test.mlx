@@ -37,7 +37,16 @@ module Filters = struct
     </p>
 end
 
+let island () =
+  <I18n.I18nProvider locale="ar-EG"><Shows_locale /></I18n.I18nProvider>
+
+external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/I18n.tsx"]
+
 let () =
+  H.alike "I18nProvider" ~island ~twin (fun _ ->
+      H.expect_equal ~what:"the provider's locale and its direction" "ar-EG rtl"
+        (H.text H.body);
+      Js.Promise.resolve ());
   Jest.describe "i18n" (fun () ->
       Jest.afterEach H.cleanup;
       Jest.test "useLocale reads the browser's locale, with a provider or none"
