@@ -2,15 +2,15 @@
 
 ## Unreleased
 
-- \`catch_error\` and \`run_with_owner\` give \`Some\` of what the function
-  returned, \`()\` and \`None\` among it, and \`None\` only when it raised:
+- `catch_error` and `run_with_owner` give `Some` of what the function
+  returned, `()` and `None` among it, and `None` only when it raised:
   a function returning either read as one that raised.
-- \`Store.track\` subscribes the computation that calls it to every field of
-  the store, as Solid's \`$TRACK\` does: Melange had dropped its read, so it
+- `Store.track` subscribes the computation that calls it to every field of
+  the store, as Solid's `$TRACK` does: Melange had dropped its read, so it
   did nothing.
-- Breaking: a toast's \`SwipeEvent\` binds \`init_event\` and
-  \`init_custom_event\` as the methods they are, where reading either gave
-  a function typed as an event, and has no \`make\`, since an event is
+- Breaking: a toast's `SwipeEvent` binds `init_event` and
+  `init_custom_event` as the methods they are, where reading either gave
+  a function typed as an event, and has no `make`, since an event is
   Kobalte's to create.
 - A callback given to a Kobalte constructor, such as a context value's
   `register_title_id`, reaches Kobalte in the shape its type declares
