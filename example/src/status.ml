@@ -1,32 +1,24 @@
-(* Where a reader is with a book, as the board shows it: a column each, in
-   reading order. The client prints the server's one status as a type per
-   place it is used, so this is the book's, and a move's is made from it. *)
+(* Where a task is, as the board shows it: a column each, in the order work
+   goes. The client prints the server's one status as a type per place it is
+   used, so this is the task's, and a move's is made from it. *)
 
-type t = Api.book_status = To_read | Reading | Read
+type t = Api.task_status = To_do | Doing | Done
 
-let all = [ To_read; Reading; Read ]
-
-let label = function
-  | To_read -> "To read"
-  | Reading -> "Reading"
-  | Read -> "Read"
-
-let next = function
-  | To_read -> Some Reading
-  | Reading -> Some Read
-  | Read -> None
+let all = [ To_do; Doing; Done ]
+let label = function To_do -> "To do" | Doing -> "Doing" | Done -> "Done"
+let next = function To_do -> Some Doing | Doing -> Some Done | Done -> None
 
 let previous = function
-  | To_read -> None
-  | Reading -> Some To_read
-  | Read -> Some Reading
+  | To_do -> None
+  | Doing -> Some To_do
+  | Done -> Some Doing
 
 let equal a b =
   match (a, b) with
-  | To_read, To_read | Reading, Reading | Read, Read -> true
-  | (To_read | Reading | Read), _ -> false
+  | To_do, To_do | Doing, Doing | Done, Done -> true
+  | (To_do | Doing | Done), _ -> false
 
 let to_move : t -> Api.move_status = function
-  | To_read -> To_read
-  | Reading -> Reading
-  | Read -> Read
+  | To_do -> To_do
+  | Doing -> Doing
+  | Done -> Done

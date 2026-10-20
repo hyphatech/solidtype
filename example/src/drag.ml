@@ -1,4 +1,4 @@
-(* The one value a card's drag carries, the book's id, as text: the drop
+(* The one value a card's drag carries, the task's id, as text: the drop
    reads it back from the event the browser hands the column. *)
 
 type transfer

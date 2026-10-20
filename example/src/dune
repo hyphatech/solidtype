@@ -11,4 +11,4 @@
 (rule
  (with-stdout-to
   api.ml
-  (run %{exe:../server/shelf.exe} api melange)))
+  (run %{exe:../server/board.exe} api melange)))

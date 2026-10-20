@@ -1,4 +1,4 @@
-(* The shelf: its API, the API's document at /docs, and the built page
+(* The board: its API, the API's document at /docs, and the built page
    beside them on one origin. Vite names what it builds under /assets/ by
    a hash of its bytes, so a browser keeps those a year. *)
 

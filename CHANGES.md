@@ -12,8 +12,8 @@
   attribute or prop that is not plain ASCII, `placeholder="Rechercher…"`,
   holds an entity or a quote, or a string with a tab or a run of spaces,
   is no longer shown as escape codes, read as entities or collapsed.
-- The example is shelf, a reading list on the whole stack: a Spindle
-  server, a Kobalte board printed against its routes and styled with
+- The example is a kanban board on the whole stack: a Spindle server, a
+  Kobalte board printed against its routes and styled with
   Tailwind, served as a Vite page and mounted as an Astro one, with the
   rough edges found building it in its README.
 

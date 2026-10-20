@@ -16,10 +16,10 @@ make setup    # once: the switch hypha-solidtype, all dependencies, and Bun's
 make test     # the ppx's lowering, each island against its twin, the example's tests
 make lint     # formatting, the plugin's types, the release build, and the generated bindings
 make fmt      # format in place
-make example  # the shelf, built by Vite into _build/example-dist, and its
+make example  # the board, built by Vite into _build/example-dist, and its
               # Astro page, into _build/example-astro
-make serve    # the shelf and its API, served on http://localhost:4420
-make dev      # the three commands that run the shelf in development
+make serve    # the board and its API, served on http://localhost:4420
+make dev      # the three commands that run the board in development
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -67,20 +67,20 @@ astro.config.mjs     the example's Astro page: Astro, its Solid
                      reaches _build
 vitest.config.ts     the OCaml tests run in jsdom, the example's server
                      started for them
-example/             shelf, a reading list: a whole application on the
+example/             a kanban board: a whole application on the
                      stack, its README the map and the rough edges found
                      building it
   index.html         the page, built by Vite with vite.config.ts
   pages/             the same board as an Astro page: wiring alone
   src/               the board's islands in .mlx, and api.ml, its client
                      printed from server/ as the build runs
-  server/            a Spindle app: the books' store, the routes over it,
+  server/            a Spindle app: the tasks' store, the routes over it,
                      which the board is called against and `make serve`
                      serves, their tests, and their command line,
                      Spindle's, which prints the board's client and the
                      twins' schemas
   twin/              each island's TSX twin, read by the twin test alone;
-                     shelf.gen.ts, the server's Zod schemas, compared
+                     board.gen.ts, the server's Zod schemas, compared
   test/              the board's behaviour, in OCaml, run by vitest
                      against the server server.ts starts
 test/jsdom.ts        what jsdom lacks, stood in for in every vitest file

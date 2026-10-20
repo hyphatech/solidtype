@@ -1,4 +1,4 @@
-/* Generated from Shelf's routes. Do not edit: change the routes, and generate it again. */
+/* Generated from Kanban Board's routes. Do not edit: change the routes, and generate it again. */
 
 import { z } from "zod/mini";
 
@@ -22,30 +22,24 @@ export const RefusalSchema = z.object({
 });
 export type Refusal = z.infer<typeof RefusalSchema>;
 
-export const BookSchema = z.object({
+export const TaskSchema = z.object({
   id: z.int(),
   title: z.string(),
-  author: z.string(),
-  status: z.enum(["to_read", "reading", "read"]),
-  rating: z.optional(z.int().check(z.gte(1), z.lte(5))),
+  note: z.optional(z.string()),
+  status: z.enum(["to_do", "doing", "done"]),
 });
-export type Book = z.infer<typeof BookSchema>;
+export type Task = z.infer<typeof TaskSchema>;
 
-export const DraftSchema = z.object({
+export const DraftInputSchema = z.object({
   title: z.string().check(z.minLength(1), z.maxLength(120)),
-  author: z.string().check(z.minLength(1), z.maxLength(80)),
+  note: z.optional(z.nullable(z.string().check(z.maxLength(200)))),
 });
-export type Draft = z.infer<typeof DraftSchema>;
+export type DraftInput = z.infer<typeof DraftInputSchema>;
 
 export const MoveSchema = z.object({
-  status: z.enum(["to_read", "reading", "read"]),
+  status: z.enum(["to_do", "doing", "done"]),
 });
 export type Move = z.infer<typeof MoveSchema>;
-
-export const StarsSchema = z.object({
-  stars: z.int().check(z.gte(1), z.lte(5)),
-});
-export type Stars = z.infer<typeof StarsSchema>;
 
 /** Every code a route may refuse with. */
 export const CodeSchema = z.enum([
@@ -54,7 +48,6 @@ export const CodeSchema = z.enum([
   "internal",
   "invalid",
   "not_found",
-  "not_read",
   "too_large",
   "unreadable",
   "unsupported_media_type",
@@ -63,23 +56,19 @@ export type Code = z.infer<typeof CodeSchema>;
 
 /** Each route, by method and pattern: the body it reads, and what it answers. */
 export const routes = {
-  "GET /api/books": {
+  "GET /api/tasks": {
     body: null,
-    answer: { status: 200, schema: z.array(BookSchema) },
+    answer: { status: 200, schema: z.array(TaskSchema) },
   },
-  "POST /api/books": {
-    body: DraftSchema,
-    answer: { status: 201, schema: BookSchema },
+  "POST /api/tasks": {
+    body: DraftInputSchema,
+    answer: { status: 201, schema: TaskSchema },
   },
-  "PUT /api/books/{id}/status": {
+  "PUT /api/tasks/{id}/status": {
     body: MoveSchema,
-    answer: { status: 200, schema: BookSchema },
+    answer: { status: 200, schema: TaskSchema },
   },
-  "PUT /api/books/{id}/rating": {
-    body: StarsSchema,
-    answer: { status: 200, schema: BookSchema },
-  },
-  "DELETE /api/books/{id}": {
+  "DELETE /api/tasks/{id}": {
     body: null,
     answer: { status: 204 },
   },

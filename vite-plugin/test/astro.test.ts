@@ -19,7 +19,7 @@ test("the page prerenders the board, empty, to hydrate as client:load", () => {
   expect(islands.map((i) => i.client)).toEqual(["load"]);
   const board = islands[0]?.html ?? "";
   expect(board).toMatch(/^<main data-hk="\w+" class="mx-auto max-w-6xl px-4 py-10">/);
-  expect([...board.matchAll(/<section data-hk="\w+" aria-label="([^"]+)"/g)].map((m) => m[1])).toEqual(["To read", "Reading", "Read"]);
-  expect(board.match(/Drop a book here/g)?.length).toBe(3);
-  expect(board).not.toContain("Could not load the shelf");
+  expect([...board.matchAll(/<section data-hk="\w+" aria-label="([^"]+)"/g)].map((m) => m[1])).toEqual(["To do", "Doing", "Done"]);
+  expect(board.match(/Drop a task here/g)?.length).toBe(3);
+  expect(board).not.toContain("Could not load the board");
 }, 60_000);

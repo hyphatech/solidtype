@@ -3,10 +3,10 @@
 
 (rule
  (with-stdout-to
-  shelf.gen.ts.printed
-  (run %{exe:../server/shelf.exe} api zod)))
+  board.gen.ts.printed
+  (run %{exe:../server/board.exe} api zod)))
 
 (rule
  (alias runtest)
  (action
-  (diff shelf.gen.ts shelf.gen.ts.printed)))
+  (diff board.gen.ts board.gen.ts.printed)))

@@ -6,11 +6,11 @@ module Jsx = Solidtype.Jsx
 
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
-(* The dialog that puts a book on the shelf; [on_added] is told its title. *)
+(* The dialog that puts a task on the board; [on_added] is told its title. *)
 let%component make ~(on_added : string -> unit) () =
   let open_, set_open = S.create_signal false in
   let title, set_title = S.create_signal "" in
-  let author, set_author = S.create_signal "" in
+  let note, set_note = S.create_signal "" in
   let problem, set_problem = S.create_signal "" in
   let submit e =
     prevent_default e;
@@ -18,25 +18,30 @@ let%component make ~(on_added : string -> unit) () =
       (Js.Promise.then_
          (fun answered ->
            (match answered with
-           | Ok (b : Api.book) ->
+           | Ok (t : Api.task) ->
                S.batch (fun () ->
                    S.set set_title "";
-                   S.set set_author "";
+                   S.set set_note "";
                    S.set set_problem "";
                    S.set set_open false);
-               on_added b.title
+               on_added t.title
            | Error e -> S.set set_problem (Said.error e));
            Js.Promise.resolve ())
-         (Api.post_api_books
-            ~body:{ title = S.get title; author = S.get author }
-            ()))
+         (Api.post_api_tasks
+            ~body:
+              {
+                title = S.get title;
+                note = (match S.get note with "" -> None | n -> Some n);
+              }
+            ())
+        : unit Js.Promise.t)
   in
   <Dialog.Root open_=(fun () -> S.get open_) on_open_change=(S.set set_open)>
     <Dialog.Trigger
       class_="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold \
               text-white shadow-sm hover:bg-amber-800 dark:bg-amber-500 \
               dark:text-stone-950 dark:hover:bg-amber-400">
-      "Add a book"
+      "Add a task"
     </Dialog.Trigger>
     <Dialog.Portal>
       <Dialog.Overlay class_="fixed inset-0 bg-stone-950/40 backdrop-blur-sm" />
@@ -44,8 +49,8 @@ let%component make ~(on_added : string -> unit) () =
         <Dialog.Content
           class_="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl \
                   dark:bg-stone-900">
-          <Dialog.Title class_="mb-4 font-serif text-xl font-semibold">
-            "Add a book"
+          <Dialog.Title class_="mb-4 text-xl font-semibold">
+            "Add a task"
           </Dialog.Title>
           <form on_submit=submit>
             <TextField.Root
@@ -66,12 +71,11 @@ let%component make ~(on_added : string -> unit) () =
             </TextField.Root>
             <TextField.Root
               class_="mb-4 flex flex-col gap-1"
-              value=(fun () -> S.get author)
-              on_change=(S.set set_author)
-              required=true>
+              value=(fun () -> S.get note)
+              on_change=(S.set set_note)>
               <TextField.Label
                 class_="text-sm text-stone-500 dark:text-stone-400">
-                "Author"
+                "Note"
               </TextField.Label>
               <TextField.Input
                 class_="rounded-lg border border-stone-300 bg-stone-50 px-3 \

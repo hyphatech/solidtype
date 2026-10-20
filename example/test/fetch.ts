@@ -1,4 +1,4 @@
-// The board fetches the page's own origin, /api/books, as a browser
+// The board fetches the page's own origin, /api/tasks, as a browser
 // resolves it. jsdom's fetch is Node's, which resolves nothing against the
 // page, so a relative URL is resolved here against the page's, the
 // server's origin.

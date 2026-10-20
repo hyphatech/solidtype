@@ -19,55 +19,50 @@ let make () =
   (* Fetched in the browser alone: a page prerendered has no server to ask,
      and shows the board empty until it hydrates. *)
   let browser () = if Solidtype.Web.is_server then None else Some () in
-  let books, actions =
+  let tasks, actions =
     S.create_resource_from browser (fun () _ ->
         Js.Promise.then_
           (fun answered ->
             Js.Promise.resolve
               (match answered with
-              | Ok books -> books
+              | Ok tasks -> tasks
               | Error e ->
-                  Notice.show ~title:"Could not load the shelf" (Said.error e);
+                  Notice.show ~title:"Could not load the board" (Said.error e);
                   [||]))
-          (Api.get_api_books ()))
+          (Api.get_api_tasks ()))
   in
   let changed what =
     S.refetch actions;
     Notice.show ~title:"Done" what
   in
   let settle what call = settle ~changed what call in
-  let move (b : Api.book) status =
-    if not (Status.equal b.status status) then
+  let move (t : Api.task) status =
+    if not (Status.equal t.status status) then
       settle
-        (b.title ^ " is now in " ^ Status.label status)
-        (Api.put_api_books_id_status ~id:b.id
+        (t.title ^ " is now in " ^ Status.label status)
+        (Api.put_api_tasks_id_status ~id:t.id
            ~body:{ status = Status.to_move status }
            ())
   in
-  let rate (b : Api.book) n =
-    settle
-      (b.title ^ " rated " ^ string_of_int n)
-      (Api.put_api_books_id_rating ~id:b.id ~body:{ stars = n } ())
+  let remove (t : Api.task) =
+    settle (t.title ^ " is off the board") (Api.delete_api_tasks_id ~id:t.id ())
   in
-  let remove (b : Api.book) =
-    settle (b.title ^ " is off the shelf") (Api.delete_api_books_id ~id:b.id ())
-  in
-  let shelved status =
+  let in_column status =
     Array.of_list
       (List.filter
-         (fun (b : Api.book) -> Status.equal b.status status)
-         (Array.to_list (Option.value (S.latest books) ~default:[||])))
+         (fun (t : Api.task) -> Status.equal t.status status)
+         (Array.to_list (Option.value (S.latest tasks) ~default:[||])))
   in
   let find id =
     Array.find_opt
-      (fun (b : Api.book) -> Float.equal b.id id)
-      (Option.value (S.latest books) ~default:[||])
+      (fun (t : Api.task) -> Float.equal t.id id)
+      (Option.value (S.latest tasks) ~default:[||])
   in
   let over, set_over = S.create_signal None in
   <main class_="mx-auto max-w-6xl px-4 py-10">
     <header class_="mb-8 flex items-center justify-between">
-      <h1 class_="font-serif text-3xl font-semibold tracking-tight">"Shelf"</h1>
-      <Add_book on_added=(fun title -> changed (title ^ " is on the shelf")) />
+      <h1 class_="text-3xl font-semibold tracking-tight">"Kanban Board"</h1>
+      <Add_task on_added=(fun title -> changed (title ^ " is on the board")) />
     </header>
     <div class_="grid gap-4 md:grid-cols-3">
       <For each=(fun () -> Array.of_list Status.all)>
@@ -90,7 +85,7 @@ let make () =
                       Drag.prevent_default e;
                       S.set set_over None;
                       Option.iter
-                        (fun b -> move b status)
+                        (fun t -> move t status)
                         (Option.bind (Drag.dropped e) find))>
             <h2
               class_="mb-3 flex items-center justify-between px-1 text-sm \
@@ -100,24 +95,23 @@ let make () =
               <span
                 class_="rounded-full bg-stone-200 px-2 py-0.5 text-xs \
                         text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-                (fun () -> Jsx.int (Array.length (shelved status)))
+                (fun () -> Jsx.int (Array.length (in_column status)))
               </span>
             </h2>
             <ul class_="flex min-h-24 flex-col gap-2">
               <For
-                each=(fun () -> shelved status)
+                each=(fun () -> in_column status)
                 fallback=(<li
                             class_="rounded-lg border border-dashed \
                                     border-stone-300 p-4 text-center text-sm \
                                     text-stone-400 dark:border-stone-700">
-                            "Drop a book here"
+                            "Drop a task here"
                           </li>)>
-                (fun (b : Api.book) _ ->
+                (fun (t : Api.task) _ ->
                   <Card
-                    book=(fun () -> b)
-                    on_move=(fun status -> move b status)
-                    on_rate=(fun n -> rate b n)
-                    on_remove=(fun _ -> remove b)
+                    task=(fun () -> t)
+                    on_move=(fun status -> move t status)
+                    on_remove=(fun _ -> remove t)
                   />)
               </For>
             </ul>

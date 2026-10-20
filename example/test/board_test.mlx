@@ -1,0 +1,43 @@
+module T = Testing
+open Testing.Syntax
+
+(* Typed into the dialog and added, as a person does: the task's card once
+   the board shows it. *)
+let add ~title ~note =
+  T.click (T.by_role_named "button" "Add a task");
+  let* title_field = T.find_by_label "Title" in
+  T.set_value title_field title;
+  T.input title_field;
+  let note_field = T.by_label "Note" in
+  T.set_value note_field note;
+  T.input note_field;
+  T.click (T.by_role_named "button" "Add");
+  T.find_by_text title
+
+let () =
+  Jest.describe "the board, against the example's server" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "a task added is on the board, to do, and said so"
+        (fun () ->
+          T.render Example.App.make;
+          let* card = add ~title:"Write the README" ~note:"its map first" in
+          let* note = T.find_by_text "its map first" in
+          let* said = T.find_by_text "Write the README is on the board" in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (T.column card, T.column note, T.text said)
+              |> toEqual
+                   ( Some "To do",
+                     Some "To do",
+                     "Write the README is on the board" )));
+      Jest.testPromise "a task moved by its arrow is in the next column"
+        (fun () ->
+          T.render Example.App.make;
+          let* (_ : Dom.element) = add ~title:"Ship it" ~note:"" in
+          T.click (T.by_role_named "button" "Move Ship it to Doing");
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the task's column" "Doing"
+                  (Option.value (T.column (T.by_text "Ship it")) ~default:""))
+          in
+          Js.Promise.resolve Jest.pass))

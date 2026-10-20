@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import solidtype from "vite-plugin-solidtype";
 
-// The shelf's page, rooted here, loads Melange's output from the
+// The board's page, rooted here, loads Melange's output from the
 // repository's _build, which `dune build --watch` keeps current; in
 // development the API is the server's, on 4420.
 const repository = fileURLToPath(new URL("..", import.meta.url));

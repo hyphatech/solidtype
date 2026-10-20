@@ -1,4 +1,4 @@
-; The shelf's server: Spindle, serving the books the board calls, their
+; The board's server: Spindle, serving the tasks the board shows, their
 ; document at /docs, and the built page beside them, on one origin. Its
 ; command line prints the board's client from the routes, so a route that
 ; changes is a build that fails where an island no longer matches it.
@@ -19,13 +19,13 @@
  (libraries spindle server eio_main))
 
 (executable
- (name shelf)
- (modules shelf)
+ (name board)
+ (modules board)
  (libraries spindle spindle-cli server))
 
 ; The routes, called in-process as the board calls them.
 
 (test
- (name test_books)
- (modules test_books)
+ (name test_tasks)
+ (modules test_tasks)
  (libraries spindle spindle.http server alcotest))

@@ -2,24 +2,24 @@ import * as Toast from "@kobalte/core/toast";
 import { createResource, createSignal, For } from "solid-js";
 import { isServer } from "solid-js/web";
 import { z } from "zod/mini";
-import { make as AddBook } from "./AddBook";
+import { make as AddTask } from "./AddTask";
 import { call } from "./api";
 import { make as Card } from "./Card";
 import { show } from "./Notice";
-import { BookSchema, type Book } from "./shelf.gen";
+import { TaskSchema, type Task } from "./board.gen";
 
-type Status = Book["status"];
+type Status = Task["status"];
 
-const labels: Record<Status, string> = { to_read: "To read", reading: "Reading", read: "Read" };
-const statuses: Status[] = ["to_read", "reading", "read"];
+const labels: Record<Status, string> = { to_do: "To do", doing: "Doing", done: "Done" };
+const statuses: Status[] = ["to_do", "doing", "done"];
 
 export function make() {
-  const [books, { refetch }] = createResource(
+  const [tasks, { refetch }] = createResource(
     () => !isServer,
     async () => {
-      const listed = await call("GET", "/api/books", z.array(BookSchema));
+      const listed = await call("GET", "/api/tasks", z.array(TaskSchema));
       if (listed.ok) return listed.value;
-      show("Could not load the shelf", listed.error);
+      show("Could not load the board", listed.error);
       return [];
     },
   );
@@ -32,18 +32,18 @@ export function make() {
     if (a.ok) changed(what);
     else show("Not done", a.error ?? "");
   };
-  const move = (b: Book, status: Status) => {
-    if (b.status !== status)
-      settle(`${b.title} is now in ${labels[status]}`, call("PUT", `/api/books/${b.id}/status`, BookSchema, { status }));
+  const move = (t: Task, status: Status) => {
+    if (t.status !== status)
+      settle(`${t.title} is now in ${labels[status]}`, call("PUT", `/api/tasks/${t.id}/status`, TaskSchema, { status }));
   };
-  const shelved = (status: Status) => (books.latest ?? []).filter((b) => b.status === status);
-  const find = (id: number) => (books.latest ?? []).find((b) => b.id === id);
+  const inColumn = (status: Status) => (tasks.latest ?? []).filter((t) => t.status === status);
+  const find = (id: number) => (tasks.latest ?? []).find((t) => t.id === id);
   const [over, setOver] = createSignal<Status>();
   return (
     <main class="mx-auto max-w-6xl px-4 py-10">
       <header class="mb-8 flex items-center justify-between">
-        <h1 class="font-serif text-3xl font-semibold tracking-tight">Shelf</h1>
-        <AddBook onAdded={(title) => changed(title + " is on the shelf")} />
+        <h1 class="text-3xl font-semibold tracking-tight">Kanban Board</h1>
+        <AddTask onAdded={(title) => changed(title + " is on the board")} />
       </header>
       <div class="grid gap-4 md:grid-cols-3">
         <For each={statuses}>
@@ -63,31 +63,30 @@ export function make() {
               onDrop={(e) => {
                 e.preventDefault();
                 setOver(undefined);
-                const b = find(Number(e.dataTransfer?.getData("text/plain")));
-                if (b) move(b, status);
+                const t = find(Number(e.dataTransfer?.getData("text/plain")));
+                if (t) move(t, status);
               }}
             >
               <h2 class="mb-3 flex items-center justify-between px-1 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                 {labels[status]}
                 <span class="rounded-full bg-stone-200 px-2 py-0.5 text-xs text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-                  {shelved(status).length}
+                  {inColumn(status).length}
                 </span>
               </h2>
               <ul class="flex min-h-24 flex-col gap-2">
                 <For
-                  each={shelved(status)}
+                  each={inColumn(status)}
                   fallback={
                     <li class="rounded-lg border border-dashed border-stone-300 p-4 text-center text-sm text-stone-400 dark:border-stone-700">
-                      Drop a book here
+                      Drop a task here
                     </li>
                   }
                 >
-                  {(b, _) => (
+                  {(t, _) => (
                     <Card
-                      book={b}
-                      onMove={(status) => move(b, status)}
-                      onRate={(n) => settle(`${b.title} rated ${n}`, call("PUT", `/api/books/${b.id}/rating`, BookSchema, { stars: n }))}
-                      onRemove={() => settle(`${b.title} is off the shelf`, call("DELETE", `/api/books/${b.id}`, null))}
+                      task={t}
+                      onMove={(status) => move(t, status)}
+                      onRemove={() => settle(`${t.title} is off the board`, call("DELETE", `/api/tasks/${t.id}`, null))}
                     />
                   )}
                 </For>

@@ -2,7 +2,7 @@
 // answer read by the schemas the server prints, and a refusal as its
 // sentence.
 import { z } from "zod/mini";
-import { RefusalSchema } from "./shelf.gen";
+import { RefusalSchema } from "./board.gen";
 
 export async function call<T>(method: string, path: string, schema: z.ZodMiniType<T> | null, body?: unknown) {
   try {
@@ -18,6 +18,6 @@ export async function call<T>(method: string, path: string, schema: z.ZodMiniTyp
     }
     return { ok: true as const, value: (schema ? schema.parse(json) : null) as T };
   } catch {
-    return { ok: false as const, error: "The shelf cannot be reached." };
+    return { ok: false as const, error: "The board cannot be reached." };
   }
 }

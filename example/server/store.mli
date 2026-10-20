@@ -1,45 +1,40 @@
-(** The books on a shelf, kept in memory, newest first, and the rules a change
+(** The tasks on a board, kept in memory, newest first, and the rules a change
     to one keeps. *)
 
-(** Where a reader is with a book. *)
-type status = To_read | Reading | Read
+(** Where a task is on the board. *)
+type status = To_do | Doing | Done
 
 val status_json : status Wiretype.t
 
-type book = {
+type task = {
   id : int;
   title : string;
-  author : string;
+  note : string option;  (** A line more about it, when there is one. *)
   status : status;
-  rating : int option;  (** One to five stars, once the book is read. *)
 }
 
-val book_json : book Wiretype.t
+val task_json : task Wiretype.t
 
 type t
-(** A shelf, safe to share between the server's domains. *)
+(** A board, safe to share between the server's domains. *)
 
 val create : unit -> t
-(** An empty shelf. *)
+(** An empty board. *)
 
 val dep : t Spindle.Dep.t
-(** The shelf, as a route reads it. *)
+(** The board, as a route reads it. *)
 
 val resource : t -> Spindle.Dep.resource
-(** [shelf] as the one {!dep} reads, for [Spindle.serve ~resources]. *)
+(** [board] as the one {!dep} reads, for [Spindle.serve ~resources]. *)
 
-val books : ?status:status -> t -> book list
-(** Every book, or those with [status]. *)
+val tasks : ?status:status -> t -> task list
+(** Every task, or those with [status]. *)
 
-val add : t -> title:string -> author:string -> book
-(** A book put on the shelf, to read. *)
+val add : t -> title:string -> ?note:string -> unit -> task
+(** A task put on the board, to do. *)
 
-val move : t -> int -> status -> book option
-(** The book [id] at [status], [None] when there is none. Its rating is kept
-    only while it stays read: a book read again is rated again. *)
-
-val rate : t -> int -> int -> (book, [ `Missing | `Unread of book ]) result
-(** The book [id] rated [stars], once it has been read. *)
+val move : t -> int -> status -> task option
+(** The task [id] at [status], [None] when there is none. *)
 
 val remove : t -> int -> bool
-(** Whether the book [id] was there to take off the shelf. *)
+(** Whether the task [id] was there to take off the board. *)
