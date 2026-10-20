@@ -83,6 +83,7 @@ example/             shelf, a reading list: a whole application on the
                      shelf.gen.ts, the server's Zod schemas, compared
   test/              the board's behaviour, in OCaml, run by vitest
                      against the server server.ts starts
+test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both

@@ -96,7 +96,8 @@ external violations : results -> violation array = "violations" [@@mel.get]
 external violation_id : violation -> string = "id" [@@mel.get]
 
 (* The rules axe cannot judge without layout, which jsdom has none of, are
-   left out: colour contrast and landmarks. *)
+   left out: colour contrast and landmarks. Nor does jsdom have a canvas, so
+   the checks axe makes by measuring text on one do not run. *)
 let accessibility_violations () =
   let off = rule ~enabled:false () in
   let* results =

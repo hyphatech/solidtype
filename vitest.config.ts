@@ -12,7 +12,8 @@ export default defineConfig({
     // origin, as `make serve` serves it.
     environmentOptions: { jsdom: { url: "http://localhost:4420/" } },
     globalSetup: ["example/test/server.ts"],
-    setupFiles: ["example/test/fetch.ts"],
+    // What jsdom lacks, stood in for in every test file.
+    setupFiles: ["test/jsdom.ts", "example/test/fetch.ts"],
     globals: true,
     include: [
       "_build/default/example/out/example/test/*_test.jsx",
