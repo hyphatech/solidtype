@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- \`catch_error\` and \`run_with_owner\` give \`Some\` of what the function
+  returned, \`()\` and \`None\` among it, and \`None\` only when it raised:
+  a function returning either read as one that raised.
 - \`Store.track\` subscribes the computation that calls it to every field of
   the store, as Solid's \`$TRACK\` does: Melange had dropped its read, so it
   did nothing.

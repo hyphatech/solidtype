@@ -246,6 +246,22 @@ let () =
           E.(
             expect (S.catch_error (fun () -> 3) (fun _ -> ()))
             |> toEqual (Some 3)));
+      Jest.test "catch_error tells a unit or a None returned from a raise"
+        (fun () ->
+          let raised = ref 0 in
+          let count _ = incr raised in
+          let unit = S.catch_error (fun () -> ()) count in
+          let none = S.catch_error (fun () -> (None : int option)) count in
+          let some = S.catch_error (fun () -> Some 0) count in
+          let failed = S.catch_error (fun () -> raise Boom) count in
+          E.(
+            expect
+              ( Option.is_some unit,
+                Option.map Option.is_none none,
+                some,
+                Option.is_none failed,
+                !raised )
+            |> toEqual (true, Some true, Some (Some 0), true, 1)));
       Jest.test "run_with_owner registers a cleanup on that owner" (fun () ->
           let cleaned = ref false in
           let owner = ref None in
@@ -258,6 +274,16 @@ let () =
           | None -> ());
           dispose ();
           E.(expect (Option.is_some !owner, !cleaned) |> toEqual (true, true)));
+      Jest.test "run_with_owner gives a unit returned, not a raise" (fun () ->
+          let ran = ref None in
+          let dispose =
+            rooted (fun () ->
+                match S.get_owner () with
+                | Some o -> ran := Some (S.run_with_owner o (fun () -> ()))
+                | None -> ())
+          in
+          dispose ();
+          E.(expect (Option.map Option.is_some !ran) |> toEqual (Some true)));
       Jest.test "no owner outside a root" (fun () ->
           E.(expect (Option.is_none (S.get_owner ())) |> toBe true)));
   Jest.describe "arrays" (fun () ->

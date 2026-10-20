@@ -117,9 +117,9 @@ val on_cleanup : (unit -> unit) -> unit
 (** Runs when the current owner is disposed or reruns. *)
 
 val catch_error : (unit -> 'a) -> (exn -> unit) -> 'a option
-(** [catch_error f handler] runs [f]; an error it raises, or one raised later by
-    a computation it created, goes to [handler]. A value JavaScript threw is
-    [Js.Exn.Error]. *)
+(** [catch_error f handler] runs [f]: [Some] what it returned, [None] when it
+    raised. An error it raises, or one raised later by a computation it created,
+    goes to [handler]. A value JavaScript threw is [Js.Exn.Error]. *)
 
 val exn_of_thrown : 'e -> exn
 (** What JavaScript threw, as an exception: an OCaml one as it was raised --

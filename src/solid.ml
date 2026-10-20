@@ -206,9 +206,22 @@ external owner : unit -> owner Js.null = "getOwner" [@@mel.module "solid-js"]
 
 let get_owner () = Js.Null.toOption (owner ())
 
-external run_with_owner : owner -> ((unit -> 'a)[@mel.uncurry]) -> 'a option
+(* What a function returned, boxed: Solid gives back undefined when the
+   function raised, which an unboxed [()] or [None] would also be. *)
+type 'a boxed
+
+external box : value:'a -> unit -> 'a boxed = "" [@@mel.obj]
+external unbox : 'a boxed -> 'a = "value" [@@mel.get]
+
+let boxed f () = box ~value:(f ()) ()
+
+external run_with_owner_js :
+  owner -> ((unit -> 'a boxed)[@mel.uncurry]) -> 'a boxed Js.undefined
   = "runWithOwner"
 [@@mel.module "solid-js"]
+
+let run_with_owner o f =
+  Option.map unbox (Js.Undefined.toOption (run_with_owner_js o (boxed f)))
 
 external on_mount : ((unit -> unit)[@mel.uncurry]) -> unit = "onMount"
 [@@mel.module "solid-js"]
@@ -238,11 +251,15 @@ let exn_of_thrown e =
 let exn_of_error = exn_of_thrown
 
 external catch_error_js :
-  ((unit -> 'a)[@mel.uncurry]) -> (('e -> unit)[@mel.uncurry]) -> 'a option
-  = "catchError"
+  ((unit -> 'a boxed)[@mel.uncurry]) ->
+  (('e -> unit)[@mel.uncurry]) ->
+  'a boxed Js.undefined = "catchError"
 [@@mel.module "solid-js"]
 
-let catch_error f handler = catch_error_js f (fun e -> handler (exn_of_error e))
+let catch_error f handler =
+  Option.map unbox
+    (Js.Undefined.toOption
+       (catch_error_js (boxed f) (fun e -> handler (exn_of_error e))))
 
 external on_error_js : (('e -> unit)[@mel.uncurry]) -> unit = "onError"
 [@@mel.module "solid-js"]
