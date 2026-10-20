@@ -344,6 +344,46 @@ A prop omit is given that the component does not have.
   Error: Unbound constructor Label.Props.Colour
   [1]
 
+A Dynamic given no props, which its component needs.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Solidtype.Dynamic component=(fun () -> Label.component) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 14-73:
+  1 | let make () = <Solidtype.Dynamic component=(fun () -> Label.component) />
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: This expression has type props:Label.Props.t -> unit
+         but an expression was expected of type unit
+         because it is in the result of a conditional with no else branch
+  Hint: This function application is partial, maybe some arguments are missing.
+  [1]
+
+A Dynamic element given props as one value, which it takes as attributes.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") props=42 />
+  > EOF
+  $ brief
+  File "case.mlx", line 1, characters 75-77:
+  1 | let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") props=42 />
+                                                                                 ^^
+  This argument cannot be applied with label ~props
+
+A Dynamic element given an attribute of the wrong type.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") class_=42 />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 76-78:
+  1 | let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") class_=42 />
+                                                                                  ^^
+  Error: This expression has type int Solidtype.Check.value
+         but an expression was expected of type string Solidtype.Check.value
+         Type int is not compatible with type string
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'

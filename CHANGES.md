@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Breaking: `Dynamic` requires its `props`, typed by its component, so a
+  prop the component needs is no longer left out unseen, and
+  `Dynamic.Element` takes the attributes every HTML element takes,
+  `Html.Element`'s, each typed, in place of any value as `props`.
 - Breaking: a spread is written `props=p`, TSX's `{...p}`, where it was
   `spread=p`, and `props` is the name of no prop: a component's
   parameter named `props` is refused, saying so, where a prop named

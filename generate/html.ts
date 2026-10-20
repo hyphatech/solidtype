@@ -200,6 +200,11 @@ for (const e of elements) {
   const module = e.tag.charAt(0).toUpperCase() + e.tag.slice(1);
   text += `\nmodule ${module} : ${moduleType(e.attributes)} with type element = ${e.element}\n`;
 }
+// An element whose tag is known only as the page runs, Dynamic's: the
+// attributes every HTML element takes, as TSX types a tag that is a string.
+text += `\n(** An element whose tag is known only as the page runs: the attributes
+    every HTML element takes. *)
+module Element : HTMLAttributes with type element = Dom.htmlElement\n`;
 
 if (unmapped.size > 0 && process.argv.includes("--unmapped")) {
   for (const [k, v] of unmapped) console.error(`${k}: ${v}`);

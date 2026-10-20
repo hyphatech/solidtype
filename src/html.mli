@@ -8250,3 +8250,7 @@ module Tspan : TSpanSVGAttributes with type element = Dom.element
 module Use : UseSVGAttributes with type element = Dom.element
 
 module View : ViewSVGAttributes with type element = Dom.element
+
+(** An element whose tag is known only as the page runs: the attributes
+    every HTML element takes. *)
+module Element : HTMLAttributes with type element = Dom.htmlElement

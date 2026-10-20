@@ -183,6 +183,26 @@ let () =
           let before = T.page () in
           S.set set_name "Bo";
           E.(expect (before, T.page ()) |> toEqual ("Hello, Ann", "Hello, Bo")));
+      Jest.test
+        "Dynamic.Element renders the tag chosen, its attributes and children \
+         with it" (fun () ->
+          let tag, set_tag = S.create_signal "section" in
+          T.render (fun () ->
+              <Dynamic.Element
+                component=(fun () -> S.get tag) class_="box" title="t">
+                "inside"
+              </Dynamic.Element>);
+          let shown () =
+            match T.first_element () with
+            | Some e -> (T.tag_name e, T.class_name e, T.text e)
+            | None -> ("", "", "")
+          in
+          let before = shown () in
+          S.set set_tag "article";
+          E.(
+            expect (before, shown ())
+            |> toEqual
+                 (("SECTION", "box", "inside"), ("ARTICLE", "box", "inside"))));
       Jest.test "Dynamic renders the component chosen" (fun () ->
           let props = Greeting.Props.make ~name:"Cy" () in
           T.render (fun () ->

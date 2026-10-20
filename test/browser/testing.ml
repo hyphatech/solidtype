@@ -38,3 +38,12 @@ external title : Dom.element -> string = "title" [@@mel.get]
 (* The first element [selector] finds: its text and its title, as a person
    reads them. *)
 let shown selector = (text (query selector), title (query selector))
+
+external query_opt : string -> Dom.element Js.null = "querySelector"
+[@@mel.scope "document"]
+
+(* The element rendered first, inside the container the library mounts. *)
+let first_element () = Js.Null.toOption (query_opt "body > div > *")
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external class_name : Dom.element -> string = "className" [@@mel.get]

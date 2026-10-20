@@ -1,6 +1,6 @@
 module Props = struct
   let check ~component:(_ : 'props Jsx.component Check.value)
-      ?props:(_ : 'props option) () =
+      ~props:(_ : 'props) () =
     ()
 end
 
@@ -9,9 +9,14 @@ external component : unit Jsx.component = "Dynamic"
 
 module Element = struct
   module Props = struct
-    let check ~component:(_ : string Check.value) ?props:(_ : 'a option)
-        ?children:(_ : (_, [ `nodes ]) Check.children option) () =
-      ()
+    (* Every attribute an HTML element takes is a label here, too many to
+       write by hand: the check is an external, as a generated part's is,
+       which nothing calls, since the ppx applies it under [if false]. *)
+    external check :
+      component:string Check.value ->
+      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      Html.Element.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
   end
 
   external component : unit Jsx.component = "Dynamic"
