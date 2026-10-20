@@ -2,3 +2,4 @@ src/html.mli
 kobalte/solidtype_kobalte.ml
 ppx/html_names.ml
 ppx/kobalte_names.ml
+kobalte/types.ml

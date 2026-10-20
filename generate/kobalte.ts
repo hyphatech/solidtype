@@ -1,7 +1,8 @@
-// Writes kobalte/solidtype_kobalte.ml -- every Kobalte component, part by
-// part, its hooks and utilities, and the types they name -- from Kobalte's
-// own declarations, so a binding is Kobalte's types and is never typed by
-// hand, and ppx/kobalte_names.ml, the props whose JavaScript name the ppx
+// Writes kobalte/solidtype_kobalte.ml and kobalte/types.ml -- every Kobalte
+// component, part by part, its hooks and utilities, and the types they name
+// -- from Kobalte's own declarations, so a binding is Kobalte's types and is
+// never typed by hand, and ppx/kobalte_names.ml, the props whose JavaScript
+// name the ppx
 // cannot spell back by rule. `make generate` writes them; `make lint`'s
 // `--check` fails when a file differs from what Kobalte's types give.
 
@@ -16,6 +17,9 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 // dependencies beside it, as Bun does, is resolved from there.
 const dist = realpathSync(`${root}node_modules/@kobalte/core/dist`);
 const out = `${root}kobalte/solidtype_kobalte.ml`;
+// The types, a file of their own: Melange keeps a function's arity, and so
+// calls it directly from another library, one module deep in a file, not two.
+const typesOut = `${root}kobalte/types.ml`;
 const namesOut = `${root}ppx/kobalte_names.ml`;
 const kobalte = JSON.parse(readFileSync(`${root}node_modules/@kobalte/core/package.json`, "utf8")).version as string;
 
@@ -765,16 +769,8 @@ while (queue.length > 0) {
 const inside = (x: string) => x.replace(/§([A-Za-z0-9_]+)§/g, (_, m: string) => (m === "Either" ? "either" : flatName(m)));
 const outside = (x: string) => x.replace(/§([A-Za-z0-9_]+)§/g, (_, m: string) => `Types.${m}.t`);
 
-const text = `(* Every Kobalte component, part by part, its hooks and utilities, and the
-   types they name. Generated from the declarations of @kobalte/core ${kobalte}
-   by generate/kobalte.ts; never edited by hand.
-
-   A part's props check takes its own props, then its children, then the
-   attributes of the element it renders, which it passes on. Each check is
-   external, since the compiler checks it and Melange writes none of it. *)
-
-module Types = struct
-  (* Members of different JavaScript kinds, each as it is. *)
+// What Types holds, a module one deep in its own file.
+const typesInner = `  (* Members of different JavaScript kinds, each as it is. *)
   type ('a, 'b) either
 ${[...opaques].sort().filter((o) => !moduleNames.has(o)).map((o) => `  type ${flatName(o)}`).join("\n")}
 ${abstracts.join("\n")}
@@ -786,15 +782,31 @@ ${abstracts.join("\n")}
     external right : 'b -> ('a, 'b) t = "%identity"
   end
 ${[...opaques].sort().filter((o) => !moduleNames.has(o)).map((o) => `\n  (* The standard library's ${o}, opaque. *)\n  module ${o} = struct\n    type t = ${flatName(o)}\n  end\n`).join("")}
-${inside(signatures.join("\n\n"))}
-end
+${inside(signatures.join("\n\n"))}`;
+
+const typesText = `(* The types Kobalte's components and functions name, each a module.
+   Generated from the declarations of @kobalte/core ${kobalte} by
+   generate/kobalte.ts; never edited by hand. *)
+
+${typesInner.replace(/^  /gm, "")}
+`;
+
+const text = `(* Every Kobalte component, part by part, its hooks and utilities, and the
+   types they name, in Types. Generated from the declarations of
+   @kobalte/core ${kobalte} by generate/kobalte.ts; never edited by hand.
+
+   A part's props check takes its own props, then its children, then the
+   attributes of the element it renders, which it passes on. Each check is
+   external, since the compiler checks it and Melange writes none of it. *)
+
+module Types = Types
 ${outside(body)}`;
 
 if (process.argv.includes("--unmapped")) for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 
 const namesText = table(names, "generate/kobalte.ts");
 if (process.argv.includes("--check")) {
-  for (const [file, want] of [[out, text], [namesOut, namesText]] as const) {
+  for (const [file, want] of [[out, text], [typesOut, typesText], [namesOut, namesText]] as const) {
     if (readFileSync(file, "utf8") !== want) {
       console.error(`${file} is not what Kobalte's types give: run make generate`);
       process.exit(1);
@@ -802,5 +814,6 @@ if (process.argv.includes("--check")) {
   }
 } else {
   writeFileSync(out, text);
+  writeFileSync(typesOut, typesText);
   writeFileSync(namesOut, namesText);
 }

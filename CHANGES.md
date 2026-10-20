@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Every function of Kobalte's `Types` is called directly from an
+  application, its wrappers included, where those went through Melange's
+  `Curry`: the types are a file of their own, `kobalte/types.ml`.
 - A function a Kobalte object holds, `toggle_color_mode`, `Toaster.show`,
   is called directly, as a method of its object, where every call went
   through Melange's `Curry`; its `_js` getter is gone with the wrapper.

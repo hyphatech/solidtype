@@ -220,7 +220,9 @@ break.
   lets a spread read as JSX; a prop of the same name would be a duplicate
   label, reported far from its cause. Test: `test/does_not_compile.t`.
 - **Kobalte's binding is generated from its declarations**, by
-  `generate/kobalte.ts` into `kobalte/solidtype_kobalte.ml`, read with TypeScript's
+  `generate/kobalte.ts` into `kobalte/solidtype_kobalte.ml` and the types it
+  names into `kobalte/types.ml`, a file of their own so Melange calls their
+  functions directly from another library, read with TypeScript's
   checker from Kobalte's real path, so a package manager that keeps
   dependencies beside each package resolves them. A part is a module of
   its component and its check: its own options, then its children by
