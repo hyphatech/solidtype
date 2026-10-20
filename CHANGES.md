@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A function a Kobalte object holds, `toggle_color_mode`, `Toaster.show`,
+  is called directly, as a method of its object, where every call went
+  through Melange's `Curry`; its `_js` getter is gone with the wrapper.
 - Breaking: a Kobalte function that throws, as its documentation or a test
   says, raises `Invalid_argument` with Kobalte's message, where it threw a
   JavaScript error: `Colors.parse_color` on a string that is no colour,

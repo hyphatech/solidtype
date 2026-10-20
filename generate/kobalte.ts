@@ -720,8 +720,10 @@ while (queue.length > 0) {
         lines.push(`    let ${value(snake(p.name))} o ${args} = let r = (${getter} o) ${args} [@u] in fun ${yargs} -> r ${yargs} [@u]`);
         shaped.set(p.name, (f) => `(fun ${args} -> let r = ${f} ${args} in fun ${yargs} -> r ${yargs})`);
       } else {
-        lines.push(`    external ${getter} : ${t} -> ((${fn}) [@u]) = "${p.name}" [@@mel.get]`);
-        lines.push(`    let ${value(snake(p.name))} o ${args} = (${getter} o) ${args} [@u]`);
+        // Called as a method of the object that holds it: an external is
+        // called directly from another library, where a [let] in a nested
+        // module goes through Curry, its arity lost.
+        lines.push(`    external ${value(snake(p.name))} : ${t} -> ${fn} = "${p.name}" [@@mel.send]`);
       }
     } else {
       lines.push(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${wrap(ft)} option` : wrap(ft)} = "${p.name}" [@@mel.get]`);
