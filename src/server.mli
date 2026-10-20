@@ -10,8 +10,10 @@ val render_to_string_async :
   ?nonce:string ->
   ?render_id:string ->
   (unit -> Jsx.element) ->
-  string Js.Promise.t
-(** As {!render_to_string}, once every resource read has resolved. *)
+  (string, [ `Timed_out ]) result Js.Promise.t
+(** As {!render_to_string}, once every resource read has resolved:
+    [Error `Timed_out] when that outlasts [timeout_ms], thirty seconds unless
+    given. The promise never rejects for it. *)
 
 type stream
 (** HTML rendered as it resolves, by {!render_to_stream}. *)

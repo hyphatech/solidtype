@@ -1,0 +1,44 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Server = Solidtype.Server
+module Suspense = Solidtype.Suspense
+module E = Jest.Expect
+open Testing.Syntax
+
+(* A page that waits on a fetch which resolves to [answer], or never. *)
+let waiting answer () =
+  let data, _ =
+    S.create_resource (fun _ ->
+        match answer with
+        | Some a -> Js.Promise.resolve a
+        | None -> Js.Promise.make (fun ~resolve:_ ~reject:_ -> ()))
+  in
+  <Suspense fallback=(<p>"loading"</p>)>
+    <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
+  </Suspense>
+
+let contains part s = Js.String.includes ~search:part s
+
+let () =
+  Jest.describe "a page rendered on the server" (fun () ->
+      Jest.test "renders at once" (fun () ->
+          let html = Server.render_to_string (fun () -> <p>"hello"</p>) in
+          E.(expect (contains "hello" html) |> toBe true));
+      Jest.testPromise "renders once what it fetches has resolved" (fun () ->
+          let* html = Server.render_to_string_async (waiting (Some "ready")) in
+          Js.Promise.resolve
+            E.(
+              expect
+                (match html with
+                | Ok h -> contains "ready" h
+                | Error _ -> false)
+              |> toBe true));
+      Jest.testPromise "times out as a value, never a rejection" (fun () ->
+          let* html =
+            Server.render_to_string_async ~timeout_ms:20 (waiting None)
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                (match html with Error `Timed_out -> true | Ok _ -> false)
+              |> toBe true)))

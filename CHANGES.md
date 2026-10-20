@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Breaking: `Server.render_to_string_async` resolves to a `result`,
+  ``Error `Timed_out`` when the render outlasts `timeout_ms`, where its
+  promise rejected; Solid's rendering on the server is tested, in Node.
 - `catch_error` and `run_with_owner` give `Some` of what the function
   returned, `()` and `None` among it, and `None` only when it raised:
   a function returning either read as one that raised.

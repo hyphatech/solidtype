@@ -18,9 +18,20 @@ external render_to_string_async_js :
   = "renderToStringAsync"
 [@@mel.module "solid-js/web"]
 
+(* Solid's server build rejects this promise only when the render outlasts its
+   time, with a string that says so; anything else rejecting is a bug, left a
+   rejection. *)
+let timed_out = "renderToString timed out"
+
 let render_to_string_async ?timeout_ms ?nonce ?render_id app =
   render_to_string_async_js app
     (string_options ?timeoutMs:timeout_ms ?nonce ?renderId:render_id ())
+  |> Js.Promise.then_ (fun html -> Js.Promise.resolve (Ok html))
+  |> Js.Promise.catch (fun e ->
+      match Js.Types.classify e with
+      | JSString reason when String.equal reason timed_out ->
+          Js.Promise.resolve (Error `Timed_out)
+      | _ -> Js.Promise.reject (Js.Exn.anyToExnInternal e))
 
 type stream
 type node_writable

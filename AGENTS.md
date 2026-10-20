@@ -85,6 +85,8 @@ example/             a kanban board: a whole application on the
                      against the server server.ts starts
 test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
+test/server/         Solid's rendering on the server, in OCaml, run by vitest
+                     in Node
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/ppx/            what the ppx writes for each JSX form

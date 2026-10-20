@@ -1,0 +1,16 @@
+; Solid's rendering on the server, in OCaml, run by vitest in Node, where
+; Solid resolves its server build.
+
+(library
+ (name server_test)
+ (modes melange)
+ (libraries solidtype melange-jest.jest)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries server_test)
+ (module_systems
+  (es6 jsx)))
