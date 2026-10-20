@@ -284,6 +284,8 @@ let () =
           in
           dispose ();
           E.(expect (Option.map Option.is_some !ran) |> toEqual (Some true)));
+      Jest.test "is_server is false in the browser" (fun () ->
+          E.(expect Solidtype.Web.is_server |> toBe false));
       Jest.test "no owner outside a root" (fun () ->
           E.(expect (Option.is_none (S.get_owner ())) |> toBe true)));
   Jest.describe "arrays" (fun () ->

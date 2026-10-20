@@ -1,0 +1,45 @@
+(* Solid's rendering on the server, beyond rendering a page to a string:
+   what tells the code it runs on the server, the hydration script, the
+   request, and the assets a page adds to its head. *)
+
+module Jsx = Solidtype.Jsx
+module Web = Solidtype.Web
+module Server = Solidtype.Server
+module E = Jest.Expect
+
+let contains part s = Js.String.includes ~search:part s
+
+let () =
+  Jest.describe "rendering on the server" (fun () ->
+      Jest.test "is_server says so" (fun () ->
+          E.(expect Web.is_server |> toBe true));
+      Jest.test "generate_hydration_script writes the script, with its nonce"
+        (fun () ->
+          let script =
+            Server.generate_hydration_script ~nonce:"n1"
+              ~event_names:[| "click" |] ()
+          in
+          E.(
+            expect (contains "<script" script, contains "nonce=\"n1\"" script)
+            |> toEqual (true, true)));
+      Jest.test "get_request_event is None outside a request" (fun () ->
+          E.(expect (Option.is_none (Server.get_request_event ())) |> toBe true));
+      Jest.test "use_assets adds to the head, and get_assets gives it"
+        (fun () ->
+          let given = ref "" in
+          let html =
+            Server.render_to_string (fun () ->
+                Server.use_assets (fun () -> <style>"p { color: red }"</style>);
+                given := Server.get_assets ();
+                <html>
+                  <head><title>"page"</title></head> <body><p>"body"</p></body>
+                </html>)
+          in
+          let head =
+            match Js.String.split ~sep:"</head>" html with
+            | [| head; _ |] -> head
+            | _ -> ""
+          in
+          E.(
+            expect (contains "color: red" head, contains "color: red" !given)
+            |> toEqual (true, true))))
