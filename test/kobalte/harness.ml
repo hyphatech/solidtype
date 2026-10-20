@@ -3,7 +3,12 @@
 
 module E = Jest.Expect
 
-let ( let* ) p f = Js.Promise.then_ f p
+(* A test is a run of steps that each wait: [let*] awaits a promise. *)
+module Syntax = struct
+  let ( let* ) p f = Js.Promise.then_ f p
+end
+
+open Syntax
 
 external render : (unit -> Solidtype.Jsx.element) -> unit = "render"
 [@@mel.module "@solidjs/testing-library"]

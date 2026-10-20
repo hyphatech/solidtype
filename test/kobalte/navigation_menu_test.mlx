@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module NavigationMenu = Solidtype_kobalte.NavigationMenu
 
 (* The viewport is an item of the menubar's list that holds no menu item,
@@ -29,8 +30,6 @@ let island () =
 
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/NavigationMenu.tsx"]
-
-let ( let* ) = H.( let* )
 
 (* jsdom has no ResizeObserver, which the viewport measures its menu with;
    one that never reports stands in, as a page with no layout would. *)

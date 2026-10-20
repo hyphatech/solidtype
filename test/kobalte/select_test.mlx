@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Select = K.Select
 module Node = K.Types.CollectionNode
@@ -33,8 +34,6 @@ let island () =
   </Select.Root>
 
 external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Select.tsx"]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "Select" ~island ~twin (fun user ->

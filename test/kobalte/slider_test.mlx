@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Slider = Solidtype_kobalte.Slider
 
 (* Slider.Input is left out: inside the thumb, as it must be, axe finds the
@@ -16,8 +17,6 @@ let island () =
 
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Slider.tsx"]
-
-let ( let* ) = H.( let* )
 
 let value_now thumb =
   Option.value (H.attribute thumb "aria-valuenow") ~default:""

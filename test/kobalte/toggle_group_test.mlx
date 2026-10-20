@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module ToggleGroup = Solidtype_kobalte.ToggleGroup
 
 let island () =
@@ -17,8 +18,6 @@ let island () =
 
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/ToggleGroup.tsx"]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "ToggleGroup" ~island ~twin (fun user ->

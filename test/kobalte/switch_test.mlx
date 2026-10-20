@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Switch = Solidtype_kobalte.Switch
 
 let island () =
@@ -10,8 +11,6 @@ let island () =
 
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Switch.tsx"]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "Switch" ~island ~twin (fun user ->

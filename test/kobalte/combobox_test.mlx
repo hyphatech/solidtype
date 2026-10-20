@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Combobox = K.Combobox
 module Node = K.Types.CollectionNode
@@ -35,7 +36,6 @@ external by_id : string -> Dom.element Js.null = "getElementById"
 
 external value : Dom.element -> string = "value" [@@mel.get]
 
-let ( let* ) = H.( let* )
 let expanded e = Option.value (H.attribute e "aria-expanded") ~default:""
 
 let offered () =

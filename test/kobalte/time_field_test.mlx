@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Field = K.TimeField
 module Time = K.Types.Time
@@ -33,7 +34,6 @@ let island () =
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/TimeField.tsx"]
 
-let ( let* ) = H.( let* )
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 (* The hidden input is found by what it holds, and throws when none does. *)

@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Breadcrumbs = Solidtype_kobalte.Breadcrumbs
 
 let island () =
@@ -22,8 +23,6 @@ external twin : unit -> Solidtype.Jsx.element = "make"
 external location : Dom.location = "location" [@@mel.scope "window"]
 external hash : Dom.location -> string = "hash" [@@mel.get]
 external set_hash : Dom.location -> string -> unit = "hash" [@@mel.set]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "Breadcrumbs" ~island ~twin (fun user ->

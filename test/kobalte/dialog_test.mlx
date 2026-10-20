@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Dialog = Solidtype_kobalte.Dialog
 
 let island () =
@@ -16,8 +17,6 @@ let island () =
 
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Dialog.tsx"]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "Dialog" ~island ~twin (fun user ->

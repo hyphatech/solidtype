@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Field = K.FileField
 module File = K.Types.File
@@ -40,8 +41,6 @@ let island () =
 
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/FileField.tsx"]
-
-let ( let* ) = H.( let* )
 
 type file_options
 

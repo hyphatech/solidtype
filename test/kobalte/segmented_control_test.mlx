@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Check = Solidtype.Check
 module Html = Solidtype.Html
 module Jsx = Solidtype.Jsx
@@ -25,8 +26,6 @@ let island () =
 
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/SegmentedControl.tsx"]
-
-let ( let* ) = H.( let* )
 
 let () =
   Css_escape.install ();

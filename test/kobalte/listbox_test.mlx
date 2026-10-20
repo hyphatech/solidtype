@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Listbox = K.Listbox
 module Node = K.Types.CollectionNode
@@ -27,7 +28,6 @@ external twin : unit -> Jsx.element = "make"
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]
 
-let ( let* ) = H.( let* )
 let option name = H.by_role_named "option" (H.query ~name ())
 let selected e = Option.value (H.attribute e "aria-selected") ~default:""
 

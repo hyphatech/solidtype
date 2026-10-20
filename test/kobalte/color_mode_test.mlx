@@ -1,11 +1,11 @@
 module H = Harness
+open Harness.Syntax
 module ColorMode = Solidtype_kobalte.ColorMode
 module Context = Solidtype_kobalte.Types.ColorModeContextType
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 module E = Jest.Expect
 
-let ( let* ) = H.( let* )
 let key = "solidtype-color-mode"
 let mode_name = function `light -> "light" | `dark -> "dark"
 

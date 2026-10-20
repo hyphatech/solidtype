@@ -11,8 +11,7 @@ module Portal = Solidtype.Portal
 module Suspense = Solidtype.Suspense
 module E = Jest.Expect
 module T = Testing
-
-let ( let* ) p f = Js.Promise.then_ f p
+open Testing.Syntax
 
 exception Broken
 

@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Toast = K.Toast
 module Toaster = K.Types.Toast_Toaster
@@ -24,7 +25,6 @@ let island () =
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Toast.tsx"]
 
-let ( let* ) = H.( let* )
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 external focus : Dom.element -> unit = "focus" [@@mel.send]

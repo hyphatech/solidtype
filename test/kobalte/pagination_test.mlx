@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Pagination = Solidtype_kobalte.Pagination
 module Item_props = Solidtype_kobalte.Types.Pagination_Root_ItemComponent
 module Jsx = Solidtype.Jsx
@@ -24,7 +25,6 @@ let island () =
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/Pagination.tsx"]
 
-let ( let* ) = H.( let* )
 let button name = H.by_role_named "button" (H.query ~name ())
 let current e = Option.value (H.attribute e "aria-current") ~default:""
 

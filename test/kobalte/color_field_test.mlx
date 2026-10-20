@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Field = Solidtype_kobalte.ColorField
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
@@ -16,8 +17,6 @@ let island () =
 
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/ColorField.tsx"]
-
-let ( let* ) = H.( let* )
 
 external value : Dom.element -> string = "value" [@@mel.get]
 

@@ -1,6 +1,6 @@
 module T = Testing
+open Testing.Syntax
 
-let ( let* ) p f = Js.Promise.then_ f p
 let origin = T.inject "origin"
 
 (* Typed into the field and added, as a person does. *)

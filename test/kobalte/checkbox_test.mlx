@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Checkbox = K.Checkbox
 module State = K.Types.CheckboxRootState
@@ -39,8 +40,6 @@ external twin : unit -> Jsx.element = "make"
 
 external indeterminate : Dom.element -> bool = "indeterminate" [@@mel.get]
 external id : Dom.element -> string = "id" [@@mel.get]
-
-let ( let* ) = H.( let* )
 
 (* Whether [element]'s aria-describedby names [description]'s id. *)
 let described_by element description =

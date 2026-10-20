@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Slider = K.ColorSlider
 
@@ -18,7 +19,6 @@ let island () =
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/ColorSlider.tsx"]
 
-let ( let* ) = H.( let* )
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 let () =

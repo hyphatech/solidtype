@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module NumberField = K.NumberField
 module Jsx = Solidtype.Jsx
@@ -33,8 +34,6 @@ external twin : unit -> Jsx.element = "make"
 
 external value : Dom.element -> string = "value" [@@mel.get]
 external id : Dom.element -> string = "id" [@@mel.get]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "NumberField" ~island ~twin (fun user ->

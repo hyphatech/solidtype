@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module TextField = Solidtype_kobalte.TextField
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
@@ -33,8 +34,6 @@ external tag : Dom.element -> string = "tagName" [@@mel.get]
 
 external all_by_text : string -> Dom.element array = "queryAllByText"
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
-
-let ( let* ) = H.( let* )
 
 (* Whether [element]'s aria-describedby names [description]'s id. *)
 let described_by element description =

@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Popover = Solidtype_kobalte.Popover
 
 let island () =
@@ -19,7 +20,6 @@ let island () =
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Popover.tsx"]
 
-let ( let* ) = H.( let* )
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 external by_id : string -> Dom.element Js.null = "getElementById"

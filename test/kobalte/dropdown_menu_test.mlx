@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module DropdownMenu = Solidtype_kobalte.DropdownMenu
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
@@ -39,7 +40,6 @@ let island () =
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/DropdownMenu.tsx"]
 
-let ( let* ) = H.( let* )
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 external focus : Dom.element -> unit = "focus" [@@mel.send]

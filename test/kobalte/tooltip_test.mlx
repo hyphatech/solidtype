@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module Tooltip = Solidtype_kobalte.Tooltip
 
 let island () =
@@ -12,7 +13,6 @@ let island () =
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/Tooltip.tsx"]
 
-let ( let* ) = H.( let* )
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 external hover : H.user -> Dom.element -> unit Js.Promise.t = "hover"

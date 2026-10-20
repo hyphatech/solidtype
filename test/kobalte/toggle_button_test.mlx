@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module ToggleButton = K.ToggleButton
 module State = K.Types.ToggleButtonRootState
@@ -16,8 +17,6 @@ let island () =
 
 external twin : unit -> Jsx.element = "make"
 [@@mel.module "./twins/ToggleButton.tsx"]
-
-let ( let* ) = H.( let* )
 
 let () =
   H.alike "ToggleButton" ~island ~twin (fun user ->

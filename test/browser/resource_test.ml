@@ -1,8 +1,7 @@
 module S = Solidtype.Solid
 module E = Jest.Expect
 module T = Testing
-
-let ( let* ) p f = Js.Promise.then_ f p
+open Testing.Syntax
 
 let () =
   Jest.describe "resources" (fun () ->

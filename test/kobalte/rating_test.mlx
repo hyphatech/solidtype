@@ -1,4 +1,5 @@
 module H = Harness
+open Harness.Syntax
 module K = Solidtype_kobalte
 module Rating = K.Rating
 module Item_state = K.Types.RatingItemState
@@ -33,8 +34,6 @@ let island () =
   </Rating.Root>
 
 external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Rating.tsx"]
-
-let ( let* ) = H.( let* )
 
 (* The rating as its items draw it: each item's star, filled up to the value. *)
 let stars () =
