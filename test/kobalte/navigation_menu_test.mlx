@@ -31,12 +31,6 @@ let island () =
 external twin : unit -> Solidtype.Jsx.element = "make"
 [@@mel.module "./twins/NavigationMenu.tsx"]
 
-(* jsdom has no ResizeObserver, which the viewport measures its menu with;
-   one that never reports stands in, as a page with no layout would. *)
-let () =
-  [%mel.raw
-    {|globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} }|}]
-
 let attribute e name = Option.value (H.attribute e name) ~default:""
 
 external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]

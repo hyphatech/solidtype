@@ -3,30 +3,6 @@ open Harness.Syntax
 module K = Solidtype_kobalte
 module Wheel = K.ColorWheel
 
-(* jsdom has no ResizeObserver, by which the wheel's track measures itself;
-   one that never reports leaves the size unknown, as jsdom has no layout. *)
-type globals
-type observer
-
-external globals : globals = "globalThis"
-
-external observer :
-  observe:(unit -> unit) ->
-  unobserve:(unit -> unit) ->
-  disconnect:(unit -> unit) ->
-  unit ->
-  observer = ""
-[@@mel.obj]
-
-external set_resize_observer : globals -> (unit -> observer) -> unit
-  = "ResizeObserver"
-[@@mel.set]
-
-let () =
-  let ignored () = () in
-  set_resize_observer globals (fun () ->
-      observer ~observe:ignored ~unobserve:ignored ~disconnect:ignored ())
-
 (* The thumb holds no Input: axe finds the range input Kobalte nests in it
    an interactive control inside a slider. *)
 let island () =
