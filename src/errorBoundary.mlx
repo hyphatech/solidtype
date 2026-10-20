@@ -1,6 +1,7 @@
 module Raw = struct
   module Props = struct
-    let check ~fallback:(_ : 'e -> ((unit -> unit)[@u]) -> Jsx.element)
+    let check
+        ~fallback:(_ : Solid.thrown -> ((unit -> unit)[@u]) -> Jsx.element)
         ?children:(_ : (_, [ `nodes ]) Check.children option) () =
       ()
   end

@@ -376,6 +376,29 @@ function mapFunction(sig: ts.Signature, vars: Vars, where: string): string | nul
 
 const wrap = (t: string) => (t.includes("->") ? `(${t})` : t);
 
+// Whether reading a member gives a type variable that neither its module nor
+// its own arguments fix: a value whose type its caller would choose, an
+// unchecked cast, so it is not read. A variable an argument fixes, a generic
+// function's, is the function's own.
+const typeVars = (t: string) => t.match(/'[a-z_][A-Za-z0-9_]*/g) ?? [];
+function unbound(t: string, params: string[]): boolean {
+  const parts: string[] = [];
+  let depth = 0;
+  let last = 0;
+  for (let i = 0; i < t.length - 1; i++) {
+    const c = t[i];
+    if (c === "(" || c === "[") depth++;
+    else if (c === ")" || c === "]") depth--;
+    else if (depth === 0 && c === "-" && t[i + 1] === ">") {
+      parts.push(t.slice(last, i));
+      last = i + 2;
+    }
+  }
+  const result = t.slice(last);
+  const fixed = new Set([...params, ...parts.flatMap(typeVars)]);
+  return typeVars(result).some((v) => !fixed.has(v));
+}
+
 // Whether an OCaml type is a function: an arrow outside every parenthesis.
 function topArrow(t: string): boolean {
   let depth = 0;
@@ -673,7 +696,7 @@ while (queue.length > 0) {
       if (library) continue;
       const sig = pt.getCallSignatures()[0];
       const f = sig ? mapFunction(sig, vars, `${n.module}.${p.name}`) : null;
-      if (!f) {
+      if (!f || unbound(f, params)) {
         unmapped.set(`${n.module}.${p.name}()`, sig ? checker.signatureToString(sig) : "?");
         continue;
       }
@@ -694,6 +717,11 @@ while (queue.length > 0) {
       continue;
     }
     fields.push([p.name, ft, optional]);
+    // Its constructor takes it, but reading it would be a cast.
+    if (unbound(ft, params)) {
+      unmapped.set(`${n.module}.${p.name}`, `read as ${ft}`);
+      continue;
+    }
     lines.push(...doc(p, "    "));
     const sig = checker.getNonNullableType(pt).getCallSignatures()[0];
     // A function is one the mapping writes as an arrow, not a setter, an

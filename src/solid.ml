@@ -232,11 +232,13 @@ external cleanup : ((unit -> unit)[@mel.uncurry]) -> (unit -> unit[@u])
 
 let on_cleanup f = ignore (cleanup f)
 
-external cause : 'e -> 'c Js.undefined = "cause" [@@mel.get]
+type thrown
+
+external cause : thrown -> thrown Js.undefined = "cause" [@@mel.get]
 
 (* Solid wraps a thrown value that is not an Error in one, the value as its
    cause, so an OCaml exception reaches a handler inside it. *)
-let exn_of_thrown e =
+let exn_of_thrown (e : thrown) =
   if Js.Exn.isCamlExceptionOrOpenVariant e then Js.Exn.anyToExnInternal e
   else if
     String.equal (Js.typeof e) "object"
@@ -248,23 +250,21 @@ let exn_of_thrown e =
     | _ -> Js.Exn.anyToExnInternal e
   else Js.Exn.anyToExnInternal e
 
-let exn_of_error = exn_of_thrown
-
 external catch_error_js :
   ((unit -> 'a boxed)[@mel.uncurry]) ->
-  (('e -> unit)[@mel.uncurry]) ->
+  ((thrown -> unit)[@mel.uncurry]) ->
   'a boxed Js.undefined = "catchError"
 [@@mel.module "solid-js"]
 
 let catch_error f handler =
   Option.map unbox
     (Js.Undefined.toOption
-       (catch_error_js (boxed f) (fun e -> handler (exn_of_error e))))
+       (catch_error_js (boxed f) (fun e -> handler (exn_of_thrown e))))
 
-external on_error_js : (('e -> unit)[@mel.uncurry]) -> unit = "onError"
+external on_error_js : ((thrown -> unit)[@mel.uncurry]) -> unit = "onError"
 [@@mel.module "solid-js"]
 
-let on_error handler = on_error_js (fun e -> handler (exn_of_error e))
+let on_error handler = on_error_js (fun e -> handler (exn_of_thrown e))
 
 external start_transition : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t
   = "startTransition"
@@ -363,9 +363,9 @@ let state r =
   | _ -> Unresolved
 
 external loading : 'a resource -> bool = "loading" [@@mel.get]
-external error_value : 'a resource -> 'e Js.undefined = "error" [@@mel.get]
+external error_value : 'a resource -> thrown Js.undefined = "error" [@@mel.get]
 
-let error r = Option.map exn_of_error (Js.Undefined.toOption (error_value r))
+let error r = Option.map exn_of_thrown (Js.Undefined.toOption (error_value r))
 
 external latest : 'a resource -> 'a option = "latest" [@@mel.get]
 

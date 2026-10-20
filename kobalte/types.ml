@@ -1676,14 +1676,12 @@ end
     Note that all JSX <Elements> are of the type `JSX.Element`. *)
 module FlowProps = struct
   type ('p, 'c) t = ('p, 'c) t_flow_props
-  external value : ('p, 'c) t -> 't = "value" [@@mel.get]
   external children : ('p, 'c) t -> Solidtype.Jsx.element = "children" [@@mel.get]
   external make : value:('t [@mel.as "value"]) -> children:(Solidtype.Jsx.element [@mel.as "children"]) -> unit -> ('p, 'c) t = "" [@@mel.obj]
 end
 
 module Context_Provider = struct
   type t = t_context_provider
-  external value : t -> 't = "value" [@@mel.get]
   external make : value:('t [@mel.as "value"]) -> unit -> t = "" [@@mel.obj]
 end
 

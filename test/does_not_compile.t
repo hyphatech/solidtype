@@ -397,6 +397,32 @@ event has no constructor.
   Error: Unbound value Solidtype_kobalte.Types.SwipeEvent.make
   [1]
 
+A value taken for one JavaScript threw, which only a handler is given.
+
+  $ cat > case.mlx <<'EOF'
+  > let e = Solidtype.Solid.exn_of_thrown 42
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 38-40:
+  1 | let e = Solidtype.Solid.exn_of_thrown 42
+                                            ^^
+  Error: The constant 42 has type int but an expression was expected of type
+           Solidtype.Solid.thrown
+  [1]
+
+A Kobalte value read as whatever type its caller names.
+
+  $ cat > case.mlx <<'EOF'
+  > let n (p : Solidtype_kobalte.Types.Context_Provider.t) : int =
+  >   Solidtype_kobalte.Types.Context_Provider.value p
+  > EOF
+  $ build
+  File "case.mlx", line 2, characters 2-48:
+  2 |   Solidtype_kobalte.Types.Context_Provider.value p
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Unbound value Solidtype_kobalte.Types.Context_Provider.value
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'

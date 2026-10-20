@@ -239,7 +239,8 @@ break.
   `multiple` is two modules, `Root` and `Root_multiple`; a named object
   type is a module of `Types`, with a getter per field, a curried
   wrapper per function it holds and a constructor where it has neither
-  methods nor a class. A member typed `any` is not bound, and nor are
+  methods nor a class. A member typed `any` is not bound, nor one whose
+  value would be a type its caller chooses, an unchecked cast, and nor are
   Kobalte's building blocks, menu, popper, dismissable-layer and
   polymorphic. Why: Kobalte's parts are hundreds, and a binding by hand
   would be a second copy of its types. Test: `make lint` runs the

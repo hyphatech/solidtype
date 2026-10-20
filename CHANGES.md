@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Breaking: what JavaScript threw is a type of its own, `Solid.thrown`,
+  so `exn_of_thrown` takes only that, never any value; and a Kobalte
+  value that would read as whatever type its caller names,
+  `Context_Provider.value`, `FlowProps.value`, is no longer bound.
 - Every function of Kobalte's `Types` is called directly from an
   application, its wrappers included, where those went through Melange's
   `Curry`: the types are a file of their own, `kobalte/types.ml`.

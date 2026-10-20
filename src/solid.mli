@@ -121,10 +121,14 @@ val catch_error : (unit -> 'a) -> (exn -> unit) -> 'a option
     raised. An error it raises, or one raised later by a computation it created,
     goes to [handler]. A value JavaScript threw is [Js.Exn.Error]. *)
 
-val exn_of_thrown : 'e -> exn
+type thrown
+(** What JavaScript threw, as Solid hands it to a handler: any value, an OCaml
+    exception among them. *)
+
+val exn_of_thrown : thrown -> exn
 (** What JavaScript threw, as an exception: an OCaml one as it was raised --
     also when Solid wrapped it in an [Error], its cause -- and any other value
-    as [Js.Exn.Error]. For a binding of a JavaScript API that throws. *)
+    as [Js.Exn.Error]. *)
 
 val on_error : (exn -> unit) -> unit
 (** Deprecated by Solid for {!catch_error}: sends the current owner's errors to
