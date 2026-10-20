@@ -1,0 +1,68 @@
+(* A page rendered on the server as a stream, into a web WritableStream,
+   the standard every server runtime has: what arrives, as text, by the time
+   the stream closes. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Server = Solidtype.Server
+module Suspense = Solidtype.Suspense
+module E = Jest.Expect
+open Testing.Syntax
+
+let contains part s = Js.String.includes ~search:part s
+
+(* A writable that collects what is written, and the promise of all of it
+   once the stream closes. *)
+let collecting () =
+  let chunks = ref [] in
+  let closed = ref (fun () -> ()) in
+  let all =
+    Js.Promise.make (fun ~resolve ~reject:_ ->
+        closed := fun () -> (resolve (String.concat "" (List.rev !chunks)) [@u]))
+  in
+  let w =
+    Server.writable
+      ~write:(fun chunk -> chunks := chunk :: !chunks)
+      ~close:(fun () -> !closed ())
+      ()
+  in
+  (w, all)
+
+module Loaded = struct
+  let%component make ~(text : string) () =
+    let data, _ = S.create_resource (fun _ -> Js.Promise.resolve (text ())) in
+    <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
+end
+
+let page () =
+  <main>
+    <h1>"Board — tâches"</h1>
+    <Suspense fallback=(<p>"loading"</p>)><Loaded text="tasks" /></Suspense>
+  </main>
+
+let () =
+  Jest.describe "a page streamed on the server" (fun () ->
+      Jest.testPromise "pipe_to_writable streams the page, its fetch resolved"
+        (fun () ->
+          let w, all = collecting () in
+          Server.pipe_to_writable page w;
+          let* html = all in
+          Js.Promise.resolve
+            E.(
+              expect
+                (contains {js|Board — tâches|js} html, contains "tasks" html)
+              |> toEqual (true, true)));
+      Jest.testPromise
+        "render_to_stream pipes to a writable, and says when done" (fun () ->
+          let w, all = collecting () in
+          let stream =
+            Server.render_to_stream
+              ~on_complete_all:(fun write -> write "<!-- whole -->")
+              page
+          in
+          let* () = Server.pipe_to stream w in
+          let* html = all in
+          Js.Promise.resolve
+            E.(
+              expect (contains "Board" html, contains "<!-- whole -->" html)
+              |> toEqual (true, true))))

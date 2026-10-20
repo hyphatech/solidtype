@@ -18,11 +18,13 @@ val render_to_string_async :
 type stream
 (** HTML rendered as it resolves, by {!render_to_stream}. *)
 
-type node_writable
-(** A Node [Writable]. *)
+type writable
+(** A web [WritableStream], the standard every server runtime has. *)
 
-type web_writable
-(** A web [WritableStream]. *)
+val writable :
+  write:(string -> unit) -> ?close:(unit -> unit) -> unit -> writable
+(** [writable ~write ~close ()] gives [write] each part of the page as text, as
+    it is rendered, and calls [close] once the page is whole. *)
 
 val render_to_stream :
   ?nonce:string ->
@@ -34,14 +36,12 @@ val render_to_stream :
 (** The shell first, then each resolved part. [on_complete_shell write] and
     [on_complete_all write] may write more. *)
 
-val pipe : stream -> node_writable -> unit
-val pipe_to : stream -> web_writable -> unit
-
-val pipe_to_node_writable :
-  ?nonce:string -> (unit -> Jsx.element) -> node_writable -> unit
+val pipe_to : stream -> writable -> unit Js.Promise.t
+(** Writes [stream] to the writable, resolving once it is all written. *)
 
 val pipe_to_writable :
-  ?nonce:string -> (unit -> Jsx.element) -> web_writable -> unit
+  ?nonce:string -> (unit -> Jsx.element) -> writable -> unit
+(** Renders [app] as a stream straight into the writable. *)
 
 val generate_hydration_script :
   ?nonce:string -> ?event_names:string array -> unit -> string

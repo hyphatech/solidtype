@@ -34,8 +34,34 @@ let render_to_string_async ?timeout_ms ?nonce ?render_id app =
       | _ -> Js.Promise.reject (Js.Exn.anyToExnInternal e))
 
 type stream
-type node_writable
-type web_writable
+type writable
+
+(* What Solid writes to a writable, its text encoded as UTF-8, and what reads
+   it back: both the web's own, as every server runtime has them. *)
+type chunk
+type decoder
+type decode_options
+type sink
+
+external decoder : unit -> decoder = "TextDecoder" [@@mel.new]
+external decode_options : stream:bool -> unit -> decode_options = "" [@@mel.obj]
+
+external decode : decoder -> chunk -> decode_options -> string = "decode"
+[@@mel.send]
+
+external sink : write:(chunk -> unit) -> close:(unit -> unit) -> unit -> sink
+  = ""
+[@@mel.obj]
+
+external writable_of_sink : sink -> writable = "WritableStream" [@@mel.new]
+
+let writable ~write ?(close = fun () -> ()) () =
+  let d = decoder () in
+  writable_of_sink
+    (sink
+       ~write:(fun chunk ->
+         write (decode d chunk (decode_options ~stream:true ())))
+       ~close ())
 
 (* What Solid gives a completion callback: the stream's [write]. *)
 type completion
@@ -65,25 +91,17 @@ let render_to_stream ?nonce ?render_id ?on_complete_shell ?on_complete_all app =
        ?onCompleteShell:(given on_complete_shell)
        ?onCompleteAll:(given on_complete_all) ())
 
-external pipe : stream -> node_writable -> unit = "pipe" [@@mel.send]
-external pipe_to : stream -> web_writable -> unit = "pipeTo" [@@mel.send]
+external pipe_to : stream -> writable -> unit Js.Promise.t = "pipeTo"
+[@@mel.send]
 
 type pipe_options
 
 external pipe_options : ?nonce:string -> unit -> pipe_options = "" [@@mel.obj]
 
-external pipe_to_node_writable_js :
-  ((unit -> Jsx.element)[@mel.uncurry]) -> node_writable -> pipe_options -> unit
-  = "pipeToNodeWritable"
-[@@mel.module "solid-js/web"]
-
 external pipe_to_writable_js :
-  ((unit -> Jsx.element)[@mel.uncurry]) -> web_writable -> pipe_options -> unit
+  ((unit -> Jsx.element)[@mel.uncurry]) -> writable -> pipe_options -> unit
   = "pipeToWritable"
 [@@mel.module "solid-js/web"]
-
-let pipe_to_node_writable ?nonce app w =
-  pipe_to_node_writable_js app w (pipe_options ?nonce ())
 
 let pipe_to_writable ?nonce app w =
   pipe_to_writable_js app w (pipe_options ?nonce ())

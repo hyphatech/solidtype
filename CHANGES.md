@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Breaking: a page streamed on the server goes into a web `WritableStream`,
+  which `Server.writable ~write ~close ()` makes, each part given as text,
+  and `Server.pipe_to` resolves once it is all written; the Node-only
+  `pipe`, `pipe_to_node_writable` and `node_writable` are gone, and nothing
+  could make a writable before.
 - A component written without its last parameter, `()`, is reported where
   it is defined, where the error named no file.
 - Breaking: a resource's `ssr_load_from` is `` `server`` or `` `initial``,
