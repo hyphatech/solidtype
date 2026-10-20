@@ -59,11 +59,16 @@ let js_name label =
         Buffer.contents b
 
 (* A string written in JSX is text for the page, so it is a JavaScript
-   string, {js|...|js}: Melange reads a plain OCaml string as bytes, and
-   writes "…" as the three characters of its UTF-8. *)
+   string, {js|...|js}: Melange reads any other string as bytes, "..." or
+   {|...|} alike, and writes "…" as the three characters of its UTF-8. It
+   also reads escapes in {js|...|js}, where [s] is already the string's
+   value, so each backslash is doubled to reach the page as one. A string
+   written {js|...|js} is JavaScript's already, its escapes meant. *)
 let js_string (e : expression) =
   match e.pexp_desc with
-  | Pexp_constant (Pconst_string (s, loc, None)) ->
+  | Pexp_constant (Pconst_string (_, _, Some "js")) -> e
+  | Pexp_constant (Pconst_string (s, loc, _)) ->
+      let s = String.concat {|\\|} (String.split_on_char '\\' s) in
       { e with pexp_desc = Pexp_constant (Pconst_string (s, loc, Some "js")) }
   | _ -> e
 

@@ -104,9 +104,10 @@ an element, a handler (`on_` and its event) or a function static,
 anything else a thunk, so a read outside a thunk does not compile; a
 name is given back its JavaScript spelling, and a value wrapped in one
 of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
-argument is therefore written `(fun _ -> ...)`. A string literal becomes a
-JavaScript string, `{js|...|js}`, since Melange reads an OCaml one as
-bytes. An element's attributes are
+argument is therefore written `(fun _ -> ...)`. A string literal, however
+quoted, becomes a JavaScript string, `{js|...|js}`, its backslashes
+doubled, since Melange reads any other as bytes and reads escapes in
+that one; one written `{js|...|js}` is left as it is. An element's attributes are
 annotated with their types; a component's element also applies the
 component's `Props.check` to its props under `if false`, which the
 compiler checks and Melange drops, and binds each prop that can hold JSX
@@ -117,7 +118,8 @@ modules without `Solidtype.`, a name the library itself cannot use. Melange comp
 calls, through one import of `vite-plugin-solidtype/markers`. The plugin
 rewrites each into JSX -- a function the ppx bound back where it is
 used, a thunk into what it returns, a return-only `if` into a
-conditional -- and `vite-plugin-solid` compiles that JSX as
+conditional, a string into JSX's own text or quoted attribute only where
+JSX reads it back unchanged, else `{"..."}` -- and `vite-plugin-solid` compiles that JSX as
 it compiles TSX: for the browser, and under Astro's build for the server
 and hydratable too, so an island is prerendered and hydrates as its twin
 would.

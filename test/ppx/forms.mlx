@@ -52,3 +52,12 @@ let switch =
       | Waiting -> <p>"wait"</p>
       | Ready n -> <p>(fun () -> Solidtype.Jsx.int n)</p>)
   </Switch>
+
+let strings =
+  <p title={x|né|x}>
+    "C:\\new\\table"
+    "¯\\_(ツ)_/¯"
+    {|a\b|}
+    {js|caf\u00e9|js}
+    <Label text="x\\y" />
+  </p>

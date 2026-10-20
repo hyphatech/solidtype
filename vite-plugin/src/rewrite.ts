@@ -102,7 +102,13 @@ function jsxName(component: t.Expression, alias: (name: string) => string): t.JS
   throw new MarkerError("a component is a name or a module's member");
 }
 
-const plainText = /^[^{}<>\n]*$/;
+// A string is written as JSX's own only where JSX reads it back unchanged,
+// as a TSX author writes it; otherwise it stays the expression it is, as
+// {"..."}. JSX reads an entity in either, and Solid's compiler collapses a
+// run of whitespace in text; a quoted attribute keeps no escape, and Babel
+// writes anything but printable ASCII there as one.
+const plainText = /^(?:[^{}<>&\s]| (?! ))*$/;
+const plainAttribute = /^(?:(?!["&\\])[\x20-\x7e])*$/;
 
 // Solid's namespaces, on:click and attr:x, are JSX's namespaced names.
 function attributeName(name: string): t.JSXIdentifier | t.JSXNamespacedName {
@@ -116,7 +122,7 @@ function attribute(node: t.Expression, namespace: string): t.JSXAttribute | t.JS
   switch (markerOf(node, namespace)) {
     case "s": {
       const [name, value] = argsOf(node, 2) as [t.Expression, t.Expression];
-      const v = t.isStringLiteral(value) && plainText.test(value.value)
+      const v = t.isStringLiteral(value) && plainAttribute.test(value.value)
         ? t.stringLiteral(value.value)
         : t.jsxExpressionContainer(value);
       return t.jsxAttribute(attributeName(stringOf(name)), v);
@@ -141,7 +147,7 @@ function child(node: t.Expression, namespace: string, alias: (name: string) => s
     const [thunk] = argsOf(node, 1) as [t.Expression];
     return t.jsxExpressionContainer(unwrap(thunk));
   }
-  if (t.isStringLiteral(node) && plainText.test(node.value) && node.value.trim() === node.value.replace(/^ +| +$/g, "").trim()) {
+  if (t.isStringLiteral(node) && plainText.test(node.value)) {
     return t.jsxText(node.value);
   }
   return t.jsxExpressionContainer(node);

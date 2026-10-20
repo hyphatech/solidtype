@@ -29,3 +29,12 @@ let page () = text body
 let later () =
   Js.Promise.make (fun ~resolve ~reject:_ ->
       ignore (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0))
+
+external query : string -> Dom.element = "querySelector"
+[@@mel.scope "document"]
+
+external title : Dom.element -> string = "title" [@@mel.get]
+
+(* The first element [selector] finds: its text and its title, as a person
+   reads them. *)
+let shown selector = (text (query selector), title (query selector))

@@ -240,3 +240,15 @@ let switch =
                                                                     [|(
                                                                     Solidtype.Jsx.render
                                                                     solidtype__children)|]))|]
+let strings =
+  Solidtype.Jsx.el "p"
+    [|(Solidtype.Jsx.s "title" ({js|né|js} : Solidtype.Html.P.title))|]
+    [|(Solidtype.Jsx.text {js|C:\\new\\table|js});(Solidtype.Jsx.text
+                                                     {js|¯\\_(ツ)_/¯|js});(
+      Solidtype.Jsx.text {js|a\\b|js});(Solidtype.Jsx.text {js|caf\u00e9|js});(
+      Solidtype.Jsx.node
+        (if false
+         then
+           Label.Props.check ~text:(Solidtype.Check.literal {js|x\\y|js}) ();
+         Solidtype.Jsx.c Label.component
+           [|(Solidtype.Jsx.s "text" {js|x\\y|js})|] [||]))|]

@@ -1,0 +1,57 @@
+(* A string written in JSX reaches the page as it reads in OCaml, whatever
+   it holds and however it is quoted, as a child, an attribute or a prop.
+   An expected string that is not ASCII is written {js|...|js}, where
+   Melange reads [\\] as one backslash. *)
+
+module Jsx = Solidtype.Jsx
+module E = Jest.Expect
+module T = Testing
+
+module Quoted = struct
+  let%component make ~(text : string) () =
+    <span title=(fun () -> text ())>(fun () -> Jsx.string (text ()))</span>
+end
+
+let () =
+  Jest.describe "a string in JSX" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "keeps its backslashes, as a child and an attribute" (fun () ->
+          T.render (fun () -> <p title="a\\b">"C:\\new\\table"</p>);
+          E.(expect (T.shown "p") |> toEqual ("C:\\new\\table", "a\\b")));
+      Jest.test "keeps an escape it shows, never reading it" (fun () ->
+          T.render (fun () -> <p>"Press \\n for a new line, \\t for a tab"</p>);
+          E.(
+            expect (T.page ()) |> toBe "Press \\n for a new line, \\t for a tab"));
+      Jest.test "keeps a backslash beside text that is not ASCII" (fun () ->
+          T.render (fun () -> <p>"¯\\_(ツ)_/¯"</p>);
+          E.(expect (T.page ()) |> toBe {js|¯\\_(ツ)_/¯|js}));
+      Jest.test "keeps its backslashes as a component's prop" (fun () ->
+          T.render (fun () -> <Quoted text="x\\y" />);
+          E.(expect (T.shown "span") |> toEqual ("x\\y", "x\\y")));
+      Jest.test "is read as text, not bytes, when quoted {|...|}" (fun () ->
+          T.render (fun () -> <p title={x|né|x}>{|café|}</p>);
+          E.(expect (T.shown "p") |> toEqual ({js|café|js}, {js|né|js})));
+      Jest.test "keeps a quoted string's backslash, which OCaml never reads"
+        (fun () ->
+          T.render (fun () -> <p>{|a\b|}</p>);
+          E.(expect (T.page ()) |> toBe "a\\b"));
+      Jest.test "written {js|...|js} is JavaScript's, its escapes read"
+        (fun () ->
+          T.render (fun () -> <p>{js|caf\u00e9|js}</p>);
+          E.(expect (T.page ()) |> toBe {js|café|js}));
+      Jest.test "is a lone backslash, as a child and an attribute" (fun () ->
+          T.render (fun () -> <p title="\\">"\\"</p>);
+          E.(expect (T.shown "p") |> toEqual ("\\", "\\")));
+      Jest.test "keeps text that is not ASCII in an attribute" (fun () ->
+          T.render (fun () -> <p title="Rechercher…">"né"</p>);
+          E.(expect (T.shown "p") |> toEqual ({js|né|js}, {js|Rechercher…|js})));
+      Jest.test "keeps an entity and quotes as written, never reading them"
+        (fun () ->
+          T.render (fun () ->
+              <p title="Tom &amp; \"Jerry\"">"Tom &amp; \"Jerry\""</p>);
+          E.(
+            expect (T.shown "p")
+            |> toEqual ("Tom &amp; \"Jerry\"", "Tom &amp; \"Jerry\"")));
+      Jest.test "keeps its whitespace: a tab, a run of spaces" (fun () ->
+          T.render (fun () -> <p title="a\tb">"two  spaces"</p>);
+          E.(expect (T.shown "p") |> toEqual ("two  spaces", "a\tb"))))

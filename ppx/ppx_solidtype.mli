@@ -7,9 +7,11 @@
     element, a handler (a prop named [on] then a capital) and a function literal
     other than [fun () -> ...] are static; anything else is a thunk, so a read
     outside a thunk does not compile. A function prop that takes no argument is
-    written [(fun _ -> ...)], since [fun () -> ...] is a thunk. A string literal
-    is written as a JavaScript string, [{js|...|js}], so text that is not ASCII
-    reaches the page as it is written.
+    written [(fun _ -> ...)], since [fun () -> ...] is a thunk. A string
+    literal, however quoted, is written as a JavaScript string, [{js|...|js}],
+    its backslashes doubled, so text that is not ASCII and a backslash reach the
+    page as written; one written [{js|...|js}] is JavaScript's already, and left
+    as it is.
 
     An element's attribute is annotated with its type from the element's module
     of [Solidtype.Html], [Html.Div.class_]. Its name is the label's, a trailing

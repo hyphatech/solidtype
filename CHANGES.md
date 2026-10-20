@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A string in JSX reaches the page as it reads in OCaml: a backslash, as
+  in `"C:\\new"`, is no longer read again as an escape, nor is a lone one
+  a build error; text quoted `{|...|}` is no longer bytes; and an
+  attribute or prop that is not plain ASCII, `placeholder="Rechercher…"`,
+  holds an entity or a quote, or a string with a tab or a run of spaces,
+  is no longer shown as escape codes, read as entities or collapsed.
 - The example is shelf, a reading list on the whole stack: a Spindle
   server, a Kobalte board printed against its routes and styled with
   Tailwind, served as a Vite page and mounted as an Astro one, with the
