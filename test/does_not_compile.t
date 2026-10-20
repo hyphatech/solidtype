@@ -449,6 +449,19 @@ A component without its last parameter, (), reported where it is defined.
   Error: a component's last parameter is ()
   [1]
 
+A function given where a thunk belongs, which cannot be called as one.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Label text=(fun s -> s) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 26-38:
+  1 | let make () = <Label text=(fun s -> s) />
+                                ^^^^^^^^^^^^
+  Error: The value solidtype__text has type 'a -> 'a
+         but an expression was expected of type string Solidtype.Check.value
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'

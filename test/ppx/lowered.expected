@@ -155,6 +155,13 @@ let svg_names =
                                                              ({js|2|js} : 
                                                              Solidtype.Html.Svg.stroke_width))|]
     [||]
+let run_of_capitals =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.s "innerHTML"
+         ({js|<b>x</b>|js} : Solidtype.Html.Div.inner_html))|] [||]
+let kobalte_names =
+  if false then Icon.Props.check ~is_svg:(Solidtype.Check.literal true) ();
+  Solidtype.Jsx.c Icon.component [|(Solidtype.Jsx.s "isSVG" true)|] [||]
 let namespaced =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.s "on:scroll"

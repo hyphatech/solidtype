@@ -33,6 +33,8 @@ let names =
   />
 
 let svg_names = <svg view_box="0 0 1 1" stroke_width="2" />
+let run_of_capitals = <div inner_html="<b>x</b>" />
+let kobalte_names = <Icon is_svg=true />
 
 let namespaced =
   <div
