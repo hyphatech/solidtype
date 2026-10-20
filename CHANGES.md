@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A component written without its last parameter, `()`, is reported where
+  it is defined, where the error named no file.
 - Breaking: a resource's `ssr_load_from` is `` `server`` or `` `initial``,
   the polymorphic variant every other closed set of Solid's strings is,
   where it was a variant of its own, `Server` or `Initial`.

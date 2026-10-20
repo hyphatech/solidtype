@@ -606,13 +606,14 @@ let prop_of (p : function_param) =
           "a component's parameter is a prop with its type, ~(name : t), \
            ?(name : t option) or ?(name : t = default), and the last is ()" )
 
-let rec props_of = function
+(* [loc] is the component's, where a parameter missing is reported. *)
+let rec props_of ~loc = function
   | [ { pparam_desc = Pparam_val (Nolabel, None, p); _ } ] when is_unit p ->
       Ok []
   | p :: rest ->
       Result.bind (prop_of p) (fun p ->
-          Result.map (fun ps -> p :: ps) (props_of rest))
-  | [] -> Error (Location.none, "a component's last parameter is ()")
+          Result.map (fun ps -> p :: ps) (props_of ~loc rest))
+  | [] -> Error (loc, "a component's last parameter is ()")
 
 (* Element children are a token in the check, so they never copy the
    elements; a function child is checked as the function, each of its kind. *)
@@ -866,7 +867,7 @@ let component_of (vb : value_binding) =
               let make = [%e make]
               let component = Solidtype.Jsx.component make
             end])
-        (props_of params)
+        (props_of ~loc params)
   | _ ->
       Error
         ( loc,

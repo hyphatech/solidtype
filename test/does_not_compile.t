@@ -436,6 +436,19 @@ A raw external under a Kobalte wrapper, which skips what the wrapper adds.
   Hint:   Did you mean Solidtype_kobalte.Types.Color.to_format?
   [1]
 
+A component without its last parameter, (), reported where it is defined.
+
+  $ cat > case.mlx <<'EOF'
+  > let%component make ~(name : string) =
+  >   <p>(fun () -> Solidtype.Jsx.string (name ()))</p>
+  > EOF
+  $ build
+  File "case.mlx", lines 1-2, characters 0-51:
+  1 | let%component make ~(name : string) =
+  2 |   <p>(fun () -> Solidtype.Jsx.string (name ()))</p>
+  Error: a component's last parameter is ()
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'
