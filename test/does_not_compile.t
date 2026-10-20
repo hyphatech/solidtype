@@ -384,6 +384,19 @@ A Dynamic element given an attribute of the wrong type.
          Type int is not compatible with type string
   [1]
 
+A swipe event built by hand: Kobalte hands one to a toast's handlers, and an
+event has no constructor.
+
+  $ cat > case.mlx <<'EOF'
+  > let e = Solidtype_kobalte.Types.SwipeEvent.make
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 8-47:
+  1 | let e = Solidtype_kobalte.Types.SwipeEvent.make
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Unbound value Solidtype_kobalte.Types.SwipeEvent.make
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'

@@ -304,7 +304,10 @@ function mapOne(t: ts.Type, vars: Vars, where: string): string | null {
       const a = arg ? map(arg, vars, where) : null;
       return a ? `${a} Js.Promise.t` : null;
     }
-    const dom = domType(name) ?? (/Event$/.test(name) ? "Dom.event" : /Element$/.test(name) ? "Dom.element" : null);
+    // An interface or a class named for an event or an element is one, but
+    // never a method that happens to be named so, initEvent.
+    const kind = symbol.flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class);
+    const dom = domType(name) ?? (kind && /Event$/.test(name) ? "Dom.event" : kind && /Element$/.test(name) ? "Dom.element" : null);
     if (dom) return dom;
     // A standard interface is opaque but for those a user builds or reads;
     // anything else of the standard library is a function or not bound.
@@ -622,7 +625,10 @@ while (queue.length > 0) {
     if (!library && n.conversions.length > 0 && p.declarations?.every((d) => /typescript\/lib\/lib\./.test(d.getSourceFile().fileName))) continue;
     const pt = checker.getTypeOfSymbol(p);
     const optional = (p.flags & ts.SymbolFlags.Optional) !== 0;
-    if (p.flags & ts.SymbolFlags.Method) {
+    // A standard type's method stays one where a mapped type, Omit, gives it
+    // back as a property: its declaration is still a method's.
+    const method = (p.flags & ts.SymbolFlags.Method) !== 0 || (p.declarations ?? []).some((d) => ts.isMethodSignature(d) || ts.isMethodDeclaration(d));
+    if (method) {
       // The standard library's methods are Melange's to bind.
       if (library) continue;
       const sig = pt.getCallSignatures()[0];

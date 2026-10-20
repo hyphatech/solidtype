@@ -1568,8 +1568,7 @@ module Types = struct
         \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail)
         Any custom data the event was created with. Typically used for synthetic events. *)
     external detail : t -> t_swipe_event_detail = "detail" [@@mel.get]
-    (** The **`CustomEvent.initCustomEvent()`** method initializes a CustomEvent object. *)
-    external init_custom_event : t -> Dom.event = "initCustomEvent" [@@mel.get]
+    external init_custom_event : t -> string -> bool option -> bool option -> t_swipe_event_detail option -> unit = "initCustomEvent" [@@mel.send]
     (** The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
         
         \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/bubbles) *)
@@ -1608,33 +1607,15 @@ module Types = struct
         
         \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/timeStamp) *)
     external time_stamp : t -> float = "timeStamp" [@@mel.get]
-    (** The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked.
-        
-        \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/composedPath) *)
-    external composed_path_js : t -> ((unit -> Dom.eventTarget array) [@u]) = "composedPath" [@@mel.get]
-    let composed_path o () = (composed_path_js o) () [@u]
-    (** The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent(). *)
-    external init_event : t -> Dom.event = "initEvent" [@@mel.get]
-    (** The **`preventDefault()`** method of the Event interface tells the user agent that if the event does not get explicitly handled, its default action should not be taken as it normally would be.
-        
-        \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/preventDefault) *)
-    external prevent_default_js : t -> ((unit -> unit) [@u]) = "preventDefault" [@@mel.get]
-    let prevent_default o () = (prevent_default_js o) () [@u]
-    (** The **`stopImmediatePropagation()`** method of the If several listeners are attached to the same element for the same event type, they are called in the order in which they were added.
-        
-        \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation) *)
-    external stop_immediate_propagation_js : t -> ((unit -> unit) [@u]) = "stopImmediatePropagation" [@@mel.get]
-    let stop_immediate_propagation o () = (stop_immediate_propagation_js o) () [@u]
-    (** The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases.
-        
-        \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation) *)
-    external stop_propagation_js : t -> ((unit -> unit) [@u]) = "stopPropagation" [@@mel.get]
-    let stop_propagation o () = (stop_propagation_js o) () [@u]
+    external composed_path : t -> unit -> Dom.eventTarget array = "composedPath" [@@mel.send]
+    external init_event : t -> string -> bool option -> bool option -> unit = "initEvent" [@@mel.send]
+    external prevent_default : t -> unit -> unit = "preventDefault" [@@mel.send]
+    external stop_immediate_propagation : t -> unit -> unit = "stopImmediatePropagation" [@@mel.send]
+    external stop_propagation : t -> unit -> unit = "stopPropagation" [@@mel.send]
     external none : t -> float = "NONE" [@@mel.get]
     external capturing_phase : t -> float = "CAPTURING_PHASE" [@@mel.get]
     external at_target : t -> float = "AT_TARGET" [@@mel.get]
     external bubbling_phase : t -> float = "BUBBLING_PHASE" [@@mel.get]
-    external make : current_target:(Dom.eventTarget [@mel.as "currentTarget"]) -> type_:(string [@mel.as "type"]) -> detail:(t_swipe_event_detail [@mel.as "detail"]) -> init_custom_event:(Dom.event [@mel.as "initCustomEvent"]) -> bubbles:(bool [@mel.as "bubbles"]) -> cancel_bubble:(bool [@mel.as "cancelBubble"]) -> cancelable:(bool [@mel.as "cancelable"]) -> composed:(bool [@mel.as "composed"]) -> default_prevented:(bool [@mel.as "defaultPrevented"]) -> event_phase:(float [@mel.as "eventPhase"]) -> is_trusted:(bool [@mel.as "isTrusted"]) -> return_value:(bool [@mel.as "returnValue"]) -> src_element:(Dom.eventTarget Js.Nullable.t [@mel.as "srcElement"]) -> target:(Dom.eventTarget Js.Nullable.t [@mel.as "target"]) -> time_stamp:(float [@mel.as "timeStamp"]) -> composed_path:((unit -> Dom.eventTarget array) [@mel.as "composedPath"]) -> init_event:(Dom.event [@mel.as "initEvent"]) -> prevent_default:((unit -> unit) [@mel.as "preventDefault"]) -> stop_immediate_propagation:((unit -> unit) [@mel.as "stopImmediatePropagation"]) -> stop_propagation:((unit -> unit) [@mel.as "stopPropagation"]) -> none:(float [@mel.as "NONE"]) -> capturing_phase:(float [@mel.as "CAPTURING_PHASE"]) -> at_target:(float [@mel.as "AT_TARGET"]) -> bubbling_phase:(float [@mel.as "BUBBLING_PHASE"]) -> unit -> t = "" [@@mel.obj]
   end
 
   module Toast_Toaster = struct
