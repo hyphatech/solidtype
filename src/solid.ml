@@ -283,14 +283,14 @@ type 'a resource
 type 'a resource_actions
 type 'a fetch_info = { value : 'a option; refetching : bool }
 type state = Unresolved | Pending | Ready | Refreshing | Errored
-type ssr_load_from = Server | Initial
+type ssr_load_from = [ `server | `initial ]
 type 'a resource_options
 
 external resource_options :
   ?initialValue:'a ->
   ?name:string ->
   ?deferStream:bool ->
-  ?ssrLoadFrom:string ->
+  ?ssrLoadFrom:ssr_load_from ->
   ?storage:('a option -> 'a option accessor * 'a option setter) ->
   ?onHydrated:(('k -> 'a fetch_info -> unit)[@u]) ->
   unit ->
@@ -300,11 +300,7 @@ external resource_options :
 let resource_options ?initial_value ?name ?defer_stream ?ssr_load_from ?storage
     ?on_hydrated () =
   resource_options ?initialValue:initial_value ?name ?deferStream:defer_stream
-    ?ssrLoadFrom:
-      (Option.map
-         (function Server -> "server" | Initial -> "initial")
-         ssr_load_from)
-    ?storage
+    ?ssrLoadFrom:ssr_load_from ?storage
     ?onHydrated:
       (Option.map
          (fun f -> fun[@u] _ (info : _ fetch_info) -> f info.value)

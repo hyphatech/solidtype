@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Breaking: a resource's `ssr_load_from` is `` `server`` or `` `initial``,
+  the polymorphic variant every other closed set of Solid's strings is,
+  where it was a variant of its own, `Server` or `Initial`.
 - Breaking: a Kobalte function's parameter that may be left out is an
   optional argument, as the stdlib's are: `I18n.create_filter ()`,
   ``Color.to_string c ~format:`hex ()``, `Toaster.show toaster render ()`,

@@ -166,8 +166,9 @@ type state =
   | Refreshing  (** Fetching again, the last value held. *)
   | Errored  (** The fetch failed. *)
 
-(** Where a server-rendered resource's first value comes from. *)
-type ssr_load_from = Server | Initial
+type ssr_load_from = [ `server | `initial ]
+(** Where a server-rendered resource's first value comes from: fetched on the
+    server, or its [initial_value], fetched in the browser alone. *)
 
 val create_resource :
   ?initial_value:'a ->

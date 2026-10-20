@@ -24,6 +24,23 @@ let () =
       Jest.test "renders at once" (fun () ->
           let html = Server.render_to_string (fun () -> <p>"hello"</p>) in
           E.(expect (contains "hello" html) |> toBe true));
+      Jest.test "renders a resource's initial value, unfetched, from `initial"
+        (fun () ->
+          let fetched = ref false in
+          let html =
+            Server.render_to_string (fun () ->
+                let data, _ =
+                  S.create_resource ~initial_value:"first"
+                    ~ssr_load_from:`initial (fun _ ->
+                      fetched := true;
+                      Js.Promise.resolve "fetched")
+                in
+                <p>
+                  (fun () ->
+                    Jsx.string (Option.value (S.read data) ~default:""))
+                </p>)
+          in
+          E.(expect (contains "first" html, !fetched) |> toEqual (true, false)));
       Jest.testPromise "renders once what it fetches has resolved" (fun () ->
           let* html = Server.render_to_string_async (waiting (Some "ready")) in
           Js.Promise.resolve
