@@ -18,14 +18,20 @@ setup: ## create the switch and install dependencies
 build: ## build everything
 	$(OPAM) dune build @all
 
+# Bun's dependencies, installed again whenever the lockfile or the manifest
+# changes, so no target runs against what an older checkout installed.
+node_modules: package.json bun.lock
+	bun install --frozen-lockfile
+	@touch node_modules
+
 # The plugin's and the example's suites read Melange's output, so the build
 # comes first.
-test: build ## run the tests
+test: build node_modules ## run the tests
 	$(OPAM) dune test --force
 	bun run test
 
 # Release is the profile opam installs with.
-lint: ## check formatting, the plugin's types, the release build and the generated bindings
+lint: node_modules ## check formatting, types, the release build and bindings
 	$(OPAM) dune build @all @fmt
 	$(OPAM) dune build --profile release @all
 	bun run tsc -p vite-plugin
@@ -35,20 +41,20 @@ lint: ## check formatting, the plugin's types, the release build and the generat
 fmt: ## format the code
 	$(OPAM) dune fmt
 
-example: build ## build the shelf into _build/example-dist, and its Astro page into _build/example-astro
+example: build node_modules ## build the example, as a Vite page and an Astro one
 	bun --bun vite build --config example/vite.config.ts
 	bun --bun astro build
 
-serve: example ## serve the shelf and its API on http://localhost:4420
+serve: example ## serve the example and its API on http://localhost:4420
 	_build/default/example/server/serve.exe
 
 # Three processes, each in a terminal of its own: dune rebuilds the OCaml
 # as it changes, the server answers /api, Vite serves the page and proxies.
-dev: example ## print the three commands that run the shelf in development
+dev: example ## print the commands that run the example in development
 	@echo "$(OPAM) dune build --watch"
 	@echo "_build/default/example/server/serve.exe"
 	@echo "bun --bun vite --config example/vite.config.ts"
 
-generate: ## write the bindings generated from Solid's and Kobalte's types
+generate: node_modules ## write the bindings from Solid's and Kobalte's types
 	$(OPAM) bun generate/html.ts
 	$(OPAM) bun generate/kobalte.ts
