@@ -505,11 +505,39 @@ const typeOf = (s: ts.Symbol): ts.Type => checker.getTypeOfSymbol(s);
 
 // Kobalte's comment on a declaration, as odoc: its documentation is the
 // binding's.
-function doc(symbol: ts.Symbol, indent: string): string[] {
+function doc(symbol: ts.Symbol, indent: string, raises = false): string[] {
   const text = ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim();
-  if (!text) return [];
   const escaped = text.replace(/\*\)/g, "* )").replace(/[{}\[\]@]/g, (c) => `\\${c}`);
-  return [`${indent}(** ${escaped.split("\n").join(`\n${indent}    `)} *)`];
+  const raise = raises ? "@raise Invalid_argument with Kobalte's message, where it throws." : "";
+  const all = [escaped, raise].filter((t) => t !== "").join("\n\n");
+  if (!all) return [];
+  return [`${indent}(** ${all.split("\n").join(`\n${indent}    `)} *)`];
+}
+
+// A function Kobalte documents as throwing, and toFormat, which throws
+// converting HSL or HSB to hex without saying so: a precondition the caller
+// broke, raised as Invalid_argument with Kobalte's message. One at the top
+// of a module reads input from outside, so it also has an _opt that gives
+// None for it.
+const undocumentedThrows = new Set(["Color.toFormat"]);
+const throws = (symbol: ts.Symbol, where: string) =>
+  undocumentedThrows.has(where) || /\bThrows\b/.test(ts.displayPartsToString(symbol.getDocumentationComment(checker)));
+
+// The OCaml function over [js], an external that may throw: [self] its
+// object where it is a method, and [opt] whether an _opt is written beside.
+function guarded(indent: string, name: string, js: string, arity: number, self: boolean, opt: boolean): string[] {
+  const xs = arity === 0 ? "()" : Array.from({ length: arity }, (_, i) => `x${i}`).join(" ");
+  const args = self ? `o ${xs}` : xs;
+  const lines = [
+    `${indent}let ${name} ${args} =`,
+    `${indent}  match ${js} ${args} with`,
+    `${indent}  | v -> v`,
+    `${indent}  | exception Js.Exn.Error e -> invalid_arg ("${name}: " ^ Option.value (Js.Exn.message e) ~default:"")`,
+  ];
+  if (opt) {
+    lines.push(`${indent}let ${name}_opt ${args} = match ${js} ${args} with v -> Some v | exception Js.Exn.Error _ -> None`);
+  }
+  return lines;
 }
 
 const real = (s: ts.Symbol) => (s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
@@ -569,8 +597,16 @@ for (const entry of entries) {
         unmapped.set(`${entry}.${sym.name}`, sig ? checker.signatureToString(sig) : "?");
         continue;
       }
+      const name = value(snake(sym.name));
+      if (sig && throws(r, sym.name)) {
+        lines.push(`  external ${name}_js : ${t} = "${sym.name}"`);
+        lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`);
+        lines.push(...doc(r, "  ", true));
+        lines.push(...guarded("  ", name, `${name}_js`, sig.getParameters().length, false, true), ``);
+        continue;
+      }
       lines.push(...doc(r, "  "));
-      lines.push(`  external ${value(snake(sym.name))} : ${t} = "${sym.name}"`);
+      lines.push(`  external ${name} : ${t} = "${sym.name}"`);
       lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`, ``);
     } else if (r.flags & ts.SymbolFlags.Variable && sym.name !== component && !byName.get(sym.name)?.getDeclarations()?.some(ts.isFunctionDeclaration)) {
       // A value: toaster, the storage managers, the default translations.
@@ -638,7 +674,14 @@ while (queue.length > 0) {
         continue;
       }
       methods++;
-      lines.push(`    external ${value(snake(p.name))} : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
+      const name = value(snake(p.name));
+      if (sig && throws(p, `${n.module}.${p.name}`)) {
+        lines.push(`    external ${name}_js : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
+        lines.push(...doc(p, "    ", true));
+        lines.push(...guarded("    ", name, `${name}_js`, sig.getParameters().length, true, false));
+        continue;
+      }
+      lines.push(`    external ${name} : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
       continue;
     }
     const ft = map(pt, vars, `${n.module}.${p.name}`, optional);

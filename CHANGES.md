@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Breaking: a Kobalte function that throws, as its documentation or a test
+  says, raises `Invalid_argument` with Kobalte's message, where it threw a
+  JavaScript error: `Colors.parse_color` on a string that is no colour,
+  `Color.get_channel_value` and `with_channel_value` on a channel the
+  format lacks, `Color.to_format` from HSL to hex. `Colors.parse_color_opt`
+  parses input from outside to an option.
 - Breaking: `Server.render_to_string_async` resolves to a `result`,
   ``Error `Timed_out`` when the render outlasts `timeout_ms`, where its
   promise rejected; Solid's rendering on the server is tested, in Node.

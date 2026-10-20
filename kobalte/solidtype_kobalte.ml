@@ -461,12 +461,35 @@ module Types = struct
   (** Represents a color value. *)
   module Color = struct
     type t = t_color
-    external to_format : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba ] -> t_color = "toFormat" [@@mel.send]
+    external to_format_js : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba ] -> t_color = "toFormat" [@@mel.send]
+    (** Converts the color to the given color format, and returns a new Color object.
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let to_format o x0 =
+      match to_format_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("to_format: " ^ Option.value (Js.Exn.message e) ~default:"")
     external to_string : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba | `css ] option -> string = "toString" [@@mel.send]
     external clone : t -> unit -> t_color = "clone" [@@mel.send]
     external to_hex_int : t -> unit -> float = "toHexInt" [@@mel.send]
-    external get_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float = "getChannelValue" [@@mel.send]
-    external with_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float -> t_color = "withChannelValue" [@@mel.send]
+    external get_channel_value_js : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float = "getChannelValue" [@@mel.send]
+    (** Returns the numeric value for a given channel.
+        Throws an error if the channel is unsupported in the current color format.
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let get_channel_value o x0 =
+      match get_channel_value_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("get_channel_value: " ^ Option.value (Js.Exn.message e) ~default:"")
+    external with_channel_value_js : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float -> t_color = "withChannelValue" [@@mel.send]
+    (** Sets the numeric value for a given channel, and returns a new Color object.
+        Throws an error if the channel is unsupported in the current color format.
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let with_channel_value o x0 x1 =
+      match with_channel_value_js o x0 x1 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("with_channel_value: " ^ Option.value (Js.Exn.message e) ~default:"")
     external get_channel_range : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_channel_range = "getChannelRange" [@@mel.send]
     external get_channel_name : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_slider_root_translations -> string = "getChannelName" [@@mel.send]
     external get_channel_format_options : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_number_format_options2 = "getChannelFormatOptions" [@@mel.send]
@@ -2276,33 +2299,328 @@ module Types = struct
     external read_big_int64_le : 't_array_buffer t -> float option -> t_number_format_format_to_parts = "readBigInt64LE" [@@mel.send]
     external read_u_int_le : 't_array_buffer t -> float -> float -> float = "readUIntLE" [@@mel.send]
     external read_uint_le : 't_array_buffer t -> float -> float -> float = "readUintLE" [@@mel.send]
-    external read_u_int_be : 't_array_buffer t -> float -> float -> float = "readUIntBE" [@@mel.send]
+    external read_u_int_be_js : 't_array_buffer t -> float -> float -> float = "readUIntBE" [@@mel.send]
+    (** Reads `byteLength` number of bytes from `buf` at the specified `offset` and interprets the result as an unsigned big-endian integer supporting
+        up to 48 bits of accuracy.
+        
+        This function is also available under the `readUintBE` alias.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[0x12, 0x34, 0x56, 0x78, 0x90, 0xab\]);
+        
+        console.log(buf.readUIntBE(0, 6).toString(16));
+        // Prints: 1234567890ab
+        console.log(buf.readUIntBE(1, 6).toString(16));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_u_int_be o x0 x1 =
+      match read_u_int_be_js o x0 x1 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_u_int_be: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_uint_be : 't_array_buffer t -> float -> float -> float = "readUintBE" [@@mel.send]
     external read_int_le : 't_array_buffer t -> float -> float -> float = "readIntLE" [@@mel.send]
-    external read_int_be : 't_array_buffer t -> float -> float -> float = "readIntBE" [@@mel.send]
-    external read_u_int8 : 't_array_buffer t -> float option -> float = "readUInt8" [@@mel.send]
+    external read_int_be_js : 't_array_buffer t -> float -> float -> float = "readIntBE" [@@mel.send]
+    (** Reads `byteLength` number of bytes from `buf` at the specified `offset` and interprets the result as a big-endian, two's complement signed value
+        supporting up to 48 bits of accuracy.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[0x12, 0x34, 0x56, 0x78, 0x90, 0xab\]);
+        
+        console.log(buf.readIntBE(0, 6).toString(16));
+        // Prints: 1234567890ab
+        console.log(buf.readIntBE(1, 6).toString(16));
+        // Throws ERR_OUT_OF_RANGE.
+        console.log(buf.readIntBE(1, 0).toString(16));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_int_be o x0 x1 =
+      match read_int_be_js o x0 x1 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_int_be: " ^ Option.value (Js.Exn.message e) ~default:"")
+    external read_u_int8_js : 't_array_buffer t -> float option -> float = "readUInt8" [@@mel.send]
+    (** Reads an unsigned 8-bit integer from `buf` at the specified `offset`.
+        
+        This function is also available under the `readUint8` alias.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[1, -2\]);
+        
+        console.log(buf.readUInt8(0));
+        // Prints: 1
+        console.log(buf.readUInt8(1));
+        // Prints: 254
+        console.log(buf.readUInt8(2));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_u_int8 o x0 =
+      match read_u_int8_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_u_int8: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_uint8 : 't_array_buffer t -> float option -> float = "readUint8" [@@mel.send]
-    external read_u_int16_le : 't_array_buffer t -> float option -> float = "readUInt16LE" [@@mel.send]
+    external read_u_int16_le_js : 't_array_buffer t -> float option -> float = "readUInt16LE" [@@mel.send]
+    (** Reads an unsigned, little-endian 16-bit integer from `buf` at the specified `offset`.
+        
+        This function is also available under the `readUint16LE` alias.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[0x12, 0x34, 0x56\]);
+        
+        console.log(buf.readUInt16LE(0).toString(16));
+        // Prints: 3412
+        console.log(buf.readUInt16LE(1).toString(16));
+        // Prints: 5634
+        console.log(buf.readUInt16LE(2).toString(16));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_u_int16_le o x0 =
+      match read_u_int16_le_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_u_int16_le: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_uint16_le : 't_array_buffer t -> float option -> float = "readUint16LE" [@@mel.send]
     external read_u_int16_be : 't_array_buffer t -> float option -> float = "readUInt16BE" [@@mel.send]
     external read_uint16_be : 't_array_buffer t -> float option -> float = "readUint16BE" [@@mel.send]
-    external read_u_int32_le : 't_array_buffer t -> float option -> float = "readUInt32LE" [@@mel.send]
+    external read_u_int32_le_js : 't_array_buffer t -> float option -> float = "readUInt32LE" [@@mel.send]
+    (** Reads an unsigned, little-endian 32-bit integer from `buf` at the specified`offset`.
+        
+        This function is also available under the `readUint32LE` alias.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[0x12, 0x34, 0x56, 0x78\]);
+        
+        console.log(buf.readUInt32LE(0).toString(16));
+        // Prints: 78563412
+        console.log(buf.readUInt32LE(1).toString(16));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_u_int32_le o x0 =
+      match read_u_int32_le_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_u_int32_le: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_uint32_le : 't_array_buffer t -> float option -> float = "readUint32LE" [@@mel.send]
     external read_u_int32_be : 't_array_buffer t -> float option -> float = "readUInt32BE" [@@mel.send]
     external read_uint32_be : 't_array_buffer t -> float option -> float = "readUint32BE" [@@mel.send]
-    external read_int8 : 't_array_buffer t -> float option -> float = "readInt8" [@@mel.send]
-    external read_int16_le : 't_array_buffer t -> float option -> float = "readInt16LE" [@@mel.send]
+    external read_int8_js : 't_array_buffer t -> float option -> float = "readInt8" [@@mel.send]
+    (** Reads a signed 8-bit integer from `buf` at the specified `offset`.
+        
+        Integers read from a `Buffer` are interpreted as two's complement signed values.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[-1, 5\]);
+        
+        console.log(buf.readInt8(0));
+        // Prints: -1
+        console.log(buf.readInt8(1));
+        // Prints: 5
+        console.log(buf.readInt8(2));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_int8 o x0 =
+      match read_int8_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_int8: " ^ Option.value (Js.Exn.message e) ~default:"")
+    external read_int16_le_js : 't_array_buffer t -> float option -> float = "readInt16LE" [@@mel.send]
+    (** Reads a signed, little-endian 16-bit integer from `buf` at the specified`offset`.
+        
+        Integers read from a `Buffer` are interpreted as two's complement signed values.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[0, 5\]);
+        
+        console.log(buf.readInt16LE(0));
+        // Prints: 1280
+        console.log(buf.readInt16LE(1));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_int16_le o x0 =
+      match read_int16_le_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_int16_le: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_int16_be : 't_array_buffer t -> float option -> float = "readInt16BE" [@@mel.send]
-    external read_int32_le : 't_array_buffer t -> float option -> float = "readInt32LE" [@@mel.send]
+    external read_int32_le_js : 't_array_buffer t -> float option -> float = "readInt32LE" [@@mel.send]
+    (** Reads a signed, little-endian 32-bit integer from `buf` at the specified`offset`.
+        
+        Integers read from a `Buffer` are interpreted as two's complement signed values.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[0, 0, 0, 5\]);
+        
+        console.log(buf.readInt32LE(0));
+        // Prints: 83886080
+        console.log(buf.readInt32LE(1));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_int32_le o x0 =
+      match read_int32_le_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_int32_le: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_int32_be : 't_array_buffer t -> float option -> float = "readInt32BE" [@@mel.send]
-    external read_float_le : 't_array_buffer t -> float option -> float = "readFloatLE" [@@mel.send]
+    external read_float_le_js : 't_array_buffer t -> float option -> float = "readFloatLE" [@@mel.send]
+    (** Reads a 32-bit, little-endian float from `buf` at the specified `offset`.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[1, 2, 3, 4\]);
+        
+        console.log(buf.readFloatLE(0));
+        // Prints: 1.539989614439558e-36
+        console.log(buf.readFloatLE(1));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_float_le o x0 =
+      match read_float_le_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_float_le: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_float_be : 't_array_buffer t -> float option -> float = "readFloatBE" [@@mel.send]
-    external read_double_le : 't_array_buffer t -> float option -> float = "readDoubleLE" [@@mel.send]
+    external read_double_le_js : 't_array_buffer t -> float option -> float = "readDoubleLE" [@@mel.send]
+    (** Reads a 64-bit, little-endian double from `buf` at the specified `offset`.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from(\[1, 2, 3, 4, 5, 6, 7, 8\]);
+        
+        console.log(buf.readDoubleLE(0));
+        // Prints: 5.447603722011605e-270
+        console.log(buf.readDoubleLE(1));
+        // Throws ERR_OUT_OF_RANGE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let read_double_le o x0 =
+      match read_double_le_js o x0 with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("read_double_le: " ^ Option.value (Js.Exn.message e) ~default:"")
     external read_double_be : 't_array_buffer t -> float option -> float = "readDoubleBE" [@@mel.send]
     external reverse : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "reverse" [@@mel.send]
-    external swap16 : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap16" [@@mel.send]
-    external swap32 : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap32" [@@mel.send]
-    external swap64 : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap64" [@@mel.send]
+    external swap16_js : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap16" [@@mel.send]
+    (** Interprets `buf` as an array of unsigned 16-bit integers and swaps the
+        byte order _in-place_. Throws `ERR_INVALID_BUFFER_SIZE` if `buf.length` is not a multiple of 2.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf1 = Buffer.from(\[0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8\]);
+        
+        console.log(buf1);
+        // Prints: <Buffer 01 02 03 04 05 06 07 08>
+        
+        buf1.swap16();
+        
+        console.log(buf1);
+        // Prints: <Buffer 02 01 04 03 06 05 08 07>
+        
+        const buf2 = Buffer.from(\[0x1, 0x2, 0x3\]);
+        
+        buf2.swap16();
+        // Throws ERR_INVALID_BUFFER_SIZE.
+        ```
+        
+        One convenient use of `buf.swap16()` is to perform a fast in-place conversion
+        between UTF-16 little-endian and UTF-16 big-endian:
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf = Buffer.from('This is little-endian UTF-16', 'utf16le');
+        buf.swap16(); // Convert to big-endian UTF-16 text.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let swap16 o () =
+      match swap16_js o () with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("swap16: " ^ Option.value (Js.Exn.message e) ~default:"")
+    external swap32_js : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap32" [@@mel.send]
+    (** Interprets `buf` as an array of unsigned 32-bit integers and swaps the
+        byte order _in-place_. Throws `ERR_INVALID_BUFFER_SIZE` if `buf.length` is not a multiple of 4.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf1 = Buffer.from(\[0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8\]);
+        
+        console.log(buf1);
+        // Prints: <Buffer 01 02 03 04 05 06 07 08>
+        
+        buf1.swap32();
+        
+        console.log(buf1);
+        // Prints: <Buffer 04 03 02 01 08 07 06 05>
+        
+        const buf2 = Buffer.from(\[0x1, 0x2, 0x3\]);
+        
+        buf2.swap32();
+        // Throws ERR_INVALID_BUFFER_SIZE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let swap32 o () =
+      match swap32_js o () with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("swap32: " ^ Option.value (Js.Exn.message e) ~default:"")
+    external swap64_js : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "swap64" [@@mel.send]
+    (** Interprets `buf` as an array of 64-bit numbers and swaps byte order _in-place_.
+        Throws `ERR_INVALID_BUFFER_SIZE` if `buf.length` is not a multiple of 8.
+        
+        ```js
+        import \{ Buffer \} from 'node:buffer';
+        
+        const buf1 = Buffer.from(\[0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8\]);
+        
+        console.log(buf1);
+        // Prints: <Buffer 01 02 03 04 05 06 07 08>
+        
+        buf1.swap64();
+        
+        console.log(buf1);
+        // Prints: <Buffer 08 07 06 05 04 03 02 01>
+        
+        const buf2 = Buffer.from(\[0x1, 0x2, 0x3\]);
+        
+        buf2.swap64();
+        // Throws ERR_INVALID_BUFFER_SIZE.
+        ```
+        
+        @raise Invalid_argument with Kobalte's message, where it throws. *)
+    let swap64 o () =
+      match swap64_js o () with
+      | v -> v
+      | exception Js.Exn.Error e -> invalid_arg ("swap64: " ^ Option.value (Js.Exn.message e) ~default:"")
     external write_u_int8 : 't_array_buffer t -> float -> float option -> float = "writeUInt8" [@@mel.send]
     external write_uint8 : 't_array_buffer t -> float -> float option -> float = "writeUint8" [@@mel.send]
     external write_u_int16_le : 't_array_buffer t -> float -> float option -> float = "writeUInt16LE" [@@mel.send]
@@ -3861,9 +4179,16 @@ module Colors = struct
   external normalize_hue : float -> float = "normalizeHue"
   [@@mel.module "@kobalte/core/colors"]
 
-  (** Parses a color from a string value. Throws an error if the string could not be parsed. *)
-  external parse_color : string -> Types.Color.t = "parseColor"
+  external parse_color_js : string -> Types.Color.t = "parseColor"
   [@@mel.module "@kobalte/core/colors"]
+  (** Parses a color from a string value. Throws an error if the string could not be parsed.
+      
+      @raise Invalid_argument with Kobalte's message, where it throws. *)
+  let parse_color x0 =
+    match parse_color_js x0 with
+    | v -> v
+    | exception Js.Exn.Error e -> invalid_arg ("parse_color: " ^ Option.value (Js.Exn.message e) ~default:"")
+  let parse_color_opt x0 = match parse_color_js x0 with v -> Some v | exception Js.Exn.Error _ -> None
 end
 
 module Combobox = struct

@@ -44,7 +44,8 @@ let () =
           let refused =
             match Color.to_format green `hex with
             | _ -> false
-            | exception Js.Exn.Error _ -> true
+            | exception Invalid_argument m ->
+                String.starts_with ~prefix:"to_format: " m
           in
           E.(
             expect
@@ -107,10 +108,30 @@ let () =
               ( Color.to_string from_string (Some `hex),
                 Color.to_string from_colour (Some `hex) )
             |> toEqual ("#0000FF", "#FF0000")));
-      Jest.test "a string that is no colour is refused" (fun () ->
+      Jest.test "a string that is no colour is refused, saying so" (fun () ->
           let refused =
             match Colors.parse_color "not a colour" with
-            | _ -> false
-            | exception Js.Exn.Error _ -> true
+            | _ -> ""
+            | exception Invalid_argument m -> m
           in
-          E.(expect refused |> toBe true)))
+          E.(
+            expect (String.starts_with ~prefix:"parse_color: " refused)
+            |> toBe true));
+      Jest.test "a string that may be a colour is parsed to an option"
+        (fun () ->
+          E.(
+            expect
+              ( Option.map
+                  (fun c -> Color.to_string c (Some `hex))
+                  (Colors.parse_color_opt "#00ff00"),
+                Colors.parse_color_opt "not a colour" )
+            |> toEqual (Some "#00FF00", None)));
+      Jest.test "a channel its format lacks is refused, saying so" (fun () ->
+          let refused =
+            match Color.get_channel_value (red ()) `hue with
+            | _ -> ""
+            | exception Invalid_argument m -> m
+          in
+          E.(
+            expect (String.starts_with ~prefix:"get_channel_value: " refused)
+            |> toBe true)))
