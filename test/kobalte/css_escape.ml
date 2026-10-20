@@ -22,7 +22,7 @@ let escape s =
   in
   List.init n (fun i ->
       let c = code i in
-      if c = 0 then "\u{FFFD}"
+      if c = 0 then {js|\uFFFD|js}
       else if (c >= 0x1 && c <= 0x1f) || c = 0x7f then code_point c
       else if i = 0 && digit c then code_point c
       else if i = 1 && digit c && code 0 = 0x2d then code_point c
