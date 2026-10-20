@@ -222,7 +222,8 @@ break.
 - **Kobalte's binding is generated from its declarations**, by
   `generate/kobalte.ts` into `kobalte/solidtype_kobalte.ml` and the types it
   names into `kobalte/types.ml`, a file of their own so Melange calls their
-  functions directly from another library, read with TypeScript's
+  functions directly from another library, each with its `.mli`, which
+  leaves out the raw external under a wrapper, read with TypeScript's
   checker from Kobalte's real path, so a package manager that keeps
   dependencies beside each package resolves them. A part is a module of
   its component and its check: its own options, then its children by

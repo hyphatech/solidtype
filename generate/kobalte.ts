@@ -550,9 +550,32 @@ const undocumentedThrows = new Set(["Color.toFormat"]);
 const throws = (symbol: ts.Symbol, where: string) =>
   undocumentedThrows.has(where) || /\bThrows\b/.test(ts.displayPartsToString(symbol.getDocumentationComment(checker)));
 
-// The OCaml function over [js], an external that may throw: [self] its
-// object where it is a method, and [opt] whether an _opt is written beside.
-function guarded(indent: string, name: string, js: string, arity: number, self: boolean, opt: boolean): string[] {
+// The type of each function written as a let, by its module and name: the
+// .mli declares it, where the raw external under it, _js, is left out.
+const vals = new Map<string, string>();
+
+// A function type's arguments and its result, split at its outer arrows.
+function splitArrow(t: string): { args: string[]; result: string } {
+  const args: string[] = [];
+  let depth = 0;
+  let last = 0;
+  for (let i = 0; i < t.length - 1; i++) {
+    const c = t[i];
+    if (c === "(" || c === "[") depth++;
+    else if (c === ")" || c === "]") depth--;
+    else if (depth === 0 && c === "-" && t[i + 1] === ">") {
+      args.push(t.slice(last, i).trim());
+      last = i + 2;
+    }
+  }
+  return { args, result: t.slice(last).trim() };
+}
+
+// The OCaml function over [js], an external that may throw, of [type], in
+// module [where]: [self] its object where it is a method, and [opt] whether
+// an _opt is written beside.
+function guarded(indent: string, where: string, name: string, type: string, js: string, arity: number, self: boolean, opt: boolean): string[] {
+  vals.set(`${where}.${name}`, type);
   const xs = arity === 0 ? "()" : Array.from({ length: arity }, (_, i) => `x${i}`).join(" ");
   const args = self ? `o ${xs}` : xs;
   const lines = [
@@ -562,6 +585,8 @@ function guarded(indent: string, name: string, js: string, arity: number, self: 
     `${indent}  | exception Js.Exn.Error e -> invalid_arg ("${name}: " ^ Option.value (Js.Exn.message e) ~default:"")`,
   ];
   if (opt) {
+    const { args: ts, result } = splitArrow(type);
+    vals.set(`${where}.${name}_opt`, `${ts.join(" -> ")} -> ${wrap(result)} option`);
     lines.push(`${indent}let ${name}_opt ${args} = match ${js} ${args} with v -> Some v | exception Js.Exn.Error _ -> None`);
   }
   return lines;
@@ -629,7 +654,7 @@ for (const entry of entries) {
         lines.push(`  external ${name}_js : ${t} = "${sym.name}"`);
         lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`);
         lines.push(...doc(r, "  ", true));
-        lines.push(...guarded("  ", name, `${name}_js`, sig.getParameters().length, false, true), ``);
+        lines.push(...guarded("  ", component, name, t, `${name}_js`, sig.getParameters().length, false, true), ``);
         continue;
       }
       lines.push(...doc(r, "  "));
@@ -705,7 +730,7 @@ while (queue.length > 0) {
       if (sig && throws(p, `${n.module}.${p.name}`)) {
         lines.push(`    external ${name}_js : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
         lines.push(...doc(p, "    ", true));
-        lines.push(...guarded("    ", name, `${name}_js`, sig.getParameters().length, true, false));
+        lines.push(...guarded("    ", n.module, name, `${t} -> ${f}`, `${name}_js`, sig.getParameters().length, true, false));
         continue;
       }
       lines.push(`    external ${name} : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
@@ -750,6 +775,7 @@ while (queue.length > 0) {
         const params = argTypes.length === 0 ? "unit" : argTypes.map((a) => wrap(a ?? "_")).join(" -> ");
         lines.push(`    external ${getter} : ${t} -> (${params} -> (${result} [@u]) [@u]) = "${p.name}" [@@mel.get]`);
         lines.push(`    let ${value(snake(p.name))} o ${args} = let r = (${getter} o) ${args} [@u] in fun ${yargs} -> r ${yargs} [@u]`);
+        vals.set(`${n.module}.${value(snake(p.name))}`, `${t} -> ${params} -> ${wrap(result)}`);
         shaped.set(p.name, (f) => `(fun ${args} -> let r = ${f} ${args} in fun ${yargs} -> r ${yargs})`);
       } else {
         // Called as a method of the object that holds it: an external is
@@ -778,6 +804,8 @@ while (queue.length > 0) {
       });
       lines.push(`    external make_js : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
       lines.push(`    let make ${params.join(" ")} () = make_js ${passed.join(" ")} ()`);
+      const labels = fields.map(([k, ft, opt]) => `${opt ? "?" : ""}${value(snake(k))}:${wrap(ft)} ->`);
+      vals.set(`${n.module}.make`, `${labels.join(" ")} unit -> ${t}`);
     }
   }
   if (isClass && n.symbol?.valueDeclaration) {
@@ -830,11 +858,52 @@ const text = `(* Every Kobalte component, part by part, its hooks and utilities,
 module Types = Types
 ${outside(body)}`;
 
+// A file's interface, from the file: a struct is a sig, a let its val, and a
+// raw external under a let, _js, left out.
+function mli(ml: string, transform: (t: string) => string): string {
+  const lines = ml.split("\n");
+  const out: string[] = [];
+  const path: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    const opened = /^(\s*)module (\w+) = struct\s*$/.exec(line);
+    if (opened) {
+      path.push(opened[2] ?? "");
+      out.push(line.replace(/= struct\s*$/, ": sig"));
+      continue;
+    }
+    if (/^\s*end\s*$/.test(line)) {
+      path.pop();
+      out.push(line);
+      continue;
+    }
+    if (/^\s*external [a-z_0-9]+_js /.test(line)) {
+      if (!line.includes("[@@")) i++;
+      continue;
+    }
+    const bound = /^(\s*)let ([a-z_0-9]+) /.exec(line);
+    if (bound) {
+      const indent = bound[1] ?? "";
+      const key = [...path, bound[2]].join(".");
+      const type = vals.get(key);
+      if (!type) throw new Error(`no type recorded for ${key}`);
+      out.push(`${indent}val ${bound[2]} : ${transform(type)}`);
+      while (i + 1 < lines.length && (lines[i + 1] ?? "").startsWith(`${indent} `)) i++;
+      continue;
+    }
+    out.push(line);
+  }
+  return out.join("\n");
+}
+
+const typesMli = mli(typesText, inside);
+const textMli = mli(text, outside);
+
 if (process.argv.includes("--unmapped")) for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 
 const namesText = table(names, "generate/kobalte.ts");
 if (process.argv.includes("--check")) {
-  for (const [file, want] of [[out, text], [typesOut, typesText], [namesOut, namesText]] as const) {
+  for (const [file, want] of [[out, text], [`${out}i`, textMli], [typesOut, typesText], [`${typesOut}i`, typesMli], [namesOut, namesText]] as const) {
     if (readFileSync(file, "utf8") !== want) {
       console.error(`${file} is not what Kobalte's types give: run make generate`);
       process.exit(1);
@@ -842,6 +911,8 @@ if (process.argv.includes("--check")) {
   }
 } else {
   writeFileSync(out, text);
+  writeFileSync(`${out}i`, textMli);
   writeFileSync(typesOut, typesText);
+  writeFileSync(`${typesOut}i`, typesMli);
   writeFileSync(namesOut, namesText);
 }

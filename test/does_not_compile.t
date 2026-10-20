@@ -423,6 +423,19 @@ A Kobalte value read as whatever type its caller names.
   Error: Unbound value Solidtype_kobalte.Types.Context_Provider.value
   [1]
 
+A raw external under a Kobalte wrapper, which skips what the wrapper adds.
+
+  $ cat > case.mlx <<'EOF'
+  > let f = Solidtype_kobalte.Types.Color.to_format_js
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 8-50:
+  1 | let f = Solidtype_kobalte.Types.Color.to_format_js
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Unbound value Solidtype_kobalte.Types.Color.to_format_js
+  Hint:   Did you mean Solidtype_kobalte.Types.Color.to_format?
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'

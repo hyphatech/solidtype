@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `solidtype-kobalte` has an interface, generated with the binding: the
+  raw externals under its wrappers, `*_js`, are no longer reachable, so
+  no call skips what a wrapper adds.
 - Breaking: what JavaScript threw is a type of its own, `Solid.thrown`,
   so `exn_of_thrown` takes only that, never any value; and a Kobalte
   value that would read as whatever type its caller names,
