@@ -1,0 +1,112 @@
+(* Solid's components that no other test reaches, each used as a page would
+   use it and read as a person reads the page. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Switch = Solidtype.Switch
+module Match = Solidtype.Match
+module ErrorBoundary = Solidtype.ErrorBoundary
+module Dynamic = Solidtype.Dynamic
+module Suspense = Solidtype.Suspense
+module SuspenseList = Solidtype.SuspenseList
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+exception Broken
+
+module Greeting = struct
+  let%component make ~(name : string) () =
+    <p>(fun () -> Jsx.string ("Hello, " ^ name ()))</p>
+end
+
+(* Raises while [broken] says so, and renders once it does not. *)
+module Fragile = struct
+  let%component make ~(broken : bool) () =
+    <p>(fun () -> if broken () then raise Broken else Jsx.string "mended")</p>
+end
+
+(* Shows [text] once a fetch of it has resolved. *)
+module Loaded = struct
+  let%component make ~(text : string) () =
+    let data, _ = S.create_resource (fun _ -> Js.Promise.resolve (text ())) in
+    <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
+end
+
+external button_by_text : string -> Dom.element = "getByText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let () =
+  Jest.describe "components" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "Match.Some shows its case with the value, Some 0 too"
+        (fun () ->
+          let value, set_value = S.create_signal None in
+          T.render (fun () ->
+              <Switch fallback=(<p>"none"</p>)>
+                <Match.Some some=(fun () -> S.get value)>
+                  (fun v -> <p>(fun () -> Jsx.int (S.get v))</p>)
+                </Match.Some>
+              </Switch>);
+          let before = T.page () in
+          S.set set_value (Some 0);
+          let zero = T.page () in
+          S.set set_value (Some 7);
+          E.(
+            expect [| before; zero; T.page () |]
+            |> toEqual [| "none"; "0"; "7" |]));
+      Jest.test "Match.Keyed gives its case the value itself" (fun () ->
+          let value, set_value = S.create_signal (Some "a") in
+          T.render (fun () ->
+              <Switch fallback=(<p>"none"</p>)>
+                <Match.Keyed some=(fun () -> S.get value)>
+                  (fun v -> <p>(fun () -> Jsx.string v)</p>)
+                </Match.Keyed>
+              </Switch>);
+          let before = T.page () in
+          S.set set_value None;
+          E.(expect (before, T.page ()) |> toEqual ("a", "none")));
+      Jest.test "ErrorBoundary's reset renders its children again" (fun () ->
+          let broken, set_broken = S.create_signal true in
+          T.render (fun () ->
+              <ErrorBoundary
+                fallback=(fun _ reset ->
+                           <button on_click=(fun _ -> reset ())>"retry"</button>)>
+                <Fragile broken=(fun () -> S.get broken) />
+              </ErrorBoundary>);
+          let before = T.page () in
+          S.set set_broken false;
+          T.click (button_by_text "retry");
+          E.(expect (before, T.page ()) |> toEqual ("retry", "mended")));
+      Jest.test
+        "ErrorBoundary's fallback may take reset after a step of its own"
+        (fun () ->
+          T.render (fun () ->
+              <ErrorBoundary
+                fallback=(fun e ->
+                           let said =
+                             match e with Broken -> "broken" | _ -> "other"
+                           in
+                           fun _reset -> <p>(fun () -> Jsx.string said)</p>)>
+                <Fragile broken=(fun () -> true) />
+              </ErrorBoundary>);
+          E.(expect (T.page ()) |> toBe "broken"));
+      Jest.test "create_dynamic renders the component chosen, with its props"
+        (fun () ->
+          T.render (fun () ->
+              Dynamic.create_dynamic
+                (fun () -> Greeting.component)
+                (Greeting.Props.make ~name:"Di" ()));
+          E.(expect (T.page ()) |> toBe "Hello, Di"));
+      Jest.testPromise "SuspenseList reveals its Suspenses' children" (fun () ->
+          T.render (fun () ->
+              <SuspenseList reveal_order=`forwards>
+                <Suspense fallback=(<p>"..."</p>)>
+                  <Loaded text="one" />
+                </Suspense>
+                <Suspense fallback=(<p>"..."</p>)>
+                  <Loaded text="two" />
+                </Suspense>
+              </SuspenseList>);
+          let* (_ : bool) = T.later () in
+          Js.Promise.resolve E.(expect (T.page ()) |> toBe "onetwo")))

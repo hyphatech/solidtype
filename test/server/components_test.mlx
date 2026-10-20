@@ -1,0 +1,58 @@
+(* Solid's components that act only where a page is rendered on the server,
+   read from the HTML that render writes. *)
+
+module Jsx = Solidtype.Jsx
+module Server = Solidtype.Server
+module NoHydration = Solidtype.NoHydration
+module Hydration = Solidtype.Hydration
+module HydrationScript = Solidtype.HydrationScript
+module Assets = Solidtype.Assets
+module E = Jest.Expect
+
+let contains part s = Js.String.includes ~search:part s
+let hydration_keys html = Js.String.includes ~search:"data-hk" html
+
+let () =
+  Jest.describe "on the server" (fun () ->
+      Jest.test "NoHydration renders its children without hydration keys"
+        (fun () ->
+          let html =
+            Server.render_to_string (fun () ->
+                <div><NoHydration><p>"static"</p></NoHydration></div>)
+          in
+          E.(
+            expect (contains "static" html, contains "<p>static" html)
+            |> toEqual (true, true)));
+      Jest.test "Hydration inside NoHydration gives its children keys again"
+        (fun () ->
+          let html =
+            Server.render_to_string (fun () ->
+                <NoHydration><Hydration><p>"live"</p></Hydration></NoHydration>)
+          in
+          E.(
+            expect (contains "live" html, hydration_keys html)
+            |> toEqual (true, true)));
+      Jest.test "Assets writes its children into the page's head" (fun () ->
+          let html =
+            Server.render_to_string (fun () ->
+                <html>
+                  <head><title>"page"</title></head>
+                  <body>
+                    <Assets><meta name="theme" content="dark" /></Assets>
+                    <p>"body"</p>
+                  </body>
+                </html>)
+          in
+          let head =
+            match Js.String.split ~sep:"</head>" html with
+            | [| head; _ |] -> head
+            | _ -> ""
+          in
+          E.(expect (contains "theme" head) |> toBe true));
+      Jest.test "HydrationScript writes the script that holds events" (fun () ->
+          let html =
+            Server.render_to_string (fun () -> <HydrationScript nonce="n1" />)
+          in
+          E.(
+            expect (contains "<script" html, contains "nonce=\"n1\"" html)
+            |> toEqual (true, true))))
