@@ -46,13 +46,13 @@
    (and
     :with-test
     (>= 0.2.0)))
-  ; The example's server, which its notes island is printed from and
-  ; called against.
+  ; The example's server, which its board is printed from and called
+  ; against, and the server's tests of its routes.
   (spindle
    (and
     :with-test
-    (>= 0.8.0)
-    (< 0.9.0)))
+    (>= 0.9.0)
+    (< 0.10.0)))
   (wiretype
    (and
     :with-test
@@ -66,8 +66,12 @@
   (spindle-cli
    (and
     :with-test
-    (>= 0.8.0)
-    (< 0.9.0)))
+    (>= 0.9.0)
+    (< 0.10.0)))
+  (alcotest
+   (and
+    :with-test
+    (>= 1.9.1)))
   (eio_main
    (and
     :with-test

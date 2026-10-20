@@ -16,8 +16,10 @@ make setup    # once: the switch hypha-solidtype, all dependencies, and Bun's
 make test     # the ppx's lowering, each island against its twin, the example's tests
 make lint     # formatting, the plugin's types, the release build, and the generated bindings
 make fmt      # format in place
-make example  # the example site, built by Astro into _build/example-dist
-make serve    # the example site and its notes, served on http://localhost:4420
+make example  # the shelf, built by Vite into _build/example-dist, and its
+              # Astro page, into _build/example-astro
+make serve    # the shelf and its API, served on http://localhost:4420
+make dev      # the three commands that run the shelf in development
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -58,24 +60,29 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   test/rewrite       what the plugin writes for a marker form
   test/browser       every module of the libraries built for the browser,
                      each import found in Solid's and Kobalte's browser build
-  test/astro         the example site built: its page holds the
-                     prerendered island, and the client:only one's mount
-astro.config.mjs     the example site: Astro, its Solid integration and
-                     the plugin, rooted here so a page reaches _build
-example/
-  pages/             the site's page, Astro: wiring alone, mounting each
-                     island from Melange's output
-  src/               islands in .mlx, and api.ml, the notes' client printed
-                     from server/ as the build runs
-  server/            the notes, a Spindle app: their store, the routes
-                     over it, which the notes island is called against
-                     and `make serve` serves, and their command line,
-                     Spindle's, which prints the island's client and the
-                     twin's schemas
+  test/astro         the example's Astro page built: it holds the board
+                     prerendered, to hydrate
+astro.config.mjs     the example's Astro page: Astro, its Solid
+                     integration and the plugin, rooted here so a page
+                     reaches _build
+vitest.config.ts     the OCaml tests run in jsdom, the example's server
+                     started for them
+example/             shelf, a reading list: a whole application on the
+                     stack, its README the map and the rough edges found
+                     building it
+  index.html         the page, built by Vite with vite.config.ts
+  pages/             the same board as an Astro page: wiring alone
+  src/               the board's islands in .mlx, and api.ml, its client
+                     printed from server/ as the build runs
+  server/            a Spindle app: the books' store, the routes over it,
+                     which the board is called against and `make serve`
+                     serves, their tests, and their command line,
+                     Spindle's, which prints the board's client and the
+                     twins' schemas
   twin/              each island's TSX twin, read by the twin test alone;
-                     notes.gen.ts, the server's Zod schemas, compared
-  test/              the islands' behaviour, in OCaml, run by vitest, the
-                     notes against the server server.ts starts
+                     shelf.gen.ts, the server's Zod schemas, compared
+  test/              the board's behaviour, in OCaml, run by vitest
+                     against the server server.ts starts
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
@@ -130,9 +137,9 @@ break.
   gets a twin and a row there.
 - **An island mounts in an Astro page as any Solid island does**,
   `client:only` or prerendered `client:load`, imported by its namespace
-  from Melange's output, `<Counter.make client:load />`; the page holds
-  wiring alone. Why: Astro builds the pages an application on the stack
-  serves, and the plugin must run under its server build as under its
+  from Melange's output, `<App.make client:load />`; the page holds
+  wiring alone. Why: an application on the stack may build its pages
+  with Astro, and the plugin must run under its server build as under its
   client's. Test: `vite-plugin/test/astro.test.ts`, which builds the site.
 - **A reactive value in a dynamic position is a thunk, and the types say
   so.** Why: a read hoisted out of Solid's tracking scope stops updating

@@ -1,0 +1,90 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module K = Solidtype_kobalte
+module Rating = K.Rating
+module Button = K.Button
+
+let stars = [| 1; 2; 3; 4; 5 |]
+
+(* A book on the board: dragged to another column, or moved a column at a
+   time by its arrows; rated once read. *)
+let%component make ~(book : Api.book) ~(on_move : Status.t -> unit)
+    ~(on_rate : int -> unit) ~(on_remove : Dom.mouseEvent -> unit) () =
+  let arrow ~label target =
+    match target with
+    | None -> <span class_="w-7" />
+    | Some status ->
+        <Button.Root
+          class_="grid h-7 w-7 place-items-center rounded-md text-stone-400 \
+                  hover:bg-stone-100 hover:text-stone-700 \
+                  dark:hover:bg-stone-800 dark:hover:text-stone-200"
+          aria_label=(fun () ->
+                       "Move " ^ (book ()).title ^ " to " ^ Status.label status)
+          on_click=(fun _ -> on_move status)>
+          (fun () -> Jsx.string label)
+        </Button.Root>
+  in
+  <li
+    class_="group cursor-grab rounded-lg border border-stone-200 bg-white p-3 \
+            shadow-sm transition hover:shadow-md active:cursor-grabbing \
+            dark:border-stone-700 dark:bg-stone-900"
+    draggable=true
+    on_drag_start=(fun e -> Drag.start e (book ()).id)>
+    <div class_="flex items-start gap-2">
+      <div class_="min-w-0 flex-1">
+        <p class_="truncate font-medium text-stone-900 dark:text-stone-100">
+          (fun () -> Jsx.string (book ()).title)
+        </p>
+        <p class_="truncate text-sm text-stone-500 dark:text-stone-400">
+          (fun () -> Jsx.string (book ()).author)
+        </p>
+      </div>
+      <Button.Root
+        class_="grid h-6 w-6 place-items-center rounded-md text-stone-400 \
+                opacity-0 transition group-hover:opacity-100 hover:bg-red-50 \
+                hover:text-red-600 focus-visible:opacity-100 \
+                dark:hover:bg-red-950"
+        aria_label=(fun () -> "Remove " ^ (book ()).title)
+        on_click=on_remove>
+        {js|×|js}
+      </Button.Root>
+    </div>
+    <div class_="mt-2 flex items-center justify-between">
+      (fun () ->
+        Jsx.element (arrow ~label:{js|←|js} (Status.previous (book ()).status)))
+      <Show when_=(fun () -> Status.equal (book ()).status Read)>
+        <Rating.Root
+          value=(fun () ->
+                  float_of_int (Option.value (book ()).rating ~default:0))
+          on_change=(fun v -> on_rate (int_of_float v))>
+          <Rating.Label class_="sr-only">"Rating"</Rating.Label>
+          <Rating.Control class_="flex">
+            <For each=(fun () -> stars)>
+              (fun n _ ->
+                <Rating.Item
+                  class_="cursor-pointer px-px text-lg text-amber-500">
+                  <Rating.ItemControl>
+                    (fun state ->
+                      <span>
+                        (fun () ->
+                          Jsx.string
+                            (if
+                               S.get (K.Types.RatingItemState.highlighted state)
+                             then {js|★|js}
+                             else {js|☆|js}))
+                      </span>)
+                  </Rating.ItemControl>
+                  <Rating.ItemLabel class_="sr-only">
+                    (fun () -> Jsx.string (string_of_int n ^ " stars"))
+                  </Rating.ItemLabel>
+                </Rating.Item>)
+            </For>
+          </Rating.Control>
+        </Rating.Root>
+      </Show>
+      (fun () ->
+        Jsx.element (arrow ~label:{js|→|js} (Status.next (book ()).status)))
+    </div>
+  </li>

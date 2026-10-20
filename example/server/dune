@@ -1,7 +1,7 @@
-; The example's server: Spindle, serving the notes the island calls and the
-; built site beside them, on one origin. Its command line prints the
-; island's client from the routes, so a route that changes is a build that
-; fails where an island no longer matches it.
+; The shelf's server: Spindle, serving the books the board calls, their
+; document at /docs, and the built page beside them, on one origin. Its
+; command line prints the board's client from the routes, so a route that
+; changes is a build that fails where an island no longer matches it.
 
 ; The store and the routes over it, each a module of its own.
 
@@ -14,11 +14,18 @@
   (pps ppx_wiretype)))
 
 (executable
- (name notes)
- (modules notes)
- (libraries spindle spindle-cli server))
-
-(executable
  (name serve)
  (modules serve)
  (libraries spindle server eio_main))
+
+(executable
+ (name shelf)
+ (modules shelf)
+ (libraries spindle spindle-cli server))
+
+; The routes, called in-process as the board calls them.
+
+(test
+ (name test_books)
+ (modules test_books)
+ (libraries spindle spindle.http server alcotest))

@@ -1,25 +1,19 @@
 ---
-// The example's page: wiring alone. Each island is OCaml, compiled by Melange
-// into _build, and mounts as any Solid island does: the counter prerendered
-// and hydrated, the settings and the notes rendered in the browser alone,
-// the notes calling the server `make serve` runs beside the site.
-import * as Counter from "../../_build/default/example/out/example/src/counter.jsx";
-import * as Notes from "../../_build/default/example/out/example/src/notes.jsx";
-import * as Settings from "../../_build/default/example/out/example/src/settings.jsx";
+// The shelf as an Astro page: wiring alone. The board is OCaml, compiled by
+// Melange into _build, and mounts as any Solid island does, prerendered and
+// hydrated, then fetching the books from the server `make serve` runs.
+import * as App from "../../_build/default/example/out/example/src/app.jsx";
+import "../src/shelf.css";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>solidtype example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shelf</title>
   </head>
-  <body>
-    <main>
-      <Counter.make client:load />
-      <Settings.make client:only="solid" />
-      <Notes.make client:only="solid" />
-    </main>
+  <body class="min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+    <App.make client:load />
   </body>
 </html>

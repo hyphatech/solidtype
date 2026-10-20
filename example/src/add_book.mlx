@@ -1,0 +1,108 @@
+module S = Solidtype.Solid
+module Dialog = Solidtype_kobalte.Dialog
+module TextField = Solidtype_kobalte.TextField
+module Button = Solidtype_kobalte.Button
+module Jsx = Solidtype.Jsx
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* The dialog that puts a book on the shelf; [on_added] is told its title. *)
+let%component make ~(on_added : string -> unit) () =
+  let open_, set_open = S.create_signal false in
+  let title, set_title = S.create_signal "" in
+  let author, set_author = S.create_signal "" in
+  let problem, set_problem = S.create_signal "" in
+  let submit e =
+    prevent_default e;
+    ignore
+      (Js.Promise.then_
+         (fun answered ->
+           (match answered with
+           | Ok (b : Api.book) ->
+               S.batch (fun () ->
+                   S.set set_title "";
+                   S.set set_author "";
+                   S.set set_problem "";
+                   S.set set_open false);
+               on_added b.title
+           | Error e -> S.set set_problem (Said.error e));
+           Js.Promise.resolve ())
+         (Api.post_api_books
+            ~body:{ title = S.get title; author = S.get author }
+            ()))
+  in
+  <Dialog.Root open_=(fun () -> S.get open_) on_open_change=(S.set set_open)>
+    <Dialog.Trigger
+      class_="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold \
+              text-white shadow-sm hover:bg-amber-800 dark:bg-amber-500 \
+              dark:text-stone-950 dark:hover:bg-amber-400">
+      "Add a book"
+    </Dialog.Trigger>
+    <Dialog.Portal>
+      <Dialog.Overlay class_="fixed inset-0 bg-stone-950/40 backdrop-blur-sm" />
+      <div class_="fixed inset-0 grid place-items-center p-4">
+        <Dialog.Content
+          class_="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl \
+                  dark:bg-stone-900">
+          <Dialog.Title class_="mb-4 font-serif text-xl font-semibold">
+            "Add a book"
+          </Dialog.Title>
+          <form on_submit=submit>
+            <TextField.Root
+              class_="mb-4 flex flex-col gap-1"
+              value=(fun () -> S.get title)
+              on_change=(S.set set_title)
+              required=true>
+              <TextField.Label
+                class_="text-sm text-stone-500 dark:text-stone-400">
+                "Title"
+              </TextField.Label>
+              <TextField.Input
+                class_="rounded-lg border border-stone-300 bg-stone-50 px-3 \
+                        py-2 outline-none focus:border-amber-500 focus:ring-2 \
+                        focus:ring-amber-500/30 dark:border-stone-700 \
+                        dark:bg-stone-950"
+              />
+            </TextField.Root>
+            <TextField.Root
+              class_="mb-4 flex flex-col gap-1"
+              value=(fun () -> S.get author)
+              on_change=(S.set set_author)
+              required=true>
+              <TextField.Label
+                class_="text-sm text-stone-500 dark:text-stone-400">
+                "Author"
+              </TextField.Label>
+              <TextField.Input
+                class_="rounded-lg border border-stone-300 bg-stone-50 px-3 \
+                        py-2 outline-none focus:border-amber-500 focus:ring-2 \
+                        focus:ring-amber-500/30 dark:border-stone-700 \
+                        dark:bg-stone-950"
+              />
+            </TextField.Root>
+            <p
+              class_="mb-2 min-h-6 text-sm text-red-600 dark:text-red-400"
+              role=`alert>
+              (fun () -> Jsx.string (S.get problem))
+            </p>
+            <div class_="flex justify-end gap-2">
+              <Dialog.CloseButton
+                class_="rounded-lg px-4 py-2 text-sm text-stone-600 \
+                        hover:bg-stone-100 dark:text-stone-300 \
+                        dark:hover:bg-stone-800">
+                "Cancel"
+              </Dialog.CloseButton>
+              <Button.Root
+                class_="rounded-lg bg-amber-700 px-4 py-2 text-sm \
+                        font-semibold text-white shadow-sm hover:bg-amber-800 \
+                        dark:bg-amber-500 dark:text-stone-950 \
+                        dark:hover:bg-amber-400"
+                type_=`submit>
+                "Add"
+              </Button.Root>
+            </div>
+          </form>
+        </Dialog.Content>
+      </div>
+    </Dialog.Portal>
+  </Dialog.Root>

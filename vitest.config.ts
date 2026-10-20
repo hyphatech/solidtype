@@ -8,8 +8,11 @@ export default defineConfig({
   plugins: [solidtype(), solid()],
   test: {
     environment: "jsdom",
-    // The example's server, which the notes island calls.
+    // The example's board calls its server, from a page on the server's
+    // origin, as `make serve` serves it.
+    environmentOptions: { jsdom: { url: "http://localhost:4420/" } },
     globalSetup: ["example/test/server.ts"],
+    setupFiles: ["example/test/fetch.ts"],
     globals: true,
     include: [
       "_build/default/example/out/example/test/*_test.jsx",

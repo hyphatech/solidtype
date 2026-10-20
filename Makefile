@@ -2,7 +2,7 @@ SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 
 .DEFAULT_GOAL := help
-.PHONY: help setup build test lint fmt example serve generate
+.PHONY: help setup build test lint fmt example serve dev generate
 
 help: ## list targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -35,11 +35,19 @@ lint: ## check formatting, the plugin's types, the release build and the generat
 fmt: ## format the code
 	$(OPAM) dune fmt
 
-example: build ## build the example site into _build/example-dist
+example: build ## build the shelf into _build/example-dist, and its Astro page into _build/example-astro
+	bun --bun vite build --config example/vite.config.ts
 	bun --bun astro build
 
-serve: example ## serve the example site and its notes on http://localhost:4420
+serve: example ## serve the shelf and its API on http://localhost:4420
 	_build/default/example/server/serve.exe
+
+# Three processes, each in a terminal of its own: dune rebuilds the OCaml
+# as it changes, the server answers /api, Vite serves the page and proxies.
+dev: example ## print the three commands that run the shelf in development
+	@echo "$(OPAM) dune build --watch"
+	@echo "_build/default/example/server/serve.exe"
+	@echo "bun --bun vite --config example/vite.config.ts"
 
 generate: ## write the bindings generated from Solid's and Kobalte's types
 	$(OPAM) bun generate/html.ts

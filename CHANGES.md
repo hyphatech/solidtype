@@ -1,5 +1,12 @@
 # Changes
 
+## Unreleased
+
+- The example is shelf, a reading list on the whole stack: a Spindle
+  server, a Kobalte board printed against its routes and styled with
+  Tailwind, served as a Vite page and mounted as an Astro one, with the
+  rough edges found building it in its README.
+
 ## 0.1.0 (2026-10-19)
 
 - The example is a whole stack: a notes island typed from a client

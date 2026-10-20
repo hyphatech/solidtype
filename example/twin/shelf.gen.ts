@@ -1,4 +1,4 @@
-/* Generated from Notes's routes. Do not edit: change the routes, and generate it again. */
+/* Generated from Shelf's routes. Do not edit: change the routes, and generate it again. */
 
 import { z } from "zod/mini";
 
@@ -22,18 +22,30 @@ export const RefusalSchema = z.object({
 });
 export type Refusal = z.infer<typeof RefusalSchema>;
 
-export const NoteSchema = z.object({
+export const BookSchema = z.object({
   id: z.int(),
-  /** What is to be done. */
-  text: z.string().check(z.minLength(1), z.maxLength(80)),
-  state: z.enum(["open", "done"]),
+  title: z.string(),
+  author: z.string(),
+  status: z.enum(["to_read", "reading", "read"]),
+  rating: z.optional(z.int().check(z.gte(1), z.lte(5))),
 });
-export type Note = z.infer<typeof NoteSchema>;
+export type Book = z.infer<typeof BookSchema>;
 
 export const DraftSchema = z.object({
-  text: z.string().check(z.minLength(1), z.maxLength(80)),
+  title: z.string().check(z.minLength(1), z.maxLength(120)),
+  author: z.string().check(z.minLength(1), z.maxLength(80)),
 });
 export type Draft = z.infer<typeof DraftSchema>;
+
+export const MoveSchema = z.object({
+  status: z.enum(["to_read", "reading", "read"]),
+});
+export type Move = z.infer<typeof MoveSchema>;
+
+export const StarsSchema = z.object({
+  stars: z.int().check(z.gte(1), z.lte(5)),
+});
+export type Stars = z.infer<typeof StarsSchema>;
 
 /** Every code a route may refuse with. */
 export const CodeSchema = z.enum([
@@ -42,6 +54,7 @@ export const CodeSchema = z.enum([
   "internal",
   "invalid",
   "not_found",
+  "not_read",
   "too_large",
   "unreadable",
   "unsupported_media_type",
@@ -50,16 +63,24 @@ export type Code = z.infer<typeof CodeSchema>;
 
 /** Each route, by method and pattern: the body it reads, and what it answers. */
 export const routes = {
-  "GET /notes": {
+  "GET /api/books": {
     body: null,
-    answer: { status: 200, schema: z.array(NoteSchema) },
+    answer: { status: 200, schema: z.array(BookSchema) },
   },
-  "POST /notes": {
+  "POST /api/books": {
     body: DraftSchema,
-    answer: { status: 201, schema: NoteSchema },
+    answer: { status: 201, schema: BookSchema },
   },
-  "PUT /notes/{id}/done": {
+  "PUT /api/books/{id}/status": {
+    body: MoveSchema,
+    answer: { status: 200, schema: BookSchema },
+  },
+  "PUT /api/books/{id}/rating": {
+    body: StarsSchema,
+    answer: { status: 200, schema: BookSchema },
+  },
+  "DELETE /api/books/{id}": {
     body: null,
-    answer: { status: 200, schema: NoteSchema },
+    answer: { status: 204 },
   },
 } as const;

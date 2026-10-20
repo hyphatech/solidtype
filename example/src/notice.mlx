@@ -1,0 +1,29 @@
+module Toast = Solidtype_kobalte.Toast
+module Toaster = Solidtype_kobalte.Types.Toast_Toaster
+module Toast_props = Solidtype_kobalte.Types.ToastComponentProps
+module Jsx = Solidtype.Jsx
+
+let show ~title text =
+  ignore
+    (Toaster.show Toast.toaster
+       (fun props ->
+         <Toast.Root
+           class_="relative rounded-xl border border-stone-200 bg-white p-4 \
+                   pr-10 shadow-lg dark:border-stone-700 dark:bg-stone-900"
+           toast_id=(fun () -> Toast_props.toast_id props)>
+           <Toast.Title class_="font-semibold">
+             (fun () -> Jsx.string title)
+           </Toast.Title>
+           <Toast.Description
+             class_="text-sm text-stone-600 dark:text-stone-300">
+             (fun () -> Jsx.string text)
+           </Toast.Description>
+           <Toast.CloseButton
+             class_="absolute right-2 top-2 grid h-6 w-6 place-items-center \
+                     rounded-md text-stone-400 hover:bg-stone-100 \
+                     dark:hover:bg-stone-800"
+             aria_label="Dismiss">
+             {js|×|js}
+           </Toast.CloseButton>
+         </Toast.Root>)
+       None)

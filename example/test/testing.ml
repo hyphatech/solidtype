@@ -32,5 +32,40 @@ external set_value : Dom.element -> string -> unit = "value" [@@mel.set]
 external input : Dom.element -> unit = "input"
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
 
-(* What vitest's global setup provided: the example server's origin. *)
-external inject : string -> string = "inject" [@@mel.module "vitest"]
+type query
+
+external query : name:string -> unit -> query = "" [@@mel.obj]
+
+external by_role_named_js : string -> query -> Dom.element = "getByRole"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let by_role_named role name = by_role_named_js role (query ~name ())
+
+external by_text : string -> Dom.element = "getByText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+external find_by_label : string -> Dom.element Js.Promise.t = "findByLabelText"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external attribute : Dom.element -> string -> string Js.null = "getAttribute"
+[@@mel.send]
+
+(* The board's column an element is in, by the column's label. *)
+let column e =
+  match Js.Null.toOption (closest e "section") with
+  | None -> None
+  | Some section -> Js.Null.toOption (attribute section "aria-label")
+
+(* [eventually f] retries [f], which raises until what it checks holds, as
+   Testing Library's waitFor does, for a change a call to the server away. *)
+external eventually : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t
+  = "waitFor"
+[@@mel.module "@solidjs/testing-library"]
+
+(* An assertion inside [eventually]: it throws, which fails the try. *)
+let expect_equal ~what expected actual =
+  if not (String.equal expected actual) then
+    Js.Exn.raiseError (what ^ ": expected " ^ expected ^ ", got " ^ actual)

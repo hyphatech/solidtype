@@ -1,0 +1,5 @@
+/* Tailwind reads its classes from the .mlx sources, where they are
+   written whole; the build's .jsx under _build is ignored with the rest
+   of what git ignores. */
+@import "tailwindcss";
+@source "./";
