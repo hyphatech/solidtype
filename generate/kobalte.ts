@@ -609,6 +609,12 @@ while (queue.length > 0) {
   // reads, whose fields, methods and constructor are bound here.
   const library = n.symbol !== null && isDomLib(n.symbol) && !readable.has(n.symbol.name);
   const fields: [string, string, boolean][] = [];
+  // A function a field holds, wrapped once by [make] into the shape its type
+  // declares: OCaml writes [fun id () -> ...] and [fun id -> fun () -> ...]
+  // as one type but not one arity, and a [let] between two [fun]s keeps
+  // Melange from merging them. The field stays curried, since Melange drops
+  // [@mel.as] from an uncurried field of a [@@mel.obj].
+  const shaped = new Map<string, (f: string) => string>();
   let methods = 0;
   for (const p of checker.getPropertiesOfType(declared)) {
     if (!named(p.name)) continue;
@@ -663,6 +669,7 @@ while (queue.length > 0) {
         const params = argTypes.length === 0 ? "unit" : argTypes.map((a) => wrap(a ?? "_")).join(" -> ");
         lines.push(`    external ${getter} : ${t} -> (${params} -> (${result} [@u]) [@u]) = "${p.name}" [@@mel.get]`);
         lines.push(`    let ${value(snake(p.name))} o ${args} = let r = (${getter} o) ${args} [@u] in fun ${yargs} -> r ${yargs} [@u]`);
+        shaped.set(p.name, (f) => `(fun ${args} -> let r = ${f} ${args} in fun ${yargs} -> r ${yargs})`);
       } else {
         lines.push(`    external ${getter} : ${t} -> ((${fn}) [@u]) = "${p.name}" [@@mel.get]`);
         lines.push(`    let ${value(snake(p.name))} o ${args} = (${getter} o) ${args} [@u]`);
@@ -675,8 +682,20 @@ while (queue.length > 0) {
     lines.push(`    external ${d.slice(4)} : ${t} -> ${d} = "%identity"`);
   }
   if (!isClass && !library && methods === 0 && fields.length > 0 && n.conversions.length === 0) {
-    const args = fields.map(([k, ft, opt]) => `${opt ? "?" : ""}${value(snake(k))}:(${wrap(ft)} [@mel.as "${k}"]) ->`);
-    lines.push(`    external make : ${args.join(" ")} unit -> ${t} = "" [@@mel.obj]`);
+    const label = ([k, ft, opt]: [string, string, boolean]) =>
+      `${opt ? "?" : ""}${value(snake(k))}:(${wrap(ft)} [@mel.as "${k}"]) ->`;
+    if (shaped.size === 0) {
+      lines.push(`    external make : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
+    } else {
+      const params = fields.map(([k, , opt]) => `${opt ? "?" : "~"}${value(snake(k))}`);
+      const passed = fields.map(([k, , opt]) => {
+        const v = value(snake(k));
+        const shape = shaped.get(k);
+        return opt ? `?${v}` : shape ? `~${v}:${shape(v)}` : `~${v}`;
+      });
+      lines.push(`    external make_js : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
+      lines.push(`    let make ${params.join(" ")} () = make_js ${passed.join(" ")} ()`);
+    }
   }
   if (isClass && n.symbol?.valueDeclaration) {
     const mod = moduleOf(n.symbol);

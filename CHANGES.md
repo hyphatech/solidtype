@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A callback given to a Kobalte constructor, such as a context value's
+  `register_title_id`, reaches Kobalte in the shape its type declares
+  however OCaml writes it: `fun id () -> ...` no longer runs its cleanup
+  at once and hands Kobalte `undefined` for it.
 - Breaking: `Dynamic` requires its `props`, typed by its component, so a
   prop the component needs is no longer left out unseen, and
   `Dynamic.Element` takes the attributes every HTML element takes,
