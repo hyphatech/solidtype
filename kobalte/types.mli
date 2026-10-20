@@ -368,7 +368,7 @@ module AlertDialog_Portal_Ref : sig
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Element/shadowRoot) *)
   external shadow_root : t -> Dom.shadowRoot = "shadowRoot" [@@mel.get]
-  external element : t -> Dom.element = "%identity"
+  external to_element : t -> Dom.element = "%identity"
 end
 
 module AlertDialog_Portal_Ref2 : sig
@@ -377,7 +377,7 @@ module AlertDialog_Portal_Ref2 : sig
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Element/shadowRoot) *)
   external shadow_root : t -> Dom.shadowRoot = "shadowRoot" [@@mel.get]
-  external htmlDivElement : t -> Dom.htmlDivElement = "%identity"
+  external to_html_div_element : t -> Dom.htmlDivElement = "%identity"
 end
 
 module AlertDialog_Root_Translations : sig
@@ -1618,7 +1618,7 @@ module ColorFieldContextValue_OnBlur : sig
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
   external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external focusEvent : t -> Dom.focusEvent = "%identity"
+  external to_focus_event : t -> Dom.focusEvent = "%identity"
 end
 
 module BoundEventHandler : sig
@@ -1690,7 +1690,7 @@ module ComboboxContextValue_OnInputKeyDown : sig
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
   external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external keyboardEvent : t -> Dom.keyboardEvent = "%identity"
+  external to_keyboard_event : t -> Dom.keyboardEvent = "%identity"
 end
 
 module ContextMenuContextValue_SetAnchorRect : sig
@@ -1815,7 +1815,7 @@ module NumberFieldContextValue_OnInput : sig
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
   external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external inputEvent : t -> Dom.inputEvent = "%identity"
+  external to_input_event : t -> Dom.inputEvent = "%identity"
 end
 
 module PopoverDataSet : sig
@@ -1911,7 +1911,7 @@ module TextFieldContextValue_OnInput : sig
       
       \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
   external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external inputEvent : t -> Dom.inputEvent = "%identity"
+  external to_input_event : t -> Dom.inputEvent = "%identity"
 end
 
 module SwipeEvent_Detail : sig

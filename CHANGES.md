@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Breaking: a Kobalte value's conversion to its DOM type is named as the
+  stdlib names one, `to_html_div_element`, `to_focus_event`, where it was
+  `htmlDivElement`, `focusEvent`, the one camel-case name a user wrote.
 - `solidtype-kobalte` has an interface, generated with the binding: the
   raw externals under its wrappers, `*_js`, are no longer reachable, so
   no call skips what a wrapper adds.

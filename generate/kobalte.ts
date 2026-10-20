@@ -787,8 +787,11 @@ while (queue.length > 0) {
       lines.push(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${wrap(ft)} option` : wrap(ft)} = "${p.name}" [@@mel.get]`);
     }
   }
+  // A value Kobalte declares as a DOM node or event, extended, is that value:
+  // the conversion only forgets what Kobalte added, so it is %identity, named
+  // as the stdlib names a conversion, to_html_div_element.
   for (const d of n.conversions) {
-    lines.push(`    external ${d.slice(4)} : ${t} -> ${d} = "%identity"`);
+    lines.push(`    external to_${snake(d.slice(4))} : ${t} -> ${d} = "%identity"`);
   }
   if (!isClass && !library && methods === 0 && fields.length > 0 && n.conversions.length === 0) {
     const label = ([k, ft, opt]: [string, string, boolean]) =>
