@@ -1,0 +1,146 @@
+---
+title: Avatar
+description: A person's picture, with a fallback while it loads.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_usage.jsx";
+import UsageCode from "../../../../islands/avatar_usage.mlx?raw";
+import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_sizes.jsx";
+import SizesCode from "../../../../islands/avatar_sizes.mlx?raw";
+import * as Colors from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_colors.jsx";
+import ColorsCode from "../../../../islands/avatar_colors.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_variants.jsx";
+import VariantsCode from "../../../../islands/avatar_variants.mlx?raw";
+import * as Fallback from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_fallback.jsx";
+import FallbackCode from "../../../../islands/avatar_fallback.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_tailwind.jsx";
+import TailwindCode from "../../../../islands/avatar_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_demo.jsx";
+
+`Solidtype_heroui.Avatar` is Kobalte's `Image.Root`, a `<span>`, with the
+classes HeroUI's own `avatarVariants` gives. Kobalte renders its image once it
+has loaded, and its fallback until then or where it cannot, as Radix's avatar
+does under HeroUI's.
+
+## Usage
+
+<Example code={UsageCode} title="avatar_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Avatar>
+  <Avatar.Image alt="Ada Lovelace" src="/ada.png" />
+  <Avatar.Fallback>"AL"</Avatar.Fallback>
+</Avatar>
+```
+
+## Examples
+
+### Sizes
+
+<Example code={SizesCode} title="avatar_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Colors
+
+<Example code={ColorsCode} title="avatar_colors.mlx"><Colors.make client:visible /></Example>
+
+### Variants
+
+<Example code={VariantsCode} title="avatar_variants.mlx"><Variants.make client:visible /></Example>
+
+### Fallback Content
+
+A fallback's delay is the avatar's `fallback_delay`, in milliseconds, which
+Kobalte reads on its root, where Radix takes `delayMs` on the fallback.
+
+<Example code={FallbackCode} title="avatar_fallback.mlx"><Fallback.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Custom Image Component example renders another image component in
+place of the `<img>`, by `asChild`, which the port does not take.
+
+## Beside React
+
+The same HeroUI Avatar twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two avatars: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on the avatar and on each part.
+
+<Example code={TailwindCode} title="avatar_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every avatar, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .avatar {
+    @apply size-16 border-2 border-accent;
+  }
+
+  .avatar__fallback {
+    @apply bg-gradient-to-br from-purple-500 to-pink-500;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.avatar`, and its sizes `.avatar--sm`, `.avatar--md`, `.avatar--lg`, and
+  `.avatar--soft`
+- `.avatar__image`
+- `.avatar__fallback`, and its colors `.avatar__fallback--default`,
+  `.avatar__fallback--accent`, `.avatar__fallback--success`,
+  `.avatar__fallback--warning`, `.avatar__fallback--danger`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Avatar
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its size |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `default `` | Its fallback's color |
+| `variant` | `variant` | `` [ `default \| `soft ] `` | `` `default `` | Its look |
+| `Avatar.Fallback`'s `delayMs` | `fallback_delay` | `float` | | Milliseconds before the fallback shows |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its image and fallback |
+
+### Avatar.Image
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `src` | `src` | `string` | Where the image is |
+| `alt` | `alt` | `string` | What it shows, for a reader that cannot see it |
+| `srcSet` | `srcset` | `string` | Its sources for each width |
+| `sizes` | `sizes` | `string` | Its width at each viewport |
+| `crossOrigin` | `crossorigin` | `` [ `anonymous \| `use_credentials ] `` | How it is fetched across origins |
+| `loading` | `loading` | `string` | `"lazy"` or `"eager"` |
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `onLoad`, `onError` | — | | Not yet |
+| `asChild` | — | | Not yet |
+
+### Avatar.Fallback
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | Its color, else the avatar's |
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `children` | `children` | elements | Initials or an icon |

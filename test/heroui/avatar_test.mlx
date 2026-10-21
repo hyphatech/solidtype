@@ -1,0 +1,130 @@
+(* HeroUI's Avatar on Kobalte's Image, beside the same Avatar in React on
+   Radix's: its fallback while the image loads, the image once it has, and
+   the classes of each size, color and variant. *)
+
+module Avatar = Solidtype_heroui.Avatar
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?size:string ->
+  ?color:string ->
+  ?variant:string ->
+  ?fallback_color:(string[@mel.as "fallbackColor"]) ->
+  ?src:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Avatar.tsx"]
+
+  external settle : unit -> unit Js.Promise.t = "settle"
+  [@@mel.module "./twins/Avatar.tsx"]
+
+  external load_images : unit -> unit = "loadImages"
+  [@@mel.module "./twins/Avatar.tsx"]
+
+  external stop_loading_images : unit -> unit = "stopLoadingImages"
+  [@@mel.module "./twins/Avatar.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Avatar.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* The avatar and what it shows, each element's attributes and text. *)
+let shown host =
+  Js.Array.from (query_all host ".avatar, .avatar *")
+  |> Array.map (fun e -> tag_name e ^ " " ^ T.attributes e ^ " " ^ text e)
+
+let color_name = function
+  | `default -> "default"
+  | `accent -> "accent"
+  | `success -> "success"
+  | `warning -> "warning"
+  | `danger -> "danger"
+
+let both ?size ?color ?variant ?fallback_color ?src () =
+  T.render (fun () ->
+      <Avatar
+        ?size=(fun () -> size)
+        ?color=(fun () -> color)
+        ?variant=(fun () -> variant)
+        class_="ms-1">
+        (fun () ->
+          match src with
+          | Some src ->
+              Solidtype.Jsx.element
+                <Avatar.Image alt="Ada Lovelace" src=(fun () -> src) />
+          | None -> Solidtype.Jsx.string "")
+        <Avatar.Fallback ?color=(fun () -> fallback_color)>
+          "AL"
+        </Avatar.Fallback>
+      </Avatar>);
+  let* () = Twin.settle () in
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let host =
+    Twin.render
+      (props
+         ?size:
+           (Option.map
+              (function `sm -> "sm" | `md -> "md" | `lg -> "lg")
+              size)
+         ?color:(Option.map color_name color)
+         ?variant:
+           (Option.map
+              (function `default -> "default" | `soft -> "soft")
+              variant)
+         ?fallback_color:(Option.map color_name fallback_color)
+         ?src ())
+  in
+  let* () = Twin.settle () in
+  let react = shown host in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Avatar" (fun () ->
+      Jest.afterEach (fun () ->
+          T.cleanup ();
+          Twin.stop_loading_images ());
+      Jest.testPromise "shows its fallback while it has no image, as React's"
+        (fun () ->
+          let* solidtype, react = both () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "shows its fallback while the image loads, as React's"
+        (fun () ->
+          let* solidtype, react = both ~src:"/ada.png" () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "shows its image once it has loaded, as React's"
+        (fun () ->
+          Twin.load_images ();
+          let* solidtype, react = both ~src:"/ada.png" () in
+          let image =
+            Array.exists (fun e -> Js.String.startsWith ~prefix:"IMG " e)
+          in
+          Js.Promise.resolve
+            E.(expect (image solidtype, solidtype) |> toEqual (true, react)));
+      Jest.testPromise "is each size, color and variant, as React's is"
+        (fun () ->
+          let* solidtype, react =
+            both ~size:`lg ~color:`success ~variant:`soft ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "has its fallback's own color, as React's" (fun () ->
+          let* solidtype, react =
+            both ~color:`accent ~fallback_color:`danger ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

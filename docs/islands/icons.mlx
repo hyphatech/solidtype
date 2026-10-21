@@ -156,3 +156,17 @@ module Star = struct
       />
     </svg>
 end
+
+module Person = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <circle cx="8" cy="5.5" r="2.75" stroke="currentColor" stroke_width="1.5"
+      />
+      <path
+        d="M2.75 13.5C3.5 11 5.5 9.75 8 9.75C10.5 9.75 12.5 11 13.25 13.5"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+      />
+    </svg>
+end

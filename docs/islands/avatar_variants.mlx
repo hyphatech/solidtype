@@ -1,0 +1,175 @@
+module Avatar = Solidtype_heroui.Avatar
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0" />
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"accent"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"default"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"success"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"warning"</span>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <span class_="text-xs text-muted capitalize">"danger"</span>
+      </div>
+    </div>
+    <Separator />
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"letter"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger><Avatar.Fallback>"AG"</Avatar.Fallback></Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"letter soft"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger variant=`soft>
+          <Avatar.Fallback>"AG"</Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"icon"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"icon soft"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent variant=`soft>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default variant=`soft>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success variant=`soft>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning variant=`soft>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger variant=`soft>
+          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0 text-sm text-muted">"img"</div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`accent>
+          <Avatar.Image
+            alt="Avatar accent"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=3"
+          />
+          <Avatar.Fallback>"A"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`default>
+          <Avatar.Image
+            alt="Avatar default"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=4"
+          />
+          <Avatar.Fallback>"D"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`success>
+          <Avatar.Image
+            alt="Avatar success"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=5"
+          />
+          <Avatar.Fallback>"S"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`warning>
+          <Avatar.Image
+            alt="Avatar warning"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=8"
+          />
+          <Avatar.Fallback>"W"</Avatar.Fallback>
+        </Avatar>
+      </div>
+      <div class_="flex w-20 shrink-0 items-center justify-center">
+        <Avatar color=`danger>
+          <Avatar.Image
+            alt="Avatar danger"
+            src="https://img.heroui.chat/image/avatar?w=400&h=400&u=16"
+          />
+          <Avatar.Fallback>"D"</Avatar.Fallback>
+        </Avatar>
+      </div>
+    </div>
+  </div>

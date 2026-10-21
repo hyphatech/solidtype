@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Avatar`: HeroUI's Avatar on Kobalte's Image, its sizes,
+  colors and variants, its image once it has loaded and its fallback until
+  then.
 - `Solidtype_heroui.Skeleton`: HeroUI's Skeleton, its animations, and the
   page's `--skeleton-animation` where it is given none, read once it is in
   the browser.

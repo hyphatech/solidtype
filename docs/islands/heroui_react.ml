@@ -48,6 +48,15 @@ external separator_props :
 external separator : Dom.htmlDivElement -> separator_props -> unit = "separator"
 [@@mel.module "./react/heroui.tsx"]
 
+type avatar_props
+
+external avatar_props :
+  size:string -> color:string -> variant:string -> unit -> avatar_props = ""
+[@@mel.obj]
+
+external avatar : Dom.htmlDivElement -> avatar_props -> unit = "avatar"
+[@@mel.module "./react/heroui.tsx"]
+
 type badge_props
 
 external badge_props :

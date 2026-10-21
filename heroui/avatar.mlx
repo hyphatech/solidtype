@@ -1,0 +1,82 @@
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.Image
+
+type color = [ `default | `accent | `success | `warning | `danger ]
+
+(* What an avatar's parts read of it: its color, size and variant. *)
+type avatar = { options : ?color:color -> unit -> Styles.Avatar.options }
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = avatar
+end)
+
+let within part =
+  match Context.use () with
+  | Some a -> a
+  | None -> invalid_arg (part ^ " is used inside an Avatar")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Image = struct
+  let%component make ~(src : string) ?(alt : string option)
+      ?(srcset : string option) ?(sizes : string option)
+      ?(crossorigin : [ `anonymous | `use_credentials ] option)
+      ?(loading : string option) ?(class_ : string option) () =
+    let a = within "Avatar.Image" in
+    <Kobalte.Img
+      src=(fun () -> src ())
+      ?alt
+      ?srcset
+      ?sizes
+      ?crossorigin=(fun () ->
+                     Option.map
+                       (function
+                         | `anonymous -> "anonymous"
+                         | `use_credentials -> "use-credentials")
+                       (crossorigin ()))
+      ?loading
+      class_=(fun () ->
+               after
+                 (Styles.Avatar.image (Styles.Avatar.slots (a.options ())))
+                 (class_ ()))
+    />
+end
+
+module Fallback = struct
+  let%component make ?(color : color option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let a = within "Avatar.Fallback" in
+    <Kobalte.Fallback
+      class_=(fun () ->
+               after
+                 (Styles.Avatar.fallback
+                    (Styles.Avatar.slots (a.options ?color:(color ()) ())))
+                 (class_ ()))
+      data_slot="avatar-fallback">
+      (fun () -> children ())
+    </Kobalte.Fallback>
+end
+
+let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
+    ?(variant : [ `default | `soft ] option) ?(fallback_delay : float option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A fallback's own color is its own, else the avatar's. *)
+  let a =
+    {
+      options =
+        (fun ?color:own () ->
+          let color = match own with Some c -> Some c | None -> color () in
+          Styles.Avatar.options ?color ?size:(size ()) ?variant:(variant ()) ());
+    }
+  in
+  <Context.Provider value=(fun () -> a)>
+    <Kobalte.Root
+      ?fallback_delay
+      class_=(fun () ->
+               after
+                 (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
+                 (class_ ()))>
+      (fun () -> children ())
+    </Kobalte.Root>
+  </Context.Provider>

@@ -1,0 +1,21 @@
+module Avatar = Solidtype_heroui.Avatar
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Avatar><Avatar.Fallback>"JD"</Avatar.Fallback></Avatar>
+    <Avatar><Avatar.Fallback><Icons.Person /></Avatar.Fallback></Avatar>
+    <Avatar fallback_delay=600.>
+      <Avatar.Image
+        alt="Delayed Avatar"
+        src="https://invalid-url-to-show-fallback.com/image.jpg"
+      />
+      <Avatar.Fallback>"NA"</Avatar.Fallback>
+    </Avatar>
+    <Avatar>
+      <Avatar.Fallback
+        class_="border-none bg-gradient-to-br from-pink-500 to-purple-500 \
+                text-white">
+        "GB"
+      </Avatar.Fallback>
+    </Avatar>
+  </div>

@@ -1,0 +1,60 @@
+module S = Solidtype.Solid
+module Avatar = Solidtype_heroui.Avatar
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+
+let colors =
+  [|
+    (`default, "default");
+    (`accent, "accent");
+    (`success, "success");
+    (`warning, "warning");
+    (`danger, "danger");
+  |]
+
+let variants = [| (`default, "default"); (`soft, "soft") |]
+
+let make () =
+  let size, set_size = S.create_signal (`md, "md") in
+  let color, set_color = S.create_signal (`default, "default") in
+  let variant, set_variant = S.create_signal (`default, "default") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Select
+        label="color"
+        choices=(fun () -> colors)
+        picked=(fun () -> S.get color)
+        on_pick=(Controls.choose colors set_color)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+    </div>
+    <Side_by_side
+      compared=".avatar"
+      solidtype=(<Avatar
+                   size=(fun () -> fst (S.get size))
+                   color=(fun () -> fst (S.get color))
+                   variant=(fun () -> fst (S.get variant))>
+                   <Avatar.Fallback>"AL"</Avatar.Fallback>
+                 </Avatar>)
+      react=(fun host ->
+              Heroui_react.avatar host
+                (Heroui_react.avatar_props
+                   ~size:(snd (S.get size))
+                   ~color:(snd (S.get color))
+                   ~variant:(snd (S.get variant))
+                   ()))
+    />
+  </section>
