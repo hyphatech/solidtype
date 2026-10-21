@@ -78,7 +78,8 @@ let () =
           Option.iter S.refetch !actions;
           let* () =
             T.eventually (fun () ->
-                T.holds ~what:"refetched" (!fetches = 2 && !read () = Some 2))
+                T.holds ~what:"refetched"
+                  (!fetches = 2 && Option.equal Int.equal (!read ()) (Some 2)))
           in
           let refetched = !read () in
           dispose ();
