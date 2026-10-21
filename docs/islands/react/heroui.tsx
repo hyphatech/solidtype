@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -357,6 +357,29 @@ export function fieldset(host: HTMLElement, props: FieldsetProps): void {
           <Button>Save</Button>
         </Fieldset.Actions>
       </Fieldset>,
+    ),
+  );
+}
+
+type CheckboxGroupProps = { variant: "primary" | "secondary"; isDisabled: boolean; isInvalid: boolean };
+
+// Two checkboxes, as the port's demo groups them.
+export function checkboxGroup(host: HTMLElement, props: CheckboxGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <CheckboxGroup {...props} name="interests">
+        <Label>Interests</Label>
+        {["Coding", "Design"].map((label) => (
+          <Checkbox key={label} value={label.toLowerCase()}>
+            <Checkbox.Content>
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              {label}
+            </Checkbox.Content>
+          </Checkbox>
+        ))}
+      </CheckboxGroup>,
     ),
   );
 }

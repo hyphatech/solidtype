@@ -79,6 +79,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
           read_only = (fun () -> is_read_only ());
           required = (fun () -> is_required ());
           aria_label;
+          described_by = (fun () -> None);
           interaction =
             Interaction.create
               ~disabled:(fun[@u] () -> is_disabled ())

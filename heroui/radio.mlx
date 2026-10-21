@@ -91,6 +91,7 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
           read_only = g.read_only;
           required = g.required;
           aria_label;
+          described_by = (fun () -> None);
           interaction =
             Interaction.create
               ~disabled:(fun[@u] () -> disabled ())

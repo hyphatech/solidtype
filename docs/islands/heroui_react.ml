@@ -268,3 +268,17 @@ external fieldset_props : disabled:bool -> unit -> fieldset_props = ""
 
 external fieldset : Dom.htmlDivElement -> fieldset_props -> unit = "fieldset"
 [@@mel.module "./react/heroui.tsx"]
+
+type checkbox_group_props
+
+external checkbox_group_props :
+  variant:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  checkbox_group_props = ""
+[@@mel.obj]
+
+external checkbox_group : Dom.htmlDivElement -> checkbox_group_props -> unit
+  = "checkboxGroup"
+[@@mel.module "./react/heroui.tsx"]

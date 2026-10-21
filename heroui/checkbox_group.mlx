@@ -1,0 +1,105 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+type group = {
+  checked : string -> bool;
+  set : string -> bool -> unit;
+  variant : unit -> [ `primary | `secondary ] option;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+  read_only : unit -> bool;
+  name : unit -> string option;
+  described_by : unit -> string option;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+(* A part a group names itself by while it is there: its id, and whether one
+   is. *)
+let named () =
+  let id = S.create_unique_id () in
+  let count, set_count = S.create_signal 0 in
+  let here () =
+    S.set set_count (S.get count + 1);
+    S.on_cleanup (fun () -> S.set set_count (S.get count - 1))
+  in
+  (id, here, fun () -> if S.get count > 0 then Some id else None)
+
+let%component make ?(variant : [ `primary | `secondary ] option)
+    ?(value : string list option) ?(default_value : string list = [])
+    ?(on_change : (string list -> unit) option) ?(is_disabled : bool option)
+    ?(is_invalid : bool = false) ?(is_read_only : bool = false)
+    ?(is_required : bool = false) ?(name : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A group is disabled as it says, else as its fieldset is. *)
+  let in_fieldset = Fieldset.disabled () in
+  let disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
+  let values, choose =
+    Field.controlled ~value ~default:(default_value ()) ~on_change
+  in
+  let checked v = List.exists (String.equal v) (values ()) in
+  let set v on =
+    let others = List.filter (fun w -> not (String.equal v w)) (values ()) in
+    choose (if on then others @ [ v ] else others)
+  in
+  let label_id, label_here, labelled_by = named () in
+  let description_id, description_here, described_by = named () in
+  (* A label in a group, but outside a checkbox's content, is a span that
+     names the group, as React Aria's is; and a description one that
+     describes it, and each checkbox's input. *)
+  let label : Label.slot =
+   fun[@u] classes children ->
+    label_here ();
+    <span id=label_id class_=(fun () -> classes ()) data_slot="label">
+      (fun () -> children ())
+    </span>
+  in
+  let description : Description.slot =
+   fun[@u] classes children ->
+    description_here ();
+    <span
+      id=description_id
+      class_=(fun () -> classes ())
+      slot="description"
+      data_slot="description">
+      (fun () -> children ())
+    </span>
+  in
+  let g =
+    {
+      checked;
+      set;
+      variant;
+      disabled;
+      invalid = (fun () -> is_invalid ());
+      read_only = (fun () -> is_read_only ());
+      name = (fun () -> name ());
+      described_by;
+    }
+  in
+  <Context.Provider value=(fun () -> g)>
+    <div
+      role=`group
+      ?aria_labelledby=(fun () -> labelled_by ())
+      ?aria_describedby=(fun () -> described_by ())
+      ?aria_disabled=(fun () -> if disabled () then Some true else None)
+      class_=(fun () ->
+               Styles.CheckboxGroup.classes
+                 (Styles.CheckboxGroup.options ?variant:(variant ())
+                    ?class_:(class_ ()) ()))
+      data_slot="checkbox-group"
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+      data_required=(fun () -> Jsx.flag (is_required ()))>
+      <Label.Slot.Provider value=(fun () -> label)>
+        <Description.Slot.Provider value=(fun () -> description)>
+          (fun () -> children ())
+        </Description.Slot.Provider>
+      </Label.Slot.Provider>
+    </div>
+  </Context.Provider>

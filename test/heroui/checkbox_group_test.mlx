@@ -1,0 +1,259 @@
+(* HeroUI's CheckboxGroup, beside the same group in React: every part, which
+   names and describes which, and the values its checkboxes check as they are
+   clicked. *)
+
+module S = Solidtype.Solid
+module Checkbox = Solidtype_heroui.Checkbox
+module Checkbox_group = Solidtype_heroui.Checkbox_group
+module Description = Solidtype_heroui.Description
+module Fieldset = Solidtype_heroui.Fieldset
+module Label = Solidtype_heroui.Label
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?variant:string ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render :
+    props -> ((string array -> unit)[@mel.uncurry]) -> Dom.element = "render"
+  [@@mel.module "./twins/CheckboxGroup.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/CheckboxGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/CheckboxGroup.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external checked : Dom.element -> bool = "checked" [@@mel.get]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+(* An attribute that names elements by id, written as the slots of the
+   elements it names, since each side makes its own ids. *)
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+let references = [ "for"; "aria-labelledby"; "aria-describedby" ]
+
+(* Kobalte writes its own state on each part, present and empty, which no
+   style of HeroUI's reads. *)
+let kobalte_only e name =
+  match (name, T.attribute e name) with
+  | ( ( "data-valid" | "data-invalid" | "data-required" | "data-disabled"
+      | "data-readonly" | "data-checked" | "data-indeterminate" ),
+      Some "" ) ->
+      true
+  | _ -> false
+
+(* The group's own parts whole; and of each checkbox what the group gives it,
+   its classes and state, and its input's name, check and description, since
+   Kobalte builds a checkbox otherwise than React Aria, as Checkbox's own
+   test holds. *)
+let given =
+  [
+    "class";
+    "data-selected";
+    "data-disabled";
+    "data-invalid";
+    "data-readonly";
+    "data-required";
+    "name";
+    "disabled";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], input")
+  |> Array.map (fun e ->
+      let slot = Option.value (T.attribute e "data-slot") ~default:"input" in
+      match slot with
+      | "checkbox-group" | "label" | "description" ->
+          let named =
+            references
+            |> List.filter_map (fun name ->
+                Option.map
+                  (fun v -> name ^ "->" ^ linked v)
+                  (T.attribute e name))
+          in
+          String.concat " "
+            (tag_name e
+            :: T.attributes_but
+                 (("id" :: references)
+                 @ (T.attribute_names e |> Array.to_list
+                   |> List.filter (kobalte_only e)))
+                 e
+            :: named)
+      | "checkbox" | "checkbox-content" | "input" -> (
+          String.concat " "
+            (slot
+            :: List.filter_map
+                 (fun name ->
+                   match T.attribute e name with
+                   | Some "" when not (String.equal name "disabled") -> None
+                   | Some v -> Some (name ^ "=" ^ v)
+                   | None -> None)
+                 given)
+          ^
+          match tag_name e with
+          | "INPUT" ->
+              " checked="
+              ^ string_of_bool (checked e)
+              ^ " described by "
+              ^ linked
+                  (Option.value (T.attribute e "aria-describedby") ~default:"")
+          | _ -> "")
+      | other -> other)
+
+(* The group as it is rendered, and as its second checkbox and then its first
+   are clicked: every part, and the values it told, after each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let content i =
+    match
+      Array.to_list
+        (Js.Array.from (query_all host "[data-slot=checkbox-content]"))
+    with
+    | first :: second :: _ -> if i = 0 then first else second
+    | _ -> host
+  in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, String.concat "," !told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "design clicked" (fun () -> T.click user (content 1)) in
+  let* () = after "coding clicked" (fun () -> T.click user (content 0)) in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?variant ?is_disabled ?is_invalid ?is_read_only ?is_required () =
+  let told = ref [] in
+  T.render (fun () ->
+      <Checkbox_group
+        ?variant=(fun () -> variant)
+        ?is_disabled=(fun () -> is_disabled)
+        ?is_invalid=(fun () -> is_invalid)
+        ?is_read_only=(fun () -> is_read_only)
+        ?is_required=(fun () -> is_required)
+        name="interests"
+        default_value=(fun () -> [ "coding" ])
+        on_change=(fun values -> told := values)>
+        <Label>"Interests"</Label>
+        <Description>"Pick any."</Description>
+        <Checkbox value="coding">
+          <Checkbox.Content>
+            <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Coding"
+          </Checkbox.Content>
+          <Description>"Building software."</Description>
+        </Checkbox>
+        <Checkbox value="design">
+          <Checkbox.Content>
+            <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Design"
+          </Checkbox.Content>
+        </Checkbox>
+        <Checkbox value="writing" is_disabled=true>
+          <Checkbox.Content>
+            <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+            "Writing"
+          </Checkbox.Content>
+        </Checkbox>
+      </Checkbox_group>);
+  let* solidtype =
+    walk
+      ~step:(fun action -> action ())
+      (Option.value (T.query "body > div") ~default:T.body)
+      told
+  in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render
+      (props
+         ?variant:
+           (Option.map
+              (function `primary -> "primary" | `secondary -> "secondary")
+              variant)
+         ?is_disabled ?is_invalid ?is_read_only ?is_required ())
+      (fun values -> told' := Array.to_list values)
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Checkbox_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "checks the values clicked, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "gives its checkboxes its variant, as React's" (fun () ->
+          let* r = both ~variant:`secondary () in
+          same r);
+      Jest.testPromise "checks nothing while disabled, as React's" (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.testPromise "is invalid and required, as React's is" (fun () ->
+          let* r = both ~is_invalid:true ~is_required:true () in
+          same r);
+      Jest.testPromise "keeps its values while read-only, as React's" (fun () ->
+          let* r = both ~is_read_only:true () in
+          same r);
+      Jest.testPromise "checks the values it is given" (fun () ->
+          let values, set_values = S.create_signal [ "design" ] in
+          T.render (fun () ->
+              <Checkbox_group
+                value=(fun () -> S.get values) on_change=(S.set set_values)>
+                <Checkbox value="coding">
+                  <Checkbox.Content>"Coding"</Checkbox.Content>
+                </Checkbox>
+                <Checkbox value="design">
+                  <Checkbox.Content>"Design"</Checkbox.Content>
+                </Checkbox>
+              </Checkbox_group>);
+          S.set set_values [ "coding" ];
+          let shown =
+            Js.Array.from (query_all T.body "input") |> Array.map checked
+          in
+          Js.Promise.resolve E.(expect shown |> toEqual [| true; false |]));
+      Jest.test "is disabled in a disabled fieldset" (fun () ->
+          T.render (fun () ->
+              <Fieldset disabled=true>
+                <Checkbox_group>
+                  <Checkbox value="coding">
+                    <Checkbox.Content>"Coding"</Checkbox.Content>
+                  </Checkbox>
+                </Checkbox_group>
+              </Fieldset>);
+          E.(
+            expect
+              (Option.bind (T.query "[data-slot=checkbox-group]") (fun e ->
+                   T.attribute e "data-disabled"))
+            |> toEqual (Some "true"))))

@@ -1,0 +1,66 @@
+module S = Solidtype.Solid
+module Checkbox = Solidtype_heroui.Checkbox
+module Checkbox_group = Solidtype_heroui.Checkbox_group
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let disabled, set_disabled = S.create_signal false in
+  let invalid, set_invalid = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+      <Toggle
+        label="invalid"
+        on=(fun () -> S.get invalid)
+        on_toggle=(S.set set_invalid)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=checkbox-group]"
+      solidtype=(<Checkbox_group
+                   variant=(fun () -> fst (S.get variant))
+                   is_disabled=(fun () -> S.get disabled)
+                   is_invalid=(fun () -> S.get invalid)
+                   name="interests">
+                   <Label>"Interests"</Label>
+                   <Checkbox value="coding">
+                     <Checkbox.Content>
+                       <Checkbox.Control>
+                         <Checkbox.Indicator />
+                       </Checkbox.Control>
+                       "Coding"
+                     </Checkbox.Content>
+                   </Checkbox>
+                   <Checkbox value="design">
+                     <Checkbox.Content>
+                       <Checkbox.Control>
+                         <Checkbox.Indicator />
+                       </Checkbox.Control>
+                       "Design"
+                     </Checkbox.Content>
+                   </Checkbox>
+                 </Checkbox_group>)
+      react=(fun host ->
+              Heroui_react.checkbox_group host
+                (Heroui_react.checkbox_group_props
+                   ~variant:(snd (S.get variant))
+                   ~is_disabled:(S.get disabled) ~is_invalid:(S.get invalid) ()))
+    />
+  </section>

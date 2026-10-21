@@ -2,7 +2,10 @@
     in HeroUI's anatomy, with HeroUI's classes from {!Styles.Checkbox} and the
     state its styles read -- selected, indeterminate, disabled, invalid,
     hovered, pressed, focus-visible -- declared as React Aria writes it. Its
-    props are named as HeroUI's documentation names them.
+    props are named as HeroUI's documentation names them. A {!Description}
+    inside it, but outside its content, is its own, which its input is described
+    by. Inside a {!Checkbox_group}, it is checked while its [value] is among the
+    group's, and takes the group's variant where it sets none, and its state.
 
     {[
       <Checkbox default_selected=true>

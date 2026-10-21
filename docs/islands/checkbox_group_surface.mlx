@@ -1,0 +1,28 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module Checkbox_group = Solidtype_heroui.Checkbox_group
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="w-full max-w-sm rounded-3xl p-6">
+    <Checkbox_group name="notifications" variant=`secondary>
+      <Label>"Notifications"</Label>
+      <Checkbox value="email">
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Email"
+        </Checkbox.Content>
+      </Checkbox>
+      <Checkbox value="sms">
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "SMS"
+        </Checkbox.Content>
+      </Checkbox>
+      <Checkbox value="push">
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          "Push notifications"
+        </Checkbox.Content>
+      </Checkbox>
+    </Checkbox_group>
+  </Surface>

@@ -11,12 +11,14 @@ type state = {
   read_only : unit -> bool;
   required : unit -> bool;
   aria_label : unit -> string option;
+  described_by : unit -> string option;
   interaction : Interaction.t;
 }
 (** A field's state, which its content declares as React Aria writes it:
     [data-selected], [data-indeterminate], [data-disabled], [data-invalid],
-    [data-readonly] and [data-required], and the {!Interaction} with it; and the
-    name its input is given where no label names it, [aria-label]. Content no
+    [data-readonly] and [data-required], and the {!Interaction} with it; the
+    name its input is given where no label names it, [aria-label]; and the id of
+    a description outside it its input is described by, a group's. Content no
     pointer presses keeps its click from its input, as React Aria's read-only
     checkbox and switch do, so a pointer neither focuses nor toggles it. *)
 

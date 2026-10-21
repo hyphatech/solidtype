@@ -12,6 +12,7 @@ type state = {
   read_only : unit -> bool;
   required : unit -> bool;
   aria_label : unit -> string option;
+  described_by : unit -> string option;
   interaction : Interaction.t;
 }
 
@@ -86,7 +87,10 @@ module Content (K : Kobalte) = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
       <Label.Slot.Provider value=(fun () -> inline)>
-        <Kobalte_input ?aria_label=(fun () -> f.aria_label ()) />
+        <Kobalte_input
+          ?aria_label=(fun () -> f.aria_label ())
+          ?aria_describedby=(fun () -> f.described_by ())
+        />
         (fun () -> children ())
       </Label.Slot.Provider>
     </Kobalte_label>

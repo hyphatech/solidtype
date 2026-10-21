@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Checkbox_group`: HeroUI's CheckboxGroup, on Kobalte's
+  checkboxes, which keeps the values they check, controlled or its own, and
+  gives them its variant and state; its label names it and its description
+  describes it and each checkbox. A `Description` in a `Checkbox` is the
+  checkbox's own.
 - `Solidtype_heroui.Switch_group`: HeroUI's SwitchGroup, switches laid out
   vertically or horizontally.
 - `Solidtype_heroui.Fieldset`: HeroUI's Fieldset, its legend, group and

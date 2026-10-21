@@ -99,7 +99,33 @@ module Indicator = struct
     </span>
 end
 
-let%component make ?(variant : [ `primary | `secondary ] = `primary)
+(* Kobalte's description as the element React Aria's is, a span, by
+   Kobalte's [as], which its generated check does not take. *)
+module Kobalte_description = struct
+  module Props = struct
+    external check :
+      ?as_:string Solidtype.Check.value ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Span.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Kobalte.Description.component
+end
+
+(* A description in a checkbox, but outside its content, is the checkbox's:
+   Kobalte's, which its input is described by, beside its group's. *)
+let description : Description.slot =
+ fun[@u] classes children ->
+  <Kobalte_description
+    as_="span"
+    class_=(fun () -> classes ())
+    slot="description"
+    data_slot="description">
+    (fun () -> children ())
+  </Kobalte_description>
+
+let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_selected : bool option) ?(default_selected : bool = false)
     ?(is_indeterminate : bool = false) ?(on_change : (bool -> unit) option)
     ?(is_disabled : bool = false) ?(is_invalid : bool = false)
@@ -107,10 +133,44 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(name : string option) ?(value : string option)
     ?(aria_label : string option) ?(class_ : string option)
     ~(children : Jsx.content) () =
-  (* The state is the checkbox's, read by Kobalte and by every part alike. *)
-  let on, change =
+  (* The state is the checkbox's, read by Kobalte and by every part alike: in
+     a group, whether its value is checked there, and the group's state. *)
+  let group = Checkbox_group.Context.use () in
+  let own_on, own_change =
     Field.controlled ~value:is_selected ~default:(default_selected ())
       ~on_change
+  in
+  let in_group f own () =
+    match group with Some g -> f g || own () | None -> own ()
+  in
+  let on, change =
+    match (group, value ()) with
+    | Some g, Some v ->
+        ( (fun () -> g.checked v),
+          fun now ->
+            g.set v now;
+            ignore (on_change now : unit option) )
+    | Some _, None | None, _ -> (own_on, own_change)
+  in
+  let disabled = in_group (fun g -> g.disabled ()) is_disabled in
+  let invalid = in_group (fun g -> g.invalid ()) is_invalid in
+  let read_only = in_group (fun g -> g.read_only ()) is_read_only in
+  (* A required group asks for one value checked, never each checkbox. *)
+  let required () = is_required () in
+  let name () =
+    match name () with
+    | Some n -> Some n
+    | None -> Option.bind group (fun (g : Checkbox_group.group) -> g.name ())
+  in
+  let variant () =
+    match variant () with
+    | Some v -> v
+    | None -> (
+        match
+          Option.bind group (fun (g : Checkbox_group.group) -> g.variant ())
+        with
+        | Some v -> v
+        | None -> `primary)
   in
   let c =
     {
@@ -123,16 +183,20 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
         {
           selected = on;
           indeterminate = (fun () -> is_indeterminate ());
-          disabled = (fun () -> is_disabled ());
-          invalid = (fun () -> is_invalid ());
-          read_only = (fun () -> is_read_only ());
-          required = (fun () -> is_required ());
+          disabled;
+          invalid;
+          read_only;
+          required;
           aria_label;
+          described_by =
+            (fun () ->
+              Option.bind group (fun (g : Checkbox_group.group) ->
+                  g.described_by ()));
           interaction =
             Interaction.create
-              ~disabled:(fun[@u] () -> is_disabled ())
-              ~no_hover:(fun[@u] () -> is_read_only ())
-              ~no_pointer_press:(fun[@u] () -> is_read_only ())
+              ~disabled:(fun[@u] () -> disabled ())
+              ~no_hover:(fun[@u] () -> read_only ())
+              ~no_pointer_press:(fun[@u] () -> read_only ())
               ();
         };
     }
@@ -142,20 +206,22 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       checked=(fun () -> on ())
       on_change=change
       indeterminate=(fun () -> is_indeterminate ())
-      disabled=(fun () -> is_disabled ())
-      read_only=(fun () -> is_read_only ())
-      required=(fun () -> is_required ())
+      disabled=(fun () -> disabled ())
+      read_only=(fun () -> read_only ())
+      required=(fun () -> required ())
       ?name
       ?value
-      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      validation_state=(fun () -> if invalid () then `invalid else `valid)
       class_=(fun () -> Styles.Checkbox.base (c.slots ()))
       data_slot="checkbox"
       data_selected=(fun () -> Jsx.flag (on ()))
       data_indeterminate=(fun () -> Jsx.flag (is_indeterminate ()))
-      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))
-      data_invalid=(fun () -> Jsx.flag (is_invalid ()))>
-      (fun () -> children ())
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_readonly=(fun () -> Jsx.flag (read_only ()))
+      data_required=(fun () -> Jsx.flag (required ()))
+      data_invalid=(fun () -> Jsx.flag (invalid ()))>
+      <Description.Slot.Provider value=(fun () -> description)>
+        (fun () -> children ())
+      </Description.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

@@ -1,0 +1,40 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Checkbox = Solidtype_heroui.Checkbox
+module Checkbox_group = Solidtype_heroui.Checkbox_group
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+
+let make () =
+  let selected, set_selected = S.create_signal [ "coding"; "design" ] in
+  <Checkbox_group
+    class_="min-w-[320px]"
+    name="skills"
+    value=(fun () -> S.get selected)
+    on_change=(S.set set_selected)>
+    <Label>"Your skills"</Label>
+    <Checkbox value="coding">
+      <Checkbox.Content>
+        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Coding"
+      </Checkbox.Content>
+    </Checkbox>
+    <Checkbox value="design">
+      <Checkbox.Content>
+        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Design"
+      </Checkbox.Content>
+    </Checkbox>
+    <Checkbox value="writing">
+      <Checkbox.Content>
+        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Writing"
+      </Checkbox.Content>
+    </Checkbox>
+    <Label class_="my-4 text-sm text-muted">
+      (fun () ->
+        Jsx.string
+          ("Selected: "
+          ^
+          match S.get selected with
+          | [] -> "None"
+          | values -> String.concat ", " values))
+    </Label>
+  </Checkbox_group>
