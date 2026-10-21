@@ -41,6 +41,14 @@ external by_role_named_js : string -> query -> Dom.element = "getByRole"
 
 let by_role_named role name = by_role_named_js role (query ~name ())
 
+external find_by_role_named_js : string -> query -> Dom.element Js.Promise.t
+  = "findByRole"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+(* As [by_role_named], once the page shows it: a modal dialog closing gives
+   the page back to the accessibility tree a frame or more later. *)
+let find_by_role_named role name = find_by_role_named_js role (query ~name ())
+
 external by_text : string -> Dom.element = "getByText"
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
 

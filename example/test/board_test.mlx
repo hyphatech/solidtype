@@ -34,7 +34,8 @@ let () =
         (fun () ->
           T.render Example.App.make;
           let* (_ : Dom.element) = add ~title:"Ship it" ~note:"" in
-          T.click (T.by_role_named "button" "Move Ship it to Doing");
+          let* move = T.find_by_role_named "button" "Move Ship it to Doing" in
+          T.click move;
           let* () =
             T.eventually (fun () ->
                 T.expect_equal ~what:"the task's column" "Doing"
