@@ -42,8 +42,13 @@ module Icon = struct
     </Show>
 end
 
-let%component make ~(href : string) ?(is_disabled : bool = false)
+let%component make ~(href : string) ?(is_disabled : bool option)
     ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A link is disabled as it says, else as its fieldset is. *)
+  let in_fieldset = Fieldset.disabled () in
+  let is_disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
     href=(fun () -> href ())

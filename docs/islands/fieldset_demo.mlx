@@ -1,0 +1,26 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Fieldset = Solidtype_heroui.Fieldset
+module Toggle = Controls.Toggle
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<Fieldset disabled=(fun () -> S.get disabled)>
+                   <Fieldset.Legend>"Profile"</Fieldset.Legend>
+                   <Fieldset.Actions><Button>"Save"</Button></Fieldset.Actions>
+                 </Fieldset>)
+      react=(fun host ->
+              Heroui_react.fieldset host
+                (Heroui_react.fieldset_props ~disabled:(S.get disabled) ()))
+    />
+  </section>

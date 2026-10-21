@@ -3,7 +3,8 @@
     and the state its styles read -- orientation, disabled, invalid -- declared
     as React Aria writes it. A {!Label} inside it, but outside a radio's
     content, is the group's, which names it, and a {!Description} the group's,
-    which describes it. Its props are named as HeroUI's documentation names
+    which describes it. It is disabled as [is_disabled] says, else as the
+    {!Fieldset} it is in is. Its props are named as HeroUI's documentation names
     them.
 
     {[

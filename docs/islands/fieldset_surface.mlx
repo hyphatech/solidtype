@@ -1,0 +1,41 @@
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Fieldset = Solidtype_heroui.Fieldset
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <div class_="flex items-center justify-center rounded-3xl bg-surface p-6">
+    <Surface class_="w-full min-w-[380px]">
+      <Fieldset class_="w-full">
+        <Fieldset.Legend>"Profile Settings"</Fieldset.Legend>
+        <Description>"Update your profile information."</Description>
+        <Fieldset.Group>
+          <Text_field is_required=true name="name">
+            <Label>"Name"</Label>
+            <Input placeholder="John Doe" variant=`secondary />
+          </Text_field>
+          <Text_field is_required=true name="email">
+            <Label>"Email"</Label>
+            <Input
+              type_="email" placeholder="john@example.com" variant=`secondary
+            />
+          </Text_field>
+          <Text_field is_required=true name="bio">
+            <Label>"Bio"</Label>
+            <Text_area
+              placeholder="Tell us about yourself..." variant=`secondary
+            />
+            <Description>"Minimum 10 characters"</Description>
+          </Text_field>
+        </Fieldset.Group>
+        <Fieldset.Actions>
+          <Button type_=`submit>"Save changes"</Button>
+          <Button type_=`reset variant=`tertiary>"Cancel"</Button>
+        </Fieldset.Actions>
+      </Fieldset>
+    </Surface>
+  </div>

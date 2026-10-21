@@ -1,0 +1,105 @@
+(* HeroUI's Fieldset, beside the same Fieldset in React: its legend, groups
+   and actions, and the disabled state it gives the buttons, links and groups
+   inside it, which their own overrides. *)
+
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Fieldset = Solidtype_heroui.Fieldset
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Link = Solidtype_heroui.Link
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+module Text_field = Solidtype_heroui.Text_field
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render : bool -> bool -> Dom.element = "render"
+  [@@mel.module "./twins/Fieldset.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Fieldset.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+(* The state each part shows, which the fieldset gives: its tag, and whether
+   it is disabled, as a reader and HeroUI's styles read it. Kobalte writes its
+   own state, present and empty, which no style of HeroUI's reads; and a
+   disabled link is a span in React and stays an anchor here, as Link's own
+   test holds. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let tag =
+        match T.attribute e "data-slot" with
+        | Some "link" -> "LINK"
+        | _ -> tag_name e
+      in
+      let state name =
+        match T.attribute e name with
+        | Some "" when String.equal name "data-disabled" -> None
+        | Some v -> Some (name ^ "=" ^ v)
+        | None -> None
+      in
+      String.concat " "
+        (tag
+        :: List.filter_map state
+             [
+               "data-slot";
+               "class";
+               "data-disabled";
+               "disabled";
+               "aria-disabled";
+             ]))
+
+let both ~disabled ~button_enabled =
+  T.render (fun () ->
+      <Fieldset disabled=(fun () -> disabled) class_="max-w-96">
+        <Fieldset.Legend>"Profile"</Fieldset.Legend>
+        <Description>"Update your profile."</Description>
+        <Fieldset.Group>
+          <Text_field name="name"><Label>"Name"</Label> <Input /></Text_field>
+          <Radio_group default_value="pro" name="plan">
+            <Label>"Plan"</Label>
+            <Radio value="pro">
+              <Radio.Content>
+                <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+              </Radio.Content>
+            </Radio>
+          </Radio_group>
+        </Fieldset.Group>
+        <Fieldset.Actions>
+          <Button type_=`submit>"Save"</Button>
+          <Button
+            ?is_disabled=(fun () -> if button_enabled then Some false else None)
+            variant=`secondary>
+            "Cancel"
+          </Button>
+          <Link href="#help">"Help"</Link>
+        </Fieldset.Actions>
+      </Fieldset>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react = shown (Twin.render disabled button_enabled) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Fieldset" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a fieldset of a legend, groups and actions, as React's"
+        (fun () ->
+          let solidtype, react = both ~disabled:false ~button_enabled:false in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "disables what is inside it, as React's does" (fun () ->
+          let solidtype, react = both ~disabled:true ~button_enabled:false in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "leaves enabled a button enabled itself, as React's" (fun () ->
+          let solidtype, react = both ~disabled:true ~button_enabled:true in
+          E.(expect solidtype |> toEqual react)))

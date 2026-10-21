@@ -100,10 +100,15 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(value : string option) ?(default_value : string option)
     ?(on_change : (string -> unit) option)
     ?(orientation : [ `horizontal | `vertical ] = `vertical)
-    ?(is_disabled : bool = false) ?(is_invalid : bool = false)
+    ?(is_disabled : bool option) ?(is_invalid : bool = false)
     ?(is_read_only : bool = false) ?(is_required : bool = false)
     ?(name : string option) ?(class_ : string option) ~(children : Jsx.content)
     () =
+  (* A group is disabled as it says, else as its fieldset is. *)
+  let in_fieldset = Fieldset.disabled () in
+  let is_disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
   (* The value is the group's, read by Kobalte and by every radio alike;
      none is Kobalte's own empty value, as a form's reset leaves it. *)
   let chosen, choose =

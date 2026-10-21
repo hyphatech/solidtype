@@ -1,0 +1,59 @@
+module Jsx = Solidtype.Jsx
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = unit -> bool
+end)
+
+let disabled () =
+  match Context.use () with Some d -> d | None -> fun () -> false
+
+(* HeroUI's classes for a fieldset's parts, read as a part is made: a module
+   does nothing as it loads. *)
+let slots () = Styles.Fieldset.slots (Styles.Fieldset.options ())
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Legend = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <legend
+      class_=(fun () -> after (Styles.Fieldset.legend (slots ())) (class_ ()))
+      data_slot="fieldset-legend">
+      (fun () -> children ())
+    </legend>
+end
+
+module Group = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () ->
+               after (Styles.Fieldset.field_group (slots ())) (class_ ()))
+      data_slot="fieldset-field-group">
+      (fun () -> children ())
+    </div>
+end
+
+module Actions = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Fieldset.actions (slots ())) (class_ ()))
+      data_slot="fieldset-actions">
+      (fun () -> children ())
+    </div>
+end
+
+let%component make ?(disabled : bool = false) ?(name : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* Named, so the plugin hands the context the read itself: a function
+     written in a thunk is read as what it returns. *)
+  let is_disabled () = disabled () in
+  <fieldset
+    disabled=(fun () -> disabled ())
+    ?name
+    class_=(fun () -> after (Styles.Fieldset.base (slots ())) (class_ ()))
+    data_disabled=(fun () -> Jsx.flag (disabled ()))
+    data_slot="fieldset">
+    <Context.Provider value=(fun () -> is_disabled)>
+      (fun () -> children ())
+    </Context.Provider>
+  </fieldset>

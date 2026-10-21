@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Fieldset`: HeroUI's Fieldset, its legend, group and
+  actions, which while disabled disables the `Button`s, `Link`s and
+  `Radio_group`s inside it, where their own `is_disabled` says nothing.
 - `Solidtype_heroui.Text_field`: HeroUI's TextField on Kobalte's, its value
   controlled or kept, required, disabled, invalid and read-only, and the
   parts inside it as Kobalte's: a `Label` names its input, a `Description`

@@ -1,0 +1,34 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Fieldset = Solidtype_heroui.Fieldset
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+module Switch = Solidtype_heroui.Switch
+
+let make () =
+  let disabled, set_disabled = S.create_signal true in
+  <div class_="flex w-full max-w-96 flex-col gap-4">
+    <Switch
+      is_selected=(fun () -> S.get disabled) on_change=(S.set set_disabled)>
+      <Switch.Content>
+        <Switch.Control><Switch.Thumb /></Switch.Control>
+        <Label>"Disable the fieldset"</Label>
+      </Switch.Content>
+    </Switch>
+    <Fieldset disabled=(fun () -> S.get disabled)>
+      <Fieldset.Legend>"Notifications"</Fieldset.Legend>
+      <Fieldset.Group>
+        <Text_field name="address">
+          <Label>"Email"</Label>
+          <Input type_="email" placeholder="john@example.com" />
+        </Text_field>
+      </Fieldset.Group>
+      <Fieldset.Actions>
+        <Button>"Save"</Button>
+        <Button is_disabled=false variant=`secondary>"Help"</Button>
+      </Fieldset.Actions>
+    </Fieldset>
+  </div>

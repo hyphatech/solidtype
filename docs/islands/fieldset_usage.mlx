@@ -1,0 +1,35 @@
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Fieldset = Solidtype_heroui.Fieldset
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  <form class_="w-full max-w-96" on_submit=(fun e -> prevent_default e)>
+    <Fieldset>
+      <Fieldset.Legend>"Profile Settings"</Fieldset.Legend>
+      <Description>"Update your profile information."</Description>
+      <Fieldset.Group>
+        <Text_field is_required=true name="name">
+          <Label>"Name"</Label> <Input placeholder="John Doe" />
+        </Text_field>
+        <Text_field is_required=true name="email">
+          <Label>"Email"</Label>
+          <Input type_="email" placeholder="john@example.com" />
+        </Text_field>
+        <Text_field is_required=true name="bio">
+          <Label>"Bio"</Label>
+          <Text_area placeholder="Tell us about yourself..." />
+          <Description>"Minimum 10 characters"</Description>
+        </Text_field>
+      </Fieldset.Group>
+      <Fieldset.Actions>
+        <Button type_=`submit>"Save changes"</Button>
+        <Button type_=`reset variant=`secondary>"Cancel"</Button>
+      </Fieldset.Actions>
+    </Fieldset>
+  </form>

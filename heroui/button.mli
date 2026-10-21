@@ -4,7 +4,8 @@
     [is_disabled] -- but for [on_click], a click as Kobalte gives it, where
     HeroUI's is [onPress]. Inside a {!Button_group}, a [variant], [size],
     [full_width] or [is_disabled] the button does not set is its group's, else
-    HeroUI's default: [`primary], [`md], neither full width nor disabled.
+    HeroUI's default: [`primary], [`md], neither full width nor disabled; and it
+    is disabled in a disabled {!Fieldset} where neither it nor its group says.
 
     {[
       <Button variant=`ghost size=`sm on_click=(fun _ -> save ())>"Save"</Button>

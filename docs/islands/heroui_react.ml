@@ -260,3 +260,11 @@ external text_field_props :
 external text_field : Dom.htmlDivElement -> text_field_props -> unit
   = "textField"
 [@@mel.module "./react/heroui.tsx"]
+
+type fieldset_props
+
+external fieldset_props : disabled:bool -> unit -> fieldset_props = ""
+[@@mel.obj]
+
+external fieldset : Dom.htmlDivElement -> fieldset_props -> unit = "fieldset"
+[@@mel.module "./react/heroui.tsx"]

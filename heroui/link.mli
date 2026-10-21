@@ -1,6 +1,7 @@
 (** HeroUI's Link: Kobalte's [Link.Root], an anchor, with HeroUI's classes from
     {!Styles.Link} and the state its styles read, kept by {!Interaction} as
-    React Aria keeps it.
+    React Aria keeps it. It is disabled as [is_disabled] says, else as the
+    {!Fieldset} it is in is.
 
     {[
       <Link href="https://heroui.com">"HeroUI" <Link.Icon /></Link>
