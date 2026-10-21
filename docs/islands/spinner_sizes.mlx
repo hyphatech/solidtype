@@ -1,0 +1,18 @@
+module Spinner = Solidtype_heroui.Spinner
+
+let make () =
+  <div class_="flex items-center gap-8">
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner size=`sm /> <span class_="text-xs text-muted">"Small"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner size=`md /> <span class_="text-xs text-muted">"Medium"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner size=`lg /> <span class_="text-xs text-muted">"Large"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner size=`xl />
+      <span class_="text-xs text-muted">"Extra Large"</span>
+    </div>
+  </div>

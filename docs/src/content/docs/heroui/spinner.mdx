@@ -1,0 +1,102 @@
+---
+title: Spinner
+description: A loading indicator, for a pending state.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/spinner_usage.jsx";
+import UsageCode from "../../../../islands/spinner_usage.mlx?raw";
+import * as Colors from "../../../../../_build/default/docs/islands/out/docs/islands/spinner_colors.jsx";
+import ColorsCode from "../../../../islands/spinner_colors.mlx?raw";
+import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/spinner_sizes.jsx";
+import SizesCode from "../../../../islands/spinner_sizes.mlx?raw";
+import * as Speed from "../../../../../_build/default/docs/islands/out/docs/islands/spinner_speed.jsx";
+import SpeedCode from "../../../../islands/spinner_speed.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/spinner_tailwind.jsx";
+import TailwindCode from "../../../../islands/spinner_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/spinner_demo.jsx";
+
+`Solidtype_heroui.Spinner` is a `<span role="status">` named "Loading", with
+the classes HeroUI's own `spinnerVariants` gives, that draws HeroUI's spinning
+icon. Its gradients take ids of their own from Solid's `createUniqueId`, so
+two spinners on a page never share one, and a prerendered page hydrates with
+the same ids. A spinner has no behaviour, so no Kobalte component underlies it.
+
+## Usage
+
+<Example code={UsageCode} title="spinner_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Colors
+
+<Example code={ColorsCode} title="spinner_colors.mlx"><Colors.make client:visible /></Example>
+
+### Sizes
+
+<Example code={SizesCode} title="spinner_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Speed
+
+An animation utility changes how fast one spinner turns; with
+`motion-reduce:animate-none`, it stays still for a reader who prefers reduced
+motion.
+
+<Example code={SpeedCode} title="spinner_speed.mlx"><Speed.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI Spinner twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two spinners: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="spinner_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every spinner, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .spinner {
+    @apply animate-spin;
+  }
+
+  .spinner--accent {
+    color: var(--accent);
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.spinner`, and its sizes `.spinner--sm`, `.spinner--md`, `.spinner--lg`,
+  `.spinner--xl`
+- its colors `.spinner--current`, `.spinner--accent`, `.spinner--danger`,
+  `.spinner--success`, `.spinner--warning`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Spinner
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `size` | `size` | `` [ `sm \| `md \| `lg \| `xl ] `` | `` `md `` | Its size |
+| `color` | `color` | `` [ `accent \| `current \| `danger \| `success \| `warning ] `` | `` `accent `` | Its color |
+| `aria-label` | `aria_label` | `string` | `"Loading"` | Its name |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |

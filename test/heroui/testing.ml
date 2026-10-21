@@ -109,12 +109,15 @@ let framework_only = function
   | _ -> false
 
 (* An element's attributes and their values, in order of name, but for each
-   framework's own: the order a framework writes them in is its own, and no
-   style reads it. *)
-let attributes e =
+   framework's own and those [but] names: the order a framework writes them in
+   is its own, and no style reads it. *)
+let attributes_but but e =
   attribute_names e |> Array.to_list
-  |> List.filter (fun name -> not (framework_only name))
+  |> List.filter (fun name ->
+      not (framework_only name || List.exists (String.equal name) but))
   |> List.sort String.compare
   |> List.map (fun name ->
       name ^ "=" ^ Option.value (attribute e name) ~default:"")
   |> String.concat " "
+
+let attributes e = attributes_but [] e

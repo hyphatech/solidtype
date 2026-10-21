@@ -1,0 +1,3 @@
+module Spinner = Solidtype_heroui.Spinner
+
+let make () = <div class_="flex items-center gap-4"><Spinner /></div>

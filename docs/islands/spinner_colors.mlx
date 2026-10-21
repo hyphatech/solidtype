@@ -1,0 +1,25 @@
+module Spinner = Solidtype_heroui.Spinner
+
+let make () =
+  <div class_="flex items-center gap-8">
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner color=`current />
+      <span class_="text-xs text-muted">"Current"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner color=`accent />
+      <span class_="text-xs text-muted">"Accent"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner color=`success />
+      <span class_="text-xs text-muted">"Success"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner color=`warning />
+      <span class_="text-xs text-muted">"Warning"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Spinner color=`danger />
+      <span class_="text-xs text-muted">"Danger"</span>
+    </div>
+  </div>

@@ -110,6 +110,15 @@ external link_props :
 external link : Dom.htmlDivElement -> link_props -> unit = "link"
 [@@mel.module "./react/heroui.tsx"]
 
+type spinner_props
+
+external spinner_props : color:string -> size:string -> unit -> spinner_props
+  = ""
+[@@mel.obj]
+
+external spinner : Dom.htmlDivElement -> spinner_props -> unit = "spinner"
+[@@mel.module "./react/heroui.tsx"]
+
 type surface_props
 
 external surface_props :

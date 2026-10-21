@@ -1,0 +1,115 @@
+(* HeroUI's Spinner, beside the same Spinner in React: its role, name and
+   classes, and the icon it draws, each gradient its own. *)
+
+module Spinner = Solidtype_heroui.Spinner
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?color:string ->
+  ?size:string ->
+  ?class_name:(string[@mel.as "className"]) ->
+  ?aria_label:(string[@mel.as "aria-label"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Spinner.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Spinner.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+external get_element_by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+(* Each element of the spinner, its attributes, with an id and a reference to
+   one taken out, since each side makes its own; and that every reference
+   finds its gradient. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot=spinner], [data-slot=spinner] *")
+  |> Array.map (fun e ->
+      let fill =
+        match T.attribute e "fill" with
+        | Some f when Js.String.startsWith ~prefix:"url(#" f ->
+            let id = Js.String.slice ~start:5 ~end_:(-1) f in
+            Some (Option.is_some (Js.Null.toOption (get_element_by_id id)))
+        | _ -> None
+      in
+      tag_name e ^ " "
+      ^ T.attributes_but [ "id"; "fill" ] e
+      ^
+      match fill with
+      | Some true -> " fill=gradient"
+      | Some false -> " fill=missing"
+      | None -> (
+          match T.attribute e "fill" with Some f -> " fill=" ^ f | None -> ""))
+
+let both ?color ?size ?class_ ?aria_label () =
+  let color_name = function
+    | `accent -> "accent"
+    | `current -> "current"
+    | `danger -> "danger"
+    | `success -> "success"
+    | `warning -> "warning"
+  in
+  let size_name = function
+    | `sm -> "sm"
+    | `md -> "md"
+    | `lg -> "lg"
+    | `xl -> "xl"
+  in
+  T.render (fun () ->
+      <Spinner
+        ?color=(fun () -> color)
+        ?size=(fun () -> size)
+        ?class_=(fun () -> class_)
+        ?aria_label=(fun () -> aria_label)
+      />);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react =
+    shown
+      (Twin.render
+         (props
+            ?color:(Option.map color_name color)
+            ?size:(Option.map size_name size)
+            ?class_name:class_ ?aria_label ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Spinner" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a status named Loading, drawn as React's is" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is each color and size, as React's is" (fun () ->
+          let solidtype, react =
+            both ~color:`warning ~size:`xl ~class_:"text-muted" ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is named by its aria-label" (fun () ->
+          let solidtype, react = both ~aria_label:"Saving" () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "gives two spinners gradients of their own" (fun () ->
+          T.render (fun () -> <div><Spinner /> <Spinner /></div>);
+          let ids =
+            Js.Array.from (query_all T.body "linearGradient")
+            |> Array.map (fun e ->
+                Option.value (T.attribute e "id") ~default:"")
+            |> Array.to_list
+            |> List.sort_uniq String.compare
+          in
+          E.(expect (List.length ids) |> toBe 4)))

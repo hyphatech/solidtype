@@ -1,0 +1,10 @@
+module Spinner = Solidtype_heroui.Spinner
+
+let make () =
+  <div
+    class_="flex items-center gap-4 rounded-xl border border-border bg-surface \
+            px-5 py-4">
+    <Spinner class_="text-accent" size=`sm />
+    <Spinner class_="text-muted" size=`md />
+    <Spinner class_="text-success" size=`lg />
+  </div>

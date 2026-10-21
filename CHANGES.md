@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Spinner`: HeroUI's Spinner, its colors and sizes, a
+  status named "Loading" that draws HeroUI's icon, its gradients given ids
+  of their own.
 - `Solidtype_heroui.Kbd`: HeroUI's Kbd, its variants, each key HeroUI draws
   by its symbol and names, and its text.
 - `Solidtype_heroui.Card`: HeroUI's Card, its variants and its parts --
