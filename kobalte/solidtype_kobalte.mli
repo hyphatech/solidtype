@@ -1261,6 +1261,7 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
+  (** A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query. *)
   module Root : sig
     module Props : sig
       external check :
@@ -1323,6 +1324,7 @@ module Combobox : sig
     [@@mel.module "@kobalte/core/combobox"]
   end
 
+  (** A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query. *)
   module Root_multiple : sig
     module Props : sig
       external check :
@@ -4302,6 +4304,7 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
+  (** A search is a combobox where the filter is external. *)
   module Root : sig
     module Props : sig
       external check :
@@ -4364,6 +4367,7 @@ module Search : sig
     [@@mel.module "@kobalte/core/search"]
   end
 
+  (** A search is a combobox where the filter is external. *)
   module Root_multiple : sig
     module Props : sig
       external check :
@@ -4767,6 +4771,7 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
+  (** Displays a list of options for the user to pick from — triggered by a button. *)
   module Root : sig
     module Props : sig
       external check :
@@ -4822,6 +4827,7 @@ module Select : sig
     [@@mel.module "@kobalte/core/select"]
   end
 
+  (** Displays a list of options for the user to pick from — triggered by a button. *)
   module Root_multiple : sig
     module Props : sig
       external check :

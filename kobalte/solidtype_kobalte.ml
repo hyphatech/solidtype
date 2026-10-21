@@ -1266,6 +1266,7 @@ module Combobox = struct
     [@@mel.module "@kobalte/core/combobox"]
   end
 
+  (** A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query. *)
   module Root = struct
     module Props = struct
       external check :
@@ -1328,6 +1329,7 @@ module Combobox = struct
     [@@mel.module "@kobalte/core/combobox"]
   end
 
+  (** A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query. *)
   module Root_multiple = struct
     module Props = struct
       external check :
@@ -4307,6 +4309,7 @@ module Search = struct
     [@@mel.module "@kobalte/core/search"]
   end
 
+  (** A search is a combobox where the filter is external. *)
   module Root = struct
     module Props = struct
       external check :
@@ -4369,6 +4372,7 @@ module Search = struct
     [@@mel.module "@kobalte/core/search"]
   end
 
+  (** A search is a combobox where the filter is external. *)
   module Root_multiple = struct
     module Props = struct
       external check :
@@ -4772,6 +4776,7 @@ module Select = struct
     [@@mel.module "@kobalte/core/select"]
   end
 
+  (** Displays a list of options for the user to pick from — triggered by a button. *)
   module Root = struct
     module Props = struct
       external check :
@@ -4827,6 +4832,7 @@ module Select = struct
     [@@mel.module "@kobalte/core/select"]
   end
 
+  (** Displays a list of options for the user to pick from — triggered by a button. *)
   module Root_multiple = struct
     module Props = struct
       external check :

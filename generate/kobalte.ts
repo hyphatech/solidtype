@@ -112,6 +112,7 @@ for (const entry of entries) {
       if (optType?.isUnion() && optType.types.some((t) => /Multiple/.test(checker.typeToString(t)))) {
         for (const variant of optType.types) {
           const multiple = /Multiple/.test(checker.typeToString(variant));
+          src.both(...doc(r, "  "));
           src.module("  ", `${sym.name}${multiple ? "_multiple" : ""}`, () => part(src, `@kobalte/core/${entry}`, `${entry}.${sym.name}`, signature, variant, commonProps(signature), sym.name));
           src.both(``);
         }

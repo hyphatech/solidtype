@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A Kobalte root split by `multiple`, `Root` and `Root_multiple`, has
+  Kobalte's documentation, as every other part has.
 - `solidtype-heroui`, a package of HeroUI's components ported onto Kobalte's:
   `Button`, with HeroUI's variants, sizes, full width and icon only, its
   classes from `@heroui/styles`, which an application installs beside
