@@ -1,0 +1,50 @@
+(* HeroUI's SwitchGroup, beside the same group in React: its classes and its
+   items, each orientation. *)
+
+module Switch = Solidtype_heroui.Switch
+module Switch_group = Solidtype_heroui.Switch_group
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render : [ `horizontal | `vertical ] option -> Dom.element = "render"
+  [@@mel.module "./twins/SwitchGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/SwitchGroup.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot^=switch-group]")
+  |> Array.map (fun e -> tag_name e ^ " " ^ T.attributes e)
+
+let both orientation =
+  T.render (fun () ->
+      <Switch_group ?orientation=(fun () -> orientation) class_="ms-1">
+        <Switch name="notifications">
+          <Switch.Content>
+            <Switch.Control><Switch.Thumb /></Switch.Control> "Notifications"
+          </Switch.Content>
+        </Switch>
+      </Switch_group>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react = shown (Twin.render orientation) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Switch_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a vertical group of switches, as React's is" (fun () ->
+          let solidtype, react = both None in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is a horizontal group, as React's is" (fun () ->
+          let solidtype, react = both (Some `horizontal) in
+          E.(expect solidtype |> toEqual react)))

@@ -19,6 +19,10 @@ import * as SwitchWithoutLabel from "../../../../../_build/default/docs/islands/
 import SwitchWithoutLabelCode from "../../../../islands/switch_without_label.mlx?raw";
 import * as SwitchLabelPosition from "../../../../../_build/default/docs/islands/out/docs/islands/switch_label_position.jsx";
 import SwitchLabelPositionCode from "../../../../islands/switch_label_position.mlx?raw";
+import * as SwitchGroup from "../../../../../_build/default/docs/islands/out/docs/islands/switch_group.jsx";
+import SwitchGroupCode from "../../../../islands/switch_group.mlx?raw";
+import * as SwitchGroupHorizontal from "../../../../../_build/default/docs/islands/out/docs/islands/switch_group_horizontal.jsx";
+import SwitchGroupHorizontalCode from "../../../../islands/switch_group_horizontal.mlx?raw";
 
 `Solidtype_heroui.Switch` is Kobalte's switch in HeroUI's anatomy: the field,
 `Switch.Content`, the clickable label that holds Kobalte's input,
@@ -55,11 +59,21 @@ declared as React Aria writes it: Space toggles a switch, and Enter does not.
 
 <Example code={SwitchLabelPositionCode} title="switch_label_position.mlx"><SwitchLabelPosition.make client:visible /></Example>
 
+### Group
+
+`Solidtype_heroui.Switch_group` lays switches out together, a `<div>` with
+the classes HeroUI's own `switchGroupVariants` gives; each switch is its own.
+
+<Example code={SwitchGroupCode} title="switch_group.mlx"><SwitchGroup.make client:visible /></Example>
+
+### Group Horizontal
+
+<Example code={SwitchGroupHorizontalCode} title="switch_group_horizontal.mlx"><SwitchGroupHorizontal.make client:visible /></Example>
+
 ### Not yet
 
-HeroUI's With Icons, With Description, Group, Group Horizontal and Form
-Integration, until their parts are ported; and Render Props and Render
-Function.
+HeroUI's With Icons, With Description and Form Integration, until their parts
+are ported; and Render Props and Render Function.
 
 ## Beside React
 
@@ -93,6 +107,8 @@ HeroUI in React:
 
 - `.switch`, `.switch__content`, `.switch__control`, `.switch__thumb`
 - Sizes: `.switch--sm`, `.switch--md`, `.switch--lg`
+- Group: `.switch-group`, `.switch-group__items`, `.switch-group--horizontal`,
+  `.switch-group--vertical`
 
 ### Interactive States
 
@@ -130,3 +146,11 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | What it holds; not the thumb's |
+
+### SwitchGroup
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | How its switches are laid out |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its switches |

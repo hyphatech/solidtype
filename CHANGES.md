@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Switch_group`: HeroUI's SwitchGroup, switches laid out
+  vertically or horizontally.
 - `Solidtype_heroui.Fieldset`: HeroUI's Fieldset, its legend, group and
   actions, which while disabled disables the `Button`s, `Link`s and
   `Radio_group`s inside it, where their own `is_disabled` says nothing.

@@ -29,8 +29,8 @@ HeroUI 3.2's design is being ported onto Kobalte by hand, in
 behaviour. Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox,
 Chip, CloseButton, Description, EmptyState, FieldError, Fieldset, Input,
 Kbd, Label, Link, RadioGroup with Radio, ScrollShadow, Separator, Skeleton,
-Spinner, Surface, Switch, TextArea, TextField and Typography are ported so
-far.
+Spinner, Surface, Switch with SwitchGroup, TextArea, TextField and
+Typography are ported so far.
 `make docs-serve` serves the documentation, where each port is shown beside
 the same component in React.
 
