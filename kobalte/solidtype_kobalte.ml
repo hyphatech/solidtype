@@ -1306,7 +1306,7 @@ module Combobox = struct
         ?option_disabled:('option -> bool) ->
         ?option_group_children:string Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
-        ?default_filter:(([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t) Solidtype.Check.value ->
+        ?default_filter:([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?allows_empty_collection:bool Solidtype.Check.value ->
         ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
@@ -1369,7 +1369,7 @@ module Combobox = struct
         ?option_disabled:('option -> bool) ->
         ?option_group_children:string Solidtype.Check.value ->
         ?keyboard_delegate:Types.KeyboardDelegate.t Solidtype.Check.value ->
-        ?default_filter:(([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t) Solidtype.Check.value ->
+        ?default_filter:([ `contains | `startsWith | `endsWith ], 'option -> string -> bool) Types.Either.t Solidtype.Check.value ->
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?allows_empty_collection:bool Solidtype.Check.value ->
         ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
@@ -4585,7 +4585,7 @@ module SegmentedControl = struct
         ?required:bool Solidtype.Check.value ->
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
-        ?ref:((Dom.htmlElement, Dom.htmlElement -> unit) Types.Either.t) Solidtype.Check.value ->
+        ?ref:(Dom.htmlElement, Dom.htmlElement -> unit) Types.Either.t Solidtype.Check.value ->
         (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end

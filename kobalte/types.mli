@@ -329,9 +329,9 @@ module ColorAreaContextValue : sig
   external state : t -> t_color_area_state = "state" [@@mel.get]
   external x_name : t -> string option Solidtype.Solid.accessor = "xName" [@@mel.get]
   external y_name : t -> string option Solidtype.Solid.accessor = "yName" [@@mel.get]
-  external on_drag_start : t -> ((float array -> unit) option) = "onDragStart" [@@mel.get]
-  external on_drag : t -> ((t_color_area_context_value_on_drag -> unit) option) = "onDrag" [@@mel.get]
-  external on_drag_end : t -> ((unit -> unit) option) = "onDragEnd" [@@mel.get]
+  external on_drag_start : t -> (float array -> unit) option = "onDragStart" [@@mel.get]
+  external on_drag : t -> (t_color_area_context_value_on_drag -> unit) option = "onDrag" [@@mel.get]
+  external on_drag_end : t -> (unit -> unit) option = "onDragEnd" [@@mel.get]
   external translations : t -> t_color_area_root_translations Solidtype.Solid.accessor = "translations" [@@mel.get]
   external get_display_color : t -> unit -> t_color = "getDisplayColor" [@@mel.send]
   external on_step_key_down : t -> Dom.keyboardEvent -> unit = "onStepKeyDown" [@@mel.send]
@@ -340,7 +340,7 @@ module ColorAreaContextValue : sig
   external background_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "backgroundRef" [@@mel.get]
   external set_background_ref : t -> Dom.htmlElement -> unit = "setBackgroundRef" [@@mel.send]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
-  external make : state:(t_color_area_state [@mel.as "state"]) -> x_name:(string option Solidtype.Solid.accessor [@mel.as "xName"]) -> y_name:(string option Solidtype.Solid.accessor [@mel.as "yName"]) -> on_drag_start:(((float array -> unit) option) [@mel.as "onDragStart"]) -> on_drag:(((t_color_area_context_value_on_drag -> unit) option) [@mel.as "onDrag"]) -> on_drag_end:(((unit -> unit) option) [@mel.as "onDragEnd"]) -> translations:(t_color_area_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> get_display_color:((unit -> t_color) [@mel.as "getDisplayColor"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> background_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "backgroundRef"]) -> set_background_ref:((Dom.htmlElement -> unit) [@mel.as "setBackgroundRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
+  external make : state:(t_color_area_state [@mel.as "state"]) -> x_name:(string option Solidtype.Solid.accessor [@mel.as "xName"]) -> y_name:(string option Solidtype.Solid.accessor [@mel.as "yName"]) -> on_drag_start:((float array -> unit) option [@mel.as "onDragStart"]) -> on_drag:((t_color_area_context_value_on_drag -> unit) option [@mel.as "onDrag"]) -> on_drag_end:((unit -> unit) option [@mel.as "onDragEnd"]) -> translations:(t_color_area_root_translations Solidtype.Solid.accessor [@mel.as "translations"]) -> get_display_color:((unit -> t_color) [@mel.as "getDisplayColor"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> background_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "backgroundRef"]) -> set_background_ref:((Dom.htmlElement -> unit) [@mel.as "setBackgroundRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module ColorChannelField_Root_Translations : sig
@@ -351,8 +351,8 @@ end
 
 module ColorFieldContextValue : sig
   type t = t_color_field_context_value
-  external on_blur : t -> ((t_color_field_context_value_on_blur -> unit, (Dom.htmlInputElement, Dom.focusEvent, t_color_field_context_value_on_blur -> unit) t_bound_event_handler) either) = "onBlur" [@@mel.get]
-  external make : on_blur:(((t_color_field_context_value_on_blur -> unit, (Dom.htmlInputElement, Dom.focusEvent, t_color_field_context_value_on_blur -> unit) t_bound_event_handler) either) [@mel.as "onBlur"]) -> unit -> t = "" [@@mel.obj]
+  external on_blur : t -> (t_color_field_context_value_on_blur -> unit, (Dom.htmlInputElement, Dom.focusEvent, t_color_field_context_value_on_blur -> unit) t_bound_event_handler) either = "onBlur" [@@mel.get]
+  external make : on_blur:((t_color_field_context_value_on_blur -> unit, (Dom.htmlInputElement, Dom.focusEvent, t_color_field_context_value_on_blur -> unit) t_bound_event_handler) either [@mel.as "onBlur"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module Context : sig
@@ -435,9 +435,9 @@ module ColorWheelContextValue : sig
   external state : t -> t_color_wheel_state = "state" [@@mel.get]
   external outer_radius : t -> float option Solidtype.Solid.accessor = "outerRadius" [@@mel.get]
   external thickness : t -> float Solidtype.Solid.accessor = "thickness" [@@mel.get]
-  external on_drag_start : t -> ((float array -> unit) option) = "onDragStart" [@@mel.get]
-  external on_drag : t -> ((t_color_wheel_context_value_on_drag -> unit) option) = "onDrag" [@@mel.get]
-  external on_drag_end : t -> ((unit -> unit) option) = "onDragEnd" [@@mel.get]
+  external on_drag_start : t -> (float array -> unit) option = "onDragStart" [@@mel.get]
+  external on_drag : t -> (t_color_wheel_context_value_on_drag -> unit) option = "onDrag" [@@mel.get]
+  external on_drag_end : t -> (unit -> unit) option = "onDragEnd" [@@mel.get]
   external get_thumb_value_label : t -> unit -> string = "getThumbValueLabel" [@@mel.send]
   external get_value_label : t -> t_color -> string = "getValueLabel" [@@mel.send]
   external on_step_key_down : t -> Dom.keyboardEvent -> unit = "onStepKeyDown" [@@mel.send]
@@ -446,7 +446,7 @@ module ColorWheelContextValue : sig
   external track_ref : t -> Dom.htmlElement option Solidtype.Solid.accessor = "trackRef" [@@mel.get]
   external set_track_ref : t -> Dom.htmlElement -> unit = "setTrackRef" [@@mel.send]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
-  external make : state:(t_color_wheel_state [@mel.as "state"]) -> outer_radius:(float option Solidtype.Solid.accessor [@mel.as "outerRadius"]) -> thickness:(float Solidtype.Solid.accessor [@mel.as "thickness"]) -> on_drag_start:(((float array -> unit) option) [@mel.as "onDragStart"]) -> on_drag:(((t_color_wheel_context_value_on_drag -> unit) option) [@mel.as "onDrag"]) -> on_drag_end:(((unit -> unit) option) [@mel.as "onDragEnd"]) -> get_thumb_value_label:((unit -> string) [@mel.as "getThumbValueLabel"]) -> get_value_label:((t_color -> string) [@mel.as "getValueLabel"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> track_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "trackRef"]) -> set_track_ref:((Dom.htmlElement -> unit) [@mel.as "setTrackRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
+  external make : state:(t_color_wheel_state [@mel.as "state"]) -> outer_radius:(float option Solidtype.Solid.accessor [@mel.as "outerRadius"]) -> thickness:(float Solidtype.Solid.accessor [@mel.as "thickness"]) -> on_drag_start:((float array -> unit) option [@mel.as "onDragStart"]) -> on_drag:((t_color_wheel_context_value_on_drag -> unit) option [@mel.as "onDrag"]) -> on_drag_end:((unit -> unit) option [@mel.as "onDragEnd"]) -> get_thumb_value_label:((unit -> string) [@mel.as "getThumbValueLabel"]) -> get_value_label:((t_color -> string) [@mel.as "getValueLabel"]) -> on_step_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onStepKeyDown"]) -> thumb_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "thumbRef"]) -> set_thumb_ref:((Dom.htmlElement -> unit) [@mel.as "setThumbRef"]) -> track_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "trackRef"]) -> set_track_ref:((Dom.htmlElement -> unit) [@mel.as "setTrackRef"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module ComboboxControlState : sig
@@ -603,10 +603,10 @@ module ComboboxContextValue : sig
   external placeholder : t -> Solidtype.Jsx.element Solidtype.Solid.accessor = "placeholder" [@@mel.get]
   external render_item : t -> _ t_collection_node -> Solidtype.Jsx.element = "renderItem" [@@mel.send]
   external render_section : t -> _ t_collection_node -> Solidtype.Jsx.element = "renderSection" [@@mel.send]
-  external on_input_key_down : t -> ((t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either) = "onInputKeyDown" [@@mel.get]
+  external on_input_key_down : t -> (t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either = "onInputKeyDown" [@@mel.get]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   val register_listbox_id : t -> string -> (unit -> unit)
-  val make : dataset:t_combobox_data_set Solidtype.Solid.accessor -> is_open:bool Solidtype.Solid.accessor -> is_disabled:bool Solidtype.Solid.accessor -> is_multiple:bool Solidtype.Solid.accessor -> is_virtualized:bool Solidtype.Solid.accessor -> is_modal:bool Solidtype.Solid.accessor -> prevent_scroll:bool Solidtype.Solid.accessor -> is_input_focused:bool Solidtype.Solid.accessor -> allows_empty_collection:bool Solidtype.Solid.accessor -> should_focus_wrap:bool Solidtype.Solid.accessor -> remove_on_backspace:bool Solidtype.Solid.accessor -> content_present:bool Solidtype.Solid.accessor -> auto_focus:([ `first | `last ], bool) either Solidtype.Solid.accessor -> active_descendant:string option Solidtype.Solid.accessor -> input_value:string option Solidtype.Solid.accessor -> trigger_mode:[ `focus | `input | `manual ] Solidtype.Solid.accessor -> control_ref:Dom.htmlElement option Solidtype.Solid.accessor -> input_ref:Dom.htmlInputElement option Solidtype.Solid.accessor -> trigger_ref:Dom.htmlElement option Solidtype.Solid.accessor -> content_ref:Dom.htmlElement option Solidtype.Solid.accessor -> listbox_id:string option Solidtype.Solid.accessor -> trigger_aria_label:string option Solidtype.Solid.accessor -> listbox_aria_label:string option Solidtype.Solid.accessor -> list_state:t_list_state Solidtype.Solid.accessor -> keyboard_delegate:t_keyboard_delegate Solidtype.Solid.accessor -> reset_input_value:(string Js.Set.t -> unit) -> set_is_input_focused:(bool -> unit) -> set_input_value:(string -> unit) -> set_control_ref:(Dom.htmlElement -> unit) -> set_input_ref:(Dom.htmlInputElement -> unit) -> set_trigger_ref:(Dom.htmlElement -> unit) -> set_content_ref:(Dom.htmlElement -> unit) -> set_listbox_ref:(Dom.htmlElement -> unit) -> open_:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> close:(unit -> unit) -> toggle:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> placeholder:Solidtype.Jsx.element Solidtype.Solid.accessor -> render_item:(_ t_collection_node -> Solidtype.Jsx.element) -> render_section:(_ t_collection_node -> Solidtype.Jsx.element) -> on_input_key_down:((t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either) -> generate_id:(string -> string) -> register_listbox_id:(string -> (unit -> unit)) -> unit -> t
+  val make : dataset:t_combobox_data_set Solidtype.Solid.accessor -> is_open:bool Solidtype.Solid.accessor -> is_disabled:bool Solidtype.Solid.accessor -> is_multiple:bool Solidtype.Solid.accessor -> is_virtualized:bool Solidtype.Solid.accessor -> is_modal:bool Solidtype.Solid.accessor -> prevent_scroll:bool Solidtype.Solid.accessor -> is_input_focused:bool Solidtype.Solid.accessor -> allows_empty_collection:bool Solidtype.Solid.accessor -> should_focus_wrap:bool Solidtype.Solid.accessor -> remove_on_backspace:bool Solidtype.Solid.accessor -> content_present:bool Solidtype.Solid.accessor -> auto_focus:([ `first | `last ], bool) either Solidtype.Solid.accessor -> active_descendant:string option Solidtype.Solid.accessor -> input_value:string option Solidtype.Solid.accessor -> trigger_mode:[ `focus | `input | `manual ] Solidtype.Solid.accessor -> control_ref:Dom.htmlElement option Solidtype.Solid.accessor -> input_ref:Dom.htmlInputElement option Solidtype.Solid.accessor -> trigger_ref:Dom.htmlElement option Solidtype.Solid.accessor -> content_ref:Dom.htmlElement option Solidtype.Solid.accessor -> listbox_id:string option Solidtype.Solid.accessor -> trigger_aria_label:string option Solidtype.Solid.accessor -> listbox_aria_label:string option Solidtype.Solid.accessor -> list_state:t_list_state Solidtype.Solid.accessor -> keyboard_delegate:t_keyboard_delegate Solidtype.Solid.accessor -> reset_input_value:(string Js.Set.t -> unit) -> set_is_input_focused:(bool -> unit) -> set_input_value:(string -> unit) -> set_control_ref:(Dom.htmlElement -> unit) -> set_input_ref:(Dom.htmlInputElement -> unit) -> set_trigger_ref:(Dom.htmlElement -> unit) -> set_content_ref:(Dom.htmlElement -> unit) -> set_listbox_ref:(Dom.htmlElement -> unit) -> open_:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> close:(unit -> unit) -> toggle:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> placeholder:Solidtype.Jsx.element Solidtype.Solid.accessor -> render_item:(_ t_collection_node -> Solidtype.Jsx.element) -> render_section:(_ t_collection_node -> Solidtype.Jsx.element) -> on_input_key_down:(t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either -> generate_id:(string -> string) -> register_listbox_id:(string -> (unit -> unit)) -> unit -> t
 end
 
 module ContextMenuContextValue : sig
@@ -878,12 +878,12 @@ module MenubarContextValue : sig
   type t = t_menubar_context_value
   external dataset : t -> t_menubar_data_set Solidtype.Solid.accessor = "dataset" [@@mel.get]
   external value : t -> string Js.Nullable.t Solidtype.Solid.accessor = "value" [@@mel.get]
-  external set_value : t -> ((string, string Js.Nullable.t -> string option) either Js.Nullable.t) -> unit = "setValue" [@@mel.send]
+  external set_value : t -> (string, string Js.Nullable.t -> string option) either Js.Nullable.t -> unit = "setValue" [@@mel.send]
   external menus : t -> string Js.Set.t Solidtype.Solid.accessor = "menus" [@@mel.get]
   external menu_refs : t -> Dom.htmlElement array Solidtype.Solid.accessor = "menuRefs" [@@mel.get]
   external menu_ref_map : t -> (string, Dom.htmlElement array) Js.Map.t Solidtype.Solid.accessor = "menuRefMap" [@@mel.get]
   external last_value : t -> string option Solidtype.Solid.accessor = "lastValue" [@@mel.get]
-  external set_last_value : t -> (((string, string option -> string option) either) option) -> unit = "setLastValue" [@@mel.send]
+  external set_last_value : t -> (string, string option -> string option) either option -> unit = "setLastValue" [@@mel.send]
   external register_menu : t -> string -> Dom.htmlElement array -> unit = "registerMenu" [@@mel.send]
   external unregister_menu : t -> string -> unit = "unregisterMenu" [@@mel.send]
   external next_menu : t -> unit -> unit = "nextMenu" [@@mel.send]
@@ -893,7 +893,7 @@ module MenubarContextValue : sig
   external auto_focus_menu : t -> bool Solidtype.Solid.accessor = "autoFocusMenu" [@@mel.get]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
-  external make : dataset:(t_menubar_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> value:(string Js.Nullable.t Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:((((string, string Js.Nullable.t -> string option) either Js.Nullable.t) -> unit) [@mel.as "setValue"]) -> menus:(string Js.Set.t Solidtype.Solid.accessor [@mel.as "menus"]) -> menu_refs:(Dom.htmlElement array Solidtype.Solid.accessor [@mel.as "menuRefs"]) -> menu_ref_map:((string, Dom.htmlElement array) Js.Map.t Solidtype.Solid.accessor [@mel.as "menuRefMap"]) -> last_value:(string option Solidtype.Solid.accessor [@mel.as "lastValue"]) -> set_last_value:(((((string, string option -> string option) either) option) -> unit) [@mel.as "setLastValue"]) -> register_menu:((string -> Dom.htmlElement array -> unit) [@mel.as "registerMenu"]) -> unregister_menu:((string -> unit) [@mel.as "unregisterMenu"]) -> next_menu:((unit -> unit) [@mel.as "nextMenu"]) -> previous_menu:((unit -> unit) [@mel.as "previousMenu"]) -> close_menu:((unit -> unit) [@mel.as "closeMenu"]) -> set_auto_focus_menu:(bool Solidtype.Solid.setter [@mel.as "setAutoFocusMenu"]) -> auto_focus_menu:(bool Solidtype.Solid.accessor [@mel.as "autoFocusMenu"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> orientation:([ `horizontal | `vertical ] Solidtype.Solid.accessor [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
+  external make : dataset:(t_menubar_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> value:(string Js.Nullable.t Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:(((string, string Js.Nullable.t -> string option) either Js.Nullable.t -> unit) [@mel.as "setValue"]) -> menus:(string Js.Set.t Solidtype.Solid.accessor [@mel.as "menus"]) -> menu_refs:(Dom.htmlElement array Solidtype.Solid.accessor [@mel.as "menuRefs"]) -> menu_ref_map:((string, Dom.htmlElement array) Js.Map.t Solidtype.Solid.accessor [@mel.as "menuRefMap"]) -> last_value:(string option Solidtype.Solid.accessor [@mel.as "lastValue"]) -> set_last_value:(((string, string option -> string option) either option -> unit) [@mel.as "setLastValue"]) -> register_menu:((string -> Dom.htmlElement array -> unit) [@mel.as "registerMenu"]) -> unregister_menu:((string -> unit) [@mel.as "unregisterMenu"]) -> next_menu:((unit -> unit) [@mel.as "nextMenu"]) -> previous_menu:((unit -> unit) [@mel.as "previousMenu"]) -> close_menu:((unit -> unit) [@mel.as "closeMenu"]) -> set_auto_focus_menu:(bool Solidtype.Solid.setter [@mel.as "setAutoFocusMenu"]) -> auto_focus_menu:(bool Solidtype.Solid.accessor [@mel.as "autoFocusMenu"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> orientation:([ `horizontal | `vertical ] Solidtype.Solid.accessor [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module GetValueLabelParams : sig
@@ -971,7 +971,7 @@ module NumberFieldContextValue : sig
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   external format_number : t -> float -> string = "formatNumber" [@@mel.send]
   external format : t -> unit -> unit = "format" [@@mel.send]
-  external on_input : t -> ((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either) = "onInput" [@@mel.get]
+  external on_input : t -> (t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either = "onInput" [@@mel.get]
   external text_value : t -> string option Solidtype.Solid.accessor = "textValue" [@@mel.get]
   external min_value : t -> float Solidtype.Solid.accessor = "minValue" [@@mel.get]
   external max_value : t -> float Solidtype.Solid.accessor = "maxValue" [@@mel.get]
@@ -984,7 +984,7 @@ module NumberFieldContextValue : sig
   external hidden_input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "hiddenInputRef" [@@mel.get]
   external set_hidden_input_ref : t -> Dom.htmlInputElement -> unit = "setHiddenInputRef" [@@mel.send]
   external vary_value : t -> float -> unit = "varyValue" [@@mel.send]
-  external make : value:((string, float) either option Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:(((string, float) either -> unit) [@mel.as "setValue"]) -> raw_value:(float Solidtype.Solid.accessor [@mel.as "rawValue"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> format_number:((float -> string) [@mel.as "formatNumber"]) -> format:((unit -> unit) [@mel.as "format"]) -> on_input:(((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either) [@mel.as "onInput"]) -> text_value:(string option Solidtype.Solid.accessor [@mel.as "textValue"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> step:(float Solidtype.Solid.accessor [@mel.as "step"]) -> large_step:(float Solidtype.Solid.accessor [@mel.as "largeStep"]) -> change_on_wheel:(bool Solidtype.Solid.accessor [@mel.as "changeOnWheel"]) -> translations:(t_color_channel_field_root_translations option Solidtype.Solid.accessor [@mel.as "translations"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> hidden_input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "hiddenInputRef"]) -> set_hidden_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setHiddenInputRef"]) -> vary_value:((float -> unit) [@mel.as "varyValue"]) -> unit -> t = "" [@@mel.obj]
+  external make : value:((string, float) either option Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:(((string, float) either -> unit) [@mel.as "setValue"]) -> raw_value:(float Solidtype.Solid.accessor [@mel.as "rawValue"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> format_number:((float -> string) [@mel.as "formatNumber"]) -> format:((unit -> unit) [@mel.as "format"]) -> on_input:((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either [@mel.as "onInput"]) -> text_value:(string option Solidtype.Solid.accessor [@mel.as "textValue"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> step:(float Solidtype.Solid.accessor [@mel.as "step"]) -> large_step:(float Solidtype.Solid.accessor [@mel.as "largeStep"]) -> change_on_wheel:(bool Solidtype.Solid.accessor [@mel.as "changeOnWheel"]) -> translations:(t_color_channel_field_root_translations option Solidtype.Solid.accessor [@mel.as "translations"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> hidden_input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "hiddenInputRef"]) -> set_hidden_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setHiddenInputRef"]) -> vary_value:((float -> unit) [@mel.as "varyValue"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module Pagination_Root_ItemComponent : sig
@@ -1165,9 +1165,9 @@ module SliderContextValue : sig
   external state : t -> t_slider_state = "state" [@@mel.get]
   external thumbs : t -> t_collection_item_with_ref array Solidtype.Solid.accessor = "thumbs" [@@mel.get]
   external set_thumbs : t -> t_collection_item_with_ref array Solidtype.Solid.setter = "setThumbs" [@@mel.get]
-  external on_slide_start : t -> ((float -> float -> unit) option) = "onSlideStart" [@@mel.get]
-  external on_slide_move : t -> ((t_slider_context_value_on_slide_move -> unit) option) = "onSlideMove" [@@mel.get]
-  external on_slide_end : t -> ((unit -> unit) option) = "onSlideEnd" [@@mel.get]
+  external on_slide_start : t -> (float -> float -> unit) option = "onSlideStart" [@@mel.get]
+  external on_slide_move : t -> (t_slider_context_value_on_slide_move -> unit) option = "onSlideMove" [@@mel.get]
+  external on_slide_end : t -> (unit -> unit) option = "onSlideEnd" [@@mel.get]
   external on_step_key_down : t -> Dom.keyboardEvent -> float -> unit = "onStepKeyDown" [@@mel.send]
   external is_sliding_from_left : t -> unit -> bool = "isSlidingFromLeft" [@@mel.send]
   external is_sliding_from_bottom : t -> unit -> bool = "isSlidingFromBottom" [@@mel.send]
@@ -1179,8 +1179,8 @@ module SliderContextValue : sig
   external inverted : t -> bool Solidtype.Solid.accessor = "inverted" [@@mel.get]
   external register_track : t -> Dom.htmlElement -> unit = "registerTrack" [@@mel.send]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
-  external get_value_label : t -> ((t_get_value_label_params2 -> string) option) = "getValueLabel" [@@mel.get]
-  external make : dataset:(t_slider_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> state:(t_slider_state [@mel.as "state"]) -> thumbs:(t_collection_item_with_ref array Solidtype.Solid.accessor [@mel.as "thumbs"]) -> set_thumbs:(t_collection_item_with_ref array Solidtype.Solid.setter [@mel.as "setThumbs"]) -> on_slide_start:(((float -> float -> unit) option) [@mel.as "onSlideStart"]) -> on_slide_move:(((t_slider_context_value_on_slide_move -> unit) option) [@mel.as "onSlideMove"]) -> on_slide_end:(((unit -> unit) option) [@mel.as "onSlideEnd"]) -> on_step_key_down:((Dom.keyboardEvent -> float -> unit) [@mel.as "onStepKeyDown"]) -> is_sliding_from_left:((unit -> bool) [@mel.as "isSlidingFromLeft"]) -> is_sliding_from_bottom:((unit -> bool) [@mel.as "isSlidingFromBottom"]) -> track_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "trackRef"]) -> start_edge:([ `top | `bottom | `left | `right ] Solidtype.Solid.accessor [@mel.as "startEdge"]) -> end_edge:([ `top | `bottom | `left | `right ] Solidtype.Solid.accessor [@mel.as "endEdge"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> inverted:(bool Solidtype.Solid.accessor [@mel.as "inverted"]) -> register_track:((Dom.htmlElement -> unit) [@mel.as "registerTrack"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> get_value_label:(((t_get_value_label_params2 -> string) option) [@mel.as "getValueLabel"]) -> unit -> t = "" [@@mel.obj]
+  external get_value_label : t -> (t_get_value_label_params2 -> string) option = "getValueLabel" [@@mel.get]
+  external make : dataset:(t_slider_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> state:(t_slider_state [@mel.as "state"]) -> thumbs:(t_collection_item_with_ref array Solidtype.Solid.accessor [@mel.as "thumbs"]) -> set_thumbs:(t_collection_item_with_ref array Solidtype.Solid.setter [@mel.as "setThumbs"]) -> on_slide_start:((float -> float -> unit) option [@mel.as "onSlideStart"]) -> on_slide_move:((t_slider_context_value_on_slide_move -> unit) option [@mel.as "onSlideMove"]) -> on_slide_end:((unit -> unit) option [@mel.as "onSlideEnd"]) -> on_step_key_down:((Dom.keyboardEvent -> float -> unit) [@mel.as "onStepKeyDown"]) -> is_sliding_from_left:((unit -> bool) [@mel.as "isSlidingFromLeft"]) -> is_sliding_from_bottom:((unit -> bool) [@mel.as "isSlidingFromBottom"]) -> track_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "trackRef"]) -> start_edge:([ `top | `bottom | `left | `right ] Solidtype.Solid.accessor [@mel.as "startEdge"]) -> end_edge:([ `top | `bottom | `left | `right ] Solidtype.Solid.accessor [@mel.as "endEdge"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> inverted:(bool Solidtype.Solid.accessor [@mel.as "inverted"]) -> register_track:((Dom.htmlElement -> unit) [@mel.as "registerTrack"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> get_value_label:((t_get_value_label_params2 -> string) option [@mel.as "getValueLabel"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module SwitchRootState : sig
@@ -1223,8 +1223,8 @@ module TextFieldContextValue : sig
   type t = t_text_field_context_value
   external value : t -> string option Solidtype.Solid.accessor = "value" [@@mel.get]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
-  external on_input : t -> ((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either) = "onInput" [@@mel.get]
-  external make : value:(string option Solidtype.Solid.accessor [@mel.as "value"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> on_input:(((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either) [@mel.as "onInput"]) -> unit -> t = "" [@@mel.obj]
+  external on_input : t -> (t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either = "onInput" [@@mel.get]
+  external make : value:(string option Solidtype.Solid.accessor [@mel.as "value"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> on_input:((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either [@mel.as "onInput"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module Time : sig
@@ -1333,10 +1333,10 @@ module Toast_Toaster : sig
   type t = t_toast_toaster
   external show : t -> (t_toast_component_props -> Solidtype.Jsx.element) -> ?options:t_show_toast_options -> unit -> float = "show" [@@mel.send]
   external update : t -> float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit = "update" [@@mel.send]
-  external promise : t -> (('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> ?options:t_show_toast_options -> unit -> float = "promise" [@@mel.send]
+  external promise : t -> ('t Js.Promise.t, unit -> 't Js.Promise.t) either -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> ?options:t_show_toast_options -> unit -> float = "promise" [@@mel.send]
   external dismiss : t -> float -> float = "dismiss" [@@mel.send]
   external clear : t -> unit -> unit = "clear" [@@mel.send]
-  external make : show:(((t_toast_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "show"]) -> update:((float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit) [@mel.as "update"]) -> promise:(((('t Js.Promise.t, unit -> 't Js.Promise.t) either) -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "promise"]) -> dismiss:((float -> float) [@mel.as "dismiss"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> t = "" [@@mel.obj]
+  external make : show:(((t_toast_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "show"]) -> update:((float -> (t_toast_component_props -> Solidtype.Jsx.element) -> unit) [@mel.as "update"]) -> promise:((('t Js.Promise.t, unit -> 't Js.Promise.t) either -> (('t, 'u) t_toast_promise_component_props -> Solidtype.Jsx.element) -> t_show_toast_options option -> float) [@mel.as "promise"]) -> dismiss:((float -> float) [@mel.as "dismiss"]) -> clear:((unit -> unit) [@mel.as "clear"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module ToastContextValue : sig
@@ -1662,7 +1662,7 @@ module SliderState : sig
   external page_size : t -> float Solidtype.Solid.accessor = "pageSize" [@@mel.get]
   external orientation : t -> [ `horizontal | `vertical ] Solidtype.Solid.accessor = "orientation" [@@mel.get]
   external is_disabled : t -> bool Solidtype.Solid.accessor = "isDisabled" [@@mel.get]
-  external set_values : t -> ((float array, float array -> float array) either) -> unit = "setValues" [@@mel.send]
+  external set_values : t -> (float array, float array -> float array) either -> unit = "setValues" [@@mel.send]
   external reset_values : t -> unit -> unit = "resetValues" [@@mel.send]
 end
 

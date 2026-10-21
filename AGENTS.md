@@ -69,6 +69,8 @@ generate/            what writes the generated bindings from Solid's and
   melange            what both read of Melange and write for it: Dom's
                      types, a type that admits any string, a literal a tag
   output             a generator's files written, or checked by `--check`
+  ocaml              an OCaml type as a generator builds it, and its one
+                     printer
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated

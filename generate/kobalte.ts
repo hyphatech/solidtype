@@ -11,6 +11,7 @@ import { readdirSync, existsSync, readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { keywords, label, record, snake, table } from "./names.ts";
 import { domType, isString, isTag } from "./melange.ts";
+import { apply, isArrow, name as tname, paren, print, vars as typeVarsOf, type Param, type Type } from "./ocaml.ts";
 import { writeOrCheck } from "./output.ts";
 import { browser } from "./program.ts";
 
@@ -90,12 +91,12 @@ function isDomLib(symbol: ts.Symbol): boolean {
   return /typescript\/lib\/lib\./.test(file);
 }
 
-type Vars = Map<string, string>;
+type Vars = Map<string, Type>;
 
-function typeVar(name: string, vars: Vars): string {
+function typeVar(name: string, vars: Vars): Type {
   let v = vars.get(name);
   if (!v) {
-    v = `'${snake(name)}`;
+    v = { kind: "var", name: snake(name) };
     vars.set(name, v);
   }
   return v;
@@ -150,15 +151,15 @@ const isElement = (t: ts.Type) => t.aliasSymbol?.name === "Element" && moduleOf(
 // anywhere else -- a callback's argument, a result -- it is an option.
 // The OCaml type of a TypeScript one, by AGENTS.md's "Kobalte's binding is
 // generated from its declarations"; null when none of its mappings covers it.
-function map(t: ts.Type, vars: Vars, where: string, absent = false): string | null {
+function map(t: ts.Type, vars: Vars, where: string, absent = false): Type | null {
   if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
-  if (isElement(t)) return "Solidtype.Jsx.element";
+  if (isElement(t)) return jsxElement;
   // Exclude<Option, null> and its kind: the type it narrows.
   if (t.flags & ts.TypeFlags.Conditional) return map((t as ts.ConditionalType).checkType, vars, where);
   if (t.flags & ts.TypeFlags.Substitution) return map((t as ts.SubstitutionType).baseType, vars, where);
   if (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) return null;
-  if (t.flags & ts.TypeFlags.Void) return "unit";
-  if (t.flags & ts.TypeFlags.Undefined) return "unit";
+  if (t.flags & ts.TypeFlags.Void) return unit;
+  if (t.flags & ts.TypeFlags.Undefined) return unit;
   if (t.isUnion()) {
     const undefinable = t.types.some((m) => m.flags & ts.TypeFlags.Undefined);
     let members = t.types.filter((m) => !(m.flags & ts.TypeFlags.Undefined));
@@ -167,18 +168,29 @@ function map(t: ts.Type, vars: Vars, where: string, absent = false): string | nu
     // name, which OCaml cannot check.
     const keys = members.filter((m) => m.flags & ts.TypeFlags.Index);
     members = members.filter((m) => !(m.flags & ts.TypeFlags.Index));
-    if (members.length === 0 && keys.length > 0) return "string";
+    if (members.length === 0 && keys.length > 0) return tname("string");
     // Solid's element, inlined, holds null and undefined of its own.
-    const element = members.some((m) => m.getSymbol()?.name === "ArrayElement" && moduleOf(m.getSymbol()!) === "solid-js");
-    const nullable = !element && members.some((m) => m.flags & ts.TypeFlags.Null);
-    if (!element) members = members.filter((m) => !(m.flags & ts.TypeFlags.Null));
+    const isJsx = members.some((m) => m.getSymbol()?.name === "ArrayElement" && moduleOf(m.getSymbol()!) === "solid-js");
+    const nullable = !isJsx && members.some((m) => m.flags & ts.TypeFlags.Null);
+    if (!isJsx) members = members.filter((m) => !(m.flags & ts.TypeFlags.Null));
     const inner = mapUnion(members, vars, where);
     if (!inner) return null;
-    const value = nullable ? `${inner} Js.Nullable.t` : inner;
-    return undefinable && !absent && !element && inner !== "unit" && !nullable ? `${wrap(value)} option` : value;
+    const value = nullable ? apply("Js.Nullable.t", inner) : inner;
+    return undefinable && !absent && !isJsx && !isUnit(inner) && !nullable ? apply("option", value) : value;
   }
   return mapUnion([t], vars, where);
 }
+
+const jsxElement = tname("Solidtype.Jsx.element");
+const unit = tname("unit");
+const isUnit = (t: Type) => t.kind === "name" && t.name === "unit";
+const either = (left: Type, right: Type): Type => ({ kind: "ref", module: "Either", args: [left, right] });
+
+// The printed form inside Types, where a reference is a placeholder the file
+// it is written in resolves.
+const placeholder = (module: string) => `§${module}§`;
+const show = (t: Type) => print(t, placeholder);
+const showArg = (t: Type) => paren(t, placeholder);
 
 // Solid's JSX.Element is a union, which TypeScript inlines into a union it is
 // part of; its members together are one element.
@@ -188,8 +200,8 @@ const isJsxMember = (t: ts.Type) => {
     (moduleOf(s) === "solid-js" || isDomLib(s));
 };
 
-function mapUnion(members: ts.Type[], vars: Vars, where: string): string | null {
-  if (members.length === 0) return "unit";
+function mapUnion(members: ts.Type[], vars: Vars, where: string): Type | null {
+  if (members.length === 0) return unit;
   // A style is a string, as an element's is: Solid's CSSProperties beside
   // it is the same declarations as an object.
   if (members.some(isString)) {
@@ -200,21 +212,21 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): string | null 
       (m) => !isJsxMember(m) && !isString(m) && !m.isStringLiteral() &&
         !(m.flags & (ts.TypeFlags.NumberLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.Null)),
     );
-    if (rest.length === 0) return "Solidtype.Jsx.element";
+    if (rest.length === 0) return jsxElement;
     const others = mapUnion(rest, vars, where);
-    return others ? `(Solidtype.Jsx.element, ${others}) §Either§` : null;
+    return others ? either(jsxElement, others) : null;
   }
   if (members.some(isString)) {
     const others = members.filter((m) => !isString(m) && !m.isStringLiteral());
-    if (others.length === 0) return "string";
+    if (others.length === 0) return tname("string");
   }
   const booleans = members.filter((m) => m.flags & ts.TypeFlags.BooleanLike);
-  if (booleans.length === members.length) return "bool";
+  if (booleans.length === members.length) return tname("bool");
   const strings = members.filter((m) => m.isStringLiteral()).map((m) => (m as ts.StringLiteralType).value);
   if (strings.length === members.length) {
-    return strings.every(isTag) ? `[ ${strings.map((s) => `\`${s}`).join(" | ")} ]` : "string";
+    return strings.every(isTag) ? { kind: "tags", tags: strings } : tname("string");
   }
-  if (members.every((m) => m.flags & ts.TypeFlags.NumberLike)) return "float";
+  if (members.every((m) => m.flags & ts.TypeFlags.NumberLike)) return tname("float");
   if (members.length === 1) return mapOne(members[0]!, vars, where);
   // Literals beside other kinds are one member, their own set of tags.
   const literals = members.filter((m) => m.isStringLiteral());
@@ -222,87 +234,70 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): string | null 
     const rest = members.filter((m) => !m.isStringLiteral());
     const tags = mapUnion(literals, vars, where);
     const others = mapUnion(rest, vars, where);
-    return tags && others ? `(${tags}, ${others}) §Either§` : null;
+    return tags && others ? either(tags, others) : null;
   }
   // Members of different JavaScript kinds: a type whose values are each
   // member as it is, built by a conversion per member.
   const kinds = members.map((m) => mapOne(m, vars, where));
   if (kinds.some((k) => k === null)) return null;
-  const distinct = [...new Set(kinds as string[])];
+  const distinct = [...new Map((kinds as Type[]).map((k) => [show(k), k])).values()];
   if (distinct.length === 1) return distinct[0]!;
-  if (distinct.length === 2) return `(${distinct[0]}, ${distinct[1]}) §Either§`;
+  if (distinct.length === 2) return either(distinct[0]!, distinct[1]!);
   return null;
 }
 
-function mapOne(t: ts.Type, vars: Vars, where: string): string | null {
+function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
   if (t.isUnion() || isElement(t) || t.flags & (ts.TypeFlags.Conditional | ts.TypeFlags.Substitution))
     return map(t, vars, where);
   if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
-  if (t.flags & ts.TypeFlags.Index) return "string";
+  if (t.flags & ts.TypeFlags.Index) return tname("string");
   if (checker.isTupleType(t)) {
     const items = checker.getTypeArguments(t as ts.TypeReference).map((a) => map(a, vars, where));
-    return items.some((i) => i === null) ? null : `(${(items as string[]).map(wrap).join(" * ")})`;
+    return items.some((i) => i === null) ? null : { kind: "tuple", items: items as Type[] };
   }
-  if (isString(t) || t.isStringLiteral()) return "string";
-  if (t.flags & ts.TypeFlags.BooleanLike) return "bool";
-  if (t.flags & ts.TypeFlags.NumberLike) return "float";
-  if (t.flags & (ts.TypeFlags.Void | ts.TypeFlags.Undefined)) return "unit";
+  if (isString(t) || t.isStringLiteral()) return tname("string");
+  if (t.flags & ts.TypeFlags.BooleanLike) return tname("bool");
+  if (t.flags & ts.TypeFlags.NumberLike) return tname("float");
+  if (t.flags & (ts.TypeFlags.Void | ts.TypeFlags.Undefined)) return unit;
   if (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never | ts.TypeFlags.Null)) return null;
   const libraryAlias = t.aliasSymbol && isDomLib(t.aliasSymbol);
   if (libraryAlias && t.aliasSymbol!.name === "NonNullable" && t.aliasTypeArguments?.[0])
     return map(t.aliasTypeArguments[0], vars, where);
   // A standard alias -- Partial, Omit -- is the type it makes.
   const alias = libraryAlias ? undefined : t.aliasSymbol;
-  if (alias?.name === "Accessor") {
-    const arg = t.aliasTypeArguments?.[0];
+  // A type of one argument, the argument mapped.
+  const of = (n: string, arg: ts.Type | undefined) => {
     const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} Solidtype.Solid.accessor` : null;
-  }
-  if (alias?.name === "Setter") {
-    const arg = t.aliasTypeArguments?.[0];
-    const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} Solidtype.Solid.setter` : null;
-  }
+    return a ? apply(n, a) : null;
+  };
+  if (alias?.name === "Accessor") return of("Solidtype.Solid.accessor", t.aliasTypeArguments?.[0]);
+  if (alias?.name === "Setter") return of("Solidtype.Solid.setter", t.aliasTypeArguments?.[0]);
   const symbol = t.getSymbol();
   const name = symbol?.name ?? "";
-  if (name === "Element" && moduleOf(symbol!) === "solid-js") return "Solidtype.Jsx.element";
-  if (alias?.name === "Element" || /JSX\.Element/.test(checker.typeToString(t))) return "Solidtype.Jsx.element";
-  if (checker.isArrayType(t)) {
-    const arg = checker.getTypeArguments(t as ts.TypeReference)[0];
-    const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} array` : null;
-  }
-  if (name === "Set" && symbol && isDomLib(symbol)) {
-    const arg = checker.getTypeArguments(t as ts.TypeReference)[0];
-    const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} Js.Set.t` : null;
-  }
+  if (name === "Element" && moduleOf(symbol!) === "solid-js") return jsxElement;
+  if (alias?.name === "Element" || /JSX\.Element/.test(checker.typeToString(t))) return jsxElement;
+  if (checker.isArrayType(t)) return of("array", checker.getTypeArguments(t as ts.TypeReference)[0]);
+  if (name === "Set" && symbol && isDomLib(symbol)) return of("Js.Set.t", checker.getTypeArguments(t as ts.TypeReference)[0]);
   if (name === "Iterable") {
-    const arg = (t as ts.TypeReference).typeArguments?.[0] ?? checker.getTypeArguments(t as ts.TypeReference)[0];
-    const a = arg ? map(arg, vars, where) : null;
-    return a ? `${a} array` : null;
+    return of("array", (t as ts.TypeReference).typeArguments?.[0] ?? checker.getTypeArguments(t as ts.TypeReference)[0]);
   }
   if (symbol && isDomLib(symbol)) {
-    if (name === "Date") return "Js.Date.t";
-    if (name === "RegExp") return "Js.Re.t";
+    if (name === "Date") return tname("Js.Date.t");
+    if (name === "RegExp") return tname("Js.Re.t");
     if (name === "Map") {
       const [k, v] = checker.getTypeArguments(t as ts.TypeReference).map((a) => map(a, vars, where));
-      return k && v ? `(${k}, ${v}) Js.Map.t` : null;
+      return k && v ? apply("Js.Map.t", k, v) : null;
     }
-    if (name === "Promise") {
-      const arg = checker.getTypeArguments(t as ts.TypeReference)[0];
-      const a = arg ? map(arg, vars, where) : null;
-      return a ? `${a} Js.Promise.t` : null;
-    }
+    if (name === "Promise") return of("Js.Promise.t", checker.getTypeArguments(t as ts.TypeReference)[0]);
     // An interface or a class named for an event or an element is one, but
     // never a method that happens to be named so, initEvent.
     const kind = symbol.flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class);
     const dom = domType(name) ?? (kind && /Event$/.test(name) ? "Dom.event" : kind && /Element$/.test(name) ? "Dom.element" : null);
-    if (dom) return dom;
+    if (dom) return tname(dom);
     // A standard interface is opaque but for those a user builds or reads;
     // anything else of the standard library is a function or not bound.
     const declared = symbol.flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.Class);
-    if (declared && named(name) && !name.startsWith("__") && !readable.has(name)) return `§${opaque(name)}§`;
+    if (declared && named(name) && !name.startsWith("__") && !readable.has(name)) return { kind: "ref", module: opaque(name), args: [] };
     if (!readable.has(name)) {
       const calls = t.getCallSignatures();
       return calls.length > 0 && t.getProperties().length === 0 ? mapFunction(calls[0]!, vars, where) : null;
@@ -325,7 +320,7 @@ function mapOne(t: ts.Type, vars: Vars, where: string): string | null {
     if (n.conversions.length === 0) {
       for (const m of standard) {
         const d = mapOne(m, vars, where);
-        if (d && d.startsWith("Dom.")) n.conversions.push(d);
+        if (d?.kind === "name" && d.name.startsWith("Dom.")) n.conversions.push(d.name);
       }
     }
     return ref;
@@ -341,12 +336,11 @@ function mapOne(t: ts.Type, vars: Vars, where: string): string | null {
   return null;
 }
 
-// A named type's reference, its type arguments applied.
-function reference(n: Named, t: ts.Type, alias: ts.Symbol | undefined, vars: Vars, where: string): string {
+// A named type's reference, its type arguments applied, one it cannot map
+// left to the compiler, _.
+function reference(n: Named, t: ts.Type, alias: ts.Symbol | undefined, vars: Vars, where: string): Type {
   const args = (alias ? t.aliasTypeArguments : (t as ts.TypeReference).typeArguments) ?? [];
-  const mapped = n.params.map((_, i) => (args[i] ? map(args[i]!, vars, where) : null) ?? "_");
-  const applied = mapped.length === 0 ? "" : mapped.length === 1 ? `${wrap(mapped[0]!)} ` : `(${mapped.join(", ")}) `;
-  return `${applied}§${n.module}§`;
+  return { kind: "ref", module: n.module, args: n.params.map((_, i) => (args[i] ? map(args[i]!, vars, where) : null) ?? tname("_")) };
 }
 
 // Whether a parameter may be left out: optional, or with a default, but not
@@ -360,61 +354,30 @@ function leftOut(q: ts.Symbol): boolean {
 // external, writes a parameter that may be left out as an optional argument,
 // ?name, followed by unit, as the stdlib does; a function JavaScript calls
 // takes its arguments by position, so there it is an option.
-function mapFunction(sig: ts.Signature, vars: Vars, where: string, labelled = false): string | null {
+function mapFunction(sig: ts.Signature, vars: Vars, where: string, labelled = false): Extract<Type, { kind: "arrow" }> | null {
   const ps = sig.getParameters();
-  const params = ps.map((q) => {
+  const params: (Param | null)[] = ps.map((q) => {
     const optional = labelled && leftOut(q);
     const t = checker.getTypeOfSymbol(q);
     const m = map(optional ? checker.getNonNullableType(t) : t, vars, where);
     if (m === null) return null;
-    const a = m.includes("->") ? `(${m})` : m;
-    return optional ? `?${value(snake(q.name))}:${a}` : a;
+    return optional ? { label: value(snake(q.name)), optional: true, type: m } : { type: m };
   });
   if (params.some((p) => p === null)) return null;
   const result = map(sig.getReturnType(), vars, where);
   if (!result) return null;
-  const args = params.length === 0 ? ["unit"] : (params as string[]);
-  if (labelled && ps.some(leftOut)) args.push("unit");
-  // A function returned is parenthesized, so it is not taken for more
-  // arguments.
-  return `${args.join(" -> ")} -> ${topArrow(result) ? `(${result})` : result}`;
+  const args = params.length === 0 ? [{ type: unit }] : (params as Param[]);
+  if (labelled && ps.some(leftOut)) args.push({ type: unit });
+  return { kind: "arrow", params: args, result };
 }
-
-const wrap = (t: string) => (t.includes("->") ? `(${t})` : t);
 
 // Whether reading a member gives a type variable that neither its module nor
 // its own arguments fix: a value whose type its caller would choose, an
 // unchecked cast, so it is not read. A variable an argument fixes, a generic
 // function's, is the function's own.
-const typeVars = (t: string) => t.match(/'[a-z_][A-Za-z0-9_]*/g) ?? [];
-function unbound(t: string, params: string[]): boolean {
-  const parts: string[] = [];
-  let depth = 0;
-  let last = 0;
-  for (let i = 0; i < t.length - 1; i++) {
-    const c = t[i];
-    if (c === "(" || c === "[") depth++;
-    else if (c === ")" || c === "]") depth--;
-    else if (depth === 0 && c === "-" && t[i + 1] === ">") {
-      parts.push(t.slice(last, i));
-      last = i + 2;
-    }
-  }
-  const result = t.slice(last);
-  const fixed = new Set([...params, ...parts.flatMap(typeVars)]);
-  return typeVars(result).some((v) => !fixed.has(v));
-}
-
-// Whether an OCaml type is a function: an arrow outside every parenthesis.
-function topArrow(t: string): boolean {
-  let depth = 0;
-  for (let i = 0; i < t.length - 1; i++) {
-    const c = t[i];
-    if (c === "(" || c === "[") depth++;
-    else if (c === ")" || c === "]") depth--;
-    else if (depth === 0 && c === "-" && t[i + 1] === ">") return true;
-  }
-  return false;
+function unbound(t: Type, params: string[]): boolean {
+  const fixed = new Set([...params, ...(isArrow(t) ? t.params.flatMap((p) => typeVarsOf(p.type)) : [])]);
+  return typeVarsOf(isArrow(t) ? t.result : t).some((v) => !fixed.has(v));
 }
 
 // Every attribute any element has, from Html: a CommonProps member that is
@@ -504,17 +467,17 @@ function part(entry: string, name: string, decl: ts.SignatureDeclaration, option
     }
     if (p.name === "children") {
       // Children: elements, a function of the part's own, or either.
-      const either = t.match(/^\(Solidtype\.Jsx\.element, (.*)\) §Either§$/);
+      const render = t.kind === "ref" && t.module === "Either" && show(t.args[0]!) === show(jsxElement) ? t.args[1] : undefined;
       const q = optional ? "?" : "";
-      children = either
-        ? `${q}children:(${either[1]}, [ \`nodes | \`render ]) Solidtype.Check.children ->`
-        : topArrow(t)
-          ? `${q}children:(${t}, [ \`render ]) Solidtype.Check.children ->`
+      children = render
+        ? `${q}children:(${show(render)}, [ \`nodes | \`render ]) Solidtype.Check.children ->`
+        : isArrow(t)
+          ? `${q}children:(${show(t)}, [ \`render ]) Solidtype.Check.children ->`
           : `${q}children:('f, [ \`nodes ]) Solidtype.Check.children ->`;
       continue;
     }
     const name = record(names, p.name);
-    const checked = topArrow(t) ? wrap(t) : `${wrap(t)} Solidtype.Check.value`;
+    const checked = isArrow(t) ? `(${show(t)})` : `${showArg(t)} Solidtype.Check.value`;
     args.push(`${optional ? "?" : ""}${name}:${checked} ->`);
   }
   const html = element ? element.charAt(0).toUpperCase() + element.slice(1) : null;
@@ -560,29 +523,12 @@ const throws = (symbol: ts.Symbol, where: string) =>
 // .mli declares it, where the raw external under it, _js, is left out.
 const vals = new Map<string, string>();
 
-// A function type's arguments and its result, split at its outer arrows.
-function splitArrow(t: string): { args: string[]; result: string } {
-  const args: string[] = [];
-  let depth = 0;
-  let last = 0;
-  for (let i = 0; i < t.length - 1; i++) {
-    const c = t[i];
-    if (c === "(" || c === "[") depth++;
-    else if (c === ")" || c === "]") depth--;
-    else if (depth === 0 && c === "-" && t[i + 1] === ">") {
-      args.push(t.slice(last, i).trim());
-      last = i + 2;
-    }
-  }
-  return { args, result: t.slice(last).trim() };
-}
-
 // The OCaml function over [js], an external that may throw, of [type], in
 // module [where]: [self] its object where it is a method, and [opt] whether
 // an _opt is written beside. It takes [sig]'s arguments as the external
 // does: by position, and one that may be left out as ?name, then ().
-function guarded(indent: string, where: string, name: string, type: string, js: string, sig: ts.Signature, self: boolean, opt: boolean): string[] {
-  vals.set(`${where}.${name}`, type);
+function guarded(indent: string, where: string, name: string, type: Extract<Type, { kind: "arrow" }>, js: string, sig: ts.Signature, self: boolean, opt: boolean): string[] {
+  vals.set(`${where}.${name}`, show(type));
   const ps = sig.getParameters();
   const named = ps.map((q, i) => (leftOut(q) ? `?${value(snake(q.name))}` : `x${i}`));
   if (ps.some(leftOut)) named.push("()");
@@ -595,8 +541,7 @@ function guarded(indent: string, where: string, name: string, type: string, js: 
     `${indent}  | exception Js.Exn.Error e -> invalid_arg ("${name}: " ^ Option.value (Js.Exn.message e) ~default:"")`,
   ];
   if (opt) {
-    const { args: ts, result } = splitArrow(type);
-    vals.set(`${where}.${name}_opt`, `${ts.join(" -> ")} -> ${wrap(result)} option`);
+    vals.set(`${where}.${name}_opt`, show({ ...type, result: apply("option", type.result) }));
     lines.push(`${indent}let ${name}_opt ${args} = match ${js} ${args} with v -> Some v | exception Js.Exn.Error _ -> None`);
   }
   return lines;
@@ -661,25 +606,25 @@ for (const entry of entries) {
       }
       const name = value(snake(sym.name));
       if (sig && throws(r, sym.name)) {
-        lines.push(`  external ${name}_js : ${t} = "${sym.name}"`);
+        lines.push(`  external ${name}_js : ${show(t)} = "${sym.name}"`);
         lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`);
         lines.push(...doc(r, "  ", true));
         lines.push(...guarded("  ", component, name, t, `${name}_js`, sig, false, true), ``);
         continue;
       }
       lines.push(...doc(r, "  "));
-      lines.push(`  external ${name} : ${t} = "${sym.name}"`);
+      lines.push(`  external ${name} : ${show(t)} = "${sym.name}"`);
       lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`, ``);
     } else if (r.flags & ts.SymbolFlags.Variable && sym.name !== component && !byName.get(sym.name)?.getDeclarations()?.some(ts.isFunctionDeclaration)) {
       // A value: toaster, the storage managers, the default translations.
       const vt = checker.getTypeOfSymbol(r);
       if (vt.getCallSignatures().length > 0 && vt.getProperties().length > 0) continue;
       const t = map(vt, new Map(), `${entry}.${sym.name}`);
-      if (!t || /'/.test(t)) {
+      if (!t || typeVarsOf(t).length > 0) {
         unmapped.set(`${entry}.${sym.name}`, checker.typeToString(vt));
         continue;
       }
-      lines.push(`  external ${value(snake(sym.name))} : ${t} = "${sym.name}"`);
+      lines.push(`  external ${value(snake(sym.name))} : ${show(t)} = "${sym.name}"`);
       lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`, ``);
     }
   }
@@ -699,17 +644,19 @@ while (queue.length > 0) {
   if (done.has(key)) continue;
   done.add(key);
   const vars: Vars = new Map();
-  const params = n.params.map((p) => typeVar(p, vars));
-  const t = params.length === 0 ? "t" : params.length === 1 ? `${params[0]} t` : `(${params.join(", ")}) t`;
+  const vs = n.params.map((p) => typeVar(p, vars));
+  const params = vs.flatMap(typeVarsOf);
+  const self: Type = vs.length === 0 ? tname("t") : apply("t", ...vs);
+  const t = show(self);
   const declared = n.symbol && !(n.symbol.flags & ts.SymbolFlags.TypeAlias) ? checker.getDeclaredTypeOfSymbol(n.symbol) : n.type;
-  const flat = `${params.length === 0 ? "" : params.length === 1 ? `${params[0]} ` : `(${params.join(", ")}) `}${flatName(n.module)}`;
+  const flat = show(vs.length === 0 ? tname(flatName(n.module)) : apply(flatName(n.module), ...vs));
   abstracts.push(`  type ${flat}`);
   const lines: string[] = [...(n.symbol ? doc(n.symbol, "  ") : []), `  module ${n.module} = struct`, `    type ${t} = ${flat}`];
   const isClass = n.symbol !== null && (n.symbol.flags & ts.SymbolFlags.Class) !== 0;
   // A standard type is Melange's to bind, but for one a user builds or
   // reads, whose fields, methods and constructor are bound here.
   const library = n.symbol !== null && isDomLib(n.symbol) && !readable.has(n.symbol.name);
-  const fields: [string, string, boolean][] = [];
+  const fields: [string, Type, boolean][] = [];
   // A function a field holds, wrapped once by [make] into the shape its type
   // declares: OCaml writes [fun id () -> ...] and [fun id -> fun () -> ...]
   // as one type but not one arity, and a [let] between two [fun]s keeps
@@ -738,12 +685,12 @@ while (queue.length > 0) {
       methods++;
       const name = value(snake(p.name));
       if (sig && throws(p, `${n.module}.${p.name}`)) {
-        lines.push(`    external ${name}_js : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
+        lines.push(`    external ${name}_js : ${t} -> ${show(f)} = "${p.name}" [@@mel.send]`);
         lines.push(...doc(p, "    ", true));
-        lines.push(...guarded("    ", n.module, name, `${t} -> ${f}`, `${name}_js`, sig, true, false));
+        lines.push(...guarded("    ", n.module, name, { ...f, params: [{ type: self }, ...f.params] }, `${name}_js`, sig, true, false));
         continue;
       }
-      lines.push(`    external ${name} : ${t} -> ${f} = "${p.name}" [@@mel.send]`);
+      lines.push(`    external ${name} : ${t} -> ${show(f)} = "${p.name}" [@@mel.send]`);
       continue;
     }
     const ft = map(pt, vars, `${n.module}.${p.name}`, optional);
@@ -754,14 +701,14 @@ while (queue.length > 0) {
     fields.push([p.name, ft, optional]);
     // Its constructor takes it, but reading it would be a cast.
     if (unbound(ft, params)) {
-      unmapped.set(`${n.module}.${p.name}`, `read as ${ft}`);
+      unmapped.set(`${n.module}.${p.name}`, `read as ${show(ft)}`);
       continue;
     }
     lines.push(...doc(p, "    "));
     const sig = checker.getNonNullableType(pt).getCallSignatures()[0];
     // A function is one the mapping writes as an arrow, not a setter, an
     // accessor or a type of its own that happens to be callable.
-    const arrow = topArrow(ft);
+    const arrow = isArrow(ft);
     const fn = sig && arrow && checker.getNonNullableType(pt).getProperties().length === 0 && !optional
       ? mapFunction(sig, vars, `${n.module}.${p.name}`)
       : null;
@@ -782,19 +729,19 @@ while (queue.length > 0) {
         const inner = returned.getParameters().length;
         const ys = Array.from({ length: inner }, (_, i) => `y${i}`);
         const yargs = inner === 0 ? "()" : ys.join(" ");
-        const params = argTypes.length === 0 ? "unit" : argTypes.map((a) => wrap(a ?? "_")).join(" -> ");
-        lines.push(`    external ${getter} : ${t} -> (${params} -> (${result} [@u]) [@u]) = "${p.name}" [@@mel.get]`);
+        const params = argTypes.length === 0 ? "unit" : argTypes.map((a) => showArg(a ?? tname("_"))).join(" -> ");
+        lines.push(`    external ${getter} : ${t} -> (${params} -> (${show(result)} [@u]) [@u]) = "${p.name}" [@@mel.get]`);
         lines.push(`    let ${value(snake(p.name))} o ${args} = let r = (${getter} o) ${args} [@u] in fun ${yargs} -> r ${yargs} [@u]`);
-        vals.set(`${n.module}.${value(snake(p.name))}`, `${t} -> ${params} -> ${wrap(result)}`);
+        vals.set(`${n.module}.${value(snake(p.name))}`, `${t} -> ${params} -> ${showArg(result)}`);
         shaped.set(p.name, (f) => `(fun ${args} -> let r = ${f} ${args} in fun ${yargs} -> r ${yargs})`);
       } else {
         // Called as a method of the object that holds it: an external is
         // called directly from another library, where a [let] in a nested
         // module goes through Curry, its arity lost.
-        lines.push(`    external ${value(snake(p.name))} : ${t} -> ${mapFunction(sig, vars, `${n.module}.${p.name}`, true) ?? fn} = "${p.name}" [@@mel.send]`);
+        lines.push(`    external ${value(snake(p.name))} : ${t} -> ${show(mapFunction(sig, vars, `${n.module}.${p.name}`, true) ?? fn)} = "${p.name}" [@@mel.send]`);
       }
     } else {
-      lines.push(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${wrap(ft)} option` : wrap(ft)} = "${p.name}" [@@mel.get]`);
+      lines.push(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${showArg(ft)} option` : showArg(ft)} = "${p.name}" [@@mel.get]`);
     }
   }
   // A value Kobalte declares as a DOM node or event, extended, is that value:
@@ -804,8 +751,8 @@ while (queue.length > 0) {
     lines.push(`    external to_${snake(d.slice(4))} : ${t} -> ${d} = "%identity"`);
   }
   if (!isClass && !library && methods === 0 && fields.length > 0 && n.conversions.length === 0) {
-    const label = ([k, ft, opt]: [string, string, boolean]) =>
-      `${opt ? "?" : ""}${value(snake(k))}:(${wrap(ft)} [@mel.as "${k}"]) ->`;
+    const label = ([k, ft, opt]: [string, Type, boolean]) =>
+      `${opt ? "?" : ""}${value(snake(k))}:(${showArg(ft)} [@mel.as "${k}"]) ->`;
     if (shaped.size === 0) {
       lines.push(`    external make : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
     } else {
@@ -817,7 +764,7 @@ while (queue.length > 0) {
       });
       lines.push(`    external make_js : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
       lines.push(`    let make ${params.join(" ")} () = make_js ${passed.join(" ")} ()`);
-      const labels = fields.map(([k, ft, opt]) => `${opt ? "?" : ""}${value(snake(k))}:${wrap(ft)} ->`);
+      const labels = fields.map(([k, ft, opt]) => `${opt ? "?" : ""}${value(snake(k))}:${showArg(ft)} ->`);
       vals.set(`${n.module}.make`, `${labels.join(" ")} unit -> ${t}`);
     }
   }
@@ -826,7 +773,7 @@ while (queue.length > 0) {
     const ctor = checker.getTypeOfSymbolAtLocation(n.symbol, n.symbol.valueDeclaration).getConstructSignatures()[0];
     const f = ctor ? mapFunction(ctor, vars, `${n.module}.constructor`, true) : null;
     if (f && mod) {
-      lines.push(`    external make : ${f.replace(/-> [^>]*$/, `-> ${t}`)} = "${n.module}" [@@mel.new] [@@mel.module "${mod}"]`);
+      lines.push(`    external make : ${show({ ...f, result: self })} = "${n.module}" [@@mel.new] [@@mel.module "${mod}"]`);
     }
   }
   lines.push(`  end`);
