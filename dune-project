@@ -107,6 +107,21 @@
    (= :version))))
 
 (package
+ (name solidtype-heroui)
+ (synopsis "HeroUI for solidtype: HeroUI's design on Kobalte's components")
+ (description
+  "HeroUI's components, ported by hand to solidtype on Kobalte: HeroUI's classes and the state its styles read, Kobalte's behaviour and accessibility.")
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))
+  (solidtype
+   (= :version))
+  (solidtype-kobalte
+   (= :version))))
+
+(package
  (name ppx_solidtype)
  (synopsis "The JSX lowering of solidtype: OCaml's JSX to Solid's")
  (description

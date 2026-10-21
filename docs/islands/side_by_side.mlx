@@ -1,0 +1,163 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+
+external first_element : Dom.htmlDivElement -> Dom.element Js.null
+  = "firstElementChild"
+[@@mel.get]
+
+external attribute_names : Dom.element -> string array = "getAttributeNames"
+[@@mel.send]
+
+external attribute : Dom.element -> string -> string Js.null = "getAttribute"
+[@@mel.send]
+
+type observer
+type watched
+
+external observer : ((unit -> unit)[@mel.uncurry]) -> observer
+  = "MutationObserver"
+[@@mel.new]
+
+external watched :
+  attributes:bool ->
+  subtree:bool ->
+  child_list:(bool[@mel.as "childList"]) ->
+  unit ->
+  watched = ""
+[@@mel.obj]
+
+external observe : observer -> Dom.htmlDivElement -> watched -> unit = "observe"
+[@@mel.send]
+
+external disconnect : observer -> unit = "disconnect" [@@mel.send]
+
+(* What one side shows of its element: each attribute and its value. *)
+let shown host =
+  match Js.Null.toOption (first_element host) with
+  | None -> [||]
+  | Some e ->
+      attribute_names e
+      |> Array.map (fun name ->
+          (name, Option.value (Js.Null.toOption (attribute e name)) ~default:""))
+
+let value_of name pairs =
+  Option.map snd (Array.find_opt (fun (n, _) -> String.equal n name) pairs)
+
+(* Every attribute either side has, once, with each side's value. *)
+let rows ours theirs =
+  let names =
+    Array.append (Array.map fst ours) (Array.map fst theirs)
+    |> Array.to_list
+    |> List.sort_uniq String.compare
+    |> Array.of_list
+  in
+  Array.map (fun name -> (name, value_of name ours, value_of name theirs)) names
+
+(* What each framework writes for itself and no style reads: Solid's
+   hydration key, React Aria's markers and the id it generates. *)
+let internal = function
+  | "data-hk" | "data-rac" | "data-react-aria-pressable" | "id" -> true
+  | _ -> false
+
+(* A class is a set of words, whatever their order and spacing. *)
+let words s =
+  String.split_on_char ' ' s
+  |> List.filter (fun w -> not (String.equal w ""))
+  |> List.sort_uniq String.compare
+
+let same name a b =
+  match (a, b) with
+  | Some a, Some b when String.equal name "class" ->
+      List.equal String.equal (words a) (words b)
+  | _ -> Option.equal String.equal a b
+
+let cell = function
+  | Some v -> Jsx.string (if String.equal v "" then {js|(present)|js} else v)
+  | None -> Jsx.string {js|—|js}
+
+(* A port and HeroUI's own component under the same props: [ours] renders
+   the port, [theirs] renders HeroUI's into its host, and is run again
+   whenever what it reads changes. Below them, each attribute of the two
+   elements: a row marked where they differ, and dimmed where it is a
+   framework's own. *)
+let%component make ~(ours : Jsx.element) ~(theirs : Dom.htmlDivElement -> unit)
+    () =
+  let compared, set_compared = S.create_signal [||] in
+  let our_host = ref None in
+  let their_host = ref None in
+  let read () =
+    match (!our_host, !their_host) with
+    | Some o, Some t -> S.set set_compared (rows (shown o) (shown t))
+    | _ -> ()
+  in
+  (* The observer is made once mounted: the page is also prerendered, where
+     there is no DOM to watch. *)
+  S.on_mount (fun () ->
+      match (!our_host, !their_host) with
+      | Some o, Some t ->
+          let watcher = observer read in
+          let all =
+            watched ~attributes:true ~subtree:true ~child_list:true ()
+          in
+          observe watcher o all;
+          observe watcher t all;
+          S.on_cleanup (fun () ->
+              disconnect watcher;
+              Heroui_react.unmount t)
+      | _ -> ());
+  S.create_effect (fun () ->
+      match !their_host with
+      | Some t ->
+          theirs t;
+          read ()
+      | None -> ());
+  <div class_="flex flex-col gap-4">
+    <div class_="grid grid-cols-2 gap-4">
+      <figure class_="flex flex-col gap-2">
+        <figcaption class_="text-xs font-medium text-muted">
+          "solidtype, on Kobalte"
+        </figcaption>
+        <div
+          class_="flex min-h-24 items-center justify-center rounded-xl border \
+                  border-separator p-6"
+          ref=(fun el -> our_host := Some el)>
+          (fun () -> Jsx.element (ours ()))
+        </div>
+      </figure>
+      <figure class_="flex flex-col gap-2">
+        <figcaption class_="text-xs font-medium text-muted">
+          "HeroUI, on React Aria"
+        </figcaption>
+        <div
+          class_="flex min-h-24 items-center justify-center rounded-xl border \
+                  border-separator p-6"
+          ref=(fun el -> their_host := Some el)
+        />
+      </figure>
+    </div>
+    <table class_="w-full text-left font-mono text-xs">
+      <thead class_="text-muted">
+        <tr>
+          <th class_="py-1 pe-4 font-medium">"attribute"</th>
+          <th class_="py-1 pe-4 font-medium">"solidtype"</th>
+          <th class_="py-1 font-medium">"HeroUI"</th>
+        </tr>
+      </thead>
+      <tbody>
+        <For each=(fun () -> S.get compared)>
+          (fun (name, a, b) _ ->
+            let marked =
+              if internal name then "text-muted"
+              else if same name a b then ""
+              else "bg-warning-soft"
+            in
+            <tr class_=marked>
+              <td class_="py-1 pe-4">(fun () -> Jsx.string name)</td>
+              <td class_="py-1 pe-4 break-all">(fun () -> cell a)</td>
+              <td class_="py-1 break-all">(fun () -> cell b)</td>
+            </tr>)
+        </For>
+      </tbody>
+    </table>
+  </div>

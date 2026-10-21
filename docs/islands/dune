@@ -1,0 +1,18 @@
+; The documentation's islands: each demo of a HeroUI port, and the port
+; beside HeroUI's own component, which react/ renders.
+
+(library
+ (name docs_islands)
+ (modes melange)
+ (libraries solidtype solidtype-heroui melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries docs_islands)
+ (runtime_deps
+  (glob_files react/*.tsx))
+ (module_systems
+  (es6 jsx)))

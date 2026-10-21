@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `solidtype-heroui`, a package of HeroUI's components ported onto Kobalte's:
+  `Button`, with HeroUI's variants, sizes, full width and icon only, its
+  classes from `@heroui/styles`, which an application installs beside
+  `@kobalte/core`.
 - Breaking: Kobalte's types are read as a browser has them, so
   `Solidtype_kobalte.Types` no longer holds Bun's server types (`BunFile`,
   `S3File`, `Buffer`, `Stats`, `Archive`, its `Image`) or Node's, and

@@ -47,5 +47,5 @@ jobs:
       - run: opam install . --deps-only --with-test -y
       - run: bun install --frozen-lockfile
       - run: opam list --installed --columns=name,version
-      - run: opam exec -- dune build -p solidtype,solidtype-kobalte,ppx_solidtype @install
+      - run: opam exec -- dune build -p solidtype,solidtype-kobalte,solidtype-heroui,ppx_solidtype @install
       - run: make test OPAM="opam exec --"

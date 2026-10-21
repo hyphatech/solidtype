@@ -1,0 +1,7 @@
+(library
+ (name solidtype_heroui)
+ (public_name solidtype-heroui)
+ (modes melange)
+ (libraries solidtype solidtype-kobalte melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))

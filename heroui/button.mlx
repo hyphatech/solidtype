@@ -1,0 +1,27 @@
+module Kobalte = Solidtype_kobalte.Button
+
+let%component make
+    ?(variant :
+        [ `primary
+        | `secondary
+        | `tertiary
+        | `outline
+        | `ghost
+        | `danger
+        | `danger_soft ] =
+      `primary) ?(size : [ `sm | `md | `lg ] = `md) ?(full_width : bool = false)
+    ?(is_icon_only : bool = false) ?(disabled : bool = false)
+    ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
+    ?(on_click : (Dom.mouseEvent -> unit) option)
+    ~(children : Solidtype.Jsx.content) () =
+  <Kobalte.Root
+    class_=(fun () ->
+             Styles.button
+               (Styles.button_options ~variant:(variant ()) ~size:(size ())
+                  ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
+                  ?class_name:(class_ ()) ()))
+    disabled=(fun () -> disabled ())
+    type_=(fun () -> type_ ())
+    on_click=(fun e -> ignore (on_click e : unit option))>
+    (fun () -> children ())
+  </Kobalte.Root>

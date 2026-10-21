@@ -1,0 +1,16 @@
+; Each HeroUI port, rendered as a page would render it and read as HeroUI's
+; styles read it: its classes and the state its element shows.
+
+(library
+ (name heroui_test)
+ (modes melange)
+ (libraries solidtype solidtype-heroui melange-jest.jest melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries heroui_test)
+ (module_systems
+  (es6 jsx)))

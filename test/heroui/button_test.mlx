@@ -1,0 +1,58 @@
+(* HeroUI's Button on Kobalte: the classes HeroUI's own buttonVariants gives
+   for the same props, and Kobalte's button underneath. *)
+
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+let () =
+  Jest.describe "Button" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a button with HeroUI's default classes" (fun () ->
+          T.render (fun () -> <Button>"Save"</Button>);
+          let b = T.by_role "button" in
+          E.(
+            expect (T.class_name b, T.attribute b "type")
+            |> toEqual ("button button--md button--primary", Some "button")));
+      Jest.test "has the classes of its variant, size and modifiers" (fun () ->
+          T.render (fun () ->
+              <Button
+                variant=`danger_soft
+                size=`lg
+                full_width=true
+                is_icon_only=true
+                class_="mt-4">
+                "Delete"
+              </Button>);
+          E.(
+            expect (T.class_name (T.by_role "button"))
+            |> toBe
+                 "button button--full-width button--icon-only button--lg \
+                  button--danger-soft mt-4"));
+      Jest.test "changes its classes as its variant changes" (fun () ->
+          let variant, set_variant = S.create_signal `primary in
+          T.render (fun () ->
+              <Button variant=(fun () -> S.get variant)>"Save"</Button>);
+          S.set set_variant `ghost;
+          E.(
+            expect (T.class_name (T.by_role "button"))
+            |> toBe "button button--md button--ghost"));
+      Jest.testPromise "is clicked, and not while it is disabled" (fun () ->
+          let clicks = ref 0 in
+          let disabled, set_disabled = S.create_signal false in
+          T.render (fun () ->
+              <Button
+                disabled=(fun () -> S.get disabled)
+                on_click=(fun _ -> incr clicks)>
+                "Save"
+              </Button>);
+          let user = T.setup () in
+          let b = T.by_role "button" in
+          let* () = T.click user b in
+          S.set set_disabled true;
+          let* () = T.click user b in
+          Js.Promise.resolve
+            E.(
+              expect (!clicks, T.attribute b "disabled") |> toEqual (1, Some ""))))

@@ -1,0 +1,57 @@
+---
+title: Button
+description: HeroUI's Button, on Kobalte's.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/button_demo.jsx";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/button_variants.jsx";
+import variants from "../../../../islands/button_variants.mlx?raw";
+
+`Solidtype_heroui.Button` is Kobalte's `Button.Root`, a native `<button>`, with
+the classes HeroUI's own `buttonVariants` gives. Its look is HeroUI's props;
+its behaviour is Kobalte's.
+
+## Beside HeroUI
+
+The port on the left, HeroUI's React component on the right, under the same
+props. Below them, every attribute of the two elements: a marked row is one
+they disagree on, and a dimmed row is a framework's own -- Solid's hydration
+key, React Aria's markers and the id it generates -- which no style reads.
+Hover, focus and press the buttons to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Variants
+
+<div class="not-content">
+  <Variants.make client:load />
+</div>
+
+<Code code={variants} lang="ocaml" title="button_variants.mlx" />
+
+## Props
+
+| HeroUI | solidtype | |
+|---|---|---|
+| `variant` | `variant` | `` `primary`` (default), `` `secondary``, `` `tertiary``, `` `outline``, `` `ghost``, `` `danger``, `` `danger_soft`` |
+| `size` | `size` | `` `sm``, `` `md`` (default), `` `lg`` |
+| `fullWidth` | `full_width` | |
+| `isIconOnly` | `is_icon_only` | name it with text in its children, `class_="sr-only"` |
+| `isDisabled` | `disabled` | Kobalte's name |
+| `type` | `type_` | `` `button`` (default) |
+| `onPress` | `on_click` | Kobalte's: a click, by mouse, touch or keyboard |
+| `className` | `class_` | added after HeroUI's classes |
+| `isPending` | — | not yet |
+| `aria-label` | — | not yet: a component cannot yet be given an attribute it may leave out |
+| render props | — | not yet |
+
+## State
+
+HeroUI's styles read React Aria's state attributes, `data-hovered`,
+`data-pressed` and `data-focus-visible`, which Kobalte's button does not set.
+Button's styles also read the pseudo-classes, `:hover`, `:active` and
+`:focus-visible`, so the port looks the same without them; the table above
+shows which attributes differ.

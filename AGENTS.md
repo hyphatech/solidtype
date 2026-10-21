@@ -6,7 +6,8 @@ OCaml's JSX (`.mlx`), and reaches the browser as the code Solid's own
 compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
 `vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
 library bound is an opam package of its own: `solidtype` binds Solid,
-`solidtype-kobalte` Kobalte. This file is for anyone changing it, human or
+`solidtype-kobalte` Kobalte; `solidtype-heroui` ports HeroUI's design onto
+Kobalte by hand, since HeroUI's components are React's. This file is for anyone changing it, human or
 agent. Users start at [README.md](README.md).
 
 ## Commands
@@ -20,6 +21,8 @@ make example  # the board, built by Vite into _build/example-dist, and its
               # Astro page, into _build/example-astro
 make serve    # the board and its API, served on http://localhost:4420
 make dev      # the three commands that run the board in development
+make docs     # the documentation, built by Astro into _build/docs
+make docs-dev # the documentation, served as it changes
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -44,6 +47,16 @@ src/                 solidtype, for Melange alone
   html               each element's attributes, generated
 kobalte/             solidtype-kobalte: Kobalte's components part by part,
                      its hooks, values and the types they name, generated
+heroui/              solidtype-heroui: HeroUI's components ported by hand onto
+                     Kobalte's, one module each
+  styles             HeroUI's variant functions, the classes of each look,
+                     bound by hand until a generator writes them
+docs/                the documentation, a Starlight site: each port's page
+                     shows it beside HeroUI's own component, with its source
+  islands/           the pages' OCaml: each demo, and the comparison of a
+                     port's element with HeroUI's, attribute by attribute
+  islands/react/     HeroUI's own components, rendered by React into a host
+                     an island owns: the one place React runs
 generate/            what writes the generated bindings from Solid's and
                      Kobalte's own types: `make generate`
   names              the one spelling of a name, shared by both
@@ -65,6 +78,8 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
                      each import found in Solid's and Kobalte's browser build
   test/astro         the example's Astro page built: it holds the board
                      prerendered, to hydrate
+  test/docs          the documentation built, React's compiler beside
+                     Solid's: a port's page holds it prerendered, to hydrate
 astro.config.mjs     the example's Astro page: Astro, its Solid
                      integration and the plugin, rooted here so a page
                      reaches _build
@@ -96,6 +111,8 @@ test/hydration/      an island rendered on the server and hydrated by
                      compile; setup.ts renders it through Vite's server loading
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
+test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
+                     by vitest
 test/ppx/            what the ppx writes for each JSX form
 test/does_not_compile.t
                      each mistake the types refuse, built against the

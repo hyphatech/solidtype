@@ -25,6 +25,7 @@ export default defineConfig({
             "_build/default/example/out/example/test/*_test.jsx",
             "_build/default/test/browser/out/test/browser/*_test.jsx",
             "_build/default/test/kobalte/out/test/kobalte/*_test.jsx",
+            "_build/default/test/heroui/out/test/heroui/*_test.jsx",
           ],
         },
       },
