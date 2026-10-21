@@ -70,7 +70,7 @@ let () =
             ^ " "
             ^ attribute hour "aria-valuemax");
           reads ~what:"at first" "9" "30" "0";
-          ignore (by_display_value "9:30:0");
+          ignore (by_display_value "9:30:0" : Dom.element);
           let* () = H.tab user in
           H.expect_equal ~what:"Tab's focus" "hour" (H.focused_label ());
           let* () = H.keyboard user "{ArrowUp}" in
@@ -90,6 +90,6 @@ let () =
             (H.focused_label ());
           H.expect_equal ~what:"onChange" "Changed to 7:14:0"
             (H.text (H.by_text "Changed to 7:14:0"));
-          ignore (by_display_value "7:14:0");
+          ignore (by_display_value "7:14:0" : Dom.element);
           Js.Promise.resolve ()
       | _ -> Js.Exn.raiseError "three segments, each a spinbutton")

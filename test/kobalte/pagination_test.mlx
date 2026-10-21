@@ -38,7 +38,8 @@ let pages () =
 
 let () =
   H.alike "Pagination" ~island ~twin (fun user ->
-      ignore (H.by_role_named "navigation" (H.query ~name:"Pages" ()));
+      ignore
+        (H.by_role_named "navigation" (H.query ~name:"Pages" ()) : Dom.element);
       H.expect_equal ~what:"the pages offered" {js|1 2 … 10|js} (pages ());
       H.expect_equal ~what:"the first page" "page" (current (button "1"));
       H.expect_equal ~what:"Previous, on the first page" "true"

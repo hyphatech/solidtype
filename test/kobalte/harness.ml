@@ -70,7 +70,9 @@ external eventually : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t
    and Melange calls a function of [()] with none. *)
 let settled () =
   Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0))
+      ignore
+        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0
+          : Js.Global.timeoutId))
 
 type rule
 type rules
@@ -113,7 +115,9 @@ let accessibility_violations () =
    waits them out, so none reaches the next. *)
 let between () =
   Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 50))
+      ignore
+        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 50
+          : Js.Global.timeoutId))
 
 let alike name ~island ~twin check =
   Jest.describe name (fun () ->

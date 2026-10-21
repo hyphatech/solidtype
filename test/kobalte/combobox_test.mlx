@@ -59,7 +59,7 @@ let () =
         (Option.value (H.attribute input "aria-autocomplete") ~default:"");
       let* () = H.click user input in
       let* () = H.keyboard user "b" in
-      let* _ = H.settled () in
+      let* (_ : bool) = H.settled () in
       H.expect_equal ~what:"the input, b typed" "true" (expanded input);
       H.expect_equal ~what:"the options, b typed" "Banana Blueberry"
         (offered ());
@@ -88,7 +88,7 @@ let () =
         H.click user
           (H.by_role_named "button" (H.query ~name:"Fruit Show suggestions" ()))
       in
-      let* _ = H.settled () in
+      let* (_ : bool) = H.settled () in
       H.expect_equal ~what:"the input, the button clicked" "true"
         (expanded input);
       H.expect_equal ~what:"the options, the button clicked"

@@ -230,7 +230,7 @@ external cleanup : ((unit -> unit)[@mel.uncurry]) -> (unit -> unit[@u])
   = "onCleanup"
 [@@mel.module "solid-js"]
 
-let on_cleanup f = ignore (cleanup f)
+let on_cleanup f = ignore (cleanup f : (unit -> unit[@u]))
 
 type thrown
 

@@ -32,10 +32,10 @@ let () =
           let dispose =
             rooted (fun () ->
                 S.create_effect (fun () ->
-                    ignore (S.get plain);
+                    ignore (S.get plain : int);
                     incr runs);
                 S.create_effect (fun () ->
-                    ignore (S.get never);
+                    ignore (S.get never : int);
                     incr runs_never))
           in
           S.set set_plain 1;
@@ -53,7 +53,7 @@ let () =
           let dispose =
             rooted (fun () ->
                 S.create_effect (fun () ->
-                    ignore (S.get word);
+                    ignore (S.get word : string);
                     incr runs))
           in
           S.set set_word "two";
@@ -122,7 +122,7 @@ let () =
           let dispose =
             rooted (fun () ->
                 S.create_effect (fun () ->
-                    ignore (S.get a + S.get b);
+                    ignore (S.get a + S.get b : int);
                     incr runs))
           in
           S.batch (fun () ->
@@ -136,7 +136,7 @@ let () =
           let dispose =
             rooted (fun () ->
                 S.create_effect (fun () ->
-                    ignore (S.untrack (fun () -> S.get a));
+                    ignore (S.untrack (fun () -> S.get a) : int);
                     incr runs))
           in
           S.set set_a 1;
@@ -152,7 +152,7 @@ let () =
                   (S.on
                      (fun () -> S.get a)
                      (fun input previous ->
-                       ignore (S.get b);
+                       ignore (S.get b : int);
                        seen := (input, previous) :: !seen)))
           in
           S.set set_b 1;
@@ -178,7 +178,7 @@ let () =
           let dispose =
             rooted (fun () ->
                 S.create_effect (fun () ->
-                    ignore (S.get a);
+                    ignore (S.get a : int);
                     S.on_cleanup (fun () -> incr cleaned)))
           in
           S.set set_a 1;
@@ -193,7 +193,7 @@ let () =
                 let is = S.create_selector (fun () -> S.get selected) in
                 for k = 0 to 2 do
                   S.create_effect (fun () ->
-                      ignore (is k);
+                      ignore (is k : bool);
                       runs.(k) <- runs.(k) + 1)
                 done)
           in
@@ -206,7 +206,7 @@ let () =
           let dispose =
             rooted (fun () ->
                 let track = S.create_reaction (fun () -> incr invalidated) in
-                track (fun () -> ignore (S.get a)))
+                track (fun () -> ignore (S.get a : int)))
           in
           S.set set_a 1;
           S.set set_a 2;
@@ -230,7 +230,8 @@ let () =
             (S.catch_error
                (fun () -> raise Boom)
                (fun e ->
-                 caught := Some (match e with Boom -> true | _ -> false)));
+                 caught := Some (match e with Boom -> true | _ -> false))
+              : unit option);
           E.(expect !caught |> toEqual (Some true)));
       Jest.test "a value JavaScript threw reaches catch_error as Js.Exn.Error"
         (fun () ->
@@ -243,7 +244,8 @@ let () =
                    match e with
                    | Js.Exn.Error js ->
                        Option.value (Js.Exn.message js) ~default:""
-                   | _ -> "another"));
+                   | _ -> "another")
+              : unit option);
           E.(expect !caught |> toBe "thrown"));
       Jest.test "catch_error gives the value when nothing raised" (fun () ->
           E.(
@@ -273,7 +275,8 @@ let () =
           | Some o ->
               ignore
                 (S.run_with_owner o (fun () ->
-                     S.on_cleanup (fun () -> cleaned := true)))
+                     S.on_cleanup (fun () -> cleaned := true))
+                  : unit option)
           | None -> ());
           dispose ();
           E.(expect (Option.is_some !owner, !cleaned) |> toEqual (true, true)));

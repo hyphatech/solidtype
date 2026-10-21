@@ -109,7 +109,9 @@ let () =
       let* () = expanded "the trigger, an item chosen" trigger "false" in
       (* The choice is found by its text: the open menu hides the rest of
          the page from the accessibility tree. *)
-      let* () = H.eventually (fun () -> ignore (H.by_text "Chose Copy")) in
+      let* () =
+        H.eventually (fun () -> ignore (H.by_text "Chose Copy" : Dom.element))
+      in
       (* Focus goes back to the trigger as the content unmounts, which
          jsdom's presence never lets it do. *)
       focus trigger;
@@ -130,4 +132,4 @@ let () =
         H.click user (H.by_role_named "menuitem" (H.query ~name:"Cut" ()))
       in
       let* () = expanded "the trigger, an item clicked" trigger "false" in
-      H.eventually (fun () -> ignore (H.by_text "Chose Cut")))
+      H.eventually (fun () -> ignore (H.by_text "Chose Cut" : Dom.element)))

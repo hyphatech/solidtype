@@ -69,9 +69,13 @@ let () =
       | Some input ->
           if Option.is_none (H.attribute input "multiple") then
             Js.Exn.raiseError "the hidden input takes several files";
-          ignore (H.by_role_named "button" (H.query ~name:"dropzone" ()));
-          ignore (H.by_role_named "button" (H.query ~name:"Choose files" ()));
-          ignore (H.by_role "group");
+          ignore
+            (H.by_role_named "button" (H.query ~name:"dropzone" ())
+              : Dom.element);
+          ignore
+            (H.by_role_named "button" (H.query ~name:"Choose files" ())
+              : Dom.element);
+          ignore (H.by_role "group" : Dom.element);
           let* () =
             upload user input
               [|

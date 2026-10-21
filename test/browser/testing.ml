@@ -28,7 +28,9 @@ let page () = text body
    argument, and [resolve] takes one. *)
 let later () =
   Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0))
+      ignore
+        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0
+          : Js.Global.timeoutId))
 
 external query : string -> Dom.element = "querySelector"
 [@@mel.scope "document"]

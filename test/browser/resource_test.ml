@@ -13,7 +13,7 @@ let () =
                   Some (fst (S.create_resource (fun _ -> Js.Promise.resolve 7)));
                 dispose)
           in
-          let* _ = T.later () in
+          let* (_ : bool) = T.later () in
           let seen =
             match !resource with
             | Some r -> (S.read r, S.state r, S.loading r)
@@ -32,13 +32,14 @@ let () =
                      (fun () -> S.get source)
                      (fun s _ ->
                        fetched := s :: !fetched;
-                       Js.Promise.resolve s));
+                       Js.Promise.resolve s)
+                    : _ S.resource * _ S.resource_actions);
                 dispose)
           in
-          let* _ = T.later () in
+          let* (_ : bool) = T.later () in
           let before = !fetched in
           S.set set_source (Some false);
-          let* _ = T.later () in
+          let* (_ : bool) = T.later () in
           dispose ();
           Js.Promise.resolve
             E.(expect (before, !fetched) |> toEqual ([], [ false ])));
@@ -56,12 +57,12 @@ let () =
                 actions := Some a;
                 dispose)
           in
-          let* _ = T.later () in
+          let* (_ : bool) = T.later () in
           let first = !read () in
           Option.iter (fun a -> S.mutate a (Some 10)) !actions;
           let mutated = !read () in
           Option.iter S.refetch !actions;
-          let* _ = T.later () in
+          let* (_ : bool) = T.later () in
           let refetched = !read () in
           dispose ();
           Js.Promise.resolve
@@ -79,7 +80,7 @@ let () =
                        (S.create_resource (fun _ -> Js.Promise.reject Not_found)));
                 dispose)
           in
-          let* _ = T.later () in
+          let* (_ : bool) = T.later () in
           let seen =
             match !resource with
             | Some r ->

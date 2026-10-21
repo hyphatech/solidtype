@@ -13,7 +13,8 @@ let settle ~changed what call =
          | Ok _ -> changed what
          | Error e -> Notice.show ~title:"Not done" (Said.error e));
          Js.Promise.resolve ())
-       call)
+       call
+      : unit Js.Promise.t)
 
 let make () =
   (* Fetched in the browser alone: a page prerendered has no server to ask,

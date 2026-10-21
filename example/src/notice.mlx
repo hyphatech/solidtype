@@ -26,4 +26,5 @@ let show ~title text =
              {js|×|js}
            </Toast.CloseButton>
          </Toast.Root>)
-       ())
+       ()
+      : float)

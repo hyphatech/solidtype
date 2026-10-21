@@ -46,7 +46,8 @@ let named_by e attribute =
 
 let () =
   H.alike "Listbox" ~island ~twin (fun user ->
-      ignore (H.by_role_named "listbox" (H.query ~name:"Fruit" ()));
+      ignore
+        (H.by_role_named "listbox" (H.query ~name:"Fruit" ()) : Dom.element);
       if Array.length (H.all_by_role "option") <> 3 then
         Js.Exn.raiseError "three options";
       H.expect_equal ~what:"an option, none chosen" "false"
