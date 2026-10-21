@@ -51,6 +51,7 @@ ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
 vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
+  src/index          the plugin Vite runs: a .jsx module's markers rewritten
   src/rewrite        the markers rewritten into Solid's JSX
   src/markers        what a build without the plugin reaches: an error
   pack               the plugin compiled and packed, as a release ships it
@@ -65,8 +66,9 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
 astro.config.mjs     the example's Astro page: Astro, its Solid
                      integration and the plugin, rooted here so a page
                      reaches _build
-vitest.config.ts     the OCaml tests run in jsdom, the example's server
-                     started for them
+vitest.config.ts     the OCaml tests, as three projects: the browser's in
+                     jsdom, the example's server started for them; the
+                     server's in Node; and hydration, compiled hydratable
 example/             a kanban board: a whole application on the
                      stack, its README the map and the rough edges found
                      building it
