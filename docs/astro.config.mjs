@@ -20,7 +20,29 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "solidtype",
-      customCss: ["./src/styles/heroui.css"],
+      customCss: ["./src/styles/heroui.css", "./src/styles/site.css"],
+      components: { PageTitle: "./src/components/PageTitle.astro" },
+      // Code as HeroUI's documentation shows it: a rounded block on the
+      // background's second shade, no border, no shadow.
+      expressiveCode: {
+        styleOverrides: {
+          borderRadius: "1rem",
+          borderColor: "transparent",
+          codeBackground: "var(--background-secondary)",
+          codeFontSize: "0.8125rem",
+          frames: {
+            shadowColor: "transparent",
+            editorTabBarBackground: "var(--background-secondary)",
+            editorActiveTabBackground: "var(--background-secondary)",
+            editorActiveTabIndicatorTopColor: "transparent",
+            editorActiveTabIndicatorBottomColor: "transparent",
+            editorActiveTabForeground: "var(--muted)",
+            editorTabBarBorderBottomColor: "var(--separator)",
+            terminalTitlebarBackground: "var(--background-secondary)",
+            terminalBackground: "var(--background-secondary)",
+          },
+        },
+      },
       sidebar: [
         { label: "Start here", items: ["index"] },
         { label: "HeroUI", items: ["heroui/coverage", "heroui/badge", "heroui/button", "heroui/checkbox", "heroui/chip", "heroui/description", "heroui/label", "heroui/link", "heroui/radio-group", "heroui/separator", "heroui/switch"] },

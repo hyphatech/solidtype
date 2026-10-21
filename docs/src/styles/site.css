@@ -1,0 +1,160 @@
+/* The site in HeroUI's look: Starlight's tokens taken from HeroUI's theme, so
+   the page is the background HeroUI's components are drawn for -- a field, a
+   radio's control, is visible on it as on heroui.com -- and both follow
+   Starlight's data-theme. Starlight's grays run from its text to its
+   background, dark or light, so each is a mix of HeroUI's foreground into
+   its background. Unlayered, so it wins over Starlight's own. */
+
+:root,
+:root[data-theme="light"],
+:root[data-theme="dark"] {
+  --sl-color-white: var(--foreground);
+  --sl-color-gray-1: color-mix(in oklab, var(--foreground) 90%, var(--background));
+  --sl-color-gray-2: color-mix(in oklab, var(--foreground) 72%, var(--background));
+  --sl-color-gray-3: color-mix(in oklab, var(--foreground) 55%, var(--background));
+  --sl-color-gray-4: color-mix(in oklab, var(--foreground) 40%, var(--background));
+  --sl-color-gray-5: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --sl-color-gray-6: color-mix(in oklab, var(--foreground) 7%, var(--background));
+  --sl-color-gray-7: color-mix(in oklab, var(--foreground) 4%, var(--background));
+  --sl-color-black: var(--background);
+
+  --sl-color-accent-low: var(--accent-soft);
+  --sl-color-accent: var(--accent);
+  --sl-color-accent-high: var(--accent-soft-foreground);
+
+  --sl-color-text: var(--foreground);
+  --sl-color-text-accent: var(--accent);
+  --sl-color-text-invert: var(--accent-foreground);
+  --sl-color-bg: var(--background);
+  --sl-color-bg-nav: var(--background);
+  --sl-color-bg-sidebar: var(--background);
+  --sl-color-bg-inline-code: var(--default);
+  --sl-color-bg-accent: var(--accent);
+  --sl-color-hairline-light: var(--separator);
+  --sl-color-hairline: var(--separator);
+  --sl-color-hairline-shade: var(--separator);
+
+  --sl-font: Inter, ui-sans-serif, system-ui, sans-serif;
+  --sl-text-h1: 1.875rem;
+  --sl-text-h2: 1.5rem;
+  --sl-text-h3: 1.25rem;
+  --sl-text-h4: 1.125rem;
+  --sl-content-width: 52rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* The header: a hairline beneath, the title in the text's colour, search a
+   filled field with no border, as HeroUI's. */
+.header {
+  border-bottom: 1px solid var(--separator);
+}
+.site-title {
+  color: var(--foreground);
+  font-weight: 600;
+}
+site-search button[data-open-modal] {
+  border: none;
+  border-radius: 0.75rem;
+  background: var(--default);
+  color: var(--muted);
+}
+
+/* The sidebar: plain links, the current one a rounded surface, no rails,
+   and no rule between it, the page and the table of contents. */
+.sidebar-pane,
+.right-sidebar {
+  border-inline: none;
+}
+.sidebar-content ul ul li {
+  border-inline-start: none;
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+}
+.sidebar-content a {
+  border-radius: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+.sidebar-content a:hover {
+  color: var(--foreground);
+}
+.sidebar-content a[aria-current="page"],
+.sidebar-content a[aria-current="page"]:hover,
+.sidebar-content a[aria-current="page"]:focus {
+  background: var(--surface);
+  color: var(--foreground);
+  font-weight: 500;
+  box-shadow: var(--surface-shadow);
+}
+.sidebar-content summary {
+  color: var(--foreground);
+}
+
+/* The page's own text: a title with no rule beneath, headings semibold. */
+.content-panel {
+  border-top: none;
+}
+.content-panel + .content-panel {
+  border-top: none;
+}
+.sl-markdown-content :is(h1, h2, h3, h4) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.sl-markdown-content :is(h2) {
+  margin-top: 3rem;
+}
+h1#_top {
+  font-weight: 600;
+}
+.page-description {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 1.0625rem;
+}
+
+/* Inline code a chip, as HeroUI's. */
+.sl-markdown-content :not(pre) > code {
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--default);
+}
+
+/* Tables: rows ruled, no stripes. */
+.sl-markdown-content table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.sl-markdown-content :is(th, td) {
+  border: none;
+  border-bottom: 1px solid var(--separator);
+  background: transparent;
+}
+.sl-markdown-content th {
+  color: var(--muted);
+  font-weight: 500;
+}
+.sl-markdown-content tr:nth-child(2n) {
+  background: transparent;
+}
+
+/* The table of contents: muted, the current entry in the text's colour. */
+starlight-toc a {
+  color: var(--muted);
+}
+starlight-toc a[aria-current="true"],
+starlight-toc a[aria-current="true"]:hover {
+  color: var(--foreground);
+}
+
+/* A chip in a table keeps to one line, as HeroUI's API tables do; the table
+   scrolls instead. */
+.sl-markdown-content td code {
+  white-space: nowrap;
+}
