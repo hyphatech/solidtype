@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Breaking: a name given to a prop or an attribute is passed as it is,
+  `<Row changed />` a callback whatever it is named, `class_=cls` a
+  constant; a changing value is written as the thunk it is,
+  `(fun () -> count ())`, where a bare name was taken for one.
 - A component's callback prop that takes nothing, `~(on_remove : unit -> unit)`,
   compiles and is called, where `let%component` refused it with an error
   over the whole component.

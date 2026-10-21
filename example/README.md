@@ -64,25 +64,17 @@ What surprised or slowed down writing this, as a user of the libraries.
 3. **`~refuses:[ Spindle.Refusal.not_found ]` does not compile**, as the
    bodies tutorial suggests: that is the refusal, and the code is
    `Spindle.Refusal.Code.not_found`.
-4. **A bare name in a JSX attribute is taken for a thunk, and the error is
-   elsewhere.** `<Item value=key>` inside a `For` makes the ppx annotate
-   `key : unit -> _`, and the compiler then reports a use of `key` lines
-   away. It must be `value=(fun () -> key)`; the rule is right, but the
-   error should point at the attribute.
-5. **A callback prop must be named `on_*` or written as a `fun`.**
-   `<Task_row changed />`, `changed : string -> unit`, is read as a thunk;
-   `on_changed=changed` is passed as the function.
-6. **A child that is a call is refused**: `(Notice.region ())` returning an
+4. **A child that is a call is refused**: `(Notice.region ())` returning an
    element is not a child; only a literal, an element or a thunk is.
-7. **An integer id is a `float` in the front end**, since it has no bound
+5. **An integer id is a `float` in the front end**, since it has no bound
    within 32 bits: documented, but an `id : int` on the server reading as
    `float` in the browser is a surprise the first time.
-8. **`api check` needs `--openapi` and `--zod`** even for an OCaml-only
+6. **`api check` needs `--openapi` and `--zod`** even for an OCaml-only
    front end; the Melange client is only an addition to them.
-9. **A port in use is a backtrace.** `Spindle.serve` raises Eio's
+7. **A port in use is a backtrace.** `Spindle.serve` raises Eio's
    `Unix_error(EADDRINUSE, "bind", "")`, as the serving guide says it
    does, rather than a line saying the port is taken.
-10. **Editors do not know `.mlx`.** Vim highlights nothing until told
+8. **Editors do not know `.mlx`.** Vim highlights nothing until told
     `au BufRead,BufNewFile *.mlx setfiletype ocaml`, which highlights the
     OCaml and not the JSX; no tree-sitter grammar knows MLX. And
     `(merlin_reader mlx)` runs `ocamlmerlin-mlx`, which no package here
@@ -90,7 +82,7 @@ What surprised or slowed down writing this, as a user of the libraries.
     dev-setup dependency, ocamllsp fails every hover and jump in an
     `.mlx`. `dune describe pp` crashes on a dialect file,
     so the ppx's output is read by running `mlx-pp` and the ppx by hand.
-11. **Small ones.** `Dialog.Root`'s check names
+9. **Small ones.** `Dialog.Root`'s check names
     `Types.AlertDialog_Root_Translations.t`; `Select` takes its options
     wrapped in `Types.Either.left`, and an item's text is read back
     through `Node.raw_value (Item_props.item props)`.

@@ -34,6 +34,12 @@ module Removable = struct
     </button>
 end
 
+(* A field that reports what is typed, its callback any name. *)
+module Field = struct
+  let%component make ~(changed : string -> unit) () =
+    <input aria_label="field" on_input=(fun _ -> changed "typed") />
+end
+
 (* Shows [text] once a fetch of it has resolved. *)
 module Loaded = struct
   let%component make ~(text : string) () =
@@ -105,6 +111,18 @@ let () =
               <Removable title="card" on_remove=(fun _ -> incr removed) />);
           T.click (button_by_text "card");
           E.(expect !removed |> toBe 1));
+      Jest.test "a callback in a variable is passed by its name, any name"
+        (fun () ->
+          let got = ref "" in
+          let changed s = got := s in
+          T.render (fun () -> <Field changed />);
+          T.input (T.by_role "textbox");
+          E.(expect !got |> toBe "typed"));
+      Jest.test "a constant in a variable is an element's attribute as it is"
+        (fun () ->
+          let cls = "card" in
+          T.render (fun () -> <p class_=cls>"x"</p>);
+          E.(expect (T.class_name (T.query "p")) |> toBe "card"));
       Jest.test "create_dynamic renders the component chosen, with its props"
         (fun () ->
           T.render (fun () ->

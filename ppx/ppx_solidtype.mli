@@ -4,14 +4,14 @@
 
     An element [<div class_="x" />] becomes [Jsx.el "div"], and a component
     [<Counter initial=1 />] becomes [Jsx.c Counter.component]. A literal, a JSX
-    element, a handler ([on_] and its event, [on_click]) and a function literal
-    other than [fun () -> ...] are static; anything else is a thunk, so a read
-    outside a thunk does not compile. A function prop that takes no argument is
-    written [(fun _ -> ...)], since [fun () -> ...] is a thunk. A string
-    literal, however quoted, is written as a JavaScript string, [{js|...|js}],
-    its backslashes doubled, so text that is not ASCII and a backslash reach the
-    page as written; one written [{js|...|js}] is JavaScript's already, and left
-    as it is.
+    element, a handler ([on_] and its event, [on_click]), a function literal
+    other than [fun () -> ...] and a name, [<Row changed />], are static;
+    anything else is a thunk, so a read outside a thunk does not compile. A
+    function prop that takes no argument is written [(fun _ -> ...)], since
+    [fun () -> ...] is a thunk. A string literal, however quoted, is written as
+    a JavaScript string, [{js|...|js}], its backslashes doubled, so text that is
+    not ASCII and a backslash reach the page as written; one written
+    [{js|...|js}] is JavaScript's already, and left as it is.
 
     An element's attribute is annotated with its type from the element's module
     of [Solidtype.Html], [Html.Div.class_]. Its name is given back its

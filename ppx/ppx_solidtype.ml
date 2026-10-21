@@ -102,9 +102,12 @@ let is_function (e : expression) =
   match e.pexp_desc with Pexp_function _ -> not (is_thunk e) | _ -> false
 
 (* What a prop is decides how Solid's compiler is handed it: a literal, an
-   element and a function as they are, a thunk as the expression it returns.
-   The syntax decides, and the types hold it: an element's attribute is
-   annotated, and a component's props go through its check. *)
+   element, a function and a name as they are, a thunk as the expression it
+   returns. The syntax decides, and the types hold it: an element's attribute
+   is annotated, and a component's props go through its check. A name is
+   passed as it is whatever it holds, a callback or a constant, since only
+   its type could say whether it is a thunk, and that type then refuses one
+   where a value belongs. *)
 type kind = Literal | Element | Function | Thunk
 
 let kind_of ~handler (e : expression) =
@@ -112,6 +115,7 @@ let kind_of ~handler (e : expression) =
   | Pexp_constant _ | Pexp_construct (_, None) | Pexp_variant (_, None) ->
       Literal
   | _ when is_jsx e -> Element
+  | Pexp_ident _ -> Function
   | _ when handler || is_function e -> Function
   | _ -> Thunk
 

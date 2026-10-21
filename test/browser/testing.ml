@@ -54,3 +54,6 @@ let holds ~what cond = if not cond then Js.Exn.raiseError ("not yet: " ^ what)
 (* Resolves once the page reads [text]. *)
 let page_reads text =
   eventually (fun () -> holds ~what:text (String.equal (page ()) text))
+
+external input : Dom.element -> unit = "input"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]

@@ -462,6 +462,22 @@ A function given where a thunk belongs, which cannot be called as one.
          but an expression was expected of type string Solidtype.Check.value
   [1]
 
+A changing value passed by its name where a thunk belongs: a name is passed
+as it is, so its type, a function, is not the value's.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () =
+  >   let count () = "3" in
+  >   <Label text=count />
+  > EOF
+  $ build
+  File "case.mlx", line 3, characters 14-19:
+  3 |   <Label text=count />
+                    ^^^^^
+  Error: The value solidtype__text has type unit -> string
+         but an expression was expected of type string Solidtype.Check.value
+  [1]
+
 A Switch over a match that leaves a case out.
 
   $ cat > case.mlx <<'EOF'
