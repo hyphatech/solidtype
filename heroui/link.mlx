@@ -43,12 +43,19 @@ end
 
 let%component make ~(href : string) ?(disabled : bool = false)
     ?(class_ : string option) ~(children : Jsx.content) () =
+  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
   <Kobalte.Root
     href=(fun () -> href ())
     disabled=(fun () -> disabled ())
     class_=(fun () ->
              Styles.Link.base
                (Styles.Link.slots (Styles.Link.options ?class_:(class_ ()) ())))
-    ref=(fun a -> Interaction.track ~disabled:(fun[@u] () -> disabled ()) a)>
+    ref=(fun a -> Interaction.watch i a)
+    data_slot="link"
+    data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+    data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+    data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+    data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
     (fun () -> children ())
   </Kobalte.Root>

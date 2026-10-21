@@ -238,8 +238,6 @@ let dom_attribute ~loc ~tag label (value : expression) =
     String.lowercase_ascii (String.sub js 2 (String.length js - 2))
   in
   match wrapped value with
-  | None when starts_with ~prefix:"data_" label ->
-      Ok (js_name label, Some [%type: string], value, false)
   | None -> Ok (js_name label, Some html, value, is_handler label)
   | Some (Error e) -> Error e
   | Some (Ok (Namespaced (Native, v))) when is_handler label ->
@@ -268,12 +266,32 @@ let dom_attribute ~loc ~tag label (value : expression) =
   | Some (Ok (Named _)) ->
       Error (value.pexp_loc, "Jsx.named is given as attr=(Jsx.named \"name\" s)")
 
+(* A data- attribute's value is a [Jsx.data], on an element as on a
+   component, which no check takes, as TSX checks no hyphenated attribute
+   of a component: present, or absent while a flag is down, so the
+   attribute is Solid's to write on the server as in the browser. A string
+   literal, the common case, is written as [Jsx.data] for it. *)
+let data ~loc label (value : expression) =
+  let name = B.estring ~loc (js_name label) in
+  match (value.pexp_desc, kind_of ~handler:false value) with
+  | Pexp_constant (Pconst_string _), _ ->
+      [%expr
+        Solidtype.Jsx.s [%e name] (Solidtype.Jsx.data [%e js_string value])]
+  | _, Thunk ->
+      [%expr
+        Solidtype.Jsx.d [%e name] ([%e value] : unit -> Solidtype.Jsx.data)]
+  | _, (Literal | Element | Function) ->
+      [%expr Solidtype.Jsx.s [%e name] ([%e value] : Solidtype.Jsx.data)]
+
 let element map ~loc name args =
   let prop (label, (value : expression)) =
     let loc = value.pexp_loc in
     match label with
     | Labelled l when String.equal l spread ->
         Ok [%expr Solidtype.Jsx.spread [%e map value]]
+    | Labelled l
+      when starts_with ~prefix:"data_" l && Option.is_none (wrapped value) ->
+        Ok (data ~loc l (map value))
     | _ -> (
         let* label = labelled ~loc label in
         let+ js, t, value, handler = dom_attribute ~loc ~tag:name label value in
@@ -314,7 +332,7 @@ let component map ~loc path args =
         let x = B.evar ~loc (bound spread) in
         Ok
           ( Some (bound spread, (None, map value)),
-            (Labelled spread, x),
+            Some (Labelled spread, x),
             [%expr Solidtype.Jsx.spread [%e x]] )
     | _ when Option.is_some (wrapped value) ->
         Error
@@ -322,6 +340,8 @@ let component map ~loc path args =
             "a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop, \
              Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's \
              attribute" )
+    | Labelled l when starts_with ~prefix:"data_" l ->
+        Ok (None, None, data ~loc l (map value))
     | _ -> (
         let+ label = labelled ~loc label in
         let name = B.estring ~loc (js_name label) in
@@ -330,19 +350,19 @@ let component map ~loc path args =
         | Literal ->
             let value = js_string value in
             ( None,
-              (Labelled label, [%expr Solidtype.Check.literal [%e value]]),
+              Some (Labelled label, [%expr Solidtype.Check.literal [%e value]]),
               [%expr Solidtype.Jsx.s [%e name] [%e value]] )
         | Element ->
             ( None,
-              (Labelled label, [%expr Solidtype.Check.element ()]),
+              Some (Labelled label, [%expr Solidtype.Check.element ()]),
               [%expr Solidtype.Jsx.s [%e name] [%e map value]] )
         | Function ->
             ( Some (bound label, (None, map value)),
-              (Labelled label, x),
+              Some (Labelled label, x),
               [%expr Solidtype.Jsx.s [%e name] [%e x]] )
         | Thunk ->
             ( Some (bound label, (Some [%type: unit -> _], map value)),
-              (Labelled label, [%expr Solidtype.Check.thunk [%e x]]),
+              Some (Labelled label, [%expr Solidtype.Check.thunk [%e x]]),
               [%expr Solidtype.Jsx.d [%e name] [%e x]] ))
   in
   let children = function
@@ -375,7 +395,7 @@ let component map ~loc path args =
             B.pexp_apply ~loc
               (B.pexp_ident ~loc
                  { txt = Ldot (Ldot (path, "Props"), "check"); loc })
-              (List.map (fun (_, c, _) -> c) props
+              (List.filter_map (fun (_, c, _) -> c) props
               @ Option.to_list child_check
               @ [ (Nolabel, [%expr ()]) ])
           in

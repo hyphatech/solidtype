@@ -64,6 +64,21 @@ is `name=(Jsx.ns v)`.
 
 The last two are for a name whose case or spelling the rule cannot keep.
 
+A `data-` attribute is a `Jsx.data`, on an element and on a component,
+which passes it on to its element, as TSX lets a component take a
+hyphenated attribute: present, or absent while a flag is down, so a state
+is in the HTML a page is prerendered with.
+
+| TSX | OCaml |
+|---|---|
+| `data-slot="badge"` | `data_slot="badge"` |
+| `data-selected={on() ? "true" : undefined}` | `data_selected=(fun () -> Jsx.flag (on ()))` |
+| `data-id={id()}` | `data_id=(fun () -> Jsx.data (id ()))` |
+
+A constant held in a name is passed to a component as the thunk it is
+read by, `choices=(fun () -> variants)`: a name alone is passed as it is,
+which a component's check takes only for a function.
+
 A spread, TSX's `{...props}`, is the attribute `props`, and so no prop is
 named `props`:
 

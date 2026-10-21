@@ -23,6 +23,18 @@ external element : element -> content = "%identity"
 val nothing : element
 (** An element that renders nothing, for an optional one left out. *)
 
+type data
+(** A [data-] attribute's value, on an element or a component: present, or
+    absent, as React Aria writes a state, ["true"] or no attribute.
+    [data_slot="badge"] is written as [data] for you. *)
+
+external data : string -> data = "%identity"
+(** [data s] is the attribute present, [s]. *)
+
+val flag : bool -> data
+(** [flag b] is ["true"] while [b] holds, and no attribute otherwise:
+    [data_selected=(fun () -> Jsx.flag (checked ()))]. *)
+
 external el : string -> prop array -> child array -> element = "el"
 [@@mel.module "vite-plugin-solidtype/markers"]
 

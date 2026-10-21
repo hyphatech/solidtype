@@ -23,6 +23,12 @@
     [oncapture:click], and [Jsx.native], [Jsx.prop], [Jsx.attr] and [Jsx.bool]
     name the others.
 
+    A [data_] attribute's value is a [Jsx.data], on an element and on a
+    component alike, and a string literal is written as [Jsx.data] for it. A
+    component's check takes none of them, as TSX checks no hyphenated attribute
+    of a component: each is passed on as a prop of its JavaScript name,
+    [data_hovered] as [data-hovered].
+
     A component's element also applies [Counter.Props.check] to its props under
     [if false], so a prop left out or not taken is a compile error, and Melange
     writes none of it. [props=p] spreads [p] without copying it, TSX's [{...p}],

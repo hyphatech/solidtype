@@ -146,7 +146,8 @@ let names =
                                                                   "aria-label"
                                                                   ({js|name|js} : 
                                                                   Solidtype.Html.Input.aria_label));(
-      Solidtype.Jsx.s "data-user-id" ({js|7|js} : string))|] [||]
+      Solidtype.Jsx.s "data-user-id" (Solidtype.Jsx.data {js|7|js}))|] 
+    [||]
 let svg_names =
   Solidtype.Jsx.el "svg"
     [|(Solidtype.Jsx.s "viewBox"
@@ -159,6 +160,18 @@ let run_of_capitals =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.s "innerHTML"
          ({js|<b>x</b>|js} : Solidtype.Html.Div.inner_html))|] [||]
+let data_flag =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.d "data-selected"
+         (fun () -> Solidtype.Jsx.flag (on ()) : unit -> Solidtype.Jsx.data))|]
+    [||]
+let data_on_component =
+  if false then Switch.Root.Props.check ();
+  Solidtype.Jsx.c Switch.Root.component
+    [|(Solidtype.Jsx.s "data-slot" (Solidtype.Jsx.data {js|switch|js}));(
+      Solidtype.Jsx.d "data-hovered"
+        (fun () -> Solidtype.Jsx.flag (on ()) : unit -> Solidtype.Jsx.data));(
+      Solidtype.Jsx.s "data-state" (state : Solidtype.Jsx.data))|] [||]
 let kobalte_names =
   if false then Icon.Props.check ~is_svg:(Solidtype.Check.literal true) ();
   Solidtype.Jsx.c Icon.component [|(Solidtype.Jsx.s "isSVG" true)|] [||]

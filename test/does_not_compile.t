@@ -78,6 +78,34 @@ for it.
   > EOF
   $ build
 
+So does a component given data- attributes, which it passes to its element:
+a literal, and a state present or absent.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () =
+  >   let on, _ = Solidtype.Solid.create_signal false in
+  >   <Solidtype_kobalte.Button.Root
+  >     data_slot="button"
+  >     data_pressed=(fun () -> Solidtype.Jsx.flag (Solidtype.Solid.get on))>
+  >     "Save"
+  >   </Solidtype_kobalte.Button.Root>
+  > EOF
+  $ build
+
+A data- attribute given a string that is not a literal, which may be absent
+only as a Jsx.data.
+
+  $ cat > case.mlx <<'EOF'
+  > let make ~(slot : string) = <div data_slot=slot />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 43-47:
+  1 | let make ~(slot : string) = <div data_slot=slot />
+                                                 ^^^^
+  Error: The value slot has type string but an expression was expected of type
+           Solidtype.Jsx.data
+  [1]
+
 A read passed as an attribute's value, not inside a thunk.
 
   $ cat > case.mlx <<'EOF'

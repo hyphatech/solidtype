@@ -28,13 +28,7 @@ external meta_key : Dom.keyboardEvent -> bool = "metaKey" [@@mel.get]
 external ctrl_key : Dom.keyboardEvent -> bool = "ctrlKey" [@@mel.get]
 external alt_key : Dom.keyboardEvent -> bool = "altKey" [@@mel.get]
 
-external set_attribute : _ Dom.element_like -> string -> string -> unit
-  = "setAttribute"
-[@@mel.send]
-
-external remove_attribute : _ Dom.element_like -> string -> unit
-  = "removeAttribute"
-[@@mel.send]
+module S = Solidtype.Solid
 
 (* Whether the last input was a key, as React Aria decides focus-visible:
    one modality for the page, read by every element tracked, its listeners
@@ -50,10 +44,6 @@ let watch_modality () =
         if not (meta_key e || ctrl_key e || alt_key e) then by_keyboard := true);
     on_pointer document "pointerdown" (fun _ -> by_keyboard := false)
   end
-
-let show element name on =
-  if on then set_attribute element name "true"
-  else remove_attribute element name
 
 external tag_name : _ Dom.element_like -> string = "tagName" [@@mel.get]
 
@@ -76,53 +66,75 @@ let link element =
 let pressing element k =
   String.equal k "Enter" || (String.equal k " " && not (link element))
 
-let track ?disabled element =
-  let disabled () =
-    match disabled with Some d -> Solidtype.Solid.get d | None -> false
-  in
+type t = {
+  off : bool S.accessor option;
+  hover : bool S.accessor;
+  set_hover : bool S.setter;
+  press : bool S.accessor;
+  set_press : bool S.setter;
+  focus : bool S.accessor;
+  set_focus : bool S.setter;
+  focus_ring : bool S.accessor;
+  set_focus_ring : bool S.setter;
+}
+
+let create ?disabled () =
+  let hover, set_hover = S.create_signal false in
+  let press, set_press = S.create_signal false in
+  let focus, set_focus = S.create_signal false in
+  let focus_ring, set_focus_ring = S.create_signal false in
+  {
+    off = disabled;
+    hover;
+    set_hover;
+    press;
+    set_press;
+    focus;
+    set_focus;
+    focus_ring;
+    set_focus_ring;
+  }
+
+let disabled i = match i.off with Some d -> S.get d | None -> false
+
+(* A disabled element is neither hovered nor pressed, whatever the pointer
+   did while it was. *)
+let hovered i = S.get i.hover && not (disabled i)
+let pressed i = S.get i.press && not (disabled i)
+let focused i = S.get i.focus
+let focus_visible i = S.get i.focus_ring
+
+let watch i element =
   watch_modality ();
   let down = ref false in
-  let focused = ref false in
-  let hovered on = show element "data-hovered" (on && not (disabled ())) in
-  let pressed on = show element "data-pressed" (on && not (disabled ())) in
+  let press on = S.set i.set_press on in
   on_pointer element "pointerenter" (fun e ->
-      if not (String.equal (pointer_type e) "touch") then hovered true;
-      if !down then pressed true);
+      if not (String.equal (pointer_type e) "touch") then S.set i.set_hover true;
+      if !down then press true);
   on_pointer element "pointerleave" (fun _ ->
-      hovered false;
-      pressed false);
+      S.set i.set_hover false;
+      press false);
   on_pointer element "pointerdown" (fun e ->
-      if button e = 0 && not (disabled ()) then begin
+      if button e = 0 && not (disabled i) then begin
         down := true;
-        pressed true
+        press true
       end);
   (* A pointer is let go wherever it is, so the page hears it. *)
   on_pointer document "pointerup" (fun _ ->
       if !down then begin
         down := false;
-        pressed false
+        press false
       end);
   on_pointer document "pointercancel" (fun _ ->
       down := false;
-      pressed false);
+      press false);
   on_key element "keydown" (fun e ->
-      if !focused then show element "data-focus-visible" true;
-      if pressing element (key e) && not (repeat e) then pressed true);
-  on_key element "keyup" (fun e ->
-      if pressing element (key e) then pressed false);
+      if focused i then S.set i.set_focus_ring true;
+      if pressing element (key e) && not (repeat e) then press true);
+  on_key element "keyup" (fun e -> if pressing element (key e) then press false);
   on_focus element "focus" (fun _ ->
-      focused := true;
-      show element "data-focused" true;
-      show element "data-focus-visible" !by_keyboard);
+      S.set i.set_focus true;
+      S.set i.set_focus_ring !by_keyboard);
   on_focus element "blur" (fun _ ->
-      focused := false;
-      show element "data-focused" false;
-      show element "data-focus-visible" false);
-  (* After Kobalte's own render effects, which write data-disabled as "". *)
-  Solidtype.Solid.create_effect (fun () ->
-      let off = disabled () in
-      show element "data-disabled" off;
-      if off then begin
-        hovered false;
-        pressed false
-      end)
+      S.set i.set_focus false;
+      S.set i.set_focus_ring false)

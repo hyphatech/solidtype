@@ -1,0 +1,33 @@
+(* A data- attribute on an element and on a component, as the server writes
+   it: present, and a state's flag "true" while up and absent while down, in
+   the HTML a page is prerendered with. *)
+
+module Jsx = Solidtype.Jsx
+module Server = Solidtype.Server
+module Button = Solidtype_kobalte.Button
+module E = Jest.Expect
+
+let page () =
+  <div data_slot="frame" data_open=(fun () -> Jsx.flag false)>
+    <Button.Root
+      data_slot="button"
+      data_selected=(fun () -> Jsx.flag true)
+      data_hovered=(fun () -> Jsx.flag false)>
+      "Save"
+    </Button.Root>
+  </div>
+
+let contains part s = Js.String.includes ~search:part s
+
+let () =
+  Jest.describe "data- attributes on the server" (fun () ->
+      Jest.test "are written as declared, a flag down left out" (fun () ->
+          let html = Server.render_to_string page in
+          E.(
+            expect
+              ( contains {js|data-slot="frame"|js} html,
+                contains {js|data-slot="button"|js} html,
+                contains {js|data-selected="true"|js} html,
+                contains "data-open" html,
+                contains "data-hovered" html )
+            |> toEqual (true, true, true, false, false))))

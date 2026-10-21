@@ -1,26 +1,50 @@
-(** The state of an interaction with an element, written on it as React Aria
-    writes it on HeroUI's components in React, for HeroUI's styles to read:
-    [data-hovered], [data-pressed], [data-focused], [data-focus-visible] and
-    [data-disabled], each ["true"] or absent.
+(** The state of an interaction with an element, kept as React Aria keeps it on
+    HeroUI's components in React, for a port to declare as the attributes
+    HeroUI's styles read: [data-hovered], [data-pressed], [data-focused],
+    [data-focus-visible] and [data-disabled], each ["true"] or absent.
 
     Kobalte gives its parts their behaviour and their ARIA state, but none of
-    these, so a port tracks them on the element Kobalte renders:
+    these. A port makes the state, has it listen to the element Kobalte renders,
+    and declares each attribute, which Solid then writes, on the server as in
+    the browser:
 
     {[
+      let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
       <Kobalte.Root
-        ref=(fun b -> Interaction.track ~disabled:(fun[@u] () -> disabled ()) b)>
+        ref=(fun b -> Interaction.watch i b)
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
     ]} *)
 
-val track :
-  ?disabled:bool Solidtype.Solid.accessor -> _ Dom.element_like -> unit
-(** [track ~disabled element] keeps [element]'s interaction state as React Aria
-    does:
+type t
+
+val create : ?disabled:bool Solidtype.Solid.accessor -> unit -> t
+(** A state with nothing hovered, pressed or focused, disabled while [disabled]
+    holds. *)
+
+val watch : t -> _ Dom.element_like -> unit
+(** [watch i element] keeps [i] as React Aria keeps an element's state:
 
     - hovered while a mouse or a pen, never a touch, is over it;
     - pressed while a pointer is down on it and over it, or while Enter is held
       on it, or Space but on a link, an anchor with an href or the link role;
     - focused while it has the focus, and focus-visible while it has it after a
-      key was pressed rather than a pointer;
-    - disabled while [disabled] holds, and then neither hovered nor pressed.
+      key was pressed rather than a pointer.
 
     It is called once, as the element is made: from its [ref]. *)
+
+val hovered : t -> bool
+(** Whether it is hovered, and not disabled; a read Solid tracks, as are the
+    others. *)
+
+val pressed : t -> bool
+(** Whether it is pressed, and not disabled. *)
+
+val focused : t -> bool
+val focus_visible : t -> bool
+
+val disabled : t -> bool
+(** Whether [disabled], given to {!create}, holds. *)

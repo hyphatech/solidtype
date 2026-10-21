@@ -14,6 +14,14 @@ external of_undefined : unit Js.undefined -> element = "%identity"
 (* Solid renders an undefined child as nothing. *)
 let nothing = of_undefined Js.undefined
 
+(* A data- attribute's value: a string, or undefined, which Solid writes as
+   no attribute, on the server as in the browser. *)
+type data = string Js.undefined
+
+external data : string -> data = "%identity"
+
+let flag b = if b then data "true" else Js.undefined
+
 external el : string -> prop array -> child array -> element = "el"
 [@@mel.module "vite-plugin-solidtype/markers"]
 

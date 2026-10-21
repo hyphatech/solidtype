@@ -255,6 +255,17 @@ break.
   Why: a wrapper left out is Solid's default, never another namespace,
   and a label that spelt the namespace would let a slip change it
   unseen. Test: `test/does_not_compile.t`.
+- **A `data-` attribute is declared, never written by hand.** Its value is
+  a `Jsx.data`, a string or JavaScript's `undefined`, which Solid leaves
+  out: `Jsx.flag b` is `"true"` or nothing, React Aria's convention. The
+  ppx takes `data_*` on an element and on a component, which passes it on
+  to its element, outside the component's check, as TSX leaves a
+  hyphenated attribute unchecked. A port's state -- `data-hovered`,
+  `data-selected` -- is so declared, and `heroui/interaction` only
+  listens. Why: an attribute Solid writes is in the HTML a page is
+  prerendered with and never races one the component writes itself; one
+  set from a `ref` is neither. Test: `test/server/data_attributes_test.mlx`,
+  `test/does_not_compile.t`, and each port's test against its React twin.
 - **A spread is `props=p`, and no prop is named `props`.** MLX has no
   syntax for TSX's `{...p}` and writes every attribute as an OCaml label,
   so a spread takes one name: the ppx reads it as a spread on an element

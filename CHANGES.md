@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Breaking: a `data-` attribute's value is a `Jsx.data`, where it was a
+  `string`: present, `Jsx.data s`, or `"true"` while a flag is up and
+  absent while it is down, `Jsx.flag b`. A string literal is still written
+  as it is, `data_slot="badge"`; any other string is `Jsx.data s`.
+- A component takes `data-` attributes, `<Button.Root data_slot="button" />`,
+  outside its check, and passes them to its element, as in TSX.
+- Breaking: `Solidtype_heroui.Interaction` keeps an element's state and
+  writes no attribute: `create`, `watch` from the element's `ref`, and a
+  read per state, which a port declares as its `data-` attributes, so they
+  are in a prerendered page; `track` is gone.
 - `Solidtype_heroui.Link`: HeroUI's Link and its icon on Kobalte's link, its
   state kept as React Aria keeps it. `Interaction` no longer presses a link
   by Space, as React Aria does not.

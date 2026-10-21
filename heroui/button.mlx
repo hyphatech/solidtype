@@ -14,6 +14,7 @@ let%component make
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option)
     ~(children : Solidtype.Jsx.content) () =
+  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
   <Kobalte.Root
     class_=(fun () ->
              Styles.Button.classes
@@ -21,7 +22,14 @@ let%component make
                   ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
                   ?class_:(class_ ()) ()))
     disabled=(fun () -> disabled ())
-    ref=(fun b -> Interaction.track ~disabled:(fun[@u] () -> disabled ()) b)
+    ref=(fun b -> Interaction.watch i b)
+    data_slot="button"
+    data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
+    data_pressed=(fun () -> Solidtype.Jsx.flag (Interaction.pressed i))
+    data_focused=(fun () -> Solidtype.Jsx.flag (Interaction.focused i))
+    data_focus_visible=(fun () ->
+                         Solidtype.Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(fun () -> Solidtype.Jsx.flag (Interaction.disabled i))
     type_=(fun () -> type_ ())
     on_click=(fun e -> ignore (on_click e : unit option))>
     (fun () -> children ())
