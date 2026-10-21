@@ -101,7 +101,8 @@ let () =
           S.set set_n 2;
           dispose ();
           E.(expect !pairs |> toEqual [ (2, Some 1); (1, None) ]));
-      Jest.testPromise "create_deferred follows its source once its time is up"
+      Jest.testPromise
+        "create_deferred lags its source, and follows once the page is idle"
         (fun () ->
           let n, set_n = S.create_signal 0 in
           let deferred = ref (fun () -> 0) in
@@ -112,10 +113,11 @@ let () =
           in
           S.set set_n 5;
           let at_once = !deferred () in
-          let* (_ : bool) = T.after 50 in
-          let later = !deferred () in
+          let* () =
+            T.eventually (fun () -> T.holds ~what:"followed" (!deferred () = 5))
+          in
           dispose ();
-          Js.Promise.resolve E.(expect (at_once, later) |> toEqual (0, 5)));
+          Js.Promise.resolve E.(expect at_once |> toBe 0));
       Jest.test "on_error is given what a computation raises later" (fun () ->
           let n, set_n = S.create_signal 0 in
           let caught = ref "" in
@@ -156,6 +158,6 @@ let () =
                 <Later name="Lu" />
               </Suspense>);
           let before = T.page () in
-          let* (_ : bool) = T.later () in
+          let* () = T.page_reads "Hello, Lu" in
           Js.Promise.resolve
             E.(expect (before, T.page ()) |> toEqual ("loading", "Hello, Lu"))))

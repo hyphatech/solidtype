@@ -108,5 +108,5 @@ let () =
                   <Loaded text="two" />
                 </Suspense>
               </SuspenseList>);
-          let* (_ : bool) = T.later () in
+          let* () = T.page_reads "onetwo" in
           Js.Promise.resolve E.(expect (T.page ()) |> toBe "onetwo")))

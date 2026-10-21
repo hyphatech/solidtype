@@ -244,6 +244,6 @@ let () =
                 </p>
               </Suspense>);
           let before = T.page () in
-          let* (_ : bool) = T.later () in
+          let* () = T.page_reads "loaded" in
           Js.Promise.resolve
             E.(expect (before, T.page ()) |> toEqual ("loading", "loaded"))))

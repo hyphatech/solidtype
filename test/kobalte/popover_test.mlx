@@ -41,7 +41,9 @@ let () =
       H.expect_equal ~what:"the trigger, closed" "false"
         (attribute trigger "aria-expanded");
       let* () = H.click user trigger in
-      let* (_ : bool) = H.settled () in
+      let* () =
+        H.eventually (fun () -> ignore (H.by_role "dialog" : Dom.element))
+      in
       let dialog = H.by_role "dialog" in
       H.expect_equal ~what:"the trigger, open" "true"
         (attribute trigger "aria-expanded");

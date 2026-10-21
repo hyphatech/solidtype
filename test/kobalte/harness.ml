@@ -65,15 +65,6 @@ external eventually : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t
   = "waitFor"
 [@@mel.module "@solidjs/testing-library"]
 
-(* Resolves once what is queued now has run: a component's mount, a focus
-   moved after it. It resolves to [true], since [resolve] takes one argument
-   and Melange calls a function of [()] with none. *)
-let settled () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore
-        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0
-          : Js.Global.timeoutId))
-
 type rule
 type rules
 type axe_options
@@ -108,21 +99,26 @@ let accessibility_violations () =
   in
   Js.Promise.resolve (Array.map violation_id (violations results))
 
-(* An overlay hides the rest of the page from assistive technology, and lets
-   it be seen again, a timer and a frame after it opens or closes: each test
-   waits them out, so none reaches the next. *)
-let between () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore
-        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 50
-          : Js.Global.timeoutId))
+type style
+
+external style : Dom.element -> style = "style" [@@mel.get]
+external pointer_events : style -> string = "pointerEvents" [@@mel.get]
+
+(* A modal overlay takes pointer events from the page while it is open and
+   gives them back once it closes: each test waits for that, so none
+   reaches the next, and no click of the next is refused. *)
+let released () =
+  eventually (fun () ->
+      if String.equal (pointer_events (style body)) "none" then
+        Js.Exn.raiseError "the page still refuses pointer events")
 
 (* [alike name ~island ~twin check]: [check] passes on the OCaml island and
    on its TSX twin, and axe finds no violation in either. *)
 let alike name ~island ~twin check =
   Jest.describe name (fun () ->
+      (* vitest runs these last first: cleanup, then the release waited for. *)
+      Jest.afterEachPromise released;
       Jest.afterEach cleanup;
-      Jest.afterEachPromise between;
       List.iter
         (fun (which, make) ->
           Jest.testPromise which (fun () ->

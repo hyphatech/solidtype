@@ -13,7 +13,15 @@ let () =
                   Some (fst (S.create_resource (fun _ -> Js.Promise.resolve 7)));
                 dispose)
           in
-          let* (_ : bool) = T.later () in
+          let ready () =
+            match !resource with
+            | Some r -> (
+                match S.state r with
+                | S.Ready -> true
+                | S.Unresolved | S.Pending | S.Refreshing | S.Errored -> false)
+            | None -> false
+          in
+          let* () = T.eventually (fun () -> T.holds ~what:"ready" (ready ())) in
           let seen =
             match !resource with
             | Some r -> (S.read r, S.state r, S.loading r)
@@ -36,10 +44,13 @@ let () =
                     : _ S.resource * _ S.resource_actions);
                 dispose)
           in
-          let* (_ : bool) = T.later () in
+          (* Solid fetches as a source becomes Some, at once: none yet is none. *)
           let before = !fetched in
           S.set set_source (Some false);
-          let* (_ : bool) = T.later () in
+          let* () =
+            T.eventually (fun () ->
+                T.holds ~what:"fetched" (List.length !fetched = 1))
+          in
           dispose ();
           Js.Promise.resolve
             E.(expect (before, !fetched) |> toEqual ([], [ false ])));
@@ -57,12 +68,18 @@ let () =
                 actions := Some a;
                 dispose)
           in
-          let* (_ : bool) = T.later () in
+          let* () =
+            T.eventually (fun () ->
+                T.holds ~what:"fetched" (Option.is_some (!read ())))
+          in
           let first = !read () in
           Option.iter (fun a -> S.mutate a (Some 10)) !actions;
           let mutated = !read () in
           Option.iter S.refetch !actions;
-          let* (_ : bool) = T.later () in
+          let* () =
+            T.eventually (fun () ->
+                T.holds ~what:"refetched" (!fetches = 2 && !read () = Some 2))
+          in
           let refetched = !read () in
           dispose ();
           Js.Promise.resolve
@@ -80,7 +97,17 @@ let () =
                        (S.create_resource (fun _ -> Js.Promise.reject Not_found)));
                 dispose)
           in
-          let* (_ : bool) = T.later () in
+          let errored () =
+            match !resource with
+            | Some r -> (
+                match S.state r with
+                | S.Errored -> true
+                | S.Unresolved | S.Pending | S.Ready | S.Refreshing -> false)
+            | None -> false
+          in
+          let* () =
+            T.eventually (fun () -> T.holds ~what:"errored" (errored ()))
+          in
           let seen =
             match !resource with
             | Some r ->

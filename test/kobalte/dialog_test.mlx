@@ -23,7 +23,9 @@ let () =
       let* () =
         H.click user (H.by_role_named "button" (H.query ~name:"Open" ()))
       in
-      let* (_ : bool) = H.settled () in
+      let* () =
+        H.eventually (fun () -> ignore (H.by_role "dialog" : Dom.element))
+      in
       let dialog = H.by_role "dialog" in
       H.expect_equal ~what:"the dialog's label" "Settings"
         (H.text (H.by_text "Settings"));

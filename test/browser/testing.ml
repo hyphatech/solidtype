@@ -23,15 +23,6 @@ external body : Dom.element = "body" [@@mel.scope "document"]
 (* What the page reads, as a person would. *)
 let page () = text body
 
-(* Resolves once what is queued now has run, a resource's fetch among it.
-   It resolves to [true], since Melange calls a function of [()] with no
-   argument, and [resolve] takes one. *)
-let later () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore
-        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 0
-          : Js.Global.timeoutId))
-
 external query : string -> Dom.element = "querySelector"
 [@@mel.scope "document"]
 
@@ -50,9 +41,16 @@ let first_element () = Js.Null.toOption (query_opt "body > div > *")
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external class_name : Dom.element -> string = "className" [@@mel.get]
 
-(* Resolves after [ms] milliseconds, for what waits on a timer of its own. *)
-let after ms =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore
-        (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
-          : Js.Global.timeoutId))
+(* [eventually f] retries [f], which raises until what it checks holds, as
+   Testing Library's waitFor does: a test waits for what it needs, never for
+   a length of time. *)
+external eventually : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t
+  = "waitFor"
+[@@mel.module "@solidjs/testing-library"]
+
+(* What [eventually] retries: it raises while [cond] is false. *)
+let holds ~what cond = if not cond then Js.Exn.raiseError ("not yet: " ^ what)
+
+(* Resolves once the page reads [text]. *)
+let page_reads text =
+  eventually (fun () -> holds ~what:text (String.equal (page ()) text))
