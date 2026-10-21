@@ -305,3 +305,44 @@ module Removable =
         let component = Solidtype.Jsx.component make
       end
   end
+let optional_attribute =
+  Solidtype.Jsx.el "a"
+    [|(Solidtype.Jsx.d "title"
+         (fun () -> "x" : unit -> Solidtype.Html.A.title));(Solidtype.Jsx.d
+                                                              "href"
+                                                              (fun () ->
+                                                                 Js.Undefined.fromOption
+                                                                   ((fun ()
+                                                                    ->
+                                                                    link () : 
+                                                                    unit ->
+                                                                    Solidtype.Html.A.href
+                                                                    option)
+                                                                    ())))|]
+    [||]
+let optional_prop =
+  let solidtype__text : unit -> _ = fun () -> "x"
+  and solidtype__count : unit -> _ option = fun () -> count () in
+  if false
+  then
+    Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
+      ?count:(Solidtype.Check.optional solidtype__count) ();
+  Solidtype.Jsx.c Label.component
+    [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.d "count"
+                                                  (fun () ->
+                                                     Js.Undefined.fromOption
+                                                       (solidtype__count ())))|]
+    [||]
+let optional_name =
+  let solidtype__text : unit -> _ = fun () -> "x"
+  and solidtype__count : unit -> _ option = count in
+  if false
+  then
+    Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
+      ?count:(Solidtype.Check.optional solidtype__count) ();
+  Solidtype.Jsx.c Label.component
+    [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.d "count"
+                                                  (fun () ->
+                                                     Js.Undefined.fromOption
+                                                       (solidtype__count ())))|]
+    [||]

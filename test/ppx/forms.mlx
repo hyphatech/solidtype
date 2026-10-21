@@ -77,3 +77,7 @@ module Removable = struct
   let%component make ~(on_remove : unit -> unit) () =
     <button on_click=(fun _ -> on_remove ())>"x"</button>
 end
+
+let optional_attribute = <a title=(fun () -> "x") ?href=(fun () -> link ()) />
+let optional_prop = <Label text=(fun () -> "x") ?count=(fun () -> count ()) />
+let optional_name = <Label text=(fun () -> "x") ?count />

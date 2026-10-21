@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- An optional prop is passed on as it is: `?title=(fun () -> o)`, or a
+  component's optional parameter by its name, `?name`, present while the
+  option is `Some` and absent while it is `None`. The compiler refuses it
+  on a prop that is not optional.
 - `Solidtype_heroui.Radio_group` and `Radio`: HeroUI's RadioGroup on
   Kobalte's, in HeroUI's anatomy, its value controlled or kept, horizontal
   or vertical, disabled and invalid. A `Label` in the group names it.

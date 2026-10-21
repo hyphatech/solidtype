@@ -159,6 +159,26 @@ let labelled ~loc = function
       Error (loc, Printf.sprintf "?%s is not supported: pass ~%s" label label)
   | Nolabel -> Error (loc, "a JSX prop is labelled")
 
+(* An optional prop, [?name=o]: a thunk of an option, or a name holding one,
+   whose [None] Solid and Kobalte are given as [undefined], absent. OCaml's
+   own [?name:] in the check refuses it where the prop is not optional. *)
+let optional ~loc label (value : expression) =
+  if starts_with ~prefix:"data_" label || String.equal label spread then
+    Error (loc, Printf.sprintf "?%s is not optional: pass %s=" label label)
+  else
+    match value.pexp_desc with
+    | Pexp_ident _ -> Ok value
+    | _ when is_thunk value -> Ok value
+    | _ ->
+        Error
+          ( loc,
+            Printf.sprintf
+              "an optional prop is a thunk of an option: ?%s=(fun () -> o)"
+              label )
+
+let absent_or ~loc read =
+  [%expr fun () -> Js.Undefined.fromOption ([%e read] ())]
+
 (* A child is told apart before it is lowered, while an element still carries
    MLX's attribute. *)
 let child map (e : expression) =
@@ -292,6 +312,22 @@ let element map ~loc name args =
     | Labelled l
       when starts_with ~prefix:"data_" l && Option.is_none (wrapped value) ->
         Ok (data ~loc l (map value))
+    | Optional l -> (
+        let* value = optional ~loc l value in
+        let* js, t, value, handler = dom_attribute ~loc ~tag:name l value in
+        match t with
+        | _ when handler || Option.is_some (wrapped value) ->
+            Error (loc, Printf.sprintf "?%s takes a value, not a handler" l)
+        | Some t ->
+            let read = [%expr ([%e map value] : unit -> [%t t] option)] in
+            Ok
+              [%expr
+                Solidtype.Jsx.d [%e B.estring ~loc js] [%e absent_or ~loc read]]
+        | None ->
+            Ok
+              [%expr
+                Solidtype.Jsx.d [%e B.estring ~loc js]
+                  [%e absent_or ~loc (map value)]])
     | _ -> (
         let* label = labelled ~loc label in
         let+ js, t, value, handler = dom_attribute ~loc ~tag:name label value in
@@ -342,6 +378,15 @@ let component map ~loc path args =
              attribute" )
     | Labelled l when starts_with ~prefix:"data_" l ->
         Ok (None, None, data ~loc l (map value))
+    | Optional l ->
+        let+ value = optional ~loc l value in
+        let x = B.evar ~loc (bound l) in
+        ( Some (bound l, (Some [%type: unit -> _ option], map value)),
+          Some (Optional l, [%expr Solidtype.Check.optional [%e x]]),
+          [%expr
+            Solidtype.Jsx.d
+              [%e B.estring ~loc (js_name l)]
+              [%e absent_or ~loc x]] )
     | _ -> (
         let+ label = labelled ~loc label in
         let name = B.estring ~loc (js_name label) in

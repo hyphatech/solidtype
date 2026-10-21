@@ -150,7 +150,9 @@ module.
 MLX parses `.mlx` into OCaml with each element marked `[@JSX]`.
 `ppx_solidtype` lowers each one to a call of `Solidtype.Jsx`: a literal,
 an element, a handler (`on_` and its event), a function or a name static,
-anything else a thunk, so a read outside a thunk does not compile; a
+anything else a thunk, so a read outside a thunk does not compile; an
+optional prop, `?name=`, a thunk of an option, `undefined` while it is
+`None`, and `?name:` in the check, so a required prop refuses it; a
 name is given back its JavaScript spelling, and a value wrapped in one
 of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
 argument is therefore written `(fun _ -> ...)`. A string literal, however

@@ -612,3 +612,58 @@ A Select of many values without multiple, which Kobalte reads to choose.
          because it is in the result of a conditional with no else branch
   Hint: This function application is partial, maybe some arguments are missing.
   [1]
+
+An optional prop given where the prop is required, which may then be absent.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Label ?text=(fun () -> Some "x") />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 27-47:
+  1 | let make () = <Label ?text=(fun () -> Some "x") />
+                                 ^^^^^^^^^^^^^^^^^^^^
+  Error (warning 43 [nonoptional-label]): the label text is not optional.
+  
+  File "case.mlx", line 1, characters 27-47:
+  1 | let make () = <Label ?text=(fun () -> Some "x") />
+                                 ^^^^^^^^^^^^^^^^^^^^
+  Error: This expression has type string Solidtype.Check.value option
+         but an expression was expected of type string Solidtype.Check.value
+  [1]
+
+An optional prop given a thunk of a value that is no option.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Label text=(fun () -> "x") ?count=(fun () -> 3) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 60-61:
+  1 | let make () = <Label text=(fun () -> "x") ?count=(fun () -> 3) />
+                                                                  ^
+  Error: The constant 3 has type int but an expression was expected of type
+           'a option
+  [1]
+
+An optional prop given a value, not a thunk of an option.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Label text=(fun () -> "x") ?count=(Some 3) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 49-57:
+  1 | let make () = <Label text=(fun () -> "x") ?count=(Some 3) />
+                                                       ^^^^^^^^
+  Error: an optional prop is a thunk of an option: ?count=(fun () -> o)
+  [1]
+
+An optional handler, which an element's handler cannot be.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <button ?on_click=(fun () -> None) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 32-48:
+  1 | let make () = <button ?on_click=(fun () -> None) />
+                                      ^^^^^^^^^^^^^^^^
+  Error: ?on_click takes a value, not a handler
+  [1]

@@ -80,6 +80,18 @@ A constant held in a name is passed to a component as the thunk it is
 read by, `choices=(fun () -> variants)`: a name alone is passed as it is,
 which a component's check takes only for a function.
 
+An optional prop, one a component may leave out, is passed on as it is
+with OCaml's own `?`: present while its option is `Some`, absent while it
+is `None`, as TSX passes `undefined`. A component's optional parameter is
+such an option, so it passes on by its name.
+
+| TSX | OCaml |
+|---|---|
+| `title={note()}` | `?title=(fun () -> note ())` |
+| `name={props.name}` | `?name` |
+
+The compiler refuses `?` on a prop that is not optional.
+
 A spread, TSX's `{...props}`, is the attribute `props`, and so no prop is
 named `props`:
 

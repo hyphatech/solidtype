@@ -21,3 +21,7 @@ external thunk : (unit -> 'a) -> 'a value = "%identity"
 external nodes : unit -> ('f, [> `nodes ]) children = "%identity"
 external render : 'f -> ('f, [> `render ]) children = "%identity"
 external element : unit -> Jsx.element value = "%identity"
+
+external optional : (unit -> 'a option) -> 'a value option = "%identity"
+(** An optional prop given as [?name=(fun () -> o)], passed to the check as
+    [?name:]: refused where the prop is not optional. *)

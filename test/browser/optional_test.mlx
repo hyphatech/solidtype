@@ -1,0 +1,46 @@
+(* An optional prop passed on as it is, [?name=o]: present while [o] is
+   [Some], absent while it is [None], on an element and through a component
+   that may leave it out. *)
+
+module S = Solidtype.Solid
+module E = Jest.Expect
+module T = Testing
+
+(* A note a component may be given, passed to its element's title by name. *)
+module Noted = struct
+  let%component make ?(note : string option) () =
+    <span ?title=note>"noted"</span>
+end
+
+external attribute : Dom.element -> string -> string Js.null = "getAttribute"
+[@@mel.send]
+
+let title selector = Js.Null.toOption (attribute (T.query selector) "title")
+
+let () =
+  Jest.describe "optional props" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "an element's attribute is there while its option is Some"
+        (fun () ->
+          let link, set_link = S.create_signal None in
+          T.render (fun () -> <a ?title=(fun () -> S.get link)>"home"</a>);
+          let before = title "a" in
+          S.set set_link (Some "/");
+          let some = title "a" in
+          S.set set_link None;
+          E.(
+            expect [| before; some; title "a" |]
+            |> toEqual [| None; Some "/"; None |]));
+      Jest.test "a component passes on an optional prop it may leave out"
+        (fun () ->
+          let note, set_note = S.create_signal (Some "first") in
+          T.render (fun () ->
+              <div><Noted ?note=(fun () -> S.get note) /> <Noted /></div>);
+          let first = title "span" in
+          S.set set_note None;
+          let none = title "span" in
+          S.set set_note (Some "");
+          let empty = title "span" in
+          E.(
+            expect [| first; none; empty; title "span + span" |]
+            |> toEqual [| Some "first"; None; Some ""; None |])))
