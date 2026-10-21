@@ -1,0 +1,12 @@
+let%component make ?(class_ : string option)
+    ?(children : Solidtype.Jsx.content option) () =
+  <div
+    class_=(fun () ->
+             Styles.EmptyState.classes
+               (Styles.EmptyState.options ?class_:(class_ ()) ()))
+    data_slot="empty-state">
+    (fun () ->
+      match children () with
+      | Some given -> given
+      | None -> Solidtype.Jsx.string "No results found")
+  </div>

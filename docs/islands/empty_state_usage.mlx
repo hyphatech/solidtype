@@ -1,0 +1,6 @@
+module Empty_state = Solidtype_heroui.Empty_state
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Empty_state /> <Empty_state>"No tasks yet"</Empty_state>
+  </div>

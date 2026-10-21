@@ -1,0 +1,46 @@
+(* HeroUI's EmptyState, beside the same EmptyState in React: its classes, and
+   its text, HeroUI's or its own. *)
+
+module Empty_state = Solidtype_heroui.Empty_state
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render : string option -> Dom.element = "render"
+  [@@mel.module "./twins/EmptyState.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/EmptyState.tsx"]
+end
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+let shown e = T.attributes e ^ " " ^ text e
+
+let both said =
+  T.render (fun () ->
+      match said with
+      | Some s ->
+          <Empty_state class_="py-6">
+            (fun () -> Solidtype.Jsx.string s)
+          </Empty_state>
+      | None -> <Empty_state class_="py-6" />);
+  let solidtype =
+    match T.query "[data-slot=empty-state]" with
+    | Some e -> shown e
+    | None -> "nothing"
+  in
+  T.cleanup ();
+  let react = shown (Twin.render said) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Empty_state" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "says there are no results, as React's does" (fun () ->
+          let solidtype, react = both None in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "says what it is given, as React's does" (fun () ->
+          let solidtype, react = both (Some "No tasks yet") in
+          E.(expect solidtype |> toEqual react)))

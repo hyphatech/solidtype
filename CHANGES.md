@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Empty_state`: HeroUI's EmptyState, which says "No
+  results found" unless it is given children.
 - `Solidtype_heroui.Typography`: HeroUI's Typography, each type the element
   it means, or the one `element_type` gives, its alignments, colors,
   weights and truncation, and its primitives, `Heading`, `Paragraph`,
