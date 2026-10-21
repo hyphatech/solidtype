@@ -1,0 +1,137 @@
+(* HeroUI's Checkbox on Kobalte, beside the same Checkbox in React: each part
+   by its slot, what HeroUI's styles read of it, the default indicator it
+   draws, the input a reader reaches, and the state the field and its
+   content show through a walk. *)
+
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  variant:[ `primary | `secondary ] ->
+  default_selected:(bool[@mel.as "defaultSelected"]) ->
+  is_indeterminate:(bool[@mel.as "isIndeterminate"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> unit = "render"
+  [@@mel.module "./twins/Checkbox.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Checkbox.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Checkbox.tsx"]
+end
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external checked : Dom.element -> bool = "checked" [@@mel.get]
+
+let part slot =
+  match T.query ("[data-slot=" ^ slot ^ "]") with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no " ^ slot)
+
+(* What HeroUI's styles read of each part, the indicator's drawing, and
+   what a reader reaches. *)
+let shown () =
+  let parts =
+    [|
+      "checkbox";
+      "checkbox-content";
+      "checkbox-control";
+      "checkbox-indicator";
+      "label";
+    |]
+    |> Array.map (fun slot ->
+        let e = part slot in
+        ( slot,
+          tag_name e,
+          T.class_name e,
+          [|
+            "data-selected";
+            "data-indeterminate";
+            "data-disabled";
+            "data-invalid";
+          |]
+          |> Array.map (T.attribute e) ))
+  in
+  let drawing =
+    match T.query "[data-slot=checkbox-indicator] svg" with
+    | Some svg ->
+        (T.attribute svg "data-slot", T.attribute svg "stroke-dashoffset")
+    | None -> (None, None)
+  in
+  let input = T.by_role "checkbox" in
+  ( parts,
+    drawing,
+    ( checked input,
+      T.attribute input "disabled",
+      T.attribute input "aria-invalid" ) )
+
+(* The port, then the same Checkbox in React, each alone on the page, shown,
+   then walked by its content, the field's state after each step too. *)
+let both ~variant ~selected ~indeterminate ~disabled ~invalid =
+  let walk () =
+    let before = shown () in
+    let* walked = T.walk ~step:Twin.step (part "checkbox-content") in
+    let after = shown () in
+    Js.Promise.resolve (before, walked, T.state (part "checkbox"), after)
+  in
+  T.render (fun () ->
+      <Checkbox
+        variant=(fun () -> variant)
+        default_selected=(fun () -> selected)
+        is_indeterminate=(fun () -> indeterminate)
+        is_disabled=(fun () -> disabled)
+        is_invalid=(fun () -> invalid)>
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          <Label>"Accept terms"</Label>
+        </Checkbox.Content>
+      </Checkbox>);
+  let* solidtype = walk () in
+  T.cleanup ();
+  Twin.render
+    (props ~variant ~default_selected:selected ~is_indeterminate:indeterminate
+       ~is_disabled:disabled ~is_invalid:invalid ());
+  let* react = walk () in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Checkbox" (fun () ->
+      Jest.testPromise "is HeroUI's checkbox, off, and walked as React Aria's"
+        (fun () ->
+          let* solidtype, react =
+            both ~variant:`primary ~selected:false ~indeterminate:false
+              ~disabled:false ~invalid:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is on, secondary, as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~variant:`secondary ~selected:true ~indeterminate:false
+              ~disabled:false ~invalid:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is indeterminate as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~variant:`primary ~selected:false ~indeterminate:true
+              ~disabled:false ~invalid:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is disabled and invalid as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~variant:`primary ~selected:true ~indeterminate:false
+              ~disabled:true ~invalid:true
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

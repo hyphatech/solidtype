@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, Chip, Label, Link, Separator, Switch } from "@heroui/react";
+import { Badge, Button, Checkbox, Chip, Label, Link, Separator, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -102,6 +102,29 @@ export function switch_(host: HTMLElement, { label, ...props }: SwitchProps): vo
           <Label>{label}</Label>
         </Switch.Content>
       </Switch>,
+    ),
+  );
+}
+
+type CheckboxProps = {
+  variant: "primary" | "secondary";
+  isIndeterminate: boolean;
+  isDisabled: boolean;
+  isInvalid: boolean;
+  label: string;
+};
+
+export function checkbox(host: HTMLElement, { label, ...props }: CheckboxProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Checkbox {...props}>
+        <Checkbox.Content>
+          <Checkbox.Control>
+            <Checkbox.Indicator />
+          </Checkbox.Control>
+          <Label>{label}</Label>
+        </Checkbox.Content>
+      </Checkbox>,
     ),
   );
 }

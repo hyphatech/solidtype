@@ -86,3 +86,18 @@ external switch_props :
 
 external switch_ : Dom.htmlDivElement -> switch_props -> unit = "switch_"
 [@@mel.module "./react/heroui.tsx"]
+
+type checkbox_props
+
+external checkbox_props :
+  variant:string ->
+  is_indeterminate:(bool[@mel.as "isIndeterminate"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  label:string ->
+  unit ->
+  checkbox_props = ""
+[@@mel.obj]
+
+external checkbox : Dom.htmlDivElement -> checkbox_props -> unit = "checkbox"
+[@@mel.module "./react/heroui.tsx"]

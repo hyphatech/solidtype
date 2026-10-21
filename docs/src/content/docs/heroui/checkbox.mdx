@@ -1,0 +1,47 @@
+---
+title: Checkbox
+description: HeroUI's Checkbox, on Kobalte's.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_demo.jsx";
+import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_example.jsx";
+import example from "../../../../islands/checkbox_example.mlx?raw";
+
+`Solidtype_heroui.Checkbox` is Kobalte's checkbox in HeroUI's anatomy: the
+field, `Checkbox.Content`, the clickable label that holds Kobalte's input,
+`Checkbox.Control`, `Checkbox.Indicator` with HeroUI's own check and dash, and
+HeroUI's `Label`. Its state -- selected, indeterminate, disabled, invalid,
+hovered, pressed, focus-visible -- is declared as React Aria writes it.
+
+## Beside React
+
+The same HeroUI Checkbox twice: in solidtype on the left, in React on the
+right. Below them, every attribute of the two contents: a marked row is one
+they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Example
+
+<div class="not-content">
+  <Example.make client:load />
+</div>
+
+<Code code={example} lang="ocaml" title="checkbox_example.mlx" />
+
+## Props
+
+| React | solidtype | |
+|---|---|---|
+| `variant` | `variant` | `` `primary`` (default), `` `secondary`` |
+| `isSelected` | `is_selected` | controlled |
+| `defaultSelected` | `default_selected` | `false` (default) |
+| `isIndeterminate` | `is_indeterminate` | |
+| `onChange` | `on_change` | |
+| `isDisabled` | `is_disabled` | |
+| `isInvalid` | `is_invalid` | |
+| `className` | `class_` | added after HeroUI's classes; on each part too |
+| `name`, `value`, `isReadOnly`, `isRequired` | — | not yet |

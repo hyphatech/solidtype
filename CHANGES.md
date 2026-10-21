@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Checkbox`: HeroUI's Checkbox on Kobalte's, in HeroUI's
+  anatomy, its check and dash drawn as HeroUI draws them, selected,
+  indeterminate, disabled and invalid.
 - Breaking: `Solidtype_heroui.Button` and `Link` take `is_disabled`, as
   HeroUI's documentation names it and as `Switch` does, where they took
   Kobalte's `disabled`.
