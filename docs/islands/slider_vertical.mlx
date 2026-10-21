@@ -1,0 +1,12 @@
+module Label = Solidtype_heroui.Label
+module Slider = Solidtype_heroui.Slider
+
+let make () =
+  <div class_="flex h-64 items-center justify-center">
+    <Slider
+      class_="h-full" default_value=(fun () -> [| 30. |]) orientation=`vertical>
+      <Label>"Volume"</Label>
+      <Slider.Output />
+      <Slider.Track><Slider.Fill /> <Slider.Thumb /></Slider.Track>
+    </Slider>
+  </div>

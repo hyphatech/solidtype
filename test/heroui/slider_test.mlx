@@ -1,0 +1,275 @@
+(* HeroUI's Slider on Kobalte's, beside the same slider in React: every part,
+   which names which, where each thumb and the fill are, and the values as a
+   thumb is stepped by the keyboard. *)
+
+module For = Solidtype.For
+module Label = Solidtype_heroui.Label
+module Slider = Solidtype_heroui.Slider
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  default_value:(float array[@mel.as "defaultValue"]) ->
+  ?min_value:(float[@mel.as "minValue"]) ->
+  ?max_value:(float[@mel.as "maxValue"]) ->
+  ?step:float ->
+  ?orientation:string ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render :
+    props -> ((float array -> unit)[@mel.uncurry]) -> Dom.element = "render"
+  [@@mel.module "./twins/Slider.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Slider.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Slider.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external value_of : Dom.element -> string = "value" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+(* A thumb a keyboard and a reader reach: React Aria's range input, or
+   Kobalte's slider, each an accessible pattern. *)
+let thumb_of e =
+  Option.equal String.equal (T.attribute e "role") (Some "slider")
+  || Option.equal String.equal (T.attribute e "type") (Some "range")
+
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e when thumb_of e -> "thumb"
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+      | None -> "missing")
+  |> String.concat " "
+
+(* A style as its declarations in order of name: the order a merge with
+   Kobalte's leaves them in is no style's. The port's own undoing of
+   Kobalte's vertical edge and of its hiding a thumb until it is mounted,
+   [bottom: auto] and [display: flex], is left out. *)
+let style_of e =
+  match T.attribute e "style" with
+  | None -> ""
+  | Some style ->
+      String.split_on_char ';' style
+      |> List.map String.trim
+      |> List.filter (fun d ->
+          not
+            (List.exists (String.equal d)
+               [ ""; "bottom: auto"; "display: flex" ]))
+      |> List.sort String.compare |> String.concat "; "
+
+(* Each part HeroUI's styles read, whole but for its ids, and Kobalte's own
+   state, present and empty; and each thumb a
+   reader reaches by its value and range, since React Aria's is a range input
+   and Kobalte's a slider. *)
+let shown host =
+  let parts =
+    Js.Array.from (query_all host "[data-slot]")
+    |> Array.map (fun e ->
+        let named =
+          List.filter_map
+            (fun name ->
+              Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+            [ "for"; "aria-labelledby" ]
+        in
+        (* A thumb shows HeroUI's classes, its place and its state; what a
+           reader reaches of it is below. Kobalte's label names its thumb by
+           [for] as well, which React Aria's does not. *)
+        let data name =
+          String.length name > 5 && String.equal (String.sub name 0 5) "data-"
+        in
+        let names = Array.to_list (T.attribute_names e) in
+        if
+          Option.equal String.equal
+            (T.attribute e "data-slot")
+            (Some "slider-thumb")
+        then
+          "THUMB "
+          ^ T.attributes_but
+              (List.filter
+                 (fun name ->
+                   not
+                     (String.equal name "class"
+                     || (data name && not (String.equal name "data-orientation"))
+                     ))
+                 names)
+              e
+          ^ " style=" ^ style_of e
+        else
+          String.concat " "
+            (tag_name e
+            :: T.attributes_but
+                 ("id" :: "for" :: "aria-labelledby" :: "style"
+                 :: List.filter
+                      (fun name ->
+                        data name
+                        && Option.equal String.equal (T.attribute e name)
+                             (Some ""))
+                      names)
+                 e
+            :: ("style=" ^ style_of e)
+            :: List.filter
+                 (fun n -> not (Js.String.startsWith ~prefix:"for->" n))
+                 named)
+          ^ if element_count e > 0 then "" else " " ^ text e)
+  in
+  let thumbs =
+    Js.Array.from (query_all host "[role=slider], input[type=range]")
+    |> Array.to_list
+    (* Kobalte's form input, inside its slider, is not one a reader reaches. *)
+    |> List.filter (fun e ->
+        not
+          (Option.is_some (Js.Null.toOption (closest e "[role=slider] input"))))
+    |> List.map (fun e ->
+        let attribute name ~react =
+          match T.attribute e name with
+          | Some v -> v
+          | None -> Option.value (T.attribute e react) ~default:"-"
+        in
+        "thumb value="
+        ^ attribute "aria-valuenow" ~react:"value"
+        ^ " min="
+        ^ attribute "aria-valuemin" ~react:"min"
+        ^ " max="
+        ^ attribute "aria-valuemax" ~react:"max"
+        ^ " text="
+        ^ attribute "aria-valuetext" ~react:"aria-valuetext"
+        ^ " orientation="
+        ^ attribute "aria-orientation" ~react:"aria-orientation"
+        ^ " labelled by "
+        ^ linked (Option.value (T.attribute e "aria-labelledby") ~default:""))
+    |> Array.of_list
+  in
+  Array.append parts thumbs
+
+(* The slider as it is rendered, and as its first thumb is focused and
+   stepped up, then up by a page, then to its end: every part, and the values
+   it told, after each. *)
+let walk ?(focusable = true) ~step host told =
+  let user = T.setup () in
+  let thumb () =
+    match
+      Js.Array.from (query_all host "[role=slider], input[type=range]")
+      |> Array.to_list
+    with
+    | first :: _ -> first
+    | [] -> host
+  in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, !told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () =
+    after "stepped up" (fun () ->
+        if focusable then focus (thumb ());
+        T.keyboard user "{ArrowRight}")
+  in
+  let* () = after "paged up" (fun () -> T.keyboard user "{PageUp}") in
+  let* () = after "ended" (fun () -> T.keyboard user "{End}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let told_of values =
+  String.concat "," (Array.to_list (Array.map Js.Float.toString values))
+
+let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled ()
+    =
+  let told = ref "" in
+  T.render (fun () ->
+      <Slider
+        default_value=(fun () -> default_value)
+        ?min_value=(fun () -> min_value)
+        ?max_value=(fun () -> max_value)
+        ?step=(fun () -> step)
+        ?orientation=(fun () -> orientation)
+        ?is_disabled=(fun () -> is_disabled)
+        on_change=(fun values -> told := told_of values)
+        class_="w-64">
+        <Label>"Volume"</Label>
+        <Slider.Output />
+        <Slider.Track>
+          <Slider.Fill />
+          <For each=(fun () -> Array.mapi (fun index _ -> index) default_value)>
+            (fun index _ -> <Slider.Thumb index=(fun () -> index) />)
+          </For>
+        </Slider.Track>
+      </Slider>);
+  let host =
+    match T.query "[data-slot=slider]" with
+    | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
+    | None -> T.body
+  in
+  let focusable = not (Option.value is_disabled ~default:false) in
+  let* solidtype = walk ~focusable ~step:(fun action -> action ()) host told in
+  T.cleanup ();
+  let told' = ref "" in
+  let host =
+    Twin.render
+      (props ~default_value ?min_value ?max_value ?step
+         ?orientation:
+           (Option.map
+              (function `horizontal -> "horizontal" | `vertical -> "vertical")
+              orientation)
+         ?is_disabled ())
+      (fun values -> told' := told_of values)
+  in
+  let* react = walk ~focusable ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Slider" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "steps its value, as React's does" (fun () ->
+          let* r = both ~default_value:[| 30. |] () in
+          same r);
+      Jest.testPromise "steps by its step, within its range, as React's"
+        (fun () ->
+          let* r =
+            both ~default_value:[| 20. |] ~min_value:10. ~max_value:50. ~step:5.
+              ()
+          in
+          same r);
+      Jest.testPromise "is a range of two thumbs, as React's is" (fun () ->
+          let* r = both ~default_value:[| 20.; 60. |] () in
+          same r);
+      Jest.testPromise "is vertical, as React's is" (fun () ->
+          let* r = both ~default_value:[| 40. |] ~orientation:`vertical () in
+          same r);
+      Jest.testPromise "steps nothing while disabled, as React's" (fun () ->
+          let* r = both ~default_value:[| 30. |] ~is_disabled:true () in
+          same r))

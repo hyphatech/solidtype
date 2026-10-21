@@ -1,0 +1,137 @@
+---
+title: Slider
+description: A value, or a range of two, chosen along a track.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/slider_usage.jsx";
+import UsageCode from "../../../../islands/slider_usage.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/slider_disabled.jsx";
+import DisabledCode from "../../../../islands/slider_disabled.mlx?raw";
+import * as Vertical from "../../../../../_build/default/docs/islands/out/docs/islands/slider_vertical.jsx";
+import VerticalCode from "../../../../islands/slider_vertical.mlx?raw";
+import * as Range from "../../../../../_build/default/docs/islands/out/docs/islands/slider_range.jsx";
+import RangeCode from "../../../../islands/slider_range.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/slider_controlled.jsx";
+import ControlledCode from "../../../../islands/slider_controlled.mlx?raw";
+import * as CustomOutput from "../../../../../_build/default/docs/islands/out/docs/islands/slider_custom_output.jsx";
+import CustomOutputCode from "../../../../islands/slider_custom_output.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/slider_demo.jsx";
+
+`Solidtype_heroui.Slider` is Kobalte's `Slider.Root`, with the classes
+HeroUI's own `sliderVariants` gives. Its values -- one, or two for a range --
+are chosen by its thumbs, Kobalte's, by a pointer or the arrow, page, Home and
+End keys, on its step's grid within its range. Its output and fill are drawn
+from its values as React Aria draws them, and each thumb is placed as React
+Aria places it, centred across the track, which HeroUI's styles count on.
+
+## Usage
+
+<Example code={UsageCode} title="slider_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Slider default_value=(fun () -> [| 25.; 75. |])>
+  <Label>"Range"</Label>
+  <Slider.Output />
+  <Slider.Track>
+    <Slider.Fill />
+    <Slider.Thumb index=0 />
+    <Slider.Thumb index=1 />
+  </Slider.Track>
+</Slider>
+```
+
+## Examples
+
+### Disabled
+
+<Example code={DisabledCode} title="slider_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Vertical
+
+<Example code={VerticalCode} title="slider_vertical.mlx"><Vertical.make client:visible /></Example>
+
+### Range
+
+Each thumb of a range is bounded, for a reader, by its neighbours.
+
+<Example code={RangeCode} title="slider_range.mlx"><Range.make client:visible /></Example>
+
+### Controlled Value
+
+<Example code={ControlledCode} title="slider_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### Custom Output
+
+`Slider.Output`'s children take the place of its values.
+
+<Example code={CustomOutputCode} title="slider_custom_output.mlx"><CustomOutput.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Custom Value Formatting, by `formatOptions`, needs React Aria's
+number formatting, which is not ported yet; values show as numbers.
+
+## Beside React
+
+The same HeroUI Slider twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two thumbs: a marked
+row is one they disagree on -- Kobalte's thumb is a `slider`, where React
+Aria's holds a range input.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.slider`, `.slider__output`, `.slider__track`, `.slider__fill`,
+  `.slider__thumb`
+
+### Interactive States
+
+- **Orientation**: `[data-orientation="horizontal"]`,
+  `[data-orientation="vertical"]`
+- **Disabled**: `[data-disabled="true"]`
+- **Filled**: `[data-fill-start="true"]`, `[data-fill-end="true"]` on the track
+- **Thumb**: `[data-focused="true"]`, `[data-focus-visible="true"]`,
+  `[data-hovered="true"]`, `[data-dragging="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Slider
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `float array` | | Its values, controlled |
+| `defaultValue` | `default_value` | `float array` | `[\| min_value \|]` | Its values at first, kept by itself |
+| `onChange` | `on_change` | `float array -> unit` | | Told its values as they change |
+| `onChangeEnd` | `on_change_end` | `float array -> unit` | | Told its values as a drag ends |
+| `minValue` | `min_value` | `float` | `0.` | The least value |
+| `maxValue` | `max_value` | `float` | `100.` | The greatest value |
+| `step` | `step` | `float` | `1.` | How far a key steps |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its direction |
+| `isDisabled` | `is_disabled` | `bool` | | Whether it is disabled, else as its fieldset is |
+| `name` | `name` | `string` | | Its name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name where no label names it |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `formatOptions` | — | | | Not yet |
+
+### Slider.Thumb
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `index` | `index` | `int` | `0` | Which value it moves |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+| `children` | `children` | elements | | Drawn inside it |
+
+### Slider.Output, Slider.Track, Slider.Fill
+
+Each takes `class_`, added after HeroUI's class; the output `children`, in
+place of its values.

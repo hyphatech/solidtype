@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -398,6 +398,24 @@ export function numberField(host: HTMLElement, props: NumberFieldProps): void {
           <NumberField.IncrementButton />
         </NumberField.Group>
       </NumberField>,
+    ),
+  );
+}
+
+type SliderProps = { orientation: "horizontal" | "vertical"; isDisabled: boolean };
+
+// A slider of one thumb, as the port's demo shows it.
+export function slider(host: HTMLElement, props: SliderProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Slider {...props} className="h-40 w-56" defaultValue={30}>
+        <Label>Volume</Label>
+        <Slider.Output />
+        <Slider.Track>
+          <Slider.Fill />
+          <Slider.Thumb />
+        </Slider.Track>
+      </Slider>,
     ),
   );
 }

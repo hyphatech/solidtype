@@ -296,3 +296,15 @@ external number_field_props :
 external number_field : Dom.htmlDivElement -> number_field_props -> unit
   = "numberField"
 [@@mel.module "./react/heroui.tsx"]
+
+type slider_props
+
+external slider_props :
+  orientation:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  slider_props = ""
+[@@mel.obj]
+
+external slider : Dom.htmlDivElement -> slider_props -> unit = "slider"
+[@@mel.module "./react/heroui.tsx"]

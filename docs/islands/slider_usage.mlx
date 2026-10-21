@@ -1,0 +1,9 @@
+module Label = Solidtype_heroui.Label
+module Slider = Solidtype_heroui.Slider
+
+let make () =
+  <Slider class_="w-full max-w-xs" default_value=(fun () -> [| 30. |])>
+    <Label>"Volume"</Label>
+    <Slider.Output />
+    <Slider.Track><Slider.Fill /> <Slider.Thumb /></Slider.Track>
+  </Slider>

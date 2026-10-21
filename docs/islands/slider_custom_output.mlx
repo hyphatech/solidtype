@@ -1,0 +1,24 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_heroui.Label
+module Slider = Solidtype_heroui.Slider
+
+let make () =
+  let values, set_values = S.create_signal [| 25.; 75. |] in
+  <Slider
+    class_="w-full max-w-xs"
+    value=(fun () -> S.get values)
+    on_change=(S.set set_values)>
+    <Label>"Range"</Label>
+    <Slider.Output>
+      (fun () ->
+        match S.get values with
+        | [| low; high |] ->
+            Jsx.string
+              (Js.Float.toString low ^ "% to " ^ Js.Float.toString high ^ "%")
+        | _ -> Jsx.string "")
+    </Slider.Output>
+    <Slider.Track>
+      <Slider.Fill /> <Slider.Thumb index=0 /> <Slider.Thumb index=1 />
+    </Slider.Track>
+  </Slider>

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Slider`: HeroUI's Slider on Kobalte's, one value or a
+  range, controlled or kept, horizontal or vertical, its output and fill
+  drawn and its thumbs placed as React Aria draws and places them.
 - `Solidtype_heroui.Number_field`: HeroUI's NumberField on Kobalte's, its
   value a number, controlled or kept, on its step's grid within its range as
   React Aria keeps it, its group, input and buttons, and its label,
