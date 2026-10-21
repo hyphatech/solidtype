@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Link`: HeroUI's Link and its icon on Kobalte's link, its
+  state kept as React Aria keeps it. `Interaction` no longer presses a link
+  by Space, as React Aria does not.
 - An SVG shape takes the presentation attributes Solid's types pick for it --
   a `<path>`'s `fill`, `stroke`, `fill_rule` and the rest -- which the
   attributes generated from those types left out, as every `Pick<...>` and

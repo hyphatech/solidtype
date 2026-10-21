@@ -1,0 +1,30 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Link = Solidtype_heroui.Link
+module Toggle = Controls.Toggle
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  let icon, set_icon = S.create_signal true in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle label="icon" on=(fun () -> S.get icon) on_toggle=(S.set set_icon)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Link href="#beside-react" disabled=(fun () -> S.get disabled)>
+                   "Read the docs"
+                   <Show when_=(fun () -> S.get icon)><Link.Icon /></Show>
+                 </Link>)
+      react=(fun host ->
+              Heroui_react.link host
+                (Heroui_react.link_props ~is_disabled:(S.get disabled)
+                   ~icon:(S.get icon) ~label:"Read the docs" ()))
+    />
+  </section>

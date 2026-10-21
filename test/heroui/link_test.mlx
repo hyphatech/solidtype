@@ -1,0 +1,59 @@
+(* HeroUI's Link on Kobalte, beside the same Link in React: what its styles
+   read of the link and its icon, and the state it shows through a walk of
+   hover, press, Tab, Enter and Space, which presses a button but not a
+   link. *)
+
+module Link = Solidtype_heroui.Link
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+module Twin = struct
+  external render : bool -> Dom.element = "render"
+  [@@mel.module "./twins/Link.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Link.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Link.tsx"]
+end
+
+(* What HeroUI's styles read of the link and of its icon. *)
+let shown link =
+  let icon = T.query "[data-slot=link-icon]" in
+  ( T.class_name link,
+    T.attribute link "aria-disabled",
+    Option.map
+      (fun i ->
+        ( T.class_name i,
+          T.attribute i "data-default-icon",
+          Option.is_some (T.query "[data-slot=link-default-icon]") ))
+      icon )
+
+(* The port, then the same Link in React, each alone on the page, shown and
+   walked. *)
+let both ~disabled =
+  T.render (fun () ->
+      <Link href="#top" disabled=(fun () -> disabled)>
+        "HeroUI" <Link.Icon />
+      </Link>);
+  let link = T.by_role "link" in
+  let solidtype = shown link in
+  let* solidtype_walk = T.walk ~step:Twin.step link in
+  T.cleanup ();
+  let link = Twin.render disabled in
+  let react = shown link in
+  let* react_walk = T.walk ~step:Twin.step link in
+  Twin.cleanup ();
+  Js.Promise.resolve ((solidtype, solidtype_walk), (react, react_walk))
+
+let () =
+  Jest.describe "Link" (fun () ->
+      Jest.testPromise "is HeroUI's link, and shows its state as React Aria"
+        (fun () ->
+          let* solidtype, react = both ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is disabled as React Aria's is" (fun () ->
+          let* solidtype, react = both ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

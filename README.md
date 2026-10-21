@@ -26,7 +26,7 @@ Kobalte 0.13 is bound whole, in a package of its own,
 
 HeroUI 3.2's design is being ported onto Kobalte by hand, in
 `solidtype-heroui`: HeroUI's classes, from `@heroui/styles`, on Kobalte's
-behaviour. Badge, Button, Chip and Separator are ported so far. `make
+behaviour. Badge, Button, Chip, Link and Separator are ported so far. `make
 docs-serve` serves the documentation, where each port is shown beside the
 same component in React.
 

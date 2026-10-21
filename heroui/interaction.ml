@@ -55,7 +55,26 @@ let show element name on =
   if on then set_attribute element name "true"
   else remove_attribute element name
 
-let pressing_key k = String.equal k "Enter" || String.equal k " "
+external tag_name : _ Dom.element_like -> string = "tagName" [@@mel.get]
+
+external has_attribute : _ Dom.element_like -> string -> bool = "hasAttribute"
+[@@mel.send]
+
+external attribute : _ Dom.element_like -> string -> string Js.null
+  = "getAttribute"
+[@@mel.send]
+
+(* A link, as React Aria tells one: an anchor with an href, or the link
+   role. *)
+let link element =
+  (String.equal (tag_name element) "A" && has_attribute element "href")
+  || Option.equal String.equal
+       (Js.Null.toOption (attribute element "role"))
+       (Some "link")
+
+(* Enter presses, and Space too but on a link, as React Aria presses. *)
+let pressing element k =
+  String.equal k "Enter" || (String.equal k " " && not (link element))
 
 let track ?disabled element =
   let disabled () =
@@ -88,8 +107,9 @@ let track ?disabled element =
       pressed false);
   on_key element "keydown" (fun e ->
       if !focused then show element "data-focus-visible" true;
-      if pressing_key (key e) && not (repeat e) then pressed true);
-  on_key element "keyup" (fun e -> if pressing_key (key e) then pressed false);
+      if pressing element (key e) && not (repeat e) then pressed true);
+  on_key element "keyup" (fun e ->
+      if pressing element (key e) then pressed false);
   on_focus element "focus" (fun _ ->
       focused := true;
       show element "data-focused" true;

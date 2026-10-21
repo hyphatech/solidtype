@@ -17,8 +17,8 @@ val track :
     does:
 
     - hovered while a mouse or a pen, never a touch, is over it;
-    - pressed while a pointer is down on it and over it, or while Enter or Space
-      is held on it;
+    - pressed while a pointer is down on it and over it, or while Enter is held
+      on it, or Space but on a link, an anchor with an href or the link role;
     - focused while it has the focus, and focus-visible while it has it after a
       key was pressed rather than a pointer;
     - disabled while [disabled] holds, and then neither hovered nor pressed.

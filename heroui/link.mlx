@@ -1,0 +1,54 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Link
+
+(* HeroUI's classes for a link's parts, the same whatever its options. *)
+let slots = Styles.Link.slots (Styles.Link.options ())
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Icon = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let icon () = after (Styles.Link.icon slots) (class_ ()) in
+    <Show
+      when_=(fun () -> Option.is_some (children ()))
+      fallback=(<span
+                  class_=(fun () -> icon ())
+                  data_default_icon="true"
+                  data_slot="link-icon">
+                  <svg
+                    aria_hidden=true
+                    fill="none"
+                    height="9"
+                    role=`presentation
+                    view_box="0 0 7 7"
+                    width="9"
+                    data_slot="link-default-icon">
+                    <path
+                      d="M1.20592 6.84333L0.379822 6.01723L4.52594 \
+                         1.8672H1.37819L1.38601 \
+                         0.731812H6.48742V5.83714H5.34421L5.35203 \
+                         2.6933L1.20592 6.84333Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>)>
+      <span class_=(fun () -> icon ()) data_slot="link-icon">
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </span>
+    </Show>
+end
+
+let%component make ~(href : string) ?(disabled : bool = false)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  <Kobalte.Root
+    href=(fun () -> href ())
+    disabled=(fun () -> disabled ())
+    class_=(fun () ->
+             Styles.Link.base
+               (Styles.Link.slots (Styles.Link.options ?class_:(class_ ()) ())))
+    ref=(fun a -> Interaction.track ~disabled:(fun[@u] () -> disabled ()) a)>
+    (fun () -> children ())
+  </Kobalte.Root>

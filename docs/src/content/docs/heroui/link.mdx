@@ -1,0 +1,43 @@
+---
+title: Link
+description: HeroUI's Link, on Kobalte's.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/link_demo.jsx";
+import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/link_example.jsx";
+import example from "../../../../islands/link_example.mlx?raw";
+
+`Solidtype_heroui.Link` is Kobalte's `Link.Root`, an anchor, with the classes
+HeroUI's own `linkVariants` gives, and `Link.Icon`, HeroUI's arrow after its
+text. Its state -- hovered, pressed, focused, focus-visible, disabled -- is
+kept as React Aria keeps it: Enter presses a link, and Space does not.
+
+## Beside React
+
+The same HeroUI Link twice: in solidtype on the left, in React on the right.
+Hover, focus and press them to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Example
+
+<div class="not-content">
+  <Example.make client:load />
+</div>
+
+<Code code={example} lang="ocaml" title="link_example.mlx" />
+
+## Props
+
+| React | solidtype | |
+|---|---|---|
+| `href` | `href` | required |
+| `isDisabled` | `disabled` | Kobalte's name |
+| `className` | `class_` | added after HeroUI's classes; on `Link.Icon` too |
+| `children` of `Link.Icon` | `children` | HeroUI's arrow when none is given |
+
+A disabled link is a `<span role="link">` in React and stays an `<a>` here,
+Kobalte's element; both are `aria-disabled="true"` and `data-disabled="true"`.

@@ -60,3 +60,16 @@ external chip_props :
 
 external chip : Dom.htmlDivElement -> chip_props -> unit = "chip"
 [@@mel.module "./react/heroui.tsx"]
+
+type link_props
+
+external link_props :
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  icon:bool ->
+  label:string ->
+  unit ->
+  link_props = ""
+[@@mel.obj]
+
+external link : Dom.htmlDivElement -> link_props -> unit = "link"
+[@@mel.module "./react/heroui.tsx"]

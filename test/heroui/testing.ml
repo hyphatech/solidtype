@@ -51,3 +51,50 @@ external query_js : string -> Dom.element Js.null = "querySelector"
 
 (* The first element [selector] finds on the page, if any. *)
 let query selector = Js.Null.toOption (query_js selector)
+
+open Syntax
+
+(* The state HeroUI's styles read, which React Aria writes on an element. *)
+let state e =
+  [
+    "data-hovered";
+    "data-pressed";
+    "data-focused";
+    "data-focus-visible";
+    "data-disabled";
+  ]
+  |> List.filter_map (fun name ->
+      Option.map (fun v -> name ^ "=" ^ v) (attribute e name))
+  |> String.concat " "
+
+(* An element hovered, pressed and let go by the mouse, left, then reached by
+   Tab and pressed by Enter, then by Space: its state after each step, by the
+   step's name. Each step runs through [step], a twin's act, which React asks
+   of a test and Solid's side does not mind. *)
+let walk ~step e =
+  let user = setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, state e) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let pointer keys () =
+    let* (_ : pointers) = pointer user keys in
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "hovered" (fun () -> hover user e) in
+  let* () = after "pressed" (pointer "[MouseLeft>]") in
+  let* () = after "released" (pointer "[/MouseLeft]") in
+  let* () = after "left" (fun () -> unhover user e) in
+  let* () =
+    after "tabbed to" (fun () ->
+        let* () = click user body in
+        tab user)
+  in
+  let* () = after "Enter held" (fun () -> keyboard user "{Enter>}") in
+  let* () = after "Enter let go" (fun () -> keyboard user "{/Enter}") in
+  let* () = after "Space held" (fun () -> keyboard user "[Space>]") in
+  let* () = after "Space let go" (fun () -> keyboard user "[/Space]") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
