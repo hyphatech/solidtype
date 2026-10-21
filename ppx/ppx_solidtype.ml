@@ -783,7 +783,7 @@ let props_module ~loc props =
       @ omit) )
 
 (* Each prop is read where it is used: a value through a thunk, [text ()], a
-   function by calling it, [onChange v]; either is inlined to a read of Solid's
+   function by calling it, [on_change v]; either is inlined to a read of Solid's
    props object, so Solid tracks it as it tracks [props.text]. *)
 let reader ~loc p =
   let field =

@@ -4,7 +4,7 @@
 
     An element [<div class_="x" />] becomes [Jsx.el "div"], and a component
     [<Counter initial=1 />] becomes [Jsx.c Counter.component]. A literal, a JSX
-    element, a handler (a prop named [on] then a capital) and a function literal
+    element, a handler ([on_] and its event, [on_click]) and a function literal
     other than [fun () -> ...] are static; anything else is a thunk, so a read
     outside a thunk does not compile. A function prop that takes no argument is
     written [(fun _ -> ...)], since [fun () -> ...] is a thunk. A string
@@ -14,10 +14,14 @@
     as it is.
 
     An element's attribute is annotated with its type from the element's module
-    of [Solidtype.Html], [Html.Div.class_]. Its name is the label's, a trailing
-    underscore dropped and an underscore read as a hyphen, [aria_label]; the
-    prefixes [on_], [oncapture_], [attr_], [bool_] and [prop_] name Solid's
-    namespaces, [on:scroll], and [data_] a data attribute.
+    of [Solidtype.Html], [Html.Div.class_]. Its name is given back its
+    JavaScript spelling by the rule's inverse -- a keyword's trailing underscore
+    dropped, a hyphen after [aria_] and [data_], [aria_label], and a capital
+    after any other underscore, [read_only] -- or by the tables the generators
+    write of the names the inverse does not give, [stroke_width]. One of Solid's
+    namespaces wraps the value, never the name: [on_click=(Jsx.capture f)] is
+    [oncapture:click], and [Jsx.native], [Jsx.prop], [Jsx.attr] and [Jsx.bool]
+    name the others.
 
     A component's element also applies [Counter.Props.check] to its props under
     [if false], so a prop left out or not taken is a compile error, and Melange
@@ -33,8 +37,9 @@
     the module's [Props] -- its type, a getter per prop, [make], which builds
     props as a value, [check], and [omit], which names props by a variant of
     their own -- and [make] and [component]. In [body] a value prop is read as a
-    thunk, [text ()], and a function prop is called, [onPick v]: each is a live
-    read of Solid's props, so Solid tracks it.
+    thunk, [text ()], and a function prop is called, [on_pick v], an optional
+    one giving [Some] of its result or [None]: each is a live read of Solid's
+    props, so Solid tracks it.
 
     [-internal] lowers JSX inside solidtype itself, naming its modules without
     [Solidtype.]. *)
