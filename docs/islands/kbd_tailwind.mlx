@@ -1,0 +1,11 @@
+module Kbd = Solidtype_heroui.Kbd
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Kbd class_="rounded-lg bg-accent-soft px-2.5 text-accent-soft-foreground">
+      <Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content>
+    </Kbd>
+    <Kbd class_="rounded-lg bg-default px-2.5 text-muted">
+      <Kbd.Abbr key_value=`shift /> <Kbd.Content>"P"</Kbd.Content>
+    </Kbd>
+  </div>

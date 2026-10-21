@@ -1,0 +1,27 @@
+module Kbd = Solidtype_heroui.Kbd
+
+let make () =
+  <div class_="space-y-4">
+    <p class_="text-sm">
+      "Press "
+      <Kbd><Kbd.Content>"Esc"</Kbd.Content></Kbd>
+      " to close the dialog."
+    </p>
+    <p class_="text-sm">
+      "Use "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+      " to open the command palette."
+    </p>
+    <p class_="text-sm">
+      "Navigate with "
+      <Kbd><Kbd.Abbr key_value=`up /></Kbd>
+      " and "
+      <Kbd><Kbd.Abbr key_value=`down /></Kbd>
+      " arrow keys."
+    </p>
+    <p class_="text-sm">
+      "Save your work with "
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"S"</Kbd.Content></Kbd>
+      " regularly."
+    </p>
+  </div>

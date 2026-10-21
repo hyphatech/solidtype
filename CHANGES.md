@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Kbd`: HeroUI's Kbd, its variants, each key HeroUI draws
+  by its symbol and names, and its text.
 - `Solidtype_heroui.Card`: HeroUI's Card, its variants and its parts --
   header, title, description, content and footer -- a surface to what is
   inside it, but while transparent.

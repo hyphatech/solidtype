@@ -1,0 +1,47 @@
+module S = Solidtype.Solid
+module Kbd = Solidtype_heroui.Kbd
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`default, "default"); (`light, "light") |]
+
+let keys =
+  [|
+    (`command, "command");
+    (`shift, "shift");
+    (`option, "option");
+    (`enter, "enter");
+    (`end_, "end");
+  |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`default, "default") in
+  let key, set_key = S.create_signal (`command, "command") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="key"
+        choices=(fun () -> keys)
+        picked=(fun () -> S.get key)
+        on_pick=(Controls.choose keys set_key)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Kbd variant=(fun () -> fst (S.get variant))>
+                   <Kbd.Abbr key_value=(fun () -> fst (S.get key)) />
+                   <Kbd.Content>"K"</Kbd.Content>
+                 </Kbd>)
+      react=(fun host ->
+              Heroui_react.kbd host
+                (Heroui_react.kbd_props
+                   ~variant:(snd (S.get variant))
+                   ~key_value:(snd (S.get key))
+                   ()))
+    />
+  </section>

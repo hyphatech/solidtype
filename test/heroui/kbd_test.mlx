@@ -1,0 +1,126 @@
+(* HeroUI's Kbd, beside the same Kbd in React: the key, each symbol and its
+   name, and the text after it. *)
+
+module Kbd = Solidtype_heroui.Kbd
+module E = Jest.Expect
+module T = Testing
+
+type key =
+  [ `command
+  | `shift
+  | `ctrl
+  | `option
+  | `enter
+  | `delete
+  | `escape
+  | `tab
+  | `capslock
+  | `up
+  | `right
+  | `down
+  | `left
+  | `pageup
+  | `pagedown
+  | `home
+  | `end_
+  | `help
+  | `space
+  | `fn
+  | `win
+  | `alt ]
+
+module Twin = struct
+  external render :
+    [ `default | `light ] option ->
+    [ `command [@mel.as "command"]
+    | `shift [@mel.as "shift"]
+    | `ctrl [@mel.as "ctrl"]
+    | `option [@mel.as "option"]
+    | `enter [@mel.as "enter"]
+    | `delete [@mel.as "delete"]
+    | `escape [@mel.as "escape"]
+    | `tab [@mel.as "tab"]
+    | `capslock [@mel.as "capslock"]
+    | `up [@mel.as "up"]
+    | `right [@mel.as "right"]
+    | `down [@mel.as "down"]
+    | `left [@mel.as "left"]
+    | `pageup [@mel.as "pageup"]
+    | `pagedown [@mel.as "pagedown"]
+    | `home [@mel.as "home"]
+    | `end_ [@mel.as "end"]
+    | `help [@mel.as "help"]
+    | `space [@mel.as "space"]
+    | `fn [@mel.as "fn"]
+    | `win [@mel.as "win"]
+    | `alt [@mel.as "alt"] ] ->
+    Dom.element = "render"
+  [@@mel.module "./twins/Kbd.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Kbd.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* Each element, its attributes and its text. *)
+let shown host =
+  Js.Array.from (query_all host "kbd, kbd *")
+  |> Array.map (fun e -> tag_name e ^ " " ^ T.attributes e ^ " " ^ text e)
+
+let both ?variant (key : key) =
+  T.render (fun () ->
+      <Kbd ?variant=(fun () -> variant) class_="ms-1">
+        <Kbd.Abbr key_value=(fun () -> key) /> <Kbd.Content>"K"</Kbd.Content>
+      </Kbd>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react = shown (Twin.render variant key) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let keys : key array =
+  [|
+    `command;
+    `shift;
+    `ctrl;
+    `option;
+    `enter;
+    `delete;
+    `escape;
+    `tab;
+    `capslock;
+    `up;
+    `right;
+    `down;
+    `left;
+    `pageup;
+    `pagedown;
+    `home;
+    `end_;
+    `help;
+    `space;
+    `fn;
+    `win;
+    `alt;
+  |]
+
+let () =
+  Jest.describe "Kbd" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a key with its symbol and text, as React's is" (fun () ->
+          let solidtype, react = both `command in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is each variant, as React's is" (fun () ->
+          let solidtype, react = both ~variant:`light `shift in
+          let solidtype', react' = both ~variant:`default `shift in
+          E.(expect (solidtype, solidtype') |> toEqual (react, react')));
+      Jest.test "draws and names every key as React does" (fun () ->
+          let solidtype, react =
+            Array.map (fun key -> both key) keys |> Array.split
+          in
+          E.(expect solidtype |> toEqual react)))

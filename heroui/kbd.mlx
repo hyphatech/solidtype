@@ -1,0 +1,109 @@
+module Jsx = Solidtype.Jsx
+
+type key =
+  [ `command
+  | `shift
+  | `ctrl
+  | `option
+  | `enter
+  | `delete
+  | `escape
+  | `tab
+  | `capslock
+  | `up
+  | `right
+  | `down
+  | `left
+  | `pageup
+  | `pagedown
+  | `home
+  | `end_
+  | `help
+  | `space
+  | `fn
+  | `win
+  | `alt ]
+
+(* A key's symbol and its name, as HeroUI draws and names it. *)
+let symbol : key -> string = function
+  | `command -> {js|⌘|js}
+  | `shift -> {js|⇧|js}
+  | `ctrl -> {js|⌃|js}
+  | `option -> {js|⌥|js}
+  | `enter -> {js|↵|js}
+  | `delete -> {js|⌫|js}
+  | `escape -> {js|⎋|js}
+  | `tab -> {js|⇥|js}
+  | `capslock -> {js|⇪|js}
+  | `up -> {js|↑|js}
+  | `right -> {js|→|js}
+  | `down -> {js|↓|js}
+  | `left -> {js|←|js}
+  | `pageup -> {js|⇞|js}
+  | `pagedown -> {js|⇟|js}
+  | `home -> {js|↖|js}
+  | `end_ -> {js|↘|js}
+  | `help -> {js|?|js}
+  | `space -> {js|␣|js}
+  | `fn -> {js|Fn|js}
+  | `win -> {js|⌘|js}
+  | `alt -> {js|⌥|js}
+
+let name : key -> string = function
+  | `command -> "Command"
+  | `shift -> "Shift"
+  | `ctrl -> "Control"
+  | `option -> "Option"
+  | `enter -> "Enter"
+  | `delete -> "Delete"
+  | `escape -> "Escape"
+  | `tab -> "Tab"
+  | `capslock -> "Caps Lock"
+  | `up -> "Up"
+  | `right -> "Right"
+  | `down -> "Down"
+  | `left -> "Left"
+  | `pageup -> "Page Up"
+  | `pagedown -> "Page Down"
+  | `home -> "Home"
+  | `end_ -> "End"
+  | `help -> "Help"
+  | `space -> "Space"
+  | `fn -> "Fn"
+  | `win -> "Win"
+  | `alt -> "Alt"
+
+(* HeroUI's classes for a key's parts, the same whatever its variant, read as
+   a part is made: a module does nothing as it loads. *)
+let slots () = Styles.Kbd.slots (Styles.Kbd.options ())
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Abbr = struct
+  let%component make ~(key_value : key) ?(class_ : string option) () =
+    <abbr
+      class_=(fun () -> after (Styles.Kbd.abbr (slots ())) (class_ ()))
+      title=(fun () -> name (key_value ()))>
+      (fun () -> Jsx.string (symbol (key_value ())))
+    </abbr>
+end
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <span class_=(fun () -> after (Styles.Kbd.content (slots ())) (class_ ()))>
+      (fun () -> children ())
+    </span>
+end
+
+let%component make ?(variant : [ `default | `light ] option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  <kbd
+    class_=(fun () ->
+             after
+               (Styles.Kbd.base
+                  (Styles.Kbd.slots
+                     (Styles.Kbd.options ?variant:(variant ()) ())))
+               (class_ ()))>
+    (fun () -> children ())
+  </kbd>

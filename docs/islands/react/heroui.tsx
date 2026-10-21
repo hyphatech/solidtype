@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Label, Link, Radio, RadioGroup, Separator, Surface, Switch } from "@heroui/react";
+import { Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Surface, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -221,6 +221,22 @@ export function card(host: HTMLElement, props: CardProps): void {
           <p>Its content</p>
         </Card.Content>
       </Card>,
+    ),
+  );
+}
+
+type KbdProps = {
+  variant: "default" | "light";
+  keyValue: Parameters<typeof Kbd.Abbr>[0]["keyValue"];
+};
+
+export function kbd(host: HTMLElement, { variant, keyValue }: KbdProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Kbd variant={variant}>
+        <Kbd.Abbr keyValue={keyValue} />
+        <Kbd.Content>K</Kbd.Content>
+      </Kbd>,
     ),
   );
 }

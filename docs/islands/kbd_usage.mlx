@@ -1,0 +1,9 @@
+module Kbd = Solidtype_heroui.Kbd
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content></Kbd>
+    <Kbd><Kbd.Abbr key_value=`shift /> <Kbd.Content>"P"</Kbd.Content></Kbd>
+    <Kbd><Kbd.Abbr key_value=`ctrl /> <Kbd.Content>"C"</Kbd.Content></Kbd>
+    <Kbd><Kbd.Abbr key_value=`option /> <Kbd.Content>"D"</Kbd.Content></Kbd>
+  </div>

@@ -87,6 +87,16 @@ external close_button : Dom.htmlDivElement -> close_button_props -> unit
   = "closeButton"
 [@@mel.module "./react/heroui.tsx"]
 
+type kbd_props
+
+external kbd_props :
+  variant:string -> key_value:(string[@mel.as "keyValue"]) -> unit -> kbd_props
+  = ""
+[@@mel.obj]
+
+external kbd : Dom.htmlDivElement -> kbd_props -> unit = "kbd"
+[@@mel.module "./react/heroui.tsx"]
+
 type link_props
 
 external link_props :

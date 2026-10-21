@@ -1,0 +1,23 @@
+module Kbd = Solidtype_heroui.Kbd
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <div class_="flex items-center gap-2">
+      <span class_="text-sm text-muted">"Arrow Keys:"</span>
+      <div class_="flex items-center gap-2">
+        <Kbd><Kbd.Abbr key_value=`up /></Kbd>
+        <Kbd><Kbd.Abbr key_value=`down /></Kbd>
+        <Kbd><Kbd.Abbr key_value=`left /></Kbd>
+        <Kbd><Kbd.Abbr key_value=`right /></Kbd>
+      </div>
+    </div>
+    <div class_="flex items-center gap-2">
+      <span class_="text-sm text-muted">"Page Navigation:"</span>
+      <div class_="flex items-center gap-2">
+        <Kbd><Kbd.Abbr key_value=`pageup /></Kbd>
+        <Kbd><Kbd.Abbr key_value=`pagedown /></Kbd>
+        <Kbd><Kbd.Abbr key_value=`home /></Kbd>
+        <Kbd><Kbd.Abbr key_value=`end_ /></Kbd>
+      </div>
+    </div>
+  </div>

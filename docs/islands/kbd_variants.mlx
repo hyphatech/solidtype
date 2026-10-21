@@ -1,0 +1,46 @@
+module Kbd = Solidtype_heroui.Kbd
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <div class_="flex items-center gap-2">
+      <span>"Copy:"</span>
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"C"</Kbd.Content></Kbd>
+      <Kbd variant=`light>
+        <Kbd.Abbr key_value=`command /> <Kbd.Content>"C"</Kbd.Content>
+      </Kbd>
+    </div>
+    <div class_="flex items-center gap-2">
+      <span>"Paste:"</span>
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"V"</Kbd.Content></Kbd>
+      <Kbd variant=`light>
+        <Kbd.Abbr key_value=`command /> <Kbd.Content>"V"</Kbd.Content>
+      </Kbd>
+    </div>
+    <div class_="flex items-center gap-2">
+      <span>"Cut:"</span>
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"X"</Kbd.Content></Kbd>
+      <Kbd variant=`light>
+        <Kbd.Abbr key_value=`command /> <Kbd.Content>"X"</Kbd.Content>
+      </Kbd>
+    </div>
+    <div class_="flex items-center gap-2">
+      <span>"Undo:"</span>
+      <Kbd><Kbd.Abbr key_value=`command /> <Kbd.Content>"Z"</Kbd.Content></Kbd>
+      <Kbd variant=`light>
+        <Kbd.Abbr key_value=`command /> <Kbd.Content>"Z"</Kbd.Content>
+      </Kbd>
+    </div>
+    <div class_="flex items-center gap-2">
+      <span>"Redo:"</span>
+      <Kbd>
+        <Kbd.Abbr key_value=`command />
+        <Kbd.Abbr key_value=`shift />
+        <Kbd.Content>"Z"</Kbd.Content>
+      </Kbd>
+      <Kbd variant=`light>
+        <Kbd.Abbr key_value=`command />
+        <Kbd.Abbr key_value=`shift />
+        <Kbd.Content>"Z"</Kbd.Content>
+      </Kbd>
+    </div>
+  </div>
