@@ -1,0 +1,16 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Close_button = Solidtype_heroui.Close_button
+
+let make () =
+  let count, set_count = S.create_signal 0 in
+  let times () = string_of_int (S.get count) ^ " times" in
+  <div class_="flex flex-col items-center justify-center gap-4">
+    <Close_button
+      aria_label=(fun () -> "Close (clicked " ^ times () ^ ")")
+      on_click=(fun _ -> S.set set_count (S.get count + 1))
+    />
+    <span class_="text-sm text-muted">
+      (fun () -> Jsx.string ("Clicked: " ^ times ()))
+    </span>
+  </div>

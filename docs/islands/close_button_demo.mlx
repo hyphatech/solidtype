@@ -1,0 +1,22 @@
+module S = Solidtype.Solid
+module Close_button = Solidtype_heroui.Close_button
+module Toggle = Controls.Toggle
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Close_button is_disabled=(fun () -> S.get disabled) />)
+      react=(fun host ->
+              Heroui_react.close_button host
+                (Heroui_react.close_button_props ~is_disabled:(S.get disabled)
+                   ()))
+    />
+  </section>

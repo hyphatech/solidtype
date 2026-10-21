@@ -38,3 +38,28 @@ module Trash = struct
       />
     </svg>
 end
+
+module Xmark = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M4 4L12 12M12 4L4 12"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+      />
+    </svg>
+end
+
+module Circle_xmark = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke_width="1.5" />
+      <path
+        d="M6 6L10 10M10 6L6 10"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+      />
+    </svg>
+end

@@ -1,0 +1,49 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Button
+
+let%component make ?(variant : [ `default ] = `default)
+    ?(is_disabled : bool = false) ?(aria_label : string = "Close")
+    ?(class_ : string option) ?(on_click : (Dom.mouseEvent -> unit) option)
+    ?(children : Jsx.content option) () =
+  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  <Kobalte.Root
+    aria_label=(fun () -> aria_label ())
+    class_=(fun () ->
+             Styles.CloseButton.classes
+               (Styles.CloseButton.options ~variant:(variant ())
+                  ?class_:(class_ ()) ()))
+    disabled=(fun () -> is_disabled ())
+    ref=(fun b -> Interaction.watch i b)
+    data_slot="close-button"
+    data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+    data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+    data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+    data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+    type_=`button
+    on_click=(fun e -> ignore (on_click e : unit option))>
+    <Show
+      when_=(fun () -> Option.is_some (children ()))
+      fallback=(<svg
+                  aria_hidden=true
+                  fill="none"
+                  height="16"
+                  role=`presentation
+                  view_box="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  data_slot="close-button-icon">
+                  <path
+                    clip_rule="evenodd"
+                    d="M3.47 3.47a.75.75 0 0 1 1.06 0L8 6.94l3.47-3.47a.75.75 \
+                       0 1 1 1.06 1.06L9.06 8l3.47 3.47a.75.75 0 1 1-1.06 \
+                       1.06L8 9.06l-3.47 3.47a.75.75 0 0 1-1.06-1.06L6.94 8 \
+                       3.47 4.53a.75.75 0 0 1 0-1.06Z"
+                    fill="currentColor"
+                    fill_rule="evenodd"
+                  />
+                </svg>)>
+      (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+    </Show>
+  </Kobalte.Root>

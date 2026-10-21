@@ -1,0 +1,122 @@
+(* HeroUI's CloseButton on Kobalte: HeroUI's classes, its name and its icon,
+   and the state React Aria shows on the same component in React. *)
+
+module S = Solidtype.Solid
+module Close_button = Solidtype_heroui.Close_button
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+module Twin = struct
+  external render : bool -> Dom.element = "render"
+  [@@mel.module "./twins/CloseButton.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/CloseButton.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/CloseButton.tsx"]
+end
+
+external outer_html : Dom.element -> string = "outerHTML" [@@mel.get]
+
+external attribute_names : Dom.element -> string array = "getAttributeNames"
+[@@mel.send]
+
+external first_child : Dom.element -> Dom.element Js.null = "firstElementChild"
+[@@mel.get]
+
+(* An element's attributes and their values, in order of name: the order a
+   framework writes them in is its own, and no style reads it. *)
+let attributes e =
+  attribute_names e |> Array.to_list |> List.sort String.compare
+  |> List.map (fun name ->
+      name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+  |> String.concat " "
+
+(* The walk on HeroUI's CloseButton in solidtype, then in React, each alone on
+   the page, so Tab reaches it. *)
+let both ~disabled =
+  T.render (fun () -> <Close_button is_disabled=(fun () -> disabled) />);
+  let* solidtype = T.walk ~step:Twin.step (T.by_role "button") in
+  T.cleanup ();
+  let* react = T.walk ~step:Twin.step (Twin.render disabled) in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+(* The icon each side draws, HeroUI's: the svg's attributes and its path's. *)
+let icon e =
+  match T.query "[data-slot=close-button-icon]" with
+  | Some svg ->
+      let path =
+        match Js.Null.toOption (first_child svg) with
+        | Some p -> attributes p
+        | None -> "no path"
+      in
+      (attributes svg, path)
+  | None -> ("no icon in " ^ outer_html e, "")
+
+let () =
+  Jest.describe "Close_button" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a button named Close, with HeroUI's classes" (fun () ->
+          T.render (fun () -> <Close_button />);
+          let b = T.by_role "button" in
+          E.(
+            expect
+              ( T.class_name b,
+                T.attribute b "type",
+                T.attribute b "aria-label",
+                T.attribute b "data-slot" )
+            |> toEqual
+                 ( "close-button close-button--default",
+                   Some "button",
+                   Some "Close",
+                   Some "close-button" )));
+      Jest.test "draws HeroUI's icon, as React does" (fun () ->
+          T.render (fun () -> <Close_button />);
+          let solidtype = icon (T.by_role "button") in
+          T.cleanup ();
+          let react = icon (Twin.render false) in
+          Twin.cleanup ();
+          E.(expect solidtype |> toEqual react));
+      Jest.test "shows its children in place of the icon" (fun () ->
+          T.render (fun () ->
+              <Close_button aria_label="Dismiss">
+                <span data_slot="custom">"x"</span>
+              </Close_button>);
+          let b = T.by_role "button" in
+          E.(
+            expect
+              ( T.attribute b "aria-label",
+                Option.is_some (T.query "[data-slot=custom]"),
+                Option.is_some (T.query "[data-slot=close-button-icon]") )
+            |> toEqual (Some "Dismiss", true, false)));
+      Jest.test "adds its class after HeroUI's" (fun () ->
+          T.render (fun () -> <Close_button class_="rounded-full" />);
+          E.(
+            expect (T.class_name (T.by_role "button"))
+            |> toBe "close-button close-button--default rounded-full"));
+      Jest.testPromise "is clicked, and not while it is disabled" (fun () ->
+          let clicks = ref 0 in
+          let disabled, set_disabled = S.create_signal false in
+          T.render (fun () ->
+              <Close_button
+                is_disabled=(fun () -> S.get disabled)
+                on_click=(fun _ -> incr clicks)
+              />);
+          let user = T.setup () in
+          let b = T.by_role "button" in
+          let* () = T.click user b in
+          S.set set_disabled true;
+          let* () = T.click user b in
+          Js.Promise.resolve E.(expect !clicks |> toBe 1));
+      Jest.testPromise "shows hover, press and focus as React Aria does"
+        (fun () ->
+          let* solidtype, react = both ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "shows none of them while disabled, as React Aria does"
+        (fun () ->
+          let* solidtype, react = both ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

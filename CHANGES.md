@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Close_button`: HeroUI's CloseButton on Kobalte's button,
+  named "Close" unless given an `aria_label`, drawing HeroUI's cross or the
+  children it is given, its state kept as Button's is.
 - `Solidtype_heroui.Switch`, `Checkbox` and `Radio_group` take
   `is_read_only`, `is_required` and `name`, and `Switch` and `Checkbox`
   `value`, so they submit with a form; `Switch`, `Checkbox`, `Radio` and

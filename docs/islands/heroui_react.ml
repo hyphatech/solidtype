@@ -61,6 +61,16 @@ external chip_props :
 external chip : Dom.htmlDivElement -> chip_props -> unit = "chip"
 [@@mel.module "./react/heroui.tsx"]
 
+type close_button_props
+
+external close_button_props :
+  is_disabled:(bool[@mel.as "isDisabled"]) -> unit -> close_button_props = ""
+[@@mel.obj]
+
+external close_button : Dom.htmlDivElement -> close_button_props -> unit
+  = "closeButton"
+[@@mel.module "./react/heroui.tsx"]
+
 type link_props
 
 external link_props :

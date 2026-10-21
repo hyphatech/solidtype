@@ -1,0 +1,8 @@
+module Close_button = Solidtype_heroui.Close_button
+
+let make () =
+  <Close_button
+    aria_label="Close"
+    class_="size-8 rounded-full bg-default text-muted hover:bg-default-hover \
+            hover:text-foreground active:scale-95"
+  />

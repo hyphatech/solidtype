@@ -45,7 +45,7 @@ export default defineConfig({
       },
       sidebar: [
         { label: "Start here", items: ["index"] },
-        { label: "HeroUI", items: ["heroui/coverage", "heroui/badge", "heroui/button", "heroui/checkbox", "heroui/chip", "heroui/description", "heroui/label", "heroui/link", "heroui/radio-group", "heroui/separator", "heroui/switch"] },
+        { label: "HeroUI", items: ["heroui/coverage", "heroui/badge", "heroui/button", "heroui/checkbox", "heroui/chip", "heroui/close-button", "heroui/description", "heroui/label", "heroui/link", "heroui/radio-group", "heroui/separator", "heroui/switch"] },
       ],
     }),
     solid({ exclude: [reactFiles] }),

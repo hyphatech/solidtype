@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, Checkbox, Chip, Description, Label, Link, Radio, RadioGroup, Separator, Switch } from "@heroui/react";
+import { Badge, Button, Checkbox, Chip, CloseButton, Description, Label, Link, Radio, RadioGroup, Separator, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -74,6 +74,12 @@ type ChipProps = {
 
 export function chip(host: HTMLElement, { label, ...props }: ChipProps): void {
   flushSync(() => rootOf(host).render(<Chip {...props}>{label}</Chip>));
+}
+
+type CloseButtonProps = { isDisabled: boolean };
+
+export function closeButton(host: HTMLElement, props: CloseButtonProps): void {
+  flushSync(() => rootOf(host).render(<CloseButton {...props} />));
 }
 
 type LinkProps = { isDisabled: boolean; icon: boolean; label: string };

@@ -1,0 +1,13 @@
+module Close_button = Solidtype_heroui.Close_button
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <div class_="flex flex-col items-center gap-2">
+      <Close_button><Icons.Circle_xmark /></Close_button>
+      <span class_="text-xs text-muted">"Custom Icon"</span>
+    </div>
+    <div class_="flex flex-col items-center gap-2">
+      <Close_button><Icons.Xmark /></Close_button>
+      <span class_="text-xs text-muted">"Alternative Icon"</span>
+    </div>
+  </div>

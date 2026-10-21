@@ -1,0 +1,3 @@
+module Close_button = Solidtype_heroui.Close_button
+
+let make () = <Close_button />
