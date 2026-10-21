@@ -4,6 +4,9 @@ module E = Jest.Expect
 exception Boom
 
 (* A computation needs an owner; this one lives until the test disposes it. *)
+(* A component's props, optional, as merge_props merges them. *)
+type sized = { size : int option; label : string option }
+
 let rooted f =
   S.create_root (fun dispose ->
       f ();
@@ -353,11 +356,12 @@ let () =
           S.set set_a 3;
           E.(expect (List.rev !seen) |> toEqual [ 1; 2 ])));
   Jest.describe "components" (fun () ->
-      Jest.test "merge_props reads the last part that has a prop" (fun () ->
-          let merged =
-            S.merge_props
-              [| [%mel.obj { a = 1; b = 2 }]; [%mel.obj { a = 3; b = 2 }] |]
-          in
-          E.(expect (merged##a, merged##b) |> toEqual (3, 2)));
+      Jest.test "merge_props reads each prop from the last part that has it"
+        (fun () ->
+          let defaults = { size = Some 1; label = Some "item" } in
+          let given = { size = Some 3; label = None } in
+          let merged = S.merge_props [| defaults; given |] in
+          E.(
+            expect (merged.size, merged.label) |> toEqual (Some 3, Some "item")));
       Jest.test "a unique id is a string" (fun () ->
           E.(expect (String.length (S.create_unique_id ()) > 0) |> toBe true)))
