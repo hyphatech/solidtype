@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -434,6 +434,21 @@ export function searchField(host: HTMLElement, props: SearchFieldProps): void {
           <SearchField.ClearButton />
         </SearchField.Group>
       </SearchField>,
+    ),
+  );
+}
+
+type InputGroupProps = { variant: "primary" | "secondary" };
+
+// An input with its prefix and suffix, as the port's demo shows it.
+export function inputGroup(host: HTMLElement, props: InputGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <InputGroup {...props}>
+        <InputGroup.Prefix>https://</InputGroup.Prefix>
+        <InputGroup.Input aria-label="Site" placeholder="heroui" />
+        <InputGroup.Suffix>.com</InputGroup.Suffix>
+      </InputGroup>,
     ),
   );
 }

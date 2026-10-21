@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=input-group]"
+      solidtype=(<Input_group variant=(fun () -> fst (S.get variant))>
+                   <Input_group.Prefix>"https://"</Input_group.Prefix>
+                   <Input_group.Input aria_label="Site" placeholder="heroui" />
+                   <Input_group.Suffix>".com"</Input_group.Suffix>
+                 </Input_group>)
+      react=(fun host ->
+              Heroui_react.input_group host
+                (Heroui_react.input_group_props
+                   ~variant:(snd (S.get variant))
+                   ()))
+    />
+  </section>

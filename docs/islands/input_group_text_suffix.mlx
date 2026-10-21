@@ -1,0 +1,13 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Text_field class_="w-full max-w-[280px]" name="field">
+    <Label>"Website"</Label>
+    <Input_group>
+      <Input_group.Input placeholder="heroui" />
+      <Input_group.Suffix>".com"</Input_group.Suffix>
+    </Input_group>
+  </Text_field>

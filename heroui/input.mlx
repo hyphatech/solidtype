@@ -37,7 +37,7 @@ end
 (* The props this input takes for itself; the rest it passes on. *)
 let own = [| "variant"; "fullWidth"; "class" |]
 
-let make (props : Props.t) =
+let input ~classes ~slot (props : Props.t) =
   let field = Text_field.Context.use () in
   let rest = S.omit props own in
   (* A field's state is the field's; alone, it is what it is given, as React
@@ -57,14 +57,11 @@ let make (props : Props.t) =
   in
   let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
   let classes () =
-    let variant =
-      match Props.variant props with
-      | Some v -> Some v
-      | None -> Option.bind field (fun (f : Text_field.field) -> f.variant ())
-    in
-    Styles.Input.classes
-      (Styles.Input.options ?full_width:(Props.full_width props) ?variant
-         ?class_:(Props.class_ props) ())
+    classes
+      ~variant:
+        (match Props.variant props with
+        | Some v -> Some v
+        | None -> Option.bind field (fun (f : Text_field.field) -> f.variant ()))
   in
   match field with
   | Some _ ->
@@ -75,7 +72,7 @@ let make (props : Props.t) =
         class_=(fun () -> classes ())
         ?title=(fun () -> if disabled () then None else Some "")
         ref=(fun e -> Interaction.watch i e)
-        data_slot="input"
+        data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
@@ -87,12 +84,18 @@ let make (props : Props.t) =
         props=rest
         class_=(fun () -> classes ())
         ref=(fun e -> Interaction.watch i e)
-        data_slot="input"
+        data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_disabled=(fun () -> Jsx.flag (disabled ()))
         data_invalid=(fun () -> Jsx.flag (invalid ()))
       />
+
+let make (props : Props.t) =
+  input props ~slot:"input" ~classes:(fun ~variant ->
+      Styles.Input.classes
+        (Styles.Input.options ?full_width:(Props.full_width props) ?variant
+           ?class_:(Props.class_ props) ()))
 
 let component = Jsx.component make

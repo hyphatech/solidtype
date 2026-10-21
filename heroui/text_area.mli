@@ -18,7 +18,19 @@ module Props : sig
     ?full_width:bool Solidtype.Check.value ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Textarea.check
+
+  val class_ : t -> string option
+  (** The class it is given, which a part that renders it adds after its own. *)
 end
+
+val text_area :
+  classes:(variant:[ `primary | `secondary ] option -> string) ->
+  slot:string ->
+  Props.t ->
+  Solidtype.Jsx.element
+(** [text_area ~classes ~slot props], this part as another part renders it with
+    its own classes, given the variant it takes, and its own [data-slot]: an
+    input group's. *)
 
 val make : Props.t -> Solidtype.Jsx.element
 val component : Props.t Solidtype.Jsx.component

@@ -1,0 +1,26 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Text_field class_="w-full max-w-[280px]" name="field" variant=`primary>
+      <Label>"Primary"</Label>
+      <Input_group>
+        <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[280px]" placeholder="name@email.com"
+        />
+      </Input_group>
+    </Text_field>
+    <Text_field class_="w-full max-w-[280px]" name="field" variant=`secondary>
+      <Label>"Secondary"</Label>
+      <Input_group>
+        <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[280px]" placeholder="name@email.com"
+        />
+      </Input_group>
+    </Text_field>
+  </div>

@@ -321,3 +321,12 @@ external search_field_props :
 external search_field : Dom.htmlDivElement -> search_field_props -> unit
   = "searchField"
 [@@mel.module "./react/heroui.tsx"]
+
+type input_group_props
+
+external input_group_props : variant:string -> unit -> input_group_props = ""
+[@@mel.obj]
+
+external input_group : Dom.htmlDivElement -> input_group_props -> unit
+  = "inputGroup"
+[@@mel.module "./react/heroui.tsx"]

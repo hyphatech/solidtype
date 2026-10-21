@@ -1,0 +1,13 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Text_field class_="w-full max-w-[280px]" name="field">
+    <Label>"Message"</Label>
+    <Input_group>
+      <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
+      <Input_group.Text_area placeholder="Write a message" />
+    </Input_group>
+  </Text_field>

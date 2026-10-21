@@ -1,0 +1,137 @@
+module Jsx = Solidtype.Jsx
+
+external query : Dom.htmlDivElement -> string -> Dom.htmlElement Js.null
+  = "querySelector"
+[@@mel.send]
+
+external focus : Dom.htmlElement -> unit = "focus" [@@mel.send]
+external target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+
+external contains : Dom.htmlElement -> Dom.element -> bool = "contains"
+[@@mel.send]
+
+(* What a group's parts read of it: its classes. *)
+type group = { slots : unit -> Styles.InputGroup.slots }
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+let within part =
+  match Context.use () with
+  | Some g -> g
+  | None -> invalid_arg (part ^ " is used inside an Input_group")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Prefix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let g = within "Input_group.Prefix" in
+    <div
+      class_=(fun () ->
+               after (Styles.InputGroup.prefix (g.slots ())) (class_ ()))
+      data_slot="input-group-prefix">
+      (fun () -> children ())
+    </div>
+end
+
+module Suffix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let g = within "Input_group.Suffix" in
+    <div
+      class_=(fun () ->
+               after (Styles.InputGroup.suffix (g.slots ())) (class_ ()))
+      data_slot="input-group-suffix">
+      (fun () -> children ())
+    </div>
+end
+
+module Input = struct
+  module Props = Input.Props
+
+  let make (props : Props.t) =
+    let g = within "Input_group.Input" in
+    Input.input props ~slot:"input-group-input" ~classes:(fun ~variant:_ ->
+        after (Styles.InputGroup.input (g.slots ())) (Props.class_ props))
+
+  let component = Jsx.component make
+end
+
+module Text_area = struct
+  module Props = Text_area.Props
+
+  let make (props : Props.t) =
+    let g = within "Input_group.Text_area" in
+    Text_area.text_area props ~slot:"input-group-textarea"
+      ~classes:(fun ~variant:_ ->
+        after (Styles.InputGroup.input (g.slots ())) (Props.class_ props))
+
+  let component = Jsx.component make
+end
+
+let%component make ?(variant : [ `primary | `secondary ] option)
+    ?(full_width : bool option) ?(is_disabled : bool option)
+    ?(is_invalid : bool option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  let field = Text_field.Context.use () in
+  let disabled () =
+    match (is_disabled (), field) with
+    | Some d, _ -> d
+    | None, Some f -> f.disabled ()
+    | None, None -> false
+  in
+  let invalid () =
+    match (is_invalid (), field) with
+    | Some i, _ -> i
+    | None, Some f -> f.invalid ()
+    | None, None -> false
+  in
+  let g =
+    {
+      slots =
+        (fun () ->
+          Styles.InputGroup.slots
+            (Styles.InputGroup.options ?full_width:(full_width ())
+               ?variant:
+                 (match variant () with
+                 | Some v -> Some v
+                 | None ->
+                     Option.bind field (fun (f : Text_field.field) ->
+                         f.variant ()))
+               ()));
+    }
+  in
+  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let element = ref None in
+  (* A click on the group but on its input gives the input the focus, as
+     HeroUI's does: an input's, never a text area's. *)
+  let clicked e =
+    match !element with
+    | Some group -> (
+        match Js.Null.toOption (query group "input") with
+        | Some input when not (contains input (target e)) -> focus input
+        | Some _ | None -> ())
+    | None -> ()
+  in
+  <Context.Provider value=(fun () -> g)>
+    <div
+      role=(fun () ->
+             (* In a field, the field is the group, as React Aria's is. *)
+             match field with
+             | Some _ -> `presentation
+             | None -> `group)
+      ref=(fun e ->
+            element := Some e;
+            Interaction.watch i e)
+      on_click=clicked
+      class_=(fun () -> after (Styles.InputGroup.base (g.slots ())) (class_ ()))
+      data_slot="input-group"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_invalid=(fun () -> Jsx.flag (invalid ()))>
+      (fun () -> children ())
+    </div>
+  </Context.Provider>
