@@ -1,0 +1,219 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.TextField
+module Kobalte_button = Solidtype_kobalte.Button
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external focus : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
+
+external prevent_pointer : Dom.pointerEvent -> unit = "preventDefault"
+[@@mel.send]
+
+(* What a field's parts read of it: its classes, its value and state, and its
+   input, which a clear gives the focus back to. *)
+type field = {
+  slots : unit -> Styles.SearchField.slots;
+  value : unit -> string;
+  clear : unit -> unit;
+  submit : unit -> unit;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+  read_only : unit -> bool;
+  input : Dom.htmlInputElement option ref;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = field
+end)
+
+let within part =
+  match Context.use () with
+  | Some f -> f
+  | None -> invalid_arg (part ^ " is used inside a Search_field")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Parts = Field.Slots (struct
+  let label = Kobalte.Label.component
+  let description = Kobalte.Description.component
+  let error = Kobalte.ErrorMessage.component
+end)
+
+module Group = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let f = within "Search_field.Group" in
+    (* Hovered, focused within and focus-visible as React Aria's group is,
+       which HeroUI's styles ring. *)
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    <div
+      role=`group
+      ref=(fun e -> Interaction.watch i e)
+      class_=(fun () ->
+               after (Styles.SearchField.group (f.slots ())) (class_ ()))
+      data_slot="search-field-group"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))>
+      (fun () -> children ())
+    </div>
+end
+
+module Search_icon = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let f = within "Search_field.Search_icon" in
+    let classes () =
+      after (Styles.SearchField.search_icon (f.slots ())) (class_ ())
+    in
+    <Show
+      when_=(fun () -> Option.is_some (children ()))
+      fallback=(<svg
+                  aria_hidden=true
+                  class_=(fun () -> classes ())
+                  fill="none"
+                  height="16"
+                  role=`presentation
+                  view_box="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  data_slot="search-field-search-icon">
+                  <path
+                    clip_rule="evenodd"
+                    d="M11.5 7a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0m-.82 4.74a6 \
+                       6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06z"
+                    fill="currentColor"
+                    fill_rule="evenodd"
+                  />
+                </svg>)>
+      <span class_=(fun () -> classes ()) data_slot="search-field-search-icon">
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </span>
+    </Show>
+end
+
+module Input = struct
+  let%component make ?(placeholder : string option) ?(class_ : string option) ()
+      =
+    let f = within "Search_field.Input" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    (* Escape clears a search, and Enter submits it, as React Aria's does. *)
+    let keyed e =
+      match key e with
+      | "Escape" when not (String.equal (f.value ()) "" || f.read_only ()) ->
+          prevent_default e;
+          f.clear ()
+      | "Enter" -> f.submit ()
+      | _ -> ()
+    in
+    <Kobalte.Input
+      ?placeholder
+      type_="search"
+      class_=(fun () ->
+               after (Styles.SearchField.input (f.slots ())) (class_ ()))
+      ref=(fun e ->
+            f.input := Some e;
+            Interaction.watch i e)
+      on_key_down=keyed
+      data_slot="search-field-input"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+    />
+end
+
+module Clear_button = struct
+  let%component make ?(class_ : string option) () =
+    let f = within "Search_field.Clear_button" in
+    let disabled () = f.disabled () || f.read_only () in
+    let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    <Kobalte_button.Root
+      aria_label="Close"
+      class_=(fun () ->
+               after
+                 (Styles.CloseButton.classes (Styles.CloseButton.options ())
+                 ^ " "
+                 ^ Styles.SearchField.clear_button (f.slots ()))
+                 (class_ ()))
+      disabled=(fun () -> disabled ())
+      slot="clear"
+      ?tab_index=(fun () -> if disabled () then None else Some "-1")
+      type_=`button
+      ref=(fun b -> Interaction.watch i b)
+          (* A press keeps the focus where it is, in the input. *)
+      on_pointer_down=(fun e -> prevent_pointer e)
+      on_click=(fun _ ->
+                 f.clear ();
+                 Option.iter focus !(f.input))
+      data_slot="search-field-clear-button"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+      <Close_button.Icon />
+    </Kobalte_button.Root>
+end
+
+let%component make ?(variant : [ `primary | `secondary ] option)
+    ?(full_width : bool option) ?(value : string option)
+    ?(default_value : string = "") ?(on_change : (string -> unit) option)
+    ?(on_submit : (string -> unit) option) ?(on_clear : (unit -> unit) option)
+    ?(is_disabled : bool option) ?(is_invalid : bool = false)
+    ?(is_read_only : bool = false) ?(is_required : bool = false)
+    ?(name : string option) ?(aria_label : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A field is disabled as it says, else as its fieldset is. *)
+  let in_fieldset = Fieldset.disabled () in
+  let disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
+  let current, set =
+    Field.controlled ~value ~default:(default_value ()) ~on_change
+  in
+  let f =
+    {
+      slots =
+        (fun () ->
+          Styles.SearchField.slots
+            (Styles.SearchField.options ?full_width:(full_width ())
+               ?variant:(variant ()) ()));
+      value = current;
+      clear =
+        (fun () ->
+          set "";
+          ignore (on_clear () : unit option));
+      submit = (fun () -> ignore (on_submit (current ()) : unit option));
+      disabled;
+      invalid = (fun () -> is_invalid ());
+      read_only = (fun () -> is_read_only ());
+      input = ref None;
+    }
+  in
+  <Context.Provider value=(fun () -> f)>
+    <Kobalte.Root
+      value=(fun () -> current ())
+      on_change=(fun v -> if not (String.equal v (current ())) then set v)
+      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      required=(fun () -> is_required ())
+      disabled=(fun () -> disabled ())
+      read_only=(fun () -> is_read_only ())
+      ?name
+      ?aria_label
+      class_=(fun () ->
+               after (Styles.SearchField.base (f.slots ())) (class_ ()))
+      data_slot="search-field"
+      data_empty=(fun () -> Jsx.flag (String.equal (current ()) ""))
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+      data_required=(fun () -> Jsx.flag (is_required ()))>
+      <Parts>(fun () -> children ())</Parts>
+    </Kobalte.Root>
+  </Context.Provider>

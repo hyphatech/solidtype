@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -416,6 +416,24 @@ export function slider(host: HTMLElement, props: SliderProps): void {
           <Slider.Thumb />
         </Slider.Track>
       </Slider>,
+    ),
+  );
+}
+
+type SearchFieldProps = { variant: "primary" | "secondary"; isDisabled: boolean };
+
+// A field of a label and its group, as the port's demo shows it.
+export function searchField(host: HTMLElement, props: SearchFieldProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <SearchField {...props} name="search">
+        <Label>Search</Label>
+        <SearchField.Group>
+          <SearchField.SearchIcon />
+          <SearchField.Input placeholder="Search..." />
+          <SearchField.ClearButton />
+        </SearchField.Group>
+      </SearchField>,
     ),
   );
 }

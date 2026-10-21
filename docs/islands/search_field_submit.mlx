@@ -1,0 +1,25 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  let searched, set_searched = S.create_signal "" in
+  <div class_="flex flex-col gap-4">
+    <Search_field name="search" on_submit=(S.set set_searched)>
+      <Label>"Search"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+      <Description>
+        (fun () ->
+          Jsx.string
+            (match S.get searched with
+            | "" -> "Press Enter to search"
+            | query -> "Searched for: " ^ query))
+      </Description>
+    </Search_field>
+  </div>

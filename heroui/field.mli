@@ -56,6 +56,32 @@ end) : sig
   val component : unit Solidtype.Jsx.component
 end
 
+(** The parts a Kobalte field gives the {!Label}, {!Description} and
+    {!Field_error} inside it, as React Aria's field does: its label, which names
+    its input, by [label_id] where it is given; its description, a [<span>],
+    which describes it; and its error message, a [<span>], which it shows while
+    it is invalid. [<Parts label_id="name">...</Parts>], made by
+    [Field.Slots (struct let label = K.Label.component ... end)]. *)
+module Slots (_ : sig
+  val label : unit Solidtype.Jsx.component
+  val description : unit Solidtype.Jsx.component
+  val error : unit Solidtype.Jsx.component
+end) : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?label_id:string Solidtype.Check.value ->
+      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?props:t ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
 (** A field's content, on the label and input of a Kobalte component:
     [Field.Content (struct let label = Switch.Label.component let input =
      Switch.Input.component end)]. A port's own content renders it with its slot

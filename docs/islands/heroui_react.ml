@@ -308,3 +308,16 @@ external slider_props :
 
 external slider : Dom.htmlDivElement -> slider_props -> unit = "slider"
 [@@mel.module "./react/heroui.tsx"]
+
+type search_field_props
+
+external search_field_props :
+  variant:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  search_field_props = ""
+[@@mel.obj]
+
+external search_field : Dom.htmlDivElement -> search_field_props -> unit
+  = "searchField"
+[@@mel.module "./react/heroui.tsx"]

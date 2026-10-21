@@ -1,0 +1,147 @@
+---
+title: SearchField
+description: A search input, cleared by Escape or its button and submitted by Enter.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_usage.jsx";
+import UsageCode from "../../../../islands/search_field_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_variants.jsx";
+import VariantsCode from "../../../../islands/search_field_variants.mlx?raw";
+import * as WithDescription from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_description.jsx";
+import WithDescriptionCode from "../../../../islands/search_field_description.mlx?raw";
+import * as Required from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_required.jsx";
+import RequiredCode from "../../../../islands/search_field_required.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_disabled.jsx";
+import DisabledCode from "../../../../islands/search_field_disabled.mlx?raw";
+import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_full_width.jsx";
+import FullWidthCode from "../../../../islands/search_field_full_width.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_controlled.jsx";
+import ControlledCode from "../../../../islands/search_field_controlled.mlx?raw";
+import * as Submit from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_submit.jsx";
+import SubmitCode from "../../../../islands/search_field_submit.mlx?raw";
+import * as CustomIcons from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_custom_icons.jsx";
+import CustomIconsCode from "../../../../islands/search_field_custom_icons.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/search_field_demo.jsx";
+
+`Solidtype_heroui.Search_field` is Kobalte's `TextField.Root`, with the
+classes HeroUI's own `searchFieldVariants` gives, whose input is a search:
+Escape clears it, Enter submits it, and its clear button clears it and gives
+its input the focus back, as React Aria's does. Kobalte's `Search` is a
+combobox; HeroUI's search field is a text field, which this is.
+
+## Usage
+
+<Example code={UsageCode} title="search_field_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Search_field>
+  <Label>"Search"</Label>
+  <Search_field.Group>
+    <Search_field.Search_icon />
+    <Search_field.Input placeholder="Search..." />
+    <Search_field.Clear_button />
+  </Search_field.Group>
+  <Description>"Find a task"</Description>
+</Search_field>
+```
+
+## Examples
+
+### Variants
+
+<Example code={VariantsCode} title="search_field_variants.mlx"><Variants.make client:visible /></Example>
+
+### With Description
+
+<Example code={WithDescriptionCode} title="search_field_description.mlx"><WithDescription.make client:visible /></Example>
+
+### Required Field
+
+<Example code={RequiredCode} title="search_field_required.mlx"><Required.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={DisabledCode} title="search_field_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Full Width
+
+<Example code={FullWidthCode} title="search_field_full_width.mlx"><FullWidth.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ControlledCode} title="search_field_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### Submitted
+
+`on_submit` is told the query as Enter submits it.
+
+<Example code={SubmitCode} title="search_field_submit.mlx"><Submit.make client:visible /></Example>
+
+### Custom Icons
+
+`Search_field.Search_icon`'s children are drawn in place of HeroUI's
+magnifier, inside a span with its class.
+
+<Example code={CustomIconsCode} title="search_field_custom_icons.mlx"><CustomIcons.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's validation examples need React Aria's `validate`, which is not
+ported yet.
+
+## Beside React
+
+The same HeroUI SearchField twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.search-field`, and `.search-field--primary`, `.search-field--secondary`,
+  `.search-field--full-width`
+- `.search-field__group`, `.search-field__search-icon`,
+  `.search-field__input`, `.search-field__clear-button`
+
+### Interactive States
+
+- **Empty**: `[data-empty="true"]`, which hides the clear button
+- **Hover**, **Focus within**, **Focus visible**: on the group
+- **Disabled**: `[data-disabled="true"]`
+- **Invalid**: `[data-invalid="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### SearchField
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `value` | `value` | `string` | | Its query, controlled |
+| `defaultValue` | `default_value` | `string` | `""` | Its query at first, kept by itself |
+| `onChange` | `on_change` | `string -> unit` | | Told each change of its query |
+| `onSubmit` | `on_submit` | `string -> unit` | | Told its query as Enter submits it |
+| `onClear` | `on_clear` | `unit -> unit` | | Told as it is cleared |
+| `isDisabled` | `is_disabled` | `bool` | | Whether it is disabled, else as its fieldset is |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether its query is kept |
+| `isRequired` | `is_required` | `bool` | `false` | Whether it is required |
+| `name` | `name` | `string` | | Its name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name where no label names it |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### SearchField.Group, SearchIcon, Input, ClearButton
+
+Each takes `class_`, added after HeroUI's class; the input a `placeholder`;
+the icon `children`, drawn in place of HeroUI's magnifier.

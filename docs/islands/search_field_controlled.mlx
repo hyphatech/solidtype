@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  let value, set_value = S.create_signal "" in
+  <div class_="flex flex-col gap-4">
+    <Search_field
+      name="search" value=(fun () -> S.get value) on_change=(S.set set_value)>
+      <Label>"Search"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+      <Description>
+        (fun () ->
+          Jsx.string
+            ("Current value: "
+            ^ match S.get value with "" -> "(empty)" | v -> v))
+      </Description>
+    </Search_field>
+    <div class_="flex gap-2">
+      <Button variant=`tertiary on_click=(fun _ -> S.set set_value "")>
+        "Clear"
+      </Button>
+      <Button
+        variant=`tertiary on_click=(fun _ -> S.set set_value "example query")>
+        "Set example"
+      </Button>
+    </div>
+  </div>

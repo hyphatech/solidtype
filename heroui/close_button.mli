@@ -10,6 +10,19 @@
       <Close_button on_click=(fun _ -> close ()) />
     ]} *)
 
+(** HeroUI's cross: the [<svg>] a close button draws where it is given no
+    children, for a part that is a close button of its own. *)
+module Icon : sig
+  module Props : sig
+    type t
+
+    val check : ?props:t -> unit -> unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
 module Props : sig
   type t
 

@@ -41,43 +41,11 @@ let within part =
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
-module Kobalte_description = Field.As_span (struct
-  let component = Kobalte.Description.component
+module Parts = Field.Slots (struct
+  let label = Kobalte.Label.component
+  let description = Kobalte.Description.component
+  let error = Kobalte.ErrorMessage.component
 end)
-
-module Kobalte_error = Field.As_span (struct
-  let component = Kobalte.ErrorMessage.component
-end)
-
-(* A field's label, description and error are Kobalte's, which name its
-   input, describe it, and show while it is invalid. *)
-let label id : Label.slot =
- fun[@u] classes children ->
-  <Kobalte.Label
-    id=(fun () -> id) class_=(fun () -> classes ()) data_slot="label">
-    (fun () -> children ())
-  </Kobalte.Label>
-
-let description : Description.slot =
- fun[@u] classes children ->
-  <Kobalte_description
-    as_="span"
-    class_=(fun () -> classes ())
-    slot="description"
-    data_slot="description">
-    (fun () -> children ())
-  </Kobalte_description>
-
-let error : Field_error.slot =
- fun[@u] classes children ->
-  <Kobalte_error
-    as_="span"
-    class_=(fun () -> classes ())
-    slot="errorMessage"
-    data_slot="field-error"
-    data_visible="true">
-    (fun () -> children ())
-  </Kobalte_error>
 
 module Group = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
@@ -288,12 +256,6 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
       <Kobalte.HiddenInput />
-      <Label.Slot.Provider value=(fun () -> label label_id)>
-        <Description.Slot.Provider value=(fun () -> description)>
-          <Field_error.Slot.Provider value=(fun () -> error)>
-            (fun () -> children ())
-          </Field_error.Slot.Provider>
-        </Description.Slot.Provider>
-      </Label.Slot.Provider>
+      <Parts label_id=(fun () -> label_id)>(fun () -> children ())</Parts>
     </Kobalte.Root>
   </Context.Provider>

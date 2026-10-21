@@ -69,6 +69,66 @@ struct
   let component = K.component
 end
 
+module Slots (K : sig
+  val label : unit Jsx.component
+  val description : unit Jsx.component
+  val error : unit Jsx.component
+end) =
+struct
+  module Kobalte_label = struct
+    module Props = Label_props
+
+    let component = K.label
+  end
+
+  module Kobalte_description = As_span (struct
+    let component = K.description
+  end)
+
+  module Kobalte_error = As_span (struct
+    let component = K.error
+  end)
+
+  let%component make ?(label_id : string option) ~(children : Jsx.content) () =
+    let label : Label.slot =
+     fun[@u] classes children ->
+      <Kobalte_label
+        ?id=(fun () -> label_id ())
+        class_=(fun () -> classes ())
+        data_slot="label">
+        (fun () -> children ())
+      </Kobalte_label>
+    in
+    let description : Description.slot =
+     fun[@u] classes children ->
+      <Kobalte_description
+        as_="span"
+        class_=(fun () -> classes ())
+        slot="description"
+        data_slot="description">
+        (fun () -> children ())
+      </Kobalte_description>
+    in
+    let error : Field_error.slot =
+     fun[@u] classes children ->
+      <Kobalte_error
+        as_="span"
+        class_=(fun () -> classes ())
+        slot="errorMessage"
+        data_slot="field-error"
+        data_visible="true">
+        (fun () -> children ())
+      </Kobalte_error>
+    in
+    <Label.Slot.Provider value=(fun () -> label)>
+      <Description.Slot.Provider value=(fun () -> description)>
+        <Field_error.Slot.Provider value=(fun () -> error)>
+          (fun () -> children ())
+        </Field_error.Slot.Provider>
+      </Description.Slot.Provider>
+    </Label.Slot.Provider>
+end
+
 module Content (K : Kobalte) = struct
   module Kobalte_label = struct
     module Props = Label_props

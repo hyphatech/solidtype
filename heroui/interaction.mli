@@ -46,9 +46,9 @@ val watch : t -> _ Dom.element_like -> unit
       with an href or the link role, as React Aria decides by what the key went
       to, or by the element itself as [keys] says;
     - focused while it or an element inside it has the focus, and focus-visible
-      while it has it after a key was pressed rather than a pointer, but for a
-      key typed into a text, which React Aria does not count, but Tab and
-      Escape.
+      while it has it and the page's last input was a key rather than a pointer,
+      a key typed into a text not counted, but Tab and Escape, as React Aria
+      decides; so a pointer pressed elsewhere hides its ring.
 
     It is called once, as the element is made: from its [ref]. *)
 

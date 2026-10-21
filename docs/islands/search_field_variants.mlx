@@ -1,0 +1,23 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Search_field name="primary" variant=`primary>
+      <Label>"Primary"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+    </Search_field>
+    <Search_field name="secondary" variant=`secondary>
+      <Label>"Secondary"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+    </Search_field>
+  </div>

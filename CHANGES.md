@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Search_field`: HeroUI's SearchField on Kobalte's text
+  field, its query cleared by Escape or its button and submitted by Enter.
+  `Close_button.Icon` is HeroUI's cross, and `Field.Slots` the label,
+  description and error any Kobalte field gives the parts inside it.
+- `Solidtype_heroui.Interaction` keeps the page's last input, a key or a
+  pointer, for every element it watches, so a pointer pressed anywhere hides
+  the focus ring of what has the focus, as React Aria does.
 - `Solidtype_heroui.Slider`: HeroUI's Slider on Kobalte's, one value or a
   range, controlled or kept, horizontal or vertical, its output and fill
   drawn and its thumbs placed as React Aria draws and places them.

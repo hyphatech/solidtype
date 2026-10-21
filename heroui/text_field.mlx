@@ -13,45 +13,11 @@ module Context = Solidtype.Context.Make_optional (struct
   type t = field
 end)
 
-module Kobalte_description = Field.As_span (struct
-  let component = Kobalte.Description.component
+module Parts = Field.Slots (struct
+  let label = Kobalte.Label.component
+  let description = Kobalte.Description.component
+  let error = Kobalte.ErrorMessage.component
 end)
-
-module Kobalte_error = Field.As_span (struct
-  let component = Kobalte.ErrorMessage.component
-end)
-
-(* An error in a field is Kobalte's, which it shows while it is invalid and
-   its input is described by. *)
-let error : Field_error.slot =
- fun[@u] classes children ->
-  <Kobalte_error
-    as_="span"
-    class_=(fun () -> classes ())
-    slot="errorMessage"
-    data_slot="field-error"
-    data_visible="true">
-    (fun () -> children ())
-  </Kobalte_error>
-
-(* A label in a field is Kobalte's, which names the field's input. *)
-let label : Label.slot =
- fun[@u] classes children ->
-  <Kobalte.Label class_=(fun () -> classes ()) data_slot="label">
-    (fun () -> children ())
-  </Kobalte.Label>
-
-(* A description in a field is Kobalte's, which the field's input is
-   described by. *)
-let description : Description.slot =
- fun[@u] classes children ->
-  <Kobalte_description
-    as_="span"
-    class_=(fun () -> classes ())
-    slot="description"
-    data_slot="description">
-    (fun () -> children ())
-  </Kobalte_description>
 
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(value : string option)
@@ -88,12 +54,6 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_invalid=(fun () -> Jsx.flag (is_invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
-      <Label.Slot.Provider value=(fun () -> label)>
-        <Description.Slot.Provider value=(fun () -> description)>
-          <Field_error.Slot.Provider value=(fun () -> error)>
-            (fun () -> children ())
-          </Field_error.Slot.Provider>
-        </Description.Slot.Provider>
-      </Label.Slot.Provider>
+      <Parts>(fun () -> children ())</Parts>
     </Kobalte.Root>
   </Context.Provider>

@@ -31,11 +31,15 @@ external alt_key : Dom.keyboardEvent -> bool = "altKey" [@@mel.get]
 module S = Solidtype.Solid
 
 (* Whether the last input was a key, as React Aria decides focus-visible:
-   one modality for the page, read by every element tracked, its listeners
-   added by the first. A key held with Meta, Control or Alt is a shortcut,
-   not a move of the focus. *)
-let by_keyboard = ref false
-let watching = ref false
+   one modality for the page, a signal every element tracked reads, so a
+   pointer pressed anywhere hides the focus ring of what has the focus, as
+   React Aria's does. Made, and its listeners added, by the first element
+   watched, in the browser. A key held with Meta, Control or Alt is a
+   shortcut, not a move of the focus. *)
+let modality = ref None
+
+let by_keyboard () =
+  match !modality with Some (keyboard, _) -> S.get keyboard | None -> false
 
 external key_on : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
 external input_type : Dom.element -> string = "type" [@@mel.get]
@@ -61,12 +65,13 @@ let typing e =
   text && match key e with "Tab" | "Escape" -> false | _ -> true
 
 let watch_modality () =
-  if not !watching then begin
-    watching := true;
+  if Option.is_none !modality then begin
+    let keyboard, set_keyboard = S.create_signal false in
+    modality := Some (keyboard, set_keyboard);
     on_key document "keydown" (fun e ->
         if not (meta_key e || ctrl_key e || alt_key e || typing e) then
-          by_keyboard := true);
-    on_pointer document "pointerdown" (fun _ -> by_keyboard := false)
+          S.set set_keyboard true);
+    on_pointer document "pointerdown" (fun _ -> S.set set_keyboard false)
   end
 
 external tag_name : _ Dom.element_like -> string = "tagName" [@@mel.get]
@@ -118,15 +123,12 @@ type t = {
   set_press : bool S.setter;
   focus : bool S.accessor;
   set_focus : bool S.setter;
-  focus_ring : bool S.accessor;
-  set_focus_ring : bool S.setter;
 }
 
 let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
   let hover, set_hover = S.create_signal false in
   let press, set_press = S.create_signal false in
   let focus, set_focus = S.create_signal false in
-  let focus_ring, set_focus_ring = S.create_signal false in
   {
     off = disabled;
     no_hover;
@@ -138,8 +140,6 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
     set_press;
     focus;
     set_focus;
-    focus_ring;
-    set_focus_ring;
   }
 
 let disabled i = match i.off with Some d -> S.get d | None -> false
@@ -151,7 +151,7 @@ let pointer_inert i = holds i.no_pointer_press
 let hovered i = S.get i.hover && not (disabled i || holds i.no_hover)
 let pressed i = S.get i.press && not (disabled i)
 let focused i = S.get i.focus
-let focus_visible i = S.get i.focus_ring
+let focus_visible i = focused i && by_keyboard ()
 
 let watch i element =
   watch_modality ();
@@ -185,14 +185,9 @@ let watch i element =
       down := false;
       press false);
   on_key element "keydown" (fun e ->
-      if focused i && not (typing e) then S.set i.set_focus_ring true;
       if pressing e && not (repeat e) then press true);
   on_key element "keyup" (fun e -> if pressing e then press false);
   (* Focus as it bubbles: a switch's content is a label whose input inside it
      takes the focus. *)
-  on_focus element "focusin" (fun _ ->
-      S.set i.set_focus true;
-      S.set i.set_focus_ring !by_keyboard);
-  on_focus element "focusout" (fun _ ->
-      S.set i.set_focus false;
-      S.set i.set_focus_ring false)
+  on_focus element "focusin" (fun _ -> S.set i.set_focus true);
+  on_focus element "focusout" (fun _ -> S.set i.set_focus false)

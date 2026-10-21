@@ -1,0 +1,209 @@
+(* HeroUI's SearchField on Kobalte's text field, beside the same field in
+   React: every part, which names and describes which, and its value as it is
+   typed, cleared by Escape and by its button, and submitted by Enter. *)
+
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?variant:string ->
+  ?full_width:(bool[@mel.as "fullWidth"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render :
+    props ->
+    ((string -> unit)[@mel.uncurry]) ->
+    ((string -> unit)[@mel.uncurry]) ->
+    Dom.element = "render"
+  [@@mel.module "./twins/SearchField.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/SearchField.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/SearchField.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external value_of : Dom.element -> string = "value" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+let references = [ "for"; "aria-labelledby"; "aria-describedby" ]
+
+(* What Kobalte writes that React Aria does not, and no style of HeroUI's
+   reads: its own state, present and empty, its ARIA state beside the native
+   attributes, and the field's role. React Aria's tabindex and title, and the
+   value it writes as an attribute where Solid sets the property, which is
+   shown as the property. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ( ( "data-valid" | "data-invalid" | "data-required" | "data-disabled"
+      | "data-readonly" ),
+      Some "" ) ->
+      true
+  | ("aria-required" | "aria-disabled" | "aria-readonly"), Some _ -> true
+  | ("value" | "title"), _ -> true
+  | "style", Some "user-select: none;" -> true
+  | "tabindex", Some "0" -> true
+  | "role", Some "group" ->
+      Option.equal String.equal
+        (T.attribute e "data-slot")
+        (Some "search-field")
+  | _ -> false
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let named =
+        references
+        |> List.filter_map (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+      in
+      String.concat " "
+        (tag_name e
+        :: T.attributes_but
+             (("id" :: references)
+             @ (T.attribute_names e |> Array.to_list
+               |> List.filter (framework_only e)))
+             e
+        :: named)
+      ^
+      match tag_name e with
+      | "INPUT" -> " value=" ^ value_of e
+      | _ when element_count e > 0 -> ""
+      | _ -> " " ^ text e)
+
+let focused () =
+  match Js.Null.toOption active with
+  | Some e -> Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+  | None -> "nothing"
+
+(* The field as it is rendered, typed in, cleared by Escape, typed in again,
+   cleared by its button, and submitted by Enter: every part, what has the
+   focus, and the values it told, after each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let part slot =
+    match Js.Null.toOption (query host ("[data-slot=" ^ slot ^ "]")) with
+    | Some e -> e
+    | None -> host
+  in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, focused (), !told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () =
+    after "typed in" (fun () ->
+        let* () = T.click user (part "search-field-input") in
+        T.keyboard user "abc")
+  in
+  let* () = after "escaped" (fun () -> T.keyboard user "{Escape}") in
+  let* () = after "typed again" (fun () -> T.keyboard user "xy") in
+  let* () =
+    after "cleared" (fun () -> T.click user (part "search-field-clear-button"))
+  in
+  let* () = after "submitted" (fun () -> T.keyboard user "q{Enter}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?variant ?full_width ?is_disabled ?is_invalid () =
+  let told = ref "" in
+  let tell what v = told := !told ^ what ^ ":" ^ v ^ " " in
+  T.render (fun () ->
+      <Search_field
+        ?variant=(fun () -> variant)
+        ?full_width=(fun () -> full_width)
+        ?is_disabled=(fun () -> is_disabled)
+        ?is_invalid=(fun () -> is_invalid)
+        name="search"
+        on_change=(tell "changed")
+        on_submit=(tell "submitted")>
+        <Label>"Search"</Label>
+        <Search_field.Group>
+          <Search_field.Search_icon />
+          <Search_field.Input placeholder="Search..." />
+          <Search_field.Clear_button />
+        </Search_field.Group>
+        <Description>"Find a task."</Description>
+      </Search_field>);
+  let host =
+    match T.query "[data-slot=search-field]" with
+    | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
+    | None -> T.body
+  in
+  let* solidtype = walk ~step:(fun action -> action ()) host told in
+  T.cleanup ();
+  let told' = ref "" in
+  let tell' what v = told' := !told' ^ what ^ ":" ^ v ^ " " in
+  let host =
+    Twin.render
+      (props
+         ?variant:
+           (Option.map
+              (function `primary -> "primary" | `secondary -> "secondary")
+              variant)
+         ?full_width ?is_disabled ?is_invalid ())
+      (tell' "changed") (tell' "submitted")
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Search_field" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is typed in, cleared and submitted, as React's is"
+        (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "is secondary and full width, as React's is" (fun () ->
+          let* r = both ~variant:`secondary ~full_width:true () in
+          same r);
+      Jest.testPromise "takes nothing while disabled, as React's" (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.testPromise "is invalid, as React's is" (fun () ->
+          let* r = both ~is_invalid:true () in
+          same r))
