@@ -1,0 +1,17 @@
+module Card = Solidtype_heroui.Card
+module Link = Solidtype_heroui.Link
+
+let make () =
+  <Card class_="w-[400px]">
+    <Icons.Circle_dollar />
+    <Card.Header>
+      <Card.Title>"Become an Acme Creator!"</Card.Title>
+      <Card.Description>
+        "Visit the Acme Creator Hub to sign up today and start earning credits \
+         from your fans and followers."
+      </Card.Description>
+    </Card.Header>
+    <Card.Footer>
+      <Link href="https://heroui.com">"Creator Hub" <Link.Icon /></Link>
+    </Card.Footer>
+  </Card>

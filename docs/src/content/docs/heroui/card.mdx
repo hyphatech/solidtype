@@ -1,0 +1,144 @@
+---
+title: Card
+description: A container that groups related content and actions.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/card_usage.jsx";
+import UsageCode from "../../../../islands/card_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/card_variants.jsx";
+import VariantsCode from "../../../../islands/card_variants.mlx?raw";
+import * as Horizontal from "../../../../../_build/default/docs/islands/out/docs/islands/card_horizontal.jsx";
+import HorizontalCode from "../../../../islands/card_horizontal.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/card_tailwind.jsx";
+import TailwindCode from "../../../../islands/card_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/card_demo.jsx";
+
+`Solidtype_heroui.Card` is a `<div>` and its parts, with the classes HeroUI's
+own `cardVariants` gives. Kobalte has no card, and a card has no behaviour: a
+card but a transparent one is a surface, which it gives what is inside it by
+`Surface.Context`, as HeroUI's does.
+
+## Usage
+
+<Example code={UsageCode} title="card_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Card>
+  <Card.Header>
+    <Card.Title>"Title"</Card.Title>
+    <Card.Description>"Description"</Card.Description>
+  </Card.Header>
+  <Card.Content>"Content"</Card.Content>
+  <Card.Footer>"Footer"</Card.Footer>
+</Card>
+```
+
+## Examples
+
+### Variants
+
+A card's variant says how prominent it is, as a surface's does:
+
+- `` `transparent ``, minimal, with no background, for nested cards
+- `` `default ``, the standard card
+- `` `secondary ``, of medium prominence
+- `` `tertiary ``, of higher prominence
+
+<Example code={VariantsCode} title="card_variants.mlx"><Variants.make client:visible /></Example>
+
+### Horizontal Layout
+
+<Example code={HorizontalCode} title="card_horizontal.mlx"><Horizontal.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's With Avatar, With Images and With Form examples need Avatar, Input
+and TextField, which are not ported yet.
+
+## Beside React
+
+The same HeroUI Card twice, under the same props: in solidtype on the left, in
+React on the right. Below them, every attribute of the two cards: a marked row
+is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on the card and on each part.
+
+<Example code={TailwindCode} title="card_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every card, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .card--secondary {
+    @apply bg-gradient-to-br from-blue-50 to-purple-50;
+  }
+
+  .card__title {
+    @apply text-xl font-bold;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.card`, and its variants `.card--default`, `.card--secondary`,
+  `.card--tertiary`, `.card--transparent`
+- `.card__header`, `.card__title`, `.card__description`, `.card__content`,
+  `.card__footer`
+
+## Accessibility
+
+A card that stands for an article takes its role and the title that names it:
+
+```ocaml
+<Card role=`article aria_labelledby="card-title">
+  <Card.Header>
+    <Card.Title id="card-title">"Article Title"</Card.Title>
+  </Card.Header>
+</Card>
+```
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Card
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `default \| `secondary \| `tertiary \| `transparent ] `` | `` `default `` | How prominent it is |
+| `role` | `role` | `Solidtype.Html.Div.role` | | Its role, `` `article `` for an article |
+| `aria-labelledby` | `aria_labelledby` | `string` | | The id of what names it |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its parts and content |
+
+### Card.Header, Card.Description, Card.Content, Card.Footer
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `children` | `children` | elements | Its content |
+
+### Card.Title
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `id` | `id` | `string` | Its id, for a card it names |
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `children` | `children` | elements | The title, an `<h3>` |

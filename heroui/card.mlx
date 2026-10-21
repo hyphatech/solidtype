@@ -1,0 +1,87 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+
+(* HeroUI's classes for a card's parts, the same whatever its variant, read
+   as a part is made: a module does nothing as it loads. *)
+let slots () = Styles.Card.slots (Styles.Card.options ())
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Header = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Card.header (slots ())) (class_ ()))
+      data_slot="card-header">
+      (fun () -> children ())
+    </div>
+end
+
+module Title = struct
+  let%component make ?(id : string option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    <h3
+      ?id
+      class_=(fun () -> after (Styles.Card.title (slots ())) (class_ ()))
+      data_slot="card-title">
+      (fun () -> children ())
+    </h3>
+end
+
+module Description = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <p
+      class_=(fun () -> after (Styles.Card.description (slots ())) (class_ ()))
+      data_slot="card-description">
+      (fun () -> children ())
+    </p>
+end
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Card.content (slots ())) (class_ ()))
+      data_slot="card-content">
+      (fun () -> children ())
+    </div>
+end
+
+module Footer = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Card.footer (slots ())) (class_ ()))
+      data_slot="card-footer">
+      (fun () -> children ())
+    </div>
+end
+
+let%component make ?(variant : Surface.variant = `default)
+    ?(role : Solidtype.Html.Div.role option) ?(aria_labelledby : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* Made where it is shown, so it reads the surface given there: a context is
+     read as an element is made. *)
+  let card () =
+    <div
+      ?role
+      ?aria_labelledby
+      class_=(fun () ->
+               after
+                 (Styles.Card.base
+                    (Styles.Card.slots
+                       (Styles.Card.options ~variant:(variant ()) ())))
+                 (class_ ()))
+      data_slot="card">
+      (fun () -> children ())
+    </div>
+  in
+  (* A transparent card is no surface, as HeroUI's is not. *)
+  <Show
+    when_=(fun () ->
+            match variant () with
+            | `transparent -> false
+            | `default | `secondary | `tertiary -> true)
+    fallback=(fun () -> card ())>
+    <Surface.Context.Provider value=(fun () -> variant)>
+      (fun () -> Jsx.element (card ()))
+    </Surface.Context.Provider>
+  </Show>

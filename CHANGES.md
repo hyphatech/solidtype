@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Card`: HeroUI's Card, its variants and its parts --
+  header, title, description, content and footer -- a surface to what is
+  inside it, but while transparent.
 - `Solidtype_heroui.Surface`: HeroUI's Surface, its variants, and
   `Surface.Context`, the variant a part inside it reads as it changes.
 - `Solidtype_heroui.Button_group`: HeroUI's ButtonGroup and its separator, a

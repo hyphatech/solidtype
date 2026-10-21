@@ -1,0 +1,60 @@
+module Button = Solidtype_heroui.Button
+module Card = Solidtype_heroui.Card
+
+let make () =
+  <Card
+    class_="relative w-full max-w-md overflow-hidden border border-accent/20 \
+            bg-linear-to-br from-accent/12 via-surface to-surface-secondary \
+            shadow-lg shadow-accent/10 dark:border-accent/30 \
+            dark:from-accent/20 dark:via-surface dark:to-accent/8 \
+            dark:shadow-accent/5">
+    <div
+      aria_hidden=true
+      class_="pointer-events-none absolute -top-12 -right-12 size-40 \
+              rounded-full bg-accent/20 blur-3xl dark:bg-accent/30"
+    />
+    <div
+      aria_hidden=true
+      class_="pointer-events-none absolute -bottom-8 -left-8 size-28 \
+              rounded-full bg-accent/10 blur-2xl dark:bg-accent/20"
+    />
+    <Card.Header class_="relative gap-3">
+      <span
+        class_="w-fit rounded-full bg-accent/15 px-2.5 py-0.5 text-xs \
+                font-medium tracking-wide text-accent dark:bg-accent/25 \
+                dark:text-accent-soft-foreground">
+        "Recommended"
+      </span>
+      <div class_="flex items-start gap-3">
+        <div
+          class_="flex size-10 shrink-0 items-center justify-center rounded-xl \
+                  bg-accent/15 text-accent dark:bg-accent/20 \
+                  dark:text-accent-soft-foreground">
+          <Icons.Star />
+        </div>
+        <div class_="flex flex-col gap-1">
+          <Card.Title>"Upgrade to Pro"</Card.Title>
+          <Card.Description>
+            "Unlock team workflows and insights built for growing products."
+          </Card.Description>
+        </div>
+      </div>
+    </Card.Header>
+    <Card.Content class_="relative">
+      <ul class_="flex flex-col gap-2">
+        <li class_="flex items-center gap-2 text-sm text-muted">
+          <Icons.Check /> "Unlimited projects and collaborators"
+        </li>
+        <li class_="flex items-center gap-2 text-sm text-muted">
+          <Icons.Check /> "Priority support with 24h response"
+        </li>
+        <li class_="flex items-center gap-2 text-sm text-muted">
+          <Icons.Check /> "Advanced analytics and exports"
+        </li>
+      </ul>
+    </Card.Content>
+    <Card.Footer class_="relative flex-col gap-2 sm:flex-row">
+      <Button class_="w-full shadow-md shadow-accent/20">"Upgrade now"</Button>
+      <Button class_="w-full" variant=`secondary>"Compare plans"</Button>
+    </Card.Footer>
+  </Card>

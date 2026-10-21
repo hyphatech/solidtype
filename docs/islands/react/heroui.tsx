@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, ButtonGroup, Checkbox, Chip, CloseButton, Description, Label, Link, Radio, RadioGroup, Separator, Surface, Switch } from "@heroui/react";
+import { Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Label, Link, Radio, RadioGroup, Separator, Surface, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -204,4 +204,23 @@ type SurfaceProps = {
 
 export function surface(host: HTMLElement, props: SurfaceProps): void {
   flushSync(() => rootOf(host).render(<Surface {...props}>Surface Content</Surface>));
+}
+
+type CardProps = { variant: "default" | "secondary" | "tertiary" | "transparent" };
+
+// A card's header and content, as the port's demo shows them.
+export function card(host: HTMLElement, props: CardProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Card {...props} className="w-[280px]">
+        <Card.Header>
+          <Card.Title>Card Title</Card.Title>
+          <Card.Description>A description</Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <p>Its content</p>
+        </Card.Content>
+      </Card>,
+    ),
+  );
 }

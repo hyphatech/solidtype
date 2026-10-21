@@ -1,0 +1,39 @@
+module Button = Solidtype_heroui.Button
+module Card = Solidtype_heroui.Card
+module Close_button = Solidtype_heroui.Close_button
+
+let make () =
+  <Card class_="w-full items-stretch md:flex-row">
+    <div
+      class_="relative h-[140px] w-full shrink-0 overflow-hidden rounded-2xl \
+              sm:h-[120px] sm:w-[120px]">
+      <img
+        alt="Cherries"
+        class_="pointer-events-none absolute inset-0 h-full w-full scale-125 \
+                object-cover select-none"
+        loading="lazy"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/cherries.jpeg"
+      />
+    </div>
+    <div class_="flex flex-1 flex-col gap-3">
+      <Card.Header class_="gap-1">
+        <Card.Title class_="pe-8">"Become an ACME Creator!"</Card.Title>
+        <Card.Description>
+          "Lorem ipsum dolor sit amet consectetur. Sed arcu donec id aliquam \
+           dolor sed amet faucibus etiam."
+        </Card.Description>
+        <Close_button aria_label="Close banner" class_="absolute end-3 top-3" />
+      </Card.Header>
+      <Card.Footer
+        class_="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row \
+                sm:items-center sm:justify-between">
+        <div class_="flex flex-col">
+          <span class_="text-sm font-medium text-foreground">
+            "Only 10 spots"
+          </span>
+          <span class_="text-xs text-muted">"Submission ends Oct 10."</span>
+        </div>
+        <Button class_="w-full sm:w-auto">"Apply Now"</Button>
+      </Card.Footer>
+    </div>
+  </Card>

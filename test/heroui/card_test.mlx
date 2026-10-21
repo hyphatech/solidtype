@@ -1,0 +1,91 @@
+(* HeroUI's Card, beside the same Card in React, part by part, and the surface
+   it gives what is inside it. *)
+
+module Jsx = Solidtype.Jsx
+module Card = Solidtype_heroui.Card
+module Surface = Solidtype_heroui.Surface
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render :
+    [ `default | `secondary | `tertiary | `transparent ] -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Card.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Card.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* Each part, its element and its attributes. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot^=card]")
+  |> Array.map (fun e -> tag_name e ^ " " ^ T.attributes e)
+
+let both variant =
+  T.render (fun () ->
+      <Card
+        variant=(fun () -> variant)
+        class_="w-[400px]"
+        role=`article
+        aria_labelledby="card-title">
+        <Card.Header class_="gap-1">
+          <Card.Title id="card-title">"Title"</Card.Title>
+          <Card.Description>"Description"</Card.Description>
+        </Card.Header>
+        <Card.Content>"Content"</Card.Content>
+        <Card.Footer>"Footer"</Card.Footer>
+      </Card>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react = shown (Twin.render variant) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+(* The surface a part inside a card stands on. *)
+module On_surface = struct
+  let%component make () =
+    let surface = Surface.Context.use () in
+    <span data_slot="read">
+      (fun () ->
+        Jsx.string
+          (match surface with
+          | Some variant -> (
+              match variant () with
+              | `default -> "default"
+              | `secondary -> "secondary"
+              | `tertiary -> "tertiary"
+              | `transparent -> "transparent")
+          | None -> "none"))
+    </span>
+end
+
+let on_surface variant =
+  T.render (fun () -> <Card variant=(fun () -> variant)><On_surface /></Card>);
+  match T.query "[data-slot=read]" with Some e -> text e | None -> "nothing"
+
+let () =
+  Jest.describe "Card" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is HeroUI's card, part by part, as React's is" (fun () ->
+          let solidtype, react = both `default in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is secondary, as React's is" (fun () ->
+          let solidtype, react = both `secondary in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is tertiary, as React's is" (fun () ->
+          let solidtype, react = both `tertiary in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is transparent, as React's is" (fun () ->
+          let solidtype, react = both `transparent in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "gives what is inside it its surface" (fun () ->
+          E.(expect (on_surface `secondary) |> toBe "secondary"));
+      Jest.test "gives no surface while transparent, as React's" (fun () ->
+          E.(expect (on_surface `transparent) |> toBe "none")))

@@ -1,0 +1,39 @@
+module S = Solidtype.Solid
+module Card = Solidtype_heroui.Card
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants =
+  [|
+    (`default, "default");
+    (`secondary, "secondary");
+    (`tertiary, "tertiary");
+    (`transparent, "transparent");
+  |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`default, "default") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=card]"
+      solidtype=(<Card
+                   variant=(fun () -> fst (S.get variant)) class_="w-[280px]">
+                   <Card.Header>
+                     <Card.Title>"Card Title"</Card.Title>
+                     <Card.Description>"A description"</Card.Description>
+                   </Card.Header>
+                   <Card.Content><p>"Its content"</p></Card.Content>
+                 </Card>)
+      react=(fun host ->
+              Heroui_react.card host
+                (Heroui_react.card_props ~variant:(snd (S.get variant)) ()))
+    />
+  </section>

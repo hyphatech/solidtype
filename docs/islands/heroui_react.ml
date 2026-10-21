@@ -125,6 +125,13 @@ external switch_props :
 external switch_ : Dom.htmlDivElement -> switch_props -> unit = "switch_"
 [@@mel.module "./react/heroui.tsx"]
 
+type card_props
+
+external card_props : variant:string -> unit -> card_props = "" [@@mel.obj]
+
+external card : Dom.htmlDivElement -> card_props -> unit = "card"
+[@@mel.module "./react/heroui.tsx"]
+
 type checkbox_props
 
 external checkbox_props :
