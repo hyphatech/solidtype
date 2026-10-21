@@ -17,6 +17,9 @@ external props :
   is_indeterminate:(bool[@mel.as "isIndeterminate"]) ->
   is_disabled:(bool[@mel.as "isDisabled"]) ->
   is_invalid:(bool[@mel.as "isInvalid"]) ->
+  is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  is_required:(bool[@mel.as "isRequired"]) ->
+  name:string ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -62,6 +65,8 @@ let shown () =
             "data-indeterminate";
             "data-disabled";
             "data-invalid";
+            "data-readonly";
+            "data-required";
           |]
           |> Array.map (T.attribute e) ))
   in
@@ -76,11 +81,13 @@ let shown () =
     drawing,
     ( checked input,
       T.attribute input "disabled",
-      T.attribute input "aria-invalid" ) )
+      T.attribute input "aria-invalid",
+      (T.attribute input "name", T.attribute input "required") ) )
 
 (* The port, then the same Checkbox in React, each alone on the page, shown,
    then walked by its content, the field's state after each step too. *)
-let both ~variant ~selected ~indeterminate ~disabled ~invalid =
+let both ?(read_only = false) ?(required = false) ~variant ~selected
+    ~indeterminate ~disabled ~invalid () =
   let walk () =
     let before = shown () in
     let* walked = T.walk ~step:Twin.step (part "checkbox-content") in
@@ -93,7 +100,10 @@ let both ~variant ~selected ~indeterminate ~disabled ~invalid =
         default_selected=(fun () -> selected)
         is_indeterminate=(fun () -> indeterminate)
         is_disabled=(fun () -> disabled)
-        is_invalid=(fun () -> invalid)>
+        is_invalid=(fun () -> invalid)
+        is_read_only=(fun () -> read_only)
+        is_required=(fun () -> required)
+        name="terms">
         <Checkbox.Content>
           <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
           <Label>"Accept terms"</Label>
@@ -103,7 +113,8 @@ let both ~variant ~selected ~indeterminate ~disabled ~invalid =
   T.cleanup ();
   Twin.render
     (props ~variant ~default_selected:selected ~is_indeterminate:indeterminate
-       ~is_disabled:disabled ~is_invalid:invalid ());
+       ~is_disabled:disabled ~is_invalid:invalid ~is_read_only:read_only
+       ~is_required:required ~name:"terms" ());
   let* react = walk () in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
@@ -114,24 +125,30 @@ let () =
         (fun () ->
           let* solidtype, react =
             both ~variant:`primary ~selected:false ~indeterminate:false
-              ~disabled:false ~invalid:false
+              ~disabled:false ~invalid:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is on, secondary, as React Aria's is" (fun () ->
           let* solidtype, react =
             both ~variant:`secondary ~selected:true ~indeterminate:false
-              ~disabled:false ~invalid:false
+              ~disabled:false ~invalid:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is indeterminate as React Aria's is" (fun () ->
           let* solidtype, react =
             both ~variant:`primary ~selected:false ~indeterminate:true
-              ~disabled:false ~invalid:false
+              ~disabled:false ~invalid:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is disabled and invalid as React Aria's is" (fun () ->
           let* solidtype, react =
             both ~variant:`primary ~selected:true ~indeterminate:false
-              ~disabled:true ~invalid:true
+              ~disabled:true ~invalid:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is read-only and required as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~read_only:true ~required:true ~variant:`primary ~selected:true
+              ~indeterminate:false ~disabled:false ~invalid:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react)))

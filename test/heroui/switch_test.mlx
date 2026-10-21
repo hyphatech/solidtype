@@ -15,6 +15,10 @@ external props :
   size:[ `sm | `md | `lg ] ->
   default_selected:(bool[@mel.as "defaultSelected"]) ->
   is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  is_required:(bool[@mel.as "isRequired"]) ->
+  name:string ->
+  ?aria_label:(string[@mel.as "aria-label"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -48,14 +52,21 @@ let shown () =
           tag_name e,
           T.class_name e,
           T.attribute e "data-selected",
-          T.attribute e "data-disabled" ))
+          T.attribute e "data-disabled",
+          (T.attribute e "data-readonly", T.attribute e "data-required") ))
   in
   let input = T.by_role "switch" in
-  (parts, (checked input, T.attribute input "disabled"))
+  ( parts,
+    ( checked input,
+      T.attribute input "disabled",
+      ( T.attribute input "name",
+        T.attribute input "required",
+        T.attribute input "aria-label" ) ) )
 
 (* The port, then the same Switch in React, each alone on the page, shown,
    then walked by its content, the field's state after each step too. *)
-let both ~size ~selected ~disabled =
+let both ?(read_only = false) ?(required = false) ?aria_label ~size ~selected
+    ~disabled () =
   let walk () =
     let shown_before = shown () in
     let content = part "switch-content" in
@@ -67,7 +78,11 @@ let both ~size ~selected ~disabled =
       <Switch
         size=(fun () -> size)
         default_selected=(fun () -> selected)
-        is_disabled=(fun () -> disabled)>
+        is_disabled=(fun () -> disabled)
+        is_read_only=(fun () -> read_only)
+        is_required=(fun () -> required)
+        name="wifi"
+        ?aria_label=(fun () -> aria_label)>
         <Switch.Content>
           <Switch.Control><Switch.Thumb /></Switch.Control>
           <Label>"Wi-Fi"</Label>
@@ -75,7 +90,9 @@ let both ~size ~selected ~disabled =
       </Switch>);
   let* solidtype = walk () in
   T.cleanup ();
-  Twin.render (props ~size ~default_selected:selected ~is_disabled:disabled ());
+  Twin.render
+    (props ~size ~default_selected:selected ~is_disabled:disabled
+       ~is_read_only:read_only ~is_required:required ~name:"wifi" ?aria_label ());
   let* react = walk () in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
@@ -85,16 +102,23 @@ let () =
       Jest.testPromise "is HeroUI's switch, off, and walked as React Aria's"
         (fun () ->
           let* solidtype, react =
-            both ~size:`md ~selected:false ~disabled:false
+            both ~size:`md ~selected:false ~disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is on, large, as React Aria's is" (fun () ->
           let* solidtype, react =
-            both ~size:`lg ~selected:true ~disabled:false
+            both ~size:`lg ~selected:true ~disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is disabled as React Aria's is" (fun () ->
           let* solidtype, react =
-            both ~size:`sm ~selected:true ~disabled:true
+            both ~size:`sm ~selected:true ~disabled:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is read-only, required and named as React Aria's is"
+        (fun () ->
+          let* solidtype, react =
+            both ~read_only:true ~required:true ~aria_label:"Wireless" ~size:`md
+              ~selected:true ~disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react)))

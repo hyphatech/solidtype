@@ -23,14 +23,19 @@ type t
 
 val create :
   ?disabled:bool Solidtype.Solid.accessor ->
+  ?no_hover:bool Solidtype.Solid.accessor ->
+  ?no_pointer_press:bool Solidtype.Solid.accessor ->
   ?keys:[ `target | `element ] ->
   unit ->
   t
 (** A state with nothing hovered, pressed or focused, disabled while [disabled]
-    holds. A key presses as [keys] says React Aria judges it: by what it went
-    to, [`target], the default; or by the element watched, [`element], as React
-    Aria's radio judges a key on its label, which the input's key reaches as it
-    bubbles, so Enter presses a radio's content as Space does. *)
+    holds. While [no_hover] holds it is not hovered, and while
+    [no_pointer_press] holds no pointer presses it, though a key still does:
+    React Aria's read-only checkbox and switch are neither, its read-only radio
+    only not hovered. A key presses as [keys] says React Aria judges it: by what
+    it went to, [`target], the default; or by the element watched, [`element],
+    as React Aria's radio judges a key on its label, which the input's key
+    reaches as it bubbles, so Enter presses a radio's content as Space does. *)
 
 val watch : t -> _ Dom.element_like -> unit
 (** [watch i element] keeps [i] as React Aria keeps an element's state:
@@ -54,6 +59,9 @@ val pressed : t -> bool
 
 val focused : t -> bool
 val focus_visible : t -> bool
+
+val pointer_inert : t -> bool
+(** Whether [no_pointer_press], given to {!create}, holds. *)
 
 val disabled : t -> bool
 (** Whether [disabled], given to {!create}, holds. *)

@@ -10,7 +10,15 @@ import { createRoot, type Root } from "react-dom/client";
 
 let mounted: { root: Root; host: HTMLElement } | null = null;
 
-type Props = { size: "sm" | "md" | "lg"; defaultSelected: boolean; isDisabled: boolean };
+type Props = {
+  size: "sm" | "md" | "lg";
+  defaultSelected: boolean;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  isRequired: boolean;
+  name: string;
+  "aria-label"?: string;
+};
 
 export function render(props: Props): void {
   const host = document.body.appendChild(document.createElement("div"));

@@ -135,7 +135,10 @@ string React takes.
 | `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its label, description and radios |
-| `name`, `isRequired`, `isReadOnly`, render props | — | | | Not yet |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its choice |
+| `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
+| `name` | `name` | `string` | | Its name in a form |
+| render props | — | | | Not yet |
 
 ### Radio
 
@@ -143,6 +146,7 @@ string React takes.
 |---|---|---|---|---|
 | `value` | `value` | `string` | required | The value it chooses |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `aria-label` | `aria_label` | `string` | | Its name where no text names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its content and description |
 | render props | — | | | Not yet |

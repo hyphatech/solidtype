@@ -21,6 +21,9 @@ external props :
   is_disabled:(bool[@mel.as "isDisabled"]) ->
   is_invalid:(bool[@mel.as "isInvalid"]) ->
   starter_disabled:(bool[@mel.as "starterDisabled"]) ->
+  is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  is_required:(bool[@mel.as "isRequired"]) ->
+  name:string ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -64,7 +67,14 @@ let named e attribute =
    none -- the group's label disabled, invalid -- which no style of HeroUI's
    reads, since each reads ["true"]: an empty one is read as none. *)
 let state_of e =
-  [| "data-selected"; "data-disabled"; "data-invalid"; "data-orientation" |]
+  [|
+    "data-selected";
+    "data-disabled";
+    "data-invalid";
+    "data-orientation";
+    "data-readonly";
+    "data-required";
+  |]
   |> Array.map (fun name ->
       Option.bind (T.attribute e name) (function "" -> None | v -> Some v))
 
@@ -84,7 +94,7 @@ let shown () =
   let inputs =
     all "input[type=radio]"
     |> Array.map (fun i ->
-        ( T.attribute i "value",
+        ( (T.attribute i "value", T.attribute i "name", T.attribute i "required"),
           checked i,
           T.attribute i "disabled",
           named i "aria-describedby" ))
@@ -110,7 +120,8 @@ let chosen () =
 (* The port, then the same RadioGroup in React, each alone on the page,
    shown, walked by a radio's content, then moved by the arrow keys from the
    radio the walk left focused. *)
-let both ~variant ~value ~orientation ~disabled ~invalid ~starter_disabled =
+let both ?(read_only = false) ?(required = false) ~variant ~value ~orientation
+    ~disabled ~invalid ~starter_disabled () =
   let walk () =
     let before = shown () in
     let content = (all "[data-slot=radio-content]").(2) in
@@ -130,7 +141,10 @@ let both ~variant ~value ~orientation ~disabled ~invalid ~starter_disabled =
         default_value=(fun () -> value)
         orientation=(fun () -> orientation)
         is_disabled=(fun () -> disabled)
-        is_invalid=(fun () -> invalid)>
+        is_invalid=(fun () -> invalid)
+        is_read_only=(fun () -> read_only)
+        is_required=(fun () -> required)
+        name="plan">
         <Label>"Plan"</Label>
         <Description>"Choose the plan that suits you"</Description>
         <Radio value="starter" is_disabled=(fun () -> starter_disabled)>
@@ -156,7 +170,8 @@ let both ~variant ~value ~orientation ~disabled ~invalid ~starter_disabled =
   T.cleanup ();
   Twin.render
     (props ~variant ~default_value:value ~orientation ~is_disabled:disabled
-       ~is_invalid:invalid ~starter_disabled ());
+       ~is_invalid:invalid ~starter_disabled ~is_read_only:read_only
+       ~is_required:required ~name:"plan" ());
   let* react = walk () in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
@@ -167,24 +182,31 @@ let () =
         "is HeroUI's radio group, walked and moved as React Aria's" (fun () ->
           let* solidtype, react =
             both ~variant:`primary ~value:"pro" ~orientation:`vertical
-              ~disabled:false ~invalid:false ~starter_disabled:false
+              ~disabled:false ~invalid:false ~starter_disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is horizontal, secondary, as React Aria's is" (fun () ->
           let* solidtype, react =
             both ~variant:`secondary ~value:"teams" ~orientation:`horizontal
-              ~disabled:false ~invalid:false ~starter_disabled:false
+              ~disabled:false ~invalid:false ~starter_disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "skips a disabled radio as React Aria's does" (fun () ->
           let* solidtype, react =
             both ~variant:`primary ~value:"pro" ~orientation:`vertical
-              ~disabled:false ~invalid:false ~starter_disabled:true
+              ~disabled:false ~invalid:false ~starter_disabled:true ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is disabled and invalid as React Aria's is" (fun () ->
           let* solidtype, react =
             both ~variant:`primary ~value:"pro" ~orientation:`vertical
-              ~disabled:true ~invalid:true ~starter_disabled:false
+              ~disabled:true ~invalid:true ~starter_disabled:false ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is read-only and required as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~read_only:true ~required:true ~variant:`primary ~value:"pro"
+              ~orientation:`vertical ~disabled:false ~invalid:false
+              ~starter_disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react)))

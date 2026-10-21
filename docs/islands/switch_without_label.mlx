@@ -1,0 +1,8 @@
+module Switch = Solidtype_heroui.Switch
+
+let make () =
+  <Switch aria_label="Enable notifications">
+    <Switch.Content>
+      <Switch.Control><Switch.Thumb /></Switch.Control>
+    </Switch.Content>
+  </Switch>

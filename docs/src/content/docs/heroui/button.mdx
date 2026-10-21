@@ -46,7 +46,7 @@ declared as React Aria writes it.
 
 ### Icon Only
 
-An icon-only button names itself with text its children hide, `sr-only`.
+An icon-only button is named by its `aria_label`, as in React.
 
 <Example code={iconOnly} title="button_icon_only.mlx"><IconOnly.make client:visible /></Example>
 
@@ -146,9 +146,9 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 | `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
 | `type` | `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
+| `aria-label` | `aria_label` | `string` | | Its name where it shows an icon alone |
 | `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its content |
 | `isPending` | — | | | Not yet |
-| `aria-label` | — | | | Not yet: a component cannot yet be given an attribute it may leave out |
 | render props | — | | | Not yet |

@@ -66,7 +66,8 @@ let description : Description.slot =
   </Kobalte.ItemDescription>
 
 let%component make ~(value : string) ?(is_disabled : bool = false)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(aria_label : string option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
   let g =
     match Radio_group.Context.use () with
     | Some g -> g
@@ -87,9 +88,13 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
           indeterminate = (fun () -> false);
           disabled;
           invalid = g.invalid;
+          read_only = g.read_only;
+          required = g.required;
+          aria_label;
           interaction =
             Interaction.create
               ~disabled:(fun[@u] () -> disabled ())
+              ~no_hover:(fun[@u] () -> g.read_only ())
               ~keys:`element ();
         };
     }
@@ -102,7 +107,9 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
       data_slot="radio"
       data_selected=(fun () -> Jsx.flag (selected ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (g.invalid ()))>
+      data_invalid=(fun () -> Jsx.flag (g.invalid ()))
+      data_readonly=(fun () -> Jsx.flag (g.read_only ()))
+      data_required=(fun () -> Jsx.flag (g.required ()))>
       <Description.Slot.Provider value=(fun () -> description)>
         (fun () -> children ())
       </Description.Slot.Provider>

@@ -2,13 +2,11 @@ module Button = Solidtype_heroui.Button
 
 let make () =
   <div class_="flex flex-wrap items-center gap-3">
-    <Button is_icon_only=true>
-      <Icons.Plus /> <span class_="sr-only">"New file"</span>
+    <Button is_icon_only=true aria_label="New file"><Icons.Plus /></Button>
+    <Button is_icon_only=true aria_label="Approve" variant=`secondary>
+      <Icons.Check />
     </Button>
-    <Button is_icon_only=true variant=`secondary>
-      <Icons.Check /> <span class_="sr-only">"Approve"</span>
-    </Button>
-    <Button is_icon_only=true variant=`danger>
-      <Icons.Trash /> <span class_="sr-only">"Delete"</span>
+    <Button is_icon_only=true aria_label="Delete" variant=`danger>
+      <Icons.Trash />
     </Button>
   </div>

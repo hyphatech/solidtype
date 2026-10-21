@@ -1,12 +1,78 @@
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.RadioGroup
 
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+
+external current_target : Dom.keyboardEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external radios : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+external click_target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+external cancel_click : Dom.mouseEvent -> unit = "preventDefault" [@@mel.send]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+(* A click in a read-only group chooses nothing: cancelled, which a browser
+   reverts for a radio, so no input is left unchecked as Kobalte undoes the
+   browser's own; and a click on a radio's content focuses its radio, as
+   React Aria's press does. *)
+let keep_choice e =
+  cancel_click e;
+  match
+    Js.Null.toOption (closest (click_target e) "[data-slot=radio-content]")
+  with
+  | Some content -> (
+      match Js.Null.toOption (query content "input[type=radio]") with
+      | Some input -> focus input
+      | None -> ())
+  | None -> ()
+
+(* An arrow key in a read-only group moves the focus to the next radio, or the
+   one before, wrapping, and chooses nothing, as React Aria's does; the
+   browser's own would check the radio it reaches, which Kobalte then unchecks,
+   leaving none checked. *)
+let move_focus e =
+  let step =
+    match key e with
+    | "ArrowDown" | "ArrowRight" -> 1
+    | "ArrowUp" | "ArrowLeft" -> -1
+    | _ -> 0
+  in
+  if step <> 0 then begin
+    prevent_default e;
+    let all =
+      Js.Array.from
+        (radios (current_target e) "input[type=radio]:not(:disabled)")
+    in
+    let n = Array.length all in
+    match Js.Null.toOption active with
+    | Some focused when n > 0 -> (
+        match Js.Array.findIndex ~f:(fun r -> r == focused) all with
+        | -1 -> ()
+        | at -> focus all.((at + step + n) mod n))
+    | _ -> ()
+  end
+
 (* What a group's radios read of it: the value chosen, and whether it is
    disabled or invalid. *)
 type group = {
   value : unit -> string option;
   disabled : unit -> bool;
   invalid : unit -> bool;
+  read_only : unit -> bool;
+  required : unit -> bool;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -35,7 +101,9 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(on_change : (string -> unit) option)
     ?(orientation : [ `horizontal | `vertical ] = `vertical)
     ?(is_disabled : bool = false) ?(is_invalid : bool = false)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(is_read_only : bool = false) ?(is_required : bool = false)
+    ?(name : string option) ?(class_ : string option) ~(children : Jsx.content)
+    () =
   (* The value is the group's, read by Kobalte and by every radio alike;
      none is Kobalte's own empty value, as a form's reset leaves it. *)
   let chosen, choose =
@@ -49,6 +117,8 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       value = chosen;
       disabled = (fun () -> is_disabled ());
       invalid = (fun () -> is_invalid ());
+      read_only = (fun () -> is_read_only ());
+      required = (fun () -> is_required ());
     }
   in
   <Context.Provider value=(fun () -> g)>
@@ -57,6 +127,11 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       on_change=(fun v -> choose (Some v))
       orientation=(fun () -> orientation ())
       disabled=(fun () -> is_disabled ())
+      read_only=(fun () -> is_read_only ())
+      required=(fun () -> is_required ())
+      ?name
+      on_key_down=(fun e -> if is_read_only () then move_focus e)
+      on_click=(fun e -> if is_read_only () then keep_choice e)
       validation_state=(fun () -> if is_invalid () then `invalid else `valid)
       class_=(fun () ->
                Styles.RadioGroup.classes
@@ -69,7 +144,9 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
                            | `horizontal -> "horizontal"
                            | `vertical -> "vertical"))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      data_invalid=(fun () -> Jsx.flag (is_invalid ()))>
+      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+      data_required=(fun () -> Jsx.flag (is_required ()))>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
           (fun () -> children ())

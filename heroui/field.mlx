@@ -1,11 +1,17 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
+external prevent_default : Dom.mouseEvent -> unit = "preventDefault"
+[@@mel.send]
+
 type state = {
   selected : unit -> bool;
   indeterminate : unit -> bool;
   disabled : unit -> bool;
   invalid : unit -> bool;
+  read_only : unit -> bool;
+  required : unit -> bool;
+  aria_label : unit -> string option;
   interaction : Interaction.t;
 }
 
@@ -67,17 +73,21 @@ module Content (K : Kobalte) = struct
     <Kobalte_label
       class_=(fun () -> class_ ())
       ref=(fun l -> Interaction.watch i l)
+      on_click=(fun e -> if Interaction.pointer_inert i then prevent_default e)
       data_slot=(fun () -> Jsx.data (slot ()))
       data_selected=(fun () -> Jsx.flag (f.selected ()))
       data_indeterminate=(fun () -> Jsx.flag (f.indeterminate ()))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      data_readonly=(fun () -> Jsx.flag (f.read_only ()))
+      data_required=(fun () -> Jsx.flag (f.required ()))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
       <Label.Slot.Provider value=(fun () -> inline)>
-        <Kobalte_input /> (fun () -> children ())
+        <Kobalte_input ?aria_label=(fun () -> f.aria_label ()) />
+        (fun () -> children ())
       </Label.Slot.Provider>
     </Kobalte_label>
 end

@@ -22,9 +22,11 @@ type group = {
   value : unit -> string option;
   disabled : unit -> bool;
   invalid : unit -> bool;
+  read_only : unit -> bool;
+  required : unit -> bool;
 }
 (** What a group's radios read of it: the value chosen, if any, and whether it
-    is disabled or invalid. *)
+    is disabled, invalid, read-only or required. *)
 
 module Context : sig
   module Provider : sig
@@ -53,6 +55,9 @@ module Props : sig
     ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?is_invalid:bool Solidtype.Check.value ->
+    ?is_read_only:bool Solidtype.Check.value ->
+    ?is_required:bool Solidtype.Check.value ->
+    ?name:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->

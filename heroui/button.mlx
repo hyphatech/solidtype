@@ -12,7 +12,7 @@ let%component make
       `primary) ?(size : [ `sm | `md | `lg ] = `md) ?(full_width : bool = false)
     ?(is_icon_only : bool = false) ?(is_disabled : bool = false)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
-    ?(on_click : (Dom.mouseEvent -> unit) option)
+    ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
     ~(children : Solidtype.Jsx.content) () =
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
@@ -22,6 +22,7 @@ let%component make
                   ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
                   ?class_:(class_ ()) ()))
     disabled=(fun () -> is_disabled ())
+    ?aria_label
     ref=(fun b -> Interaction.watch i b)
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))

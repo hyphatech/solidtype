@@ -16,6 +16,9 @@ type Props = {
   isIndeterminate: boolean;
   isDisabled: boolean;
   isInvalid: boolean;
+  isReadOnly: boolean;
+  isRequired: boolean;
+  name: string;
 };
 
 export function render(props: Props): void {

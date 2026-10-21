@@ -17,6 +17,9 @@ type Props = {
   isDisabled: boolean;
   isInvalid: boolean;
   starterDisabled: boolean;
+  isReadOnly: boolean;
+  isRequired: boolean;
+  name: string;
 };
 
 const plans = [

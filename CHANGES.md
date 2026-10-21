@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Switch`, `Checkbox` and `Radio_group` take
+  `is_read_only`, `is_required` and `name`, and `Switch` and `Checkbox`
+  `value`, so they submit with a form; `Switch`, `Checkbox`, `Radio` and
+  `Button` take `aria_label`, for one no text names. A read-only field is
+  not hovered and, but for a radio, no pointer presses it, as React Aria's;
+  a read-only radio group keeps its choice and moves the focus by the
+  arrow keys. `Interaction.create` takes `?no_hover` and
+  `?no_pointer_press` for them.
 - An optional prop is passed on as it is: `?title=(fun () -> o)`, or a
   component's optional parameter by its name, `?name`, present while the
   option is `Some` and absent while it is `None`. The compiler refuses it

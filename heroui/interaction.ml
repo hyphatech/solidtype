@@ -85,6 +85,8 @@ let pressing target e =
 
 type t = {
   off : bool S.accessor option;
+  no_hover : bool S.accessor option;
+  no_pointer_press : bool S.accessor option;
   keys : [ `target | `element ];
   hover : bool S.accessor;
   set_hover : bool S.setter;
@@ -96,13 +98,15 @@ type t = {
   set_focus_ring : bool S.setter;
 }
 
-let create ?disabled ?(keys = `target) () =
+let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
   let hover, set_hover = S.create_signal false in
   let press, set_press = S.create_signal false in
   let focus, set_focus = S.create_signal false in
   let focus_ring, set_focus_ring = S.create_signal false in
   {
     off = disabled;
+    no_hover;
+    no_pointer_press;
     keys;
     hover;
     set_hover;
@@ -115,10 +119,12 @@ let create ?disabled ?(keys = `target) () =
   }
 
 let disabled i = match i.off with Some d -> S.get d | None -> false
+let holds = function Some a -> S.get a | None -> false
+let pointer_inert i = holds i.no_pointer_press
 
 (* A disabled element is neither hovered nor pressed, whatever the pointer
    did while it was. *)
-let hovered i = S.get i.hover && not (disabled i)
+let hovered i = S.get i.hover && not (disabled i || holds i.no_hover)
 let pressed i = S.get i.press && not (disabled i)
 let focused i = S.get i.focus
 let focus_visible i = S.get i.focus_ring
@@ -141,7 +147,7 @@ let watch i element =
       S.set i.set_hover false;
       press false);
   on_pointer element "pointerdown" (fun e ->
-      if button e = 0 && not (disabled i) then begin
+      if button e = 0 && not (disabled i || pointer_inert i) then begin
         down := true;
         press true
       end);

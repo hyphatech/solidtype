@@ -97,6 +97,11 @@ module Props : sig
     ?default_selected:bool Solidtype.Check.value ->
     ?on_change:(bool -> unit) ->
     ?is_disabled:bool Solidtype.Check.value ->
+    ?is_read_only:bool Solidtype.Check.value ->
+    ?is_required:bool Solidtype.Check.value ->
+    ?name:string Solidtype.Check.value ->
+    ?value:string Solidtype.Check.value ->
+    ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->

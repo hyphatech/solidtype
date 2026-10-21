@@ -32,6 +32,7 @@ module Props : sig
     ?type_:Solidtype.Html.Button.type_ Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
+    ?aria_label:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->
     unit ->

@@ -8,11 +8,17 @@ type state = {
   indeterminate : unit -> bool;
   disabled : unit -> bool;
   invalid : unit -> bool;
+  read_only : unit -> bool;
+  required : unit -> bool;
+  aria_label : unit -> string option;
   interaction : Interaction.t;
 }
 (** A field's state, which its content declares as React Aria writes it:
-    [data-selected], [data-indeterminate], [data-disabled] and [data-invalid],
-    and the {!Interaction} with it. *)
+    [data-selected], [data-indeterminate], [data-disabled], [data-invalid],
+    [data-readonly] and [data-required], and the {!Interaction} with it; and the
+    name its input is given where no label names it, [aria-label]. Content no
+    pointer presses keeps its click from its input, as React Aria's read-only
+    checkbox and switch do, so a pointer neither focuses nor toggles it. *)
 
 val controlled :
   value:(unit -> 'a option) ->

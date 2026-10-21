@@ -53,6 +53,13 @@ let () =
             |> toBe
                  "button button--full-width button--icon-only button--lg \
                   button--danger-soft mt-4"));
+      Jest.test "is named by its aria-label where it shows an icon alone"
+        (fun () ->
+          T.render (fun () ->
+              <Button is_icon_only=true aria_label="Delete">"×"</Button>);
+          E.(
+            expect (T.attribute (T.by_role "button") "aria-label")
+            |> toEqual (Some "Delete")));
       Jest.test "changes its classes as its variant changes" (fun () ->
           let variant, set_variant = S.create_signal `primary in
           T.render (fun () ->

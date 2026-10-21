@@ -55,7 +55,10 @@ end
 let%component make ?(size : [ `lg | `md | `sm ] = `md)
     ?(is_selected : bool option) ?(default_selected : bool = false)
     ?(on_change : (bool -> unit) option) ?(is_disabled : bool = false)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(is_read_only : bool = false) ?(is_required : bool = false)
+    ?(name : string option) ?(value : string option)
+    ?(aria_label : string option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
   (* The state is the switch's, read by Kobalte and by every part alike. *)
   let on, change =
     Field.controlled ~value:is_selected ~default:(default_selected ())
@@ -73,8 +76,15 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
           indeterminate = (fun () -> false);
           disabled = (fun () -> is_disabled ());
           invalid = (fun () -> false);
+          read_only = (fun () -> is_read_only ());
+          required = (fun () -> is_required ());
+          aria_label;
           interaction =
-            Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) ();
+            Interaction.create
+              ~disabled:(fun[@u] () -> is_disabled ())
+              ~no_hover:(fun[@u] () -> is_read_only ())
+              ~no_pointer_press:(fun[@u] () -> is_read_only ())
+              ();
         };
     }
   in
@@ -83,10 +93,16 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       checked=(fun () -> on ())
       on_change=change
       disabled=(fun () -> is_disabled ())
+      read_only=(fun () -> is_read_only ())
+      required=(fun () -> is_required ())
+      ?name
+      ?value
       class_=(fun () -> Styles.Switch.base (s.slots ()))
       data_slot="switch"
       data_selected=(fun () -> Jsx.flag (on ()))
-      data_disabled=(fun () -> Jsx.flag (is_disabled ()))>
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+      data_required=(fun () -> Jsx.flag (is_required ()))>
       (fun () -> children ())
     </Kobalte.Root>
   </Context.Provider>
