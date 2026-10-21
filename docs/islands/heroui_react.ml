@@ -57,6 +57,21 @@ external avatar_props :
 external avatar : Dom.htmlDivElement -> avatar_props -> unit = "avatar"
 [@@mel.module "./react/heroui.tsx"]
 
+type avatar_group_props
+
+external avatar_group_props :
+  size:string ->
+  overlap:string ->
+  ?max:int ->
+  is_grid:(bool[@mel.as "isGrid"]) ->
+  unit ->
+  avatar_group_props = ""
+[@@mel.obj]
+
+external avatar_group : Dom.htmlDivElement -> avatar_group_props -> unit
+  = "avatarGroup"
+[@@mel.module "./react/heroui.tsx"]
+
 type badge_props
 
 external badge_props :

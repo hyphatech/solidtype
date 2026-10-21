@@ -1,0 +1,60 @@
+module S = Solidtype.Solid
+module Avatar = Solidtype_heroui.Avatar
+module Avatar_group = Solidtype_heroui.Avatar_group
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+let overlaps = [| (`clip, "clip"); (`ring, "ring") |]
+let maxima = [| (None, "none"); (Some 2, "2"); (Some 3, "3") |]
+
+let make () =
+  let size, set_size = S.create_signal (`md, "md") in
+  let overlap, set_overlap = S.create_signal (`clip, "clip") in
+  let max, set_max = S.create_signal (None, "none") in
+  let grid, set_grid = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Select
+        label="overlap"
+        choices=(fun () -> overlaps)
+        picked=(fun () -> S.get overlap)
+        on_pick=(Controls.choose overlaps set_overlap)
+      />
+      <Select
+        label="max"
+        choices=(fun () -> maxima)
+        picked=(fun () -> S.get max)
+        on_pick=(Controls.choose maxima set_max)
+      />
+      <Toggle label="grid" on=(fun () -> S.get grid) on_toggle=(S.set set_grid)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=avatar-group]"
+      solidtype=(<Avatar_group
+                   size=(fun () -> fst (S.get size))
+                   overlap=(fun () -> fst (S.get overlap))
+                   ?max=(fun () -> fst (S.get max))
+                   is_grid=(fun () -> S.get grid)>
+                   <Avatar><Avatar.Fallback>"AL"</Avatar.Fallback></Avatar>
+                   <Avatar><Avatar.Fallback>"GH"</Avatar.Fallback></Avatar>
+                   <Avatar><Avatar.Fallback>"KJ"</Avatar.Fallback></Avatar>
+                   <Avatar><Avatar.Fallback>"BL"</Avatar.Fallback></Avatar>
+                 </Avatar_group>)
+      react=(fun host ->
+              Heroui_react.avatar_group host
+                (Heroui_react.avatar_group_props
+                   ~size:(snd (S.get size))
+                   ~overlap:(snd (S.get overlap))
+                   ?max:(fst (S.get max))
+                   ~is_grid:(S.get grid) ()))
+    />
+  </section>

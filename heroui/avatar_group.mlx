@@ -1,0 +1,122 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Image
+
+type size = [ `sm | `md | `lg ]
+type color = [ `default | `accent | `success | `warning | `danger ]
+type variant = [ `default | `soft ]
+
+type group = {
+  size : unit -> size;
+  color : unit -> color option;
+  variant : unit -> variant option;
+  join : unit -> unit -> bool;
+  count : unit -> unit;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* Kobalte's image and fallback with an avatar's classes, as HeroUI's count is
+   an avatar: an Avatar itself would read the group it is in. *)
+let counted ~size ~color ~variant ~class_ children =
+  let slots () =
+    Styles.Avatar.slots
+      (Styles.Avatar.options ?color:(color ()) ~size:(size ())
+         ?variant:(variant ()) ())
+  in
+  <Kobalte.Root
+    class_=(fun () ->
+             after
+               (Styles.Avatar.base (slots ())
+               ^ " "
+               ^ Styles.AvatarGroup.count
+                   (Styles.AvatarGroup.slots (Styles.AvatarGroup.options ())))
+               (class_ ()))
+    data_slot="avatar-group-count">
+    <Kobalte.Fallback
+      class_=(fun () -> Styles.Avatar.fallback (slots ()))
+      data_slot="avatar-fallback">
+      (fun () -> children ())
+    </Kobalte.Fallback>
+  </Kobalte.Root>
+
+module Count = struct
+  let%component make ?(size : size option) ?(color : color option)
+      ?(variant : variant option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let g = Context.use () in
+    Option.iter (fun (g : group) -> g.count ()) g;
+    let own field of_group () =
+      match field () with Some v -> Some v | None -> Option.bind g of_group
+    in
+    counted
+      ~size:(fun () ->
+        match own size (fun (g : group) -> Some (g.size ())) () with
+        | Some s -> s
+        | None -> `md)
+      ~color:(own color (fun (g : group) -> g.color ()))
+      ~variant:(own variant (fun (g : group) -> g.variant ()))
+      ~class_ children
+end
+
+let%component make ?(size : size = `md) ?(color : color option)
+    ?(variant : variant option) ?(max : int option) ?(is_grid : bool = false)
+    ?(overlap : [ `clip | `ring ] = `clip)
+    ?(role : Solidtype.Html.Div.role option) ?(aria_label : string option)
+    ?(aria_labelledby : string option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  (* Each avatar in the order it joined, by the number it was given. *)
+  let avatars, set_avatars = S.create_signal [] in
+  let counts, set_counts = S.create_signal 0 in
+  let next = ref 0 in
+  let join () =
+    let id = !next in
+    incr next;
+    S.set set_avatars (S.get avatars @ [ id ]);
+    S.on_cleanup (fun () ->
+        S.set set_avatars (List.filter (fun a -> a <> id) (S.get avatars)));
+    fun () ->
+      match (max (), List.find_index (fun a -> a = id) (S.get avatars)) with
+      | Some m, Some at -> at < m
+      | None, _ | _, None -> true
+  in
+  let count () =
+    S.set set_counts (S.get counts + 1);
+    S.on_cleanup (fun () -> S.set set_counts (S.get counts - 1))
+  in
+  let remaining () =
+    match max () with
+    | Some m when S.get counts = 0 ->
+        Int.max 0 (List.length (S.get avatars) - Int.max 0 m)
+    | Some _ | None -> 0
+  in
+  let g = { size; color; variant; join; count } in
+  <Context.Provider value=(fun () -> g)>
+    <div
+      ?role
+      ?aria_label
+      ?aria_labelledby
+      class_=(fun () ->
+               after
+                 (Styles.AvatarGroup.base
+                    (Styles.AvatarGroup.slots
+                       (Styles.AvatarGroup.options ~is_grid:(is_grid ())
+                          ~overlap:(overlap ()) ())))
+                 (class_ ()))
+      data_slot="avatar-group">
+      (fun () -> children ())
+      <Show when_=(fun () -> remaining () > 0)>
+        (fun () ->
+          Jsx.element
+          @@ counted ~size ~color ~variant
+               ~class_:(fun () -> None)
+               (fun () -> Jsx.string ("+" ^ string_of_int (remaining ()))))
+      </Show>
+    </div>
+  </Context.Provider>

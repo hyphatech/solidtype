@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Avatar_group`: HeroUI's AvatarGroup and its count,
+  stacked or in a grid, that gives its avatars its size, color and variant,
+  each where an avatar sets none, and shows the first `max` of them and
+  counts the rest. `Avatar` reads its group.
 - `Solidtype_heroui.Avatar`: HeroUI's Avatar on Kobalte's Image, its sizes,
   colors and variants, its image once it has loaded and its fallback until
   then.

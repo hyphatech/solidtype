@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Skeleton, Spinner, Surface, Switch } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Skeleton, Spinner, Surface, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -268,6 +268,28 @@ export function avatar(host: HTMLElement, props: AvatarProps): void {
       <Avatar {...props}>
         <Avatar.Fallback>AL</Avatar.Fallback>
       </Avatar>,
+    ),
+  );
+}
+
+type AvatarGroupProps = {
+  size: "sm" | "md" | "lg";
+  overlap: "clip" | "ring";
+  max?: number;
+  isGrid: boolean;
+};
+
+// Four avatars, as the port's demo groups them.
+export function avatarGroup(host: HTMLElement, props: AvatarGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <AvatarGroup {...props}>
+        {["AL", "GH", "KJ", "BL"].map((initials) => (
+          <Avatar key={initials}>
+            <Avatar.Fallback>{initials}</Avatar.Fallback>
+          </Avatar>
+        ))}
+      </AvatarGroup>,
     ),
   );
 }

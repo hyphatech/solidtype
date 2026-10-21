@@ -1,0 +1,143 @@
+---
+title: AvatarGroup
+description: Avatars stacked or in a grid, the rest counted.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_usage.jsx";
+import UsageCode from "../../../../islands/avatar_group_usage.mlx?raw";
+import * as Max from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_max.jsx";
+import MaxCode from "../../../../islands/avatar_group_max.mlx?raw";
+import * as Count from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_count.jsx";
+import CountCode from "../../../../islands/avatar_group_count.mlx?raw";
+import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_sizes.jsx";
+import SizesCode from "../../../../islands/avatar_group_sizes.mlx?raw";
+import * as Grid from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_grid.jsx";
+import GridCode from "../../../../islands/avatar_group_grid.mlx?raw";
+import * as Overlap from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_overlap.jsx";
+import OverlapCode from "../../../../islands/avatar_group_overlap.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_tailwind.jsx";
+import TailwindCode from "../../../../islands/avatar_group_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/avatar_group_demo.jsx";
+
+`Solidtype_heroui.Avatar_group` is a `<div>` of `Solidtype_heroui.Avatar`s,
+with the classes HeroUI's own `avatarGroupVariants` gives. It gives the
+avatars inside it its `size`, `color` and `variant`, each where an avatar sets
+none itself, shows the first `max` of them, and counts the rest. Kobalte has
+no group.
+
+## Usage
+
+<Example code={UsageCode} title="avatar_group_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Avatar_group>
+  <Avatar>
+    <Avatar.Image alt="Ada Lovelace" src="/ada.png" />
+    <Avatar.Fallback>"AL"</Avatar.Fallback>
+  </Avatar>
+  <Avatar_group.Count>"+3"</Avatar_group.Count>
+</Avatar_group>
+```
+
+## Examples
+
+### Max
+
+`max` shows the first avatars and counts the rest.
+
+<Example code={MaxCode} title="avatar_group_max.mlx"><Max.make client:visible /></Example>
+
+### With Count
+
+For a total the page knows, an `Avatar_group.Count` of its own: the group
+counts none itself, and shows it whatever its `max`.
+
+<Example code={CountCode} title="avatar_group_count.mlx"><Count.make client:visible /></Example>
+
+### Sizes
+
+<Example code={SizesCode} title="avatar_group_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Grid
+
+<Example code={GridCode} title="avatar_group_grid.mlx"><Grid.make client:visible /></Example>
+
+### Overlap
+
+`` `clip ``, the default, leaves a crescent seam between avatars, and
+`` `ring `` a solid outline; neither applies to a grid.
+
+<Example code={OverlapCode} title="avatar_group_overlap.mlx"><Overlap.make client:visible /></Example>
+
+## Counting
+
+React counts a group's own children. Solid cannot single them out, so an
+avatar joins its group as it is made, and is counted in the order the
+avatars were made: an avatar a `For` adds later is counted after the others,
+wherever it is shown.
+
+## Beside React
+
+The same HeroUI AvatarGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes; a group that means something, as
+assignees do, takes a role and a name.
+
+<Example code={TailwindCode} title="avatar_group_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every group, as with
+HeroUI in React. The overlap is `--avatar-group-overlap`, `0.5rem` by
+default, and the seam `--avatar-group-seam`.
+
+## Styling Reference
+
+### CSS Classes
+
+- `.avatar-group`, and `.avatar-group--grid`, `.avatar-group--clip`,
+  `.avatar-group--ring`
+- `.avatar-group__count`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### AvatarGroup
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | The size of each avatar that sets none |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | | The color of each avatar that sets none |
+| `variant` | `variant` | `` [ `default \| `soft ] `` | | The variant of each avatar that sets none |
+| `max` | `max` | `int` | | How many avatars it shows |
+| `isGrid` | `is_grid` | `bool` | `false` | Whether it is a grid, with no overlap |
+| `overlap` | `overlap` | `` [ `clip \| `ring ] `` | `` `clip `` | How stacked avatars overlap |
+| `role` | `role` | `Solidtype.Html.Div.role` | | Its role, `` `group `` where it means something |
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `aria-labelledby` | `aria_labelledby` | `string` | | The id of what names it |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its avatars, and its count |
+
+### AvatarGroup.Count
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | Its size, else the group's |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | Its color, else the group's |
+| `variant` | `variant` | `` [ `default \| `soft ] `` | Its variant, else the group's |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | The count, "+3" |

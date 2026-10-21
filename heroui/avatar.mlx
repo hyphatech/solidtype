@@ -1,4 +1,5 @@
 module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Image
 
 type color = [ `default | `accent | `success | `warning | `danger ]
@@ -61,22 +62,36 @@ end
 let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
     ?(variant : [ `default | `soft ] option) ?(fallback_delay : float option)
     ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A prop the avatar sets is its own, else its group's; and in a group it is
+     shown while the group shows it. *)
+  let group = Avatar_group.Context.use () in
+  let own field of_group () =
+    match field () with Some v -> Some v | None -> Option.bind group of_group
+  in
+  let size = own size (fun (g : Avatar_group.group) -> Some (g.size ())) in
+  let variant = own variant (fun (g : Avatar_group.group) -> g.variant ()) in
+  let color = own color (fun (g : Avatar_group.group) -> g.color ()) in
+  let shown = match group with Some g -> g.join () | None -> fun () -> true in
   (* A fallback's own color is its own, else the avatar's. *)
   let a =
     {
       options =
-        (fun ?color:own () ->
-          let color = match own with Some c -> Some c | None -> color () in
+        (fun ?color:fallback () ->
+          let color =
+            match fallback with Some c -> Some c | None -> color ()
+          in
           Styles.Avatar.options ?color ?size:(size ()) ?variant:(variant ()) ());
     }
   in
-  <Context.Provider value=(fun () -> a)>
-    <Kobalte.Root
-      ?fallback_delay
-      class_=(fun () ->
-               after
-                 (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
-                 (class_ ()))>
-      (fun () -> children ())
-    </Kobalte.Root>
-  </Context.Provider>
+  <Show when_=(fun () -> shown ())>
+    <Context.Provider value=(fun () -> a)>
+      <Kobalte.Root
+        ?fallback_delay
+        class_=(fun () ->
+                 after
+                   (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
+                   (class_ ()))>
+        (fun () -> children ())
+      </Kobalte.Root>
+    </Context.Provider>
+  </Show>

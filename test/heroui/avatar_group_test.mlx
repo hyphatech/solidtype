@@ -1,0 +1,143 @@
+(* HeroUI's AvatarGroup, beside the same group in React: the avatars it
+   shows, the size, color and variant it gives them, and its count. *)
+
+module S = Solidtype.Solid
+module Avatar = Solidtype_heroui.Avatar
+module Avatar_group = Solidtype_heroui.Avatar_group
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?size:string ->
+  ?color:string ->
+  ?variant:string ->
+  ?max:int ->
+  ?is_grid:(bool[@mel.as "isGrid"]) ->
+  ?overlap:string ->
+  ?count:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/AvatarGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/AvatarGroup.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* The group and everything in it, each element's attributes and text. *)
+let shown host =
+  Js.Array.from
+    (query_all host "[data-slot=avatar-group], [data-slot=avatar-group] *")
+  |> Array.map (fun e -> tag_name e ^ " " ^ T.attributes e ^ " " ^ text e)
+
+let both ?size ?color ?variant ?max ?is_grid ?overlap ?count () =
+  T.render (fun () ->
+      <Avatar_group
+        ?size=(fun () -> size)
+        ?color=(fun () -> color)
+        ?variant=(fun () -> variant)
+        ?max=(fun () -> max)
+        ?is_grid=(fun () -> is_grid)
+        ?overlap=(fun () -> overlap)
+        class_="ms-1">
+        <Avatar color=`danger><Avatar.Fallback>"A1"</Avatar.Fallback></Avatar>
+        <Avatar><Avatar.Fallback>"A2"</Avatar.Fallback></Avatar>
+        <Avatar><Avatar.Fallback>"A3"</Avatar.Fallback></Avatar>
+        <Avatar><Avatar.Fallback>"A4"</Avatar.Fallback></Avatar>
+        (fun () ->
+          match count with
+          | Some c ->
+              Solidtype.Jsx.element
+                <Avatar_group.Count>
+                  (fun () -> Solidtype.Jsx.string c)
+                </Avatar_group.Count>
+          | None -> Solidtype.Jsx.string "")
+      </Avatar_group>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react =
+    shown
+      (Twin.render
+         (props
+            ?size:
+              (Option.map
+                 (function `sm -> "sm" | `md -> "md" | `lg -> "lg")
+                 size)
+            ?color:
+              (Option.map
+                 (function
+                   | `default -> "default"
+                   | `accent -> "accent"
+                   | `success -> "success"
+                   | `warning -> "warning"
+                   | `danger -> "danger")
+                 color)
+            ?variant:
+              (Option.map
+                 (function `default -> "default" | `soft -> "soft")
+                 variant)
+            ?max ?is_grid
+            ?overlap:
+              (Option.map
+                 (function `clip -> "clip" | `ring -> "ring")
+                 overlap)
+            ?count ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Avatar_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "shows every avatar, as React's does" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "shows the first of them and counts the rest, as React's"
+        (fun () ->
+          let solidtype, react = both ~max:2 () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "shows none of them where max is 0, as React's" (fun () ->
+          let solidtype, react = both ~max:0 () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "counts none where max is more than there are" (fun () ->
+          let solidtype, react = both ~max:9 () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "shows its own count in place of one, as React's" (fun () ->
+          let solidtype, react = both ~max:2 ~count:"+40" () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "gives its avatars its size, color and variant" (fun () ->
+          let solidtype, react =
+            both ~size:`lg ~color:`accent ~variant:`soft ~max:3 ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is a grid, as React's is" (fun () ->
+          let solidtype, react = both ~is_grid:true () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "rings its avatars, as React's does" (fun () ->
+          let solidtype, react = both ~overlap:`ring () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "shows as many as its max as it changes" (fun () ->
+          let max, set_max = S.create_signal 3 in
+          T.render (fun () ->
+              <Avatar_group max=(fun () -> S.get max)>
+                <Avatar><Avatar.Fallback>"A1"</Avatar.Fallback></Avatar>
+                <Avatar><Avatar.Fallback>"A2"</Avatar.Fallback></Avatar>
+                <Avatar><Avatar.Fallback>"A3"</Avatar.Fallback></Avatar>
+              </Avatar_group>);
+          S.set set_max 1;
+          let texts =
+            Js.Array.from (query_all T.body ".avatar") |> Array.map text
+          in
+          E.(expect texts |> toEqual [| "A1"; "+2" |])))

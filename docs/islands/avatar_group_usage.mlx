@@ -1,0 +1,42 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Avatar = Solidtype_heroui.Avatar
+module Avatar_group = Solidtype_heroui.Avatar_group
+
+let users =
+  [|
+    ( "John Doe",
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+    );
+    ( "Kate Wilson",
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+    );
+    ( "Emily Chen",
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
+    );
+    ( "Michael Brown",
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg"
+    );
+    ( "Olivia Davis",
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg" );
+  |]
+
+(* "John Doe" is "JD". *)
+let initials name =
+  String.split_on_char ' ' name
+  |> List.filter_map (fun word ->
+      if String.length word > 0 then Some (String.make 1 word.[0]) else None)
+  |> String.concat ""
+
+let make () =
+  <Avatar_group>
+    <For each=(fun () -> Array.sub users 0 4)>
+      (fun (name, image) _ ->
+        <Avatar>
+          <Avatar.Image alt=(fun () -> name) src=(fun () -> image) />
+          <Avatar.Fallback>
+            (fun () -> Jsx.string (initials name))
+          </Avatar.Fallback>
+        </Avatar>)
+    </For>
+  </Avatar_group>

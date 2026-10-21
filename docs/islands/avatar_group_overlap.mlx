@@ -1,0 +1,46 @@
+module Avatar = Solidtype_heroui.Avatar
+module Avatar_group = Solidtype_heroui.Avatar_group
+
+let group overlap =
+  <Avatar_group overlap=(fun () -> overlap) size=`lg>
+    <Avatar>
+      <Avatar.Image
+        alt="John"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+      />
+      <Avatar.Fallback>"JD"</Avatar.Fallback>
+    </Avatar>
+    <Avatar><Avatar.Fallback>"AB"</Avatar.Fallback></Avatar>
+    <Avatar>
+      <Avatar.Image
+        alt="Emily"
+        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
+      />
+      <Avatar.Fallback>"EC"</Avatar.Fallback>
+    </Avatar>
+    <Avatar><Avatar.Fallback>"SM"</Avatar.Fallback></Avatar>
+    <Avatar_group.Count>"+2"</Avatar_group.Count>
+  </Avatar_group>
+
+(* A striped backdrop, which shows the seam each overlap leaves. *)
+let backdrop child =
+  <div class_="relative inline-flex rounded-xl p-6">
+    <div
+      aria_hidden=true
+      class_="pointer-events-none absolute inset-0 rounded-xl \
+              bg-[repeating-linear-gradient(-45deg,transparent_0_10px,color-mix(in_oklab,var(--danger)_20%,transparent)_10px_11px)]"
+    />
+    <div class_="relative z-10">(fun () -> Solidtype.Jsx.element child)</div>
+  </div>
+
+let make () =
+  <div class_="flex flex-col items-start gap-6">
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm text-muted">"clip"</p>
+      (fun () -> Solidtype.Jsx.element (backdrop (group `clip)))
+    </div>
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm text-muted">"ring"</p>
+      (fun () -> Solidtype.Jsx.element (backdrop (group `ring)))
+    </div>
+  </div>
