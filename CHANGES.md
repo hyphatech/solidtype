@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Alert`: HeroUI's Alert, its statuses and their icons,
+  its indicator, title and description, a default surface to what is inside
+  it.
 - `Solidtype_heroui.Input_group`: HeroUI's InputGroup, an input or a text
   area with its prefix and suffix, alone or a text field's. `Input.input`
   and `Text_area.text_area` render either as a part with classes of its

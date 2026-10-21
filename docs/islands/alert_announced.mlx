@@ -1,0 +1,10 @@
+module Alert = Solidtype_heroui.Alert
+
+let make () =
+  <Alert role=`alert status=`danger>
+    <Alert.Indicator />
+    <Alert.Content>
+      <Alert.Title>"Payment failed"</Alert.Title>
+      <Alert.Description>"Your card was declined."</Alert.Description>
+    </Alert.Content>
+  </Alert>

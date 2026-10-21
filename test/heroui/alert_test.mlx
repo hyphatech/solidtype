@@ -1,0 +1,86 @@
+(* HeroUI's Alert, beside the same Alert in React: every part, and the icon
+   each status draws. *)
+
+module Jsx = Solidtype.Jsx
+module Alert = Solidtype_heroui.Alert
+module Surface = Solidtype_heroui.Surface
+module E = Jest.Expect
+module T = Testing
+
+type status = [ `default | `accent | `success | `warning | `danger ]
+
+module Twin = struct
+  external render : status option -> Dom.element = "render"
+  [@@mel.module "./twins/Alert.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Alert.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], [data-slot] *")
+  |> Array.map (fun e ->
+      tag_name e ^ " " ^ T.attributes e
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let both (status : status option) =
+  T.render (fun () ->
+      <Alert ?status=(fun () -> status) class_="max-w-md">
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>"New features"</Alert.Title>
+          <Alert.Description>"Check out the dashboard."</Alert.Description>
+        </Alert.Content>
+      </Alert>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react = shown (Twin.render status) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Alert" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is HeroUI's alert, part by part, as React's is" (fun () ->
+          let solidtype, react = both None in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws each status's icon, as React's does" (fun () ->
+          let solidtype, react =
+            [| `default; `accent; `success; `warning; `danger |]
+            |> Array.map (fun s -> both (Some s))
+            |> Array.split
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws the indicator it is given" (fun () ->
+          T.render (fun () ->
+              <Alert>
+                <Alert.Indicator>
+                  <span data_slot="own">"!"</span>
+                </Alert.Indicator>
+              </Alert>);
+          E.(
+            expect
+              ( Option.is_some (T.query "[data-slot=own]"),
+                Option.is_some (T.query "[data-slot=alert-default-icon]") )
+            |> toEqual (true, false)));
+      Jest.test "is a default surface to what is inside it" (fun () ->
+          let read = ref "none" in
+          let module Reader = struct
+            let%component make () =
+              (match Surface.Context.use () with
+              | Some v -> (
+                  match v () with
+                  | `default -> read := "default"
+                  | `secondary | `tertiary | `transparent -> read := "other")
+              | None -> read := "none");
+              <span />
+          end in
+          T.render (fun () -> <Alert><Reader /></Alert>);
+          E.(expect !read |> toBe "default")))

@@ -1,0 +1,41 @@
+module S = Solidtype.Solid
+module Alert = Solidtype_heroui.Alert
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let statuses =
+  [|
+    (`default, "default");
+    (`accent, "accent");
+    (`success, "success");
+    (`warning, "warning");
+    (`danger, "danger");
+  |]
+
+let make () =
+  let status, set_status = S.create_signal (`default, "default") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="status"
+        choices=(fun () -> statuses)
+        picked=(fun () -> S.get status)
+        on_pick=(Controls.choose statuses set_status)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=alert-root]"
+      solidtype=(<Alert status=(fun () -> fst (S.get status))>
+                   <Alert.Indicator />
+                   <Alert.Content>
+                     <Alert.Title>"Saved"</Alert.Title>
+                     <Alert.Description>
+                       "Your changes are saved."
+                     </Alert.Description>
+                   </Alert.Content>
+                 </Alert>)
+      react=(fun host ->
+              Heroui_react.alert host
+                (Heroui_react.alert_props ~status:(snd (S.get status)) ()))
+    />
+  </section>

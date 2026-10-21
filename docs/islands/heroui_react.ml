@@ -330,3 +330,10 @@ external input_group_props : variant:string -> unit -> input_group_props = ""
 external input_group : Dom.htmlDivElement -> input_group_props -> unit
   = "inputGroup"
 [@@mel.module "./react/heroui.tsx"]
+
+type alert_props
+
+external alert_props : status:string -> unit -> alert_props = "" [@@mel.obj]
+
+external alert : Dom.htmlDivElement -> alert_props -> unit = "alert"
+[@@mel.module "./react/heroui.tsx"]

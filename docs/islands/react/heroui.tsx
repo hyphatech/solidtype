@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -449,6 +449,22 @@ export function inputGroup(host: HTMLElement, props: InputGroupProps): void {
         <InputGroup.Input aria-label="Site" placeholder="heroui" />
         <InputGroup.Suffix>.com</InputGroup.Suffix>
       </InputGroup>,
+    ),
+  );
+}
+
+type AlertProps = { status: "default" | "accent" | "success" | "warning" | "danger" };
+
+export function alert(host: HTMLElement, props: AlertProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Alert {...props}>
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Saved</Alert.Title>
+          <Alert.Description>Your changes are saved.</Alert.Description>
+        </Alert.Content>
+      </Alert>,
     ),
   );
 }

@@ -1,0 +1,98 @@
+---
+title: Alert
+description: A message, with its status's icon, title and description.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/alert_usage.jsx";
+import UsageCode from "../../../../islands/alert_usage.mlx?raw";
+import * as Announced from "../../../../../_build/default/docs/islands/out/docs/islands/alert_announced.jsx";
+import AnnouncedCode from "../../../../islands/alert_announced.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/alert_demo.jsx";
+
+`Solidtype_heroui.Alert` is a `<div>` with the classes HeroUI's own
+`alertVariants` gives, its indicator drawing its status's icon, its title and
+its description; it is a default surface to what is inside it. It has no role,
+as HeroUI's has none. Kobalte's Alert is `role="alert"`, which a reader
+announces as it appears, so the port is HeroUI's `<div>`, and an alert to be
+announced is given the role.
+
+## Usage
+
+<Example code={UsageCode} title="alert_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Alert>
+  <Alert.Indicator />
+  <Alert.Content>
+    <Alert.Title>"Title"</Alert.Title>
+    <Alert.Description>"Description"</Alert.Description>
+  </Alert.Content>
+</Alert>
+```
+
+## Examples
+
+### Announced
+
+`` role=`alert `` has a reader announce the alert as it appears.
+
+<Example code={AnnouncedCode} title="alert_announced.mlx"><Announced.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI Alert twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two: a marked row is
+one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every alert, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .alert {
+    @apply rounded-2xl shadow-lg;
+  }
+
+  .alert__title {
+    @apply font-bold;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.alert`, and its statuses `.alert--default`, `.alert--accent`,
+  `.alert--success`, `.alert--warning`, `.alert--danger`
+- `.alert__indicator`, `.alert__content`, `.alert__title`,
+  `.alert__description`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Alert
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `status` | `status` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `default `` | Its status, and its icon |
+| `role` | `role` | `Solidtype.Html.Div.role` | | `` `alert `` to be announced |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its parts |
+
+### Alert.Indicator, Content, Title, Description
+
+Each takes `class_`, added after HeroUI's class, and its children; the
+indicator's take the place of its status's icon.
