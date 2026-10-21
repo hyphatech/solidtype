@@ -1,0 +1,47 @@
+(* HeroUI's Separator on Kobalte, beside the same Separator in React: its
+   role, its orientation and HeroUI's classes, for each orientation and
+   variant. *)
+
+module Separator = Solidtype_heroui.Separator
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render :
+    [ `horizontal | `vertical ] ->
+    [ `default | `secondary | `tertiary ] ->
+    Dom.element = "render"
+  [@@mel.module "./twins/Separator.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Separator.tsx"]
+end
+
+(* What a separator shows a reader and HeroUI's styles. *)
+let shown e =
+  ( T.attribute e "role",
+    T.attribute e "aria-orientation",
+    T.attribute e "data-orientation",
+    T.class_name e )
+
+let both orientation variant =
+  T.render (fun () ->
+      <Separator orientation=(fun () -> orientation) variant=(fun () -> variant)
+      />);
+  let solidtype = shown (T.by_role "separator") in
+  T.cleanup ();
+  let react = shown (Twin.render orientation variant) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Separator" (fun () ->
+      Jest.test "is horizontal, as React's is" (fun () ->
+          let solidtype, react = both `horizontal `default in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is vertical, as React's is" (fun () ->
+          let solidtype, react = both `vertical `default in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "has the classes of its variant, as React's has" (fun () ->
+          let solidtype, react = both `horizontal `tertiary in
+          E.(expect solidtype |> toEqual react)))

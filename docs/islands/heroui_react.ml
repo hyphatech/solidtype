@@ -18,3 +18,16 @@ external button_props :
 
 external button : Dom.htmlDivElement -> button_props -> unit = "button"
 [@@mel.module "./react/heroui.tsx"]
+
+type separator_props
+
+external separator_props :
+  orientation:string ->
+  variant:string ->
+  class_name:(string[@mel.as "className"]) ->
+  unit ->
+  separator_props = ""
+[@@mel.obj]
+
+external separator : Dom.htmlDivElement -> separator_props -> unit = "separator"
+[@@mel.module "./react/heroui.tsx"]

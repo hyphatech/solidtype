@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Button } from "@heroui/react";
+import { Button, Separator } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -33,4 +33,14 @@ type ButtonProps = {
 
 export function button(host: HTMLElement, { label, ...props }: ButtonProps): void {
   flushSync(() => rootOf(host).render(<Button {...props}>{label}</Button>));
+}
+
+type SeparatorProps = {
+  orientation: "horizontal" | "vertical";
+  variant: "default" | "secondary" | "tertiary";
+  className: string;
+};
+
+export function separator(host: HTMLElement, props: SeparatorProps): void {
+  flushSync(() => rootOf(host).render(<Separator {...props} />));
 }

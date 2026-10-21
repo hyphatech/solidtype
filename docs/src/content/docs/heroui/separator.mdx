@@ -1,0 +1,41 @@
+---
+title: Separator
+description: HeroUI's Separator, on Kobalte's.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/separator_demo.jsx";
+import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/separator_example.jsx";
+import example from "../../../../islands/separator_example.mlx?raw";
+
+`Solidtype_heroui.Separator` is Kobalte's `Separator.Root`, with the classes
+HeroUI's own `separatorVariants` gives.
+
+## Beside React
+
+The same HeroUI Separator twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two elements:
+a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Example
+
+<div class="not-content">
+  <Example.make client:load />
+</div>
+
+<Code code={example} lang="ocaml" title="separator_example.mlx" />
+
+## Props
+
+| React | solidtype | |
+|---|---|---|
+| `orientation` | `orientation` | `` `horizontal`` (default), `` `vertical`` |
+| `variant` | `variant` | `` `default`` (default), `` `secondary``, `` `tertiary`` |
+| `className` | `class_` | added after HeroUI's classes |
+
+A vertical separator is a `<div>` in React and an `<hr>` here, Kobalte's
+element; both have the role `separator` and `aria-orientation="vertical"`.

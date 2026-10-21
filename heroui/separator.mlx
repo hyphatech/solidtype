@@ -1,0 +1,13 @@
+module Kobalte = Solidtype_kobalte.Separator
+
+let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(variant : [ `default | `secondary | `tertiary ] = `default)
+    ?(class_ : string option) () =
+  <Kobalte.Root
+    orientation=(fun () -> orientation ())
+    role=`separator
+    class_=(fun () ->
+             Styles.Separator.classes
+               (Styles.Separator.options ~orientation:(orientation ())
+                  ~variant:(variant ()) ?class_:(class_ ()) ()))
+  />

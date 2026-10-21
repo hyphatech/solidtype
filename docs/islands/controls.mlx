@@ -1,0 +1,48 @@
+(* The controls a demo's props are chosen by, the same on every page. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+
+external target : Dom.event -> Dom.htmlInputElement = "target" [@@mel.get]
+external value : Dom.htmlInputElement -> string = "value" [@@mel.get]
+external checked : Dom.htmlInputElement -> bool = "checked" [@@mel.get]
+
+let choose choices set e =
+  let picked = value (target e) in
+  Array.find_opt (fun (_, name) -> String.equal name picked) choices
+  |> Option.iter (S.set set)
+
+module Select = struct
+  let%component make ~(label : string) ~(choices : ('a * string) array)
+      ~(picked : 'a * string) ~(on_pick : Dom.event -> unit) () =
+    <label class_="flex flex-col gap-1 text-xs text-muted">
+      (fun () -> Jsx.string (label ()))
+      <select
+        class_="rounded-lg border border-separator bg-surface px-2 py-1 \
+                text-sm text-foreground"
+        on_change=on_pick>
+        <For each=(fun () -> choices ())>
+          (fun (_, name) _ ->
+            <option
+              value=name
+              selected=(fun () -> String.equal name (snd (picked ())))>
+              (fun () -> Jsx.string name)
+            </option>)
+        </For>
+      </select>
+    </label>
+end
+
+module Toggle = struct
+  let%component make ~(label : string) ~(on : bool) ~(on_toggle : bool -> unit)
+      () =
+    <label class_="flex items-center gap-2 text-sm">
+      <input
+        type_="checkbox"
+        checked=(fun () -> on ())
+        on_change=(fun e -> on_toggle (checked (target e)))
+      />
+      (fun () -> Jsx.string (label ()))
+    </label>
+end

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Separator`: HeroUI's Separator on Kobalte's, its
+  orientations and variants.
 - A Kobalte root split by `multiple`, `Root` and `Root_multiple`, has
   Kobalte's documentation, as every other part has.
 - `solidtype-heroui`, a package of HeroUI's components ported onto Kobalte's:

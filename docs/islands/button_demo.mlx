@@ -1,11 +1,8 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
-module For = Solidtype.For
 module Button = Solidtype_heroui.Button
-
-external target : Dom.event -> Dom.htmlInputElement = "target" [@@mel.get]
-external value : Dom.htmlInputElement -> string = "value" [@@mel.get]
-external checked : Dom.htmlInputElement -> bool = "checked" [@@mel.get]
+module Select = Controls.Select
+module Toggle = Controls.Toggle
 
 (* Each choice with the name HeroUI's React component takes for it. *)
 let variants =
@@ -21,45 +18,6 @@ let variants =
 
 let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
 
-let choose choices set e =
-  let picked = value (target e) in
-  Array.find_opt (fun (_, name) -> String.equal name picked) choices
-  |> Option.iter (S.set set)
-
-module Select = struct
-  let%component make ~(label : string) ~(choices : ('a * string) array)
-      ~(picked : 'a * string) ~(on_pick : Dom.event -> unit) () =
-    <label class_="flex flex-col gap-1 text-xs text-muted">
-      (fun () -> Jsx.string (label ()))
-      <select
-        class_="rounded-lg border border-separator bg-surface px-2 py-1 \
-                text-sm text-foreground"
-        on_change=on_pick>
-        <For each=(fun () -> choices ())>
-          (fun (_, name) _ ->
-            <option
-              value=name
-              selected=(fun () -> String.equal name (snd (picked ())))>
-              (fun () -> Jsx.string name)
-            </option>)
-        </For>
-      </select>
-    </label>
-end
-
-module Toggle = struct
-  let%component make ~(label : string) ~(on : bool) ~(on_toggle : bool -> unit)
-      () =
-    <label class_="flex items-center gap-2 text-sm">
-      <input
-        type_="checkbox"
-        checked=(fun () -> on ())
-        on_change=(fun e -> on_toggle (checked (target e)))
-      />
-      (fun () -> Jsx.string (label ()))
-    </label>
-end
-
 let make () =
   let variant, set_variant = S.create_signal (`primary, "primary") in
   let size, set_size = S.create_signal (`md, "md") in
@@ -74,13 +32,13 @@ let make () =
         label="variant"
         choices=(fun () -> variants)
         picked=(fun () -> S.get variant)
-        on_pick=(choose variants set_variant)
+        on_pick=(Controls.choose variants set_variant)
       />
       <Select
         label="size"
         choices=(fun () -> sizes)
         picked=(fun () -> S.get size)
-        on_pick=(choose sizes set_size)
+        on_pick=(Controls.choose sizes set_size)
       />
       <Toggle
         label="full width"
