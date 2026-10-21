@@ -791,14 +791,24 @@ let reader ~loc p =
       (B.pexp_ident ~loc { txt = Ldot (Lident "Props", "get_" ^ p.label); loc })
       [ (Nolabel, [%expr props]) ]
   in
+  (* A function of unit alone is uncurried with no argument, so Melange calls
+     it as [f () [@u]], with the unit written, never a variable of it. *)
+  let of_unit =
+    match p.typ.ptyp_desc with
+    | Ptyp_arrow
+        ( Nolabel,
+          { ptyp_desc = Ptyp_constr ({ txt = Lident "unit"; _ }, []); _ },
+          _ ) ->
+        p.arity = 1
+    | _ -> false
+  in
   let expr =
     if p.arity > 0 then
       let xs = List.init p.arity (Printf.sprintf "solidtype__%d") in
+      let arg x = if of_unit then [%expr ()] else B.evar ~loc x in
       let call f =
         {
-          (B.pexp_apply ~loc f
-             (List.map (fun x -> (Nolabel, B.evar ~loc x)) xs))
-          with
+          (B.pexp_apply ~loc f (List.map (fun x -> (Nolabel, arg x)) xs)) with
           pexp_attributes = [ attribute ~loc "u" ];
         }
       in

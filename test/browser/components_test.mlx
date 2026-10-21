@@ -26,6 +26,14 @@ module Fragile = struct
     <p>(fun () -> if broken () then raise Broken else Jsx.string "mended")</p>
 end
 
+(* A card whose callback takes nothing, as a close or a remove does. *)
+module Removable = struct
+  let%component make ~(title : string) ~(on_remove : unit -> unit) () =
+    <button on_click=(fun _ -> on_remove ())>
+      (fun () -> Solidtype.Jsx.string (title ()))
+    </button>
+end
+
 (* Shows [text] once a fetch of it has resolved. *)
 module Loaded = struct
   let%component make ~(text : string) () =
@@ -91,6 +99,12 @@ let () =
                 <Fragile broken=(fun () -> true) />
               </ErrorBoundary>);
           E.(expect (T.page ()) |> toBe "broken"));
+      Jest.test "a callback prop that takes nothing is called" (fun () ->
+          let removed = ref 0 in
+          T.render (fun () ->
+              <Removable title="card" on_remove=(fun _ -> incr removed) />);
+          T.click (button_by_text "card");
+          E.(expect !removed |> toBe 1));
       Jest.test "create_dynamic renders the component chosen, with its props"
         (fun () ->
           T.render (fun () ->

@@ -63,3 +63,8 @@ let strings =
     {js|caf\u00e9|js}
     <Label text="x\\y" />
   </p>
+
+module Removable = struct
+  let%component make ~(on_remove : unit -> unit) () =
+    <button on_click=(fun _ -> on_remove ())>"x"</button>
+end

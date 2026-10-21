@@ -259,3 +259,36 @@ let strings =
            Label.Props.check ~text:(Solidtype.Check.literal {js|x\\y|js}) ();
          Solidtype.Jsx.c Label.component
            [|(Solidtype.Jsx.s "text" {js|x\\y|js})|] [||]))|]
+module Removable =
+  struct
+    include
+      struct
+        module Props =
+          struct
+            [@@@ocaml.warning "-32-37"]
+            type t
+            external get_on_remove : t -> ((unit -> unit)[@u ]) = "onRemove"
+            [@@mel.get ]
+            external make :
+              on_remove:((unit -> unit)[@mel.as "onRemove"]) -> unit -> t =
+                ""[@@mel.obj ]
+            let check ~on_remove:(_ : unit -> unit) ?props:(_ : t option) ()
+              = ()
+            type name =
+              | On_remove 
+            let omit (props : t) (names : name array) :
+              t Solidtype.Solid.rest=
+              Solidtype.Solid.omit props
+                (Array.map (function | On_remove -> "onRemove") names)
+          end
+        let make (props : Props.t) =
+          let on_remove solidtype__0 =
+            let f = Props.get_on_remove props in ((f ())[@u ])[@@inline ]
+            [@@ocaml.warning "-26-27"] in
+          Solidtype.Jsx.el "button"
+            [|(Solidtype.Jsx.s "onClick"
+                 (fun _ -> on_remove () : Solidtype.Html.Button.on_click))|]
+            [|(Solidtype.Jsx.text {js|x|js})|]
+        let component = Solidtype.Jsx.component make
+      end
+  end

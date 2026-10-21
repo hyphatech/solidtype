@@ -6,7 +6,7 @@ module Button = Solidtype_kobalte.Button
 (* A task on the board: dragged to another column, or moved a column at a
    time by its arrows. *)
 let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
-    ~(on_remove : Dom.mouseEvent -> unit) () =
+    ~(on_remove : unit -> unit) () =
   let arrow ~label target =
     match target with
     | None -> <span class_="w-7" />
@@ -45,7 +45,7 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
                 hover:text-red-600 focus-visible:opacity-100 \
                 dark:hover:bg-red-950"
         aria_label=(fun () -> "Remove " ^ (task ()).title)
-        on_click=on_remove>
+        on_click=(fun _ -> on_remove ())>
         {js|×|js}
       </Button.Root>
     </div>

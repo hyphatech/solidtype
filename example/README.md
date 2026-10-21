@@ -90,11 +90,7 @@ What surprised or slowed down writing this, as a user of the libraries.
     dev-setup dependency, ocamllsp fails every hover and jump in an
     `.mlx`. `dune describe pp` crashes on a dialect file,
     so the ppx's output is read by running `mlx-pp` and the ppx by hand.
-11. **A function prop that takes `unit` breaks `let%component`.**
-    `~(on_remove : unit -> unit)` fails to compile with an error over the
-    whole component, about an accessor: it reads as a value prop's.
-    `Card` takes the click event instead.
-12. **Small ones.** `Dialog.Root`'s check names
+11. **Small ones.** `Dialog.Root`'s check names
     `Types.AlertDialog_Root_Translations.t`; `Select` takes its options
     wrapped in `Types.Either.left`, and an item's text is read back
     through `Node.raw_value (Item_props.item props)`.

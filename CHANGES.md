@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A component's callback prop that takes nothing, `~(on_remove : unit -> unit)`,
+  compiles and is called, where `let%component` refused it with an error
+  over the whole component.
 - Breaking: a page streamed on the server goes into a web `WritableStream`,
   which `Server.writable ~write ~close ()` makes, each part given as text,
   and `Server.pipe_to` resolves once it is all written; the Node-only

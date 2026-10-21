@@ -7,7 +7,7 @@ type Status = Task["status"];
 const labels: Record<Status, string> = { to_do: "To do", doing: "Doing", done: "Done" };
 const order: Status[] = ["to_do", "doing", "done"];
 
-export function make(props: { task: Task; onMove: (status: Status) => void; onRemove: (e: MouseEvent) => void }) {
+export function make(props: { task: Task; onMove: (status: Status) => void; onRemove: () => void }) {
   const arrow = (label: string, target: Status | undefined) => {
     if (target === undefined) return <span class="w-7" />;
     return (
@@ -37,7 +37,7 @@ export function make(props: { task: Task; onMove: (status: Status) => void; onRe
         <Button.Root
           class="grid h-6 w-6 place-items-center rounded-md text-stone-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 dark:hover:bg-red-950"
           aria-label={"Remove " + props.task.title}
-          onClick={(e) => props.onRemove(e)}
+          onClick={() => props.onRemove()}
         >
           ×
         </Button.Root>
