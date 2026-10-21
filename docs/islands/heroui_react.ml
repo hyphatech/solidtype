@@ -216,3 +216,18 @@ external radio_group_props :
 external radio_group : Dom.htmlDivElement -> radio_group_props -> unit
   = "radioGroup"
 [@@mel.module "./react/heroui.tsx"]
+
+type typography_props
+
+external typography_props :
+  type_:(string[@mel.as "type"]) ->
+  align:string ->
+  color:string ->
+  truncate:bool ->
+  unit ->
+  typography_props = ""
+[@@mel.obj]
+
+external typography : Dom.htmlDivElement -> typography_props -> unit
+  = "typography"
+[@@mel.module "./react/heroui.tsx"]

@@ -1,0 +1,115 @@
+module Jsx = Solidtype.Jsx
+module Dynamic = Solidtype.Dynamic
+
+type type_ =
+  [ `body | `body_sm | `body_xs | `code | `h1 | `h2 | `h3 | `h4 | `h5 | `h6 ]
+
+type align = [ `start | `center | `end_ | `justify ]
+type color = [ `default | `muted ]
+type weight = [ `normal | `medium | `semibold | `bold ]
+
+(* The element a type means, and its name as HeroUI's data-type writes it. *)
+let element : type_ -> string = function
+  | `body | `body_sm | `body_xs -> "p"
+  | `code -> "code"
+  | `h1 -> "h1"
+  | `h2 -> "h2"
+  | `h3 -> "h3"
+  | `h4 -> "h4"
+  | `h5 -> "h5"
+  | `h6 -> "h6"
+
+let name : type_ -> string = function
+  | `body -> "body"
+  | `body_sm -> "body-sm"
+  | `body_xs -> "body-xs"
+  | `code -> "code"
+  | `h1 -> "h1"
+  | `h2 -> "h2"
+  | `h3 -> "h3"
+  | `h4 -> "h4"
+  | `h5 -> "h5"
+  | `h6 -> "h6"
+
+(* Text of a type, which every primitive is. *)
+let text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children =
+  <Dynamic.Element
+    component=(fun () ->
+                match element_type () with
+                | Some tag -> tag
+                | None -> element (type_ ()))
+    class_=(fun () ->
+             let base =
+               Styles.Typography.base
+                 (Styles.Typography.slots
+                    (Styles.Typography.options ~type_:(type_ ())
+                       ~align:(Option.value (align ()) ~default:`start)
+                       ~color:(Option.value (color ()) ~default:`default)
+                       ?weight:(weight ()) ?truncate:(truncate ()) ()))
+             in
+             match class_ () with Some c -> base ^ " " ^ c | None -> base)
+    data_slot="typography"
+    data_type=(fun () -> Jsx.data (name (type_ ())))>
+    (fun () -> children ())
+  </Dynamic.Element>
+
+let%component make ?(type_ : type_ = `body) ?(align : align option)
+    ?(color : color option) ?(weight : weight option) ?(truncate : bool option)
+    ?(element_type : string option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children
+
+module Heading = struct
+  let%component make ?(level : int = 1) ?(align : align option)
+      ?(color : color option) ?(weight : weight option)
+      ?(truncate : bool option) ?(element_type : string option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let type_ () =
+      match level () with
+      | 1 -> `h1
+      | 2 -> `h2
+      | 3 -> `h3
+      | 4 -> `h4
+      | 5 -> `h5
+      | 6 -> `h6
+      | n ->
+          invalid_arg
+            ("Typography.Heading's level is 1 to 6, not " ^ string_of_int n)
+    in
+    text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children
+end
+
+module Paragraph = struct
+  let%component make ?(size : [ `base | `sm | `xs ] = `base)
+      ?(align : align option) ?(color : color option) ?(weight : weight option)
+      ?(truncate : bool option) ?(element_type : string option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let type_ () =
+      match size () with `base -> `body | `sm -> `body_sm | `xs -> `body_xs
+    in
+    text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children
+end
+
+module Code = struct
+  let%component make ?(align : align option) ?(color : color option)
+      ?(weight : weight option) ?(truncate : bool option)
+      ?(element_type : string option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    text
+      ~type_:(fun () -> `code)
+      ~align ~color ~weight ~truncate ~element_type ~class_ children
+end
+
+module Prose = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () ->
+               let prose =
+                 Styles.Typography.prose
+                   (Styles.Typography.slots (Styles.Typography.options ()))
+               in
+               match class_ () with Some c -> prose ^ " " ^ c | None -> prose)
+      data_slot="prose">
+      (fun () -> children ())
+    </div>
+end

@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Skeleton, Spinner, Surface, Switch } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Skeleton, Spinner, Surface, Switch, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -292,4 +292,15 @@ export function avatarGroup(host: HTMLElement, props: AvatarGroupProps): void {
       </AvatarGroup>,
     ),
   );
+}
+
+type TypographyProps = {
+  type: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "body" | "body-sm" | "body-xs" | "code";
+  align: "start" | "center" | "end" | "justify";
+  color: "default" | "muted";
+  truncate: boolean;
+};
+
+export function typography(host: HTMLElement, props: TypographyProps): void {
+  flushSync(() => rootOf(host).render(<Typography {...props}>Pricing on your terms</Typography>));
 }

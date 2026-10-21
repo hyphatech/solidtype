@@ -1,0 +1,75 @@
+module S = Solidtype.Solid
+module Typography = Solidtype_heroui.Typography
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let types =
+  [|
+    (`h1, "h1");
+    (`h2, "h2");
+    (`h3, "h3");
+    (`h4, "h4");
+    (`h5, "h5");
+    (`h6, "h6");
+    (`body, "body");
+    (`body_sm, "body-sm");
+    (`body_xs, "body-xs");
+    (`code, "code");
+  |]
+
+let aligns =
+  [|
+    (`start, "start"); (`center, "center"); (`end_, "end"); (`justify, "justify");
+  |]
+
+let colors = [| (`default, "default"); (`muted, "muted") |]
+
+let make () =
+  let type_, set_type = S.create_signal (`h2, "h2") in
+  let align, set_align = S.create_signal (`start, "start") in
+  let color, set_color = S.create_signal (`default, "default") in
+  let truncate, set_truncate = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="type"
+        choices=(fun () -> types)
+        picked=(fun () -> S.get type_)
+        on_pick=(Controls.choose types set_type)
+      />
+      <Select
+        label="align"
+        choices=(fun () -> aligns)
+        picked=(fun () -> S.get align)
+        on_pick=(Controls.choose aligns set_align)
+      />
+      <Select
+        label="color"
+        choices=(fun () -> colors)
+        picked=(fun () -> S.get color)
+        on_pick=(Controls.choose colors set_color)
+      />
+      <Toggle
+        label="truncate"
+        on=(fun () -> S.get truncate)
+        on_toggle=(S.set set_truncate)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Typography
+                   type_=(fun () -> fst (S.get type_))
+                   align=(fun () -> fst (S.get align))
+                   color=(fun () -> fst (S.get color))
+                   truncate=(fun () -> S.get truncate)>
+                   "Pricing on your terms"
+                 </Typography>)
+      react=(fun host ->
+              Heroui_react.typography host
+                (Heroui_react.typography_props
+                   ~type_:(snd (S.get type_))
+                   ~align:(snd (S.get align))
+                   ~color:(snd (S.get color))
+                   ~truncate:(S.get truncate) ()))
+    />
+  </section>

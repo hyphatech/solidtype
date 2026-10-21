@@ -1,0 +1,16 @@
+module Typography = Solidtype_heroui.Typography
+
+let make () =
+  <Typography.Prose class_="flex max-w-xl flex-col gap-3">
+    <h1>"Prose title"</h1>
+    <p>
+      "Prose is for authored content where the markup is already semantic and \
+       HeroUI applies the default typography rhythm."
+    </p>
+    <h2>"Section title"</h2>
+    <p>
+      "Inline code like "
+      <code>"element_type"</code>
+      " receives the same code treatment as the Typography primitive."
+    </p>
+  </Typography.Prose>

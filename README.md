@@ -28,7 +28,8 @@ HeroUI 3.2's design is being ported onto Kobalte by hand, in
 `solidtype-heroui`: HeroUI's classes, from `@heroui/styles`, on Kobalte's
 behaviour. Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox,
 Chip, CloseButton, Description, Kbd, Label, Link, RadioGroup with Radio,
-Separator, Skeleton, Spinner, Surface and Switch are ported so far.
+Separator, Skeleton, Spinner, Surface, Switch and Typography are ported so
+far.
 `make docs-serve` serves the documentation, where each port is shown beside
 the same component in React.
 

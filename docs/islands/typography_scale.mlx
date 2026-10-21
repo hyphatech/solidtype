@@ -1,0 +1,100 @@
+module Typography = Solidtype_heroui.Typography
+
+let make () =
+  <div class_="flex w-full flex-col divide-y divide-border">
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"h1"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "36px / 600 / 1.11 / tight"
+        </span>
+      </div>
+      <Typography type_=`h1>"Build better interfaces"</Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"h2"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "30px / 600 / 1.17 / tight"
+        </span>
+      </div>
+      <Typography type_=`h2>"Built for the intelligence age"</Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"h3"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "24px / 600 / 1.25 / tight"
+        </span>
+      </div>
+      <Typography type_=`h3>"Pricing on your terms"</Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"h4"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "20px / 600 / 1.33 / tight"
+        </span>
+      </div>
+      <Typography type_=`h4>"Apply to the startup program"</Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"h5"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "18px / 600 / 1.39 / tight"
+        </span>
+      </div>
+      <Typography type_=`h5>"Card titles"</Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"h6"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "16px / 600 / 1.50 / tight"
+        </span>
+      </div>
+      <Typography type_=`h6>"Smaller feature headers"</Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"body"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "16px / 400 / 1.75"
+        </span>
+      </div>
+      <Typography type_=`body>
+        "Primary body text used across documentation, marketing copy, and \
+         descriptions."
+      </Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"body-sm"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "14px / 400 / 1.50"
+        </span>
+      </div>
+      <Typography type_=`body_sm>
+        "Secondary body, table cells, navigation, and sidebar items."
+      </Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"body-xs"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">
+          "12px / 400 / 1.25"
+        </span>
+      </div>
+      <Typography type_=`body_xs>
+        "Captions, badges, helper text, and fine print."
+      </Typography>
+    </div>
+    <div class_="grid grid-cols-[160px_1fr] items-center gap-8 py-5">
+      <div class_="flex shrink-0 flex-col gap-0.5">
+        <span class_="text-sm font-semibold text-foreground">"code"</span>
+        <span class_="text-xs whitespace-nowrap text-muted">"14px / mono"</span>
+      </div>
+      <Typography type_=`code>"bun add @heroui/styles"</Typography>
+    </div>
+  </div>

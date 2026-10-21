@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Typography`: HeroUI's Typography, each type the element
+  it means, or the one `element_type` gives, its alignments, colors,
+  weights and truncation, and its primitives, `Heading`, `Paragraph`,
+  `Code` and `Prose`.
 - `Solidtype_heroui.Avatar_group`: HeroUI's AvatarGroup and its count,
   stacked or in a grid, that gives its avatars its size, color and variant,
   each where an avatar sets none, and shows the first `max` of them and

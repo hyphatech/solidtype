@@ -1,0 +1,17 @@
+module Typography = Solidtype_heroui.Typography
+
+let make () =
+  <div class_="flex max-w-xl flex-col gap-4">
+    <Typography type_=`h1>"Build better interfaces"</Typography>
+    <Typography type_=`h2>"Typography that stays semantic"</Typography>
+    <Typography type_=`h3>"Composable by default"</Typography>
+    <Typography type_=`h4>"Small heading"</Typography>
+    <Typography>
+      "HeroUI Typography, with semantic typography types, each the element it \
+       means."
+    </Typography>
+    <Typography color=`muted type_=`body_sm>
+      "Smaller muted body copy for secondary descriptions."
+    </Typography>
+    <Typography type_=`code>"bun add @heroui/styles"</Typography>
+  </div>

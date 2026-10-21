@@ -1,0 +1,12 @@
+module Typography = Solidtype_heroui.Typography
+
+let make () =
+  <div class_="flex max-w-xl flex-col gap-4">
+    <Typography element_type="h2" type_=`h1>
+      "H1 visual style, h2 semantic element"
+    </Typography>
+    <Typography element_type="span">
+      "element_type swaps the underlying element while keeping HeroUI's props \
+       and styles."
+    </Typography>
+  </div>

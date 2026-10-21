@@ -1,0 +1,174 @@
+(* HeroUI's Typography, beside the same Typography in React: the element each
+   type is, its classes and its primitives. *)
+
+module Typography = Solidtype_heroui.Typography
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?type_:(string[@mel.as "type"]) ->
+  ?align:string ->
+  ?color:string ->
+  ?weight:string ->
+  ?truncate:bool ->
+  ?element_type:(string[@mel.as "elementType"]) ->
+  ?class_name:(string[@mel.as "className"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Typography.tsx"]
+
+  external primitives : unit -> Dom.element = "primitives"
+  [@@mel.module "./twins/Typography.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Typography.tsx"]
+end
+
+external children : Dom.element -> Dom.element Js.Array.array_like = "children"
+[@@mel.get]
+
+external first_child : Dom.element -> Dom.element Js.null = "firstElementChild"
+[@@mel.get]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+external set_inner_html : Dom.element -> string -> unit = "innerHTML"
+[@@mel.set]
+
+(* Each element the host holds, its tag and its attributes. *)
+let shown host =
+  Js.Array.from (children host)
+  |> Array.map (fun e -> tag_name e ^ " " ^ T.attributes e)
+
+let solidtype_host () =
+  match Js.Null.toOption (first_child T.body) with
+  | Some host -> shown host
+  | None -> [||]
+
+type type_ =
+  [ `body | `body_sm | `body_xs | `code | `h1 | `h2 | `h3 | `h4 | `h5 | `h6 ]
+
+let type_name : type_ -> string = function
+  | `body -> "body"
+  | `body_sm -> "body-sm"
+  | `body_xs -> "body-xs"
+  | `code -> "code"
+  | `h1 -> "h1"
+  | `h2 -> "h2"
+  | `h3 -> "h3"
+  | `h4 -> "h4"
+  | `h5 -> "h5"
+  | `h6 -> "h6"
+
+let both ?(type_ : type_ option) ?align ?color ?weight ?truncate ?element_type
+    ?class_ () =
+  T.render (fun () ->
+      <Typography
+        ?type_=(fun () -> type_)
+        ?align=(fun () -> align)
+        ?color=(fun () -> color)
+        ?weight=(fun () -> weight)
+        ?truncate=(fun () -> truncate)
+        ?element_type=(fun () -> element_type)
+        ?class_=(fun () -> class_)>
+        "Text"
+      </Typography>);
+  let solidtype = solidtype_host () in
+  T.cleanup ();
+  let react =
+    shown
+      (Twin.render
+         (props
+            ?type_:(Option.map type_name type_)
+            ?align:
+              (Option.map
+                 (function
+                   | `start -> "start"
+                   | `center -> "center"
+                   | `end_ -> "end"
+                   | `justify -> "justify")
+                 align)
+            ?color:
+              (Option.map
+                 (function `default -> "default" | `muted -> "muted")
+                 color)
+            ?weight:
+              (Option.map
+                 (function
+                   | `normal -> "normal"
+                   | `medium -> "medium"
+                   | `semibold -> "semibold"
+                   | `bold -> "bold")
+                 weight)
+            ?truncate ?element_type ?class_name:class_ ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Typography" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is body text, a paragraph, as React's is" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is each type's element, as React's is" (fun () ->
+          let solidtype, react =
+            [| `body_sm; `body_xs; `code; `h1; `h2; `h3; `h4; `h5; `h6 |]
+            |> Array.map (fun type_ -> both ~type_ ())
+            |> Array.split
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is aligned, colored, weighted and truncated, as React's is"
+        (fun () ->
+          let solidtype, react =
+            both ~type_:`h2 ~align:`end_ ~color:`muted ~weight:`bold
+              ~truncate:true ~class_:"mt-2" ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is the element it is given, as React's is" (fun () ->
+          let solidtype, react = both ~type_:`h1 ~element_type:"h2" () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "refuses a heading's level outside 1 to 6" (fun () ->
+          let refused =
+            match
+              T.render (fun () ->
+                  <Typography.Heading level=7>"Heading"</Typography.Heading>)
+            with
+            | () -> false
+            | exception Invalid_argument _ -> true
+          in
+          (* A render that raised leaves its container, which no cleanup
+             knows of. *)
+          set_inner_html T.body "";
+          E.(expect refused |> toBe true));
+      Jest.test "has its primitives, as React's has" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Typography.Heading level=3>"Heading"</Typography.Heading>
+                <Typography.Paragraph size=`xs color=`muted>
+                  "Paragraph"
+                </Typography.Paragraph>
+                <Typography.Paragraph>"Paragraph"</Typography.Paragraph>
+                <Typography.Code>"Code"</Typography.Code>
+                <Typography.Prose class_="gap-3">
+                  <p>"Prose"</p>
+                </Typography.Prose>
+              </div>);
+          let solidtype =
+            match Js.Null.toOption (first_child T.body) with
+            | Some host -> (
+                match Js.Null.toOption (first_child host) with
+                | Some div -> shown div
+                | None -> [||])
+            | None -> [||]
+          in
+          T.cleanup ();
+          let react = shown (Twin.primitives ()) in
+          Twin.cleanup ();
+          E.(expect solidtype |> toEqual react)))
