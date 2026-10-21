@@ -271,7 +271,8 @@ break.
   emits. Symptom: a `.test.ts` or `.test.tsx` that imports an OCaml
   module.
 - **The opens are the ppx's `Ppxlib`**, which every ppxlib rewriter opens
-  to build the AST it writes, **and a test library's `Syntax`**
+  to build the AST it writes, and its `Result.Syntax`, whose `let*` chains
+  the results it builds, **and a test library's `Syntax`**
   (`Testing.Syntax`, `Harness.Syntax`), whose `let*` awaits a promise as
   `MELANGE.md` lets a test. Symptom: `rg -n '^\s*open ' src ppx example
   test | rg -v 'open (Ppxlib|Syntax|\w+\.Syntax)$'` finds any other.

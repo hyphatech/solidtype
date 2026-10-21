@@ -1,4 +1,5 @@
 open Ppxlib
+open Result.Syntax
 module B = Ast_builder.Default
 
 let attribute ~loc ?(payload = PStr []) name =
@@ -235,16 +236,17 @@ let dom_attribute ~loc ~tag label (value : expression) =
       Ok (js_name label, Some [%type: string], value, false)
   | None -> Ok (js_name label, Some html, value, is_handler label)
   | Some (Error e) -> Error e
-  | Some (Ok (Namespaced (((Native | Capture) as ns), v))) ->
-      if is_handler label then
-        let prefix = match ns with Native -> "on:" | _ -> "oncapture:" in
-        Ok (prefix ^ event (), Some html, v, true)
-      else
-        Error
-          ( value.pexp_loc,
-            Printf.sprintf "Jsx.%s wraps a handler, on_<event>=(Jsx.%s f)"
-              (match ns with Native -> "native" | _ -> "capture")
-              (match ns with Native -> "native" | _ -> "capture") )
+  | Some (Ok (Namespaced (Native, v))) when is_handler label ->
+      Ok ("on:" ^ event (), Some html, v, true)
+  | Some (Ok (Namespaced (Capture, v))) when is_handler label ->
+      Ok ("oncapture:" ^ event (), Some html, v, true)
+  | Some (Ok (Namespaced (Native, _))) ->
+      Error
+        (value.pexp_loc, "Jsx.native wraps a handler, on_<event>=(Jsx.native f)")
+  | Some (Ok (Namespaced (Capture, _))) ->
+      Error
+        ( value.pexp_loc,
+          "Jsx.capture wraps a handler, on_<event>=(Jsx.capture f)" )
   | Some (Ok (Namespaced (Prop, v))) ->
       Ok ("prop:" ^ js_name label, None, v, false)
   | Some (Ok (Namespaced (Attr, v))) ->
@@ -266,22 +268,19 @@ let element map ~loc name args =
     match label with
     | Labelled l when String.equal l spread ->
         Ok [%expr Solidtype.Jsx.spread [%e map value]]
-    | _ ->
-        Result.bind (labelled ~loc label) (fun label ->
-            Result.map
-              (fun (js, t, value, handler) ->
-                let js = B.estring ~loc js in
-                let value = js_string (map value) in
-                match (kind_of ~handler value, t) with
-                | Thunk, Some t ->
-                    [%expr
-                      Solidtype.Jsx.d [%e js] ([%e value] : unit -> [%t t])]
-                | Thunk, None -> [%expr Solidtype.Jsx.d [%e js] [%e value]]
-                | (Literal | Element | Function), Some t ->
-                    [%expr Solidtype.Jsx.s [%e js] ([%e value] : [%t t])]
-                | (Literal | Element | Function), None ->
-                    [%expr Solidtype.Jsx.s [%e js] [%e value]])
-              (dom_attribute ~loc ~tag:name label value))
+    | _ -> (
+        let* label = labelled ~loc label in
+        let+ js, t, value, handler = dom_attribute ~loc ~tag:name label value in
+        let js = B.estring ~loc js in
+        let value = js_string (map value) in
+        match (kind_of ~handler value, t) with
+        | Thunk, Some t ->
+            [%expr Solidtype.Jsx.d [%e js] ([%e value] : unit -> [%t t])]
+        | Thunk, None -> [%expr Solidtype.Jsx.d [%e js] [%e value]]
+        | (Literal | Element | Function), Some t ->
+            [%expr Solidtype.Jsx.s [%e js] ([%e value] : [%t t])]
+        | (Literal | Element | Function), None ->
+            [%expr Solidtype.Jsx.s [%e js] [%e value]])
   in
   match split args with
   | Error (loc, m) -> error ~loc m
@@ -317,30 +316,28 @@ let component map ~loc path args =
             "a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop, \
              Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's \
              attribute" )
-    | _ ->
-        Result.map
-          (fun label ->
-            let name = B.estring ~loc (js_name label) in
-            let x = B.evar ~loc (bound label) in
-            match kind_of ~handler:(is_handler label) value with
-            | Literal ->
-                let value = js_string value in
-                ( None,
-                  (Labelled label, [%expr Solidtype.Check.literal [%e value]]),
-                  [%expr Solidtype.Jsx.s [%e name] [%e value]] )
-            | Element ->
-                ( None,
-                  (Labelled label, [%expr Solidtype.Check.element ()]),
-                  [%expr Solidtype.Jsx.s [%e name] [%e map value]] )
-            | Function ->
-                ( Some (bound label, (None, map value)),
-                  (Labelled label, x),
-                  [%expr Solidtype.Jsx.s [%e name] [%e x]] )
-            | Thunk ->
-                ( Some (bound label, (Some [%type: unit -> _], map value)),
-                  (Labelled label, [%expr Solidtype.Check.thunk [%e x]]),
-                  [%expr Solidtype.Jsx.d [%e name] [%e x]] ))
-          (labelled ~loc label)
+    | _ -> (
+        let+ label = labelled ~loc label in
+        let name = B.estring ~loc (js_name label) in
+        let x = B.evar ~loc (bound label) in
+        match kind_of ~handler:(is_handler label) value with
+        | Literal ->
+            let value = js_string value in
+            ( None,
+              (Labelled label, [%expr Solidtype.Check.literal [%e value]]),
+              [%expr Solidtype.Jsx.s [%e name] [%e value]] )
+        | Element ->
+            ( None,
+              (Labelled label, [%expr Solidtype.Check.element ()]),
+              [%expr Solidtype.Jsx.s [%e name] [%e map value]] )
+        | Function ->
+            ( Some (bound label, (None, map value)),
+              (Labelled label, x),
+              [%expr Solidtype.Jsx.s [%e name] [%e x]] )
+        | Thunk ->
+            ( Some (bound label, (Some [%type: unit -> _], map value)),
+              (Labelled label, [%expr Solidtype.Check.thunk [%e x]]),
+              [%expr Solidtype.Jsx.d [%e name] [%e x]] ))
   in
   let children = function
     | [] -> Ok (None, None, [])
@@ -611,8 +608,9 @@ let rec props_of ~loc = function
   | [ { pparam_desc = Pparam_val (Nolabel, None, p); _ } ] when is_unit p ->
       Ok []
   | p :: rest ->
-      Result.bind (prop_of p) (fun p ->
-          Result.map (fun ps -> p :: ps) (props_of ~loc rest))
+      let* p = prop_of p in
+      let+ ps = props_of ~loc rest in
+      p :: ps
   | [] -> Error (loc, "a component's last parameter is ()")
 
 (* Element children are a token in the check, so they never copy the
@@ -840,34 +838,29 @@ let component_of (vb : value_binding) =
   match (vb.pvb_pat.ppat_desc, vb.pvb_expr.pexp_desc) with
   | ( Ppat_var { txt = "make"; _ },
       Pexp_function (params, None, Pfunction_body body) ) ->
-      Result.map
-        (fun props ->
-          let vars, props_module = props_module ~loc props in
-          let props_t =
-            B.ptyp_constr ~loc
-              { txt = Ldot (Lident "Props", "t"); loc }
-              (List.map (fun _ -> B.ptyp_any ~loc) vars)
-          in
-          (* With no props there is nothing to read, and nothing to spread. *)
-          let make =
-            if List.is_empty props then
-              [%expr fun (_ : [%t props_t]) -> [%e body]]
-            else
-              [%expr
-                fun (props : [%t props_t]) ->
-                  [%e
-                    B.pexp_let ~loc Nonrecursive
-                      (List.map (reader ~loc) props)
-                      body]]
-          in
-          [%stri
-            include struct
-              module Props = [%m props_module]
+      let+ props = props_of ~loc params in
+      let vars, props_module = props_module ~loc props in
+      let props_t =
+        B.ptyp_constr ~loc
+          { txt = Ldot (Lident "Props", "t"); loc }
+          (List.map (fun _ -> B.ptyp_any ~loc) vars)
+      in
+      (* With no props there is nothing to read, and nothing to spread. *)
+      let make =
+        if List.is_empty props then [%expr fun (_ : [%t props_t]) -> [%e body]]
+        else
+          [%expr
+            fun (props : [%t props_t]) ->
+              [%e
+                B.pexp_let ~loc Nonrecursive (List.map (reader ~loc) props) body]]
+      in
+      [%stri
+        include struct
+          module Props = [%m props_module]
 
-              let make = [%e make]
-              let component = Solidtype.Jsx.component make
-            end])
-        (props_of ~loc params)
+          let make = [%e make]
+          let component = Solidtype.Jsx.component make
+        end]
   | _ ->
       Error
         ( loc,
