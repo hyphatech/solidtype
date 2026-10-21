@@ -244,3 +244,19 @@ external typography_props :
 external typography : Dom.htmlDivElement -> typography_props -> unit
   = "typography"
 [@@mel.module "./react/heroui.tsx"]
+
+type text_field_props
+
+external text_field_props :
+  variant:string ->
+  is_required:(bool[@mel.as "isRequired"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  unit ->
+  text_field_props = ""
+[@@mel.obj]
+
+external text_field : Dom.htmlDivElement -> text_field_props -> unit
+  = "textField"
+[@@mel.module "./react/heroui.tsx"]

@@ -1,0 +1,12 @@
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Text_field class_="w-full max-w-64" name="email">
+    <Label>"Email"</Label>
+    <Input type_="email" placeholder="Enter your email" />
+  </Text_field>

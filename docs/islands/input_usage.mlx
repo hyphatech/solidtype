@@ -1,0 +1,4 @@
+module Input = Solidtype_heroui.Input
+
+let make () =
+  <Input class_="w-64" placeholder="Enter your name" aria_label="Name" />

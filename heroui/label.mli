@@ -1,8 +1,9 @@
-(** HeroUI's Label: a field's name, with HeroUI's classes from {!Styles.Label}.
-    It is a [<label>], unless a part above it gives it its element, as React
-    Aria's do: a [<span>] inside a control's own clickable label,
-    {!Switch.Content} and the others, and the group's label, which names the
-    group, inside a {!Radio_group}.
+(** HeroUI's Label: a field's name, with HeroUI's classes from {!Styles.Label},
+    marked required, disabled or invalid as it is told. It is a [<label>],
+    unless a part above it gives it its element, as React Aria's do: a [<span>]
+    inside a control's own clickable label, {!Switch.Content} and the others,
+    the group's label, which names the group, inside a {!Radio_group}, and the
+    field's, which names its input, inside a {!Text_field}.
 
     {[
       <Label>"Wi-Fi"</Label>
@@ -35,6 +36,9 @@ module Props : sig
   type t
 
   val check :
+    ?is_required:bool Solidtype.Check.value ->
+    ?is_disabled:bool Solidtype.Check.value ->
+    ?is_invalid:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->

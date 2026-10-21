@@ -1,0 +1,14 @@
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <div class_="w-[400px] space-y-4">
+    <Text_field full_width=true name="full-width">
+      <Label>"Full width"</Label>
+      <Input full_width=true placeholder="Takes the container's width" />
+    </Text_field>
+  </div>

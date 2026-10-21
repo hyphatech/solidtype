@@ -1,0 +1,11 @@
+module Input = Solidtype_heroui.Input
+
+let make () =
+  <div class_="flex w-64 flex-col gap-3">
+    <Input type_="text" placeholder="Enter text" aria_label="Text" />
+    <Input type_="email" placeholder="name@example.org" aria_label="Email" />
+    <Input type_="password" placeholder="Enter password" aria_label="Password"
+    />
+    <Input type_="number" placeholder="0" aria_label="Number" />
+    <Input type_="url" placeholder="https://example.org" aria_label="URL" />
+  </div>

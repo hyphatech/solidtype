@@ -1,0 +1,71 @@
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let required, set_required = S.create_signal false in
+  let disabled, set_disabled = S.create_signal false in
+  let invalid, set_invalid = S.create_signal false in
+  let read_only, set_read_only = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="required"
+        on=(fun () -> S.get required)
+        on_toggle=(S.set set_required)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+      <Toggle
+        label="invalid"
+        on=(fun () -> S.get invalid)
+        on_toggle=(S.set set_invalid)
+      />
+      <Toggle
+        label="read-only"
+        on=(fun () -> S.get read_only)
+        on_toggle=(S.set set_read_only)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=input]"
+      solidtype=(<Text_field
+                   variant=(fun () -> fst (S.get variant))
+                   is_required=(fun () -> S.get required)
+                   is_disabled=(fun () -> S.get disabled)
+                   is_invalid=(fun () -> S.get invalid)
+                   is_read_only=(fun () -> S.get read_only)
+                   name="email"
+                   class_="w-64">
+                   <Label>"Email"</Label>
+                   <Input placeholder="Enter your email" />
+                   <Description>"We'll never share it."</Description>
+                   <Field_error>"Enter a valid email."</Field_error>
+                 </Text_field>)
+      react=(fun host ->
+              Heroui_react.text_field host
+                (Heroui_react.text_field_props
+                   ~variant:(snd (S.get variant))
+                   ~is_required:(S.get required) ~is_disabled:(S.get disabled)
+                   ~is_invalid:(S.get invalid) ~is_read_only:(S.get read_only)
+                   ()))
+    />
+  </section>

@@ -1,0 +1,139 @@
+---
+title: TextField
+description: A field of a label, an input, a description and an error.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_usage.jsx";
+import UsageCode from "../../../../islands/text_field_usage.mlx?raw";
+import * as WithDescription from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_description.jsx";
+import WithDescriptionCode from "../../../../islands/text_field_description.mlx?raw";
+import * as Required from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_required.jsx";
+import RequiredCode from "../../../../islands/text_field_required.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_disabled.jsx";
+import DisabledCode from "../../../../islands/text_field_disabled.mlx?raw";
+import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_full_width.jsx";
+import FullWidthCode from "../../../../islands/text_field_full_width.mlx?raw";
+import * as Validation from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_validation.jsx";
+import ValidationCode from "../../../../islands/text_field_validation.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_controlled.jsx";
+import ControlledCode from "../../../../islands/text_field_controlled.mlx?raw";
+import * as TextArea from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_text_area.jsx";
+import TextAreaCode from "../../../../islands/text_field_text_area.mlx?raw";
+import * as InputTypes from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_input_types.jsx";
+import InputTypesCode from "../../../../islands/text_field_input_types.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_tailwind.jsx";
+import TailwindCode from "../../../../islands/text_field_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/text_field_demo.jsx";
+
+`Solidtype_heroui.Text_field` is Kobalte's `TextField.Root`, with the classes
+HeroUI's own `textFieldVariants` gives, and the parts inside it as Kobalte's:
+its [Label](../label/) names its [Input](../input/) or
+[TextArea](../text-area/), its [Description](../description/) describes it,
+and its [FieldError](../field-error/) shows while it is invalid. It keeps its
+value, controlled or its own, and declares its state as React Aria writes it.
+
+## Usage
+
+<Example code={UsageCode} title="text_field_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### With Description
+
+<Example code={WithDescriptionCode} title="text_field_description.mlx"><WithDescription.make client:visible /></Example>
+
+### Required Field
+
+A required field marks its label, as HeroUI's styles mark it.
+
+<Example code={RequiredCode} title="text_field_required.mlx"><Required.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={DisabledCode} title="text_field_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Full Width
+
+<Example code={FullWidthCode} title="text_field_full_width.mlx"><FullWidth.make client:visible /></Example>
+
+### Validation
+
+`is_invalid` shows the field's `Field_error`, which its input is then described by, and HeroUI's styles hide its description.
+
+<Example code={ValidationCode} title="text_field_validation.mlx"><Validation.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ControlledCode} title="text_field_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### TextArea
+
+<Example code={TextAreaCode} title="text_field_text_area.mlx"><TextArea.make client:visible /></Example>
+
+### Input Types
+
+<Example code={InputTypesCode} title="text_field_input_types.mlx"><InputTypes.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI TextField twice, under the same props: in solidtype on the left, in
+React on the right. Below them, every attribute of the two inputs: a marked
+row is one they disagree on, and a dimmed row is a framework's own, which no
+style reads. Hover, focus and type in them to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Not yet
+
+React Aria's `validate`, `validationErrors` and native validation on submit,
+and HeroUI's In Surface example's surface-aware variant, are not ported yet:
+a field is invalid as `is_invalid` says.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on the field and on each part.
+
+<Example code={TailwindCode} title="text_field_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.textfield`, and `.textfield--full-width`
+
+### Interactive States
+
+- **Invalid**: `[data-invalid="true"]`, which hides the description
+- **Disabled**: `[data-disabled="true"]`
+- **Read-only**: `[data-readonly="true"]`
+- **Required**: `[data-required="true"]`, which marks the label
+
+Kobalte writes its own state on each part too, present and empty, which
+HeroUI's styles pass over, and gives the field the `group` role.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### TextField
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | | Its input's variant, where the input sets none |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `value` | `value` | `string` | | Its value, controlled |
+| `defaultValue` | `default_value` | `string` | | Its value at first, kept by itself |
+| `onChange` | `on_change` | `string -> unit` | | Told each change of its value |
+| `isRequired` | `is_required` | `bool` | `false` | Whether it is required |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it is read-only |
+| `name` | `name` | `string` | | Its input's name in a form |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its label, input, description and error |
+| `validate`, `validationErrors`, `validationBehavior` | — | | | Not yet |

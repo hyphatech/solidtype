@@ -1,7 +1,8 @@
 (** HeroUI's Description: a field's helper text, with HeroUI's classes from
     {!Styles.Description}. It is a [<span>], unless a part above it gives it its
-    element, as React Aria's do: inside a {!Radio_group} or a {!Radio},
-    Kobalte's description, which the group or the radio's input is described by.
+    element, as React Aria's do: inside a {!Radio_group}, a {!Radio} or a
+    {!Text_field}, Kobalte's description, which the group, the radio's input or
+    the field's input is described by.
 
     {[
       <Description>"Includes 100 messages per month"</Description>

@@ -1,0 +1,56 @@
+---
+title: TextArea
+description: A multi-line text input.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/text_area_usage.jsx";
+import UsageCode from "../../../../islands/text_area_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/text_area_variants.jsx";
+import VariantsCode from "../../../../islands/text_area_variants.mlx?raw";
+import * as Rows from "../../../../../_build/default/docs/islands/out/docs/islands/text_area_rows.jsx";
+import RowsCode from "../../../../islands/text_area_rows.mlx?raw";
+
+`Solidtype_heroui.Text_area` is a `<textarea>` with the classes HeroUI's own
+`textAreaVariants` gives and the state its styles read, as
+[Input](../input/)'s are. It takes every attribute a `<textarea>` takes and
+passes them on. Inside a [TextField](../text-field/) it is Kobalte's
+`TextField.TextArea`.
+
+## Usage
+
+<Example code={UsageCode} title="text_area_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+<Example code={VariantsCode} title="text_area_variants.mlx"><Variants.make client:visible /></Example>
+
+### Rows and Resizing
+
+<Example code={RowsCode} title="text_area_rows.mlx"><Rows.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.textarea`, and `.textarea--primary`, `.textarea--secondary`,
+  `.textarea--full-width`
+
+### Interactive States
+
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Focus Visible**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Invalid**: `[data-invalid="true"]`
+- **Disabled**: `:disabled` or `[data-disabled="true"]`
+
+## API Reference
+
+TextArea takes every attribute a `<textarea>` takes, and:
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary ``, or its field's | Its look |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |

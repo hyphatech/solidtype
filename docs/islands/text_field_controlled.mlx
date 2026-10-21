@@ -1,0 +1,23 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  let name, set_name = S.create_signal "" in
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Text_field
+      name="name" value=(fun () -> S.get name) on_change=(S.set set_name)>
+      <Label>"Display name"</Label>
+      <Input placeholder="Jane" />
+      <Description>
+        (fun () ->
+          Jsx.string
+            ("Characters: " ^ string_of_int (String.length (S.get name))))
+      </Description>
+    </Text_field>
+  </div>

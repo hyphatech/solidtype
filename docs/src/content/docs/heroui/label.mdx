@@ -6,12 +6,15 @@ description: A field's name.
 import Example from "../../../components/Example.astro";
 import * as LabelUsage from "../../../../../_build/default/docs/islands/out/docs/islands/label_usage.jsx";
 import LabelUsageCode from "../../../../islands/label_usage.mlx?raw";
+import * as LabelStates from "../../../../../_build/default/docs/islands/out/docs/islands/label_states.jsx";
+import LabelStatesCode from "../../../../islands/label_states.mlx?raw";
 
 `Solidtype_heroui.Label` is HeroUI's label, with the classes HeroUI's own
 `labelVariants` gives. Inside a switch's, a checkbox's or a radio's content it
 is a `<span>`, since the content is the clickable label already; inside a
 [Radio Group](../radio-group/), but outside a radio, it is Kobalte's group
-label, which names the group; anywhere else it is a `<label>`. The
+label, which names the group; inside a [TextField](../text-field/), Kobalte's
+field label, which names its input; anywhere else it is a `<label>`. The
 [Switch](../switch/), [Checkbox](../checkbox/) and Radio Group pages show it
 in its fields.
 
@@ -19,11 +22,9 @@ in its fields.
 
 <Example code={LabelUsageCode} title="label_usage.mlx"><LabelUsage.make client:visible /></Example>
 
-### Not yet
+### Required, Disabled and Invalid
 
-HeroUI's Required, Disabled and Invalid labels: the port does not take
-`isRequired`, `isDisabled` or `isInvalid` yet, though HeroUI's styles have
-their classes.
+<Example code={LabelStatesCode} title="label_states.mlx"><LabelStates.make client:visible /></Example>
 
 ## Customization
 
@@ -57,7 +58,9 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | Its text |
-| `isRequired`, `isDisabled`, `isInvalid` | — | | Not yet |
+| `isRequired` | `is_required` | `bool` | Whether it marks its field required |
+| `isDisabled` | `is_disabled` | `bool` | Whether it is shown disabled |
+| `isInvalid` | `is_invalid` | `bool` | Whether it is shown invalid |
 
 ### Label.Slot
 

@@ -1,0 +1,4 @@
+module Text_area = Solidtype_heroui.Text_area
+
+let make () =
+  <Text_area class_="w-64" placeholder="Write a message" aria_label="Message" />

@@ -1,0 +1,72 @@
+---
+title: Input
+description: A single-line text input.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/input_usage.jsx";
+import UsageCode from "../../../../islands/input_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/input_variants.jsx";
+import VariantsCode from "../../../../islands/input_variants.mlx?raw";
+import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/input_full_width.jsx";
+import FullWidthCode from "../../../../islands/input_full_width.mlx?raw";
+import * as Types from "../../../../../_build/default/docs/islands/out/docs/islands/input_types.jsx";
+import TypesCode from "../../../../islands/input_types.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/input_controlled.jsx";
+import ControlledCode from "../../../../islands/input_controlled.mlx?raw";
+
+`Solidtype_heroui.Input` is an `<input>` with the classes HeroUI's own
+`inputVariants` gives and the state its styles read -- hovered, focused,
+focus-visible, disabled, invalid -- kept as React Aria keeps it. It takes
+every attribute an `<input>` takes and passes them on. Inside a
+[TextField](../text-field/) it is Kobalte's `TextField.Input`, which the
+field's value, state, label and description reach.
+
+## Usage
+
+<Example code={UsageCode} title="input_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+`` `secondary `` is the variant for an input on a surface.
+
+<Example code={VariantsCode} title="input_variants.mlx"><Variants.make client:visible /></Example>
+
+### Full Width
+
+<Example code={FullWidthCode} title="input_full_width.mlx"><FullWidth.make client:visible /></Example>
+
+### Input Types
+
+<Example code={TypesCode} title="input_types.mlx"><Types.make client:visible /></Example>
+
+### Controlled
+
+Alone, an input is an `<input>`: its value is its `value`, and its changes are its `on_input`.
+
+<Example code={ControlledCode} title="input_controlled.mlx"><Controlled.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.input`, and `.input--primary`, `.input--secondary`, `.input--full-width`
+
+### Interactive States
+
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Focus Visible**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Invalid**: `[data-invalid="true"]`, alone from its `aria_invalid`
+- **Disabled**: `:disabled` or `[data-disabled="true"]`
+
+## API Reference
+
+Input takes every attribute an `<input>` takes, and:
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary ``, or its field's | Its look |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |

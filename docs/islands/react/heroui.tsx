@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, FieldError, Input, Kbd, Label, Link, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -319,6 +319,28 @@ export function scrollShadow(host: HTMLElement, props: ScrollShadowProps): void 
           <p key={i}>Line {i + 1}</p>
         ))}
       </ScrollShadow>,
+    ),
+  );
+}
+
+type TextFieldProps = {
+  variant: "primary" | "secondary";
+  isRequired: boolean;
+  isDisabled: boolean;
+  isInvalid: boolean;
+  isReadOnly: boolean;
+};
+
+// A field of every part, as the port's demo shows it.
+export function textField(host: HTMLElement, props: TextFieldProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <TextField {...props} name="email" className="w-64">
+        <Label>Email</Label>
+        <Input placeholder="Enter your email" />
+        <Description>We'll never share it.</Description>
+        <FieldError>Enter a valid email.</FieldError>
+      </TextField>,
     ),
   );
 }

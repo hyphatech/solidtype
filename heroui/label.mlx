@@ -9,9 +9,14 @@ module Slot = Solidtype.Context.Make_optional (struct
   type t = slot
 end)
 
-let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+let%component make ?(is_required : bool option) ?(is_disabled : bool option)
+    ?(is_invalid : bool option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
   let classes () =
-    Styles.Label.classes (Styles.Label.options ?class_:(class_ ()) ())
+    Styles.Label.classes
+      (Styles.Label.options ?is_required:(is_required ())
+         ?is_disabled:(is_disabled ()) ?is_invalid:(is_invalid ())
+         ?class_:(class_ ()) ())
   in
   match Slot.use () with
   | Some render -> render classes (fun () -> children ()) [@u]

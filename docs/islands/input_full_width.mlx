@@ -1,0 +1,8 @@
+module Input = Solidtype_heroui.Input
+
+let make () =
+  <div class_="w-[400px] space-y-3">
+    <Input
+      full_width=true placeholder="Full width input" aria_label="Full width"
+    />
+  </div>

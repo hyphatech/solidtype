@@ -1,0 +1,19 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Input = Solidtype_heroui.Input
+
+external target : Dom.inputEvent -> Dom.htmlInputElement = "target" [@@mel.get]
+external value_of : Dom.htmlInputElement -> string = "value" [@@mel.get]
+
+let make () =
+  let value, set_value = S.create_signal "heroui.com" in
+  <div class_="flex w-64 flex-col gap-2">
+    <Input
+      aria_label="Domain"
+      value=(fun () -> S.get value)
+      on_input=(fun e -> S.set set_value (value_of (target e)))
+    />
+    <span class_="px-1 text-sm text-muted">
+      (fun () -> Jsx.string ("https://" ^ S.get value))
+    </span>
+  </div>

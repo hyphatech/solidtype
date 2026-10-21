@@ -1,0 +1,98 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+(* Kobalte's part, given the rest of the props as a spread, which its
+   generated check does not take. *)
+module Kobalte = struct
+  module Props = struct
+    external check :
+      ?props:'props Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Input.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Solidtype_kobalte.TextField.Input.component
+end
+
+module Props = struct
+  type t
+
+  external check :
+    ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
+    ?full_width:bool Solidtype.Check.value ->
+    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    Solidtype.Html.Input.check = "check"
+  [@@mel.module "vite-plugin-solidtype/markers"]
+
+  external variant : t -> [ `primary | `secondary ] option = "variant"
+  [@@mel.get]
+
+  external full_width : t -> bool option = "fullWidth" [@@mel.get]
+  external class_ : t -> string option = "class" [@@mel.get]
+  external disabled : t -> bool option = "disabled" [@@mel.get]
+  external aria_invalid : t -> string option = "aria-invalid" [@@mel.get]
+end
+
+(* The props this input takes for itself; the rest it passes on. *)
+let own = [| "variant"; "fullWidth"; "class" |]
+
+let make (props : Props.t) =
+  let field = Text_field.Context.use () in
+  let rest = S.omit props own in
+  (* A field's state is the field's; alone, it is what it is given, as React
+     Aria's is. *)
+  let disabled () =
+    match field with
+    | Some f -> f.disabled ()
+    | None -> Option.value (Props.disabled props) ~default:false
+  in
+  let invalid () =
+    match field with
+    | Some f -> f.invalid ()
+    | None -> (
+        match Props.aria_invalid props with
+        | Some "false" | None -> false
+        | Some _ -> true)
+  in
+  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let classes () =
+    let variant =
+      match Props.variant props with
+      | Some v -> Some v
+      | None -> Option.bind field (fun (f : Text_field.field) -> f.variant ())
+    in
+    Styles.Input.classes
+      (Styles.Input.options ?full_width:(Props.full_width props) ?variant
+         ?class_:(Props.class_ props) ())
+  in
+  match field with
+  | Some _ ->
+      (* React Aria titles a field's input with nothing, so a browser shows no
+         tooltip of its own for the field's validity. *)
+      <Kobalte
+        props=rest
+        class_=(fun () -> classes ())
+        ?title=(fun () -> if disabled () then None else Some "")
+        ref=(fun e -> Interaction.watch i e)
+        data_slot="input"
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(fun () -> Jsx.flag (disabled ()))
+        data_invalid=(fun () -> Jsx.flag (invalid ()))
+      />
+  | None ->
+      <input
+        props=rest
+        class_=(fun () -> classes ())
+        ref=(fun e -> Interaction.watch i e)
+        data_slot="input"
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(fun () -> Jsx.flag (disabled ()))
+        data_invalid=(fun () -> Jsx.flag (invalid ()))
+      />
+
+let component = Jsx.component make

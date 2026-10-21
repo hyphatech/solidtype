@@ -1,0 +1,46 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  let username, set_username = S.create_signal "" in
+  let bio, set_bio = S.create_signal "" in
+  let short name n () =
+    let length = String.length (S.get name) in
+    length > 0 && length < n
+  in
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Text_field
+      is_required=true
+      is_invalid=(short username 3)
+      name="username"
+      value=(fun () -> S.get username)
+      on_change=(S.set set_username)>
+      <Label>"Username"</Label>
+      <Input placeholder="jane_doe" />
+      <Field_error>"Username must be at least 3 characters."</Field_error>
+      <Description>"Choose a unique username for your profile."</Description>
+    </Text_field>
+    <Text_field
+      is_required=true
+      is_invalid=(short bio 20)
+      name="bio"
+      value=(fun () -> S.get bio)
+      on_change=(S.set set_bio)>
+      <Label>"Bio"</Label>
+      <Text_area placeholder="Tell us about yourself..." />
+      <Field_error>"Bio must contain at least 20 characters."</Field_error>
+      <Description>
+        (fun () ->
+          Jsx.string
+            ("Minimum 20 characters ("
+            ^ string_of_int (String.length (S.get bio))
+            ^ "/20)."))
+      </Description>
+    </Text_field>
+  </div>

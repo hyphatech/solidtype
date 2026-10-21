@@ -1,0 +1,8 @@
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <div class_="flex flex-col gap-3">
+    <Label is_required=true>"Required"</Label>
+    <Label is_disabled=true>"Disabled"</Label>
+    <Label is_invalid=true>"Invalid"</Label>
+  </div>

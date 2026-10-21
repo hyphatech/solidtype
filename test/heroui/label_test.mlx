@@ -1,0 +1,70 @@
+(* HeroUI's Label, beside the same Label in React: required, disabled and
+   invalid; and FieldError, which is a field's own. *)
+
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Label.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Label.tsx"]
+end
+
+external set_inner_html : Dom.element -> string -> unit = "innerHTML"
+[@@mel.set]
+
+let both ?is_required ?is_disabled ?is_invalid () =
+  T.render (fun () ->
+      <Label
+        ?is_required=(fun () -> is_required)
+        ?is_disabled=(fun () -> is_disabled)
+        ?is_invalid=(fun () -> is_invalid)
+        class_="ms-1">
+        "Email"
+      </Label>);
+  let solidtype =
+    match T.query "[data-slot=label]" with
+    | Some e -> T.attributes e
+    | None -> "no label"
+  in
+  T.cleanup ();
+  let react =
+    T.attributes (Twin.render (props ?is_required ?is_disabled ?is_invalid ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Label" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a label, as React's is" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is required, disabled and invalid, as React's is" (fun () ->
+          let solidtype, react =
+            both ~is_required:true ~is_disabled:true ~is_invalid:true ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "refuses a field's error outside a field" (fun () ->
+          let refused =
+            match T.render (fun () -> <Field_error>"Wrong"</Field_error>) with
+            | () -> false
+            | exception Invalid_argument _ -> true
+          in
+          (* A render that raised leaves its container, which no cleanup
+             knows of. *)
+          set_inner_html T.body "";
+          E.(expect refused |> toBe true)))

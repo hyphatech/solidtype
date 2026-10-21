@@ -1,0 +1,31 @@
+---
+title: FieldError
+description: A field's validation error.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/field_error_usage.jsx";
+import UsageCode from "../../../../islands/field_error_usage.mlx?raw";
+
+`Solidtype_heroui.Field_error` is Kobalte's `TextField.ErrorMessage`, a
+`<span>`, with the class HeroUI's own `fieldErrorVariants` gives, which a
+[TextField](../text-field/) shows while it is invalid and its input is
+described by. It is a field's own: outside one it raises `Invalid_argument`.
+
+## Usage
+
+<Example code={UsageCode} title="field_error_usage.mlx"><Usage.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.field-error`
+
+## API Reference
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `children` | `children` | elements | The error |
+| render function | — | | Not yet |

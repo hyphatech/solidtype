@@ -1,0 +1,13 @@
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Text_field class_="w-full max-w-64" name="message">
+    <Label>"Message"</Label>
+    <Text_area placeholder="Write a message" />
+    <Description>"Up to 500 characters"</Description>
+  </Text_field>

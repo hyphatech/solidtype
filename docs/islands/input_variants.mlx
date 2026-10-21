@@ -1,0 +1,9 @@
+module Input = Solidtype_heroui.Input
+
+let make () =
+  <div class_="flex w-64 flex-col gap-4">
+    <Input placeholder="Primary input" aria_label="Primary" variant=`primary />
+    <Input
+      placeholder="Secondary input" aria_label="Secondary" variant=`secondary
+    />
+  </div>

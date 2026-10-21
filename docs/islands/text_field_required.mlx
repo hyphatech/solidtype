@@ -1,0 +1,18 @@
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Text_field is_required=true name="name">
+      <Label>"Name"</Label> <Input placeholder="Enter your name" />
+    </Text_field>
+    <Text_field is_required=true name="email">
+      <Label>"Email"</Label>
+      <Input type_="email" placeholder="Enter your email" />
+      <Description>"Required field"</Description>
+    </Text_field>
+  </div>

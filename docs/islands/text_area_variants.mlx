@@ -1,0 +1,8 @@
+module Text_area = Solidtype_heroui.Text_area
+
+let make () =
+  <div class_="flex w-64 flex-col gap-4">
+    <Text_area placeholder="Primary" aria_label="Primary" variant=`primary />
+    <Text_area placeholder="Secondary" aria_label="Secondary" variant=`secondary
+    />
+  </div>

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Text_field`: HeroUI's TextField on Kobalte's, its value
+  controlled or kept, required, disabled, invalid and read-only, and the
+  parts inside it as Kobalte's: a `Label` names its input, a `Description`
+  describes it, and a `Field_error`, HeroUI's FieldError, shows while it is
+  invalid. `Solidtype_heroui.Input` and `Text_area`: HeroUI's Input and
+  TextArea, each element's every attribute passed on, alone or a field's.
+- `Solidtype_heroui.Label` takes `is_required`, `is_disabled` and
+  `is_invalid`.
 - `Solidtype_heroui.Scroll_shadow`: HeroUI's ScrollShadow, faded at each edge
   it hides content at, measured as it scrolls, as it is resized and as its
   content changes, or at the edges its `visibility` gives.

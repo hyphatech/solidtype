@@ -1,0 +1,29 @@
+(* Kobalte's error message as the element React Aria's is, a span, by
+   Kobalte's [as], which its generated check does not take. *)
+module Kobalte_error = struct
+  module Props = struct
+    external check :
+      ?as_:string Solidtype.Check.value ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Span.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Solidtype_kobalte.TextField.ErrorMessage.component
+end
+
+let%component make ?(class_ : string option) ~(children : Solidtype.Jsx.content)
+    () =
+  (match Text_field.Context.use () with
+  | Some _ -> ()
+  | None -> invalid_arg "Field_error is used inside a Text_field");
+  <Kobalte_error
+    as_="span"
+    class_=(fun () ->
+             Styles.FieldError.classes
+               (Styles.FieldError.options ?class_:(class_ ()) ()))
+    slot="errorMessage"
+    data_slot="field-error"
+    data_visible="true">
+    (fun () -> children ())
+  </Kobalte_error>
