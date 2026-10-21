@@ -1,0 +1,20 @@
+module Jsx = Solidtype.Jsx
+
+type variant = [ `default | `secondary | `tertiary | `transparent ]
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = unit -> variant
+end)
+
+let%component make ?(variant : variant = `default) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  <Context.Provider value=(fun () -> variant)>
+    <div
+      class_=(fun () ->
+               Styles.Surface.classes
+                 (Styles.Surface.options ~variant:(variant ())
+                    ?class_:(class_ ()) ()))
+      data_slot="surface">
+      (fun () -> children ())
+    </div>
+  </Context.Provider>

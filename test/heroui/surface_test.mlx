@@ -1,0 +1,81 @@
+(* HeroUI's Surface, beside the same Surface in React, and the variant it gives
+   what is inside it. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Surface = Solidtype_heroui.Surface
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render :
+    [ `default | `secondary | `tertiary | `transparent ] ->
+    string ->
+    Dom.element = "render"
+  [@@mel.module "./twins/Surface.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Surface.tsx"]
+end
+
+let both variant =
+  T.render (fun () ->
+      <Surface variant=(fun () -> variant) class_="p-6">"Content"</Surface>);
+  let solidtype =
+    match T.query "[data-slot=surface]" with
+    | Some e -> T.attributes e
+    | None -> "no surface"
+  in
+  T.cleanup ();
+  let react = T.attributes (Twin.render variant "p-6") in
+  Twin.cleanup ();
+  (solidtype, react)
+
+(* What a part inside a surface reads of it. *)
+module Variant = struct
+  let%component make () =
+    let surface = Surface.Context.use () in
+    let shown () =
+      match surface with
+      | Some variant -> (
+          match variant () with
+          | `default -> "default"
+          | `secondary -> "secondary"
+          | `tertiary -> "tertiary"
+          | `transparent -> "transparent")
+      | None -> "none"
+    in
+    <span data_slot="read">(fun () -> Jsx.string (shown ()))</span>
+end
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+let read () =
+  match T.query "[data-slot=read]" with Some e -> text e | None -> "nothing"
+
+let () =
+  Jest.describe "Surface" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a default surface, as React's is" (fun () ->
+          let solidtype, react = both `default in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is each variant, as React's is" (fun () ->
+          let shown =
+            [ `secondary; `tertiary; `transparent ]
+            |> List.map (fun v ->
+                let solidtype, react = both v in
+                String.equal solidtype react)
+          in
+          E.(expect shown |> toEqual [ true; true; true ]));
+      Jest.test "gives what is inside it its variant" (fun () ->
+          T.render (fun () -> <Surface variant=`tertiary><Variant /></Surface>);
+          E.(expect (read ()) |> toBe "tertiary"));
+      Jest.test "gives what is inside it its variant as it changes" (fun () ->
+          let variant, set_variant = S.create_signal `default in
+          T.render (fun () ->
+              <Surface variant=(fun () -> S.get variant)><Variant /></Surface>);
+          S.set set_variant `secondary;
+          E.(expect (read ()) |> toBe "secondary"));
+      Jest.test "gives nothing outside it a variant" (fun () ->
+          T.render (fun () -> <Variant />);
+          E.(expect (read ()) |> toBe "none")))

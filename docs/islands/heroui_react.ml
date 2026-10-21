@@ -100,6 +100,18 @@ external link_props :
 external link : Dom.htmlDivElement -> link_props -> unit = "link"
 [@@mel.module "./react/heroui.tsx"]
 
+type surface_props
+
+external surface_props :
+  variant:string ->
+  class_name:(string[@mel.as "className"]) ->
+  unit ->
+  surface_props = ""
+[@@mel.obj]
+
+external surface : Dom.htmlDivElement -> surface_props -> unit = "surface"
+[@@mel.module "./react/heroui.tsx"]
+
 type switch_props
 
 external switch_props :

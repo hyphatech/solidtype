@@ -1,0 +1,106 @@
+---
+title: Surface
+description: The background a part of a page stands on.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/surface_usage.jsx";
+import UsageCode from "../../../../islands/surface_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/surface_variants.jsx";
+import VariantsCode from "../../../../islands/surface_variants.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/surface_tailwind.jsx";
+import TailwindCode from "../../../../islands/surface_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/surface_demo.jsx";
+
+`Solidtype_heroui.Surface` is a `<div>` with the classes HeroUI's own
+`surfaceVariants` gives. Kobalte has no surface, and a surface has no
+behaviour: it gives what is inside it its variant, by `Surface.Context`, so a
+part can choose the colours that stand out on it.
+
+## Usage
+
+<Example code={UsageCode} title="surface_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+A surface's variant says how prominent it is:
+
+- `` `default ``, the standard surface, `bg-surface`
+- `` `secondary ``, of medium prominence, `bg-surface-secondary`
+- `` `tertiary ``, of higher prominence, `bg-surface-tertiary`
+- `` `transparent ``, with no background
+
+<Example code={VariantsCode} title="surface_variants.mlx"><Variants.make client:visible /></Example>
+
+### Reading the surface
+
+A part inside a surface reads its variant, a function it calls to follow it as
+it changes, or `None` on no surface:
+
+```ocaml
+let surface = Surface.Context.use () in
+let on_surface () =
+  match surface with Some variant -> variant () | None -> `default
+```
+
+### Not yet
+
+HeroUI's With Form Components example needs Input and TextArea, which are not
+ported yet.
+
+## Beside React
+
+The same HeroUI Surface twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two elements: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="surface_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every surface, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .surface {
+    @apply rounded-2xl border border-border;
+  }
+
+  .surface--secondary {
+    @apply bg-gradient-to-br from-blue-50 to-purple-50;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.surface`, and its variants `.surface--default`, `.surface--secondary`,
+  `.surface--tertiary`, `.surface--transparent`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Surface
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `default \| `secondary \| `tertiary \| `transparent ] `` | `` `default `` | How prominent it is |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its content |
+| `SurfaceContext` | `Surface.Context` | `(unit -> variant) option` | | The variant a part inside it reads |

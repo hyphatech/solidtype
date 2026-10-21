@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Surface`: HeroUI's Surface, its variants, and
+  `Surface.Context`, the variant a part inside it reads as it changes.
 - `Solidtype_heroui.Button_group`: HeroUI's ButtonGroup and its separator, a
   group of buttons it gives its variant, size, disabled state and full
   width, each where a button sets none itself, horizontal or vertical.

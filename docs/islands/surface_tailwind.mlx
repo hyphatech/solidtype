@@ -1,0 +1,12 @@
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface
+    class_="w-full max-w-sm rounded-xl border border-accent/15 bg-linear-to-br \
+            from-accent/8 via-surface to-surface-secondary p-4"
+    variant=`default>
+    <h3 class_="text-sm font-semibold text-foreground">"Billing overview"</h3>
+    <p class_="text-sm text-muted">
+      "View invoices and payment methods in one place."
+    </p>
+  </Surface>
