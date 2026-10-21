@@ -57,7 +57,8 @@ Each prop beside the name HeroUI's React component gives it.
 | `children` | `children` | elements | Its text |
 | `isRequired`, `isDisabled`, `isInvalid` | — | | Not yet |
 
-### Label.Inline
+### Label.Slot
 
-A context of `bool`, `true` inside a control's clickable label, where a label
-is a `<span>`. `Switch.Content` and `Checkbox.Content` provide it.
+How a label renders below a part, given its classes and its children, as
+React Aria's `LabelContext` gives it: `Switch.Content` and `Checkbox.Content`
+make it a `<span>`, since a label in a label is not HTML.

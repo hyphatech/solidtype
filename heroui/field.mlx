@@ -1,0 +1,83 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+type state = {
+  selected : unit -> bool;
+  indeterminate : unit -> bool;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+  interaction : Interaction.t;
+}
+
+let controlled ~value ~default ~on_change =
+  let own, set_own = S.create_signal default in
+  let get () = match value () with Some v -> v | None -> S.get own in
+  let set v =
+    S.set set_own v;
+    ignore (on_change v)
+  in
+  (get, set)
+
+(* A label inside a control's own clickable label is a span: a label in a
+   label is not HTML. *)
+let inline : Label.slot =
+ fun[@u] classes children ->
+  <span class_=(fun () -> classes ()) data_slot="label">
+    (fun () -> children ())
+  </span>
+
+module type Kobalte = sig
+  val label : unit Jsx.component
+  val input : unit Jsx.component
+end
+
+(* The checks of the parts a library gives, which every library's field
+   label and input share. *)
+module Label_props = struct
+  external check :
+    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    Solidtype.Html.Label.check = "check"
+  [@@mel.module "vite-plugin-solidtype/markers"]
+end
+
+module Input_props = struct
+  external check :
+    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    Solidtype.Html.Input.check = "check"
+  [@@mel.module "vite-plugin-solidtype/markers"]
+end
+
+module Content (K : Kobalte) = struct
+  module Kobalte_label = struct
+    module Props = Label_props
+
+    let component = K.label
+  end
+
+  module Kobalte_input = struct
+    module Props = Input_props
+
+    let component = K.input
+  end
+
+  let%component make ~(field : state) ~(slot : string) ~(class_ : string)
+      ~(children : Jsx.content) () =
+    let f = field () in
+    let i = f.interaction in
+    <Kobalte_label
+      class_=(fun () -> class_ ())
+      ref=(fun l -> Interaction.watch i l)
+      data_slot=(fun () -> Jsx.data (slot ()))
+      data_selected=(fun () -> Jsx.flag (f.selected ()))
+      data_indeterminate=(fun () -> Jsx.flag (f.indeterminate ()))
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
+      <Label.Slot.Provider value=(fun () -> inline)>
+        <Kobalte_input /> (fun () -> children ())
+      </Label.Slot.Provider>
+    </Kobalte_label>
+end

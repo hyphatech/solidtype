@@ -54,6 +54,9 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      generated
   interaction        the state React Aria writes on an element and HeroUI's
                      styles read, kept as React Aria keeps it
+  field              what a switch, a checkbox and a radio share: the state
+                     their content declares, a value controlled or kept, and
+                     the content, on a Kobalte component's label and input
 docs/                the documentation, a Starlight site: each port's page
                      shows it beside the same component in React, with its
                      source

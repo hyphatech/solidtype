@@ -148,3 +148,24 @@ function make() {
 }`);
   expect(code).toContain('<p title="Hello">Hello, world</p>');
 });
+
+test("a component a function binds in lower case is renamed where it is bound", async () => {
+  const code = await written(`
+function Content(funarg) {
+  const component = funarg.label;
+  const make = function (props) { return Markers.c(component, [], [Markers.c(component, [], [])]); };
+  return { make };
+}
+function Other(funarg) {
+  const component = funarg.input;
+  const make = function (props) { return Markers.c(component, [], []); };
+  return { make };
+}`);
+  const content = code.slice(code.indexOf("function Content"), code.indexOf("function Other"));
+  const other = code.slice(code.indexOf("function Other"));
+  const bound = (body: string) => /const (\w+) = funarg/.exec(body)?.[1];
+  expect(bound(content)).toMatch(/^C/);
+  expect(content).toContain(`<${bound(content)}><${bound(content)} /></${bound(content)}>`);
+  expect(other).toContain(`<${bound(other)} />`);
+  expect(code).not.toMatch(/function C\w*\(props\)/);
+});

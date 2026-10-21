@@ -1,18 +1,10 @@
-module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Checkbox
 
 (* What a checkbox's parts read of the checkbox they are in: its classes,
-   its state, and the interaction with its content. *)
-type checkbox = {
-  slots : unit -> Styles.Checkbox.slots;
-  on : unit -> bool;
-  indeterminate : unit -> bool;
-  disabled : unit -> bool;
-  invalid : unit -> bool;
-  interaction : Interaction.t;
-}
+   and its state as a field. *)
+type checkbox = { slots : unit -> Styles.Checkbox.slots; field : Field.state }
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = checkbox
@@ -26,27 +18,21 @@ let within part =
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
+module Field_content = Field.Content (struct
+  let label = Kobalte.Label.component
+  let input = Kobalte.Input.component
+end)
+
 module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let c = within "Checkbox.Content" in
-    let i = c.interaction in
-    <Kobalte.Label
+    <Field_content
+      field=(fun () -> c.field)
+      slot="checkbox-content"
       class_=(fun () ->
-               after (Styles.Checkbox.content (c.slots ())) (class_ ()))
-      ref=(fun l -> Interaction.watch i l)
-      data_slot="checkbox-content"
-      data_selected=(fun () -> Jsx.flag (c.on ()))
-      data_indeterminate=(fun () -> Jsx.flag (c.indeterminate ()))
-      data_disabled=(fun () -> Jsx.flag (c.disabled ()))
-      data_invalid=(fun () -> Jsx.flag (c.invalid ()))
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
-      <Label.Inline.Provider value=(fun () -> true)>
-        <Kobalte.Input /> (fun () -> children ())
-      </Label.Inline.Provider>
-    </Kobalte.Label>
+               after (Styles.Checkbox.content (c.slots ())) (class_ ()))>
+      (fun () -> children ())
+    </Field_content>
 end
 
 module Control = struct
@@ -106,8 +92,8 @@ module Indicator = struct
         | None ->
             Jsx.element
               <Show
-                when_=(fun () -> c.indeterminate ())
-                fallback=(fun () -> check c.on)>
+                when_=(fun () -> c.field.indeterminate ())
+                fallback=(fun () -> check c.field.selected)>
                 (fun () -> Jsx.element (dash ()))
               </Show>)
     </span>
@@ -119,11 +105,9 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(is_disabled : bool = false) ?(is_invalid : bool = false)
     ?(class_ : string option) ~(children : Jsx.content) () =
   (* The state is the checkbox's, read by Kobalte and by every part alike. *)
-  let own, set_own = S.create_signal (default_selected ()) in
-  let on () = match is_selected () with Some v -> v | None -> S.get own in
-  let change v =
-    S.set set_own v;
-    ignore (on_change v : unit option)
+  let on, change =
+    Field.controlled ~value:is_selected ~default:(default_selected ())
+      ~on_change
   in
   let c =
     {
@@ -132,12 +116,15 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
           Styles.Checkbox.slots
             (Styles.Checkbox.options ~variant:(variant ()) ?class_:(class_ ())
                ()));
-      on;
-      indeterminate = (fun () -> is_indeterminate ());
-      disabled = (fun () -> is_disabled ());
-      invalid = (fun () -> is_invalid ());
-      interaction =
-        Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) ();
+      field =
+        {
+          selected = on;
+          indeterminate = (fun () -> is_indeterminate ());
+          disabled = (fun () -> is_disabled ());
+          invalid = (fun () -> is_invalid ());
+          interaction =
+            Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) ();
+        };
     }
   in
   <Context.Provider value=(fun () -> c)>

@@ -1,18 +1,25 @@
 (** HeroUI's Label: a field's name, with HeroUI's classes from {!Styles.Label}.
-    It is a [<label>], but a [<span>] inside a control's own clickable label, a
-    switch's {!Switch.Content}, as HeroUI's is there.
+    It is a [<label>], unless a part above it gives it its element, as React
+    Aria's do: a [<span>] inside a control's own clickable label,
+    {!Switch.Content} and the others, and the group's label, which names the
+    group, inside a {!Radio_group}.
 
     {[
       <Label>"Wi-Fi"</Label>
     ]} *)
 
-(** Whether a label is inside a control's clickable label: {!Switch.Content}
-    provides it. *)
-module Inline : sig
+type slot =
+  ((unit -> string) -> (unit -> Solidtype.Jsx.content) -> Solidtype.Jsx.element
+  [@u])
+(** How a label renders below a part: given its classes and its children, the
+    element it is, which declares [data-slot="label"]. *)
+
+(** The {!slot} a part gives the labels below it. *)
+module Slot : sig
   module Provider : sig
     module Props : sig
       val check :
-        value:bool Solidtype.Check.value ->
+        value:slot Solidtype.Check.value ->
         ?children:('f, [ `nodes ]) Solidtype.Check.children ->
         unit ->
         unit
@@ -21,7 +28,7 @@ module Inline : sig
     val component : unit Solidtype.Jsx.component
   end
 
-  val use : unit -> bool
+  val use : unit -> slot option
 end
 
 module Props : sig

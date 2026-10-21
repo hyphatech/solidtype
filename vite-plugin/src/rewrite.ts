@@ -5,6 +5,8 @@
 
 import { transformAsync, types as t, type BabelFileResult, type NodePath, type PluginObj } from "@babel/core";
 
+type Scope = NodePath["scope"];
+
 export const MARKERS = "vite-plugin-solidtype/markers";
 
 type Marker = "el" | "c" | "s" | "d" | "spread" | "dynamic";
@@ -208,8 +210,21 @@ function markersPlugin(): PluginObj {
         if (namespaces.length !== imports.length) {
           throw new MarkerError(`"${MARKERS}" is imported as a namespace`);
         }
+        // A component Melange names in lower case gets a capitalised name,
+        // which JSX reads as a component. One bound in a function -- a
+        // component a functor is given -- is renamed where it is bound, all
+        // its uses with it; one bound at the top, or not bound here, gets an
+        // alias, a function declared at the top and so hoisted, which reads
+        // the component only when Solid renders it.
         const aliases = new Map<string, string>();
+        let scope: Scope = program.scope;
         const alias = (name: string) => {
+          const binding = scope.getBinding(name);
+          if (binding && binding.scope !== program.scope) {
+            const fresh = binding.scope.generateUid(`Component_${name}`).replace(/^_/, "C");
+            binding.scope.rename(name, fresh);
+            return fresh;
+          }
           const existing = aliases.get(name);
           if (existing) return existing;
           const fresh = program.scope.generateUid(`Component_${name}`).replace(/^_/, "C");
@@ -244,13 +259,11 @@ function markersPlugin(): PluginObj {
             }
             // The new element is traversed in turn: an element given as a
             // prop's value, or returned from a thunk, is a marker still.
+            scope = call.scope;
             call.replaceWith(element(call.node, namespace, alias));
           },
         });
         for (const i of imports) i.remove();
-        // A component Melange names in lower case gets a capitalised name,
-        // which JSX reads as a component; a function, so it is hoisted and
-        // reads the component only when Solid renders it.
         for (const [name, fresh] of aliases) {
           const props = t.identifier("props");
           program.pushContainer("body", t.functionDeclaration(
