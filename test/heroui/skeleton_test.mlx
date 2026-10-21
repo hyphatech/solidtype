@@ -1,0 +1,74 @@
+(* HeroUI's Skeleton, beside the same Skeleton in React, and the animation it
+   takes from the page's --skeleton-animation where it is given none. *)
+
+module Skeleton = Solidtype_heroui.Skeleton
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external render : [ `shimmer | `pulse | `none ] option -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Skeleton.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Skeleton.tsx"]
+end
+
+type style
+
+external root_style : style = "style"
+[@@mel.scope "document", "documentElement"]
+
+external set_property : style -> string -> string -> unit = "setProperty"
+[@@mel.send]
+
+external remove_property : style -> string -> unit = "removeProperty"
+[@@mel.send]
+
+external first_child : Dom.element -> Dom.element Js.null = "firstElementChild"
+[@@mel.get]
+
+let shown () =
+  match Js.Null.toOption (first_child T.body) with
+  | Some host -> (
+      match Js.Null.toOption (first_child host) with
+      | Some e -> T.attributes e
+      | None -> "nothing")
+  | None -> "nothing"
+
+let both animation_type =
+  T.render (fun () ->
+      <Skeleton ?animation_type=(fun () -> animation_type) class_="h-3 w-3/5" />);
+  let solidtype = shown () in
+  T.cleanup ();
+  let react = T.attributes (Twin.render animation_type) in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Skeleton" (fun () ->
+      Jest.afterEach (fun () ->
+          T.cleanup ();
+          remove_property root_style "--skeleton-animation");
+      Jest.test "shimmers, as React's does" (fun () ->
+          let solidtype, react = both None in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "pulses, as React's does" (fun () ->
+          let solidtype, react = both (Some `pulse) in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is still, as React's is" (fun () ->
+          let solidtype, react = both (Some `none) in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "takes the page's animation where it is given none" (fun () ->
+          set_property root_style "--skeleton-animation" "pulse";
+          T.render (fun () -> <Skeleton />);
+          E.(expect (shown ()) |> toBe "class=skeleton skeleton--pulse"));
+      Jest.test "keeps its own animation over the page's" (fun () ->
+          set_property root_style "--skeleton-animation" "pulse";
+          T.render (fun () -> <Skeleton animation_type=`none />);
+          E.(expect (shown ()) |> toBe "class=skeleton skeleton--none"));
+      Jest.test "shimmers where the page's animation is none it knows"
+        (fun () ->
+          set_property root_style "--skeleton-animation" "wobble";
+          T.render (fun () -> <Skeleton />);
+          E.(expect (shown ()) |> toBe "class=skeleton skeleton--shimmer")))

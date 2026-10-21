@@ -1,0 +1,36 @@
+module S = Solidtype.Solid
+
+type style
+
+external computed_style : Dom.element -> style = "getComputedStyle"
+[@@mel.scope "window"]
+
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+external root : Dom.element = "documentElement" [@@mel.scope "document"]
+
+(* The page's animation for every skeleton, which a theme sets on the root. *)
+let page_animation () =
+  match String.trim (property (computed_style root) "--skeleton-animation") with
+  | "shimmer" -> Some `shimmer
+  | "pulse" -> Some `pulse
+  | "none" -> Some `none
+  | _ -> None
+
+let%component make ?(animation_type : [ `shimmer | `pulse | `none ] option)
+    ?(class_ : string option) () =
+  (* Read once mounted: a server has no page to read, and a prerendered
+     skeleton hydrates as it was rendered before it takes the page's. *)
+  let page, set_page = S.create_signal None in
+  S.on_mount (fun () -> S.set set_page (page_animation ()));
+  let animation () =
+    match animation_type () with Some a -> Some a | None -> S.get page
+  in
+  <div
+    class_=(fun () ->
+               let base =
+                 Styles.Skeleton.base
+                   (Styles.Skeleton.slots
+                      (Styles.Skeleton.options ?animation_type:(animation ()) ()))
+               in
+               match class_ () with Some c -> base ^ " " ^ c | None -> base)
+  />

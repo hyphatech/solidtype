@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Spinner, Surface, Switch } from "@heroui/react";
+import { Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Skeleton, Spinner, Surface, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -248,4 +248,10 @@ type SpinnerProps = {
 
 export function spinner(host: HTMLElement, props: SpinnerProps): void {
   flushSync(() => rootOf(host).render(<Spinner {...props} />));
+}
+
+type SkeletonProps = { animationType: "shimmer" | "pulse" | "none"; className: string };
+
+export function skeleton(host: HTMLElement, props: SkeletonProps): void {
+  flushSync(() => rootOf(host).render(<Skeleton {...props} />));
 }

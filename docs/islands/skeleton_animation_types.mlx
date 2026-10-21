@@ -1,0 +1,31 @@
+module Skeleton = Solidtype_heroui.Skeleton
+
+let make () =
+  <div
+    class_="grid w-full max-w-xl grid-cols-1 gap-6 sm:grid-cols-2 \
+            lg:grid-cols-3">
+    <div class_="space-y-2">
+      <p class_="truncate text-xs text-muted">"Shimmer"</p>
+      <div class_="shadow-panel space-y-3 rounded-lg bg-transparent p-4">
+        <Skeleton animation_type=`shimmer class_="h-20 rounded-lg" />
+        <Skeleton animation_type=`shimmer class_="h-3 w-3/5 rounded-lg" />
+        <Skeleton animation_type=`shimmer class_="h-3 w-4/5 rounded-lg" />
+      </div>
+    </div>
+    <div class_="space-y-2">
+      <p class_="truncate text-xs text-muted">"Pulse"</p>
+      <div class_="shadow-panel space-y-3 rounded-lg bg-transparent p-4">
+        <Skeleton animation_type=`pulse class_="h-20 rounded-lg" />
+        <Skeleton animation_type=`pulse class_="h-3 w-3/5 rounded-lg" />
+        <Skeleton animation_type=`pulse class_="h-3 w-4/5 rounded-lg" />
+      </div>
+    </div>
+    <div class_="space-y-2">
+      <p class_="truncate text-xs text-muted">"None"</p>
+      <div class_="shadow-panel space-y-3 rounded-lg bg-transparent p-4">
+        <Skeleton animation_type=`none class_="h-20 rounded-lg" />
+        <Skeleton animation_type=`none class_="h-3 w-3/5 rounded-lg" />
+        <Skeleton animation_type=`none class_="h-3 w-4/5 rounded-lg" />
+      </div>
+    </div>
+  </div>

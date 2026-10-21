@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Skeleton`: HeroUI's Skeleton, its animations, and the
+  page's `--skeleton-animation` where it is given none, read once it is in
+  the browser.
 - `Solidtype_heroui.Spinner`: HeroUI's Spinner, its colors and sizes, a
   status named "Loading" that draws HeroUI's icon, its gradients given ids
   of their own.

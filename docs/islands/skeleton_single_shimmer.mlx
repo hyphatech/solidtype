@@ -1,0 +1,10 @@
+module Skeleton = Solidtype_heroui.Skeleton
+
+let make () =
+  <div
+    class_="skeleton--shimmer relative grid w-full max-w-xl grid-cols-3 gap-4 \
+            overflow-hidden rounded-xl">
+    <Skeleton animation_type=`none class_="h-24 rounded-xl" />
+    <Skeleton animation_type=`none class_="h-24 rounded-xl" />
+    <Skeleton animation_type=`none class_="h-24 rounded-xl" />
+  </div>

@@ -110,6 +110,18 @@ external link_props :
 external link : Dom.htmlDivElement -> link_props -> unit = "link"
 [@@mel.module "./react/heroui.tsx"]
 
+type skeleton_props
+
+external skeleton_props :
+  animation_type:(string[@mel.as "animationType"]) ->
+  class_name:(string[@mel.as "className"]) ->
+  unit ->
+  skeleton_props = ""
+[@@mel.obj]
+
+external skeleton : Dom.htmlDivElement -> skeleton_props -> unit = "skeleton"
+[@@mel.module "./react/heroui.tsx"]
+
 type spinner_props
 
 external spinner_props : color:string -> size:string -> unit -> spinner_props

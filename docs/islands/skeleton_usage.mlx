@@ -1,0 +1,11 @@
+module Skeleton = Solidtype_heroui.Skeleton
+
+let make () =
+  <div class_="shadow-panel w-[250px] space-y-5 rounded-lg bg-transparent p-4">
+    <Skeleton class_="h-32 rounded-lg" />
+    <div class_="space-y-3">
+      <Skeleton class_="h-3 w-3/5 rounded-lg" />
+      <Skeleton class_="h-3 w-4/5 rounded-lg" />
+      <Skeleton class_="h-3 w-2/5 rounded-lg" />
+    </div>
+  </div>

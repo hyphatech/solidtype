@@ -1,0 +1,137 @@
+---
+title: Skeleton
+description: A placeholder in the shape of content that is loading.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_usage.jsx";
+import UsageCode from "../../../../islands/skeleton_usage.mlx?raw";
+import * as Text from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_text.jsx";
+import TextCode from "../../../../islands/skeleton_text.mlx?raw";
+import * as Profile from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_profile.jsx";
+import ProfileCode from "../../../../islands/skeleton_profile.mlx?raw";
+import * as List from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_list.jsx";
+import ListCode from "../../../../islands/skeleton_list.mlx?raw";
+import * as Grid from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_grid.jsx";
+import GridCode from "../../../../islands/skeleton_grid.mlx?raw";
+import * as SingleShimmer from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_single_shimmer.jsx";
+import SingleShimmerCode from "../../../../islands/skeleton_single_shimmer.mlx?raw";
+import * as AnimationTypes from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_animation_types.jsx";
+import AnimationTypesCode from "../../../../islands/skeleton_animation_types.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_tailwind.jsx";
+import TailwindCode from "../../../../islands/skeleton_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/skeleton_demo.jsx";
+
+`Solidtype_heroui.Skeleton` is a `<div>` with the classes HeroUI's own
+`skeletonVariants` gives, shaped by its `class_`. Kobalte's Skeleton is a
+wrapper that hides its content while it loads, with a role and sizes of its
+own; HeroUI's is the placeholder alone, which this is, with no behaviour.
+
+## Usage
+
+<Example code={UsageCode} title="skeleton_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Text Content
+
+<Example code={TextCode} title="skeleton_text.mlx"><Text.make client:visible /></Example>
+
+### User Profile
+
+<Example code={ProfileCode} title="skeleton_profile.mlx"><Profile.make client:visible /></Example>
+
+### List Items
+
+<Example code={ListCode} title="skeleton_list.mlx"><List.make client:visible /></Example>
+
+### Grid
+
+<Example code={GridCode} title="skeleton_grid.mlx"><Grid.make client:visible /></Example>
+
+### Single Shimmer
+
+One shimmer passes over every skeleton at once: the `skeleton--shimmer` class
+on their container, and `` animation_type=`none `` on each.
+
+<Example code={SingleShimmerCode} title="skeleton_single_shimmer.mlx"><SingleShimmer.make client:visible /></Example>
+
+### Animation Types
+
+<Example code={AnimationTypesCode} title="skeleton_animation_types.mlx"><AnimationTypes.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI Skeleton twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two: a marked
+row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="skeleton_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every skeleton, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .skeleton {
+    @apply bg-surface-secondary/50;
+  }
+
+  .skeleton--pulse {
+    @apply animate-pulse opacity-75;
+  }
+
+  .skeleton--none {
+    @apply opacity-50;
+  }
+}
+```
+
+### Global Animation Configuration
+
+The page's `--skeleton-animation` is the animation of every skeleton given
+none, `shimmer`, `pulse` or `none`, as in React:
+
+```css
+:root {
+  --skeleton-animation: pulse;
+}
+
+.dark, [data-theme="dark"] {
+  --skeleton-animation: shimmer;
+}
+```
+
+A skeleton reads it once it is in the browser, never on the server, so a
+prerendered skeleton hydrates as it was rendered, a shimmer, and then takes
+the page's. A value it does not know is a shimmer.
+
+## Styling Reference
+
+### CSS Classes
+
+- `.skeleton`, and its animations `.skeleton--shimmer`, `.skeleton--pulse`,
+  `.skeleton--none`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Skeleton
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `animationType` | `animation_type` | `` [ `shimmer \| `pulse \| `none ] `` | the page's `--skeleton-animation`, else `` `shimmer `` | How it moves |
+| `className` | `class_` | `string` | | Added after HeroUI's classes: its shape |

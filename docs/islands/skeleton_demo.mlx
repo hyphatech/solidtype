@@ -1,0 +1,30 @@
+module S = Solidtype.Solid
+module Skeleton = Solidtype_heroui.Skeleton
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let animations = [| (`shimmer, "shimmer"); (`pulse, "pulse"); (`none, "none") |]
+
+let make () =
+  let animation, set_animation = S.create_signal (`shimmer, "shimmer") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="animation type"
+        choices=(fun () -> animations)
+        picked=(fun () -> S.get animation)
+        on_pick=(Controls.choose animations set_animation)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Skeleton
+                   animation_type=(fun () -> fst (S.get animation))
+                   class_="h-24 w-[200px] rounded-xl"
+                 />)
+      react=(fun host ->
+              Heroui_react.skeleton host
+                (Heroui_react.skeleton_props
+                   ~animation_type:(snd (S.get animation))
+                   ~class_name:"h-24 w-[200px] rounded-xl" ()))
+    />
+  </section>
