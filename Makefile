@@ -36,6 +36,7 @@ lint: node_modules ## check formatting, types, the release build and bindings
 	$(OPAM) dune build @all @fmt
 	$(OPAM) dune build --profile release @all
 	bun run tsc -p vite-plugin
+	bun run tsc -p generate
 	$(OPAM) bun generate/html.ts --check
 	$(OPAM) bun generate/kobalte.ts --check
 

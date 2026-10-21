@@ -15,7 +15,8 @@ agent. Users start at [README.md](README.md).
 ```sh
 make setup    # once: the switch hypha-solidtype, all dependencies, and Bun's
 make test     # the ppx's lowering, each island against its twin, the example's tests
-make lint     # formatting, the plugin's types, the release build, and the generated bindings
+make lint     # formatting, the plugin's and the generators' types, the release
+              # build, and the generated bindings
 make fmt      # format in place
 make example  # the board, built by Vite into _build/example-dist, and its
               # Astro page, into _build/example-astro
@@ -72,6 +73,12 @@ generate/            what writes the generated bindings from Solid's and
   ocaml              an OCaml type as a generator builds it, and its one
                      printer
   source             an OCaml file and its interface, written side by side
+  binding            the core of a binding of a TypeScript library of Solid
+                     components: its types mapped, its parts, functions and
+                     values bound, and the types they name, each a module;
+                     a library's generator says only what is its own
+  kobalte            Kobalte's: which entries, how its parts and options are
+                     named, its shared props, roots split by `multiple`
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
