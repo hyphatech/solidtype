@@ -1,7 +1,7 @@
 // HeroUI's Button in React, on React Aria, which the solidtype port's test
 // puts through the same steps as the port. React renders a step's state after
-// the event, so each step ends in settle, which waits for that render and
-// nothing else.
+// the event, so each step runs inside act, which React asks of a test: the
+// step ends once React has rendered what it caused, and nothing later.
 
 import { Button } from "@heroui/react";
 import { act } from "react";
@@ -21,8 +21,10 @@ export function render(disabled: boolean): HTMLElement {
   return button;
 }
 
-export async function settle(): Promise<void> {
-  await act(async () => {});
+export async function step(action: () => Promise<unknown>): Promise<void> {
+  await act(async () => {
+    await action();
+  });
 }
 
 export function cleanup(): void {

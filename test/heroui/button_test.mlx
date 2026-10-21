@@ -11,7 +11,8 @@ module Twin = struct
   external render : bool -> Dom.element = "render"
   [@@mel.module "./twins/Button.tsx"]
 
-  external settle : unit -> unit Js.Promise.t = "settle"
+  external step : ((unit -> _ Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t
+    = "step"
   [@@mel.module "./twins/Button.tsx"]
 
   external cleanup : unit -> unit = "cleanup"
@@ -32,31 +33,29 @@ let state b =
   |> String.concat " "
 
 (* A button hovered, pressed and let go by the mouse, left, then reached by
-   Tab and pressed by Enter: its state after each step, by the step's name. *)
+   Tab and pressed by Enter: its state after each step, by the step's name.
+   Each step runs as React asks a test to, which Solid's side does not
+   need and does not mind. *)
 let walk b =
   let user = T.setup () in
   let seen = ref [] in
-  let after step =
-    let* () = Twin.settle () in
-    seen := (step, state b) :: !seen;
+  let after name action =
+    let* () = Twin.step action in
+    seen := (name, state b) :: !seen;
     Js.Promise.resolve ()
   in
-  let* () = after "rendered" in
-  let* () = T.hover user b in
-  let* () = after "hovered" in
-  let* (_ : T.pointers) = T.pointer user "[MouseLeft>]" in
-  let* () = after "pressed" in
-  let* (_ : T.pointers) = T.pointer user "[/MouseLeft]" in
-  let* () = after "released" in
-  let* () = T.unhover user b in
-  let* () = after "left" in
-  let* () = T.click user T.body in
-  let* () = T.tab user in
-  let* () = after "tabbed to" in
-  let* () = T.keyboard user "{Enter>}" in
-  let* () = after "Enter held" in
-  let* () = T.keyboard user "{/Enter}" in
-  let* () = after "Enter let go" in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "hovered" (fun () -> T.hover user b) in
+  let* () = after "pressed" (fun () -> T.pointer user "[MouseLeft>]") in
+  let* () = after "released" (fun () -> T.pointer user "[/MouseLeft]") in
+  let* () = after "left" (fun () -> T.unhover user b) in
+  let* () =
+    after "tabbed to" (fun () ->
+        let* () = T.click user T.body in
+        T.tab user)
+  in
+  let* () = after "Enter held" (fun () -> T.keyboard user "{Enter>}") in
+  let* () = after "Enter let go" (fun () -> T.keyboard user "{/Enter}") in
   Js.Promise.resolve (Array.of_list (List.rev !seen))
 
 (* The walk on HeroUI's Button in solidtype, then in React, each alone on
