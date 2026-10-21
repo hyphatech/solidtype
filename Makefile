@@ -1,8 +1,9 @@
 SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
+DOCS_PORT ?= 4321
 
 .DEFAULT_GOAL := help
-.PHONY: help setup build test lint fmt example serve dev docs docs-dev generate
+.PHONY: help setup build test lint fmt example serve dev docs docs-serve generate
 
 help: ## list targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -60,8 +61,8 @@ docs: build node_modules ## build the documentation into _build/docs
 
 # Astro serves the pages as they change; `dune build --watch`, beside it,
 # rebuilds the OCaml they show.
-docs-dev: build node_modules ## serve the documentation on http://localhost:4321
-	bun --bun astro dev --root docs
+docs-serve: build node_modules ## serve the documentation on DOCS_PORT, rebuilt as pages change
+	bun --bun astro dev --root docs --open --port $(DOCS_PORT)
 
 generate: node_modules ## write the bindings from Solid's and Kobalte's types
 	$(OPAM) bun generate/html.ts
