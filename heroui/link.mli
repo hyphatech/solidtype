@@ -29,7 +29,7 @@ module Props : sig
 
   val check :
     href:string Solidtype.Check.value ->
-    ?disabled:bool Solidtype.Check.value ->
+    ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->

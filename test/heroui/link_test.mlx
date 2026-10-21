@@ -35,7 +35,7 @@ let shown link =
    walked. *)
 let both ~disabled =
   T.render (fun () ->
-      <Link href="#top" disabled=(fun () -> disabled)>
+      <Link href="#top" is_disabled=(fun () -> disabled)>
         "HeroUI" <Link.Icon />
       </Link>);
   let link = T.by_role "link" in

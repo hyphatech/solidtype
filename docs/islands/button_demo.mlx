@@ -62,7 +62,7 @@ let make () =
                    size=(fun () -> fst (S.get size))
                    full_width=(fun () -> S.get full_width)
                    is_icon_only=(fun () -> S.get icon_only)
-                   disabled=(fun () -> S.get disabled)>
+                   is_disabled=(fun () -> S.get disabled)>
                    (fun () -> Jsx.string (label ()))
                  </Button>)
       react=(fun host ->

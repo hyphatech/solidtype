@@ -10,18 +10,18 @@ let%component make
         | `danger
         | `danger_soft ] =
       `primary) ?(size : [ `sm | `md | `lg ] = `md) ?(full_width : bool = false)
-    ?(is_icon_only : bool = false) ?(disabled : bool = false)
+    ?(is_icon_only : bool = false) ?(is_disabled : bool = false)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option)
     ~(children : Solidtype.Jsx.content) () =
-  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
     class_=(fun () ->
              Styles.Button.classes
                (Styles.Button.options ~variant:(variant ()) ~size:(size ())
                   ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
                   ?class_:(class_ ()) ()))
-    disabled=(fun () -> disabled ())
+    disabled=(fun () -> is_disabled ())
     ref=(fun b -> Interaction.watch i b)
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))

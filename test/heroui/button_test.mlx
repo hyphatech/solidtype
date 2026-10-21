@@ -22,7 +22,7 @@ end
 (* The walk on HeroUI's Button in solidtype, then in React, each alone on
    the page, so Tab reaches it. *)
 let both ~disabled =
-  T.render (fun () -> <Button disabled=(fun () -> disabled)>"Save"</Button>);
+  T.render (fun () -> <Button is_disabled=(fun () -> disabled)>"Save"</Button>);
   let* solidtype = T.walk ~step:Twin.step (T.by_role "button") in
   T.cleanup ();
   let* react = T.walk ~step:Twin.step (Twin.render disabled) in
@@ -66,7 +66,7 @@ let () =
           let disabled, set_disabled = S.create_signal false in
           T.render (fun () ->
               <Button
-                disabled=(fun () -> S.get disabled)
+                is_disabled=(fun () -> S.get disabled)
                 on_click=(fun _ -> incr clicks)>
                 "Save"
               </Button>);

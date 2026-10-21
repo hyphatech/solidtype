@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Breaking: `Solidtype_heroui.Button` and `Link` take `is_disabled`, as
+  HeroUI's documentation names it and as `Switch` does, where they took
+  Kobalte's `disabled`.
 - `Solidtype_heroui.Switch`: HeroUI's Switch on Kobalte's, in HeroUI's
   anatomy, its props named as HeroUI's documentation names them; and
   `Solidtype_heroui.Label`, HeroUI's Label. `Interaction` decides by what a

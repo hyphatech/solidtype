@@ -18,7 +18,8 @@ let make () =
       />
     </div>
     <Side_by_side
-      solidtype=(<Link href="#beside-react" disabled=(fun () -> S.get disabled)>
+      solidtype=(<Link
+                   href="#beside-react" is_disabled=(fun () -> S.get disabled)>
                    "Read the docs"
                    <Show when_=(fun () -> S.get icon)><Link.Icon /></Show>
                  </Link>)

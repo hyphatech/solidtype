@@ -41,12 +41,12 @@ module Icon = struct
     </Show>
 end
 
-let%component make ~(href : string) ?(disabled : bool = false)
+let%component make ~(href : string) ?(is_disabled : bool = false)
     ?(class_ : string option) ~(children : Jsx.content) () =
-  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
     href=(fun () -> href ())
-    disabled=(fun () -> disabled ())
+    disabled=(fun () -> is_disabled ())
     class_=(fun () ->
              Styles.Link.base
                (Styles.Link.slots (Styles.Link.options ?class_:(class_ ()) ())))
