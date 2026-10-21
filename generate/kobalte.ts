@@ -105,7 +105,7 @@ type Vars = Map<string, string>;
 function typeVar(name: string, vars: Vars): string {
   let v = vars.get(name);
   if (!v) {
-    v = `'${snake(name).replace(/^t$/, "t")}`;
+    v = `'${snake(name)}`;
     vars.set(name, v);
   }
   return v;

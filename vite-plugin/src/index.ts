@@ -9,7 +9,7 @@ export default function solidtype(): Plugin {
     enforce: "pre",
     async transform(code, id) {
       if (!/\.jsx(\?|$)/.test(id)) return null;
-      return rewrite(code, id) as Promise<{ code: string; map: null } | null>;
+      return rewrite(code, id);
     },
   };
 }

@@ -178,7 +178,6 @@ function signature(ms: Members, include: boolean, root = false): string {
 }
 
 const used = [...new Set(elements.map((e) => e.attributes))].sort();
-const moduleType = (name: string) => name.replace(/HTMLAttributes$|SVGAttributes$/, (s) => s);
 
 let text = `(** Each element's attributes, as their types: [Html.Div.class_] is
     [string]. Generated from the JSX types of solid-js ${solid} by
@@ -195,11 +194,11 @@ end
 `;
 for (const name of used) {
   const ms = membersOf(name);
-  text += `\nmodule type ${moduleType(name)} = sig\n${signature(ms, sharesCommon(ms))}\nend\n`;
+  text += `\nmodule type ${name} = sig\n${signature(ms, sharesCommon(ms))}\nend\n`;
 }
 for (const e of elements) {
   const module = e.tag.charAt(0).toUpperCase() + e.tag.slice(1);
-  text += `\nmodule ${module} : ${moduleType(e.attributes)} with type element = ${e.element}\n`;
+  text += `\nmodule ${module} : ${e.attributes} with type element = ${e.element}\n`;
 }
 // An element whose tag is known only as the page runs, Dynamic's: the
 // attributes every HTML element takes, as TSX types a tag that is a string.

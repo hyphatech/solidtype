@@ -3,7 +3,7 @@
 // reads. It recognises those calls alone, never another shape of Melange's
 // output, so what Melange does around them cannot change their meaning.
 
-import { transformAsync, types as t, type NodePath, type PluginObj } from "@babel/core";
+import { transformAsync, types as t, type BabelFileResult, type NodePath, type PluginObj } from "@babel/core";
 
 export const MARKERS = "vite-plugin-solidtype/markers";
 
@@ -263,7 +263,7 @@ function markersPlugin(): PluginObj {
   };
 }
 
-export async function rewrite(code: string, filename: string): Promise<{ code: string; map: unknown } | null> {
+export async function rewrite(code: string, filename: string): Promise<{ code: string; map: NonNullable<BabelFileResult["map"]> | null } | null> {
   if (!code.includes(MARKERS)) return null;
   const result = await transformAsync(code, {
     filename,
@@ -273,5 +273,5 @@ export async function rewrite(code: string, filename: string): Promise<{ code: s
     plugins: [markersPlugin],
   });
   if (!result?.code) return null;
-  return { code: result.code, map: result.map };
+  return { code: result.code, map: result.map ?? null };
 }
