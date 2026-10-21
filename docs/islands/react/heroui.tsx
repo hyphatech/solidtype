@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -465,6 +465,25 @@ export function alert(host: HTMLElement, props: AlertProps): void {
           <Alert.Description>Your changes are saved.</Alert.Description>
         </Alert.Content>
       </Alert>,
+    ),
+  );
+}
+
+type MeterProps = {
+  color: "default" | "accent" | "success" | "warning" | "danger";
+  size: "sm" | "md" | "lg";
+};
+
+export function meter(host: HTMLElement, props: MeterProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Meter {...props} value={60} className="w-56">
+        <Label>Storage</Label>
+        <Meter.Output />
+        <Meter.Track>
+          <Meter.Fill />
+        </Meter.Track>
+      </Meter>,
     ),
   );
 }

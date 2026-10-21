@@ -1,0 +1,106 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Meter
+
+(* What a meter's parts read of it: its classes and how far along its range
+   its value is, from 0 to 100. *)
+type meter = { slots : unit -> Styles.Meter.slots; percent : unit -> float }
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = meter
+end)
+
+let within part =
+  match Context.use () with
+  | Some m -> m
+  | None -> invalid_arg (part ^ " is used inside a Meter")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Kobalte_label = Field.As_span (struct
+  let component = Kobalte.Label.component
+end)
+
+module Kobalte_value = Field.As_span (struct
+  let component = Kobalte.ValueLabel.component
+end)
+
+(* A label in a meter is Kobalte's, a span, which names it. *)
+let label : Label.slot =
+ fun[@u] classes children ->
+  <Kobalte_label as_="span" class_=(fun () -> classes ()) data_slot="label">
+    (fun () -> children ())
+  </Kobalte_label>
+
+module Output = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let m = within "Meter.Output" in
+    let classes () = after (Styles.Meter.output (m.slots ())) (class_ ()) in
+    <Show
+      when_=(fun () -> Option.is_some (children ()))
+      fallback=(<Kobalte_value
+                  as_="span"
+                  class_=(fun () -> classes ())
+                  data_slot="meter-output"
+                />)>
+      <span class_=(fun () -> classes ()) data_slot="meter-output">
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </span>
+    </Show>
+end
+
+module Track = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let m = within "Meter.Track" in
+    <div
+      class_=(fun () -> after (Styles.Meter.track (m.slots ())) (class_ ()))
+      data_slot="meter-track">
+      (fun () -> children ())
+    </div>
+end
+
+module Fill = struct
+  let%component make ?(class_ : string option) () =
+    let m = within "Meter.Fill" in
+    <div
+      class_=(fun () -> after (Styles.Meter.fill (m.slots ())) (class_ ()))
+      style=(fun () -> "width: " ^ Js.Float.toString (m.percent ()) ^ "%;")
+      data_slot="meter-fill"
+    />
+end
+
+let%component make ~(value : float) ?(min_value : float = 0.)
+    ?(max_value : float = 100.)
+    ?(color : [ `default | `accent | `success | `warning | `danger ] option)
+    ?(size : [ `sm | `md | `lg ] option) ?(aria_label : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let m =
+    {
+      slots =
+        (fun () ->
+          Styles.Meter.slots
+            (Styles.Meter.options ?color:(color ()) ?size:(size ()) ()));
+      percent =
+        (fun () ->
+          let range = max_value () -. min_value () in
+          if range <= 0. then 0.
+          else
+            Float.min 100.
+              (Float.max 0. ((value () -. min_value ()) /. range *. 100.)));
+    }
+  in
+  <Context.Provider value=(fun () -> m)>
+    <Kobalte.Root
+      value=(fun () -> value ())
+      min_value=(fun () -> min_value ())
+      max_value=(fun () -> max_value ())
+      ?aria_label
+      class_=(fun () -> after (Styles.Meter.base (m.slots ())) (class_ ()))
+      data_slot="meter">
+      <Label.Slot.Provider value=(fun () -> label)>
+        (fun () -> children ())
+      </Label.Slot.Provider>
+    </Kobalte.Root>
+  </Context.Provider>

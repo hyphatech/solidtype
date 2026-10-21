@@ -1,0 +1,7 @@
+module Label = Solidtype_heroui.Label
+module Meter = Solidtype_heroui.Meter
+
+let make () =
+  <Meter class_="w-64" aria_label="Storage usage" value=45.>
+    <Meter.Track><Meter.Fill /></Meter.Track>
+  </Meter>

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Meter`: HeroUI's Meter on Kobalte's, a quantity within a
+  range, its colors and sizes, its output Kobalte's formatting of its value.
 - `Solidtype_heroui.Alert`: HeroUI's Alert, its statuses and their icons,
   its indicator, title and description, a default surface to what is inside
   it.

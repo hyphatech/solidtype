@@ -337,3 +337,11 @@ external alert_props : status:string -> unit -> alert_props = "" [@@mel.obj]
 
 external alert : Dom.htmlDivElement -> alert_props -> unit = "alert"
 [@@mel.module "./react/heroui.tsx"]
+
+type meter_props
+
+external meter_props : color:string -> size:string -> unit -> meter_props = ""
+[@@mel.obj]
+
+external meter : Dom.htmlDivElement -> meter_props -> unit = "meter"
+[@@mel.module "./react/heroui.tsx"]
