@@ -17,10 +17,8 @@ let is_jsx (e : expression) =
    may not take it. *)
 let spread = "props"
 
-(* A name a user writes is Solid's or Kobalte's by one rule: a capital is an
-   underscore and the lower case, a hyphen an underscore, and a keyword takes
-   a trailing underscore. Its JavaScript name comes back from the tables the
-   generators write, where the rule's inverse would not give it, *)
+(* The names the spelling rule's inverse would not give back, from the tables
+   the generators write. *)
 let names =
   let t = Hashtbl.create 64 in
   List.iter
@@ -32,8 +30,12 @@ let starts_with ~prefix s =
   String.length s >= String.length prefix
   && String.equal (String.sub s 0 (String.length prefix)) prefix
 
-(* and otherwise from that inverse: the keyword's underscore dropped, a hyphen
-   after [aria_] and [data_], and a capital after any other underscore. *)
+(* A name a user writes is Solid's or Kobalte's by one rule: a capital is an
+   underscore and the lower case, a hyphen an underscore, and a keyword takes
+   a trailing underscore. Its JavaScript name comes back from the generators'
+   tables where the rule's inverse would not give it, and otherwise from that
+   inverse: the keyword's underscore dropped, a hyphen after [aria_] and
+   [data_], and a capital after any other underscore. *)
 let js_name label =
   match Hashtbl.find_opt names label with
   | Some js -> js

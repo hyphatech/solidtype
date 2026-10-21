@@ -33,6 +33,8 @@ let[@inline] create_signal ?equals ?name v =
   | None, None -> signal v
   | _ -> signal_with v (options ?equals:(Option.map js_equals equals) ?name ())
 
+(* A setter is Solid's one function, given a value or a function of the last
+   value: each is a view of it, typed for one of the two. *)
 external value_setter : 'a setter -> ('a -> unit[@u]) = "%identity"
 external function_setter : 'a setter -> (('a -> 'a) -> unit[@u]) = "%identity"
 
@@ -112,7 +114,7 @@ let create_computed_from ?name ~init f =
 type 'a deferred_options
 
 external deferred_options :
-  ?timeoutMs:int ->
+  ?timeout_ms:(int[@mel.as "timeoutMs"]) ->
   ?equals:'a js_equals ->
   ?name:string ->
   unit ->
@@ -126,7 +128,7 @@ external deferred :
 
 let create_deferred ?timeout_ms ?equals ?name f =
   deferred f
-    (deferred_options ?timeoutMs:timeout_ms
+    (deferred_options ?timeout_ms
        ?equals:(Option.map js_equals equals)
        ?name ())
 
@@ -287,23 +289,22 @@ type ssr_load_from = [ `server | `initial ]
 type 'a resource_options
 
 external resource_options :
-  ?initialValue:'a ->
+  ?initial_value:('a[@mel.as "initialValue"]) ->
   ?name:string ->
-  ?deferStream:bool ->
-  ?ssrLoadFrom:ssr_load_from ->
+  ?defer_stream:(bool[@mel.as "deferStream"]) ->
+  ?ssr_load_from:(ssr_load_from[@mel.as "ssrLoadFrom"]) ->
   ?storage:('a option -> 'a option accessor * 'a option setter) ->
-  ?onHydrated:(('k -> 'a fetch_info -> unit)[@u]) ->
+  ?on_hydrated:(('k -> 'a fetch_info -> unit)[@mel.as "onHydrated"]) ->
   unit ->
   'a resource_options = ""
 [@@mel.obj]
 
 let resource_options ?initial_value ?name ?defer_stream ?ssr_load_from ?storage
     ?on_hydrated () =
-  resource_options ?initialValue:initial_value ?name ?deferStream:defer_stream
-    ?ssrLoadFrom:ssr_load_from ?storage
-    ?onHydrated:
+  resource_options ?initial_value ?name ?defer_stream ?ssr_load_from ?storage
+    ?on_hydrated:
       (Option.map
-         (fun f -> fun[@u] _ (info : _ fetch_info) -> f info.value)
+         (fun f -> fun _ (info : _ fetch_info) -> f info.value)
          on_hydrated)
     ()
 
@@ -344,6 +345,8 @@ let create_resource_from ?initial_value ?name ?defer_stream ?ssr_load_from
     (resource_options ?initial_value ?name ?defer_stream ?ssr_load_from ?storage
        ?on_hydrated ())
 
+(* A resource is its accessor, the function that reads its value, with its
+   state beside it as fields. *)
 external resource_accessor : 'a resource -> 'a option accessor = "%identity"
 
 let[@inline] read r = get (resource_accessor r)
@@ -437,6 +440,9 @@ external children : ((unit -> Jsx.content)[@mel.uncurry]) -> resolved accessor
 [@@mel.module "solid-js"]
 
 external is_array : resolved -> bool = "isArray" [@@mel.scope "Array"]
+
+(* What children resolve to is an element or an array of them, which
+   [is_array] tells apart. *)
 external elements : resolved -> Jsx.element array = "%identity"
 external element : resolved -> Jsx.element = "%identity"
 
@@ -447,15 +453,21 @@ let to_array r =
 
 (* Solid's [lazy] takes what a dynamic import gives: a module, its component
    as [default]. *)
+type 'props js_module
+
+external js_module : default:'props Jsx.component -> unit -> 'props js_module
+  = ""
+[@@mel.obj]
+
 external lazy_js :
-  ((unit -> < default : 'props Jsx.component > Js.t Js.Promise.t)[@mel.uncurry]) ->
+  ((unit -> 'props js_module Js.Promise.t)[@mel.uncurry]) ->
   'props Jsx.component = "lazy"
 [@@mel.module "solid-js"]
 
 let lazy_ load =
   lazy_js (fun () ->
       Js.Promise.then_
-        (fun c -> Js.Promise.resolve [%mel.obj { default = c }])
+        (fun c -> Js.Promise.resolve (js_module ~default:c ()))
         (load ()))
 
 type 'props rest

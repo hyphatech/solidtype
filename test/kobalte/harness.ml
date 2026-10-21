@@ -108,8 +108,6 @@ let accessibility_violations () =
   in
   Js.Promise.resolve (Array.map violation_id (violations results))
 
-(* [alike name ~island ~twin check]: [check] passes on the OCaml island and
-   on its TSX twin, and axe finds no violation in either. *)
 (* An overlay hides the rest of the page from assistive technology, and lets
    it be seen again, a timer and a frame after it opens or closes: each test
    waits them out, so none reaches the next. *)
@@ -119,6 +117,8 @@ let between () =
         (Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 50
           : Js.Global.timeoutId))
 
+(* [alike name ~island ~twin check]: [check] passes on the OCaml island and
+   on its TSX twin, and axe finds no violation in either. *)
 let alike name ~island ~twin check =
   Jest.describe name (fun () ->
       Jest.afterEach cleanup;

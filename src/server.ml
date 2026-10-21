@@ -1,8 +1,11 @@
 type string_options
 
 external string_options :
-  ?timeoutMs:int -> ?nonce:string -> ?renderId:string -> unit -> string_options
-  = ""
+  ?timeout_ms:(int[@mel.as "timeoutMs"]) ->
+  ?nonce:string ->
+  ?render_id:(string[@mel.as "renderId"]) ->
+  unit ->
+  string_options = ""
 [@@mel.obj]
 
 external render_to_string_js :
@@ -11,7 +14,7 @@ external render_to_string_js :
 [@@mel.module "solid-js/web"]
 
 let render_to_string ?nonce ?render_id app =
-  render_to_string_js app (string_options ?nonce ?renderId:render_id ())
+  render_to_string_js app (string_options ?nonce ?render_id ())
 
 external render_to_string_async_js :
   ((unit -> Jsx.element)[@mel.uncurry]) -> string_options -> string Js.Promise.t
@@ -25,7 +28,7 @@ let timed_out = "renderToString timed out"
 
 let render_to_string_async ?timeout_ms ?nonce ?render_id app =
   render_to_string_async_js app
-    (string_options ?timeoutMs:timeout_ms ?nonce ?renderId:render_id ())
+    (string_options ?timeout_ms ?nonce ?render_id ())
   |> Js.Promise.then_ (fun html -> Js.Promise.resolve (Ok html))
   |> Js.Promise.catch (fun e ->
       match Js.Types.classify e with
@@ -72,9 +75,9 @@ type stream_options
 
 external stream_options :
   ?nonce:string ->
-  ?renderId:string ->
-  ?onCompleteShell:(completion -> unit) ->
-  ?onCompleteAll:(completion -> unit) ->
+  ?render_id:(string[@mel.as "renderId"]) ->
+  ?on_complete_shell:((completion -> unit)[@mel.as "onCompleteShell"]) ->
+  ?on_complete_all:((completion -> unit)[@mel.as "onCompleteAll"]) ->
   unit ->
   stream_options = ""
 [@@mel.obj]
@@ -87,9 +90,9 @@ external render_to_stream_js :
 let render_to_stream ?nonce ?render_id ?on_complete_shell ?on_complete_all app =
   let given f = Option.map (fun f c -> f (write c)) f in
   render_to_stream_js app
-    (stream_options ?nonce ?renderId:render_id
-       ?onCompleteShell:(given on_complete_shell)
-       ?onCompleteAll:(given on_complete_all) ())
+    (stream_options ?nonce ?render_id
+       ?on_complete_shell:(given on_complete_shell)
+       ?on_complete_all:(given on_complete_all) ())
 
 external pipe_to : stream -> writable -> unit Js.Promise.t = "pipeTo"
 [@@mel.send]
@@ -109,7 +112,10 @@ let pipe_to_writable ?nonce app w =
 type script_options
 
 external script_options :
-  ?nonce:string -> ?eventNames:string array -> unit -> script_options = ""
+  ?nonce:string ->
+  ?event_names:(string array[@mel.as "eventNames"]) ->
+  unit ->
+  script_options = ""
 [@@mel.obj]
 
 external generate_hydration_script_js : script_options -> string
@@ -117,8 +123,7 @@ external generate_hydration_script_js : script_options -> string
 [@@mel.module "solid-js/web"]
 
 let generate_hydration_script ?nonce ?event_names () =
-  generate_hydration_script_js
-    (script_options ?nonce ?eventNames:event_names ())
+  generate_hydration_script_js (script_options ?nonce ?event_names ())
 
 type request_event
 

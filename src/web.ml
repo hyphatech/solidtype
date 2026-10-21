@@ -9,7 +9,8 @@ let render app root =
 
 type hydrate_options
 
-external hydrate_options : ?renderId:string -> unit -> hydrate_options = ""
+external hydrate_options :
+  ?render_id:(string[@mel.as "renderId"]) -> unit -> hydrate_options = ""
 [@@mel.obj]
 
 external hydrate_js :
@@ -20,7 +21,7 @@ external hydrate_js :
 [@@mel.module "solid-js/web"]
 
 let hydrate ?render_id app root =
-  let dispose = hydrate_js app root (hydrate_options ?renderId:render_id ()) in
+  let dispose = hydrate_js app root (hydrate_options ?render_id ()) in
   fun () -> (dispose () [@u])
 
 external is_server : bool = "isServer" [@@mel.module "solid-js/web"]

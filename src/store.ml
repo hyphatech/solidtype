@@ -8,6 +8,8 @@ external create : 's -> options -> 's * 's setter = "createStore"
 
 let create_store ?name state = create state (options ?name ())
 
+(* A store's setter is Solid's one function, given a whole value or a
+   modifier: each is a view of it, typed for one of the two. *)
 external setter : 's setter -> ('s -> unit[@u]) = "%identity"
 
 let set s v = (setter s) v [@u]
