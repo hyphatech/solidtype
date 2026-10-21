@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Button, Separator } from "@heroui/react";
+import { Badge, Button, Separator } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -43,4 +43,24 @@ type SeparatorProps = {
 
 export function separator(host: HTMLElement, props: SeparatorProps): void {
   flushSync(() => rootOf(host).render(<Separator {...props} />));
+}
+
+type BadgeProps = {
+  color: "accent" | "danger" | "default" | "success" | "warning";
+  placement: "bottom-left" | "bottom-right" | "top-left" | "top-right";
+  size: "lg" | "md" | "sm";
+  variant: "primary" | "secondary" | "soft";
+  label: string;
+};
+
+// A badge over a square it marks, as the port's demo places it.
+export function badge(host: HTMLElement, { label, ...props }: BadgeProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Badge.Anchor>
+        <span className="block size-10 rounded-lg bg-default" />
+        <Badge {...props}>{label}</Badge>
+      </Badge.Anchor>,
+    ),
+  );
 }

@@ -1,0 +1,47 @@
+module Jsx = Solidtype.Jsx
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Anchor = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <span
+      class_=(fun () -> after "badge-anchor" (class_ ()))
+      data_slot="badge-anchor">
+      (fun () -> children ())
+    </span>
+end
+
+module Label = struct
+  (* HeroUI's label class is one, whatever the badge's options. *)
+  let label = Styles.Badge.label (Styles.Badge.slots (Styles.Badge.options ()))
+
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <span class_=(fun () -> after label (class_ ())) data_slot="badge-label">
+      (fun () -> children ())
+    </span>
+end
+
+(* Text a badge is given is its label's, as HeroUI's React badge wraps a
+   string or a number. *)
+let text (c : Jsx.content) =
+  match Js.typeof c with "string" | "number" -> true | _ -> false
+
+let%component make
+    ?(color : [ `accent | `danger | `default | `success | `warning ] = `default)
+    ?(placement : [ `bottom_left | `bottom_right | `top_left | `top_right ] =
+      `top_right) ?(size : [ `lg | `md | `sm ] = `md)
+    ?(variant : [ `primary | `secondary | `soft ] = `primary)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  <span
+    class_=(fun () ->
+             Styles.Badge.base
+               (Styles.Badge.slots
+                  (Styles.Badge.options ~color:(color ())
+                     ~placement:(placement ()) ~size:(size ())
+                     ~variant:(variant ()) ?class_:(class_ ()) ())))
+    data_slot="badge">
+    (fun () ->
+      let c = children () in
+      if text c then Jsx.element <Label>(fun () -> c)</Label> else c)
+  </span>

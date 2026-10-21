@@ -45,3 +45,9 @@ external pointer : user -> string -> pointers Js.Promise.t = "pointer"
 [@@mel.send]
 
 external body : Dom.element = "body" [@@mel.scope "document"]
+
+external query_js : string -> Dom.element Js.null = "querySelector"
+[@@mel.scope "document"]
+
+(* The first element [selector] finds on the page, if any. *)
+let query selector = Js.Null.toOption (query_js selector)

@@ -1,0 +1,81 @@
+module S = Solidtype.Solid
+module Badge = Solidtype_heroui.Badge
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let colors =
+  [|
+    (`default, "default");
+    (`accent, "accent");
+    (`success, "success");
+    (`warning, "warning");
+    (`danger, "danger");
+  |]
+
+let placements =
+  [|
+    (`top_right, "top-right");
+    (`top_left, "top-left");
+    (`bottom_right, "bottom-right");
+    (`bottom_left, "bottom-left");
+  |]
+
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+
+let variants =
+  [| (`primary, "primary"); (`secondary, "secondary"); (`soft, "soft") |]
+
+let make () =
+  let color, set_color = S.create_signal (`default, "default") in
+  let placement, set_placement = S.create_signal (`top_right, "top-right") in
+  let size, set_size = S.create_signal (`md, "md") in
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="color"
+        choices=(fun () -> colors)
+        picked=(fun () -> S.get color)
+        on_pick=(Controls.choose colors set_color)
+      />
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=badge]"
+      solidtype=(<Badge.Anchor>
+                   <span class_="block size-10 rounded-lg bg-default" />
+                   <Badge
+                     color=(fun () -> fst (S.get color))
+                     placement=(fun () -> fst (S.get placement))
+                     size=(fun () -> fst (S.get size))
+                     variant=(fun () -> fst (S.get variant))>
+                     "5"
+                   </Badge>
+                 </Badge.Anchor>)
+      react=(fun host ->
+              Heroui_react.badge host
+                (Heroui_react.badge_props
+                   ~color:(snd (S.get color))
+                   ~placement:(snd (S.get placement))
+                   ~size:(snd (S.get size))
+                   ~variant:(snd (S.get variant))
+                   ~label:"5" ()))
+    />
+  </section>

@@ -1,0 +1,43 @@
+---
+title: Badge
+description: HeroUI's Badge, in OCaml.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/badge_demo.jsx";
+import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/badge_example.jsx";
+import example from "../../../../islands/badge_example.mlx?raw";
+
+`Solidtype_heroui.Badge` is a count or a status over the content it marks:
+`Badge.Anchor` around the content and the badge, with the classes HeroUI's
+own `badgeVariants` gives. Text a badge is given becomes its `Badge.Label`,
+as in React. A badge has no behaviour, so it is HeroUI's spans as they are,
+with no Kobalte part beneath.
+
+## Beside React
+
+The same HeroUI Badge twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two badges: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Example
+
+<div class="not-content">
+  <Example.make client:load />
+</div>
+
+<Code code={example} lang="ocaml" title="badge_example.mlx" />
+
+## Props
+
+| React | solidtype | |
+|---|---|---|
+| `color` | `color` | `` `default`` (default), `` `accent``, `` `success``, `` `warning``, `` `danger`` |
+| `placement` | `placement` | `` `top_right`` (default), `` `top_left``, `` `bottom_right``, `` `bottom_left`` |
+| `size` | `size` | `` `sm``, `` `md`` (default), `` `lg`` |
+| `variant` | `variant` | `` `primary`` (default), `` `secondary``, `` `soft`` |
+| `className` | `class_` | added after HeroUI's classes; on `Badge.Anchor` and `Badge.Label` too |

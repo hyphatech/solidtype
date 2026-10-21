@@ -31,3 +31,18 @@ external separator_props :
 
 external separator : Dom.htmlDivElement -> separator_props -> unit = "separator"
 [@@mel.module "./react/heroui.tsx"]
+
+type badge_props
+
+external badge_props :
+  color:string ->
+  placement:string ->
+  size:string ->
+  variant:string ->
+  label:string ->
+  unit ->
+  badge_props = ""
+[@@mel.obj]
+
+external badge : Dom.htmlDivElement -> badge_props -> unit = "badge"
+[@@mel.module "./react/heroui.tsx"]

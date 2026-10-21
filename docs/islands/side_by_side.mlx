@@ -2,9 +2,9 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module For = Solidtype.For
 
-external first_element : Dom.htmlDivElement -> Dom.element Js.null
-  = "firstElementChild"
-[@@mel.get]
+external query : Dom.htmlDivElement -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
 
 external attribute_names : Dom.element -> string array = "getAttributeNames"
 [@@mel.send]
@@ -32,9 +32,10 @@ external observe : observer -> Dom.htmlDivElement -> watched -> unit = "observe"
 
 external disconnect : observer -> unit = "disconnect" [@@mel.send]
 
-(* What one side shows of its element: each attribute and its value. *)
-let shown host =
-  match Js.Null.toOption (first_element host) with
+(* What one side shows of the element [compared] finds in it: each attribute
+   and its value. *)
+let shown compared host =
+  match Js.Null.toOption (query host compared) with
   | None -> [||]
   | Some e ->
       attribute_names e
@@ -80,17 +81,19 @@ let cell = function
 
 (* One HeroUI component twice, under the same props: [solidtype] renders the
    port, [react] renders HeroUI's React component into its host, and is run
-   again whenever what it reads changes. Below them, each attribute of the two
-   elements: a row marked where they differ, and dimmed where it is a
+   again whenever what it reads changes; [compared] finds the element each
+   frame is compared by, its first by default. Below them, each attribute of
+   the two elements: a row marked where they differ, and dimmed where it is a
    framework's own. *)
-let%component make ~(solidtype : Jsx.element)
-    ~(react : Dom.htmlDivElement -> unit) () =
-  let compared, set_compared = S.create_signal [||] in
+let%component make ?(compared : string = ":scope > *")
+    ~(solidtype : Jsx.element) ~(react : Dom.htmlDivElement -> unit) () =
+  let table, set_table = S.create_signal [||] in
   let solidtype_host = ref None in
   let react_host = ref None in
   let read () =
     match (!solidtype_host, !react_host) with
-    | Some s, Some r -> S.set set_compared (rows (shown s) (shown r))
+    | Some s, Some r ->
+        S.set set_table (rows (shown (compared ()) s) (shown (compared ()) r))
     | _ -> ()
   in
   (* The observer is made once mounted: the page is also prerendered, where
@@ -147,7 +150,7 @@ let%component make ~(solidtype : Jsx.element)
         </tr>
       </thead>
       <tbody>
-        <For each=(fun () -> S.get compared)>
+        <For each=(fun () -> S.get table)>
           (fun (name, a, b) _ ->
             let marked =
               if internal name then "text-muted"

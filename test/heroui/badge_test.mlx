@@ -1,0 +1,70 @@
+(* HeroUI's Badge beside the same Badge in React: the anchor, the badge and
+   the label its text is wrapped in, each by its slot, class and text. *)
+
+module Badge = Solidtype_heroui.Badge
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  color:[ `accent | `danger | `default | `success | `warning ] ->
+  placement:
+    ([ `bottom_left [@mel.as "bottom-left"]
+     | `bottom_right [@mel.as "bottom-right"]
+     | `top_left [@mel.as "top-left"]
+     | `top_right [@mel.as "top-right"] ]
+    [@mel.as "placement"]) ->
+  size:[ `lg | `md | `sm ] ->
+  variant:[ `primary | `secondary | `soft ] ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> unit = "render" [@@mel.module "./twins/Badge.tsx"]
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Badge.tsx"]
+end
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* What the page shows of each part: the anchor, the badge, its label. *)
+let shown () =
+  [| "badge-anchor"; "badge"; "badge-label" |]
+  |> Array.map (fun slot ->
+      match T.query ("[data-slot=" ^ slot ^ "]") with
+      | None -> (slot, None)
+      | Some e -> (slot, Some (T.class_name e, text e)))
+
+let both ?(color = `default) ?(placement = `top_right) ?(size = `md)
+    ?(variant = `primary) () =
+  T.render (fun () ->
+      <Badge.Anchor>
+        <span>"Inbox"</span>
+        <Badge
+          color=(fun () -> color)
+          placement=(fun () -> placement)
+          size=(fun () -> size)
+          variant=(fun () -> variant)>
+          "5"
+        </Badge>
+      </Badge.Anchor>);
+  let solidtype = shown () in
+  T.cleanup ();
+  Twin.render (props ~color ~placement ~size ~variant ());
+  let react = shown () in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Badge" (fun () ->
+      Jest.test "is HeroUI's badge over its anchor, its text a label" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "has the classes of its color, placement, size and variant"
+        (fun () ->
+          let solidtype, react =
+            both ~color:`danger ~placement:`bottom_left ~size:`lg ~variant:`soft
+              ()
+          in
+          E.(expect solidtype |> toEqual react)))
