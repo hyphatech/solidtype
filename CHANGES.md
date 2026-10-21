@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Radio_group` and `Radio`: HeroUI's RadioGroup on
+  Kobalte's, in HeroUI's anatomy, its value controlled or kept, horizontal
+  or vertical, disabled and invalid. A `Label` in the group names it.
+- `Solidtype_heroui.Description`: HeroUI's Description, a span, or inside a
+  radio group or a radio the description its input is described by.
+- `Solidtype_heroui.Interaction.create` takes `?keys`: `` `element `` judges
+  a key by the element watched, as React Aria's radio presses its label by
+  Enter as by Space.
+- `Solidtype_heroui.Field`: what a switch, a checkbox and a radio share --
+  the state their content declares, a value controlled or kept, and the
+  content, made by a functor over a Kobalte component's label and input.
+- Breaking: `Solidtype_heroui.Label.Slot` replaces `Label.Inline`. The part
+  above a label says how it renders, as React Aria's `LabelContext` does:
+  a span in a control's content, a radio group's own label in the group.
+- A component bound in a function, as a functor's argument is, renders:
+  the plugin gave its lower-case name an alias it declared out of reach.
+
 - `Solidtype_heroui.Checkbox`: HeroUI's Checkbox on Kobalte's, in HeroUI's
   anatomy, its check and dash drawn as HeroUI draws them, selected,
   indeterminate, disabled and invalid.
