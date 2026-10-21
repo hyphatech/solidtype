@@ -67,6 +67,17 @@ So does each namespace, a handler typed by its event.
   > EOF
   $ build
 
+So does an SVG shape given the presentation attributes Solid's types pick
+for it.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () =
+  >   <svg view_box="0 0 7 7" fill="none">
+  >     <path d="M1 1H6V6Z" fill="currentColor" stroke="none" fill_rule="evenodd" />
+  >   </svg>
+  > EOF
+  $ build
+
 A read passed as an attribute's value, not inside a thunk.
 
   $ cat > case.mlx <<'EOF'

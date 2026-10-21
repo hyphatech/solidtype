@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- An SVG shape takes the presentation attributes Solid's types pick for it --
+  a `<path>`'s `fill`, `stroke`, `fill_rule` and the rest -- which the
+  attributes generated from those types left out, as every `Pick<...>` and
+  `Omit<...>` an interface extends was.
 - `Solidtype_heroui.Chip`: HeroUI's Chip and its label, its colors, sizes and
   variants.
 - `Solidtype_heroui.Badge`: HeroUI's Badge, its anchor and its label, its

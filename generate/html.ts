@@ -97,6 +97,12 @@ function ocamlType(name: string, node: ts.TypeNode | undefined): string | null {
 
 type Members = Map<string, string>;
 
+// The string literals a type node lists, "a" | "b".
+function literals(node: ts.TypeNode): string[] {
+  const parts = ts.isUnionTypeNode(node) ? node.types : [node];
+  return parts.flatMap((p) => (ts.isLiteralTypeNode(p) && ts.isStringLiteral(p.literal) ? [p.literal.text] : []));
+}
+
 // An interface's members, its bases' included, with the element type T left
 // as [element].
 function membersOf(name: string, seen = new Set<string>()): Members {
@@ -106,7 +112,20 @@ function membersOf(name: string, seen = new Set<string>()): Members {
   seen.add(name);
   for (const clause of decl.heritageClauses ?? []) {
     for (const base of clause.types) {
-      for (const [k, v] of membersOf(base.expression.getText(), seen)) members.set(k, v);
+      const target = base.expression.getText();
+      // Pick<X, "a" | "b"> is the members of X it names, and Omit<X, ...> the
+      // rest: an SVG shape takes its fill and stroke so. X is read again,
+      // whoever else has, since each takes its own few.
+      if (target === "Pick" || target === "Omit") {
+        const [from, keys] = base.typeArguments ?? [];
+        if (!from || !keys || !ts.isTypeReferenceNode(from)) continue;
+        const listed = new Set(literals(keys).map(label));
+        for (const [k, v] of membersOf(from.typeName.getText(), new Set(seen))) {
+          if (listed.has(k) === (target === "Pick")) members.set(k, v);
+        }
+        continue;
+      }
+      for (const [k, v] of membersOf(target, seen)) members.set(k, v);
     }
   }
   for (const m of decl.members) {

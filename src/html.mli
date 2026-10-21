@@ -572,6 +572,8 @@ module type AnimateSVGAttributes = sig
   type begin_ = string
   type by = string
   type calc_mode = [ `discrete | `linear | `paced | `spline ]
+  type color_interpolation = string
+  type color_rendering = string
   type dur = string
   type end_ = string
   type external_resources_required = bool
@@ -602,6 +604,8 @@ module type AnimateSVGAttributes = sig
     ?begin_:begin_ Check.value ->
     ?by:by Check.value ->
     ?calc_mode:calc_mode Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
     ?dur:dur Check.value ->
     ?end_:end_ Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
@@ -1671,30 +1675,81 @@ end
 
 module type CircleSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
   type cx = string
   type cy = string
+  type display = string
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type path_length = string
+  type pointer_events = string
   type r = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
     ?cx:cx Check.value ->
     ?cy:cy Check.value ->
+    ?display:display Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?r:r Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type ClipPathSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
   type clip_path_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type external_resources_required = bool
   type lang = string
@@ -1704,6 +1759,7 @@ module type ClipPathSVGAttributes = sig
   type transform = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
     ?clip_path_units:clip_path_units Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
     ?lang:lang Check.value ->
@@ -1764,7 +1820,7 @@ module type ColHTMLAttributes = sig
   type title = string
   type translate = [ `yes | `no ]
   type typeof = string
-  type valign = [ `baseline | `bottom | `middle | `top ]
+  type valign = [ `baseline | `middle | `bottom | `top ]
   type vocab = string
   type width = string
   type 'r check =
@@ -1870,7 +1926,7 @@ module type ColgroupHTMLAttributes = sig
   type title = string
   type translate = [ `yes | `no ]
   type typeof = string
-  type valign = [ `baseline | `bottom | `middle | `top ]
+  type valign = [ `baseline | `middle | `bottom | `top ]
   type vocab = string
   type width = string
   type 'r check =
@@ -2023,18 +2079,62 @@ end
 
 module type DefsSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type path_length = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -2245,28 +2345,78 @@ end
 
 module type EllipseSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
   type cx = string
   type cy = string
+  type display = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type path_length = string
+  type pointer_events = string
   type required_extensions = string
   type required_features = string
   type rx = string
   type ry = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
     ?cx:cx Check.value ->
     ?cy:cy Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?rx:rx Check.value ->
     ?ry:ry Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -2377,6 +2527,7 @@ end
 
 module type FeBlendSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in2 = string
   type in_ = string
@@ -2388,6 +2539,7 @@ module type FeBlendSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in2:in2 Check.value ->
     ?in_:in_ Check.value ->
@@ -2403,6 +2555,7 @@ end
 
 module type FeColorMatrixSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
@@ -2414,6 +2567,7 @@ module type FeColorMatrixSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
@@ -2429,6 +2583,7 @@ end
 
 module type FeComponentTransferSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
@@ -2438,6 +2593,7 @@ module type FeComponentTransferSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
@@ -2451,6 +2607,7 @@ end
 
 module type FeCompositeSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in2 = string
   type in_ = string
@@ -2466,6 +2623,7 @@ module type FeCompositeSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in2:in2 Check.value ->
     ?in_:in_ Check.value ->
@@ -2486,6 +2644,7 @@ end
 module type FeConvolveMatrixSVGAttributes = sig
   include Dom_attributes
   type bias = string
+  type color_interpolation_filters = string
   type divisor = string
   type edge_mode = [ `none | `duplicate | `wrap ]
   type height = string
@@ -2504,6 +2663,7 @@ module type FeConvolveMatrixSVGAttributes = sig
   type y = string
   type 'r check =
     ?bias:bias Check.value ->
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?divisor:divisor Check.value ->
     ?edge_mode:edge_mode Check.value ->
     ?height:height Check.value ->
@@ -2525,11 +2685,14 @@ end
 
 module type FeDiffuseLightingSVGAttributes = sig
   include Dom_attributes
+  type color = string
+  type color_interpolation_filters = string
   type diffuse_constant = string
   type height = string
   type in_ = string
   type kernel_unit_length = string
   type lang = string
+  type lighting_color = string
   type result = string
   type surface_scale = string
   type width = string
@@ -2537,11 +2700,14 @@ module type FeDiffuseLightingSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color:color Check.value ->
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?diffuse_constant:diffuse_constant Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?kernel_unit_length:kernel_unit_length Check.value ->
     ?lang:lang Check.value ->
+    ?lighting_color:lighting_color Check.value ->
     ?result:result Check.value ->
     ?surface_scale:surface_scale Check.value ->
     ?width:width Check.value ->
@@ -2553,6 +2719,7 @@ end
 
 module type FeDisplacementMapSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in2 = string
   type in_ = string
@@ -2566,6 +2733,7 @@ module type FeDisplacementMapSVGAttributes = sig
   type y = string
   type y_channel_selector = [ `R | `G | `B | `A ]
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in2:in2 Check.value ->
     ?in_:in_ Check.value ->
@@ -2597,8 +2765,12 @@ end
 
 module type FeDropShadowSVGAttributes = sig
   include Dom_attributes
+  type color = string
+  type color_interpolation_filters = string
   type dx = string
   type dy = string
+  type flood_color = string
+  type flood_opacity = string
   type height = string
   type lang = string
   type result = string
@@ -2608,8 +2780,12 @@ module type FeDropShadowSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color:color Check.value ->
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?dx:dx Check.value ->
     ?dy:dy Check.value ->
+    ?flood_color:flood_color Check.value ->
+    ?flood_opacity:flood_opacity Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
@@ -2623,6 +2799,10 @@ end
 
 module type FeFloodSVGAttributes = sig
   include Dom_attributes
+  type color = string
+  type color_interpolation_filters = string
+  type flood_color = string
+  type flood_opacity = string
   type height = string
   type lang = string
   type result = string
@@ -2631,6 +2811,10 @@ module type FeFloodSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color:color Check.value ->
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
+    ?flood_color:flood_color Check.value ->
+    ?flood_opacity:flood_opacity Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
@@ -2667,6 +2851,7 @@ end
 
 module type FeGaussianBlurSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
@@ -2677,6 +2862,7 @@ module type FeGaussianBlurSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
@@ -2691,6 +2877,7 @@ end
 
 module type FeImageSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type external_resources_required = bool
   type height = string
   type href = string
@@ -2702,6 +2889,7 @@ module type FeImageSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?href:href Check.value ->
@@ -2729,6 +2917,7 @@ end
 
 module type FeMergeSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type lang = string
   type result = string
@@ -2737,6 +2926,7 @@ module type FeMergeSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
     ?result:result Check.value ->
@@ -2749,6 +2939,7 @@ end
 
 module type FeMorphologySVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
@@ -2760,6 +2951,7 @@ module type FeMorphologySVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
@@ -2775,6 +2967,7 @@ end
 
 module type FeOffsetSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type dx = string
   type dy = string
   type height = string
@@ -2786,6 +2979,7 @@ module type FeOffsetSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?dx:dx Check.value ->
     ?dy:dy Check.value ->
     ?height:height Check.value ->
@@ -2817,10 +3011,13 @@ end
 
 module type FeSpecularLightingSVGAttributes = sig
   include Dom_attributes
+  type color = string
+  type color_interpolation_filters = string
   type height = string
   type in_ = string
   type kernel_unit_length = string
   type lang = string
+  type lighting_color = string
   type result = string
   type specular_constant = string
   type specular_exponent = string
@@ -2830,10 +3027,13 @@ module type FeSpecularLightingSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color:color Check.value ->
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?kernel_unit_length:kernel_unit_length Check.value ->
     ?lang:lang Check.value ->
+    ?lighting_color:lighting_color Check.value ->
     ?result:result Check.value ->
     ?specular_constant:specular_constant Check.value ->
     ?specular_exponent:specular_exponent Check.value ->
@@ -2873,6 +3073,7 @@ end
 
 module type FeTileSVGAttributes = sig
   include Dom_attributes
+  type color_interpolation_filters = string
   type height = string
   type in_ = string
   type lang = string
@@ -2882,6 +3083,7 @@ module type FeTileSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?in_:in_ Check.value ->
     ?lang:lang Check.value ->
@@ -2896,6 +3098,7 @@ end
 module type FeTurbulanceSVGAttributes = sig
   include Dom_attributes
   type base_frequency = string
+  type color_interpolation_filters = string
   type height = string
   type lang = string
   type num_octaves = string
@@ -2909,6 +3112,7 @@ module type FeTurbulanceSVGAttributes = sig
   type y = string
   type 'r check =
     ?base_frequency:base_frequency Check.value ->
+    ?color_interpolation_filters:color_interpolation_filters Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
     ?num_octaves:num_octaves Check.value ->
@@ -3049,27 +3253,35 @@ end
 
 module type ForeignObjectSVGAttributes = sig
   include Dom_attributes
+  type clip = string
+  type display = string
   type external_resources_required = bool
   type height = string
   type lang = string
+  type overflow = string
   type required_extensions = string
   type required_features = string
   type system_language = string
   type transform = string
   type view_box = string
+  type visibility = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
+    ?clip:clip Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
+    ?overflow:overflow Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?view_box:view_box Check.value ->
+    ?visibility:visibility Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -3195,20 +3407,68 @@ end
 
 module type GSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type path_length = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -3545,29 +3805,59 @@ end
 
 module type ImageSVGAttributes = sig
   include Dom_attributes
+  type clip = string
+  type clip_path = string
+  type clip_rule = string
+  type color_interpolation = string
+  type color_profile = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
+  type filter = string
   type height = string
   type href = string
+  type image_rendering = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type overflow = string
+  type pointer_events = string
   type preserve_aspect_ratio = string
   type required_extensions = string
   type required_features = string
   type system_language = string
   type transform = string
   type view_box = string
+  type visibility = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
+    ?clip:clip Check.value ->
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_profile:color_profile Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
+    ?filter:filter Check.value ->
     ?height:height Check.value ->
     ?href:href Check.value ->
+    ?image_rendering:image_rendering Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?overflow:overflow Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
     ?view_box:view_box Check.value ->
+    ?visibility:visibility Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -3580,7 +3870,7 @@ module type ImgHTMLAttributes = sig
   type about = string
   type access_key = string
   type accesskey = string
-  type align = [ `left | `right | `bottom | `middle | `top ]
+  type align = [ `middle | `left | `right | `bottom | `top ]
   type alt = string
   type attributionsrc = string
   type auto_capitalize = [ `none | `off | `on | `sentences | `words | `characters ]
@@ -4205,24 +4495,80 @@ end
 
 module type LineSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type marker_end = string
+  type marker_mid = string
+  type marker_start = string
+  type mask = string
+  type opacity = string
+  type path_length = string
+  type pointer_events = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type x1 = string
   type x2 = string
   type xmlns = string
   type y1 = string
   type y2 = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?marker_end:marker_end Check.value ->
+    ?marker_mid:marker_mid Check.value ->
+    ?marker_start:marker_start Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?x1:x1 Check.value ->
     ?x2:x2 Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -4499,60 +4845,148 @@ end
 
 module type MarkerSVGAttributes = sig
   include Dom_attributes
+  type clip = string
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
   type marker_height = string
   type marker_units = [ `userSpaceOnUse | `strokeWidth ]
   type marker_width = string
+  type mask = string
+  type opacity = string
   type orient = string
+  type overflow = string
+  type path_length = string
   type preserve_aspect_ratio = string
   type ref_x = string
   type ref_y = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type view_box = string
   type xmlns = string
   type 'r check =
+    ?clip:clip Check.value ->
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
     ?marker_height:marker_height Check.value ->
     ?marker_units:marker_units Check.value ->
     ?marker_width:marker_width Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
     ?orient:orient Check.value ->
+    ?overflow:overflow Check.value ->
+    ?path_length:path_length Check.value ->
     ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
     ?ref_x:ref_x Check.value ->
     ?ref_y:ref_y Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?view_box:view_box Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type MaskSVGAttributes = sig
-  type element
-  type class_ = string
+  include Dom_attributes
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
   type height = string
+  type lang = string
+  type mask = string
   type mask_content_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type mask_units = [ `userSpaceOnUse | `objectBoundingBox ]
+  type path_length = string
   type required_extensions = string
   type required_features = string
-  type style = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type width = string
   type x = string
+  type xmlns = string
   type y = string
   type 'r check =
-    ?class_:class_ Check.value ->
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
     ?height:height Check.value ->
+    ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
     ?mask_content_units:mask_content_units Check.value ->
     ?mask_units:mask_units Check.value ->
+    ?path_length:path_length Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
-    ?style:style Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
+    ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
-    'r
+    'r dom_check
 end
 
 module type MenuHTMLAttributes = sig
@@ -5599,40 +6033,118 @@ end
 
 module type PathSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
   type d = string
+  type display = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type marker_end = string
+  type marker_mid = string
+  type marker_start = string
+  type mask = string
+  type opacity = string
   type path_length = string
+  type pointer_events = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
     ?d:d Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?marker_end:marker_end Check.value ->
+    ?marker_mid:marker_mid Check.value ->
+    ?marker_start:marker_start Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
     ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type PatternSVGAttributes = sig
   include Dom_attributes
+  type clip = string
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type height = string
   type href = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type overflow = string
+  type path_length = string
   type pattern_content_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type pattern_transform = string
   type pattern_units = [ `userSpaceOnUse | `objectBoundingBox ]
   type preserve_aspect_ratio = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type view_box = string
   type width = string
@@ -5640,16 +6152,40 @@ module type PatternSVGAttributes = sig
   type xmlns = string
   type y = string
   type 'r check =
+    ?clip:clip Check.value ->
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?height:height Check.value ->
     ?href:href Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?overflow:overflow Check.value ->
+    ?path_length:path_length Check.value ->
     ?pattern_content_units:pattern_content_units Check.value ->
     ?pattern_transform:pattern_transform Check.value ->
     ?pattern_units:pattern_units Check.value ->
     ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?view_box:view_box Check.value ->
     ?width:width Check.value ->
@@ -5661,44 +6197,156 @@ end
 
 module type PolygonSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type marker_end = string
+  type marker_mid = string
+  type marker_start = string
+  type mask = string
+  type opacity = string
+  type path_length = string
+  type pointer_events = string
   type points = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?marker_end:marker_end Check.value ->
+    ?marker_mid:marker_mid Check.value ->
+    ?marker_start:marker_start Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?points:points Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type PolylineSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type marker_end = string
+  type marker_mid = string
+  type marker_start = string
+  type mask = string
+  type opacity = string
+  type path_length = string
+  type pointer_events = string
   type points = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?marker_end:marker_end Check.value ->
+    ?marker_mid:marker_mid Check.value ->
+    ?marker_start:marker_start Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?points:points Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -5925,29 +6573,79 @@ end
 
 module type RectSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type height = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type path_length = string
+  type pointer_events = string
   type required_extensions = string
   type required_features = string
   type rx = string
   type ry = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?rx:rx Check.value ->
     ?ry:ry Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
@@ -6339,12 +7037,18 @@ end
 
 module type StopSVGAttributes = sig
   include Dom_attributes
+  type color = string
   type lang = string
   type offset = string
+  type stop_color = string
+  type stop_opacity = string
   type xmlns = string
   type 'r check =
+    ?color:color Check.value ->
     ?lang:lang Check.value ->
     ?offset:offset Check.value ->
+    ?stop_color:stop_color Check.value ->
+    ?stop_opacity:stop_opacity Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
@@ -6651,44 +7355,140 @@ end
 
 module type SwitchSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type display = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type path_length = string
   type required_extensions = string
   type required_features = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
   type transform = string
+  type visibility = string
   type xmlns = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?display:display Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?path_length:path_length Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
     ?transform:transform Check.value ->
+    ?visibility:visibility Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type SymbolSVGAttributes = sig
   include Dom_attributes
+  type clip = string
+  type clip_path = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type enable_background = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
   type height = string
   type lang = string
+  type mask = string
+  type opacity = string
+  type overflow = string
+  type path_length = string
   type preserve_aspect_ratio = string
   type ref_x = string
   type ref_y = string
+  type shape_rendering = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type view_box = string
   type width = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
+    ?clip:clip Check.value ->
+    ?clip_path:clip_path Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?enable_background:enable_background Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
     ?height:height Check.value ->
     ?lang:lang Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?overflow:overflow Check.value ->
+    ?path_length:path_length Check.value ->
     ?preserve_aspect_ratio:preserve_aspect_ratio Check.value ->
     ?ref_x:ref_x Check.value ->
     ?ref_y:ref_y Check.value ->
+    ?shape_rendering:shape_rendering Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?view_box:view_box Check.value ->
     ?width:width Check.value ->
     ?x:x Check.value ->
@@ -6699,30 +7499,96 @@ end
 
 module type TSpanSVGAttributes = sig
   include Dom_attributes
+  type alignment_baseline = string
+  type baseline_shift = string
+  type color = string
+  type direction = string
+  type display = string
+  type dominant_baseline = string
   type dx = string
   type dy = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type font_family = string
+  type font_size = string
+  type font_size_adjust = string
+  type font_stretch = string
+  type font_style = string
+  type font_variant = string
+  type font_weight = string
+  type glyph_orientation_horizontal = string
+  type glyph_orientation_vertical = string
+  type kerning = string
   type lang = string
   type length_adjust = [ `spacing | `spacingAndGlyphs ]
+  type letter_spacing = string
   type required_extensions = string
   type required_features = string
   type rotate = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
+  type text_anchor = string
+  type text_decoration = string
   type text_length = string
+  type unicode_bidi = string
+  type visibility = string
+  type word_spacing = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
+    ?alignment_baseline:alignment_baseline Check.value ->
+    ?baseline_shift:baseline_shift Check.value ->
+    ?color:color Check.value ->
+    ?direction:direction Check.value ->
+    ?display:display Check.value ->
+    ?dominant_baseline:dominant_baseline Check.value ->
     ?dx:dx Check.value ->
     ?dy:dy Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?font_family:font_family Check.value ->
+    ?font_size:font_size Check.value ->
+    ?font_size_adjust:font_size_adjust Check.value ->
+    ?font_stretch:font_stretch Check.value ->
+    ?font_style:font_style Check.value ->
+    ?font_variant:font_variant Check.value ->
+    ?font_weight:font_weight Check.value ->
+    ?glyph_orientation_horizontal:glyph_orientation_horizontal Check.value ->
+    ?glyph_orientation_vertical:glyph_orientation_vertical Check.value ->
+    ?kerning:kerning Check.value ->
     ?lang:lang Check.value ->
     ?length_adjust:length_adjust Check.value ->
+    ?letter_spacing:letter_spacing Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?rotate:rotate Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
+    ?text_anchor:text_anchor Check.value ->
+    ?text_decoration:text_decoration Check.value ->
     ?text_length:text_length Check.value ->
+    ?unicode_bidi:unicode_bidi Check.value ->
+    ?visibility:visibility Check.value ->
+    ?word_spacing:word_spacing Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
@@ -6787,7 +7653,7 @@ module type TdHTMLAttributes = sig
   type title = string
   type translate = [ `yes | `no ]
   type typeof = string
-  type valign = [ `baseline | `bottom | `middle | `top ]
+  type valign = [ `baseline | `middle | `bottom | `top ]
   type vocab = string
   type width = string
   type 'r check =
@@ -6957,58 +7823,208 @@ end
 
 module type TextPathSVGAttributes = sig
   include Dom_attributes
+  type alignment_baseline = string
+  type baseline_shift = string
+  type color = string
+  type direction = string
+  type display = string
+  type dominant_baseline = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type font_family = string
+  type font_size = string
+  type font_size_adjust = string
+  type font_stretch = string
+  type font_style = string
+  type font_variant = string
+  type font_weight = string
+  type glyph_orientation_horizontal = string
+  type glyph_orientation_vertical = string
   type href = string
+  type kerning = string
   type lang = string
+  type letter_spacing = string
   type method_ = [ `align | `stretch ]
   type required_extensions = string
   type required_features = string
   type spacing = [ `auto | `exact ]
   type start_offset = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
+  type text_anchor = string
+  type text_decoration = string
+  type unicode_bidi = string
+  type visibility = string
+  type word_spacing = string
   type xmlns = string
   type 'r check =
+    ?alignment_baseline:alignment_baseline Check.value ->
+    ?baseline_shift:baseline_shift Check.value ->
+    ?color:color Check.value ->
+    ?direction:direction Check.value ->
+    ?display:display Check.value ->
+    ?dominant_baseline:dominant_baseline Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?font_family:font_family Check.value ->
+    ?font_size:font_size Check.value ->
+    ?font_size_adjust:font_size_adjust Check.value ->
+    ?font_stretch:font_stretch Check.value ->
+    ?font_style:font_style Check.value ->
+    ?font_variant:font_variant Check.value ->
+    ?font_weight:font_weight Check.value ->
+    ?glyph_orientation_horizontal:glyph_orientation_horizontal Check.value ->
+    ?glyph_orientation_vertical:glyph_orientation_vertical Check.value ->
     ?href:href Check.value ->
+    ?kerning:kerning Check.value ->
     ?lang:lang Check.value ->
+    ?letter_spacing:letter_spacing Check.value ->
     ?method_:method_ Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?spacing:spacing Check.value ->
     ?start_offset:start_offset Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
+    ?text_anchor:text_anchor Check.value ->
+    ?text_decoration:text_decoration Check.value ->
+    ?unicode_bidi:unicode_bidi Check.value ->
+    ?visibility:visibility Check.value ->
+    ?word_spacing:word_spacing Check.value ->
     ?xmlns:xmlns Check.value ->
     'r dom_check
 end
 
 module type TextSVGAttributes = sig
   include Dom_attributes
+  type clip_path = string
+  type clip_rule = string
+  type color = string
+  type color_interpolation = string
+  type color_rendering = string
+  type cursor = string
+  type direction = string
+  type display = string
+  type dominant_baseline = string
   type dx = string
   type dy = string
   type external_resources_required = bool
+  type fill = string
+  type fill_opacity = string
+  type fill_rule = string
+  type filter = string
+  type font_family = string
+  type font_size = string
+  type font_size_adjust = string
+  type font_stretch = string
+  type font_style = string
+  type font_variant = string
+  type font_weight = string
+  type glyph_orientation_horizontal = string
+  type glyph_orientation_vertical = string
+  type kerning = string
   type lang = string
   type length_adjust = [ `spacing | `spacingAndGlyphs ]
+  type letter_spacing = string
+  type mask = string
+  type opacity = string
+  type pointer_events = string
   type required_extensions = string
   type required_features = string
   type rotate = string
+  type stroke = string
+  type stroke_dasharray = string
+  type stroke_dashoffset = string
+  type stroke_linecap = string
+  type stroke_linejoin = string
+  type stroke_miterlimit = string
+  type stroke_opacity = string
+  type stroke_width = string
   type system_language = string
+  type text_anchor = string
+  type text_decoration = string
   type text_length = string
+  type text_rendering = string
   type transform = string
+  type unicode_bidi = string
+  type visibility = string
+  type word_spacing = string
+  type writing_mode = string
   type x = string
   type xmlns = string
   type y = string
   type 'r check =
+    ?clip_path:clip_path Check.value ->
+    ?clip_rule:clip_rule Check.value ->
+    ?color:color Check.value ->
+    ?color_interpolation:color_interpolation Check.value ->
+    ?color_rendering:color_rendering Check.value ->
+    ?cursor:cursor Check.value ->
+    ?direction:direction Check.value ->
+    ?display:display Check.value ->
+    ?dominant_baseline:dominant_baseline Check.value ->
     ?dx:dx Check.value ->
     ?dy:dy Check.value ->
     ?external_resources_required:external_resources_required Check.value ->
+    ?fill:fill Check.value ->
+    ?fill_opacity:fill_opacity Check.value ->
+    ?fill_rule:fill_rule Check.value ->
+    ?filter:filter Check.value ->
+    ?font_family:font_family Check.value ->
+    ?font_size:font_size Check.value ->
+    ?font_size_adjust:font_size_adjust Check.value ->
+    ?font_stretch:font_stretch Check.value ->
+    ?font_style:font_style Check.value ->
+    ?font_variant:font_variant Check.value ->
+    ?font_weight:font_weight Check.value ->
+    ?glyph_orientation_horizontal:glyph_orientation_horizontal Check.value ->
+    ?glyph_orientation_vertical:glyph_orientation_vertical Check.value ->
+    ?kerning:kerning Check.value ->
     ?lang:lang Check.value ->
     ?length_adjust:length_adjust Check.value ->
+    ?letter_spacing:letter_spacing Check.value ->
+    ?mask:mask Check.value ->
+    ?opacity:opacity Check.value ->
+    ?pointer_events:pointer_events Check.value ->
     ?required_extensions:required_extensions Check.value ->
     ?required_features:required_features Check.value ->
     ?rotate:rotate Check.value ->
+    ?stroke:stroke Check.value ->
+    ?stroke_dasharray:stroke_dasharray Check.value ->
+    ?stroke_dashoffset:stroke_dashoffset Check.value ->
+    ?stroke_linecap:stroke_linecap Check.value ->
+    ?stroke_linejoin:stroke_linejoin Check.value ->
+    ?stroke_miterlimit:stroke_miterlimit Check.value ->
+    ?stroke_opacity:stroke_opacity Check.value ->
+    ?stroke_width:stroke_width Check.value ->
     ?system_language:system_language Check.value ->
+    ?text_anchor:text_anchor Check.value ->
+    ?text_decoration:text_decoration Check.value ->
     ?text_length:text_length Check.value ->
+    ?text_rendering:text_rendering Check.value ->
     ?transform:transform Check.value ->
+    ?unicode_bidi:unicode_bidi Check.value ->
+    ?visibility:visibility Check.value ->
+    ?word_spacing:word_spacing Check.value ->
+    ?writing_mode:writing_mode Check.value ->
     ?x:x Check.value ->
     ?xmlns:xmlns Check.value ->
     ?y:y Check.value ->
@@ -7199,7 +8215,7 @@ module type ThHTMLAttributes = sig
   type title = string
   type translate = [ `yes | `no ]
   type typeof = string
-  type valign = [ `baseline | `bottom | `middle | `top ]
+  type valign = [ `baseline | `middle | `bottom | `top ]
   type vocab = string
   type width = string
   type 'r check =
