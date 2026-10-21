@@ -2,8 +2,9 @@ module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Link
 
-(* HeroUI's classes for a link's parts, the same whatever its options. *)
-let slots = Styles.Link.slots (Styles.Link.options ())
+(* HeroUI's classes for a link's parts, the same whatever its options, read
+   as a part is made: a module does nothing as it loads. *)
+let slots () = Styles.Link.slots (Styles.Link.options ())
 
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
@@ -11,7 +12,7 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Icon = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
       () =
-    let icon () = after (Styles.Link.icon slots) (class_ ()) in
+    let icon () = after (Styles.Link.icon (slots ())) (class_ ()) in
     <Show
       when_=(fun () -> Option.is_some (children ()))
       fallback=(<span

@@ -14,10 +14,12 @@ end
 
 module Label = struct
   (* HeroUI's label class is one, whatever the badge's options. *)
-  let label = Styles.Badge.label (Styles.Badge.slots (Styles.Badge.options ()))
+  let label () =
+    Styles.Badge.label (Styles.Badge.slots (Styles.Badge.options ()))
 
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
-    <span class_=(fun () -> after label (class_ ())) data_slot="badge-label">
+    <span
+      class_=(fun () -> after (label ()) (class_ ())) data_slot="badge-label">
       (fun () -> children ())
     </span>
 end
