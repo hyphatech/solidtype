@@ -71,6 +71,7 @@ generate/            what writes the generated bindings from Solid's and
   output             a generator's files written, or checked by `--check`
   ocaml              an OCaml type as a generator builds it, and its one
                      printer
+  source             an OCaml file and its interface, written side by side
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated

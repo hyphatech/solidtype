@@ -13,6 +13,7 @@ import { keywords, label, record, snake, table } from "./names.ts";
 import { domType, isString, isTag } from "./melange.ts";
 import { apply, isArrow, name as tname, paren, print, vars as typeVarsOf, type Param, type Type } from "./ocaml.ts";
 import { writeOrCheck } from "./output.ts";
+import { Source } from "./source.ts";
 import { browser } from "./program.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -186,11 +187,15 @@ const unit = tname("unit");
 const isUnit = (t: Type) => t.kind === "name" && t.name === "unit";
 const either = (left: Type, right: Type): Type => ({ kind: "ref", module: "Either", args: [left, right] });
 
-// The printed form inside Types, where a reference is a placeholder the file
-// it is written in resolves.
-const placeholder = (module: string) => `§${module}§`;
-const show = (t: Type) => print(t, placeholder);
-const showArg = (t: Type) => paren(t, placeholder);
+// A type as each file names it: inside Types, where the types refer to one
+// another, a named type is its flat name; outside, its module's t.
+const flatName = (module: string) => `t_${snake(module)}`;
+const inside = (module: string) => (module === "Either" ? "either" : flatName(module));
+const outside = (module: string) => `Types.${module}.t`;
+const showIn = (t: Type) => print(t, inside);
+const argIn = (t: Type) => paren(t, inside);
+const showOut = (t: Type) => print(t, outside);
+const argOut = (t: Type) => paren(t, outside);
 
 // Solid's JSX.Element is a union, which TypeScript inlines into a union it is
 // part of; its members together are one element.
@@ -240,7 +245,7 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): Type | null {
   // member as it is, built by a conversion per member.
   const kinds = members.map((m) => mapOne(m, vars, where));
   if (kinds.some((k) => k === null)) return null;
-  const distinct = [...new Map((kinds as Type[]).map((k) => [show(k), k])).values()];
+  const distinct = [...new Map((kinds as Type[]).map((k) => [showIn(k), k])).values()];
   if (distinct.length === 1) return distinct[0]!;
   if (distinct.length === 2) return either(distinct[0]!, distinct[1]!);
   return null;
@@ -434,7 +439,7 @@ function fixedElement(decl: ts.SignatureDeclaration): { element: string; own: ts
 
 // One part's binding: its component, from its entry, and its props check --
 // its options, then its children, then its element's attributes.
-function part(entry: string, name: string, decl: ts.SignatureDeclaration, options: ts.Type | null, js: string): string {
+function part(src: Source, entry: string, name: string, decl: ts.SignatureDeclaration, options: ts.Type | null, js: string): void {
   const where = `${entry}.${name}`;
   const vars: Vars = new Map();
   const tp = decl.typeParameters?.find((p) => p.default && /ValidComponent/.test(p.constraint?.getText() ?? ""));
@@ -467,33 +472,35 @@ function part(entry: string, name: string, decl: ts.SignatureDeclaration, option
     }
     if (p.name === "children") {
       // Children: elements, a function of the part's own, or either.
-      const render = t.kind === "ref" && t.module === "Either" && show(t.args[0]!) === show(jsxElement) ? t.args[1] : undefined;
+      const render = t.kind === "ref" && t.module === "Either" && showOut(t.args[0]!) === showOut(jsxElement) ? t.args[1] : undefined;
       const q = optional ? "?" : "";
       children = render
-        ? `${q}children:(${show(render)}, [ \`nodes | \`render ]) Solidtype.Check.children ->`
+        ? `${q}children:(${showOut(render)}, [ \`nodes | \`render ]) Solidtype.Check.children ->`
         : isArrow(t)
-          ? `${q}children:(${show(t)}, [ \`render ]) Solidtype.Check.children ->`
+          ? `${q}children:(${showOut(t)}, [ \`render ]) Solidtype.Check.children ->`
           : `${q}children:('f, [ \`nodes ]) Solidtype.Check.children ->`;
       continue;
     }
     const name = record(names, p.name);
-    const checked = isArrow(t) ? `(${show(t)})` : `${showArg(t)} Solidtype.Check.value`;
+    const checked = isArrow(t) ? `(${showOut(t)})` : `${argOut(t)} Solidtype.Check.value`;
     args.push(`${optional ? "?" : ""}${name}:${checked} ->`);
   }
   const html = element ? element.charAt(0).toUpperCase() + element.slice(1) : null;
   const tail = `${children} unit -> unit`;
   const check = html && htmlModules.has(html) ? `(${tail}) Solidtype.Html.${html}.check` : tail;
-  return [
-    `    module Props = struct`,
-    `      external check :`,
-    ...args.map((a) => `        ${a}`),
-    `        ${check} = "check"`,
-    `      [@@mel.module "vite-plugin-solidtype/markers"]`,
-    `    end`,
+  src.module("    ", "Props", () =>
+    src.both(
+      `      external check :`,
+      ...args.map((a) => `        ${a}`),
+      `        ${check} = "check"`,
+      `      [@@mel.module "vite-plugin-solidtype/markers"]`,
+    ),
+  );
+  src.both(
     ``,
     `    external component : unit Solidtype.Jsx.component = "${js}"`,
     `    [@@mel.module "@kobalte/core/${entry}"]`,
-  ].join("\n");
+  );
 }
 
 // A symbol's type, also one a mapped type made, which has no declaration.
@@ -519,37 +526,35 @@ const undocumentedThrows = new Set(["Color.toFormat"]);
 const throws = (symbol: ts.Symbol, where: string) =>
   undocumentedThrows.has(where) || /\bThrows\b/.test(ts.displayPartsToString(symbol.getDocumentationComment(checker)));
 
-// The type of each function written as a let, by its module and name: the
-// .mli declares it, where the raw external under it, _js, is left out.
-const vals = new Map<string, string>();
-
-// The OCaml function over [js], an external that may throw, of [type], in
-// module [where]: [self] its object where it is a method, and [opt] whether
-// an _opt is written beside. It takes [sig]'s arguments as the external
-// does: by position, and one that may be left out as ?name, then ().
-function guarded(indent: string, where: string, name: string, type: Extract<Type, { kind: "arrow" }>, js: string, sig: ts.Signature, self: boolean, opt: boolean): string[] {
-  vals.set(`${where}.${name}`, show(type));
+// The OCaml function over [js], an external that may throw, of [type],
+// written into [src]: [self] its object where it is a method, and [opt]
+// whether an _opt is written beside. It takes [sig]'s arguments as the
+// external does: by position, and one that may be left out as ?name, then ().
+// The interface declares each function, and leaves the external out.
+function guarded(src: Source, indent: string, name: string, type: Extract<Type, { kind: "arrow" }>, show: (t: Type) => string, js: string, sig: ts.Signature, self: boolean, opt: boolean): void {
   const ps = sig.getParameters();
   const named = ps.map((q, i) => (leftOut(q) ? `?${value(snake(q.name))}` : `x${i}`));
   if (ps.some(leftOut)) named.push("()");
   const xs = named.length === 0 ? "()" : named.join(" ");
   const args = self ? `o ${xs}` : xs;
-  const lines = [
+  src.implementation(
     `${indent}let ${name} ${args} =`,
     `${indent}  match ${js} ${args} with`,
     `${indent}  | v -> v`,
     `${indent}  | exception Js.Exn.Error e -> invalid_arg ("${name}: " ^ Option.value (Js.Exn.message e) ~default:"")`,
-  ];
+  );
+  src.interface(`${indent}val ${name} : ${show(type)}`);
   if (opt) {
-    vals.set(`${where}.${name}_opt`, show({ ...type, result: apply("option", type.result) }));
-    lines.push(`${indent}let ${name}_opt ${args} = match ${js} ${args} with v -> Some v | exception Js.Exn.Error _ -> None`);
+    src.implementation(`${indent}let ${name}_opt ${args} = match ${js} ${args} with v -> Some v | exception Js.Exn.Error _ -> None`);
+    src.interface(`${indent}val ${name}_opt : ${show({ ...type, result: apply("option", type.result) })}`);
   }
-  return lines;
 }
 
 const real = (s: ts.Symbol) => (s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
 
+// Each entry's module, its lines ending in an empty one, then end.
 let body = "";
+let bodyMli = "";
 for (const entry of entries) {
   const source = program.getSourceFile(`${dist}/${entry}/index.d.ts`);
   const mod = source && checker.getSymbolAtLocation(source);
@@ -557,7 +562,7 @@ for (const entry of entries) {
   const exports = checker.getExportsOfModule(mod);
   const byName = new Map(exports.map((s) => [s.name, s]));
   const component = pascal(entry);
-  const lines: string[] = [];
+  const src = new Source();
   for (const sym of [...exports].sort((a, b) => (a.name < b.name ? -1 : 1))) {
     const r = real(sym);
     const declared = r.declarations?.[0];
@@ -587,16 +592,14 @@ for (const entry of entries) {
       if (optType?.isUnion() && optType.types.some((t) => /Multiple/.test(checker.typeToString(t)))) {
         for (const variant of optType.types) {
           const multiple = /Multiple/.test(checker.typeToString(variant));
-          lines.push(`  module ${sym.name}${multiple ? "_multiple" : ""} = struct`);
-          lines.push(part(entry, sym.name, decl, variant, sym.name));
-          lines.push(`  end`, ``);
+          src.module("  ", `${sym.name}${multiple ? "_multiple" : ""}`, () => part(src, entry, sym.name, decl, variant, sym.name));
+          src.both(``);
         }
         continue;
       }
-      lines.push(...doc(r, "  "));
-      lines.push(`  module ${sym.name} = struct`);
-      lines.push(part(entry, sym.name, decl, optType, sym.name));
-      lines.push(`  end`, ``);
+      src.both(...doc(r, "  "));
+      src.module("  ", sym.name, () => part(src, entry, sym.name, decl, optType, sym.name));
+      src.both(``);
     } else if ((r.flags & ts.SymbolFlags.Function) && ts.isFunctionDeclaration(decl)) {
       const sig = checker.getSignaturesOfType(checker.getTypeOfSymbol(r), ts.SignatureKind.Call)[0];
       const t = sig ? mapFunction(sig, new Map(), `${entry}.${sym.name}`, true) : null;
@@ -606,15 +609,14 @@ for (const entry of entries) {
       }
       const name = value(snake(sym.name));
       if (sig && throws(r, sym.name)) {
-        lines.push(`  external ${name}_js : ${show(t)} = "${sym.name}"`);
-        lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`);
-        lines.push(...doc(r, "  ", true));
-        lines.push(...guarded("  ", component, name, t, `${name}_js`, sig, false, true), ``);
+        src.implementation(`  external ${name}_js : ${showOut(t)} = "${sym.name}"`, `  [@@mel.module "@kobalte/core/${entry}"]`);
+        src.both(...doc(r, "  ", true));
+        guarded(src, "  ", name, t, showOut, `${name}_js`, sig, false, true);
+        src.both(``);
         continue;
       }
-      lines.push(...doc(r, "  "));
-      lines.push(`  external ${name} : ${show(t)} = "${sym.name}"`);
-      lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`, ``);
+      src.both(...doc(r, "  "));
+      src.both(`  external ${name} : ${showOut(t)} = "${sym.name}"`, `  [@@mel.module "@kobalte/core/${entry}"]`, ``);
     } else if (r.flags & ts.SymbolFlags.Variable && sym.name !== component && !byName.get(sym.name)?.getDeclarations()?.some(ts.isFunctionDeclaration)) {
       // A value: toaster, the storage managers, the default translations.
       const vt = checker.getTypeOfSymbol(r);
@@ -624,20 +626,19 @@ for (const entry of entries) {
         unmapped.set(`${entry}.${sym.name}`, checker.typeToString(vt));
         continue;
       }
-      lines.push(`  external ${value(snake(sym.name))} : ${show(t)} = "${sym.name}"`);
-      lines.push(`  [@@mel.module "@kobalte/core/${entry}"]`, ``);
+      src.both(`  external ${value(snake(sym.name))} : ${showOut(t)} = "${sym.name}"`, `  [@@mel.module "@kobalte/core/${entry}"]`, ``);
     }
   }
-  if (lines.length === 0) continue;
-  body += `\nmodule ${component} = struct\n${lines.join("\n")}end\n`;
+  if (src.ml.length === 0) continue;
+  body += `\nmodule ${component} = struct\n${src.ml.join("\n")}end\n`;
+  bodyMli += `\nmodule ${component} : sig\n${src.mli.join("\n")}end\n`;
 }
 
 // Each named type: abstract, a getter per property, a method per method,
 // and a constructor where it has none and is not a class.
-const flatName = (module: string) => `t_${snake(module)}`;
 const abstracts: string[] = [];
 const done = new Set<ts.Symbol | ts.Type>();
-const signatures: string[] = [];
+const signatures: Source[] = [];
 while (queue.length > 0) {
   const n = queue.shift()!;
   const key = n.symbol ?? n.type;
@@ -647,167 +648,172 @@ while (queue.length > 0) {
   const vs = n.params.map((p) => typeVar(p, vars));
   const params = vs.flatMap(typeVarsOf);
   const self: Type = vs.length === 0 ? tname("t") : apply("t", ...vs);
-  const t = show(self);
+  const t = showIn(self);
   const declared = n.symbol && !(n.symbol.flags & ts.SymbolFlags.TypeAlias) ? checker.getDeclaredTypeOfSymbol(n.symbol) : n.type;
-  const flat = show(vs.length === 0 ? tname(flatName(n.module)) : apply(flatName(n.module), ...vs));
+  const flat = showIn(vs.length === 0 ? tname(flatName(n.module)) : apply(flatName(n.module), ...vs));
   abstracts.push(`  type ${flat}`);
-  const lines: string[] = [...(n.symbol ? doc(n.symbol, "  ") : []), `  module ${n.module} = struct`, `    type ${t} = ${flat}`];
-  const isClass = n.symbol !== null && (n.symbol.flags & ts.SymbolFlags.Class) !== 0;
-  // A standard type is Melange's to bind, but for one a user builds or
-  // reads, whose fields, methods and constructor are bound here.
-  const library = n.symbol !== null && isDomLib(n.symbol) && !readable.has(n.symbol.name);
-  const fields: [string, Type, boolean][] = [];
-  // A function a field holds, wrapped once by [make] into the shape its type
-  // declares: OCaml writes [fun id () -> ...] and [fun id -> fun () -> ...]
-  // as one type but not one arity, and a [let] between two [fun]s keeps
-  // Melange from merging them. The field stays curried, since Melange drops
-  // [@mel.as] from an uncurried field of a [@@mel.obj].
-  const shaped = new Map<string, (f: string) => string>();
-  let methods = 0;
-  for (const p of checker.getPropertiesOfType(declared)) {
-    if (!named(p.name)) continue;
-    // A standard type's members are Melange's, through a conversion.
-    if (!library && n.conversions.length > 0 && p.declarations?.every((d) => /typescript\/lib\/lib\./.test(d.getSourceFile().fileName))) continue;
-    const pt = checker.getTypeOfSymbol(p);
-    const optional = (p.flags & ts.SymbolFlags.Optional) !== 0;
-    // A standard type's method stays one where a mapped type, Omit, gives it
-    // back as a property: its declaration is still a method's.
-    const method = (p.flags & ts.SymbolFlags.Method) !== 0 || (p.declarations ?? []).some((d) => ts.isMethodSignature(d) || ts.isMethodDeclaration(d));
-    if (method) {
-      // The standard library's methods are Melange's to bind.
-      if (library) continue;
-      const sig = pt.getCallSignatures()[0];
-      const f = sig ? mapFunction(sig, vars, `${n.module}.${p.name}`, true) : null;
-      if (!f || unbound(f, params)) {
-        unmapped.set(`${n.module}.${p.name}()`, sig ? checker.signatureToString(sig) : "?");
+  const src = new Source();
+  signatures.push(src);
+  src.both(...(n.symbol ? doc(n.symbol, "  ") : []));
+  src.module("  ", n.module, () => {
+    src.both(`    type ${t} = ${flat}`);
+    const isClass = n.symbol !== null && (n.symbol.flags & ts.SymbolFlags.Class) !== 0;
+    // A standard type is Melange's to bind, but for one a user builds or
+    // reads, whose fields, methods and constructor are bound here.
+    const library = n.symbol !== null && isDomLib(n.symbol) && !readable.has(n.symbol.name);
+    const fields: [string, Type, boolean][] = [];
+    // A function a field holds, wrapped once by [make] into the shape its type
+    // declares: OCaml writes [fun id () -> ...] and [fun id -> fun () -> ...]
+    // as one type but not one arity, and a [let] between two [fun]s keeps
+    // Melange from merging them. The field stays curried, since Melange drops
+    // [@mel.as] from an uncurried field of a [@@mel.obj].
+    const shaped = new Map<string, (f: string) => string>();
+    let methods = 0;
+    for (const p of checker.getPropertiesOfType(declared)) {
+      if (!named(p.name)) continue;
+      // A standard type's members are Melange's, through a conversion.
+      if (!library && n.conversions.length > 0 && p.declarations?.every((d) => /typescript\/lib\/lib\./.test(d.getSourceFile().fileName))) continue;
+      const pt = checker.getTypeOfSymbol(p);
+      const optional = (p.flags & ts.SymbolFlags.Optional) !== 0;
+      // A standard type's method stays one where a mapped type, Omit, gives it
+      // back as a property: its declaration is still a method's.
+      const method = (p.flags & ts.SymbolFlags.Method) !== 0 || (p.declarations ?? []).some((d) => ts.isMethodSignature(d) || ts.isMethodDeclaration(d));
+      if (method) {
+        // The standard library's methods are Melange's to bind.
+        if (library) continue;
+        const sig = pt.getCallSignatures()[0];
+        const f = sig ? mapFunction(sig, vars, `${n.module}.${p.name}`, true) : null;
+        if (!f || unbound(f, params)) {
+          unmapped.set(`${n.module}.${p.name}()`, sig ? checker.signatureToString(sig) : "?");
+          continue;
+        }
+        methods++;
+        const name = value(snake(p.name));
+        if (sig && throws(p, `${n.module}.${p.name}`)) {
+          src.implementation(`    external ${name}_js : ${t} -> ${showIn(f)} = "${p.name}" [@@mel.send]`);
+          src.both(...doc(p, "    ", true));
+          guarded(src, "    ", name, { ...f, params: [{ type: self }, ...f.params] }, showIn, `${name}_js`, sig, true, false);
+          continue;
+        }
+        src.both(`    external ${name} : ${t} -> ${showIn(f)} = "${p.name}" [@@mel.send]`);
         continue;
       }
-      methods++;
-      const name = value(snake(p.name));
-      if (sig && throws(p, `${n.module}.${p.name}`)) {
-        lines.push(`    external ${name}_js : ${t} -> ${show(f)} = "${p.name}" [@@mel.send]`);
-        lines.push(...doc(p, "    ", true));
-        lines.push(...guarded("    ", n.module, name, { ...f, params: [{ type: self }, ...f.params] }, `${name}_js`, sig, true, false));
+      const ft = map(pt, vars, `${n.module}.${p.name}`, optional);
+      if (!ft) {
+        unmapped.set(`${n.module}.${p.name}`, checker.typeToString(pt));
         continue;
       }
-      lines.push(`    external ${name} : ${t} -> ${show(f)} = "${p.name}" [@@mel.send]`);
-      continue;
-    }
-    const ft = map(pt, vars, `${n.module}.${p.name}`, optional);
-    if (!ft) {
-      unmapped.set(`${n.module}.${p.name}`, checker.typeToString(pt));
-      continue;
-    }
-    fields.push([p.name, ft, optional]);
-    // Its constructor takes it, but reading it would be a cast.
-    if (unbound(ft, params)) {
-      unmapped.set(`${n.module}.${p.name}`, `read as ${show(ft)}`);
-      continue;
-    }
-    lines.push(...doc(p, "    "));
-    const sig = checker.getNonNullableType(pt).getCallSignatures()[0];
-    // A function is one the mapping writes as an arrow, not a setter, an
-    // accessor or a type of its own that happens to be callable.
-    const arrow = isArrow(ft);
-    const fn = sig && arrow && checker.getNonNullableType(pt).getProperties().length === 0 && !optional
-      ? mapFunction(sig, vars, `${n.module}.${p.name}`)
-      : null;
-    if (sig && library) continue;
-    if (sig && fn) {
-      // A function a property holds: read uncurried, as Melange counts an
-      // external's arguments through parentheses, and called curried.
-      const arity = sig.getParameters().length;
-      const xs = Array.from({ length: arity }, (_, i) => `x${i}`);
-      const getter = `${value(snake(p.name))}_js`;
-      const args = arity === 0 ? "()" : xs.join(" ");
-      // A function it returns is uncurried too, since OCaml reads
-      // a -> (b -> c) as a -> b -> c, and is given back curried.
-      const returned = sig.getReturnType().getCallSignatures()[0];
-      const result = returned ? mapFunction(returned, vars, `${n.module}.${p.name}`) : null;
-      if (returned && result) {
-        const argTypes = sig.getParameters().map((q) => map(checker.getTypeOfSymbol(q), vars, n.module));
-        const inner = returned.getParameters().length;
-        const ys = Array.from({ length: inner }, (_, i) => `y${i}`);
-        const yargs = inner === 0 ? "()" : ys.join(" ");
-        const params = argTypes.length === 0 ? "unit" : argTypes.map((a) => showArg(a ?? tname("_"))).join(" -> ");
-        lines.push(`    external ${getter} : ${t} -> (${params} -> (${show(result)} [@u]) [@u]) = "${p.name}" [@@mel.get]`);
-        lines.push(`    let ${value(snake(p.name))} o ${args} = let r = (${getter} o) ${args} [@u] in fun ${yargs} -> r ${yargs} [@u]`);
-        vals.set(`${n.module}.${value(snake(p.name))}`, `${t} -> ${params} -> ${showArg(result)}`);
-        shaped.set(p.name, (f) => `(fun ${args} -> let r = ${f} ${args} in fun ${yargs} -> r ${yargs})`);
+      fields.push([p.name, ft, optional]);
+      // Its constructor takes it, but reading it would be a cast.
+      if (unbound(ft, params)) {
+        unmapped.set(`${n.module}.${p.name}`, `read as ${showIn(ft)}`);
+        continue;
+      }
+      src.both(...doc(p, "    "));
+      const sig = checker.getNonNullableType(pt).getCallSignatures()[0];
+      // A function is one the mapping writes as an arrow, not a setter, an
+      // accessor or a type of its own that happens to be callable.
+      const fn = sig && isArrow(ft) && checker.getNonNullableType(pt).getProperties().length === 0 && !optional
+        ? mapFunction(sig, vars, `${n.module}.${p.name}`)
+        : null;
+      if (sig && library) continue;
+      if (sig && fn) {
+        // A function a property holds: read uncurried, as Melange counts an
+        // external's arguments through parentheses, and called curried.
+        const arity = sig.getParameters().length;
+        const xs = Array.from({ length: arity }, (_, i) => `x${i}`);
+        const getter = `${value(snake(p.name))}_js`;
+        const args = arity === 0 ? "()" : xs.join(" ");
+        // A function it returns is uncurried too, since OCaml reads
+        // a -> (b -> c) as a -> b -> c, and is given back curried.
+        const returned = sig.getReturnType().getCallSignatures()[0];
+        const result = returned ? mapFunction(returned, vars, `${n.module}.${p.name}`) : null;
+        if (returned && result) {
+          const argTypes = sig.getParameters().map((q) => map(checker.getTypeOfSymbol(q), vars, n.module));
+          const inner = returned.getParameters().length;
+          const ys = Array.from({ length: inner }, (_, i) => `y${i}`);
+          const yargs = inner === 0 ? "()" : ys.join(" ");
+          const params = argTypes.length === 0 ? "unit" : argTypes.map((a) => argIn(a ?? tname("_"))).join(" -> ");
+          src.implementation(
+            `    external ${getter} : ${t} -> (${params} -> (${showIn(result)} [@u]) [@u]) = "${p.name}" [@@mel.get]`,
+            `    let ${value(snake(p.name))} o ${args} = let r = (${getter} o) ${args} [@u] in fun ${yargs} -> r ${yargs} [@u]`,
+          );
+          src.interface(`    val ${value(snake(p.name))} : ${t} -> ${params} -> ${argIn(result)}`);
+          shaped.set(p.name, (f) => `(fun ${args} -> let r = ${f} ${args} in fun ${yargs} -> r ${yargs})`);
+        } else {
+          // Called as a method of the object that holds it: an external is
+          // called directly from another library, where a [let] in a nested
+          // module goes through Curry, its arity lost.
+          src.both(`    external ${value(snake(p.name))} : ${t} -> ${showIn(mapFunction(sig, vars, `${n.module}.${p.name}`, true) ?? fn)} = "${p.name}" [@@mel.send]`);
+        }
       } else {
-        // Called as a method of the object that holds it: an external is
-        // called directly from another library, where a [let] in a nested
-        // module goes through Curry, its arity lost.
-        lines.push(`    external ${value(snake(p.name))} : ${t} -> ${show(mapFunction(sig, vars, `${n.module}.${p.name}`, true) ?? fn)} = "${p.name}" [@@mel.send]`);
+        src.both(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${argIn(ft)} option` : argIn(ft)} = "${p.name}" [@@mel.get]`);
       }
-    } else {
-      lines.push(`    external ${value(snake(p.name))} : ${t} -> ${optional ? `${showArg(ft)} option` : showArg(ft)} = "${p.name}" [@@mel.get]`);
     }
-  }
-  // A value Kobalte declares as a DOM node or event, extended, is that value:
-  // the conversion only forgets what Kobalte added, so it is %identity, named
-  // as the stdlib names a conversion, to_html_div_element.
-  for (const d of n.conversions) {
-    lines.push(`    external to_${snake(d.slice(4))} : ${t} -> ${d} = "%identity"`);
-  }
-  if (!isClass && !library && methods === 0 && fields.length > 0 && n.conversions.length === 0) {
-    const label = ([k, ft, opt]: [string, Type, boolean]) =>
-      `${opt ? "?" : ""}${value(snake(k))}:(${showArg(ft)} [@mel.as "${k}"]) ->`;
-    if (shaped.size === 0) {
-      lines.push(`    external make : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
-    } else {
-      const params = fields.map(([k, , opt]) => `${opt ? "?" : "~"}${value(snake(k))}`);
-      const passed = fields.map(([k, , opt]) => {
-        const v = value(snake(k));
-        const shape = shaped.get(k);
-        return opt ? `?${v}` : shape ? `~${v}:${shape(v)}` : `~${v}`;
-      });
-      lines.push(`    external make_js : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
-      lines.push(`    let make ${params.join(" ")} () = make_js ${passed.join(" ")} ()`);
-      const labels = fields.map(([k, ft, opt]) => `${opt ? "?" : ""}${value(snake(k))}:${showArg(ft)} ->`);
-      vals.set(`${n.module}.make`, `${labels.join(" ")} unit -> ${t}`);
+    // A value Kobalte declares as a DOM node or event, extended, is that value:
+    // the conversion only forgets what Kobalte added, so it is %identity, named
+    // as the stdlib names a conversion, to_html_div_element.
+    for (const d of n.conversions) {
+      src.both(`    external to_${snake(d.slice(4))} : ${t} -> ${d} = "%identity"`);
     }
-  }
-  if (isClass && n.symbol?.valueDeclaration) {
-    const mod = moduleOf(n.symbol);
-    const ctor = checker.getTypeOfSymbolAtLocation(n.symbol, n.symbol.valueDeclaration).getConstructSignatures()[0];
-    const f = ctor ? mapFunction(ctor, vars, `${n.module}.constructor`, true) : null;
-    if (f && mod) {
-      lines.push(`    external make : ${show({ ...f, result: self })} = "${n.module}" [@@mel.new] [@@mel.module "${mod}"]`);
+    if (!isClass && !library && methods === 0 && fields.length > 0 && n.conversions.length === 0) {
+      const label = ([k, ft, opt]: [string, Type, boolean]) =>
+        `${opt ? "?" : ""}${value(snake(k))}:(${argIn(ft)} [@mel.as "${k}"]) ->`;
+      if (shaped.size === 0) {
+        src.both(`    external make : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`);
+      } else {
+        const params = fields.map(([k, , opt]) => `${opt ? "?" : "~"}${value(snake(k))}`);
+        const passed = fields.map(([k, , opt]) => {
+          const v = value(snake(k));
+          const shape = shaped.get(k);
+          return opt ? `?${v}` : shape ? `~${v}:${shape(v)}` : `~${v}`;
+        });
+        src.implementation(
+          `    external make_js : ${fields.map(label).join(" ")} unit -> ${t} = "" [@@mel.obj]`,
+          `    let make ${params.join(" ")} () = make_js ${passed.join(" ")} ()`,
+        );
+        const labels = fields.map(([k, ft, opt]) => `${opt ? "?" : ""}${value(snake(k))}:${argIn(ft)} ->`);
+        src.interface(`    val make : ${labels.join(" ")} unit -> ${t}`);
+      }
     }
-  }
-  lines.push(`  end`);
-  signatures.push(lines.join("\n"));
+    if (isClass && n.symbol?.valueDeclaration) {
+      const mod = moduleOf(n.symbol);
+      const ctor = checker.getTypeOfSymbolAtLocation(n.symbol, n.symbol.valueDeclaration).getConstructSignatures()[0];
+      const f = ctor ? mapFunction(ctor, vars, `${n.module}.constructor`, true) : null;
+      if (f && mod) {
+        src.both(`    external make : ${showIn({ ...f, result: self })} = "${n.module}" [@@mel.new] [@@mel.module "${mod}"]`);
+      }
+    }
+  });
 }
 
-// A reference to a named type: its flat name inside Types, where the types
-// refer to one another, and its module's type outside.
-const inside = (x: string) => x.replace(/§([A-Za-z0-9_]+)§/g, (_, m: string) => (m === "Either" ? "either" : flatName(m)));
-const outside = (x: string) => x.replace(/§([A-Za-z0-9_]+)§/g, (_, m: string) => `Types.${m}.t`);
-
-// What Types holds, a module one deep in its own file.
-const typesInner = `  (* Members of different JavaScript kinds, each as it is. *)
+// What Types holds, a module one deep in its own file, as its file or its
+// interface writes it.
+const opaqueOnly = [...opaques].sort().filter((o) => !moduleNames.has(o));
+const typesInner = (lines: (s: Source) => string[], open: (m: string) => string) => `  (* Members of different JavaScript kinds, each as it is. *)
   type ('a, 'b) either
-${[...opaques].sort().filter((o) => !moduleNames.has(o)).map((o) => `  type ${flatName(o)}`).join("\n")}
+${opaqueOnly.map((o) => `  type ${flatName(o)}`).join("\n")}
 ${abstracts.join("\n")}
 
-  module Either = struct
+  ${open("Either")}
     type ('a, 'b) t = ('a, 'b) either
 
     external left : 'a -> ('a, 'b) t = "%identity"
     external right : 'b -> ('a, 'b) t = "%identity"
   end
-${[...opaques].sort().filter((o) => !moduleNames.has(o)).map((o) => `\n  (* The standard library's ${o}, opaque. *)\n  module ${o} = struct\n    type t = ${flatName(o)}\n  end\n`).join("")}
-${inside(signatures.join("\n\n"))}`;
+${opaqueOnly.map((o) => `\n  (* The standard library's ${o}, opaque. *)\n  ${open(o)}\n    type t = ${flatName(o)}\n  end\n`).join("")}
+${signatures.map((s) => lines(s).join("\n")).join("\n\n")}`;
 
-const typesText = `(* The types Kobalte's components and functions name, each a module.
+const typesFile = (inner: string) => `(* The types Kobalte's components and functions name, each a module.
    Generated from the declarations of @kobalte/core ${kobalte} by
    generate/kobalte.ts; never edited by hand. *)
 
-${typesInner.replace(/^  /gm, "")}
+${inner.replace(/^  /gm, "")}
 `;
+const typesText = typesFile(typesInner((s) => s.ml, (m) => `module ${m} = struct`));
+const typesMli = typesFile(typesInner((s) => s.mli, (m) => `module ${m} : sig`));
 
-const text = `(* Every Kobalte component, part by part, its hooks and utilities, and the
+const componentsFile = (modules: string) => `(* Every Kobalte component, part by part, its hooks and utilities, and the
    types they name, in Types. Generated from the declarations of
    @kobalte/core ${kobalte} by generate/kobalte.ts; never edited by hand.
 
@@ -816,48 +822,9 @@ const text = `(* Every Kobalte component, part by part, its hooks and utilities,
    external, since the compiler checks it and Melange writes none of it. *)
 
 module Types = Types
-${outside(body)}`;
-
-// A file's interface, from the file: a struct is a sig, a let its val, and a
-// raw external under a let, _js, left out.
-function mli(ml: string, transform: (t: string) => string): string {
-  const lines = ml.split("\n");
-  const out: string[] = [];
-  const path: string[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i] ?? "";
-    const opened = /^(\s*)module (\w+) = struct\s*$/.exec(line);
-    if (opened) {
-      path.push(opened[2] ?? "");
-      out.push(line.replace(/= struct\s*$/, ": sig"));
-      continue;
-    }
-    if (/^\s*end\s*$/.test(line)) {
-      path.pop();
-      out.push(line);
-      continue;
-    }
-    if (/^\s*external [a-z_0-9]+_js /.test(line)) {
-      if (!line.includes("[@@")) i++;
-      continue;
-    }
-    const bound = /^(\s*)let ([a-z_0-9]+) /.exec(line);
-    if (bound) {
-      const indent = bound[1] ?? "";
-      const key = [...path, bound[2]].join(".");
-      const type = vals.get(key);
-      if (!type) throw new Error(`no type recorded for ${key}`);
-      out.push(`${indent}val ${bound[2]} : ${transform(type)}`);
-      while (i + 1 < lines.length && (lines[i + 1] ?? "").startsWith(`${indent} `)) i++;
-      continue;
-    }
-    out.push(line);
-  }
-  return out.join("\n");
-}
-
-const typesMli = mli(typesText, inside);
-const textMli = mli(text, outside);
+${modules}`;
+const text = componentsFile(body);
+const textMli = componentsFile(bodyMli);
 
 if (process.argv.includes("--unmapped")) for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 
