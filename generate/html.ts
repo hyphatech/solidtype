@@ -5,10 +5,11 @@
 // `--check` fails when a file differs from what Solid's types give.
 
 import ts from "typescript";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { keywords, record, table } from "./names.ts";
-import { switchPrefix } from "./opam.ts";
+import { domType, isString, isTag } from "./melange.ts";
+import { record, table } from "./names.ts";
+import { writeOrCheck } from "./output.ts";
 import { browser } from "./program.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -16,15 +17,6 @@ const jsx = `${root}node_modules/solid-js/types/jsx.d.ts`;
 const out = `${root}src/html.mli`;
 const namesOut = `${root}ppx/html_names.ml`;
 const solid = JSON.parse(readFileSync(`${root}node_modules/solid-js/package.json`, "utf8")).version as string;
-
-// The types Melange's Dom module has, which an event or an element maps to,
-// read from the switch the build uses: `make generate` runs this inside it.
-const prefix = switchPrefix();
-const domTypes = new Set(
-  readFileSync(`${prefix}/lib/melange/dom/melange/dom.ml`, "utf8")
-    .match(/^type [a-zA-Z_]+/gm)
-    ?.map((t) => t.slice(5)) ?? [],
-);
 
 const program = ts.createProgram([jsx], browser);
 const checker = program.getTypeChecker();
@@ -60,18 +52,7 @@ const eventUnions = new Set([
   "ChangeEventHandlerUnion", "EventHandlerWithOptionsUnion",
 ]);
 
-function domType(tsName: string, fallback: string): string {
-  const name = tsName.replace(/^HTML/, "html").replace(/^SVG/, "svg").replace(/^UI/, "ui");
-  const lower = name.charAt(0).toLowerCase() + name.slice(1);
-  return domTypes.has(lower) ? `Dom.${lower}` : fallback;
-}
-
 const unmapped = new Map<string, string>();
-
-// A tag is written as its name, so the literal must be one OCaml can name.
-function literalTag(v: string): boolean {
-  return /^[A-Za-z][A-Za-z0-9_']*$/.test(v) && !keywords.has(v);
-}
 
 // What an attribute holds, from Solid's declared type, by AGENTS.md's "An
 // attribute's type is generated from Solid's JSX types", and null for a
@@ -85,7 +66,7 @@ function ocamlType(name: string, node: ts.TypeNode | undefined): string | null {
   for (const p of parts) {
     if (ts.isTypeReferenceNode(p) && eventUnions.has(p.typeName.getText())) {
       const event = p.typeArguments?.[1]?.getText() ?? "Event";
-      return `${domType(event, "Dom.event")} -> unit`;
+      return `${domType(event) ?? "Dom.event"} -> unit`;
     }
   }
   const type = checker.getTypeFromTypeNode(node);
@@ -96,12 +77,7 @@ function ocamlType(name: string, node: ts.TypeNode | undefined): string | null {
   const has = (f: ts.TypeFlags) => flags.some((x) => (x & f) !== 0);
   const only = (f: ts.TypeFlags) => flags.every((x) => (x & f) !== 0);
   if (members.length === 0 || has(ts.TypeFlags.Any | ts.TypeFlags.Never)) return null;
-  // Any string: a plain one, a template, or literals widened by
-  // [string & {}], which TypeScript writes to keep them in its completions.
-  const open = (t: ts.Type) =>
-    (t.flags & (ts.TypeFlags.String | ts.TypeFlags.TemplateLiteral | ts.TypeFlags.StringMapping)) !== 0 ||
-    (t.isIntersection() && t.types.some(open));
-  if (members.some(open)) return "string";
+  if (members.some(isString)) return "string";
   if (only(ts.TypeFlags.BooleanLike)) return "bool";
   const strings = members.filter((t) => t.isStringLiteral()).map((t) => (t as ts.StringLiteralType).value);
   const booleans = members.filter((t) => t.flags & ts.TypeFlags.BooleanLike);
@@ -112,7 +88,7 @@ function ocamlType(name: string, node: ts.TypeNode | undefined): string | null {
   // Solid writes a boolean attribute as the text "true" or "false".
   if (strings.length === members.length && strings.every((s) => s === "true" || s === "false")) return "bool";
   if (strings.length === members.length) {
-    return strings.every(literalTag) ? `[ ${strings.map((s) => `\`${s}`).join(" | ")} ]` : "string";
+    return strings.every(isTag) ? `[ ${strings.map((s) => `\`${s}`).join(" | ")} ]` : "string";
   }
   if (only(ts.TypeFlags.NumberLike)) return "int";
   if (has(ts.TypeFlags.Number) && members.every((t) => t.flags & (ts.TypeFlags.NumberLike | ts.TypeFlags.StringLike))) return "string";
@@ -156,7 +132,7 @@ for (const tags of ["HTMLElementTags", "HTMLElementDeprecatedTags", "SVGElementT
     const tag = m.name.getText();
     if (!/^[a-z][A-Za-z0-9]*$/.test(tag) || elements.some((e) => e.tag === tag)) continue;
     const element = m.type.typeArguments?.[0]?.getText() ?? "Element";
-    elements.push({ tag, attributes: m.type.typeName.getText(), element: domType(element, "Dom.element") });
+    elements.push({ tag, attributes: m.type.typeName.getText(), element: domType(element) ?? "Dom.element" });
   }
 }
 
@@ -211,15 +187,10 @@ if (unmapped.size > 0 && process.argv.includes("--unmapped")) {
   for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 }
 
-const namesText = table(names, "generate/html.ts");
-if (process.argv.includes("--check")) {
-  for (const [file, want] of [[out, text], [namesOut, namesText]] as const) {
-    if (readFileSync(file, "utf8") !== want) {
-      console.error(`${file} is not what Solid's types give: run make generate`);
-      process.exit(1);
-    }
-  }
-} else {
-  writeFileSync(out, text);
-  writeFileSync(namesOut, namesText);
-}
+writeOrCheck(
+  [
+    [out, text],
+    [namesOut, table(names, "generate/html.ts")],
+  ],
+  "Solid's types",
+);

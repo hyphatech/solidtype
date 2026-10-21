@@ -66,6 +66,9 @@ generate/            what writes the generated bindings from Solid's and
   names              the one spelling of a name, shared by both
   program            the browser's library both read declarations under,
                      with no ambient types: Bun's own would join it
+  melange            what both read of Melange and write for it: Dom's
+                     types, a type that admits any string, a literal a tag
+  output             a generator's files written, or checked by `--check`
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated

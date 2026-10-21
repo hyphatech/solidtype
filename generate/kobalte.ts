@@ -7,10 +7,11 @@
 // `--check` fails when a file differs from what Kobalte's types give.
 
 import ts from "typescript";
-import { readdirSync, existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { readdirSync, existsSync, readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { keywords, label, record, snake, table } from "./names.ts";
-import { switchPrefix } from "./opam.ts";
+import { domType, isString, isTag } from "./melange.ts";
+import { writeOrCheck } from "./output.ts";
 import { browser } from "./program.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -28,10 +29,6 @@ const kobalte = JSON.parse(readFileSync(`${root}node_modules/@kobalte/core/packa
 // documentation does not offer as components.
 const blocks = new Set(["menu", "popper", "dismissable-layer", "polymorphic"]);
 
-const prefix = switchPrefix();
-const domTypes = new Set(
-  readFileSync(`${prefix}/lib/melange/dom/melange/dom.ml`, "utf8").match(/^type [a-zA-Z_]+/gm)?.map((t) => t.slice(5)) ?? [],
-);
 // The elements solidtype's Html has a module for.
 const htmlModules = new Set(
   readFileSync(`${root}src/html.mli`, "utf8").match(/^module [A-Z][A-Za-z0-9]* :/gm)?.map((m) => m.slice(7, -2)) ?? [],
@@ -50,7 +47,6 @@ const program = ts.createProgram(entries.map((d) => `${dist}/${d}/index.d.ts`), 
 const checker = program.getTypeChecker();
 
 const pascal = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
-const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 const value = (name: string) => (keywords.has(name) ? `${name}_` : name);
 const named = (name: string) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(name);
 
@@ -92,11 +88,6 @@ function moduleOf(symbol: ts.Symbol): string | null {
 function isDomLib(symbol: ts.Symbol): boolean {
   const file = symbol.declarations?.[0]?.getSourceFile().fileName ?? "";
   return /typescript\/lib\/lib\./.test(file);
-}
-
-function domType(name: string): string | null {
-  const ocaml = lowerFirst(name.replace(/^HTML/, "html").replace(/^SVG/, "svg").replace(/^UI/, "ui"));
-  return domTypes.has(ocaml) ? `Dom.${ocaml}` : null;
 }
 
 type Vars = Map<string, string>;
@@ -152,10 +143,6 @@ function opaque(name: string): string {
   opaques.add(name);
   return name;
 }
-
-const isString = (t: ts.Type): boolean =>
-  (t.flags & (ts.TypeFlags.String | ts.TypeFlags.TemplateLiteral | ts.TypeFlags.StringMapping)) !== 0 ||
-  (t.isIntersection() && t.types.some(isString));
 
 const isElement = (t: ts.Type) => t.aliasSymbol?.name === "Element" && moduleOf(t.aliasSymbol) === "solid-js";
 
@@ -225,7 +212,7 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): string | null 
   if (booleans.length === members.length) return "bool";
   const strings = members.filter((m) => m.isStringLiteral()).map((m) => (m as ts.StringLiteralType).value);
   if (strings.length === members.length) {
-    return strings.every((s) => named(s) && !keywords.has(s)) ? `[ ${strings.map((s) => `\`${s}`).join(" | ")} ]` : "string";
+    return strings.every(isTag) ? `[ ${strings.map((s) => `\`${s}`).join(" | ")} ]` : "string";
   }
   if (members.every((m) => m.flags & ts.TypeFlags.NumberLike)) return "float";
   if (members.length === 1) return mapOne(members[0]!, vars, where);
@@ -927,18 +914,13 @@ const textMli = mli(text, outside);
 
 if (process.argv.includes("--unmapped")) for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
 
-const namesText = table(names, "generate/kobalte.ts");
-if (process.argv.includes("--check")) {
-  for (const [file, want] of [[out, text], [`${out}i`, textMli], [typesOut, typesText], [`${typesOut}i`, typesMli], [namesOut, namesText]] as const) {
-    if (readFileSync(file, "utf8") !== want) {
-      console.error(`${file} is not what Kobalte's types give: run make generate`);
-      process.exit(1);
-    }
-  }
-} else {
-  writeFileSync(out, text);
-  writeFileSync(`${out}i`, textMli);
-  writeFileSync(typesOut, typesText);
-  writeFileSync(`${typesOut}i`, typesMli);
-  writeFileSync(namesOut, namesText);
-}
+writeOrCheck(
+  [
+    [out, text],
+    [`${out}i`, textMli],
+    [typesOut, typesText],
+    [`${typesOut}i`, typesMli],
+    [namesOut, table(names, "generate/kobalte.ts")],
+  ],
+  "Kobalte's types",
+);
