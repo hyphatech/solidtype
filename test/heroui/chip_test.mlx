@@ -1,0 +1,59 @@
+(* HeroUI's Chip beside the same Chip in React: the chip and the label its
+   text is wrapped in, each by its slot, class and text. *)
+
+module Chip = Solidtype_heroui.Chip
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  color:[ `accent | `danger | `default | `success | `warning ] ->
+  ?size:[ `lg | `md | `sm ] ->
+  variant:[ `primary | `secondary | `soft | `tertiary ] ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> unit = "render" [@@mel.module "./twins/Chip.tsx"]
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Chip.tsx"]
+end
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* What the page shows of each part: the chip, its label. *)
+let shown () =
+  [| "chip"; "chip-label" |]
+  |> Array.map (fun slot ->
+      match T.query ("[data-slot=" ^ slot ^ "]") with
+      | None -> (slot, None)
+      | Some e -> (slot, Some (T.class_name e, text e)))
+
+(* [render] the port, then the same Chip in React under [react]. *)
+let both render react =
+  T.render render;
+  let solidtype = shown () in
+  T.cleanup ();
+  Twin.render react;
+  let react = shown () in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Chip" (fun () ->
+      Jest.test "is HeroUI's chip, its text a label, no size given" (fun () ->
+          let solidtype, react =
+            both
+              (fun () -> <Chip>"Design"</Chip>)
+              (props ~color:`default ~variant:`secondary ())
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "has the classes of its color, size and variant" (fun () ->
+          let solidtype, react =
+            both
+              (fun () ->
+                <Chip color=`success size=`lg variant=`soft>"Design"</Chip>)
+              (props ~color:`success ~size:`lg ~variant:`soft ())
+          in
+          E.(expect solidtype |> toEqual react)))

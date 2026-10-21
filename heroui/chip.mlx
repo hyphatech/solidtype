@@ -1,0 +1,36 @@
+module Jsx = Solidtype.Jsx
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Label = struct
+  (* HeroUI's label class is one, whatever the chip's options. *)
+  let label = Styles.Chip.label (Styles.Chip.slots (Styles.Chip.options ()))
+
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <span class_=(fun () -> after label (class_ ())) data_slot="chip-label">
+      (fun () -> children ())
+    </span>
+end
+
+(* Text a chip is given is its label's, as HeroUI's React chip wraps a string
+   or a number. *)
+let text (c : Jsx.content) =
+  match Js.typeof c with "string" | "number" -> true | _ -> false
+
+let%component make
+    ?(color : [ `accent | `danger | `default | `success | `warning ] = `default)
+    ?(size : [ `lg | `md | `sm ] option)
+    ?(variant : [ `primary | `secondary | `soft | `tertiary ] = `secondary)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  <span
+    class_=(fun () ->
+             Styles.Chip.base
+               (Styles.Chip.slots
+                  (Styles.Chip.options ~color:(color ()) ?size:(size ())
+                     ~variant:(variant ()) ?class_:(class_ ()) ())))
+    data_slot="chip">
+    (fun () ->
+      let c = children () in
+      if text c then Jsx.element <Label>(fun () -> c)</Label> else c)
+  </span>

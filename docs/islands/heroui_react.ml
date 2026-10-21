@@ -46,3 +46,17 @@ external badge_props :
 
 external badge : Dom.htmlDivElement -> badge_props -> unit = "badge"
 [@@mel.module "./react/heroui.tsx"]
+
+type chip_props
+
+external chip_props :
+  color:string ->
+  size:string ->
+  variant:string ->
+  label:string ->
+  unit ->
+  chip_props = ""
+[@@mel.obj]
+
+external chip : Dom.htmlDivElement -> chip_props -> unit = "chip"
+[@@mel.module "./react/heroui.tsx"]

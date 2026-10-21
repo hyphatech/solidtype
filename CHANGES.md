@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Chip`: HeroUI's Chip and its label, its colors, sizes and
+  variants.
 - `Solidtype_heroui.Badge`: HeroUI's Badge, its anchor and its label, its
   colors, placements, sizes and variants.
 - `Solidtype_heroui.Separator`: HeroUI's Separator on Kobalte's, its
