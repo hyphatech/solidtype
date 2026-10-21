@@ -1,0 +1,7 @@
+module Link = Solidtype_heroui.Link
+
+let make () =
+  <div class_="flex flex-col gap-3">
+    <Link href="#">"Icon at end (default)" <Link.Icon /></Link>
+    <Link class_="gap-1" href="#"><Link.Icon /> "Icon at start"</Link>
+  </div>

@@ -1,0 +1,10 @@
+module Switch = Solidtype_heroui.Switch
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Switch>
+    <Switch.Content>
+      <Switch.Control><Switch.Thumb /></Switch.Control>
+      <Label>"Enable notifications"</Label>
+    </Switch.Content>
+  </Switch>

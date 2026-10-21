@@ -1,0 +1,7 @@
+module Badge = Solidtype_heroui.Badge
+
+let make () =
+  <Badge.Anchor>
+    <span class_="block size-10 rounded-full bg-default" />
+    <Badge color=`danger size=`sm>"5"</Badge>
+  </Badge.Anchor>

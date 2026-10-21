@@ -1,0 +1,6 @@
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <div class_="flex w-64 flex-col gap-3 text-sm">
+    <p>"Above"</p> <Separator /> <p>"Below"</p>
+  </div>

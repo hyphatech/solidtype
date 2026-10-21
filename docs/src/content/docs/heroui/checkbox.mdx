@@ -1,47 +1,137 @@
 ---
 title: Checkbox
-description: HeroUI's Checkbox, on Kobalte's.
+description: A checkbox, HeroUI's on Kobalte's.
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import Example from "../../../components/Example.astro";
 import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_demo.jsx";
-import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_example.jsx";
-import example from "../../../../islands/checkbox_example.mlx?raw";
+import * as CheckboxUsage from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_usage.jsx";
+import CheckboxUsageCode from "../../../../islands/checkbox_usage.mlx?raw";
+import * as CheckboxVariants from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_variants.jsx";
+import CheckboxVariantsCode from "../../../../islands/checkbox_variants.mlx?raw";
+import * as CheckboxRounded from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_rounded.jsx";
+import CheckboxRoundedCode from "../../../../islands/checkbox_rounded.mlx?raw";
+import * as CheckboxDisabled from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_disabled.jsx";
+import CheckboxDisabledCode from "../../../../islands/checkbox_disabled.mlx?raw";
+import * as CheckboxInvalid from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_invalid.jsx";
+import CheckboxInvalidCode from "../../../../islands/checkbox_invalid.mlx?raw";
+import * as CheckboxControlled from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_controlled.jsx";
+import CheckboxControlledCode from "../../../../islands/checkbox_controlled.mlx?raw";
+import * as CheckboxIndeterminate from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_indeterminate.jsx";
+import CheckboxIndeterminateCode from "../../../../islands/checkbox_indeterminate.mlx?raw";
+import * as CheckboxCustomIndicator from "../../../../../_build/default/docs/islands/out/docs/islands/checkbox_custom_indicator.jsx";
+import CheckboxCustomIndicatorCode from "../../../../islands/checkbox_custom_indicator.mlx?raw";
 
 `Solidtype_heroui.Checkbox` is Kobalte's checkbox in HeroUI's anatomy: the
 field, `Checkbox.Content`, the clickable label that holds Kobalte's input,
 `Checkbox.Control`, `Checkbox.Indicator` with HeroUI's own check and dash, and
-HeroUI's `Label`. Its state -- selected, indeterminate, disabled, invalid,
-hovered, pressed, focus-visible -- is declared as React Aria writes it.
+HeroUI's `Label`. Its state is declared as React Aria writes it.
+
+## Usage
+
+<Example code={CheckboxUsageCode} title="checkbox_usage.mlx"><CheckboxUsage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+<Example code={CheckboxVariantsCode} title="checkbox_variants.mlx"><CheckboxVariants.make client:visible /></Example>
+
+### Full Rounded
+
+<Example code={CheckboxRoundedCode} title="checkbox_rounded.mlx"><CheckboxRounded.make client:visible /></Example>
+
+### Disabled
+
+<Example code={CheckboxDisabledCode} title="checkbox_disabled.mlx"><CheckboxDisabled.make client:visible /></Example>
+
+### Invalid
+
+<Example code={CheckboxInvalidCode} title="checkbox_invalid.mlx"><CheckboxInvalid.make client:visible /></Example>
+
+### Controlled
+
+<Example code={CheckboxControlledCode} title="checkbox_controlled.mlx"><CheckboxControlled.make client:visible /></Example>
+
+### Indeterminate
+
+<Example code={CheckboxIndeterminateCode} title="checkbox_indeterminate.mlx"><CheckboxIndeterminate.make client:visible /></Example>
+
+### Custom Indicator
+
+<Example code={CheckboxCustomIndicatorCode} title="checkbox_custom_indicator.mlx"><CheckboxCustomIndicator.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's External Label, which needs an `id` the label names; With
+Description and Form Integration, until their parts are ported; and Render
+Props and Render Function.
 
 ## Beside React
 
-The same HeroUI Checkbox twice: in solidtype on the left, in React on the
-right. Below them, every attribute of the two contents: a marked row is one
-they disagree on.
+The same HeroUI Checkbox twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two contents: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
 
 <div class="not-content">
   <Demo.make client:load />
 </div>
 
-## Example
+## Customization
 
-<div class="not-content">
-  <Example.make client:load />
-</div>
+### Global CSS
 
-<Code code={example} lang="ocaml" title="checkbox_example.mlx" />
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
 
-## Props
+```css
+@layer components {
+  .checkbox__control {
+    @apply rounded-full;
+  }
+}
+```
 
-| React | solidtype | |
+## Styling Reference
+
+### CSS Classes
+
+- `.checkbox`, `.checkbox__content`, `.checkbox__control`,
+  `.checkbox__indicator`
+- Variants: `.checkbox--primary`, `.checkbox--secondary`
+
+### Interactive States
+
+- **Selected**: `[data-selected="true"]` or `[aria-checked="true"]`
+- **Indeterminate**: `[data-indeterminate="true"]`
+- **Invalid**: `[data-invalid="true"]` or `[aria-invalid="true"]`
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `[data-disabled="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+
+## API Reference
+
+### Checkbox
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual style |
+| `is_selected` | `bool` | | Whether it is checked, controlled |
+| `default_selected` | `bool` | `false` | Whether it starts checked |
+| `is_indeterminate` | `bool` | `false` | Whether it shows the dash |
+| `on_change` | `bool -> unit` | | Called as it is toggled |
+| `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `class_` | `string` | | Added after HeroUI's classes |
+| `children` | elements | | Its content, and its control |
+
+HeroUI's `name`, `value`, `isReadOnly` and `isRequired` are not taken yet.
+
+### Checkbox.Content, Checkbox.Control and Checkbox.Indicator
+
+| Prop | Type | Description |
 |---|---|---|
-| `variant` | `variant` | `` `primary`` (default), `` `secondary`` |
-| `isSelected` | `is_selected` | controlled |
-| `defaultSelected` | `default_selected` | `false` (default) |
-| `isIndeterminate` | `is_indeterminate` | |
-| `onChange` | `on_change` | |
-| `isDisabled` | `is_disabled` | |
-| `isInvalid` | `is_invalid` | |
-| `className` | `class_` | added after HeroUI's classes; on each part too |
-| `name`, `value`, `isReadOnly`, `isRequired` | — | not yet |
+| `class_` | `string` | Added after HeroUI's class |
+| `children` | elements | What it holds; the indicator's own mark when given |

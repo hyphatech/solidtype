@@ -1,0 +1,3 @@
+module Button = Solidtype_heroui.Button
+
+let make () = <Button on_click=(fun _ -> ())>"My Button"</Button>

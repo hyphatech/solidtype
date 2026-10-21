@@ -1,0 +1,39 @@
+module Badge = Solidtype_heroui.Badge
+
+(* Each color in a variant, over a square where an Avatar will stand. *)
+module Row = struct
+  let%component make ~(variant : [ `primary | `secondary | `soft ]) () =
+    <div class_="flex items-center gap-6">
+      <Badge.Anchor>
+        <span class_="block size-10 rounded-full bg-default" />
+        <Badge variant=(fun () -> variant ()) color=`accent size=`sm>"5"</Badge>
+      </Badge.Anchor>
+      <Badge.Anchor>
+        <span class_="block size-10 rounded-full bg-default" />
+        <Badge variant=(fun () -> variant ()) color=`default size=`sm>
+          "5"
+        </Badge>
+      </Badge.Anchor>
+      <Badge.Anchor>
+        <span class_="block size-10 rounded-full bg-default" />
+        <Badge variant=(fun () -> variant ()) color=`success size=`sm>
+          "5"
+        </Badge>
+      </Badge.Anchor>
+      <Badge.Anchor>
+        <span class_="block size-10 rounded-full bg-default" />
+        <Badge variant=(fun () -> variant ()) color=`warning size=`sm>
+          "5"
+        </Badge>
+      </Badge.Anchor>
+      <Badge.Anchor>
+        <span class_="block size-10 rounded-full bg-default" />
+        <Badge variant=(fun () -> variant ()) color=`danger size=`sm>"5"</Badge>
+      </Badge.Anchor>
+    </div>
+end
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <Row variant=`primary /> <Row variant=`secondary /> <Row variant=`soft />
+  </div>

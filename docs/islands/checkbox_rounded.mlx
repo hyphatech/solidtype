@@ -1,0 +1,12 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Checkbox default_selected=true>
+    <Checkbox.Content>
+      <Checkbox.Control class_="rounded-full before:rounded-full">
+        <Checkbox.Indicator />
+      </Checkbox.Control>
+      <Label>"Rounded checkbox"</Label>
+    </Checkbox.Content>
+  </Checkbox>

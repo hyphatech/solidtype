@@ -1,0 +1,12 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Checkbox default_selected=true>
+    <Checkbox.Content>
+      <Checkbox.Control>
+        <Checkbox.Indicator><Icons.Plus /></Checkbox.Indicator>
+      </Checkbox.Control>
+      <Label>"Plus"</Label>
+    </Checkbox.Content>
+  </Checkbox>

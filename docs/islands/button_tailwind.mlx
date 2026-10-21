@@ -1,0 +1,6 @@
+module Button = Solidtype_heroui.Button
+
+let make () =
+  <Button class_="bg-purple-500 text-white hover:bg-purple-600">
+    "Custom button"
+  </Button>

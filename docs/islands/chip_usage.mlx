@@ -1,0 +1,3 @@
+module Chip = Solidtype_heroui.Chip
+
+let make () = <Chip>"Label"</Chip>

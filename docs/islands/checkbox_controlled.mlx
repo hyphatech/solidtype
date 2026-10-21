@@ -1,0 +1,19 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+
+let make () =
+  let on, set_on = S.create_signal true in
+  <div class_="flex flex-col gap-3">
+    <Checkbox is_selected=(fun () -> S.get on) on_change=(S.set set_on)>
+      <Checkbox.Content>
+        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+        <Label>"Email notifications"</Label>
+      </Checkbox.Content>
+    </Checkbox>
+    <p class_="text-sm text-muted">
+      "Status: "
+      (fun () -> Jsx.string (if S.get on then "Enabled" else "Disabled"))
+    </p>
+  </div>

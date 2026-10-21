@@ -1,9 +1,0 @@
-module Chip = Solidtype_heroui.Chip
-
-let make () =
-  <div class_="flex flex-wrap items-center gap-2">
-    <Chip>"Draft"</Chip>
-    <Chip color=`accent variant=`soft>"In review"</Chip>
-    <Chip color=`success variant=`primary>"Shipped"</Chip>
-    <Chip color=`danger size=`sm>"Blocked"</Chip>
-  </div>

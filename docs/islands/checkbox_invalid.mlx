@@ -1,0 +1,10 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Checkbox is_invalid=true>
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+      <Label>"I agree to the terms"</Label>
+    </Checkbox.Content>
+  </Checkbox>

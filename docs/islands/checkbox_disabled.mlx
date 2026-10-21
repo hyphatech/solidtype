@@ -1,0 +1,10 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Checkbox is_disabled=true>
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+      <Label>"Premium feature"</Label>
+    </Checkbox.Content>
+  </Checkbox>

@@ -1,0 +1,13 @@
+module Link = Solidtype_heroui.Link
+
+let make () =
+  <div class_="flex flex-col gap-3">
+    <Link href="#">"Hover to see the underline" <Link.Icon /></Link>
+    <Link class_="underline" href="#">
+      "Underline always visible" <Link.Icon />
+    </Link>
+    <Link class_="no-underline" href="#">"No underline" <Link.Icon /></Link>
+    <Link class_="underline underline-offset-4" href="#">
+      "Underline offset 4" <Link.Icon />
+    </Link>
+  </div>

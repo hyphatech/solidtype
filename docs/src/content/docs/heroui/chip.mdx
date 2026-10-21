@@ -1,41 +1,103 @@
 ---
 title: Chip
-description: HeroUI's Chip, in OCaml.
+description: A short label for a status, a category or a choice.
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import Example from "../../../components/Example.astro";
 import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/chip_demo.jsx";
-import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/chip_example.jsx";
-import example from "../../../../islands/chip_example.mlx?raw";
+import * as ChipUsage from "../../../../../_build/default/docs/islands/out/docs/islands/chip_usage.jsx";
+import ChipUsageCode from "../../../../islands/chip_usage.mlx?raw";
+import * as ChipVariants from "../../../../../_build/default/docs/islands/out/docs/islands/chip_variants.jsx";
+import ChipVariantsCode from "../../../../islands/chip_variants.mlx?raw";
+import * as ChipSizes from "../../../../../_build/default/docs/islands/out/docs/islands/chip_sizes.jsx";
+import ChipSizesCode from "../../../../islands/chip_sizes.mlx?raw";
+import * as ChipStatuses from "../../../../../_build/default/docs/islands/out/docs/islands/chip_statuses.jsx";
+import ChipStatusesCode from "../../../../islands/chip_statuses.mlx?raw";
+import * as ChipIcons from "../../../../../_build/default/docs/islands/out/docs/islands/chip_icons.jsx";
+import ChipIconsCode from "../../../../islands/chip_icons.mlx?raw";
 
-`Solidtype_heroui.Chip` is a short label for a status, a category or a choice,
-with the classes HeroUI's own `chipVariants` gives. Text a chip is given
-becomes its `Chip.Label`, as in React. A chip has no behaviour, so it is
-HeroUI's spans as they are, with no Kobalte part beneath.
+`Solidtype_heroui.Chip` is HeroUI's chip, with the classes HeroUI's own
+`chipVariants` gives. Text a chip is given becomes its `Chip.Label`, as in
+React. A chip has no behaviour, so it is HeroUI's spans as they are.
+
+## Usage
+
+<Example code={ChipUsageCode} title="chip_usage.mlx"><ChipUsage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+<Example code={ChipVariantsCode} title="chip_variants.mlx"><ChipVariants.make client:visible /></Example>
+
+### Sizes
+
+<Example code={ChipSizesCode} title="chip_sizes.mlx"><ChipSizes.make client:visible /></Example>
+
+### Statuses
+
+<Example code={ChipStatusesCode} title="chip_statuses.mlx"><ChipStatuses.make client:visible /></Example>
+
+### With Icons
+
+<Example code={ChipIconsCode} title="chip_icons.mlx"><ChipIcons.make client:visible /></Example>
+
+### Not yet
+
+Nothing of HeroUI's examples: each is here.
 
 ## Beside React
 
-The same HeroUI Chip twice, under the same props: in solidtype on the left, in
-React on the right. Below them, every attribute of the two chips: a marked row
-is one they disagree on.
+The same HeroUI Chip twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two chips: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
 
 <div class="not-content">
   <Demo.make client:load />
 </div>
 
-## Example
+## Customization
 
-<div class="not-content">
-  <Example.make client:load />
-</div>
+### Global CSS
 
-<Code code={example} lang="ocaml" title="chip_example.mlx" />
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
 
-## Props
+```css
+@layer components {
+  .chip {
+    @apply rounded-md;
+  }
+}
+```
 
-| React | solidtype | |
+## Styling Reference
+
+### CSS Classes
+
+- `.chip`, `.chip__label`
+- Colors: `.chip--accent`, `.chip--default`, `.chip--success`, `.chip--warning`,
+  `.chip--danger`
+- Variants: `.chip--primary`, `.chip--secondary`, `.chip--tertiary`,
+  `.chip--soft`
+- Sizes: `.chip--sm`, `.chip--md`, `.chip--lg`
+
+## API Reference
+
+### Chip
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `color` | `` [ `accent \| `default \| `success \| `warning \| `danger ] `` | `` `default `` | Color |
+| `variant` | `` [ `primary \| `secondary \| `tertiary \| `soft ] `` | `` `secondary `` | Visual style |
+| `size` | `` [ `sm \| `md \| `lg ] `` | none | Size; none adds no size class, as in React |
+| `class_` | `string` | | Added after HeroUI's classes |
+| `children` | elements | | Its content; text becomes a `Chip.Label` |
+
+### Chip.Label
+
+| Prop | Type | Description |
 |---|---|---|
-| `color` | `color` | `` `default`` (default), `` `accent``, `` `success``, `` `warning``, `` `danger`` |
-| `size` | `size` | `` `sm``, `` `md``, `` `lg``; none by default, as in React, where it adds no size class |
-| `variant` | `variant` | `` `secondary`` (default), `` `primary``, `` `soft``, `` `tertiary`` |
-| `className` | `class_` | added after HeroUI's classes; on `Chip.Label` too |
+| `class_` | `string` | Added after HeroUI's class |
+| `children` | elements | Its text |

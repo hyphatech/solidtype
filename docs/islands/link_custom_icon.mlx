@@ -1,0 +1,4 @@
+module Link = Solidtype_heroui.Link
+
+let make () =
+  <Link href="#">"Add to library" <Link.Icon><Icons.Plus /></Link.Icon></Link>

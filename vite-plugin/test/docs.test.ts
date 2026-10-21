@@ -1,6 +1,7 @@
 // The documentation builds as `make docs` builds it, Solid's and React's
-// compilers sharing the site, and a port's page holds the port prerendered
-// with HeroUI's classes, to hydrate as client:load.
+// compilers sharing the site, and a port's page holds its examples
+// prerendered with HeroUI's classes, to hydrate as they are scrolled to, and
+// its demo beside React, to hydrate as the page loads.
 
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -12,10 +13,21 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
   const build = Bun.spawnSync(["bun", "--bun", "astro", "build", "--root", "docs"], { cwd: root, stdout: "pipe", stderr: "pipe" });
   expect(build.exitCode, build.stderr.toString()).toBe(0);
   const html = readFileSync(`${root}_build/docs/heroui/button/index.html`, "utf8");
-  const islands = [...html.matchAll(/<astro-island [^>]*client="(\w+)"/g)].map((m) => m[1]);
-  expect(islands).toEqual(["load", "load"]);
+  const islands = [...html.matchAll(/<astro-island [^>]*component-url="\/_astro\/(\w+)\.[^"]*"[^>]*client="(\w+)"/g)].map((m) => `${m[1]} ${m[2]}`);
+  expect(islands).toEqual([
+    "button_usage visible",
+    "button_variants visible",
+    "button_sizes visible",
+    "button_icons visible",
+    "button_icon_only visible",
+    "button_full_width visible",
+    "button_disabled visible",
+    "button_demo load",
+    "button_tailwind visible",
+  ]);
+  // Usage's button, then Variants' each.
   const classes = [...html.matchAll(/<button data-hk="\w+" type="button" class="([^"]*)"/g)].map((m) => m[1]?.trim());
-  expect(classes).toEqual([
+  expect(classes.slice(0, 8)).toEqual([
     "button button--md button--primary",
     "button button--md button--primary",
     "button button--md button--secondary",

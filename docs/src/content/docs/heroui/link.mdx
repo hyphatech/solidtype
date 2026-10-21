@@ -1,43 +1,108 @@
 ---
 title: Link
-description: HeroUI's Link, on Kobalte's.
+description: A link, HeroUI's on Kobalte's.
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import Example from "../../../components/Example.astro";
 import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/link_demo.jsx";
-import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/link_example.jsx";
-import example from "../../../../islands/link_example.mlx?raw";
+import * as LinkUsage from "../../../../../_build/default/docs/islands/out/docs/islands/link_usage.jsx";
+import LinkUsageCode from "../../../../islands/link_usage.mlx?raw";
+import * as LinkPlacement from "../../../../../_build/default/docs/islands/out/docs/islands/link_placement.jsx";
+import LinkPlacementCode from "../../../../islands/link_placement.mlx?raw";
+import * as LinkDecoration from "../../../../../_build/default/docs/islands/out/docs/islands/link_decoration.jsx";
+import LinkDecorationCode from "../../../../islands/link_decoration.mlx?raw";
+import * as LinkCustomIcon from "../../../../../_build/default/docs/islands/out/docs/islands/link_custom_icon.jsx";
+import LinkCustomIconCode from "../../../../islands/link_custom_icon.mlx?raw";
+import * as LinkDisabled from "../../../../../_build/default/docs/islands/out/docs/islands/link_disabled.jsx";
+import LinkDisabledCode from "../../../../islands/link_disabled.mlx?raw";
 
 `Solidtype_heroui.Link` is Kobalte's `Link.Root`, an anchor, with the classes
-HeroUI's own `linkVariants` gives, and `Link.Icon`, HeroUI's arrow after its
-text. Its state -- hovered, pressed, focused, focus-visible, disabled -- is
-kept as React Aria keeps it: Enter presses a link, and Space does not.
+HeroUI's own `linkVariants` gives, and `Link.Icon`, HeroUI's arrow. Its state
+is declared as React Aria writes it: Enter presses a link, and Space does
+not.
+
+## Usage
+
+<Example code={LinkUsageCode} title="link_usage.mlx"><LinkUsage.make client:visible /></Example>
+
+## Examples
+
+### Icon Placement
+
+<Example code={LinkPlacementCode} title="link_placement.mlx"><LinkPlacement.make client:visible /></Example>
+
+### Text Decoration with Tailwind CSS
+
+<Example code={LinkDecorationCode} title="link_decoration.mlx"><LinkDecoration.make client:visible /></Example>
+
+### Custom Icon
+
+<Example code={LinkCustomIconCode} title="link_custom_icon.mlx"><LinkCustomIcon.make client:visible /></Example>
+
+### Disabled
+
+<Example code={LinkDisabledCode} title="link_disabled.mlx"><LinkDisabled.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Render Function, which needs `render`.
 
 ## Beside React
 
-The same HeroUI Link twice: in solidtype on the left, in React on the right.
-Hover, focus and press them to see the state each sets.
+The same HeroUI Link twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two links: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
 
 <div class="not-content">
   <Demo.make client:load />
 </div>
 
-## Example
+## Customization
 
-<div class="not-content">
-  <Example.make client:load />
-</div>
+### Global CSS
 
-<Code code={example} lang="ocaml" title="link_example.mlx" />
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
 
-## Props
+```css
+@layer components {
+  .link {
+    @apply font-semibold;
+  }
+}
+```
 
-| React | solidtype | |
-|---|---|---|
-| `href` | `href` | required |
-| `isDisabled` | `is_disabled` | |
-| `className` | `class_` | added after HeroUI's classes; on `Link.Icon` too |
-| `children` of `Link.Icon` | `children` | HeroUI's arrow when none is given |
+## Styling Reference
+
+### CSS Classes
+
+- `.link`, `.link__icon`
+
+### Interactive States
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+- **Disabled**: `[aria-disabled="true"]`
 
 A disabled link is a `<span role="link">` in React and stays an `<a>` here,
 Kobalte's element; both are `aria-disabled="true"` and `data-disabled="true"`.
+
+## API Reference
+
+### Link
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `href` | `string` | required | Where it leads |
+| `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `class_` | `string` | | Added after HeroUI's classes |
+| `children` | elements | | Its text, and its icon |
+
+### Link.Icon
+
+| Prop | Type | Description |
+|---|---|---|
+| `class_` | `string` | Added after HeroUI's class |
+| `children` | elements | Its icon; HeroUI's arrow when none is given |

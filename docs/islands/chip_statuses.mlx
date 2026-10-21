@@ -1,0 +1,21 @@
+module Chip = Solidtype_heroui.Chip
+
+let make () =
+  <div class_="flex flex-wrap items-center gap-3">
+    <Chip variant=`primary>
+      <span class_="size-1.5 rounded-full bg-current" />
+      <Chip.Label>"Default"</Chip.Label>
+    </Chip>
+    <Chip color=`success variant=`primary>
+      <span class_="size-1.5 rounded-full bg-current" />
+      <Chip.Label>"Active"</Chip.Label>
+    </Chip>
+    <Chip color=`warning variant=`primary>
+      <span class_="size-1.5 rounded-full bg-current" />
+      <Chip.Label>"Pending"</Chip.Label>
+    </Chip>
+    <Chip color=`danger variant=`primary>
+      <span class_="size-1.5 rounded-full bg-current" />
+      <Chip.Label>"Inactive"</Chip.Label>
+    </Chip>
+  </div>

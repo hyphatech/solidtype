@@ -1,0 +1,3 @@
+module Label = Solidtype_heroui.Label
+
+let make () = <Label>"Email"</Label>

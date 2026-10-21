@@ -1,20 +1,18 @@
-module S = Solidtype.Solid
 module Checkbox = Solidtype_heroui.Checkbox
 module Label = Solidtype_heroui.Label
 
 let make () =
-  let terms, set_terms = S.create_signal false in
-  <div class_="flex flex-col gap-3">
-    <Checkbox is_selected=(fun () -> S.get terms) on_change=(S.set set_terms)>
+  <div class_="flex flex-col gap-4">
+    <Checkbox variant=`primary default_selected=true>
       <Checkbox.Content>
         <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-        <Label>"Accept terms and conditions"</Label>
+        <Label>"Primary checkbox"</Label>
       </Checkbox.Content>
     </Checkbox>
-    <Checkbox is_indeterminate=true>
+    <Checkbox variant=`secondary default_selected=true>
       <Checkbox.Content>
         <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-        <Label>"Select all"</Label>
+        <Label>"Secondary checkbox"</Label>
       </Checkbox.Content>
     </Checkbox>
   </div>

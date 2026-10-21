@@ -1,0 +1,60 @@
+---
+title: Label
+description: A field's name.
+---
+
+import Example from "../../../components/Example.astro";
+import * as LabelUsage from "../../../../../_build/default/docs/islands/out/docs/islands/label_usage.jsx";
+import LabelUsageCode from "../../../../islands/label_usage.mlx?raw";
+
+`Solidtype_heroui.Label` is HeroUI's label, with the classes HeroUI's own
+`labelVariants` gives. Inside a switch's or a checkbox's content it is a
+`<span>`, since the content is the clickable label already; anywhere else it is
+a `<label>`. The [Switch](../switch/) and [Checkbox](../checkbox/) pages show
+it in its fields.
+
+## Usage
+
+<Example code={LabelUsageCode} title="label_usage.mlx"><LabelUsage.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Required, Disabled and Invalid labels: the port does not take
+`isRequired`, `isDisabled` or `isInvalid` yet, though HeroUI's styles have
+their classes.
+
+## Customization
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .label {
+    @apply font-semibold;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.label`
+- States: `.label--required`, `.label--disabled`, `.label--invalid`
+
+## API Reference
+
+### Label
+
+| Prop | Type | Description |
+|---|---|---|
+| `class_` | `string` | Added after HeroUI's classes |
+| `children` | elements | Its text |
+
+### Label.Inline
+
+A context of `bool`, `true` inside a control's clickable label, where a label
+is a `<span>`. `Switch.Content` and `Checkbox.Content` provide it.

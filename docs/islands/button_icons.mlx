@@ -1,0 +1,8 @@
+module Button = Solidtype_heroui.Button
+
+let make () =
+  <div class_="flex flex-wrap items-center gap-3">
+    <Button><Icons.Plus /> "New file"</Button>
+    <Button variant=`secondary><Icons.Check /> "Approve"</Button>
+    <Button variant=`danger><Icons.Trash /> "Delete"</Button>
+  </div>

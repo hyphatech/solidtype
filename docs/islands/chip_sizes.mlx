@@ -1,0 +1,8 @@
+module Chip = Solidtype_heroui.Chip
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Chip size=`sm>"Small"</Chip>
+    <Chip size=`md>"Medium"</Chip>
+    <Chip size=`lg>"Large"</Chip>
+  </div>

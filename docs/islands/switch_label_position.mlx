@@ -1,0 +1,18 @@
+module Switch = Solidtype_heroui.Switch
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Switch>
+      <Switch.Content>
+        <Switch.Control><Switch.Thumb /></Switch.Control>
+        <Label>"Label after"</Label>
+      </Switch.Content>
+    </Switch>
+    <Switch>
+      <Switch.Content>
+        <Label>"Label before"</Label>
+        <Switch.Control><Switch.Thumb /></Switch.Control>
+      </Switch.Content>
+    </Switch>
+  </div>

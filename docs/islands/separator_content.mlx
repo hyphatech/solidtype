@@ -1,0 +1,17 @@
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <div class_="flex w-72 flex-col gap-3">
+    <div>
+      <h4 class_="text-base font-medium">"solidtype"</h4>
+      <p class_="text-sm text-muted">"Solid, typed, for OCaml front ends."</p>
+    </div>
+    <Separator />
+    <div class_="flex h-5 items-center gap-4 text-sm">
+      <div>"Blog"</div>
+      <Separator orientation=`vertical />
+      <div>"Docs"</div>
+      <Separator orientation=`vertical />
+      <div>"Source"</div>
+    </div>
+  </div>

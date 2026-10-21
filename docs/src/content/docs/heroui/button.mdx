@@ -1,61 +1,141 @@
 ---
 title: Button
-description: HeroUI's Button, on Kobalte's.
+description: A clickable button, HeroUI's on Kobalte's.
 ---
 
-import { Code } from "@astrojs/starlight/components";
-import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/button_demo.jsx";
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/button_usage.jsx";
+import usage from "../../../../islands/button_usage.mlx?raw";
 import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/button_variants.jsx";
 import variants from "../../../../islands/button_variants.mlx?raw";
+import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/button_sizes.jsx";
+import sizes from "../../../../islands/button_sizes.mlx?raw";
+import * as Icons from "../../../../../_build/default/docs/islands/out/docs/islands/button_icons.jsx";
+import icons from "../../../../islands/button_icons.mlx?raw";
+import * as IconOnly from "../../../../../_build/default/docs/islands/out/docs/islands/button_icon_only.jsx";
+import iconOnly from "../../../../islands/button_icon_only.mlx?raw";
+import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/button_full_width.jsx";
+import fullWidth from "../../../../islands/button_full_width.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/button_disabled.jsx";
+import disabled from "../../../../islands/button_disabled.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/button_tailwind.jsx";
+import tailwind from "../../../../islands/button_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/button_demo.jsx";
 
 `Solidtype_heroui.Button` is Kobalte's `Button.Root`, a native `<button>`, with
-the classes HeroUI's own `buttonVariants` gives. Its look is HeroUI's props;
-its behaviour is Kobalte's.
+the classes HeroUI's own `buttonVariants` gives and the state its styles read,
+declared as React Aria writes it.
+
+## Usage
+
+<Example code={usage} title="button_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+<Example code={variants} title="button_variants.mlx"><Variants.make client:visible /></Example>
+
+### Sizes
+
+<Example code={sizes} title="button_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### With Icons
+
+<Example code={icons} title="button_icons.mlx"><Icons.make client:visible /></Example>
+
+### Icon Only
+
+An icon-only button names itself with text its children hide, `sr-only`.
+
+<Example code={iconOnly} title="button_icon_only.mlx"><IconOnly.make client:visible /></Example>
+
+### Full Width
+
+<Example code={fullWidth} title="button_full_width.mlx"><FullWidth.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={disabled} title="button_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Loading, Social Buttons, Render Function and custom variants
+examples need what the port does not take yet: `isPending`, render props and
+`render`.
 
 ## Beside React
 
-The same HeroUI Button twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two elements: a
-marked row is one they disagree on, and a dimmed row is a framework's own --
-Solid's hydration key, React Aria's markers and the id it generates -- which
-no style reads. Hover, focus and press the buttons to see the state each
-sets.
+The same HeroUI Button twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two elements:
+a marked row is one they disagree on, and a dimmed row is a framework's own --
+Solid's hydration key, React Aria's markers and the id it generates -- which no
+style reads. Hover, focus and press them to see the state each sets.
 
 <div class="not-content">
   <Demo.make client:load />
 </div>
 
-## Variants
+## Customization
 
-<div class="not-content">
-  <Variants.make client:load />
-</div>
+### Tailwind CSS
 
-<Code code={variants} lang="ocaml" title="button_variants.mlx" />
+`class_` is added after HeroUI's classes.
 
-## Props
+<Example code={tailwind} title="button_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
-| React | solidtype | |
-|---|---|---|
-| `variant` | `variant` | `` `primary`` (default), `` `secondary``, `` `tertiary``, `` `outline``, `` `ghost``, `` `danger``, `` `danger_soft`` |
-| `size` | `size` | `` `sm``, `` `md`` (default), `` `lg`` |
-| `fullWidth` | `full_width` | |
-| `isIconOnly` | `is_icon_only` | name it with text in its children, `class_="sr-only"` |
-| `isDisabled` | `is_disabled` | |
-| `type` | `type_` | `` `button`` (default) |
-| `onPress` | `on_click` | Kobalte's: a click, by mouse, touch or keyboard |
-| `className` | `class_` | added after HeroUI's classes |
-| `isPending` | — | not yet |
-| `aria-label` | — | not yet: a component cannot yet be given an attribute it may leave out |
-| render props | — | not yet |
+### Global CSS
 
-## State
+HeroUI's classes are global, so a stylesheet restyles every button, as with
+HeroUI in React:
 
-HeroUI's styles read the state React Aria writes on an element:
-`data-hovered`, `data-pressed`, `data-focused`, `data-focus-visible` and
-`data-disabled`, each `"true"` or absent. Kobalte writes only `data-disabled`,
-and empty, so the port keeps them itself, by
-`Solidtype_heroui.Interaction`, as React Aria does: hovered by a mouse but
-never a touch, pressed by a pointer or by Enter and Space, focus-visible only
-after a key. Its test puts the port and the same Button in React through the
-same steps and compares what each shows after every one.
+```css
+@layer components {
+  .button {
+    @apply font-semibold uppercase;
+  }
+
+  .button--primary {
+    @apply bg-indigo-600 hover:bg-indigo-700;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The classes HeroUI's button styles define, which `variant`, `size`,
+`full_width` and `is_icon_only` choose:
+
+- `.button`, and its sizes `.button--sm`, `.button--md`, `.button--lg`
+- `.button--primary`, `.button--secondary`, `.button--tertiary`,
+  `.button--outline`, `.button--ghost`, `.button--danger`,
+  `.button--danger-soft`
+- `.button--icon-only`, `.button--full-width`
+
+### Interactive States
+
+HeroUI's styles read a pseudo-class or a data attribute for each; the port
+declares each attribute as React Aria writes it:
+
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `:disabled` or `[data-disabled="true"]`
+
+## API Reference
+
+### Button
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `variant` | `` [ `primary \| `secondary \| `tertiary \| `outline \| `ghost \| `danger \| `danger_soft ] `` | `` `primary `` | Visual style |
+| `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
+| `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
+| `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
+| `on_click` | `Dom.mouseEvent -> unit` | | Called on a click, by mouse, touch or keyboard; HeroUI's `onPress` |
+| `class_` | `string` | | Added after HeroUI's classes |
+| `children` | elements | | Its content |

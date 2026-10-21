@@ -1,0 +1,22 @@
+module Chip = Solidtype_heroui.Chip
+
+(* Each color in a variant. *)
+module Row = struct
+  let%component make ~(variant : [ `primary | `secondary | `soft | `tertiary ])
+      () =
+    <div class_="flex flex-wrap items-center gap-3">
+      <Chip variant=(fun () -> variant ()) color=`accent>"Accent"</Chip>
+      <Chip variant=(fun () -> variant ()) color=`default>"Default"</Chip>
+      <Chip variant=(fun () -> variant ()) color=`success>"Success"</Chip>
+      <Chip variant=(fun () -> variant ()) color=`warning>"Warning"</Chip>
+      <Chip variant=(fun () -> variant ()) color=`danger>"Danger"</Chip>
+    </div>
+end
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Row variant=`primary />
+    <Row variant=`secondary />
+    <Row variant=`tertiary />
+    <Row variant=`soft />
+  </div>

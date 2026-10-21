@@ -1,0 +1,3 @@
+module Link = Solidtype_heroui.Link
+
+let make () = <Link href="#">"Call to action" <Link.Icon /></Link>

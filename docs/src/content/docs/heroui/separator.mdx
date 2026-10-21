@@ -1,41 +1,89 @@
 ---
 title: Separator
-description: HeroUI's Separator, on Kobalte's.
+description: A line between content.
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import Example from "../../../components/Example.astro";
 import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/separator_demo.jsx";
-import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/separator_example.jsx";
-import example from "../../../../islands/separator_example.mlx?raw";
+import * as SeparatorUsage from "../../../../../_build/default/docs/islands/out/docs/islands/separator_usage.jsx";
+import SeparatorUsageCode from "../../../../islands/separator_usage.mlx?raw";
+import * as SeparatorVariants from "../../../../../_build/default/docs/islands/out/docs/islands/separator_variants.jsx";
+import SeparatorVariantsCode from "../../../../islands/separator_variants.mlx?raw";
+import * as SeparatorVertical from "../../../../../_build/default/docs/islands/out/docs/islands/separator_vertical.jsx";
+import SeparatorVerticalCode from "../../../../islands/separator_vertical.mlx?raw";
+import * as SeparatorContent from "../../../../../_build/default/docs/islands/out/docs/islands/separator_content.jsx";
+import SeparatorContentCode from "../../../../islands/separator_content.mlx?raw";
 
 `Solidtype_heroui.Separator` is Kobalte's `Separator.Root`, with the classes
-HeroUI's own `separatorVariants` gives.
+HeroUI's own `separatorVariants` gives and the explicit role React Aria
+writes.
+
+## Usage
+
+<Example code={SeparatorUsageCode} title="separator_usage.mlx"><SeparatorUsage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+<Example code={SeparatorVariantsCode} title="separator_variants.mlx"><SeparatorVariants.make client:visible /></Example>
+
+### Vertical
+
+<Example code={SeparatorVerticalCode} title="separator_vertical.mlx"><SeparatorVertical.make client:visible /></Example>
+
+### With Content
+
+<Example code={SeparatorContentCode} title="separator_content.mlx"><SeparatorContent.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's With Surface, until Surface is ported, and its Render Function,
+which needs `render`.
 
 ## Beside React
 
-The same HeroUI Separator twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two elements:
-a marked row is one they disagree on.
+The same HeroUI Separator twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two separators: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
 
 <div class="not-content">
   <Demo.make client:load />
 </div>
 
-## Example
+## Customization
 
-<div class="not-content">
-  <Example.make client:load />
-</div>
+### Global CSS
 
-<Code code={example} lang="ocaml" title="separator_example.mlx" />
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
 
-## Props
+```css
+@layer components {
+  .separator {
+    @apply bg-accent;
+  }
+}
+```
 
-| React | solidtype | |
-|---|---|---|
-| `orientation` | `orientation` | `` `horizontal`` (default), `` `vertical`` |
-| `variant` | `variant` | `` `default`` (default), `` `secondary``, `` `tertiary`` |
-| `className` | `class_` | added after HeroUI's classes |
+## Styling Reference
+
+### CSS Classes
+
+- `.separator`, `.separator--horizontal`, `.separator--vertical`
+- Variants: `.separator--default`, `.separator--secondary`,
+  `.separator--tertiary`
 
 A vertical separator is a `<div>` in React and an `<hr>` here, Kobalte's
 element; both have the role `separator` and `aria-orientation="vertical"`.
+
+## API Reference
+
+### Separator
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its direction |
+| `variant` | `` [ `default \| `secondary \| `tertiary ] `` | `` `default `` | Its contrast |
+| `class_` | `string` | | Added after HeroUI's classes |

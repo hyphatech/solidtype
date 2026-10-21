@@ -1,0 +1,40 @@
+(* A few icons for the examples, drawn as HeroUI's examples draw theirs:
+   currentColor, sized by the component around them. *)
+
+module Check = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M13.5 4.5L6.5 11.5L3 8"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+        stroke_linejoin="round"
+      />
+    </svg>
+end
+
+module Plus = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M8 3V13M3 8H13"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+      />
+    </svg>
+end
+
+module Trash = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M3 4.5H13M6.5 4.5V3H9.5V4.5M4.5 4.5L5 13H11L11.5 4.5"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+        stroke_linejoin="round"
+      />
+    </svg>
+end
