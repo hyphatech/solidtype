@@ -73,3 +73,16 @@ external link_props :
 
 external link : Dom.htmlDivElement -> link_props -> unit = "link"
 [@@mel.module "./react/heroui.tsx"]
+
+type switch_props
+
+external switch_props :
+  size:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  label:string ->
+  unit ->
+  switch_props = ""
+[@@mel.obj]
+
+external switch_ : Dom.htmlDivElement -> switch_props -> unit = "switch_"
+[@@mel.module "./react/heroui.tsx"]

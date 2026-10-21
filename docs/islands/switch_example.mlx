@@ -1,0 +1,18 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Switch = Solidtype_heroui.Switch
+module Label = Solidtype_heroui.Label
+
+let make () =
+  let notify, set_notify = S.create_signal true in
+  <div class_="flex flex-col gap-3">
+    <Switch is_selected=(fun () -> S.get notify) on_change=(S.set set_notify)>
+      <Switch.Content>
+        <Switch.Control><Switch.Thumb /></Switch.Control>
+        <Label>"Allow notifications"</Label>
+      </Switch.Content>
+    </Switch>
+    <p class_="text-sm text-muted">
+      (fun () -> Jsx.string (if S.get notify then "On" else "Off"))
+    </p>
+  </div>

@@ -1,0 +1,99 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.Switch
+
+(* What a switch's parts read of the switch they are in: its classes, whether
+   it is on or disabled, and the interaction with its content. *)
+type switch = {
+  slots : unit -> Styles.Switch.slots;
+  on : unit -> bool;
+  disabled : unit -> bool;
+  interaction : Interaction.t;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = switch
+end)
+
+let within part =
+  match Context.use () with
+  | Some s -> s
+  | None -> invalid_arg (part ^ " is used inside a Switch")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let s = within "Switch.Content" in
+    let i = s.interaction in
+    <Kobalte.Label
+      class_=(fun () -> after (Styles.Switch.content (s.slots ())) (class_ ()))
+      ref=(fun l -> Interaction.watch i l)
+      data_slot="switch-content"
+      data_selected=(fun () -> Jsx.flag (s.on ()))
+      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
+      <Label.Inline.Provider value=(fun () -> true)>
+        <Kobalte.Input /> (fun () -> children ())
+      </Label.Inline.Provider>
+    </Kobalte.Label>
+end
+
+module Control = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let s = within "Switch.Control" in
+    <span
+      class_=(fun () -> after (Styles.Switch.control (s.slots ())) (class_ ()))
+      data_slot="switch-control">
+      (fun () -> children ())
+    </span>
+end
+
+module Thumb = struct
+  let%component make ?(class_ : string option) () =
+    let s = within "Switch.Thumb" in
+    <span
+      class_=(fun () -> after (Styles.Switch.thumb (s.slots ())) (class_ ()))
+      data_slot="switch-thumb"
+    />
+end
+
+let%component make ?(size : [ `lg | `md | `sm ] = `md)
+    ?(is_selected : bool option) ?(default_selected : bool = false)
+    ?(on_change : (bool -> unit) option) ?(is_disabled : bool = false)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* The state is the switch's, read by Kobalte and by every part alike. *)
+  let own, set_own = S.create_signal (default_selected ()) in
+  let on () = match is_selected () with Some v -> v | None -> S.get own in
+  let change v =
+    S.set set_own v;
+    ignore (on_change v : unit option)
+  in
+  let s =
+    {
+      slots =
+        (fun () ->
+          Styles.Switch.slots
+            (Styles.Switch.options ~size:(size ()) ?class_:(class_ ()) ()));
+      on;
+      disabled = (fun () -> is_disabled ());
+      interaction =
+        Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) ();
+    }
+  in
+  <Context.Provider value=(fun () -> s)>
+    <Kobalte.Root
+      checked=(fun () -> on ())
+      on_change=change
+      disabled=(fun () -> is_disabled ())
+      class_=(fun () -> Styles.Switch.base (s.slots ()))
+      data_slot="switch"
+      data_selected=(fun () -> Jsx.flag (on ()))
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))>
+      (fun () -> children ())
+    </Kobalte.Root>
+  </Context.Provider>

@@ -1,0 +1,22 @@
+module Jsx = Solidtype.Jsx
+
+(* Whether a label is inside a control's own clickable label, a switch's
+   content, where HeroUI's Label is a span: a label in a label is not HTML. *)
+module Inline = Solidtype.Context.Make (struct
+  type t = bool
+
+  let default = false
+end)
+
+let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let classes () =
+    Styles.Label.classes (Styles.Label.options ?class_:(class_ ()) ())
+  in
+  if Inline.use () then
+    <span class_=(fun () -> classes ()) data_slot="label">
+      (fun () -> children ())
+    </span>
+  else
+    <label class_=(fun () -> classes ()) data_slot="label">
+      (fun () -> children ())
+    </label>

@@ -23,7 +23,7 @@ export default defineConfig({
       customCss: ["./src/styles/heroui.css"],
       sidebar: [
         { label: "Start here", items: ["index"] },
-        { label: "HeroUI", items: ["heroui/coverage", "heroui/badge", "heroui/button", "heroui/chip", "heroui/link", "heroui/separator"] },
+        { label: "HeroUI", items: ["heroui/coverage", "heroui/badge", "heroui/button", "heroui/chip", "heroui/link", "heroui/separator", "heroui/switch"] },
       ],
     }),
     solid({ exclude: [reactFiles] }),

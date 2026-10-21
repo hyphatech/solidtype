@@ -1,0 +1,45 @@
+---
+title: Switch
+description: HeroUI's Switch, on Kobalte's.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/switch_demo.jsx";
+import * as Example from "../../../../../_build/default/docs/islands/out/docs/islands/switch_example.jsx";
+import example from "../../../../islands/switch_example.mlx?raw";
+
+`Solidtype_heroui.Switch` is Kobalte's switch in HeroUI's anatomy: the field,
+`Switch.Content`, the clickable label that holds Kobalte's input,
+`Switch.Control` and `Switch.Thumb`, and HeroUI's `Label`. Its state --
+selected, disabled, hovered, pressed, focus-visible -- is declared as React
+Aria writes it: Space toggles a switch, and Enter does not.
+
+## Beside React
+
+The same HeroUI Switch twice: in solidtype on the left, in React on the right.
+Below them, every attribute of the two contents: a marked row is one they
+disagree on. Hover, focus and toggle them to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Example
+
+<div class="not-content">
+  <Example.make client:load />
+</div>
+
+<Code code={example} lang="ocaml" title="switch_example.mlx" />
+
+## Props
+
+| React | solidtype | |
+|---|---|---|
+| `size` | `size` | `` `sm``, `` `md`` (default), `` `lg`` |
+| `isSelected` | `is_selected` | controlled |
+| `defaultSelected` | `default_selected` | `false` (default) |
+| `onChange` | `on_change` | |
+| `isDisabled` | `is_disabled` | |
+| `className` | `class_` | added after HeroUI's classes; on each part too |
+| `name`, `value`, `isReadOnly`, `isInvalid` | — | not yet |

@@ -30,9 +30,11 @@ val watch : t -> _ Dom.element_like -> unit
 
     - hovered while a mouse or a pen, never a touch, is over it;
     - pressed while a pointer is down on it and over it, or while Enter is held
-      on it, or Space but on a link, an anchor with an href or the link role;
-    - focused while it has the focus, and focus-visible while it has it after a
-      key was pressed rather than a pointer.
+      on it but for a checkbox or a radio, or Space but on a link, an anchor
+      with an href or the link role, as React Aria decides by what the key went
+      to;
+    - focused while it or an element inside it has the focus, and focus-visible
+      while it has it after a key was pressed rather than a pointer.
 
     It is called once, as the element is made: from its [ref]. *)
 

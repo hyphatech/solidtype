@@ -62,9 +62,25 @@ let link element =
        (Js.Null.toOption (attribute element "role"))
        (Some "link")
 
-(* Enter presses, and Space too but on a link, as React Aria presses. *)
-let pressing element k =
-  String.equal k "Enter" || (String.equal k " " && not (link element))
+external key_target : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
+external input_type : Dom.element -> string Js.undefined = "type" [@@mel.get]
+
+(* A checkbox or a radio, a switch's input among them, which a key toggles
+   only by Space, as a browser does. *)
+let check element =
+  String.equal (tag_name element) "INPUT"
+  && Option.fold ~none:false
+       ~some:(fun t -> String.equal t "checkbox" || String.equal t "radio")
+       (Js.Undefined.toOption (input_type element))
+
+(* Whether a key presses what it went to, as React Aria decides: Enter and
+   Space, but only Enter a link and only Space a checkbox or a radio. *)
+let pressing e =
+  let target = key_target e in
+  match key e with
+  | "Enter" -> not (check target)
+  | " " -> not (link target)
+  | _ -> false
 
 type t = {
   off : bool S.accessor option;
@@ -130,11 +146,13 @@ let watch i element =
       press false);
   on_key element "keydown" (fun e ->
       if focused i then S.set i.set_focus_ring true;
-      if pressing element (key e) && not (repeat e) then press true);
-  on_key element "keyup" (fun e -> if pressing element (key e) then press false);
-  on_focus element "focus" (fun _ ->
+      if pressing e && not (repeat e) then press true);
+  on_key element "keyup" (fun e -> if pressing e then press false);
+  (* Focus as it bubbles: a switch's content is a label whose input inside it
+     takes the focus. *)
+  on_focus element "focusin" (fun _ ->
       S.set i.set_focus true;
       S.set i.set_focus_ring !by_keyboard);
-  on_focus element "blur" (fun _ ->
+  on_focus element "focusout" (fun _ ->
       S.set i.set_focus false;
       S.set i.set_focus_ring false)

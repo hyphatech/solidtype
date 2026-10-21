@@ -1,0 +1,100 @@
+(* HeroUI's Switch on Kobalte, beside the same Switch in React: each part by
+   its slot -- the field, its clickable content, the control, the thumb, the
+   label -- what HeroUI's styles read of it, the input a reader reaches, and
+   the state the field and its content show through a walk. *)
+
+module Switch = Solidtype_heroui.Switch
+module Label = Solidtype_heroui.Label
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  size:[ `sm | `md | `lg ] ->
+  default_selected:(bool[@mel.as "defaultSelected"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> unit = "render" [@@mel.module "./twins/Switch.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Switch.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Switch.tsx"]
+end
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external checked : Dom.element -> bool = "checked" [@@mel.get]
+
+let part slot =
+  match T.query ("[data-slot=" ^ slot ^ "]") with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no " ^ slot)
+
+(* What HeroUI's styles read of each part, and what a reader reaches. *)
+let shown () =
+  let parts =
+    [| "switch"; "switch-content"; "switch-control"; "switch-thumb"; "label" |]
+    |> Array.map (fun slot ->
+        let e = part slot in
+        ( slot,
+          tag_name e,
+          T.class_name e,
+          T.attribute e "data-selected",
+          T.attribute e "data-disabled" ))
+  in
+  let input = T.by_role "switch" in
+  (parts, (checked input, T.attribute input "disabled"))
+
+(* The port, then the same Switch in React, each alone on the page, shown,
+   then walked by its content, the field's state after each step too. *)
+let both ~size ~selected ~disabled =
+  let walk () =
+    let shown_before = shown () in
+    let content = part "switch-content" in
+    let* walked = T.walk ~step:Twin.step content in
+    let field = T.state (part "switch") in
+    Js.Promise.resolve (shown_before, walked, field)
+  in
+  T.render (fun () ->
+      <Switch
+        size=(fun () -> size)
+        default_selected=(fun () -> selected)
+        is_disabled=(fun () -> disabled)>
+        <Switch.Content>
+          <Switch.Control><Switch.Thumb /></Switch.Control>
+          <Label>"Wi-Fi"</Label>
+        </Switch.Content>
+      </Switch>);
+  let* solidtype = walk () in
+  T.cleanup ();
+  Twin.render (props ~size ~default_selected:selected ~is_disabled:disabled ());
+  let* react = walk () in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Switch" (fun () ->
+      Jest.testPromise "is HeroUI's switch, off, and walked as React Aria's"
+        (fun () ->
+          let* solidtype, react =
+            both ~size:`md ~selected:false ~disabled:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is on, large, as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~size:`lg ~selected:true ~disabled:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is disabled as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~size:`sm ~selected:true ~disabled:true
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

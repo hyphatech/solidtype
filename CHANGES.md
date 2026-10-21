@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Switch`: HeroUI's Switch on Kobalte's, in HeroUI's
+  anatomy, its props named as HeroUI's documentation names them; and
+  `Solidtype_heroui.Label`, HeroUI's Label. `Interaction` decides by what a
+  key went to, as React Aria does: Enter presses no checkbox or radio, and
+  it follows the focus into an element, a switch's input inside its label.
 - Breaking: a `data-` attribute's value is a `Jsx.data`, where it was a
   `string`: present, `Jsx.data s`, or `"true"` while a flag is up and
   absent while it is down, `Jsx.flag b`. A string literal is still written
