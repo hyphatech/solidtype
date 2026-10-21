@@ -1,0 +1,54 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Primary"</p>
+      <Button_group variant=`primary>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Secondary"</p>
+      <Button_group variant=`secondary>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Tertiary"</p>
+      <Button_group variant=`tertiary>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Outline"</p>
+      <Button_group variant=`outline>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Ghost"</p>
+      <Button_group variant=`ghost>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Danger"</p>
+      <Button_group variant=`danger>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+  </div>

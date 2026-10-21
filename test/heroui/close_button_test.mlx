@@ -21,19 +21,8 @@ end
 
 external outer_html : Dom.element -> string = "outerHTML" [@@mel.get]
 
-external attribute_names : Dom.element -> string array = "getAttributeNames"
-[@@mel.send]
-
 external first_child : Dom.element -> Dom.element Js.null = "firstElementChild"
 [@@mel.get]
-
-(* An element's attributes and their values, in order of name: the order a
-   framework writes them in is its own, and no style reads it. *)
-let attributes e =
-  attribute_names e |> Array.to_list |> List.sort String.compare
-  |> List.map (fun name ->
-      name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
-  |> String.concat " "
 
 (* The walk on HeroUI's CloseButton in solidtype, then in React, each alone on
    the page, so Tab reaches it. *)
@@ -51,10 +40,10 @@ let icon e =
   | Some svg ->
       let path =
         match Js.Null.toOption (first_child svg) with
-        | Some p -> attributes p
+        | Some p -> T.attributes p
         | None -> "no path"
       in
-      (attributes svg, path)
+      (T.attributes svg, path)
   | None -> ("no icon in " ^ outer_html e, "")
 
 let () =

@@ -2,15 +2,15 @@
     classes from {!Styles.Button.classes}. Its props are named as HeroUI's
     documentation names them -- [variant], [size], [full_width], [is_icon_only],
     [is_disabled] -- but for [on_click], a click as Kobalte gives it, where
-    HeroUI's is [onPress].
+    HeroUI's is [onPress]. Inside a {!Button_group}, a [variant], [size],
+    [full_width] or [is_disabled] the button does not set is its group's, else
+    HeroUI's default: [`primary], [`md], neither full width nor disabled.
 
     {[
       <Button variant=`ghost size=`sm on_click=(fun _ -> save ())>"Save"</Button>
     ]}
 
-    An icon-only button names itself with text in its children, hidden by
-    [class_="sr-only"], until a component can be given an [aria-label] it may
-    leave out. *)
+    An icon-only button is named by its [aria_label]. *)
 
 module Props : sig
   type t

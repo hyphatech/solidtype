@@ -98,3 +98,23 @@ let walk ~step e =
   let* () = after "Space held" (fun () -> keyboard user "[Space>]") in
   let* () = after "Space let go" (fun () -> keyboard user "[/Space]") in
   Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+external attribute_names : Dom.element -> string array = "getAttributeNames"
+[@@mel.send]
+
+(* What each framework writes for itself and no style reads: Solid's
+   hydration key, React Aria's markers and the id it generates. *)
+let framework_only = function
+  | "data-hk" | "data-rac" | "data-react-aria-pressable" | "id" -> true
+  | _ -> false
+
+(* An element's attributes and their values, in order of name, but for each
+   framework's own: the order a framework writes them in is its own, and no
+   style reads it. *)
+let attributes e =
+  attribute_names e |> Array.to_list
+  |> List.filter (fun name -> not (framework_only name))
+  |> List.sort String.compare
+  |> List.map (fun name ->
+      name ^ "=" ^ Option.value (attribute e name) ~default:"")
+  |> String.concat " "

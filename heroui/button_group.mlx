@@ -1,0 +1,73 @@
+module Jsx = Solidtype.Jsx
+
+type group = {
+  variant :
+    unit ->
+    [ `primary
+    | `secondary
+    | `tertiary
+    | `outline
+    | `ghost
+    | `danger
+    | `danger_soft ]
+    option;
+  size : unit -> [ `sm | `md | `lg ] option;
+  is_disabled : unit -> bool option;
+  full_width : unit -> bool option;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+module Separator = struct
+  let%component make ?(class_ : string option) () =
+    <span
+      aria_hidden=true
+      class_=(fun () ->
+               let separator =
+                 Styles.ButtonGroup.separator
+                   (Styles.ButtonGroup.slots (Styles.ButtonGroup.options ()))
+               in
+               match class_ () with
+               | Some c -> separator ^ " " ^ c
+               | None -> separator)
+      data_slot="button-group-separator"
+    />
+end
+
+let%component make
+    ?(variant :
+       [ `primary
+       | `secondary
+       | `tertiary
+       | `outline
+       | `ghost
+       | `danger
+       | `danger_soft ]
+       option) ?(size : [ `sm | `md | `lg ] option)
+    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(full_width : bool option) ?(is_disabled : bool option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let g = { variant; size; is_disabled; full_width } in
+  let disabled () = Option.value (is_disabled ()) ~default:false in
+  <Context.Provider value=(fun () -> g)>
+    <div
+      role=`group
+      class_=(fun () ->
+               let base =
+                 Styles.ButtonGroup.base
+                   (Styles.ButtonGroup.slots
+                      (Styles.ButtonGroup.options ?full_width:(full_width ())
+                         ~orientation:(orientation ()) ()))
+               in
+               (* A slot's class takes no class of the caller's, so it is
+                  added after HeroUI's, as React's className is. *)
+               match class_ () with
+               | Some c -> base ^ " " ^ c
+               | None -> base)
+      data_slot="button-group"
+      data_disabled=(fun () -> Jsx.flag (disabled ()))>
+      (fun () -> children ())
+    </div>
+  </Context.Provider>

@@ -1,0 +1,26 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"All buttons disabled"</p>
+      <Button_group is_disabled=true>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">
+        "Group disabled, but one button overrides"
+      </p>
+      <Button_group is_disabled=true>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button is_disabled=false>
+          <Button_group.Separator /> "Third (enabled)"
+        </Button>
+      </Button_group>
+    </div>
+  </div>

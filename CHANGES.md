@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Button_group`: HeroUI's ButtonGroup and its separator, a
+  group of buttons it gives its variant, size, disabled state and full
+  width, each where a button sets none itself, horizontal or vertical.
 - `Solidtype_heroui.Close_button`: HeroUI's CloseButton on Kobalte's button,
   named "Close" unless given an `aria_label`, drawing HeroUI's cross or the
   children it is given, its state kept as Button's is.

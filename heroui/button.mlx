@@ -2,18 +2,37 @@ module Kobalte = Solidtype_kobalte.Button
 
 let%component make
     ?(variant :
-        [ `primary
-        | `secondary
-        | `tertiary
-        | `outline
-        | `ghost
-        | `danger
-        | `danger_soft ] =
-      `primary) ?(size : [ `sm | `md | `lg ] = `md) ?(full_width : bool = false)
-    ?(is_icon_only : bool = false) ?(is_disabled : bool = false)
+       [ `primary
+       | `secondary
+       | `tertiary
+       | `outline
+       | `ghost
+       | `danger
+       | `danger_soft ]
+       option) ?(size : [ `sm | `md | `lg ] option) ?(full_width : bool option)
+    ?(is_icon_only : bool = false) ?(is_disabled : bool option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
     ~(children : Solidtype.Jsx.content) () =
+  (* A prop the button sets is its own, else its group's, else HeroUI's
+     default. *)
+  let group = Button_group.Context.use () in
+  let given own of_group default () =
+    match own () with
+    | Some v -> v
+    | None -> (
+        match Option.bind group of_group with Some v -> v | None -> default)
+  in
+  let variant =
+    given variant (fun (g : Button_group.group) -> g.variant ()) `primary
+  in
+  let size = given size (fun (g : Button_group.group) -> g.size ()) `md in
+  let full_width =
+    given full_width (fun (g : Button_group.group) -> g.full_width ()) false
+  in
+  let is_disabled =
+    given is_disabled (fun (g : Button_group.group) -> g.is_disabled ()) false
+  in
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
     class_=(fun () ->

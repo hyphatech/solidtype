@@ -1,0 +1,22 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let make () =
+  <div class_="w-[400px] space-y-3">
+    <Button_group full_width=true>
+      <Button>"First"</Button>
+      <Button><Button_group.Separator /> "Second"</Button>
+      <Button><Button_group.Separator /> "Third"</Button>
+    </Button_group>
+    <Button_group full_width=true>
+      <Button is_icon_only=true aria_label="Align left">
+        <Icons.Align_left />
+      </Button>
+      <Button is_icon_only=true aria_label="Align center">
+        <Button_group.Separator /> <Icons.Align_center />
+      </Button>
+      <Button is_icon_only=true aria_label="Align right">
+        <Button_group.Separator /> <Icons.Align_right />
+      </Button>
+    </Button_group>
+  </div>

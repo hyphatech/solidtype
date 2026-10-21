@@ -1,0 +1,82 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants =
+  [|
+    (`primary, "primary");
+    (`secondary, "secondary");
+    (`tertiary, "tertiary");
+    (`outline, "outline");
+    (`ghost, "ghost");
+    (`danger, "danger");
+    (`danger_soft, "danger-soft");
+  |]
+
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+let orientations = [| (`horizontal, "horizontal"); (`vertical, "vertical") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let size, set_size = S.create_signal (`md, "md") in
+  let orientation, set_orientation =
+    S.create_signal (`horizontal, "horizontal")
+  in
+  let full_width, set_full_width = S.create_signal false in
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Select
+        label="orientation"
+        choices=(fun () -> orientations)
+        picked=(fun () -> S.get orientation)
+        on_pick=(Controls.choose orientations set_orientation)
+      />
+      <Toggle
+        label="full width"
+        on=(fun () -> S.get full_width)
+        on_toggle=(S.set set_full_width)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button-group]"
+      solidtype=(<Button_group
+                   variant=(fun () -> fst (S.get variant))
+                   size=(fun () -> fst (S.get size))
+                   orientation=(fun () -> fst (S.get orientation))
+                   full_width=(fun () -> S.get full_width)
+                   is_disabled=(fun () -> S.get disabled)>
+                   <Button>"First"</Button>
+                   <Button><Button_group.Separator /> "Second"</Button>
+                   <Button><Button_group.Separator /> "Third"</Button>
+                 </Button_group>)
+      react=(fun host ->
+              Heroui_react.button_group host
+                (Heroui_react.button_group_props
+                   ~variant:(snd (S.get variant))
+                   ~size:(snd (S.get size))
+                   ~orientation:(snd (S.get orientation))
+                   ~full_width:(S.get full_width) ~is_disabled:(S.get disabled)
+                   ()))
+    />
+  </section>

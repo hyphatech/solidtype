@@ -1,0 +1,30 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Small"</p>
+      <Button_group size=`sm variant=`secondary>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Medium (default)"</p>
+      <Button_group size=`md variant=`secondary>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col items-start gap-2">
+      <p class_="text-sm text-muted">"Large"</p>
+      <Button_group size=`lg variant=`secondary>
+        <Button>"First"</Button>
+        <Button><Button_group.Separator /> "Second"</Button>
+        <Button><Button_group.Separator /> "Third"</Button>
+      </Button_group>
+    </div>
+  </div>

@@ -63,3 +63,63 @@ module Circle_xmark = struct
       />
     </svg>
 end
+
+module Globe = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke_width="1.5" />
+      <path
+        d="M1.75 8H14.25M8 1.75C9.75 3.5 10.5 5.75 10.5 8C10.5 10.25 9.75 12.5 \
+           8 14.25C6.25 12.5 5.5 10.25 5.5 8C5.5 5.75 6.25 3.5 8 1.75Z"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linejoin="round"
+      />
+    </svg>
+end
+
+module Chevron_down = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M4 6L8 10L12 6"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+        stroke_linejoin="round"
+      />
+    </svg>
+end
+
+(* Four lines, the shorter ones placed as text is aligned. *)
+module Align = struct
+  let%component make ~(lines : string) () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d=(fun () -> lines ())
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+      />
+    </svg>
+end
+
+module Align_left = struct
+  let%component make () =
+    <Align lines="M2.5 3.5H13.5M2.5 6.5H9.5M2.5 9.5H13.5M2.5 12.5H9.5" />
+end
+
+module Align_center = struct
+  let%component make () =
+    <Align lines="M2.5 3.5H13.5M4.5 6.5H11.5M2.5 9.5H13.5M4.5 12.5H11.5" />
+end
+
+module Align_right = struct
+  let%component make () =
+    <Align lines="M2.5 3.5H13.5M6.5 6.5H13.5M2.5 9.5H13.5M6.5 12.5H13.5" />
+end
+
+module Align_justify = struct
+  let%component make () =
+    <Align lines="M2.5 3.5H13.5M2.5 6.5H13.5M2.5 9.5H13.5M2.5 12.5H13.5" />
+end

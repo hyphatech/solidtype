@@ -1,0 +1,9 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let make () =
+  <Button_group>
+    <Button>"First"</Button>
+    <Button><Button_group.Separator /> "Second"</Button>
+    <Button><Button_group.Separator /> "Third"</Button>
+  </Button_group>

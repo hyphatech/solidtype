@@ -19,6 +19,22 @@ external button_props :
 external button : Dom.htmlDivElement -> button_props -> unit = "button"
 [@@mel.module "./react/heroui.tsx"]
 
+type button_group_props
+
+external button_group_props :
+  variant:string ->
+  size:string ->
+  orientation:string ->
+  full_width:(bool[@mel.as "fullWidth"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  button_group_props = ""
+[@@mel.obj]
+
+external button_group : Dom.htmlDivElement -> button_group_props -> unit
+  = "buttonGroup"
+[@@mel.module "./react/heroui.tsx"]
+
 type separator_props
 
 external separator_props :

@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, Checkbox, Chip, CloseButton, Description, Label, Link, Radio, RadioGroup, Separator, Switch } from "@heroui/react";
+import { Badge, Button, ButtonGroup, Checkbox, Chip, CloseButton, Description, Label, Link, Radio, RadioGroup, Separator, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -33,6 +33,33 @@ type ButtonProps = {
 
 export function button(host: HTMLElement, { label, ...props }: ButtonProps): void {
   flushSync(() => rootOf(host).render(<Button {...props}>{label}</Button>));
+}
+
+type ButtonGroupProps = {
+  variant: ButtonProps["variant"];
+  size: ButtonProps["size"];
+  orientation: "horizontal" | "vertical";
+  fullWidth: boolean;
+  isDisabled: boolean;
+};
+
+// Three buttons, as the port's demo groups them.
+export function buttonGroup(host: HTMLElement, props: ButtonGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ButtonGroup {...props}>
+        <Button>First</Button>
+        <Button>
+          <ButtonGroup.Separator />
+          Second
+        </Button>
+        <Button>
+          <ButtonGroup.Separator />
+          Third
+        </Button>
+      </ButtonGroup>,
+    ),
+  );
 }
 
 type SeparatorProps = {

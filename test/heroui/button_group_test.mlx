@@ -1,0 +1,120 @@
+(* HeroUI's ButtonGroup, beside the same group in React: the group, the
+   variant, size and disabled state it gives its buttons, which a button's own
+   overrides, and its separators. *)
+
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?variant:string ->
+  ?size:string ->
+  ?orientation:string ->
+  ?full_width:(bool[@mel.as "fullWidth"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ButtonGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ButtonGroup.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external remove_attribute : Dom.element -> string -> unit = "removeAttribute"
+[@@mel.send]
+
+(* The group, then each button and each separator, as HeroUI's styles read
+   them. React Aria gives a native button tabindex 0, which it has already,
+   and which no style reads. *)
+let shown host =
+  Js.Array.from
+    (query_all host
+       "[data-slot=button-group], [data-slot=button], \
+        [data-slot=button-group-separator]")
+  |> Array.map (fun e ->
+      remove_attribute e "tabindex";
+      T.attributes e)
+
+let variant_name = function
+  | `primary -> "primary"
+  | `secondary -> "secondary"
+  | `tertiary -> "tertiary"
+  | `outline -> "outline"
+  | `ghost -> "ghost"
+  | `danger -> "danger"
+  | `danger_soft -> "danger-soft"
+
+let size_name = function `sm -> "sm" | `md -> "md" | `lg -> "lg"
+
+let orientation_name = function
+  | `horizontal -> "horizontal"
+  | `vertical -> "vertical"
+
+(* The same group in solidtype and in React, each alone on the page: three
+   buttons, the last of its own variant and enabled. *)
+let both ?variant ?size ?orientation ?full_width ?is_disabled () =
+  T.render (fun () ->
+      <Button_group
+        ?variant=(fun () -> variant)
+        ?size=(fun () -> size)
+        ?orientation=(fun () -> orientation)
+        ?full_width=(fun () -> full_width)
+        ?is_disabled=(fun () -> is_disabled)>
+        <Button>"One"</Button>
+        <Button><Button_group.Separator /> "Two"</Button>
+        <Button variant=`outline is_disabled=false>
+          <Button_group.Separator /> "Three"
+        </Button>
+      </Button_group>);
+  let solidtype = shown T.body in
+  T.cleanup ();
+  let react =
+    shown
+      (Twin.render
+         (props
+            ?variant:(Option.map variant_name variant)
+            ?size:(Option.map size_name size)
+            ?orientation:(Option.map orientation_name orientation)
+            ?full_width ?is_disabled ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Button_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a horizontal group of buttons, as React's is" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "gives its buttons its variant and size" (fun () ->
+          let solidtype, react = both ~variant:`danger_soft ~size:`lg () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "disables its buttons, but for one enabled itself" (fun () ->
+          let solidtype, react = both ~is_disabled:true () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is vertical and full width" (fun () ->
+          let solidtype, react =
+            both ~orientation:`vertical ~full_width:true ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "adds its class after HeroUI's" (fun () ->
+          T.render (fun () ->
+              <Button_group full_width=true class_="mt-2">
+                <Button>"One"</Button>
+              </Button_group>);
+          E.(
+            expect (T.class_name (T.by_role "group"))
+            |> toBe
+                 "button-group button-group--full-width \
+                  button-group--horizontal mt-2")))

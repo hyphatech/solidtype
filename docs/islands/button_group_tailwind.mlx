@@ -1,0 +1,15 @@
+module Button = Solidtype_heroui.Button
+module Button_group = Solidtype_heroui.Button_group
+
+let make () =
+  <Button_group>
+    <Button class_="rounded-none bg-[#08872B] data-hovered:bg-[#0FBF3E]">
+      "Merge pull request"
+    </Button>
+    <Button
+      is_icon_only=true
+      aria_label="Merge options"
+      class_="rounded-none bg-[#08872B] data-hovered:bg-[#0FBF3E]">
+      <Button_group.Separator /> <Icons.Chevron_down />
+    </Button>
+  </Button_group>
