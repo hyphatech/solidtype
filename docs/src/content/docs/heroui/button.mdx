@@ -124,18 +124,31 @@ declares each attribute as React Aria writes it:
 - **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
 - **Disabled**: `:disabled` or `[data-disabled="true"]`
 
+Kobalte writes only `data-disabled`, and empty, so the port keeps the rest
+itself, by `Solidtype_heroui.Interaction`, as React Aria does: hovered by a
+mouse but never a touch, pressed by a pointer or by Enter and Space,
+focus-visible only after a key. Its test puts the port and the same Button in
+React through the same steps and compares what each shows after every one.
+
 ## API Reference
+
+Each prop beside the name HeroUI's React component gives it. A tag is the
+string React takes, a hyphen written as an underscore: `` `danger_soft `` is
+`"danger-soft"`.
 
 ### Button
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `variant` | `` [ `primary \| `secondary \| `tertiary \| `outline \| `ghost \| `danger \| `danger_soft ] `` | `` `primary `` | Visual style |
-| `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
-| `full_width` | `bool` | `false` | Whether it takes its container's width |
-| `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
-| `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
-| `on_click` | `Dom.mouseEvent -> unit` | | Called on a click, by mouse, touch or keyboard; HeroUI's `onPress` |
-| `class_` | `string` | | Added after HeroUI's classes |
-| `children` | elements | | Its content |
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary \| `tertiary \| `outline \| `ghost \| `danger \| `danger_soft ] `` | `` `primary `` | Visual style |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `type` | `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
+| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its content |
+| `isPending` | — | | | Not yet |
+| `aria-label` | — | | | Not yet: a component cannot yet be given an attribute it may leave out |
+| render props | — | | | Not yet |
