@@ -282,3 +282,17 @@ external checkbox_group_props :
 external checkbox_group : Dom.htmlDivElement -> checkbox_group_props -> unit
   = "checkboxGroup"
 [@@mel.module "./react/heroui.tsx"]
+
+type number_field_props
+
+external number_field_props :
+  variant:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  number_field_props = ""
+[@@mel.obj]
+
+external number_field : Dom.htmlDivElement -> number_field_props -> unit
+  = "numberField"
+[@@mel.module "./react/heroui.tsx"]

@@ -1,0 +1,299 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.NumberField
+
+(* What a field's parts read of it: its classes and its state. *)
+type field = {
+  slots : unit -> Styles.NumberField.slots;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+  label_id : string;
+  can_increment : unit -> bool;
+  can_decrement : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = field
+end)
+
+(* A value on its step's grid, counted from the minimum, within the range,
+   as React Aria snaps one: to the nearer step, and below the maximum to the
+   last step that fits. *)
+let snap ~min ~max ~step value =
+  let base = Option.value min ~default:0. in
+  let rest = Float.rem (value -. base) step in
+  let near =
+    if Float.abs rest *. 2. < step then value -. rest
+    else if rest > 0. then value +. (step -. rest)
+    else value -. (step +. rest)
+  in
+  match (min, max) with
+  | Some m, _ when near < m -> m
+  | _, Some m when near > m ->
+      base +. (Float.floor ((m -. base) /. step) *. step)
+  | _ -> near
+
+let within part =
+  match Context.use () with
+  | Some f -> f
+  | None -> invalid_arg (part ^ " is used inside a Number_field")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Kobalte_description = Field.As_span (struct
+  let component = Kobalte.Description.component
+end)
+
+module Kobalte_error = Field.As_span (struct
+  let component = Kobalte.ErrorMessage.component
+end)
+
+(* A field's label, description and error are Kobalte's, which name its
+   input, describe it, and show while it is invalid. *)
+let label id : Label.slot =
+ fun[@u] classes children ->
+  <Kobalte.Label
+    id=(fun () -> id) class_=(fun () -> classes ()) data_slot="label">
+    (fun () -> children ())
+  </Kobalte.Label>
+
+let description : Description.slot =
+ fun[@u] classes children ->
+  <Kobalte_description
+    as_="span"
+    class_=(fun () -> classes ())
+    slot="description"
+    data_slot="description">
+    (fun () -> children ())
+  </Kobalte_description>
+
+let error : Field_error.slot =
+ fun[@u] classes children ->
+  <Kobalte_error
+    as_="span"
+    class_=(fun () -> classes ())
+    slot="errorMessage"
+    data_slot="field-error"
+    data_visible="true">
+    (fun () -> children ())
+  </Kobalte_error>
+
+module Group = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let f = within "Number_field.Group" in
+    (* Hovered and focused within as React Aria's group is, which HeroUI's
+       styles ring. *)
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    <div
+      role=`group
+      ?aria_invalid=(fun () -> if f.invalid () then Some "true" else None)
+      ref=(fun e -> Interaction.watch i e)
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+      class_=(fun () ->
+               after (Styles.NumberField.group (f.slots ())) (class_ ()))
+      data_slot="number-field-group"
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))>
+      (fun () -> children ())
+    </div>
+end
+
+module Input = struct
+  let%component make ?(placeholder : string option) ?(class_ : string option) ()
+      =
+    let f = within "Number_field.Input" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    <Kobalte.Input
+      ?placeholder
+      class_=(fun () ->
+               after (Styles.NumberField.input (f.slots ())) (class_ ()))
+      ref=(fun e -> Interaction.watch i e)
+      data_slot="number-field-input"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+    />
+end
+
+(* HeroUI's own plus and minus, drawn where a button is given no children. *)
+let icon ~slot ~d =
+  <svg
+    aria_hidden=true
+    fill="none"
+    height="16"
+    role=`presentation
+    view_box="0 0 16 16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+    data_slot=(fun () -> Jsx.data slot)>
+    <path
+      clip_rule="evenodd"
+      d=(fun () -> d)
+      fill="currentColor"
+      fill_rule="evenodd"
+    />
+  </svg>
+
+let plus =
+  "M8 1.75a.75.75 0 0 1 .75.75v4.75h4.75a.75.75 0 0 1 0 1.5H8.75v4.75a.75.75 0 \
+   0 1-1.5 0V8.75H2.5a.75.75 0 0 1 0-1.5h4.75V2.5A.75.75 0 0 1 8 1.75"
+
+let minus =
+  "M1.75 8a.75.75 0 0 1 .75-.75h11a.75.75 0 0 1 0 1.5h-11A.75.75 0 0 1 1.75 8"
+
+module Increment_button = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let f = within "Number_field.Increment_button" in
+    let disabled () = not (f.can_increment ()) in
+    let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    (* Named "Increase" and by the field's label, as React Aria's is. *)
+    let id = Solidtype.Solid.create_unique_id () in
+    <Kobalte.IncrementTrigger
+      id=(fun () -> id)
+      aria_label="Increase"
+      aria_labelledby=(fun () -> id ^ " " ^ f.label_id)
+      class_=(fun () ->
+               after
+                 (Styles.NumberField.increment_button (f.slots ()))
+                 (class_ ()))
+      slot="increment"
+      ref=(fun e -> Interaction.watch i e)
+      data_slot="number-field-increment-button"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      disabled=(fun () -> disabled ())
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+      <Show
+        when_=(fun () -> Option.is_some (children ()))
+        fallback=(fun () ->
+                   icon ~slot:"number-field-increment-button-icon" ~d:plus)>
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </Show>
+    </Kobalte.IncrementTrigger>
+end
+
+module Decrement_button = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let f = within "Number_field.Decrement_button" in
+    let disabled () = not (f.can_decrement ()) in
+    let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    (* Named "Decrease" and by the field's label, as React Aria's is. *)
+    let id = Solidtype.Solid.create_unique_id () in
+    <Kobalte.DecrementTrigger
+      id=(fun () -> id)
+      aria_label="Decrease"
+      aria_labelledby=(fun () -> id ^ " " ^ f.label_id)
+      class_=(fun () ->
+               after
+                 (Styles.NumberField.decrement_button (f.slots ()))
+                 (class_ ()))
+      slot="decrement"
+      ref=(fun e -> Interaction.watch i e)
+      data_slot="number-field-decrement-button"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      disabled=(fun () -> disabled ())
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+      <Show
+        when_=(fun () -> Option.is_some (children ()))
+        fallback=(fun () ->
+                   icon ~slot:"number-field-decrement-button-icon" ~d:minus)>
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </Show>
+    </Kobalte.DecrementTrigger>
+end
+
+let%component make ?(variant : [ `primary | `secondary ] option)
+    ?(full_width : bool option) ?(value : float option)
+    ?(default_value : float option) ?(on_change : (float -> unit) option)
+    ?(min_value : float option) ?(max_value : float option) ?(step : float = 1.)
+    ?(is_disabled : bool option) ?(is_invalid : bool = false)
+    ?(is_read_only : bool = false) ?(is_required : bool = false)
+    ?(name : string option) ?(aria_label : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A field is disabled as it says, else as its fieldset is. *)
+  let in_fieldset = Fieldset.disabled () in
+  let disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
+  let snapped v =
+    if Float.is_nan v then v
+    else snap ~min:(min_value ()) ~max:(max_value ()) ~step:(step ()) v
+  in
+  (* The value is the field's, on its step's grid within its range, as React
+     Aria keeps it, and Kobalte is given it: Kobalte snaps nothing, nor stops
+     at a bound. Empty is not a number. *)
+  let current, set =
+    Field.controlled
+      ~value:(fun () -> Option.map snapped (value ()))
+      ~default:(snapped (Option.value (default_value ()) ~default:Float.nan))
+      ~on_change
+  in
+  let change v =
+    let v = snapped v in
+    let now = current () in
+    if not (Float.equal v now || (Float.is_nan v && Float.is_nan now)) then
+      set v
+  in
+  (* A button steps the value while its step would move it. *)
+  let can moved () =
+    (not (disabled () || is_read_only ()))
+    &&
+    let now = current () in
+    Float.is_nan now || not (Float.equal (snapped (moved now)) now)
+  in
+  let label_id = Solidtype.Solid.create_unique_id () in
+  let f =
+    {
+      label_id;
+      slots =
+        (fun () ->
+          Styles.NumberField.slots
+            (Styles.NumberField.options ?full_width:(full_width ())
+               ?variant:(variant ()) ()));
+      disabled;
+      invalid = (fun () -> is_invalid ());
+      can_increment = can (fun v -> v +. step ());
+      can_decrement = can (fun v -> v -. step ());
+    }
+  in
+  <Context.Provider value=(fun () -> f)>
+    <Kobalte.Root
+      raw_value=(fun () -> current ())
+      on_raw_value_change=change
+      ?min_value
+      ?max_value
+      step=(fun () -> step ())
+      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      required=(fun () -> is_required ())
+      disabled=(fun () -> disabled ())
+      read_only=(fun () -> is_read_only ())
+      ?name
+      ?aria_label
+      class_=(fun () ->
+               after (Styles.NumberField.base (f.slots ())) (class_ ()))
+      data_slot="number-field"
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+      data_required=(fun () -> Jsx.flag (is_required ()))>
+      <Kobalte.HiddenInput />
+      <Label.Slot.Provider value=(fun () -> label label_id)>
+        <Description.Slot.Provider value=(fun () -> description)>
+          <Field_error.Slot.Provider value=(fun () -> error)>
+            (fun () -> children ())
+          </Field_error.Slot.Provider>
+        </Description.Slot.Provider>
+      </Label.Slot.Provider>
+    </Kobalte.Root>
+  </Context.Provider>

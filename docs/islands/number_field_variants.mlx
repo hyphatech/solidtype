@@ -1,0 +1,25 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+
+let make () =
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Number_field
+      default_value=1024. min_value=0. name="primary" variant=`primary>
+      <Label>"Primary"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+    </Number_field>
+    <Number_field
+      default_value=1024. min_value=0. name="secondary" variant=`secondary>
+      <Label>"Secondary"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+    </Number_field>
+  </div>

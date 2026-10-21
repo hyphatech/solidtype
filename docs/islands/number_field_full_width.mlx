@@ -1,0 +1,15 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+
+let make () =
+  <div class_="w-[400px]">
+    <Number_field full_width=true default_value=1024. min_value=0. name="width">
+      <Label>"Width"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+    </Number_field>
+  </div>

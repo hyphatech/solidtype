@@ -170,3 +170,15 @@ module Person = struct
       />
     </svg>
 end
+
+module Minus = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M3 8H13"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+      />
+    </svg>
+end

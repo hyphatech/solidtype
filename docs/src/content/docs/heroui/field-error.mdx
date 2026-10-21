@@ -7,9 +7,10 @@ import Example from "../../../components/Example.astro";
 import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/field_error_usage.jsx";
 import UsageCode from "../../../../islands/field_error_usage.mlx?raw";
 
-`Solidtype_heroui.Field_error` is Kobalte's `TextField.ErrorMessage`, a
-`<span>`, with the class HeroUI's own `fieldErrorVariants` gives, which a
-[TextField](../text-field/) shows while it is invalid and its input is
+`Solidtype_heroui.Field_error` is a field's error, with the class HeroUI's
+own `fieldErrorVariants` gives: Kobalte's error message, a `<span>`, which the
+field it is in -- a [TextField](../text-field/), a
+[NumberField](../number-field/) -- shows while it is invalid and its input is
 described by. It is a field's own: outside one it raises `Invalid_argument`.
 
 ## Usage

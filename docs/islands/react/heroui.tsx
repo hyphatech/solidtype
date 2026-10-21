@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, Kbd, Label, Link, NumberField, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -380,6 +380,24 @@ export function checkboxGroup(host: HTMLElement, props: CheckboxGroupProps): voi
           </Checkbox>
         ))}
       </CheckboxGroup>,
+    ),
+  );
+}
+
+type NumberFieldProps = { variant: "primary" | "secondary"; isDisabled: boolean; isInvalid: boolean };
+
+// A field of a label and its group, as the port's demo shows it.
+export function numberField(host: HTMLElement, props: NumberFieldProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <NumberField {...props} defaultValue={4} minValue={0} name="width">
+        <Label>Width</Label>
+        <NumberField.Group>
+          <NumberField.DecrementButton />
+          <NumberField.Input className="w-[80px]" />
+          <NumberField.IncrementButton />
+        </NumberField.Group>
+      </NumberField>,
     ),
   );
 }

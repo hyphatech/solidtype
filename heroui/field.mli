@@ -39,6 +39,23 @@ module type Kobalte = sig
   val input : unit Solidtype.Jsx.component
 end
 
+(** A Kobalte part that renders a [<div>] by default, taking Kobalte's [as],
+    which its generated check does not, so a field renders it as the element
+    React Aria's is: [<K.component as_="span">], a field's description or its
+    error. *)
+module As_span (K : sig
+  val component : unit Solidtype.Jsx.component
+end) : sig
+  module Props : sig
+    val check :
+      ?as_:string Solidtype.Check.value ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Span.check
+  end
+
+  val component : unit Solidtype.Jsx.component
+end
+
 (** A field's content, on the label and input of a Kobalte component:
     [Field.Content (struct let label = Switch.Label.component let input =
      Switch.Input.component end)]. A port's own content renders it with its slot

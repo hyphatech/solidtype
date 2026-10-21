@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Number_field`: HeroUI's NumberField on Kobalte's, its
+  value a number, controlled or kept, on its step's grid within its range as
+  React Aria keeps it, its group, input and buttons, and its label,
+  description and error as Kobalte's. `Field_error` is any field's, given
+  its element by the field it is in, as `Label` and `Description` are.
+- `Solidtype_heroui.Interaction` shows no focus ring for a key typed into a
+  text, but Tab and Escape, as React Aria does.
 - `Solidtype_heroui.Checkbox_group`: HeroUI's CheckboxGroup, on Kobalte's
   checkboxes, which keeps the values they check, controlled or its own, and
   gives them its variant and state; its label names it and its description

@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+
+let make () =
+  let value, set_value = S.create_signal 1024. in
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Number_field
+      min_value=0.
+      name="width"
+      value=(fun () -> S.get value)
+      on_change=(S.set set_value)>
+      <Label>"Width"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Description>
+        (fun () ->
+          Jsx.string ("Current value: " ^ Js.Float.toString (S.get value)))
+      </Description>
+    </Number_field>
+    <div class_="flex gap-2">
+      <Button variant=`tertiary on_click=(fun _ -> S.set set_value 0.)>
+        "Reset to 0"
+      </Button>
+      <Button variant=`tertiary on_click=(fun _ -> S.set set_value 2048.)>
+        "Set to 2048"
+      </Button>
+    </div>
+  </div>

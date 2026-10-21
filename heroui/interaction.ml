@@ -37,11 +37,35 @@ module S = Solidtype.Solid
 let by_keyboard = ref false
 let watching = ref false
 
+external key_on : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
+external input_type : Dom.element -> string = "type" [@@mel.get]
+external editable : Dom.element -> bool = "isContentEditable" [@@mel.get]
+external element_tag : Dom.element -> string = "tagName" [@@mel.get]
+
+(* A key typed into a text, as React Aria tells one: into an input of a text
+   type, a text area or editable content, but Tab and Escape, which move the
+   focus or leave. Typing shows no focus ring. *)
+let typing e =
+  let target = key_on e in
+  let text =
+    match element_tag target with
+    | "INPUT" -> (
+        match input_type target with
+        | "checkbox" | "radio" | "range" | "color" | "file" | "image" | "button"
+        | "submit" | "reset" ->
+            false
+        | _ -> true)
+    | "TEXTAREA" -> true
+    | _ -> editable target
+  in
+  text && match key e with "Tab" | "Escape" -> false | _ -> true
+
 let watch_modality () =
   if not !watching then begin
     watching := true;
     on_key document "keydown" (fun e ->
-        if not (meta_key e || ctrl_key e || alt_key e) then by_keyboard := true);
+        if not (meta_key e || ctrl_key e || alt_key e || typing e) then
+          by_keyboard := true);
     on_pointer document "pointerdown" (fun _ -> by_keyboard := false)
   end
 
@@ -161,7 +185,7 @@ let watch i element =
       down := false;
       press false);
   on_key element "keydown" (fun e ->
-      if focused i then S.set i.set_focus_ring true;
+      if focused i && not (typing e) then S.set i.set_focus_ring true;
       if pressing e && not (repeat e) then press true);
   on_key element "keyup" (fun e -> if pressing e then press false);
   (* Focus as it bubbles: a switch's content is a label whose input inside it

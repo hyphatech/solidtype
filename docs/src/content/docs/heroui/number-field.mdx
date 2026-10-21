@@ -1,0 +1,149 @@
+---
+title: NumberField
+description: A number, typed or stepped by its buttons and the arrow keys.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_usage.jsx";
+import UsageCode from "../../../../islands/number_field_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_variants.jsx";
+import VariantsCode from "../../../../islands/number_field_variants.mlx?raw";
+import * as WithDescription from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_description.jsx";
+import WithDescriptionCode from "../../../../islands/number_field_description.mlx?raw";
+import * as Required from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_required.jsx";
+import RequiredCode from "../../../../islands/number_field_required.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_disabled.jsx";
+import DisabledCode from "../../../../islands/number_field_disabled.mlx?raw";
+import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_full_width.jsx";
+import FullWidthCode from "../../../../islands/number_field_full_width.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_controlled.jsx";
+import ControlledCode from "../../../../islands/number_field_controlled.mlx?raw";
+import * as Step from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_step.jsx";
+import StepCode from "../../../../islands/number_field_step.mlx?raw";
+import * as CustomIcons from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_custom_icons.jsx";
+import CustomIconsCode from "../../../../islands/number_field_custom_icons.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_demo.jsx";
+
+`Solidtype_heroui.Number_field` is Kobalte's `NumberField.Root`, with the
+classes HeroUI's own `numberFieldVariants` gives, and the parts inside it as
+Kobalte's. Its value is a number, controlled or its own, kept on its step's
+grid within its range as React Aria keeps it: Kobalte snaps nothing, so the
+field snaps each value, and disables a button its step would not move. Its
+input is Kobalte's spinbutton.
+
+## Usage
+
+<Example code={UsageCode} title="number_field_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Number_field>
+  <Label>"Width"</Label>
+  <Number_field.Group>
+    <Number_field.Decrement_button />
+    <Number_field.Input />
+    <Number_field.Increment_button />
+  </Number_field.Group>
+  <Description>"In pixels"</Description>
+  <Field_error>"Too wide"</Field_error>
+</Number_field>
+```
+
+## Examples
+
+### Variants
+
+<Example code={VariantsCode} title="number_field_variants.mlx"><Variants.make client:visible /></Example>
+
+### With Description
+
+<Example code={WithDescriptionCode} title="number_field_description.mlx"><WithDescription.make client:visible /></Example>
+
+### Required Field
+
+<Example code={RequiredCode} title="number_field_required.mlx"><Required.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={DisabledCode} title="number_field_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Full Width
+
+<Example code={FullWidthCode} title="number_field_full_width.mlx"><FullWidth.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ControlledCode} title="number_field_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### Step Values
+
+<Example code={StepCode} title="number_field_step.mlx"><Step.make client:visible /></Example>
+
+### Custom Icons
+
+<Example code={CustomIconsCode} title="number_field_custom_icons.mlx"><CustomIcons.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Format Options (currency, percent, units) need React Aria's number
+formatting, and its validation examples React Aria's `validate`; neither is
+ported yet.
+
+## Beside React
+
+The same HeroUI NumberField twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.number-field`, and `.number-field--primary`, `.number-field--secondary`,
+  `.number-field--full-width`
+- `.number-field__group`, and `.number-field__group--full-width`
+- `.number-field__input`
+- `.number-field__increment-button`, `.number-field__decrement-button`
+
+### Interactive States
+
+- **Hover**: `[data-hovered="true"]` on the group, the input and the buttons
+- **Focus within**: `[data-focus-within="true"]` on the group
+- **Focus visible**: `[data-focus-visible="true"]` on the input and buttons
+- **Disabled**: `[data-disabled="true"]`
+- **Invalid**: `[data-invalid="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### NumberField
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `value` | `value` | `float` | | Its value, controlled |
+| `defaultValue` | `default_value` | `float` | | Its value at first, kept by itself |
+| `onChange` | `on_change` | `float -> unit` | | Told each change of its value |
+| `minValue` | `min_value` | `float` | | The least value |
+| `maxValue` | `max_value` | `float` | | The greatest value |
+| `step` | `step` | `float` | `1.` | How far a button or an arrow key steps |
+| `isDisabled` | `is_disabled` | `bool` | | Whether it is disabled, else as its fieldset is |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether its value is kept |
+| `isRequired` | `is_required` | `bool` | `false` | Whether it is required |
+| `name` | `name` | `string` | | Its name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name where no label names it |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `formatOptions`, `validate` | — | | | Not yet |
+
+### NumberField.Group, Input, IncrementButton, DecrementButton
+
+Each takes `class_`, added after HeroUI's class; the input a `placeholder`;
+a button `children`, drawn in place of HeroUI's plus or minus.

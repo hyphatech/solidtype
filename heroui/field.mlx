@@ -54,6 +54,21 @@ module Input_props = struct
   [@@mel.module "vite-plugin-solidtype/markers"]
 end
 
+module As_span (K : sig
+  val component : unit Jsx.component
+end) =
+struct
+  module Props = struct
+    external check :
+      ?as_:string Solidtype.Check.value ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Span.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = K.component
+end
+
 module Content (K : Kobalte) = struct
   module Kobalte_label = struct
     module Props = Label_props

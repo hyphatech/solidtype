@@ -99,19 +99,9 @@ module Indicator = struct
     </span>
 end
 
-(* Kobalte's description as the element React Aria's is, a span, by
-   Kobalte's [as], which its generated check does not take. *)
-module Kobalte_description = struct
-  module Props = struct
-    external check :
-      ?as_:string Solidtype.Check.value ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
-      Solidtype.Html.Span.check = "check"
-    [@@mel.module "vite-plugin-solidtype/markers"]
-  end
-
+module Kobalte_description = Field.As_span (struct
   let component = Kobalte.Description.component
-end
+end)
 
 (* A description in a checkbox, but outside its content, is the checkbox's:
    Kobalte's, which its input is described by, beside its group's. *)
