@@ -21,6 +21,7 @@ let%component make
                   ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
                   ?class_name:(class_ ()) ()))
     disabled=(fun () -> disabled ())
+    ref=(fun b -> Interaction.track ~disabled:(fun[@u] () -> disabled ()) b)
     type_=(fun () -> type_ ())
     on_click=(fun e -> ignore (on_click e : unit option))>
     (fun () -> children ())

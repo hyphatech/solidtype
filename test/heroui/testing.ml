@@ -27,3 +27,21 @@ external setup : unit -> user = "setup"
 [@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
 
 external click : user -> Dom.element -> unit Js.Promise.t = "click" [@@mel.send]
+external hover : user -> Dom.element -> unit Js.Promise.t = "hover" [@@mel.send]
+
+external unhover : user -> Dom.element -> unit Js.Promise.t = "unhover"
+[@@mel.send]
+
+external tab_js : user -> unit -> unit Js.Promise.t = "tab" [@@mel.send]
+
+let tab user = tab_js user ()
+
+external keyboard : user -> string -> unit Js.Promise.t = "keyboard"
+[@@mel.send]
+
+type pointers
+
+external pointer : user -> string -> pointers Js.Promise.t = "pointer"
+[@@mel.send]
+
+external body : Dom.element = "body" [@@mel.scope "document"]

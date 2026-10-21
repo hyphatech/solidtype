@@ -6,11 +6,11 @@ import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import solidtype from "vite-plugin-solidtype";
 
-// solidtype's documentation: each HeroUI port live, beside HeroUI's own
-// component, with its source. The demos are OCaml, compiled by Melange into
-// the repository's _build; two JSX compilers share the site, React's kept to
-// islands/react, where HeroUI's own components are rendered, and Solid's to
-// everything else.
+// solidtype's documentation: each HeroUI port live, beside the same
+// component in React, with its source. The demos are OCaml, compiled by
+// Melange into the repository's _build; two JSX compilers share the site,
+// React's kept to islands/react, where HeroUI's React components are
+// rendered, and Solid's to everything else.
 const repository = fileURLToPath(new URL("..", import.meta.url));
 const reactFiles = /\/islands\/react\/[^/]+\.tsx$/;
 

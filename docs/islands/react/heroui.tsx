@@ -1,4 +1,4 @@
-// HeroUI's own components, rendered by React into a host the playground's
+// HeroUI's components in React, rendered into a host the documentation's
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 

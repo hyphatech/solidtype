@@ -1,5 +1,6 @@
 ; Each HeroUI port, rendered as a page would render it and read as HeroUI's
-; styles read it: its classes and the state its element shows.
+; styles read it: its classes, and the state its element shows beside the
+; state of the same component in React, its twin in twins/
 
 (library
  (name heroui_test)
@@ -12,5 +13,7 @@
  (target out)
  (modules)
  (libraries heroui_test)
+ (runtime_deps
+  (glob_files twins/*.tsx))
  (module_systems
   (es6 jsx)))

@@ -99,21 +99,21 @@ let make () =
       />
     </div>
     <Side_by_side
-      ours=(<Button
-              variant=(fun () -> fst (S.get variant))
-              size=(fun () -> fst (S.get size))
-              full_width=(fun () -> S.get full_width)
-              is_icon_only=(fun () -> S.get icon_only)
-              disabled=(fun () -> S.get disabled)>
-              (fun () -> Jsx.string (label ()))
-            </Button>)
-      theirs=(fun host ->
-               Heroui_react.button host
-                 (Heroui_react.button_props
-                    ~variant:(snd (S.get variant))
-                    ~size:(snd (S.get size))
-                    ~full_width:(S.get full_width)
-                    ~is_icon_only:(S.get icon_only)
-                    ~is_disabled:(S.get disabled) ~label:(label ()) ()))
+      solidtype=(<Button
+                   variant=(fun () -> fst (S.get variant))
+                   size=(fun () -> fst (S.get size))
+                   full_width=(fun () -> S.get full_width)
+                   is_icon_only=(fun () -> S.get icon_only)
+                   disabled=(fun () -> S.get disabled)>
+                   (fun () -> Jsx.string (label ()))
+                 </Button>)
+      react=(fun host ->
+              Heroui_react.button host
+                (Heroui_react.button_props
+                   ~variant:(snd (S.get variant))
+                   ~size:(snd (S.get size))
+                   ~full_width:(S.get full_width)
+                   ~is_icon_only:(S.get icon_only) ~is_disabled:(S.get disabled)
+                   ~label:(label ()) ()))
     />
   </section>

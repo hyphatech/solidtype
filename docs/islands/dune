@@ -1,5 +1,5 @@
 ; The documentation's islands: each demo of a HeroUI port, and the port
-; beside HeroUI's own component, which react/ renders.
+; beside the same component in React, which react/ renders.
 
 (library
  (name docs_islands)

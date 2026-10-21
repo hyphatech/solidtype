@@ -51,12 +51,16 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
                      bound by hand until a generator writes them
+  interaction        the state React Aria writes on an element and HeroUI's
+                     styles read, kept as React Aria keeps it
 docs/                the documentation, a Starlight site: each port's page
-                     shows it beside HeroUI's own component, with its source
+                     shows it beside the same component in React, with its
+                     source
   islands/           the pages' OCaml: each demo, and the comparison of a
-                     port's element with HeroUI's, attribute by attribute
-  islands/react/     HeroUI's own components, rendered by React into a host
-                     an island owns: the one place React runs
+                     port's element with React's, attribute by attribute
+  islands/react/     HeroUI's components in React, rendered into a host
+                     an island owns: the one place the documentation runs
+                     React
 generate/            what writes the generated bindings from Solid's and
                      Kobalte's own types: `make generate`
   names              the one spelling of a name, shared by both
@@ -112,7 +116,8 @@ test/hydration/      an island rendered on the server and hydrated by
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
-                     by vitest
+                     by vitest, and its state beside the same component in
+                     React, its twin in twins/
 test/ppx/            what the ppx writes for each JSX form
 test/does_not_compile.t
                      each mistake the types refuse, built against the

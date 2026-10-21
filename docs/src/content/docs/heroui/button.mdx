@@ -12,13 +12,14 @@ import variants from "../../../../islands/button_variants.mlx?raw";
 the classes HeroUI's own `buttonVariants` gives. Its look is HeroUI's props;
 its behaviour is Kobalte's.
 
-## Beside HeroUI
+## Beside React
 
-The port on the left, HeroUI's React component on the right, under the same
-props. Below them, every attribute of the two elements: a marked row is one
-they disagree on, and a dimmed row is a framework's own -- Solid's hydration
-key, React Aria's markers and the id it generates -- which no style reads.
-Hover, focus and press the buttons to see the state each sets.
+The same HeroUI Button twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two elements: a
+marked row is one they disagree on, and a dimmed row is a framework's own --
+Solid's hydration key, React Aria's markers and the id it generates -- which
+no style reads. Hover, focus and press the buttons to see the state each
+sets.
 
 <div class="not-content">
   <Demo.make client:load />
@@ -34,7 +35,7 @@ Hover, focus and press the buttons to see the state each sets.
 
 ## Props
 
-| HeroUI | solidtype | |
+| React | solidtype | |
 |---|---|---|
 | `variant` | `variant` | `` `primary`` (default), `` `secondary``, `` `tertiary``, `` `outline``, `` `ghost``, `` `danger``, `` `danger_soft`` |
 | `size` | `size` | `` `sm``, `` `md`` (default), `` `lg`` |
@@ -50,8 +51,11 @@ Hover, focus and press the buttons to see the state each sets.
 
 ## State
 
-HeroUI's styles read React Aria's state attributes, `data-hovered`,
-`data-pressed` and `data-focus-visible`, which Kobalte's button does not set.
-Button's styles also read the pseudo-classes, `:hover`, `:active` and
-`:focus-visible`, so the port looks the same without them; the table above
-shows which attributes differ.
+HeroUI's styles read the state React Aria writes on an element:
+`data-hovered`, `data-pressed`, `data-focused`, `data-focus-visible` and
+`data-disabled`, each `"true"` or absent. Kobalte writes only `data-disabled`,
+and empty, so the port keeps them itself, by
+`Solidtype_heroui.Interaction`, as React Aria does: hovered by a mouse but
+never a touch, pressed by a pointer or by Enter and Space, focus-visible only
+after a key. Its test puts the port and the same Button in React through the
+same steps and compares what each shows after every one.

@@ -45,14 +45,16 @@ let value_of name pairs =
   Option.map snd (Array.find_opt (fun (n, _) -> String.equal n name) pairs)
 
 (* Every attribute either side has, once, with each side's value. *)
-let rows ours theirs =
+let rows solidtype react =
   let names =
-    Array.append (Array.map fst ours) (Array.map fst theirs)
+    Array.append (Array.map fst solidtype) (Array.map fst react)
     |> Array.to_list
     |> List.sort_uniq String.compare
     |> Array.of_list
   in
-  Array.map (fun name -> (name, value_of name ours, value_of name theirs)) names
+  Array.map
+    (fun name -> (name, value_of name solidtype, value_of name react))
+    names
 
 (* What each framework writes for itself and no style reads: Solid's
    hydration key, React Aria's markers and the id it generates. *)
@@ -76,63 +78,63 @@ let cell = function
   | Some v -> Jsx.string (if String.equal v "" then {js|(present)|js} else v)
   | None -> Jsx.string {js|—|js}
 
-(* A port and HeroUI's own component under the same props: [ours] renders
-   the port, [theirs] renders HeroUI's into its host, and is run again
-   whenever what it reads changes. Below them, each attribute of the two
+(* One HeroUI component twice, under the same props: [solidtype] renders the
+   port, [react] renders HeroUI's React component into its host, and is run
+   again whenever what it reads changes. Below them, each attribute of the two
    elements: a row marked where they differ, and dimmed where it is a
    framework's own. *)
-let%component make ~(ours : Jsx.element) ~(theirs : Dom.htmlDivElement -> unit)
-    () =
+let%component make ~(solidtype : Jsx.element)
+    ~(react : Dom.htmlDivElement -> unit) () =
   let compared, set_compared = S.create_signal [||] in
-  let our_host = ref None in
-  let their_host = ref None in
+  let solidtype_host = ref None in
+  let react_host = ref None in
   let read () =
-    match (!our_host, !their_host) with
-    | Some o, Some t -> S.set set_compared (rows (shown o) (shown t))
+    match (!solidtype_host, !react_host) with
+    | Some s, Some r -> S.set set_compared (rows (shown s) (shown r))
     | _ -> ()
   in
   (* The observer is made once mounted: the page is also prerendered, where
      there is no DOM to watch. *)
   S.on_mount (fun () ->
-      match (!our_host, !their_host) with
-      | Some o, Some t ->
+      match (!solidtype_host, !react_host) with
+      | Some s, Some r ->
           let watcher = observer read in
           let all =
             watched ~attributes:true ~subtree:true ~child_list:true ()
           in
-          observe watcher o all;
-          observe watcher t all;
+          observe watcher s all;
+          observe watcher r all;
           S.on_cleanup (fun () ->
               disconnect watcher;
-              Heroui_react.unmount t)
+              Heroui_react.unmount r)
       | _ -> ());
   S.create_effect (fun () ->
-      match !their_host with
-      | Some t ->
-          theirs t;
+      match !react_host with
+      | Some r ->
+          react r;
           read ()
       | None -> ());
   <div class_="flex flex-col gap-4">
     <div class_="grid grid-cols-2 gap-4">
       <figure class_="flex flex-col gap-2">
         <figcaption class_="text-xs font-medium text-muted">
-          "solidtype, on Kobalte"
+          "solidtype — OCaml, on Solid and Kobalte"
         </figcaption>
         <div
           class_="flex min-h-24 items-center justify-center rounded-xl border \
                   border-separator p-6"
-          ref=(fun el -> our_host := Some el)>
-          (fun () -> Jsx.element (ours ()))
+          ref=(fun el -> solidtype_host := Some el)>
+          (fun () -> Jsx.element (solidtype ()))
         </div>
       </figure>
       <figure class_="flex flex-col gap-2">
         <figcaption class_="text-xs font-medium text-muted">
-          "HeroUI, on React Aria"
+          "React — TypeScript, on React Aria"
         </figcaption>
         <div
           class_="flex min-h-24 items-center justify-center rounded-xl border \
                   border-separator p-6"
-          ref=(fun el -> their_host := Some el)
+          ref=(fun el -> react_host := Some el)
         />
       </figure>
     </div>
@@ -141,7 +143,7 @@ let%component make ~(ours : Jsx.element) ~(theirs : Dom.htmlDivElement -> unit)
         <tr>
           <th class_="py-1 pe-4 font-medium">"attribute"</th>
           <th class_="py-1 pe-4 font-medium">"solidtype"</th>
-          <th class_="py-1 font-medium">"HeroUI"</th>
+          <th class_="py-1 font-medium">"React"</th>
         </tr>
       </thead>
       <tbody>

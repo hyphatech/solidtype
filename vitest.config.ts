@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 import solid from "vite-plugin-solid";
 import solidtype from "vite-plugin-solidtype";
 
@@ -6,11 +7,16 @@ import solidtype from "vite-plugin-solidtype";
 // _build; melange-jest reaches the globals Jest and vitest share. What runs
 // in a browser runs in jsdom; Solid's rendering on the server runs in Node,
 // compiled for the server, where Solid resolves its server build.
+//
+// A HeroUI port is tested beside HeroUI's React component, its twin: React's
+// compiler is kept to those twins, Solid's to everything else.
+const reactTwins = /\/test\/heroui\/twins\/[^/]+\.tsx$/;
+
 export default defineConfig({
   test: {
     projects: [
       {
-        plugins: [solidtype(), solid()],
+        plugins: [solidtype(), solid({ exclude: [reactTwins] }), react({ include: reactTwins })],
         test: {
           name: "browser",
           environment: "jsdom",

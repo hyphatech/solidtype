@@ -1,4 +1,4 @@
-(* HeroUI's own components, from react/heroui.tsx, rendered into a host. *)
+(* HeroUI's components in React, from react/heroui.tsx, rendered into a host. *)
 
 external unmount : Dom.htmlDivElement -> unit = "unmount"
 [@@mel.module "./react/heroui.tsx"]

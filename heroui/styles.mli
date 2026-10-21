@@ -1,5 +1,5 @@
 (** HeroUI's variant functions, from [@heroui/styles]: each gives the classes of
-    a component's look, as HeroUI's own components apply them. Bound by hand
+    a component's look, as HeroUI's React components apply them. Bound by hand
     until the generator writes them from HeroUI's declarations. *)
 
 type button_options

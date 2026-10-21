@@ -7,6 +7,68 @@ module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
 
+module Twin = struct
+  external render : bool -> Dom.element = "render"
+  [@@mel.module "./twins/Button.tsx"]
+
+  external settle : unit -> unit Js.Promise.t = "settle"
+  [@@mel.module "./twins/Button.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Button.tsx"]
+end
+
+(* The state HeroUI's styles read, which React Aria writes on its element. *)
+let state b =
+  [
+    "data-hovered";
+    "data-pressed";
+    "data-focused";
+    "data-focus-visible";
+    "data-disabled";
+  ]
+  |> List.filter_map (fun name ->
+      Option.map (fun v -> name ^ "=" ^ v) (T.attribute b name))
+  |> String.concat " "
+
+(* A button hovered, pressed and let go by the mouse, left, then reached by
+   Tab and pressed by Enter: its state after each step, by the step's name. *)
+let walk b =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after step =
+    let* () = Twin.settle () in
+    seen := (step, state b) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" in
+  let* () = T.hover user b in
+  let* () = after "hovered" in
+  let* (_ : T.pointers) = T.pointer user "[MouseLeft>]" in
+  let* () = after "pressed" in
+  let* (_ : T.pointers) = T.pointer user "[/MouseLeft]" in
+  let* () = after "released" in
+  let* () = T.unhover user b in
+  let* () = after "left" in
+  let* () = T.click user T.body in
+  let* () = T.tab user in
+  let* () = after "tabbed to" in
+  let* () = T.keyboard user "{Enter>}" in
+  let* () = after "Enter held" in
+  let* () = T.keyboard user "{/Enter}" in
+  let* () = after "Enter let go" in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+(* The walk on HeroUI's Button in solidtype, then in React, each alone on
+   the page, so Tab reaches it. *)
+let both ~disabled =
+  T.render (fun () -> <Button disabled=(fun () -> disabled)>"Save"</Button>);
+  let* solidtype = walk (T.by_role "button") in
+  T.cleanup ();
+  let* react = walk (Twin.render disabled) in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Button" (fun () ->
       Jest.afterEach T.cleanup;
@@ -55,4 +117,12 @@ let () =
           let* () = T.click user b in
           Js.Promise.resolve
             E.(
-              expect (!clicks, T.attribute b "disabled") |> toEqual (1, Some ""))))
+              expect (!clicks, T.attribute b "disabled") |> toEqual (1, Some "")));
+      Jest.testPromise "shows hover, press and focus as React Aria does"
+        (fun () ->
+          let* solidtype, react = both ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "shows none of them while disabled, as React Aria does"
+        (fun () ->
+          let* solidtype, react = both ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))
