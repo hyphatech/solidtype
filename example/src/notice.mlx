@@ -23,7 +23,7 @@ let show ~title text =
                      rounded-md text-stone-400 hover:bg-stone-100 \
                      dark:hover:bg-stone-800"
              aria_label="Dismiss">
-             {js|×|js}
+             "×"
            </Toast.CloseButton>
          </Toast.Root>)
        ()
