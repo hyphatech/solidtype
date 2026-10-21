@@ -9,6 +9,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { keywords, record, table } from "./names.ts";
 import { switchPrefix } from "./opam.ts";
+import { browser } from "./program.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const jsx = `${root}node_modules/solid-js/types/jsx.d.ts`;
@@ -25,7 +26,7 @@ const domTypes = new Set(
     ?.map((t) => t.slice(5)) ?? [],
 );
 
-const program = ts.createProgram([jsx], { strict: true, skipLibCheck: true, noEmit: true });
+const program = ts.createProgram([jsx], browser);
 const checker = program.getTypeChecker();
 const source = program.getSourceFile(jsx);
 if (!source) throw new Error(`no ${jsx}`);

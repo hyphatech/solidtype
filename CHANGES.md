@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Breaking: Kobalte's types are read as a browser has them, so
+  `Solidtype_kobalte.Types` no longer holds Bun's server types (`BunFile`,
+  `S3File`, `Buffer`, `Stats`, `Archive`, its `Image`) or Node's, and
+  `Types.File` no longer has `image` or `form_data`, which no browser's
+  `File` has and which threw when called.
 - Breaking: a name given to a prop or an attribute is passed as it is,
   `<Row changed />` a callback whatever it is named, `class_=cls` a
   constant; a changing value is written as the thunk it is,

@@ -47,6 +47,8 @@ kobalte/             solidtype-kobalte: Kobalte's components part by part,
 generate/            what writes the generated bindings from Solid's and
                      Kobalte's own types: `make generate`
   names              the one spelling of a name, shared by both
+  program            the browser's library both read declarations under,
+                     with no ambient types: Bun's own would join it
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated

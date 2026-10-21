@@ -11,6 +11,7 @@ import { readdirSync, existsSync, readFileSync, realpathSync, writeFileSync } fr
 import { fileURLToPath } from "node:url";
 import { keywords, label, record, snake, table } from "./names.ts";
 import { switchPrefix } from "./opam.ts";
+import { browser } from "./program.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 // Kobalte's real path: a package manager that links each package's
@@ -41,10 +42,8 @@ const entries = readdirSync(dist)
   .filter((d) => existsSync(`${dist}/${d}/index.d.ts`) && !blocks.has(d))
   .sort();
 const program = ts.createProgram(entries.map((d) => `${dist}/${d}/index.d.ts`), {
-  strict: true,
+  ...browser,
   jsx: ts.JsxEmit.Preserve,
-  skipLibCheck: true,
-  noEmit: true,
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler,
 });

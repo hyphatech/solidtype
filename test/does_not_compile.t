@@ -436,6 +436,18 @@ A raw external under a Kobalte wrapper, which skips what the wrapper adds.
   Hint:   Did you mean Solidtype_kobalte.Types.Color.to_format?
   [1]
 
+A method of Bun's File, which a browser's does not have.
+
+  $ cat > case.mlx <<'EOF'
+  > let f = Solidtype_kobalte.Types.File.image
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 8-42:
+  1 | let f = Solidtype_kobalte.Types.File.image
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Unbound value Solidtype_kobalte.Types.File.image
+  [1]
+
 A component without its last parameter, (), reported where it is defined.
 
   $ cat > case.mlx <<'EOF'

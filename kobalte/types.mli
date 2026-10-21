@@ -5,35 +5,15 @@
 (* Members of different JavaScript kinds, each as it is. *)
 type ('a, 'b) either
 type t_array_buffer
-type t_array_iterator
-type t_array_like
-type t_big_int64_array
 type t_big_int_to_locale_string_options
-type t_big_uint64_array
 type t_blob
-type t_data_view
 type t_date_time_format_part
-type t_error
-type t_float16_array
-type t_float32_array
-type t_float64_array
-type t_form_data
-type t_int16_array
-type t_int32_array
-type t_int8_array
 type t_number_format_part
 type t_readable_stream
-type t_request
 type t_resolved_collator_options
 type t_resolved_date_time_format_options
 type t_resolved_number_format_options
-type t_response
-type t_shared_array_buffer
-type t_url
-type t_uint16_array
-type t_uint32_array
 type t_uint8_array
-type t_uint8_clamped_array
 type t_accordion_context_value
 type t_alert_dialog_portal_ref
 type t_alert_dialog_portal_ref2
@@ -138,10 +118,8 @@ type t_color_wheel_context_value_on_drag
 type t_combobox_data_set
 type t_combobox_context_value_on_input_key_down
 type t_context_menu_context_value_set_anchor_rect
-type t_constructor_options
-type t_image
 type t_hover_card_data_set
-type t_number_format_format_to_parts
+type t_date_time_format_format_range
 type t_selection_manager
 type t_menubar_data_set
 type t_meter_data_set
@@ -168,35 +146,8 @@ type t_color_area_state_get_thumb_percent
 type t_color_area_state_set_thumb_percent
 type t_color_area_state_set_thumb_value
 type t_color_wheel_state_get_thumb_position
-type t_resize_options
-type t_modulate_options
-type t_image_jpeg
-type t_image_png
-type t_image_webp
-type t_image_heic
-type t_image_avif
-type 't_array_buffer t_buffer
-type t_bun_file
-type t_s3_file
-type t_metadata
 type t_multiple_selection_state
 type t_swipe_event_detail_delta
-type t_buffer_to_json
-type t_buffer_to_base64
-type t_buffer_set_from_base64
-type t_buffer_set_from_hex
-type t_bun_file_writer
-type t_file_sink
-type t_bun_file_write
-type t_stats
-type t_s3_options
-type t_network_sink
-type t_archive
-type t_s3_file_presign_options
-type t_s3_stats
-type t_file_sink_start
-type t_archive_extract_options
-type t_archive_options
 
 module Either : sig
   type ('a, 'b) t = ('a, 'b) either
@@ -210,29 +161,9 @@ module ArrayBuffer : sig
   type t = t_array_buffer
 end
 
-(* The standard library's ArrayIterator, opaque. *)
-module ArrayIterator : sig
-  type t = t_array_iterator
-end
-
-(* The standard library's ArrayLike, opaque. *)
-module ArrayLike : sig
-  type t = t_array_like
-end
-
-(* The standard library's BigInt64Array, opaque. *)
-module BigInt64Array : sig
-  type t = t_big_int64_array
-end
-
 (* The standard library's BigIntToLocaleStringOptions, opaque. *)
 module BigIntToLocaleStringOptions : sig
   type t = t_big_int_to_locale_string_options
-end
-
-(* The standard library's BigUint64Array, opaque. *)
-module BigUint64Array : sig
-  type t = t_big_uint64_array
 end
 
 (* The standard library's Blob, opaque. *)
@@ -240,54 +171,9 @@ module Blob : sig
   type t = t_blob
 end
 
-(* The standard library's DataView, opaque. *)
-module DataView : sig
-  type t = t_data_view
-end
-
 (* The standard library's DateTimeFormatPart, opaque. *)
 module DateTimeFormatPart : sig
   type t = t_date_time_format_part
-end
-
-(* The standard library's Error, opaque. *)
-module Error : sig
-  type t = t_error
-end
-
-(* The standard library's Float16Array, opaque. *)
-module Float16Array : sig
-  type t = t_float16_array
-end
-
-(* The standard library's Float32Array, opaque. *)
-module Float32Array : sig
-  type t = t_float32_array
-end
-
-(* The standard library's Float64Array, opaque. *)
-module Float64Array : sig
-  type t = t_float64_array
-end
-
-(* The standard library's FormData, opaque. *)
-module FormData : sig
-  type t = t_form_data
-end
-
-(* The standard library's Int16Array, opaque. *)
-module Int16Array : sig
-  type t = t_int16_array
-end
-
-(* The standard library's Int32Array, opaque. *)
-module Int32Array : sig
-  type t = t_int32_array
-end
-
-(* The standard library's Int8Array, opaque. *)
-module Int8Array : sig
-  type t = t_int8_array
 end
 
 (* The standard library's NumberFormatPart, opaque. *)
@@ -298,11 +184,6 @@ end
 (* The standard library's ReadableStream, opaque. *)
 module ReadableStream : sig
   type t = t_readable_stream
-end
-
-(* The standard library's Request, opaque. *)
-module Request : sig
-  type t = t_request
 end
 
 (* The standard library's ResolvedCollatorOptions, opaque. *)
@@ -320,39 +201,9 @@ module ResolvedNumberFormatOptions : sig
   type t = t_resolved_number_format_options
 end
 
-(* The standard library's Response, opaque. *)
-module Response : sig
-  type t = t_response
-end
-
-(* The standard library's SharedArrayBuffer, opaque. *)
-module SharedArrayBuffer : sig
-  type t = t_shared_array_buffer
-end
-
-(* The standard library's URL, opaque. *)
-module URL : sig
-  type t = t_url
-end
-
-(* The standard library's Uint16Array, opaque. *)
-module Uint16Array : sig
-  type t = t_uint16_array
-end
-
-(* The standard library's Uint32Array, opaque. *)
-module Uint32Array : sig
-  type t = t_uint32_array
-end
-
 (* The standard library's Uint8Array, opaque. *)
 module Uint8Array : sig
   type t = t_uint8_array
-end
-
-(* The standard library's Uint8ClampedArray, opaque. *)
-module Uint8ClampedArray : sig
-  type t = t_uint8_clamped_array
 end
 
 module AccordionContextValue : sig
@@ -828,21 +679,17 @@ module File : sig
   external webkit_relative_path : t -> string = "webkitRelativePath" [@@mel.get]
   (** The **`size`** read-only property of the Blob interface returns the size of the Blob or File in bytes.
       
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/size)
-      The size of this Blob in bytes *)
+      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/size) *)
   external size : t -> float = "size" [@@mel.get]
   (** The **`type`** read-only property of the Blob interface returns the MIME type of the file.
       
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/type)
-      The MIME type of this Blob *)
+      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/type) *)
   external type_ : t -> string = "type" [@@mel.get]
   external array_buffer : t -> unit -> t_array_buffer Js.Promise.t = "arrayBuffer" [@@mel.send]
   external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
   external slice : t -> ?start:float -> ?end_:float -> ?content_type:string -> unit -> t_blob = "slice" [@@mel.send]
   external stream : t -> unit -> t_readable_stream = "stream" [@@mel.send]
   external text : t -> unit -> string Js.Promise.t = "text" [@@mel.send]
-  external image : t -> ?options:t_constructor_options -> unit -> t_image = "image" [@@mel.send]
-  external form_data : t -> unit -> t_form_data Js.Promise.t = "formData" [@@mel.send]
 end
 
 module FileField_Root_Translations : sig
@@ -924,7 +771,8 @@ module DateTimeFormatOptions : sig
   external date_style : t -> [ `long | `short | `full | `medium ] option = "dateStyle" [@@mel.get]
   external time_style : t -> [ `long | `short | `full | `medium ] option = "timeStyle" [@@mel.get]
   external hour_cycle : t -> [ `h11 | `h12 | `h23 | `h24 ] option = "hourCycle" [@@mel.get]
-  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?weekday:([ `long | `short | `narrow ] [@mel.as "weekday"]) -> ?era:([ `long | `short | `narrow ] [@mel.as "era"]) -> ?year:(string [@mel.as "year"]) -> ?month:(string [@mel.as "month"]) -> ?day:(string [@mel.as "day"]) -> ?hour:(string [@mel.as "hour"]) -> ?minute:(string [@mel.as "minute"]) -> ?second:(string [@mel.as "second"]) -> ?time_zone_name:([ `long | `short | `shortOffset | `longOffset | `shortGeneric | `longGeneric ] [@mel.as "timeZoneName"]) -> ?format_matcher:(string [@mel.as "formatMatcher"]) -> ?hour12:(bool [@mel.as "hour12"]) -> ?time_zone:(string [@mel.as "timeZone"]) -> ?calendar:(string [@mel.as "calendar"]) -> ?day_period:([ `long | `short | `narrow ] [@mel.as "dayPeriod"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?date_style:([ `long | `short | `full | `medium ] [@mel.as "dateStyle"]) -> ?time_style:([ `long | `short | `full | `medium ] [@mel.as "timeStyle"]) -> ?hour_cycle:([ `h11 | `h12 | `h23 | `h24 ] [@mel.as "hourCycle"]) -> unit -> t = "" [@@mel.obj]
+  external fractional_second_digits : t -> float option = "fractionalSecondDigits" [@@mel.get]
+  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?weekday:([ `long | `short | `narrow ] [@mel.as "weekday"]) -> ?era:([ `long | `short | `narrow ] [@mel.as "era"]) -> ?year:(string [@mel.as "year"]) -> ?month:(string [@mel.as "month"]) -> ?day:(string [@mel.as "day"]) -> ?hour:(string [@mel.as "hour"]) -> ?minute:(string [@mel.as "minute"]) -> ?second:(string [@mel.as "second"]) -> ?time_zone_name:([ `long | `short | `shortOffset | `longOffset | `shortGeneric | `longGeneric ] [@mel.as "timeZoneName"]) -> ?format_matcher:(string [@mel.as "formatMatcher"]) -> ?hour12:(bool [@mel.as "hour12"]) -> ?time_zone:(string [@mel.as "timeZone"]) -> ?calendar:(string [@mel.as "calendar"]) -> ?day_period:([ `long | `short | `narrow ] [@mel.as "dayPeriod"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?date_style:([ `long | `short | `full | `medium ] [@mel.as "dateStyle"]) -> ?time_style:([ `long | `short | `full | `medium ] [@mel.as "timeStyle"]) -> ?hour_cycle:([ `h11 | `h12 | `h23 | `h24 ] [@mel.as "hourCycle"]) -> ?fractional_second_digits:(float [@mel.as "fractionalSecondDigits"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module DateTimeFormat : sig
@@ -956,7 +804,7 @@ module NumberFormatOptions : sig
   external style : t -> [ `decimal | `percent | `currency | `unit ] option = "style" [@@mel.get]
   external currency : t -> string option = "currency" [@@mel.get]
   external currency_display : t -> [ `symbol | `code | `name | `narrowSymbol ] option = "currencyDisplay" [@@mel.get]
-  external use_grouping : t -> bool option = "useGrouping" [@@mel.get]
+  external use_grouping : t -> (string, bool) either option = "useGrouping" [@@mel.get]
   external minimum_integer_digits : t -> float option = "minimumIntegerDigits" [@@mel.get]
   external minimum_fraction_digits : t -> float option = "minimumFractionDigits" [@@mel.get]
   external maximum_fraction_digits : t -> float option = "maximumFractionDigits" [@@mel.get]
@@ -964,18 +812,22 @@ module NumberFormatOptions : sig
   external maximum_significant_digits : t -> float option = "maximumSignificantDigits" [@@mel.get]
   external compact_display : t -> [ `long | `short ] option = "compactDisplay" [@@mel.get]
   external notation : t -> [ `standard | `scientific | `engineering | `compact ] option = "notation" [@@mel.get]
-  external sign_display : t -> [ `auto | `never | `always | `exceptZero ] option = "signDisplay" [@@mel.get]
+  external sign_display : t -> [ `auto | `always | `never | `exceptZero | `negative ] option = "signDisplay" [@@mel.get]
   external unit : t -> string option = "unit" [@@mel.get]
   external unit_display : t -> [ `long | `short | `narrow ] option = "unitDisplay" [@@mel.get]
   external currency_sign : t -> [ `standard | `accounting ] option = "currencySign" [@@mel.get]
-  external make : ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?style:([ `decimal | `percent | `currency | `unit ] [@mel.as "style"]) -> ?currency:(string [@mel.as "currency"]) -> ?currency_display:([ `symbol | `code | `name | `narrowSymbol ] [@mel.as "currencyDisplay"]) -> ?use_grouping:(bool [@mel.as "useGrouping"]) -> ?minimum_integer_digits:(float [@mel.as "minimumIntegerDigits"]) -> ?minimum_fraction_digits:(float [@mel.as "minimumFractionDigits"]) -> ?maximum_fraction_digits:(float [@mel.as "maximumFractionDigits"]) -> ?minimum_significant_digits:(float [@mel.as "minimumSignificantDigits"]) -> ?maximum_significant_digits:(float [@mel.as "maximumSignificantDigits"]) -> ?compact_display:([ `long | `short ] [@mel.as "compactDisplay"]) -> ?notation:([ `standard | `scientific | `engineering | `compact ] [@mel.as "notation"]) -> ?sign_display:([ `auto | `never | `always | `exceptZero ] [@mel.as "signDisplay"]) -> ?unit:(string [@mel.as "unit"]) -> ?unit_display:([ `long | `short | `narrow ] [@mel.as "unitDisplay"]) -> ?currency_sign:([ `standard | `accounting ] [@mel.as "currencySign"]) -> unit -> t = "" [@@mel.obj]
+  external rounding_priority : t -> [ `auto | `morePrecision | `lessPrecision ] option = "roundingPriority" [@@mel.get]
+  external rounding_increment : t -> float option = "roundingIncrement" [@@mel.get]
+  external rounding_mode : t -> [ `ceil | `floor | `expand | `trunc | `halfCeil | `halfFloor | `halfExpand | `halfTrunc | `halfEven ] option = "roundingMode" [@@mel.get]
+  external trailing_zero_display : t -> [ `auto | `stripIfInteger ] option = "trailingZeroDisplay" [@@mel.get]
+  external make : ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?style:([ `decimal | `percent | `currency | `unit ] [@mel.as "style"]) -> ?currency:(string [@mel.as "currency"]) -> ?currency_display:([ `symbol | `code | `name | `narrowSymbol ] [@mel.as "currencyDisplay"]) -> ?use_grouping:((string, bool) either [@mel.as "useGrouping"]) -> ?minimum_integer_digits:(float [@mel.as "minimumIntegerDigits"]) -> ?minimum_fraction_digits:(float [@mel.as "minimumFractionDigits"]) -> ?maximum_fraction_digits:(float [@mel.as "maximumFractionDigits"]) -> ?minimum_significant_digits:(float [@mel.as "minimumSignificantDigits"]) -> ?maximum_significant_digits:(float [@mel.as "maximumSignificantDigits"]) -> ?compact_display:([ `long | `short ] [@mel.as "compactDisplay"]) -> ?notation:([ `standard | `scientific | `engineering | `compact ] [@mel.as "notation"]) -> ?sign_display:([ `auto | `always | `never | `exceptZero | `negative ] [@mel.as "signDisplay"]) -> ?unit:(string [@mel.as "unit"]) -> ?unit_display:([ `long | `short | `narrow ] [@mel.as "unitDisplay"]) -> ?currency_sign:([ `standard | `accounting ] [@mel.as "currencySign"]) -> ?rounding_priority:([ `auto | `morePrecision | `lessPrecision ] [@mel.as "roundingPriority"]) -> ?rounding_increment:(float [@mel.as "roundingIncrement"]) -> ?rounding_mode:([ `ceil | `floor | `expand | `trunc | `halfCeil | `halfFloor | `halfExpand | `halfTrunc | `halfEven ] [@mel.as "roundingMode"]) -> ?trailing_zero_display:([ `auto | `stripIfInteger ] [@mel.as "trailingZeroDisplay"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module NumberFormat : sig
   type t = t_number_format
   external format : t -> float -> string = "format" [@@mel.send]
   external resolved_options : t -> unit -> t_resolved_number_format_options = "resolvedOptions" [@@mel.send]
-  external format_to_parts : t -> ?number:(float, t_number_format_format_to_parts) either -> unit -> t_number_format_part array = "formatToParts" [@@mel.send]
+  external format_to_parts : t -> ?number:(float, t_date_time_format_format_range) either -> unit -> t_number_format_part array = "formatToParts" [@@mel.send]
 end
 
 module Locale : sig
@@ -1091,7 +943,7 @@ module NumberFormatOptions2 : sig
   external style : t -> [ `decimal | `percent | `currency | `unit ] option = "style" [@@mel.get]
   external currency : t -> string option = "currency" [@@mel.get]
   external currency_display : t -> [ `symbol | `code | `name | `narrowSymbol ] option = "currencyDisplay" [@@mel.get]
-  external use_grouping : t -> bool option = "useGrouping" [@@mel.get]
+  external use_grouping : t -> (string, bool) either option = "useGrouping" [@@mel.get]
   external minimum_integer_digits : t -> float option = "minimumIntegerDigits" [@@mel.get]
   external minimum_fraction_digits : t -> float option = "minimumFractionDigits" [@@mel.get]
   external maximum_fraction_digits : t -> float option = "maximumFractionDigits" [@@mel.get]
@@ -1100,11 +952,15 @@ module NumberFormatOptions2 : sig
   external numbering_system : t -> string option = "numberingSystem" [@@mel.get]
   external compact_display : t -> [ `long | `short ] option = "compactDisplay" [@@mel.get]
   external notation : t -> [ `standard | `scientific | `engineering | `compact ] option = "notation" [@@mel.get]
-  external sign_display : t -> [ `auto | `never | `always | `exceptZero ] option = "signDisplay" [@@mel.get]
+  external sign_display : t -> [ `auto | `always | `never | `exceptZero | `negative ] option = "signDisplay" [@@mel.get]
   external unit : t -> string option = "unit" [@@mel.get]
   external unit_display : t -> [ `long | `short | `narrow ] option = "unitDisplay" [@@mel.get]
   external currency_sign : t -> [ `standard | `accounting ] option = "currencySign" [@@mel.get]
-  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?style:([ `decimal | `percent | `currency | `unit ] [@mel.as "style"]) -> ?currency:(string [@mel.as "currency"]) -> ?currency_display:([ `symbol | `code | `name | `narrowSymbol ] [@mel.as "currencyDisplay"]) -> ?use_grouping:(bool [@mel.as "useGrouping"]) -> ?minimum_integer_digits:(float [@mel.as "minimumIntegerDigits"]) -> ?minimum_fraction_digits:(float [@mel.as "minimumFractionDigits"]) -> ?maximum_fraction_digits:(float [@mel.as "maximumFractionDigits"]) -> ?minimum_significant_digits:(float [@mel.as "minimumSignificantDigits"]) -> ?maximum_significant_digits:(float [@mel.as "maximumSignificantDigits"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?compact_display:([ `long | `short ] [@mel.as "compactDisplay"]) -> ?notation:([ `standard | `scientific | `engineering | `compact ] [@mel.as "notation"]) -> ?sign_display:([ `auto | `never | `always | `exceptZero ] [@mel.as "signDisplay"]) -> ?unit:(string [@mel.as "unit"]) -> ?unit_display:([ `long | `short | `narrow ] [@mel.as "unitDisplay"]) -> ?currency_sign:([ `standard | `accounting ] [@mel.as "currencySign"]) -> unit -> t = "" [@@mel.obj]
+  external rounding_priority : t -> [ `auto | `morePrecision | `lessPrecision ] option = "roundingPriority" [@@mel.get]
+  external rounding_increment : t -> float option = "roundingIncrement" [@@mel.get]
+  external rounding_mode : t -> [ `ceil | `floor | `expand | `trunc | `halfCeil | `halfFloor | `halfExpand | `halfTrunc | `halfEven ] option = "roundingMode" [@@mel.get]
+  external trailing_zero_display : t -> [ `auto | `stripIfInteger ] option = "trailingZeroDisplay" [@@mel.get]
+  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?style:([ `decimal | `percent | `currency | `unit ] [@mel.as "style"]) -> ?currency:(string [@mel.as "currency"]) -> ?currency_display:([ `symbol | `code | `name | `narrowSymbol ] [@mel.as "currencyDisplay"]) -> ?use_grouping:((string, bool) either [@mel.as "useGrouping"]) -> ?minimum_integer_digits:(float [@mel.as "minimumIntegerDigits"]) -> ?minimum_fraction_digits:(float [@mel.as "minimumFractionDigits"]) -> ?maximum_fraction_digits:(float [@mel.as "maximumFractionDigits"]) -> ?minimum_significant_digits:(float [@mel.as "minimumSignificantDigits"]) -> ?maximum_significant_digits:(float [@mel.as "maximumSignificantDigits"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?compact_display:([ `long | `short ] [@mel.as "compactDisplay"]) -> ?notation:([ `standard | `scientific | `engineering | `compact ] [@mel.as "notation"]) -> ?sign_display:([ `auto | `always | `never | `exceptZero | `negative ] [@mel.as "signDisplay"]) -> ?unit:(string [@mel.as "unit"]) -> ?unit_display:([ `long | `short | `narrow ] [@mel.as "unitDisplay"]) -> ?currency_sign:([ `standard | `accounting ] [@mel.as "currencySign"]) -> ?rounding_priority:([ `auto | `morePrecision | `lessPrecision ] [@mel.as "roundingPriority"]) -> ?rounding_increment:(float [@mel.as "roundingIncrement"]) -> ?rounding_mode:([ `ceil | `floor | `expand | `trunc | `halfCeil | `halfFloor | `halfExpand | `halfTrunc | `halfEven ] [@mel.as "roundingMode"]) -> ?trailing_zero_display:([ `auto | `stripIfInteger ] [@mel.as "trailingZeroDisplay"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module NumberFieldContextValue : sig
@@ -1421,8 +1277,7 @@ module SwipeEvent : sig
   external type_ : t -> string = "type" [@@mel.get]
   (** The read-only **`detail`** property of the CustomEvent interface returns any data passed when initializing the event.
       
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail)
-      Any custom data the event was created with. Typically used for synthetic events. *)
+      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail) *)
   external detail : t -> t_swipe_event_detail = "detail" [@@mel.get]
   external init_custom_event : t -> string -> ?bubbles:bool -> ?cancelable:bool -> ?detail:t_swipe_event_detail -> unit -> unit = "initCustomEvent" [@@mel.send]
   (** The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
@@ -1700,66 +1555,14 @@ module ContextMenuContextValue_SetAnchorRect : sig
   external make : x:(float [@mel.as "x"]) -> y:(float [@mel.as "y"]) -> unit -> t = "" [@@mel.obj]
 end
 
-module ConstructorOptions : sig
-  type t = t_constructor_options
-  (** Reject inputs whose `width × height` exceeds this many pixels. The
-      check runs after the header is read but before any pixel buffer is
-      allocated, so a tiny file claiming a huge canvas is refused cheaply. *)
-  external max_pixels : t -> float option = "maxPixels" [@@mel.get]
-  (** Apply EXIF Orientation (JPEG) before any other operation. *)
-  external auto_orient : t -> bool option = "autoOrient" [@@mel.get]
-  external make : ?max_pixels:(float [@mel.as "maxPixels"]) -> ?auto_orient:(bool [@mel.as "autoOrient"]) -> unit -> t = "" [@@mel.obj]
-end
-
-(** Decode, transform and re-encode images. Ships JPEG, PNG and WebP via
-    statically-linked libjpeg-turbo / libspng / libwebp; resize and rotate
-    are SIMD kernels — no native module install, no `sharp`.
-    
-    The constructor and every chainable method only *record* settings; the
-    decode → transform → encode pipeline runs on a worker thread when a
-    terminal (`bytes`, `buffer`, `blob`, `toBase64`, `metadata`) is awaited.
-    
-    Chainables overwrite (calling `.resize()` twice keeps the second). Order
-    of execution is fixed regardless of call order:
-    `autoOrient → rotate → flip/flop → resize → modulate`.
-    
-    The source ICC colour profile (Display P3, Adobe RGB, Jpegli XYB, etc.)
-    is preserved through re-encode to JPEG, PNG, and WebP so non-sRGB
-    images don't shift colour. *)
-module Image : sig
-  type t = t_image
-  external resize : t -> float -> ?height:float -> ?options:t_resize_options -> unit -> t_image = "resize" [@@mel.send]
-  external rotate : t -> float -> t_image = "rotate" [@@mel.send]
-  external flip : t -> unit -> t_image = "flip" [@@mel.send]
-  external flop : t -> unit -> t_image = "flop" [@@mel.send]
-  external modulate : t -> t_modulate_options -> t_image = "modulate" [@@mel.send]
-  external jpeg : t -> ?options:t_image_jpeg -> unit -> t_image = "jpeg" [@@mel.send]
-  external png : t -> ?options:t_image_png -> unit -> t_image = "png" [@@mel.send]
-  external webp : t -> ?options:t_image_webp -> unit -> t_image = "webp" [@@mel.send]
-  external heic : t -> ?options:t_image_heic -> unit -> t_image = "heic" [@@mel.send]
-  external avif : t -> ?options:t_image_avif -> unit -> t_image = "avif" [@@mel.send]
-  external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
-  external buffer : t -> unit -> (t_array_buffer, t_shared_array_buffer) either t_buffer Js.Promise.t = "buffer" [@@mel.send]
-  external to_buffer : t -> unit -> (t_array_buffer, t_shared_array_buffer) either t_buffer Js.Promise.t = "toBuffer" [@@mel.send]
-  external dataurl : t -> unit -> string Js.Promise.t = "dataurl" [@@mel.send]
-  external placeholder : t -> ?as_:[ `dataurl ] -> unit -> string Js.Promise.t = "placeholder" [@@mel.send]
-  external blob : t -> unit -> t_blob Js.Promise.t = "blob" [@@mel.send]
-  external to_base64 : t -> unit -> string Js.Promise.t = "toBase64" [@@mel.send]
-  external metadata : t -> unit -> t_metadata Js.Promise.t = "metadata" [@@mel.send]
-  (** Populated after the first awaited terminal; `-1` before. *)
-  external width : t -> float = "width" [@@mel.get]
-  (** Populated after the first awaited terminal; `-1` before. *)
-  external height : t -> float = "height" [@@mel.get]
-end
-
 module HoverCardDataSet : sig
   type t = t_hover_card_data_set
 end
 
-module NumberFormat_FormatToParts : sig
-  type t = t_number_format_format_to_parts
+module DateTimeFormat_FormatRange : sig
+  type t = t_date_time_format_format_range
   external to_string : t -> ?radix:float -> unit -> string = "toString" [@@mel.send]
-  external value_of : t -> unit -> t_number_format_format_to_parts = "valueOf" [@@mel.send]
+  external value_of : t -> unit -> t_date_time_format_format_range = "valueOf" [@@mel.send]
 end
 
 (** An interface for reading and updating multiple selection state. *)
@@ -1995,495 +1798,6 @@ module ColorWheelState_GetThumbPosition : sig
   external make : x:(float [@mel.as "x"]) -> y:(float [@mel.as "y"]) -> unit -> t = "" [@@mel.obj]
 end
 
-module ResizeOptions : sig
-  type t = t_resize_options
-  (** Resampling kernel. *)
-  external filter : t -> [ `nearest | `box | `bilinear | `linear | `cubic | `mitchell | `lanczos2 | `lanczos3 | `mks2013 | `mks2021 ] option = "filter" [@@mel.get]
-  (** `"fill"` stretches to exactly width×height. `"inside"` preserves
-      aspect ratio so the result fits *within* width×height. *)
-  external fit : t -> [ `fill | `inside ] option = "fit" [@@mel.get]
-  (** Never upscale — if the source is already smaller, leave it. *)
-  external without_enlargement : t -> bool option = "withoutEnlargement" [@@mel.get]
-  external make : ?filter:([ `nearest | `box | `bilinear | `linear | `cubic | `mitchell | `lanczos2 | `lanczos3 | `mks2013 | `mks2021 ] [@mel.as "filter"]) -> ?fit:([ `fill | `inside ] [@mel.as "fit"]) -> ?without_enlargement:(bool [@mel.as "withoutEnlargement"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module ModulateOptions : sig
-  type t = t_modulate_options
-  (** Multiplier; `1` leaves brightness unchanged. *)
-  external brightness : t -> float option = "brightness" [@@mel.get]
-  (** `0` = greyscale, `1` = unchanged, `>1` = more saturated. *)
-  external saturation : t -> float option = "saturation" [@@mel.get]
-  external make : ?brightness:(float [@mel.as "brightness"]) -> ?saturation:(float [@mel.as "saturation"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Image_Jpeg : sig
-  type t = t_image_jpeg
-  (** 1–100, default 80. *)
-  external quality : t -> float option = "quality" [@@mel.get]
-  (** Emit a progressive (multi-scan) JPEG. Default `false`. *)
-  external progressive : t -> bool option = "progressive" [@@mel.get]
-  external make : ?quality:(float [@mel.as "quality"]) -> ?progressive:(bool [@mel.as "progressive"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Image_Png : sig
-  type t = t_image_png
-  (** zlib level 0–9. *)
-  external compression_level : t -> float option = "compressionLevel" [@@mel.get]
-  (** Quantize to a palette and emit indexed (colour-type 3) PNG. *)
-  external palette : t -> bool option = "palette" [@@mel.get]
-  (** Max palette size when `palette: true`. 2–256. *)
-  external colors : t -> float option = "colors" [@@mel.get]
-  (** Floyd–Steinberg error-diffusion dither (only with `palette: true`). *)
-  external dither : t -> bool option = "dither" [@@mel.get]
-  external make : ?compression_level:(float [@mel.as "compressionLevel"]) -> ?palette:(bool [@mel.as "palette"]) -> ?colors:(float [@mel.as "colors"]) -> ?dither:(bool [@mel.as "dither"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Image_Webp : sig
-  type t = t_image_webp
-  external quality : t -> float option = "quality" [@@mel.get]
-  external lossless : t -> bool option = "lossless" [@@mel.get]
-  external make : ?quality:(float [@mel.as "quality"]) -> ?lossless:(bool [@mel.as "lossless"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Image_Heic : sig
-  type t = t_image_heic
-  external quality : t -> float option = "quality" [@@mel.get]
-  external make : ?quality:(float [@mel.as "quality"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Image_Avif : sig
-  type t = t_image_avif
-  external quality : t -> float option = "quality" [@@mel.get]
-  external make : ?quality:(float [@mel.as "quality"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Buffer : sig
-  type 't_array_buffer t = 't_array_buffer t_buffer
-  external slice : 't_array_buffer t -> ?start:float -> ?end_:float -> unit -> t_array_buffer t_buffer = "slice" [@@mel.send]
-  external subarray : 't_array_buffer t -> ?start:float -> ?end_:float -> unit -> 't_array_buffer t_buffer = "subarray" [@@mel.send]
-  external write : 't_array_buffer t -> string -> ?encoding:string -> unit -> float = "write" [@@mel.send]
-  external to_string : 't_array_buffer t -> ?encoding:string -> ?start:float -> ?end_:float -> unit -> string = "toString" [@@mel.send]
-  external to_json : 't_array_buffer t -> unit -> t_buffer_to_json = "toJSON" [@@mel.send]
-  external equals : 't_array_buffer t -> t_uint8_array -> bool = "equals" [@@mel.send]
-  external compare : 't_array_buffer t -> t_uint8_array -> ?target_start:float -> ?target_end:float -> ?source_start:float -> ?source_end:float -> unit -> float = "compare" [@@mel.send]
-  external copy : 't_array_buffer t -> t_uint8_array -> ?target_start:float -> ?source_start:float -> ?source_end:float -> unit -> float = "copy" [@@mel.send]
-  external write_big_int64_be : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigInt64BE" [@@mel.send]
-  external write_big_int64_le : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigInt64LE" [@@mel.send]
-  external write_big_u_int64_be : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUInt64BE" [@@mel.send]
-  external write_big_uint64_be : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUint64BE" [@@mel.send]
-  external write_big_u_int64_le : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUInt64LE" [@@mel.send]
-  external write_big_uint64_le : 't_array_buffer t -> t_number_format_format_to_parts -> ?offset:float -> unit -> float = "writeBigUint64LE" [@@mel.send]
-  external write_u_int_le : 't_array_buffer t -> float -> float -> float -> float = "writeUIntLE" [@@mel.send]
-  external write_uint_le : 't_array_buffer t -> float -> float -> float -> float = "writeUintLE" [@@mel.send]
-  external write_u_int_be : 't_array_buffer t -> float -> float -> float -> float = "writeUIntBE" [@@mel.send]
-  external write_uint_be : 't_array_buffer t -> float -> float -> float -> float = "writeUintBE" [@@mel.send]
-  external write_int_le : 't_array_buffer t -> float -> float -> float -> float = "writeIntLE" [@@mel.send]
-  external write_int_be : 't_array_buffer t -> float -> float -> float -> float = "writeIntBE" [@@mel.send]
-  external read_big_u_int64_be : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUInt64BE" [@@mel.send]
-  external read_big_uint64_be : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUint64BE" [@@mel.send]
-  external read_big_u_int64_le : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUInt64LE" [@@mel.send]
-  external read_big_uint64_le : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigUint64LE" [@@mel.send]
-  external read_big_int64_be : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigInt64BE" [@@mel.send]
-  external read_big_int64_le : 't_array_buffer t -> ?offset:float -> unit -> t_number_format_format_to_parts = "readBigInt64LE" [@@mel.send]
-  external read_u_int_le : 't_array_buffer t -> float -> float -> float = "readUIntLE" [@@mel.send]
-  external read_uint_le : 't_array_buffer t -> float -> float -> float = "readUintLE" [@@mel.send]
-  (** Reads `byteLength` number of bytes from `buf` at the specified `offset` and interprets the result as an unsigned big-endian integer supporting
-      up to 48 bits of accuracy.
-      
-      This function is also available under the `readUintBE` alias.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[0x12, 0x34, 0x56, 0x78, 0x90, 0xab\]);
-      
-      console.log(buf.readUIntBE(0, 6).toString(16));
-      // Prints: 1234567890ab
-      console.log(buf.readUIntBE(1, 6).toString(16));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_u_int_be : 't_array_buffer t -> float -> float -> float
-  external read_uint_be : 't_array_buffer t -> float -> float -> float = "readUintBE" [@@mel.send]
-  external read_int_le : 't_array_buffer t -> float -> float -> float = "readIntLE" [@@mel.send]
-  (** Reads `byteLength` number of bytes from `buf` at the specified `offset` and interprets the result as a big-endian, two's complement signed value
-      supporting up to 48 bits of accuracy.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[0x12, 0x34, 0x56, 0x78, 0x90, 0xab\]);
-      
-      console.log(buf.readIntBE(0, 6).toString(16));
-      // Prints: 1234567890ab
-      console.log(buf.readIntBE(1, 6).toString(16));
-      // Throws ERR_OUT_OF_RANGE.
-      console.log(buf.readIntBE(1, 0).toString(16));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_int_be : 't_array_buffer t -> float -> float -> float
-  (** Reads an unsigned 8-bit integer from `buf` at the specified `offset`.
-      
-      This function is also available under the `readUint8` alias.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[1, -2\]);
-      
-      console.log(buf.readUInt8(0));
-      // Prints: 1
-      console.log(buf.readUInt8(1));
-      // Prints: 254
-      console.log(buf.readUInt8(2));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_u_int8 : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_uint8 : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint8" [@@mel.send]
-  (** Reads an unsigned, little-endian 16-bit integer from `buf` at the specified `offset`.
-      
-      This function is also available under the `readUint16LE` alias.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[0x12, 0x34, 0x56\]);
-      
-      console.log(buf.readUInt16LE(0).toString(16));
-      // Prints: 3412
-      console.log(buf.readUInt16LE(1).toString(16));
-      // Prints: 5634
-      console.log(buf.readUInt16LE(2).toString(16));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_u_int16_le : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_uint16_le : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint16LE" [@@mel.send]
-  external read_u_int16_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt16BE" [@@mel.send]
-  external read_uint16_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint16BE" [@@mel.send]
-  (** Reads an unsigned, little-endian 32-bit integer from `buf` at the specified`offset`.
-      
-      This function is also available under the `readUint32LE` alias.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[0x12, 0x34, 0x56, 0x78\]);
-      
-      console.log(buf.readUInt32LE(0).toString(16));
-      // Prints: 78563412
-      console.log(buf.readUInt32LE(1).toString(16));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_u_int32_le : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_uint32_le : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint32LE" [@@mel.send]
-  external read_u_int32_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUInt32BE" [@@mel.send]
-  external read_uint32_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readUint32BE" [@@mel.send]
-  (** Reads a signed 8-bit integer from `buf` at the specified `offset`.
-      
-      Integers read from a `Buffer` are interpreted as two's complement signed values.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[-1, 5\]);
-      
-      console.log(buf.readInt8(0));
-      // Prints: -1
-      console.log(buf.readInt8(1));
-      // Prints: 5
-      console.log(buf.readInt8(2));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_int8 : 't_array_buffer t -> ?offset:float -> unit -> float
-  (** Reads a signed, little-endian 16-bit integer from `buf` at the specified`offset`.
-      
-      Integers read from a `Buffer` are interpreted as two's complement signed values.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[0, 5\]);
-      
-      console.log(buf.readInt16LE(0));
-      // Prints: 1280
-      console.log(buf.readInt16LE(1));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_int16_le : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_int16_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt16BE" [@@mel.send]
-  (** Reads a signed, little-endian 32-bit integer from `buf` at the specified`offset`.
-      
-      Integers read from a `Buffer` are interpreted as two's complement signed values.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[0, 0, 0, 5\]);
-      
-      console.log(buf.readInt32LE(0));
-      // Prints: 83886080
-      console.log(buf.readInt32LE(1));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_int32_le : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_int32_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readInt32BE" [@@mel.send]
-  (** Reads a 32-bit, little-endian float from `buf` at the specified `offset`.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[1, 2, 3, 4\]);
-      
-      console.log(buf.readFloatLE(0));
-      // Prints: 1.539989614439558e-36
-      console.log(buf.readFloatLE(1));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_float_le : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_float_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readFloatBE" [@@mel.send]
-  (** Reads a 64-bit, little-endian double from `buf` at the specified `offset`.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from(\[1, 2, 3, 4, 5, 6, 7, 8\]);
-      
-      console.log(buf.readDoubleLE(0));
-      // Prints: 5.447603722011605e-270
-      console.log(buf.readDoubleLE(1));
-      // Throws ERR_OUT_OF_RANGE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val read_double_le : 't_array_buffer t -> ?offset:float -> unit -> float
-  external read_double_be : 't_array_buffer t -> ?offset:float -> unit -> float = "readDoubleBE" [@@mel.send]
-  external reverse : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "reverse" [@@mel.send]
-  (** Interprets `buf` as an array of unsigned 16-bit integers and swaps the
-      byte order _in-place_. Throws `ERR_INVALID_BUFFER_SIZE` if `buf.length` is not a multiple of 2.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf1 = Buffer.from(\[0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8\]);
-      
-      console.log(buf1);
-      // Prints: <Buffer 01 02 03 04 05 06 07 08>
-      
-      buf1.swap16();
-      
-      console.log(buf1);
-      // Prints: <Buffer 02 01 04 03 06 05 08 07>
-      
-      const buf2 = Buffer.from(\[0x1, 0x2, 0x3\]);
-      
-      buf2.swap16();
-      // Throws ERR_INVALID_BUFFER_SIZE.
-      ```
-      
-      One convenient use of `buf.swap16()` is to perform a fast in-place conversion
-      between UTF-16 little-endian and UTF-16 big-endian:
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf = Buffer.from('This is little-endian UTF-16', 'utf16le');
-      buf.swap16(); // Convert to big-endian UTF-16 text.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val swap16 : 't_array_buffer t -> unit -> 't_array_buffer t_buffer
-  (** Interprets `buf` as an array of unsigned 32-bit integers and swaps the
-      byte order _in-place_. Throws `ERR_INVALID_BUFFER_SIZE` if `buf.length` is not a multiple of 4.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf1 = Buffer.from(\[0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8\]);
-      
-      console.log(buf1);
-      // Prints: <Buffer 01 02 03 04 05 06 07 08>
-      
-      buf1.swap32();
-      
-      console.log(buf1);
-      // Prints: <Buffer 04 03 02 01 08 07 06 05>
-      
-      const buf2 = Buffer.from(\[0x1, 0x2, 0x3\]);
-      
-      buf2.swap32();
-      // Throws ERR_INVALID_BUFFER_SIZE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val swap32 : 't_array_buffer t -> unit -> 't_array_buffer t_buffer
-  (** Interprets `buf` as an array of 64-bit numbers and swaps byte order _in-place_.
-      Throws `ERR_INVALID_BUFFER_SIZE` if `buf.length` is not a multiple of 8.
-      
-      ```js
-      import \{ Buffer \} from 'node:buffer';
-      
-      const buf1 = Buffer.from(\[0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8\]);
-      
-      console.log(buf1);
-      // Prints: <Buffer 01 02 03 04 05 06 07 08>
-      
-      buf1.swap64();
-      
-      console.log(buf1);
-      // Prints: <Buffer 08 07 06 05 04 03 02 01>
-      
-      const buf2 = Buffer.from(\[0x1, 0x2, 0x3\]);
-      
-      buf2.swap64();
-      // Throws ERR_INVALID_BUFFER_SIZE.
-      ```
-      
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
-  val swap64 : 't_array_buffer t -> unit -> 't_array_buffer t_buffer
-  external write_u_int8 : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt8" [@@mel.send]
-  external write_uint8 : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint8" [@@mel.send]
-  external write_u_int16_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt16LE" [@@mel.send]
-  external write_uint16_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint16LE" [@@mel.send]
-  external write_u_int16_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt16BE" [@@mel.send]
-  external write_uint16_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint16BE" [@@mel.send]
-  external write_u_int32_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt32LE" [@@mel.send]
-  external write_uint32_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint32LE" [@@mel.send]
-  external write_u_int32_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUInt32BE" [@@mel.send]
-  external write_uint32_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeUint32BE" [@@mel.send]
-  external write_int8 : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt8" [@@mel.send]
-  external write_int16_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt16LE" [@@mel.send]
-  external write_int16_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt16BE" [@@mel.send]
-  external write_int32_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt32LE" [@@mel.send]
-  external write_int32_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeInt32BE" [@@mel.send]
-  external write_float_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeFloatLE" [@@mel.send]
-  external write_float_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeFloatBE" [@@mel.send]
-  external write_double_le : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeDoubleLE" [@@mel.send]
-  external write_double_be : 't_array_buffer t -> float -> ?offset:float -> unit -> float = "writeDoubleBE" [@@mel.send]
-  (** The size in bytes of each element in the array. *)
-  external bytes_per_element : 't_array_buffer t -> float = "BYTES_PER_ELEMENT" [@@mel.get]
-  (** The ArrayBuffer instance referenced by the array. *)
-  external buffer : 't_array_buffer t -> 't_array_buffer = "buffer" [@@mel.get]
-  (** The length in bytes of the array. *)
-  external byte_length : 't_array_buffer t -> float = "byteLength" [@@mel.get]
-  (** The offset in bytes of the array. *)
-  external byte_offset : 't_array_buffer t -> float = "byteOffset" [@@mel.get]
-  external copy_within : 't_array_buffer t -> float -> float -> ?end_:float -> unit -> 't_array_buffer t_buffer = "copyWithin" [@@mel.send]
-  external join : 't_array_buffer t -> ?separator:string -> unit -> string = "join" [@@mel.send]
-  (** The length of the array. *)
-  external length : 't_array_buffer t -> float = "length" [@@mel.get]
-  external reduce : 't_array_buffer t -> (float -> float -> float -> 't_array_buffer t_buffer -> float) -> float = "reduce" [@@mel.send]
-  external reduce_right : 't_array_buffer t -> (float -> float -> float -> 't_array_buffer t_buffer -> float) -> float = "reduceRight" [@@mel.send]
-  external set : 't_array_buffer t -> t_array_like -> ?offset:float -> unit -> unit = "set" [@@mel.send]
-  external sort : 't_array_buffer t -> ?compare_fn:(float -> float -> float) -> unit -> 't_array_buffer t_buffer = "sort" [@@mel.send]
-  external to_locale_string : 't_array_buffer t -> unit -> string = "toLocaleString" [@@mel.send]
-  external value_of : 't_array_buffer t -> unit -> 't_array_buffer t_buffer = "valueOf" [@@mel.send]
-  external entries : 't_array_buffer t -> unit -> t_array_iterator = "entries" [@@mel.send]
-  external keys : 't_array_buffer t -> unit -> t_array_iterator = "keys" [@@mel.send]
-  external values : 't_array_buffer t -> unit -> t_array_iterator = "values" [@@mel.send]
-  external to_base64 : 't_array_buffer t -> ?options:t_buffer_to_base64 -> unit -> string = "toBase64" [@@mel.send]
-  external set_from_base64 : 't_array_buffer t -> string -> ?offset:float -> unit -> t_buffer_set_from_base64 = "setFromBase64" [@@mel.send]
-  external to_hex : 't_array_buffer t -> unit -> string = "toHex" [@@mel.send]
-  external set_from_hex : 't_array_buffer t -> string -> t_buffer_set_from_hex = "setFromHex" [@@mel.send]
-end
-
-(** \[`Blob`\](https://developer.mozilla.org/en-US/docs/Web/API/Blob) powered by the fastest system calls available for operating on files.
-    
-    This Blob is lazy: it does no work until you read from it.
-    
-    - `size` is not valid until the contents of the file are read at least once.
-    - `type` is auto-set based on the file extension when possible *)
-module BunFile : sig
-  type t = t_bun_file
-  external slice : t -> ?begin_:float -> ?end_:float -> ?content_type:string -> unit -> t_bun_file = "slice" [@@mel.send]
-  external writer : t -> ?options:t_bun_file_writer -> unit -> t_file_sink = "writer" [@@mel.send]
-  (** A UNIX timestamp indicating when the file was last modified. *)
-  external last_modified : t -> float = "lastModified" [@@mel.get]
-  (** The name or path of the file, as specified in the constructor. *)
-  external name : t -> string option = "name" [@@mel.get]
-  external exists : t -> unit -> bool Js.Promise.t = "exists" [@@mel.send]
-  external unlink : t -> unit -> unit Js.Promise.t = "unlink" [@@mel.send]
-  external delete : t -> unit -> unit Js.Promise.t = "delete" [@@mel.send]
-  external stat : t -> unit -> t_stats Js.Promise.t = "stat" [@@mel.send]
-  (** The **`size`** read-only property of the Blob interface returns the size of the Blob or File in bytes.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/size)
-      The size of this Blob in bytes *)
-  external size : t -> float = "size" [@@mel.get]
-  (** The **`type`** read-only property of the Blob interface returns the MIME type of the file.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/type)
-      The MIME type of this Blob *)
-  external type_ : t -> string = "type" [@@mel.get]
-  external array_buffer : t -> unit -> t_array_buffer Js.Promise.t = "arrayBuffer" [@@mel.send]
-  external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
-  external stream : t -> unit -> t_readable_stream = "stream" [@@mel.send]
-  external text : t -> unit -> string Js.Promise.t = "text" [@@mel.send]
-  external image : t -> ?options:t_constructor_options -> unit -> t_image = "image" [@@mel.send]
-  external form_data : t -> unit -> t_form_data Js.Promise.t = "formData" [@@mel.send]
-end
-
-(** Represents a file in an S3-compatible storage service.
-    Extends the Blob interface for compatibility with web APIs. *)
-module S3File : sig
-  type t = t_s3_file
-  external slice : t -> ?begin_:float -> ?end_:float -> ?content_type:string -> unit -> t_s3_file = "slice" [@@mel.send]
-  external writer : t -> ?options:t_s3_options -> unit -> t_network_sink = "writer" [@@mel.send]
-  (** Gets a readable stream of the file's content.
-      Useful for processing large files without loading them entirely into memory. *)
-  external readable : t -> t_readable_stream = "readable" [@@mel.get]
-  external stream : t -> unit -> t_readable_stream = "stream" [@@mel.send]
-  (** The name or path of the file in the bucket. *)
-  external name : t -> string option = "name" [@@mel.get]
-  (** The bucket name containing the file. *)
-  external bucket : t -> string option = "bucket" [@@mel.get]
-  external exists : t -> unit -> bool Js.Promise.t = "exists" [@@mel.send]
-  external presign : t -> ?options:t_s3_file_presign_options -> unit -> string = "presign" [@@mel.send]
-  external delete : t -> unit -> unit Js.Promise.t = "delete" [@@mel.send]
-  (** Alias for `delete()`, matching the Node.js `fs` API naming. *)
-  external unlink : t -> unit -> unit Js.Promise.t = "unlink" [@@mel.send]
-  external stat : t -> unit -> t_s3_stats Js.Promise.t = "stat" [@@mel.send]
-  (** The **`size`** read-only property of the Blob interface returns the size of the Blob or File in bytes.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/size)
-      The size of this Blob in bytes *)
-  external size : t -> float = "size" [@@mel.get]
-  (** The **`type`** read-only property of the Blob interface returns the MIME type of the file.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Blob/type)
-      The MIME type of this Blob *)
-  external type_ : t -> string = "type" [@@mel.get]
-  external array_buffer : t -> unit -> t_array_buffer Js.Promise.t = "arrayBuffer" [@@mel.send]
-  external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
-  external text : t -> unit -> string Js.Promise.t = "text" [@@mel.send]
-  external image : t -> ?options:t_constructor_options -> unit -> t_image = "image" [@@mel.send]
-  external form_data : t -> unit -> t_form_data Js.Promise.t = "formData" [@@mel.send]
-end
-
-module Metadata : sig
-  type t = t_metadata
-  external width : t -> float = "width" [@@mel.get]
-  external height : t -> float = "height" [@@mel.get]
-  external format : t -> [ `jpeg | `png | `webp | `heic | `avif | `bmp | `tiff | `gif ] = "format" [@@mel.get]
-  external make : width:(float [@mel.as "width"]) -> height:(float [@mel.as "height"]) -> format:([ `jpeg | `png | `webp | `heic | `avif | `bmp | `tiff | `gif ] [@mel.as "format"]) -> unit -> t = "" [@@mel.obj]
-end
-
 module MultipleSelectionState : sig
   type t = t_multiple_selection_state
   (** The type of selection that is allowed in the collection. *)
@@ -2509,357 +1823,4 @@ module SwipeEvent_Detail_Delta : sig
   external x : t -> float = "x" [@@mel.get]
   external y : t -> float = "y" [@@mel.get]
   external make : x:(float [@mel.as "x"]) -> y:(float [@mel.as "y"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Buffer_ToJSON : sig
-  type t = t_buffer_to_json
-  external type_ : t -> [ `Buffer ] = "type" [@@mel.get]
-  external data : t -> float array = "data" [@@mel.get]
-  external make : type_:([ `Buffer ] [@mel.as "type"]) -> data:(float array [@mel.as "data"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Buffer_ToBase64 : sig
-  type t = t_buffer_to_base64
-  external alphabet : t -> [ `base64 | `base64url ] option = "alphabet" [@@mel.get]
-  external omit_padding : t -> bool option = "omitPadding" [@@mel.get]
-  external make : ?alphabet:([ `base64 | `base64url ] [@mel.as "alphabet"]) -> ?omit_padding:(bool [@mel.as "omitPadding"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Buffer_SetFromBase64 : sig
-  type t = t_buffer_set_from_base64
-  (** The number of bytes read from the base64 string *)
-  external read : t -> float = "read" [@@mel.get]
-  (** The number of bytes written to the Uint8Array.
-      Never greater than the `.byteLength` of this Uint8Array *)
-  external written : t -> float = "written" [@@mel.get]
-  external make : read:(float [@mel.as "read"]) -> written:(float [@mel.as "written"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module Buffer_SetFromHex : sig
-  type t = t_buffer_set_from_hex
-  (** The number of bytes read from the hex string *)
-  external read : t -> float = "read" [@@mel.get]
-  (** The number of bytes written to the Uint8Array.
-      Never greater than the `.byteLength` of this Uint8Array *)
-  external written : t -> float = "written" [@@mel.get]
-  external make : read:(float [@mel.as "read"]) -> written:(float [@mel.as "written"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module BunFile_Writer : sig
-  type t = t_bun_file_writer
-  external high_water_mark : t -> float option = "highWaterMark" [@@mel.get]
-  external make : ?high_water_mark:(float [@mel.as "highWaterMark"]) -> unit -> t = "" [@@mel.obj]
-end
-
-(** Fast incremental writer for files and pipes.
-    
-    This uses the same interface as \{\@link ArrayBufferSink\}, but writes to a file or pipe. *)
-module FileSink : sig
-  type t = t_file_sink
-  external flush : t -> unit -> (float, float Js.Promise.t) either = "flush" [@@mel.send]
-  external end_ : t -> ?error:t_error -> unit -> (float, float Js.Promise.t) either = "end" [@@mel.send]
-  external start : t -> ?options:t_file_sink_start -> unit -> unit = "start" [@@mel.send]
-  external ref : t -> unit -> unit = "ref" [@@mel.send]
-  external unref : t -> unit -> unit = "unref" [@@mel.send]
-end
-
-module BunFile_Write : sig
-  type t = t_bun_file_write
-  external high_water_mark : t -> float option = "highWaterMark" [@@mel.get]
-  external make : ?high_water_mark:(float [@mel.as "highWaterMark"]) -> unit -> t = "" [@@mel.obj]
-end
-
-(** A `fs.Stats` object provides information about a file.
-    
-    Objects returned from \{\@link stat\}, \{\@link lstat\}, \{\@link fstat\}, and
-    their synchronous counterparts are of this type.
-    If `bigint` in the `options` passed to those methods is true, the numeric values
-    will be `bigint` instead of `number`, and the object will contain additional
-    nanosecond-precision properties suffixed with `Ns`. `Stat` objects are not to be created directly using the `new` keyword.
-    
-    ```console
-    Stats \{
-      dev: 2114,
-      ino: 48064969,
-      mode: 33188,
-      nlink: 1,
-      uid: 85,
-      gid: 100,
-      rdev: 0,
-      size: 527,
-      blksize: 4096,
-      blocks: 8,
-      atimeMs: 1318289051000.1,
-      mtimeMs: 1318289051000.1,
-      ctimeMs: 1318289051000.1,
-      birthtimeMs: 1318289051000.1,
-      atime: Mon, 10 Oct 2011 23:24:11 GMT,
-      mtime: Mon, 10 Oct 2011 23:24:11 GMT,
-      ctime: Mon, 10 Oct 2011 23:24:11 GMT,
-      birthtime: Mon, 10 Oct 2011 23:24:11 GMT \}
-    ```
-    
-    `bigint` version:
-    
-    ```console
-    BigIntStats \{
-      dev: 2114n,
-      ino: 48064969n,
-      mode: 33188n,
-      nlink: 1n,
-      uid: 85n,
-      gid: 100n,
-      rdev: 0n,
-      size: 527n,
-      blksize: 4096n,
-      blocks: 8n,
-      atimeMs: 1318289051000n,
-      mtimeMs: 1318289051000n,
-      ctimeMs: 1318289051000n,
-      birthtimeMs: 1318289051000n,
-      atimeNs: 1318289051000000000n,
-      mtimeNs: 1318289051000000000n,
-      ctimeNs: 1318289051000000000n,
-      birthtimeNs: 1318289051000000000n,
-      atime: Mon, 10 Oct 2011 23:24:11 GMT,
-      mtime: Mon, 10 Oct 2011 23:24:11 GMT,
-      ctime: Mon, 10 Oct 2011 23:24:11 GMT,
-      birthtime: Mon, 10 Oct 2011 23:24:11 GMT \}
-    ``` *)
-module Stats : sig
-  type t = t_stats
-  external is_file : t -> unit -> bool = "isFile" [@@mel.send]
-  external is_directory : t -> unit -> bool = "isDirectory" [@@mel.send]
-  external is_block_device : t -> unit -> bool = "isBlockDevice" [@@mel.send]
-  external is_character_device : t -> unit -> bool = "isCharacterDevice" [@@mel.send]
-  external is_symbolic_link : t -> unit -> bool = "isSymbolicLink" [@@mel.send]
-  external is_fifo : t -> unit -> bool = "isFIFO" [@@mel.send]
-  external is_socket : t -> unit -> bool = "isSocket" [@@mel.send]
-  external dev : t -> float = "dev" [@@mel.get]
-  external ino : t -> float = "ino" [@@mel.get]
-  external mode : t -> float = "mode" [@@mel.get]
-  external nlink : t -> float = "nlink" [@@mel.get]
-  external uid : t -> float = "uid" [@@mel.get]
-  external gid : t -> float = "gid" [@@mel.get]
-  external rdev : t -> float = "rdev" [@@mel.get]
-  external size : t -> float = "size" [@@mel.get]
-  external blksize : t -> float = "blksize" [@@mel.get]
-  external blocks : t -> float = "blocks" [@@mel.get]
-  external atime_ms : t -> float = "atimeMs" [@@mel.get]
-  external mtime_ms : t -> float = "mtimeMs" [@@mel.get]
-  external ctime_ms : t -> float = "ctimeMs" [@@mel.get]
-  external birthtime_ms : t -> float = "birthtimeMs" [@@mel.get]
-  external atime : t -> Js.Date.t = "atime" [@@mel.get]
-  external mtime : t -> Js.Date.t = "mtime" [@@mel.get]
-  external ctime : t -> Js.Date.t = "ctime" [@@mel.get]
-  external birthtime : t -> Js.Date.t = "birthtime" [@@mel.get]
-  external make : unit -> t = "Stats" [@@mel.new] [@@mel.module "@types/node"]
-end
-
-(** Configuration options for S3 operations *)
-module S3Options : sig
-  type t = t_s3_options
-  (** The Access Control List (ACL) policy for the file.
-      Controls who can access the file and what permissions they have. *)
-  external acl : t -> string option = "acl" [@@mel.get]
-  (** The S3 bucket name. Defaults to `S3_BUCKET` or `AWS_BUCKET` environment variables. *)
-  external bucket : t -> string option = "bucket" [@@mel.get]
-  (** The AWS region. Defaults to `S3_REGION` or `AWS_REGION` environment variables. *)
-  external region : t -> string option = "region" [@@mel.get]
-  (** The access key ID for authentication.
-      Defaults to `S3_ACCESS_KEY_ID` or `AWS_ACCESS_KEY_ID` environment variables. *)
-  external access_key_id : t -> string option = "accessKeyId" [@@mel.get]
-  (** The secret access key for authentication.
-      Defaults to `S3_SECRET_ACCESS_KEY` or `AWS_SECRET_ACCESS_KEY` environment variables. *)
-  external secret_access_key : t -> string option = "secretAccessKey" [@@mel.get]
-  (** Optional session token for temporary credentials.
-      Defaults to `S3_SESSION_TOKEN` or `AWS_SESSION_TOKEN` environment variables. *)
-  external session_token : t -> string option = "sessionToken" [@@mel.get]
-  (** The S3-compatible service endpoint URL.
-      Defaults to `S3_ENDPOINT` or `AWS_ENDPOINT` environment variables. *)
-  external endpoint : t -> string option = "endpoint" [@@mel.get]
-  (** Use a virtual hosted-style endpoint, where the bucket name is part of the
-      hostname. Defaults to `false`. When `true`, if `endpoint` is provided, the
-      `bucket` option is ignored. *)
-  external virtual_hosted_style : t -> bool option = "virtualHostedStyle" [@@mel.get]
-  (** The size of each part in multipart uploads (in bytes).
-      - Minimum: 5 MiB
-      - Maximum: 5120 MiB
-      - Default: 5 MiB *)
-  external part_size : t -> float option = "partSize" [@@mel.get]
-  (** Number of parts to upload in parallel for multipart uploads.
-      - Default: 5
-      - Maximum: 255
-      
-      Increasing this value can improve upload speeds for large files
-      but uses more memory. *)
-  external queue_size : t -> float option = "queueSize" [@@mel.get]
-  (** Number of retry attempts for failed uploads.
-      - Default: 3
-      - Maximum: 255 *)
-  external retry : t -> float option = "retry" [@@mel.get]
-  (** The Content-Type of the file.
-      Automatically set based on file extension when possible. *)
-  external type_ : t -> string option = "type" [@@mel.get]
-  (** The Content-Disposition header value.
-      Controls how the file is presented when downloaded. *)
-  external content_disposition : t -> string option = "contentDisposition" [@@mel.get]
-  (** The Content-Encoding header value.
-      Specifies what content encodings have been applied to the object,
-      for example to indicate that it has been compressed. *)
-  external content_encoding : t -> string option = "contentEncoding" [@@mel.get]
-  (** The storage class for the object. By default, Amazon S3 stores newly
-      created objects in the `STANDARD` storage class. *)
-  external storage_class : t -> [ `STANDARD | `DEEP_ARCHIVE | `EXPRESS_ONEZONE | `GLACIER | `GLACIER_IR | `INTELLIGENT_TIERING | `ONEZONE_IA | `OUTPOSTS | `REDUCED_REDUNDANCY | `SNOW | `STANDARD_IA ] option = "storageClass" [@@mel.get]
-  (** When set to `true`, confirms that the requester knows they will be charged
-      for the request and data transfer costs. Required for accessing objects
-      in Requester Pays buckets. *)
-  external request_payer : t -> bool option = "requestPayer" [@@mel.get]
-  external high_water_mark : t -> float option = "highWaterMark" [@@mel.get]
-  external endings : t -> [ `native | `transparent ] option = "endings" [@@mel.get]
-  external make : ?acl:(string [@mel.as "acl"]) -> ?bucket:(string [@mel.as "bucket"]) -> ?region:(string [@mel.as "region"]) -> ?access_key_id:(string [@mel.as "accessKeyId"]) -> ?secret_access_key:(string [@mel.as "secretAccessKey"]) -> ?session_token:(string [@mel.as "sessionToken"]) -> ?endpoint:(string [@mel.as "endpoint"]) -> ?virtual_hosted_style:(bool [@mel.as "virtualHostedStyle"]) -> ?part_size:(float [@mel.as "partSize"]) -> ?queue_size:(float [@mel.as "queueSize"]) -> ?retry:(float [@mel.as "retry"]) -> ?type_:(string [@mel.as "type"]) -> ?content_disposition:(string [@mel.as "contentDisposition"]) -> ?content_encoding:(string [@mel.as "contentEncoding"]) -> ?storage_class:([ `STANDARD | `DEEP_ARCHIVE | `EXPRESS_ONEZONE | `GLACIER | `GLACIER_IR | `INTELLIGENT_TIERING | `ONEZONE_IA | `OUTPOSTS | `REDUCED_REDUNDANCY | `SNOW | `STANDARD_IA ] [@mel.as "storageClass"]) -> ?request_payer:(bool [@mel.as "requestPayer"]) -> ?high_water_mark:(float [@mel.as "highWaterMark"]) -> ?endings:([ `native | `transparent ] [@mel.as "endings"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module NetworkSink : sig
-  type t = t_network_sink
-  external flush : t -> unit -> (float, float Js.Promise.t) either = "flush" [@@mel.send]
-  external end_ : t -> ?error:t_error -> unit -> (float, float Js.Promise.t) either = "end" [@@mel.send]
-  external stat : t -> unit -> t_stats Js.Promise.t = "stat" [@@mel.send]
-  external start : t -> ?options:t_file_sink_start -> unit -> unit = "start" [@@mel.send]
-  external ref : t -> unit -> unit = "ref" [@@mel.send]
-  external unref : t -> unit -> unit = "unref" [@@mel.send]
-end
-
-(** Create and extract tar archives, with optional gzip compression.
-    
-    `Bun.Archive` builds an archive from in-memory data, or wraps an existing
-    archive so you can extract it to disk or memory. *)
-module Archive : sig
-  type t = t_archive
-  external extract : t -> string -> ?options:t_archive_extract_options -> unit -> float Js.Promise.t = "extract" [@@mel.send]
-  external blob : t -> unit -> t_blob Js.Promise.t = "blob" [@@mel.send]
-  external bytes : t -> unit -> t_uint8_array Js.Promise.t = "bytes" [@@mel.send]
-  external files : t -> ?glob:(string, string array) either -> unit -> (string, t_file) Js.Map.t Js.Promise.t = "files" [@@mel.send]
-end
-
-(** Options for generating presigned URLs *)
-module S3FilePresignOptions : sig
-  type t = t_s3_file_presign_options
-  (** Number of seconds until the presigned URL expires.
-      - Default: 86400 (1 day) *)
-  external expires_in : t -> float option = "expiresIn" [@@mel.get]
-  (** The HTTP method allowed for the presigned URL. *)
-  external method_ : t -> [ `GET | `POST | `PUT | `DELETE | `HEAD ] option = "method" [@@mel.get]
-  (** The Access Control List (ACL) policy for the file.
-      Controls who can access the file and what permissions they have. *)
-  external acl : t -> string option = "acl" [@@mel.get]
-  (** The S3 bucket name. Defaults to `S3_BUCKET` or `AWS_BUCKET` environment variables. *)
-  external bucket : t -> string option = "bucket" [@@mel.get]
-  (** The AWS region. Defaults to `S3_REGION` or `AWS_REGION` environment variables. *)
-  external region : t -> string option = "region" [@@mel.get]
-  (** The access key ID for authentication.
-      Defaults to `S3_ACCESS_KEY_ID` or `AWS_ACCESS_KEY_ID` environment variables. *)
-  external access_key_id : t -> string option = "accessKeyId" [@@mel.get]
-  (** The secret access key for authentication.
-      Defaults to `S3_SECRET_ACCESS_KEY` or `AWS_SECRET_ACCESS_KEY` environment variables. *)
-  external secret_access_key : t -> string option = "secretAccessKey" [@@mel.get]
-  (** Optional session token for temporary credentials.
-      Defaults to `S3_SESSION_TOKEN` or `AWS_SESSION_TOKEN` environment variables. *)
-  external session_token : t -> string option = "sessionToken" [@@mel.get]
-  (** The S3-compatible service endpoint URL.
-      Defaults to `S3_ENDPOINT` or `AWS_ENDPOINT` environment variables. *)
-  external endpoint : t -> string option = "endpoint" [@@mel.get]
-  (** Use a virtual hosted-style endpoint, where the bucket name is part of the
-      hostname. Defaults to `false`. When `true`, if `endpoint` is provided, the
-      `bucket` option is ignored. *)
-  external virtual_hosted_style : t -> bool option = "virtualHostedStyle" [@@mel.get]
-  (** The size of each part in multipart uploads (in bytes).
-      - Minimum: 5 MiB
-      - Maximum: 5120 MiB
-      - Default: 5 MiB *)
-  external part_size : t -> float option = "partSize" [@@mel.get]
-  (** Number of parts to upload in parallel for multipart uploads.
-      - Default: 5
-      - Maximum: 255
-      
-      Increasing this value can improve upload speeds for large files
-      but uses more memory. *)
-  external queue_size : t -> float option = "queueSize" [@@mel.get]
-  (** Number of retry attempts for failed uploads.
-      - Default: 3
-      - Maximum: 255 *)
-  external retry : t -> float option = "retry" [@@mel.get]
-  (** The Content-Type of the file.
-      Automatically set based on file extension when possible. *)
-  external type_ : t -> string option = "type" [@@mel.get]
-  (** The Content-Disposition header value.
-      Controls how the file is presented when downloaded. *)
-  external content_disposition : t -> string option = "contentDisposition" [@@mel.get]
-  (** The Content-Encoding header value.
-      Specifies what content encodings have been applied to the object,
-      for example to indicate that it has been compressed. *)
-  external content_encoding : t -> string option = "contentEncoding" [@@mel.get]
-  (** The storage class for the object. By default, Amazon S3 stores newly
-      created objects in the `STANDARD` storage class. *)
-  external storage_class : t -> [ `STANDARD | `DEEP_ARCHIVE | `EXPRESS_ONEZONE | `GLACIER | `GLACIER_IR | `INTELLIGENT_TIERING | `ONEZONE_IA | `OUTPOSTS | `REDUCED_REDUNDANCY | `SNOW | `STANDARD_IA ] option = "storageClass" [@@mel.get]
-  (** When set to `true`, confirms that the requester knows they will be charged
-      for the request and data transfer costs. Required for accessing objects
-      in Requester Pays buckets. *)
-  external request_payer : t -> bool option = "requestPayer" [@@mel.get]
-  external high_water_mark : t -> float option = "highWaterMark" [@@mel.get]
-  external endings : t -> [ `native | `transparent ] option = "endings" [@@mel.get]
-  external make : ?expires_in:(float [@mel.as "expiresIn"]) -> ?method_:([ `GET | `POST | `PUT | `DELETE | `HEAD ] [@mel.as "method"]) -> ?acl:(string [@mel.as "acl"]) -> ?bucket:(string [@mel.as "bucket"]) -> ?region:(string [@mel.as "region"]) -> ?access_key_id:(string [@mel.as "accessKeyId"]) -> ?secret_access_key:(string [@mel.as "secretAccessKey"]) -> ?session_token:(string [@mel.as "sessionToken"]) -> ?endpoint:(string [@mel.as "endpoint"]) -> ?virtual_hosted_style:(bool [@mel.as "virtualHostedStyle"]) -> ?part_size:(float [@mel.as "partSize"]) -> ?queue_size:(float [@mel.as "queueSize"]) -> ?retry:(float [@mel.as "retry"]) -> ?type_:(string [@mel.as "type"]) -> ?content_disposition:(string [@mel.as "contentDisposition"]) -> ?content_encoding:(string [@mel.as "contentEncoding"]) -> ?storage_class:([ `STANDARD | `DEEP_ARCHIVE | `EXPRESS_ONEZONE | `GLACIER | `GLACIER_IR | `INTELLIGENT_TIERING | `ONEZONE_IA | `OUTPOSTS | `REDUCED_REDUNDANCY | `SNOW | `STANDARD_IA ] [@mel.as "storageClass"]) -> ?request_payer:(bool [@mel.as "requestPayer"]) -> ?high_water_mark:(float [@mel.as "highWaterMark"]) -> ?endings:([ `native | `transparent ] [@mel.as "endings"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module S3Stats : sig
-  type t = t_s3_stats
-  external size : t -> float = "size" [@@mel.get]
-  external last_modified : t -> Js.Date.t = "lastModified" [@@mel.get]
-  external etag : t -> string = "etag" [@@mel.get]
-  external type_ : t -> string = "type" [@@mel.get]
-  external make : size:(float [@mel.as "size"]) -> last_modified:(Js.Date.t [@mel.as "lastModified"]) -> etag:(string [@mel.as "etag"]) -> type_:(string [@mel.as "type"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module FileSink_Start : sig
-  type t = t_file_sink_start
-  (** Preallocate an internal buffer of this size.
-      This can significantly improve performance when the chunk size is small. *)
-  external high_water_mark : t -> float option = "highWaterMark" [@@mel.get]
-  external make : ?high_water_mark:(float [@mel.as "highWaterMark"]) -> unit -> t = "" [@@mel.obj]
-end
-
-(** Options for extracting archive contents. *)
-module ArchiveExtractOptions : sig
-  type t = t_archive_extract_options
-  (** Glob pattern(s) to filter which entries are extracted.
-      Uses the same syntax as \{\@link Bun.Glob\}, including support for wildcards (`*`, `**`),
-      character classes (`\[abc\]`), alternation (`\{a,b\}`), and negation (`!pattern`).
-      
-      Patterns are matched against archive entry paths normalized to use forward slashes (`/`),
-      regardless of the host operating system. Always write patterns using `/` as the separator.
-      
-      - Positive patterns: Only entries matching at least one pattern are extracted.
-      - Negative patterns (prefixed with `!`): Entries matching these patterns are excluded.
-        Negative patterns are applied after positive patterns.
-      
-      If not specified, all entries are extracted. *)
-  external glob : t -> (string, string array) either option = "glob" [@@mel.get]
-  external make : ?glob:((string, string array) either [@mel.as "glob"]) -> unit -> t = "" [@@mel.obj]
-end
-
-(** Options for creating an Archive instance.
-    
-    By default, archives are not compressed. Use `\{ compress: "gzip" \}` to enable compression. *)
-module ArchiveOptions : sig
-  type t = t_archive_options
-  (** Compression algorithm to use.
-      Only `"gzip"` is supported.
-      If not specified, no compression is applied. *)
-  external compress : t -> [ `gzip ] option = "compress" [@@mel.get]
-  (** Compression level (1-12). Only applies when `compress` is set.
-      - 1: Fastest compression, lowest ratio
-      - 6: Default balance of speed and ratio
-      - 12: Best compression ratio, slowest *)
-  external level : t -> float option = "level" [@@mel.get]
-  external make : ?compress:([ `gzip ] [@mel.as "compress"]) -> ?level:(float [@mel.as "level"]) -> unit -> t = "" [@@mel.obj]
 end
