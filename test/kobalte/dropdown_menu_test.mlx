@@ -47,6 +47,13 @@ external focus : Dom.element -> unit = "focus" [@@mel.send]
 let focus_is what label =
   H.eventually (fun () -> H.expect_equal ~what label (H.text H.focused))
 
+(* As a menu opens, Kobalte hides the page from the accessibility tree for a
+   frame or more, before the content it keeps visible is set: a query of the
+   open menu waits for the page to show it, as a person waits for the menu. *)
+let shown find =
+  let* () = H.eventually (fun () -> ignore (find () : Dom.element)) in
+  Js.Promise.resolve (find ())
+
 let expanded what trigger value =
   H.eventually (fun () ->
       H.expect_equal ~what value (attribute trigger "aria-expanded"))
@@ -61,7 +68,7 @@ let () =
       focus trigger;
       let* () = H.keyboard user "{Enter}" in
       let* () = expanded "the trigger, Enter pressed" trigger "true" in
-      let menu = H.by_role "menu" in
+      let* menu = shown (fun () -> H.by_role "menu") in
       H.expect_equal ~what:"the trigger controls the menu" (attribute menu "id")
         (attribute trigger "aria-controls");
       H.expect_equal ~what:"the menu is labelled by its trigger"
@@ -128,8 +135,9 @@ let () =
       let trigger = H.by_role_named "button" (H.query ~name:"Edit" ()) in
       let* () = H.click user trigger in
       let* () = expanded "the trigger, clicked" trigger "true" in
-      let* () =
-        H.click user (H.by_role_named "menuitem" (H.query ~name:"Cut" ()))
+      let* cut =
+        shown (fun () -> H.by_role_named "menuitem" (H.query ~name:"Cut" ()))
       in
+      let* () = H.click user cut in
       let* () = expanded "the trigger, an item clicked" trigger "false" in
       H.eventually (fun () -> ignore (H.by_text "Chose Cut" : Dom.element)))

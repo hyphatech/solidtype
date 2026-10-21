@@ -104,13 +104,16 @@ type style
 external style : Dom.element -> style = "style" [@@mel.get]
 external pointer_events : style -> string = "pointerEvents" [@@mel.get]
 
-(* A modal overlay takes pointer events from the page while it is open and
-   gives them back once it closes: each test waits for that, so none
-   reaches the next, and no click of the next is refused. *)
+(* A modal overlay takes pointer events from the page while it is open, and
+   hides the rest of it from the accessibility tree, and gives both back
+   once it closes: each test waits for that, so none reaches the next, and
+   no click or query of the next is refused. *)
 let released () =
   eventually (fun () ->
       if String.equal (pointer_events (style body)) "none" then
-        Js.Exn.raiseError "the page still refuses pointer events")
+        Js.Exn.raiseError "the page still refuses pointer events";
+      if Option.is_some (attribute body "aria-hidden") then
+        Js.Exn.raiseError "the page is still hidden from the accessibility tree")
 
 (* [alike name ~island ~twin check]: [check] passes on the OCaml island and
    on its TSX twin, and axe finds no violation in either. *)
