@@ -1,6 +1,7 @@
-// FR-1: an OCaml component reaches the browser as the code Solid's own
-// compiler emits for the same JSX. Each example island, compiled by Melange
-// and rewritten, goes through babel-preset-solid beside its TSX twin, and
+// AGENTS.md's "An island compiles as its TSX twin does": an OCaml component
+// reaches the browser as the code Solid's own compiler emits for the same
+// JSX. Each example island, compiled by Melange and rewritten, goes through
+// babel-preset-solid beside its TSX twin, and
 // the two must agree once names are set aside -- the three ways Astro's
 // integration runs the compiler: for the browser, for the browser with
 // hydration, and for the server. A prerendered island hydrates because the

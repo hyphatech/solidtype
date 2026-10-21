@@ -72,8 +72,9 @@ function literalTag(v: string): boolean {
   return /^[A-Za-z][A-Za-z0-9_']*$/.test(v) && !keywords.has(v);
 }
 
-// What an attribute holds, from Solid's declared type: the rules the PRD
-// states, and null for a type none of them covers.
+// What an attribute holds, from Solid's declared type, by AGENTS.md's "An
+// attribute's type is generated from Solid's JSX types", and null for a
+// type none of its mappings covers.
 function ocamlType(name: string, node: ts.TypeNode | undefined): string | null {
   if (!node) return null;
   if (name === "ref") return "element -> unit";

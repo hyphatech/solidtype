@@ -158,12 +158,12 @@ const isString = (t: ts.Type): boolean =>
   (t.flags & (ts.TypeFlags.String | ts.TypeFlags.TemplateLiteral | ts.TypeFlags.StringMapping)) !== 0 ||
   (t.isIntersection() && t.types.some(isString));
 
-// The OCaml type of a TypeScript one, by the rules the PRD states; null when
-// none covers it.
 const isElement = (t: ts.Type) => t.aliasSymbol?.name === "Element" && moduleOf(t.aliasSymbol) === "solid-js";
 
 // [absent] drops undefined, which an optional prop's absence already says;
 // anywhere else -- a callback's argument, a result -- it is an option.
+// The OCaml type of a TypeScript one, by AGENTS.md's "Kobalte's binding is
+// generated from its declarations"; null when none of its mappings covers it.
 function map(t: ts.Type, vars: Vars, where: string, absent = false): string | null {
   if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
   if (isElement(t)) return "Solidtype.Jsx.element";
