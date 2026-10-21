@@ -1,0 +1,190 @@
+(* HeroUI's RadioGroup on Kobalte, beside the same RadioGroup in React: each
+   part by its slot, what HeroUI's styles read of it, what names and
+   describes the group and each radio, the inputs a reader reaches, the state
+   a radio and its content show through a walk, and the arrow keys moving the
+   choice. *)
+
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  variant:[ `primary | `secondary ] ->
+  default_value:(string[@mel.as "defaultValue"]) ->
+  orientation:[ `horizontal | `vertical ] ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  starter_disabled:(bool[@mel.as "starterDisabled"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> unit = "render"
+  [@@mel.module "./twins/RadioGroup.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/RadioGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/RadioGroup.tsx"]
+end
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external checked : Dom.element -> bool = "checked" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external query_all_js : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let all selector = Js.Array.from (query_all_js selector)
+
+(* The text of the elements an attribute names by their ids, as a reader
+   reaches a name or a description. *)
+let named e attribute =
+  match T.attribute e attribute with
+  | None -> ""
+  | Some ids ->
+      String.split_on_char ' ' ids
+      |> List.filter_map (fun id -> Js.Null.toOption (by_id id))
+      |> List.map text |> String.concat " "
+
+(* Kobalte marks some parts with an empty attribute where React Aria writes
+   none -- the group's label disabled, invalid -- which no style of HeroUI's
+   reads, since each reads ["true"]: an empty one is read as none. *)
+let state_of e =
+  [| "data-selected"; "data-disabled"; "data-invalid"; "data-orientation" |]
+  |> Array.map (fun name ->
+      Option.bind (T.attribute e name) (function "" -> None | v -> Some v))
+
+(* What HeroUI's styles read of each part, and what a reader reaches. A
+   description is Kobalte's div where React Aria's is a span, so its tag is
+   left out. *)
+let shown () =
+  let parts slot =
+    all ("[data-slot=" ^ slot ^ "]")
+    |> Array.map (fun e -> (slot, tag_name e, T.class_name e, state_of e))
+  in
+  let group = T.by_role "radiogroup" in
+  let descriptions =
+    all "[data-slot=description]"
+    |> Array.map (fun e -> (T.class_name e, T.attribute e "slot", text e))
+  in
+  let inputs =
+    all "input[type=radio]"
+    |> Array.map (fun i ->
+        ( T.attribute i "value",
+          checked i,
+          T.attribute i "disabled",
+          named i "aria-describedby" ))
+  in
+  ( Array.concat
+      (List.map parts
+         [
+           "radio-group";
+           "radio";
+           "radio-content";
+           "radio-control";
+           "radio-indicator";
+           "label";
+         ]),
+    descriptions,
+    (named group "aria-labelledby", named group "aria-describedby"),
+    inputs )
+
+let chosen () =
+  all "input[type=radio]" |> Array.to_list |> List.filter checked
+  |> List.map (fun i -> T.attribute i "value")
+
+(* The port, then the same RadioGroup in React, each alone on the page,
+   shown, walked by a radio's content, then moved by the arrow keys from the
+   radio the walk left focused. *)
+let both ~variant ~value ~orientation ~disabled ~invalid ~starter_disabled =
+  let walk () =
+    let before = shown () in
+    let content = (all "[data-slot=radio-content]").(2) in
+    let* walked = T.walk ~step:Twin.step content in
+    let after = shown () in
+    let user = T.setup () in
+    let* () = Twin.step (fun () -> T.keyboard user "{ArrowUp}") in
+    let up = chosen () in
+    let* () = Twin.step (fun () -> T.keyboard user "{ArrowDown}") in
+    let down = chosen () in
+    Js.Promise.resolve
+      (before, walked, T.state (all "[data-slot=radio]").(2), after, up, down)
+  in
+  T.render (fun () ->
+      <Radio_group
+        variant=(fun () -> variant)
+        default_value=(fun () -> value)
+        orientation=(fun () -> orientation)
+        is_disabled=(fun () -> disabled)
+        is_invalid=(fun () -> invalid)>
+        <Label>"Plan"</Label>
+        <Description>"Choose the plan that suits you"</Description>
+        <Radio value="starter" is_disabled=(fun () -> starter_disabled)>
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Starter"
+          </Radio.Content>
+          <Description>"For side projects"</Description>
+        </Radio>
+        <Radio value="pro">
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+          </Radio.Content>
+          <Description>"Advanced reporting"</Description>
+        </Radio>
+        <Radio value="teams">
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Teams"
+          </Radio.Content>
+          <Description>"Up to 10 teammates"</Description>
+        </Radio>
+      </Radio_group>);
+  let* solidtype = walk () in
+  T.cleanup ();
+  Twin.render
+    (props ~variant ~default_value:value ~orientation ~is_disabled:disabled
+       ~is_invalid:invalid ~starter_disabled ());
+  let* react = walk () in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "RadioGroup" (fun () ->
+      Jest.testPromise
+        "is HeroUI's radio group, walked and moved as React Aria's" (fun () ->
+          let* solidtype, react =
+            both ~variant:`primary ~value:"pro" ~orientation:`vertical
+              ~disabled:false ~invalid:false ~starter_disabled:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is horizontal, secondary, as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~variant:`secondary ~value:"teams" ~orientation:`horizontal
+              ~disabled:false ~invalid:false ~starter_disabled:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "skips a disabled radio as React Aria's does" (fun () ->
+          let* solidtype, react =
+            both ~variant:`primary ~value:"pro" ~orientation:`vertical
+              ~disabled:false ~invalid:false ~starter_disabled:true
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is disabled and invalid as React Aria's is" (fun () ->
+          let* solidtype, react =
+            both ~variant:`primary ~value:"pro" ~orientation:`vertical
+              ~disabled:true ~invalid:true ~starter_disabled:false
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

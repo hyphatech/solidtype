@@ -21,9 +21,16 @@
 
 type t
 
-val create : ?disabled:bool Solidtype.Solid.accessor -> unit -> t
+val create :
+  ?disabled:bool Solidtype.Solid.accessor ->
+  ?keys:[ `target | `element ] ->
+  unit ->
+  t
 (** A state with nothing hovered, pressed or focused, disabled while [disabled]
-    holds. *)
+    holds. A key presses as [keys] says React Aria judges it: by what it went
+    to, [`target], the default; or by the element watched, [`element], as React
+    Aria's radio judges a key on its label, which the input's key reaches as it
+    bubbles, so Enter presses a radio's content as Space does. *)
 
 val watch : t -> _ Dom.element_like -> unit
 (** [watch i element] keeps [i] as React Aria keeps an element's state:
@@ -32,7 +39,7 @@ val watch : t -> _ Dom.element_like -> unit
     - pressed while a pointer is down on it and over it, or while Enter is held
       on it but for a checkbox or a radio, or Space but on a link, an anchor
       with an href or the link role, as React Aria decides by what the key went
-      to;
+      to, or by the element itself as [keys] says;
     - focused while it or an element inside it has the focus, and focus-visible
       while it has it after a key was pressed rather than a pointer.
 

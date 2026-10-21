@@ -1,0 +1,23 @@
+module Jsx = Solidtype.Jsx
+
+type slot = ((unit -> string) -> (unit -> Jsx.content) -> Jsx.element[@u])
+
+(* How a description renders where a part above gives it its element, as
+   React Aria's TextContext does: a field's description, which the field's
+   input is described by. *)
+module Slot = Solidtype.Context.Make_optional (struct
+  type t = slot
+end)
+
+let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let classes () =
+    Styles.Description.classes
+      (Styles.Description.options ?class_:(class_ ()) ())
+  in
+  match Slot.use () with
+  | Some render -> render classes (fun () -> children ()) [@u]
+  | None ->
+      <span
+        class_=(fun () -> classes ()) slot="description" data_slot="description">
+        (fun () -> children ())
+      </span>

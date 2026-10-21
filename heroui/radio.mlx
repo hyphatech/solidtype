@@ -1,0 +1,110 @@
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.RadioGroup
+
+(* What a radio's parts read of the radio they are in: its classes, and its
+   state as a field. *)
+type radio = { slots : unit -> Styles.Radio.slots; field : Field.state }
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = radio
+end)
+
+let within part =
+  match Context.use () with
+  | Some r -> r
+  | None -> invalid_arg (part ^ " is used inside a Radio")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Field_content = Field.Content (struct
+  let label = Kobalte.ItemLabel.component
+  let input = Kobalte.ItemInput.component
+end)
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let r = within "Radio.Content" in
+    <Field_content
+      field=(fun () -> r.field)
+      slot="radio-content"
+      class_=(fun () -> after (Styles.Radio.content (r.slots ())) (class_ ()))>
+      (fun () -> children ())
+    </Field_content>
+end
+
+module Control = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let r = within "Radio.Control" in
+    <span
+      class_=(fun () -> after (Styles.Radio.control (r.slots ())) (class_ ()))
+      data_slot="radio-control">
+      (fun () -> children ())
+    </span>
+end
+
+module Indicator = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let r = within "Radio.Indicator" in
+    <span
+      aria_hidden=true
+      class_=(fun () -> after (Styles.Radio.indicator (r.slots ())) (class_ ()))
+      data_slot="radio-indicator">
+      (fun () ->
+        match children () with Some given -> given | None -> Jsx.string "")
+    </span>
+end
+
+(* A description in a radio is the radio's: Kobalte's, which its input is
+   described by. *)
+let description : Description.slot =
+ fun[@u] classes children ->
+  <Kobalte.ItemDescription
+    class_=(fun () -> classes ()) slot="description" data_slot="description">
+    (fun () -> children ())
+  </Kobalte.ItemDescription>
+
+let%component make ~(value : string) ?(is_disabled : bool = false)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let g =
+    match Radio_group.Context.use () with
+    | Some g -> g
+    | None -> invalid_arg "Radio is used inside a Radio_group"
+  in
+  let selected () =
+    match g.value () with Some v -> String.equal v (value ()) | None -> false
+  in
+  let disabled () = g.disabled () || is_disabled () in
+  let r =
+    {
+      slots =
+        (fun () ->
+          Styles.Radio.slots (Styles.Radio.options ?class_:(class_ ()) ()));
+      field =
+        {
+          selected;
+          indeterminate = (fun () -> false);
+          disabled;
+          invalid = g.invalid;
+          interaction =
+            Interaction.create
+              ~disabled:(fun[@u] () -> disabled ())
+              ~keys:`element ();
+        };
+    }
+  in
+  <Context.Provider value=(fun () -> r)>
+    <Kobalte.Item
+      value=(fun () -> value ())
+      disabled=(fun () -> is_disabled ())
+      class_=(fun () -> Styles.Radio.base (r.slots ()))
+      data_slot="radio"
+      data_selected=(fun () -> Jsx.flag (selected ()))
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_invalid=(fun () -> Jsx.flag (g.invalid ()))>
+      <Description.Slot.Provider value=(fun () -> description)>
+        (fun () -> children ())
+      </Description.Slot.Provider>
+    </Kobalte.Item>
+  </Context.Provider>

@@ -1,0 +1,79 @@
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.RadioGroup
+
+(* What a group's radios read of it: the value chosen, and whether it is
+   disabled or invalid. *)
+type group = {
+  value : unit -> string option;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+(* A label in a group, but outside a radio's content, is the group's: Kobalte's
+   label, which names it. *)
+let label : Label.slot =
+ fun[@u] classes children ->
+  <Kobalte.Label class_=(fun () -> classes ()) data_slot="label">
+    (fun () -> children ())
+  </Kobalte.Label>
+
+(* A description in a group, but outside a radio, is the group's: Kobalte's
+   description, which it is described by. *)
+let description : Description.slot =
+ fun[@u] classes children ->
+  <Kobalte.Description
+    class_=(fun () -> classes ()) slot="description" data_slot="description">
+    (fun () -> children ())
+  </Kobalte.Description>
+
+let%component make ?(variant : [ `primary | `secondary ] = `primary)
+    ?(value : string option) ?(default_value : string option)
+    ?(on_change : (string -> unit) option)
+    ?(orientation : [ `horizontal | `vertical ] = `vertical)
+    ?(is_disabled : bool = false) ?(is_invalid : bool = false)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* The value is the group's, read by Kobalte and by every radio alike;
+     none is Kobalte's own empty value, as a form's reset leaves it. *)
+  let chosen, choose =
+    Field.controlled
+      ~value:(fun () -> Option.map Option.some (value ()))
+      ~default:(default_value ())
+      ~on_change:(Option.iter (fun v -> ignore (on_change v : unit option)))
+  in
+  let g =
+    {
+      value = chosen;
+      disabled = (fun () -> is_disabled ());
+      invalid = (fun () -> is_invalid ());
+    }
+  in
+  <Context.Provider value=(fun () -> g)>
+    <Kobalte.Root
+      value=(fun () -> Option.value (chosen ()) ~default:"")
+      on_change=(fun v -> choose (Some v))
+      orientation=(fun () -> orientation ())
+      disabled=(fun () -> is_disabled ())
+      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      class_=(fun () ->
+               Styles.RadioGroup.classes
+                 (Styles.RadioGroup.options ~variant:(variant ())
+                    ?class_:(class_ ()) ()))
+      data_slot="radio-group"
+      data_orientation=(fun () ->
+                         Jsx.data
+                           (match orientation () with
+                           | `horizontal -> "horizontal"
+                           | `vertical -> "vertical"))
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      data_invalid=(fun () -> Jsx.flag (is_invalid ()))>
+      <Label.Slot.Provider value=(fun () -> label)>
+        <Description.Slot.Provider value=(fun () -> description)>
+          (fun () -> children ())
+        </Description.Slot.Provider>
+      </Label.Slot.Provider>
+    </Kobalte.Root>
+  </Context.Provider>

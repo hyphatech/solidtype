@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Badge, Button, Checkbox, Chip, Label, Link, Separator, Switch } from "@heroui/react";
+import { Badge, Button, Checkbox, Chip, Description, Label, Link, Radio, RadioGroup, Separator, Switch } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -125,6 +125,41 @@ export function checkbox(host: HTMLElement, { label, ...props }: CheckboxProps):
           <Label>{label}</Label>
         </Checkbox.Content>
       </Checkbox>,
+    ),
+  );
+}
+
+type RadioGroupProps = {
+  variant: "primary" | "secondary";
+  orientation: "horizontal" | "vertical";
+  isDisabled: boolean;
+  isInvalid: boolean;
+};
+
+export function radioGroup(host: HTMLElement, props: RadioGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <RadioGroup {...props} defaultValue="pro">
+        <Label>Plan</Label>
+        <Radio value="starter">
+          <Radio.Content>
+            <Radio.Control>
+              <Radio.Indicator />
+            </Radio.Control>
+            Starter
+          </Radio.Content>
+          <Description>For side projects</Description>
+        </Radio>
+        <Radio value="pro">
+          <Radio.Content>
+            <Radio.Control>
+              <Radio.Indicator />
+            </Radio.Control>
+            Pro
+          </Radio.Content>
+          <Description>Advanced reporting</Description>
+        </Radio>
+      </RadioGroup>,
     ),
   );
 }

@@ -101,3 +101,18 @@ external checkbox_props :
 
 external checkbox : Dom.htmlDivElement -> checkbox_props -> unit = "checkbox"
 [@@mel.module "./react/heroui.tsx"]
+
+type radio_group_props
+
+external radio_group_props :
+  variant:string ->
+  orientation:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  radio_group_props = ""
+[@@mel.obj]
+
+external radio_group : Dom.htmlDivElement -> radio_group_props -> unit
+  = "radioGroup"
+[@@mel.module "./react/heroui.tsx"]

@@ -1,0 +1,62 @@
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module For = Solidtype.For
+
+let options =
+  [|
+    ("monthly", "Monthly", "$12 billed every month");
+    ("yearly", "Yearly", "$120 billed once a year");
+  |]
+
+let content =
+  "group flex w-full items-start gap-3 rounded-xl border border-success/10 \
+   bg-success-soft/30 px-4 py-3 transition-colors \
+   data-[focus-visible=true]:ring-2 data-[focus-visible=true]:ring-success/15 \
+   data-[hovered=true]:bg-success-soft-hover \
+   data-[selected=true]:border-success/30 data-[selected=true]:bg-success-soft \
+   data-[selected=true]:data-[hovered=true]:bg-success-soft-hover"
+
+let control =
+  "mt-0.5 size-5 shrink-0 rounded-full border border-border bg-default \
+   shadow-none group-data-[pressed=true]:scale-95 \
+   group-data-[selected=true]:border-transparent \
+   group-data-[selected=true]:bg-success \
+   group-data-[selected=true]:group-data-[pressed=true]:bg-success-hover"
+
+let indicator =
+  "before:rounded-full before:bg-default \
+   group-data-[selected=true]:before:scale-50 \
+   group-data-[selected=true]:before:bg-success-foreground \
+   group-data-[selected=true]:group-data-[pressed=true]:before:scale-[0.57]"
+
+let make () =
+  <Radio_group
+    class_="w-full max-w-sm gap-3 **:data-[slot=radio]:mt-0"
+    default_value="yearly"
+    variant=`secondary>
+    <Label class_="font-medium text-foreground">"Billing cycle"</Label>
+    <Description>"Choose how often you are charged."</Description>
+    <For each=(fun () -> options)>
+      (fun (value, label, about) _ ->
+        <Radio value=(fun () -> value)>
+          <Radio.Content class_=(fun () -> content)>
+            <Radio.Control class_=(fun () -> control)>
+              <Radio.Indicator class_=(fun () -> indicator) />
+            </Radio.Control>
+            <div class_="flex flex-col gap-0.5">
+              <span
+                class_="font-medium text-foreground \
+                        group-data-[selected=true]:text-success-soft-foreground">
+                (fun () -> Solidtype.Jsx.string label)
+              </span>
+              <Description
+                class_="group-data-[selected=true]:text-success-soft-foreground/80">
+                (fun () -> Solidtype.Jsx.string about)
+              </Description>
+            </div>
+          </Radio.Content>
+        </Radio>)
+    </For>
+  </Radio_group>

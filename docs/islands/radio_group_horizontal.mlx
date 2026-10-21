@@ -1,0 +1,29 @@
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Label>"Subscription plan"</Label>
+    <Radio_group default_value="pro" orientation=`horizontal>
+      <Radio value="starter">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Starter"
+        </Radio.Content>
+        <Description>"For side projects"</Description>
+      </Radio>
+      <Radio value="pro">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+        </Radio.Content>
+        <Description>"Advanced reporting"</Description>
+      </Radio>
+      <Radio value="teams">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Teams"
+        </Radio.Content>
+        <Description>"Up to 10 teammates"</Description>
+      </Radio>
+    </Radio_group>
+  </div>

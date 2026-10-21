@@ -1,0 +1,73 @@
+module S = Solidtype.Solid
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+let orientations = [| (`vertical, "vertical"); (`horizontal, "horizontal") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let orientation, set_orientation = S.create_signal (`vertical, "vertical") in
+  let disabled, set_disabled = S.create_signal false in
+  let invalid, set_invalid = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="orientation"
+        choices=(fun () -> orientations)
+        picked=(fun () -> S.get orientation)
+        on_pick=(Controls.choose orientations set_orientation)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+      <Toggle
+        label="invalid"
+        on=(fun () -> S.get invalid)
+        on_toggle=(S.set set_invalid)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=radio-content]"
+      solidtype=(<Radio_group
+                   default_value="pro"
+                   variant=(fun () -> fst (S.get variant))
+                   orientation=(fun () -> fst (S.get orientation))
+                   is_disabled=(fun () -> S.get disabled)
+                   is_invalid=(fun () -> S.get invalid)>
+                   <Label>"Plan"</Label>
+                   <Radio value="starter">
+                     <Radio.Content>
+                       <Radio.Control><Radio.Indicator /></Radio.Control>
+                       "Starter"
+                     </Radio.Content>
+                     <Description>"For side projects"</Description>
+                   </Radio>
+                   <Radio value="pro">
+                     <Radio.Content>
+                       <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+                     </Radio.Content>
+                     <Description>"Advanced reporting"</Description>
+                   </Radio>
+                 </Radio_group>)
+      react=(fun host ->
+              Heroui_react.radio_group host
+                (Heroui_react.radio_group_props
+                   ~variant:(snd (S.get variant))
+                   ~orientation:(snd (S.get orientation))
+                   ~is_disabled:(S.get disabled) ~is_invalid:(S.get invalid) ()))
+    />
+  </section>

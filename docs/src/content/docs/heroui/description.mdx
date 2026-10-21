@@ -1,0 +1,33 @@
+---
+title: Description
+description: A field's helper text.
+---
+
+`Solidtype_heroui.Description` is HeroUI's description, with the classes
+HeroUI's own `descriptionVariants` gives. It is a `<span>`, unless a part
+above it gives it its element, as React Aria's do: inside a
+[Radio Group](../radio-group/) it is Kobalte's group description, which the
+group is described by, and inside a radio the radio's, which its input is
+described by. The Radio Group page shows it in its fields.
+
+```ocaml
+<Description>"Includes 100 messages per month"</Description>
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.description`
+
+## API Reference
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | Its text |
+
+### Description.Slot
+
+How a description renders below a part, given its classes and its children,
+as React Aria's `TextContext` gives it.

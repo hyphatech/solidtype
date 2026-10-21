@@ -1,0 +1,36 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+
+let make () =
+  let selection, set_selection = S.create_signal "pro" in
+  <div class_="flex flex-col gap-4">
+    <Radio_group default_value="pro" on_change=(S.set set_selection)>
+      <Label>"Subscription plan"</Label>
+      <Radio value="starter">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Starter"
+        </Radio.Content>
+        <Description>"For side projects and small teams"</Description>
+      </Radio>
+      <Radio value="pro">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+        </Radio.Content>
+        <Description>"Advanced reporting and analytics"</Description>
+      </Radio>
+      <Radio value="teams">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Teams"
+        </Radio.Content>
+        <Description>"Share access with up to 10 teammates"</Description>
+      </Radio>
+    </Radio_group>
+    <p class_="text-sm text-muted">
+      "Last chosen plan: "
+      <span class_="font-medium">(fun () -> Jsx.string (S.get selection))</span>
+    </p>
+  </div>

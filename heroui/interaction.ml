@@ -73,10 +73,11 @@ let check element =
        ~some:(fun t -> String.equal t "checkbox" || String.equal t "radio")
        (Js.Undefined.toOption (input_type element))
 
-(* Whether a key presses what it went to, as React Aria decides: Enter and
-   Space, but only Enter a link and only Space a checkbox or a radio. *)
-let pressing e =
-  let target = key_target e in
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+
+(* Whether a key presses [target], as React Aria decides: Enter and Space,
+   but only Enter a link and only Space a checkbox or a radio. *)
+let pressing target e =
   match key e with
   | "Enter" -> not (check target)
   | " " -> not (link target)
@@ -84,6 +85,7 @@ let pressing e =
 
 type t = {
   off : bool S.accessor option;
+  keys : [ `target | `element ];
   hover : bool S.accessor;
   set_hover : bool S.setter;
   press : bool S.accessor;
@@ -94,13 +96,14 @@ type t = {
   set_focus_ring : bool S.setter;
 }
 
-let create ?disabled () =
+let create ?disabled ?(keys = `target) () =
   let hover, set_hover = S.create_signal false in
   let press, set_press = S.create_signal false in
   let focus, set_focus = S.create_signal false in
   let focus_ring, set_focus_ring = S.create_signal false in
   {
     off = disabled;
+    keys;
     hover;
     set_hover;
     press;
@@ -124,6 +127,13 @@ let watch i element =
   watch_modality ();
   let down = ref false in
   let press on = S.set i.set_press on in
+  let pressing e =
+    pressing
+      (match i.keys with
+      | `target -> key_target e
+      | `element -> as_element element)
+      e
+  in
   on_pointer element "pointerenter" (fun e ->
       if not (String.equal (pointer_type e) "touch") then S.set i.set_hover true;
       if !down then press true);

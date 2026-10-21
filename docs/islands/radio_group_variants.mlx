@@ -1,0 +1,44 @@
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+
+let make () =
+  <div class_="flex flex-col gap-8">
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Primary variant"</p>
+      <Radio_group default_value="option1" variant=`primary>
+        <Radio value="option1">
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Option 1"
+          </Radio.Content>
+          <Description>"Standard styling with default background"</Description>
+        </Radio>
+        <Radio value="option2">
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Option 2"
+          </Radio.Content>
+          <Description>"Another option with primary styling"</Description>
+        </Radio>
+      </Radio_group>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Secondary variant"</p>
+      <Radio_group default_value="option1" variant=`secondary>
+        <Radio value="option1">
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Option 1"
+          </Radio.Content>
+          <Description>
+            "Lower emphasis variant for use in surfaces"
+          </Description>
+        </Radio>
+        <Radio value="option2">
+          <Radio.Content>
+            <Radio.Control><Radio.Indicator /></Radio.Control> "Option 2"
+          </Radio.Content>
+          <Description>"Another option with secondary styling"</Description>
+        </Radio>
+      </Radio_group>
+    </div>
+  </div>
