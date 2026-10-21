@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, Separator, Skeleton, Spinner, Surface, Switch, Typography } from "@heroui/react";
+import { Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, Chip, CloseButton, Description, Kbd, Label, Link, Radio, RadioGroup, ScrollShadow, Separator, Skeleton, Spinner, Surface, Switch, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -303,4 +303,22 @@ type TypographyProps = {
 
 export function typography(host: HTMLElement, props: TypographyProps): void {
   flushSync(() => rootOf(host).render(<Typography {...props}>Pricing on your terms</Typography>));
+}
+
+type ScrollShadowProps = {
+  visibility: "auto" | "both" | "top" | "bottom" | "none";
+  hideScrollBar: boolean;
+};
+
+// Eight lines, as the port's demo scrolls them.
+export function scrollShadow(host: HTMLElement, props: ScrollShadowProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ScrollShadow {...props} className="max-h-[120px] p-4">
+        {Array.from({ length: 8 }, (_, i) => (
+          <p key={i}>Line {i + 1}</p>
+        ))}
+      </ScrollShadow>,
+    ),
+  );
 }

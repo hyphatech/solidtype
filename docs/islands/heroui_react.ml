@@ -35,6 +35,19 @@ external button_group : Dom.htmlDivElement -> button_group_props -> unit
   = "buttonGroup"
 [@@mel.module "./react/heroui.tsx"]
 
+type scroll_shadow_props
+
+external scroll_shadow_props :
+  visibility:string ->
+  hide_scroll_bar:(bool[@mel.as "hideScrollBar"]) ->
+  unit ->
+  scroll_shadow_props = ""
+[@@mel.obj]
+
+external scroll_shadow : Dom.htmlDivElement -> scroll_shadow_props -> unit
+  = "scrollShadow"
+[@@mel.module "./react/heroui.tsx"]
+
 type separator_props
 
 external separator_props :

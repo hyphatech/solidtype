@@ -1,0 +1,139 @@
+---
+title: ScrollShadow
+description: Scrolling content, faded at each edge it hides more at.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_usage.jsx";
+import UsageCode from "../../../../islands/scroll_shadow_usage.mlx?raw";
+import * as Orientation from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_orientation.jsx";
+import OrientationCode from "../../../../islands/scroll_shadow_orientation.mlx?raw";
+import * as Size from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_size.jsx";
+import SizeCode from "../../../../islands/scroll_shadow_size.mlx?raw";
+import * as WithCard from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_card.jsx";
+import WithCardCode from "../../../../islands/scroll_shadow_card.mlx?raw";
+import * as HideScrollBar from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_hide_scroll_bar.jsx";
+import HideScrollBarCode from "../../../../islands/scroll_shadow_hide_scroll_bar.mlx?raw";
+import * as VisibilityChange from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_visibility_change.jsx";
+import VisibilityChangeCode from "../../../../islands/scroll_shadow_visibility_change.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_tailwind.jsx";
+import TailwindCode from "../../../../islands/scroll_shadow_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/scroll_shadow_demo.jsx";
+
+`Solidtype_heroui.Scroll_shadow` is a `<div>` that scrolls, with the classes
+HeroUI's own `scrollShadowVariants` gives, faded at each edge it hides content
+at. It measures itself as it scrolls, as it is resized and as its content
+changes, as HeroUI's hook does, and declares each edge as that hook writes
+it. Kobalte has no scroll shadow.
+
+## Usage
+
+<Example code={UsageCode} title="scroll_shadow_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Orientation
+
+<Example code={OrientationCode} title="scroll_shadow_orientation.mlx"><Orientation.make client:visible /></Example>
+
+### Shadow Size
+
+<Example code={SizeCode} title="scroll_shadow_size.mlx"><Size.make client:visible /></Example>
+
+### With Card
+
+<Example code={WithCardCode} title="scroll_shadow_card.mlx"><WithCard.make client:visible /></Example>
+
+### Hide Scroll Bar
+
+<Example code={HideScrollBarCode} title="scroll_shadow_hide_scroll_bar.mlx"><HideScrollBar.make client:visible /></Example>
+
+### Visibility Change
+
+`on_visibility_change` is told each change of the edges content is hidden
+at.
+
+<Example code={VisibilityChangeCode} title="scroll_shadow_visibility_change.mlx"><VisibilityChange.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI ScrollShadow twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two: a marked
+row is one they disagree on. Scroll them to see the edges each marks.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="scroll_shadow_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every scroll shadow, as
+with HeroUI in React:
+
+```css
+@layer components {
+  .scroll-shadow {
+    @apply rounded-xl border border-default-200;
+  }
+
+  .scroll-shadow--vertical {
+    @apply pr-2;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.scroll-shadow`, and `.scroll-shadow--vertical`,
+  `.scroll-shadow--horizontal`, `.scroll-shadow--hide-scrollbar`
+
+### CSS Variables
+
+- `--scroll-shadow-size`, the fade's size, from `size`
+- `--scroll-shadow-offset`, how far it scrolls before the fade starts, from
+  `offset`
+- `--scroll-shadow-scrollbar-size`, the gutter kept for a native scrollbar
+
+### Data Attributes
+
+- `[data-top-scroll]`, `[data-bottom-scroll]`, `[data-left-scroll]`,
+  `[data-right-scroll]`: `"true"` where content is hidden at that edge,
+  `"false"` where it is not
+- `[data-top-bottom-scroll]`, `[data-left-right-scroll]`: content hidden at
+  both edges
+- `[data-orientation]`, `[data-scroll-shadow-size]`
+- `[data-scroll-shadow-mode]`: `"auto"` where the fade follows the scroll,
+  `"manual"` where `visibility` is given or it is disabled
+
+A shadow is measured once it is in the browser, so a prerendered one marks no
+edge until it is; where a browser has scroll-driven animations, HeroUI's
+styles fade an `"auto"` shadow from its first paint without them.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### ScrollShadow
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `orientation` | `orientation` | `` [ `vertical \| `horizontal ] `` | `` `vertical `` | The way it scrolls |
+| `variant` | `variant` | `` [ `fade ] `` | `` `fade `` | Its shadow |
+| `size` | `size` | `int` | `40` | The fade's size, in pixels |
+| `offset` | `offset` | `int` | `0` | How far it scrolls before the fade starts, in pixels |
+| `hideScrollBar` | `hide_scroll_bar` | `bool` | `false` | Whether the native scrollbar is hidden |
+| `isEnabled` | `is_enabled` | `bool` | `true` | Whether it measures itself |
+| `visibility` | `visibility` | `` [ `auto \| `top \| `bottom \| `left \| `right \| `both \| `none ] `` | `` `auto `` | The edges it marks, or `` `auto `` for those measured |
+| `onVisibilityChange` | `on_visibility_change` | `Scroll_shadow.edge -> unit` | | Told each change of the edges measured |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | What it scrolls |

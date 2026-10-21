@@ -1,0 +1,249 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+type edge = [ `top | `bottom | `left | `right | `both | `none ]
+
+external scroll_top : Dom.htmlDivElement -> float = "scrollTop" [@@mel.get]
+external scroll_left : Dom.htmlDivElement -> float = "scrollLeft" [@@mel.get]
+
+external scroll_height : Dom.htmlDivElement -> float = "scrollHeight"
+[@@mel.get]
+
+external scroll_width : Dom.htmlDivElement -> float = "scrollWidth" [@@mel.get]
+
+external client_height : Dom.htmlDivElement -> float = "clientHeight"
+[@@mel.get]
+
+external client_width : Dom.htmlDivElement -> float = "clientWidth" [@@mel.get]
+
+external on_scroll :
+  Dom.htmlDivElement -> (_[@mel.as "scroll"]) -> (unit -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external off_scroll :
+  Dom.htmlDivElement -> (_[@mel.as "scroll"]) -> (unit -> unit) -> unit
+  = "removeEventListener"
+[@@mel.send]
+
+type observer
+
+external resize_observer : (unit -> unit) -> observer = "ResizeObserver"
+[@@mel.new]
+
+type mutation
+
+external target : mutation -> Dom.htmlDivElement = "target" [@@mel.get]
+
+external attribute_name : mutation -> string Js.null = "attributeName"
+[@@mel.get]
+
+external old_value : mutation -> string Js.null = "oldValue" [@@mel.get]
+
+external attribute : Dom.htmlDivElement -> string -> string Js.null
+  = "getAttribute"
+[@@mel.send]
+
+external mutation_observer : (mutation array -> unit) -> observer
+  = "MutationObserver"
+[@@mel.new]
+
+external observe_size : observer -> Dom.htmlDivElement -> unit = "observe"
+[@@mel.send]
+
+type watched
+
+external watched :
+  attribute_filter:(string array[@mel.as "attributeFilter"]) ->
+  attribute_old_value:(bool[@mel.as "attributeOldValue"]) ->
+  attributes:bool ->
+  character_data:(bool[@mel.as "characterData"]) ->
+  child_list:(bool[@mel.as "childList"]) ->
+  subtree:bool ->
+  unit ->
+  watched = ""
+[@@mel.obj]
+
+external observe_content : observer -> Dom.htmlDivElement -> watched -> unit
+  = "observe"
+[@@mel.send]
+
+external disconnect : observer -> unit = "disconnect" [@@mel.send]
+
+(* The edges a shadow marks, each attribute present or absent. *)
+type marks = {
+  top : Jsx.data;
+  bottom : Jsx.data;
+  top_bottom : Jsx.data;
+  left : Jsx.data;
+  right : Jsx.data;
+  left_right : Jsx.data;
+}
+
+let none =
+  let absent = Jsx.flag false in
+  {
+    top = absent;
+    bottom = absent;
+    top_bottom = absent;
+    left = absent;
+    right = absent;
+    left_right = absent;
+  }
+
+let shown = Jsx.data "true"
+
+(* What HeroUI's hook writes for content measured hidden before and after:
+   both edges as one attribute, else each "true" or "false". *)
+let measured_marks orientation (before, after) =
+  let said b = Jsx.data (string_of_bool b) in
+  match (orientation, before && after) with
+  | `vertical, true -> { none with top_bottom = shown }
+  | `vertical, false -> { none with top = said before; bottom = said after }
+  | `horizontal, true -> { none with left_right = shown }
+  | `horizontal, false -> { none with left = said before; right = said after }
+
+(* Whether content is hidden before the shadow's start and after its end, past
+   its offset, as HeroUI's hook measures it. *)
+let hidden ~orientation ~offset e =
+  let offset = float_of_int offset in
+  let start, length, shown =
+    match orientation with
+    | `vertical -> (scroll_top e, scroll_height e, client_height e)
+    | `horizontal -> (Float.abs (scroll_left e), scroll_width e, client_width e)
+  in
+  (start > offset, start +. shown +. offset < length -. 1.)
+
+let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
+    ?(visibility : [ `auto | `top | `bottom | `left | `right | `both | `none ] =
+      `auto) ?(on_visibility_change : (edge -> unit) option)
+    ?(is_enabled : bool = true) ?(hide_scroll_bar : bool = false)
+    ?(size : int = 40) ?(offset : int = 0) ?(variant : [ `fade ] = `fade)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let element = ref None in
+  (* What was measured, once it is: content hidden before and after. *)
+  let measured, set_measured = S.create_signal None in
+  let measuring () =
+    is_enabled ()
+    &&
+    match visibility () with
+    | `auto -> true
+    | `top | `bottom | `left | `right | `both | `none -> false
+  in
+  let check () =
+    match !element with
+    | Some e when measuring () ->
+        let ((before, after) as now) =
+          hidden ~orientation:(orientation ()) ~offset:(offset ()) e
+        in
+        let changed =
+          match S.get measured with
+          | Some (was_before, was_after) ->
+              not (Bool.equal was_before before && Bool.equal was_after after)
+          | None -> true
+        in
+        if changed then begin
+          S.set set_measured (Some now);
+          let edge =
+            match (before, after, orientation ()) with
+            | true, true, _ -> `both
+            | true, false, `vertical -> `top
+            | false, true, `vertical -> `bottom
+            | true, false, `horizontal -> `left
+            | false, true, `horizontal -> `right
+            | false, false, _ -> `none
+          in
+          ignore (on_visibility_change edge : unit option)
+        end
+    | Some _ | None -> ()
+  in
+  (* Checked first, then watched, as HeroUI's hook does, so what the first
+     check writes is no change to the content. *)
+  S.create_effect (fun () ->
+      ignore (orientation (), offset ());
+      if measuring () then check () else S.set set_measured None);
+  (* Measured again as it scrolls, as it is resized, and as its content
+     changes, which resizes neither it nor scrolls it. *)
+  S.on_mount (fun () ->
+      match !element with
+      | Some e ->
+          let resized = resize_observer check in
+          (* Solid sets a shadow's style again as it marks an edge, the same
+             style, which changes nothing it holds. *)
+          let restyled m =
+            target m == e
+            && Option.equal String.equal
+                 (Js.Null.toOption (attribute_name m))
+                 (Some "style")
+            && Option.equal String.equal
+                 (Js.Null.toOption (old_value m))
+                 (Js.Null.toOption (attribute e "style"))
+          in
+          let changed =
+            mutation_observer (fun mutations ->
+                if not (Array.for_all restyled mutations) then check ())
+          in
+          on_scroll e check;
+          observe_size resized e;
+          observe_content changed e
+            (watched ~attribute_filter:[| "class"; "style" |]
+               ~attribute_old_value:true ~attributes:true ~character_data:true
+               ~child_list:true ~subtree:true ());
+          S.on_cleanup (fun () ->
+              off_scroll e check;
+              disconnect resized;
+              disconnect changed)
+      | None -> ());
+  (* The edges given, else those measured. *)
+  let marks () =
+    match visibility () with
+    | `auto -> (
+        match S.get measured with
+        | Some hidden when is_enabled () ->
+            measured_marks (orientation ()) hidden
+        | Some _ | None -> none)
+    | `both -> (
+        match orientation () with
+        | `vertical -> { none with top_bottom = shown }
+        | `horizontal -> { none with left_right = shown })
+    | `top -> { none with top = shown }
+    | `bottom -> { none with bottom = shown }
+    | `left -> { none with left = shown }
+    | `right -> { none with right = shown }
+    | `none -> none
+  in
+  <div
+    ref=(fun e -> element := Some e)
+    class_=(fun () ->
+             let base =
+               Styles.ScrollShadow.base
+                 (Styles.ScrollShadow.slots
+                    (Styles.ScrollShadow.options
+                       ~hide_scroll_bar:(hide_scroll_bar ())
+                       ~orientation:(orientation ()) ~variant:(variant ()) ()))
+             in
+             match class_ () with Some c -> base ^ " " ^ c | None -> base)
+    style=(fun () ->
+            "--scroll-shadow-size: "
+            ^ string_of_int (size ())
+            ^ "px; --scroll-shadow-offset: "
+            ^ string_of_int (offset ())
+            ^ "px;")
+    data_orientation=(fun () ->
+                       Jsx.data
+                         (match orientation () with
+                         | `vertical -> "vertical"
+                         | `horizontal -> "horizontal"))
+    data_scroll_shadow_mode=(fun () ->
+                              Jsx.data
+                                (if measuring () then "auto" else "manual"))
+    data_scroll_shadow_size=(fun () -> Jsx.data (string_of_int (size ())))
+    data_slot="scroll-shadow"
+    data_top_scroll=(fun () -> (marks ()).top)
+    data_bottom_scroll=(fun () -> (marks ()).bottom)
+    data_top_bottom_scroll=(fun () -> (marks ()).top_bottom)
+    data_left_scroll=(fun () -> (marks ()).left)
+    data_right_scroll=(fun () -> (marks ()).right)
+    data_left_right_scroll=(fun () -> (marks ()).left_right)>
+    (fun () -> children ())
+  </div>

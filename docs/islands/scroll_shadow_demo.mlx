@@ -1,0 +1,54 @@
+module S = Solidtype.Solid
+module For = Solidtype.For
+module Scroll_shadow = Solidtype_heroui.Scroll_shadow
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let visibilities =
+  [|
+    (`auto, "auto");
+    (`both, "both");
+    (`top, "top");
+    (`bottom, "bottom");
+    (`none, "none");
+  |]
+
+let make () =
+  let visibility, set_visibility = S.create_signal (`auto, "auto") in
+  let hide, set_hide = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="visibility"
+        choices=(fun () -> visibilities)
+        picked=(fun () -> S.get visibility)
+        on_pick=(Controls.choose visibilities set_visibility)
+      />
+      <Toggle
+        label="hide scroll bar"
+        on=(fun () -> S.get hide)
+        on_toggle=(S.set set_hide)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=scroll-shadow]"
+      solidtype=(<Scroll_shadow
+                   visibility=(fun () -> fst (S.get visibility))
+                   hide_scroll_bar=(fun () -> S.get hide)
+                   class_="max-h-[120px] p-4">
+                   <For each=(fun () -> Array.init 8 (fun i -> i + 1))>
+                     (fun line _ ->
+                       <p>
+                         (fun () ->
+                           Solidtype.Jsx.string ("Line " ^ string_of_int line))
+                       </p>)
+                   </For>
+                 </Scroll_shadow>)
+      react=(fun host ->
+              Heroui_react.scroll_shadow host
+                (Heroui_react.scroll_shadow_props
+                   ~visibility:(snd (S.get visibility))
+                   ~hide_scroll_bar:(S.get hide) ()))
+    />
+  </section>

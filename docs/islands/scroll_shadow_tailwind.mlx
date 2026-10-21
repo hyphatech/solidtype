@@ -1,0 +1,34 @@
+module For = Solidtype.For
+module Scroll_shadow = Solidtype_heroui.Scroll_shadow
+
+let entries =
+  [|
+    "Reviewed quarterly goals with the design team.";
+    "Shipped dark mode tokens to production.";
+    "Merged accessibility fixes for form fields.";
+    "Published updated component documentation.";
+    "Scheduled performance audit for next sprint.";
+    "Added scroll shadow demos to the docs site.";
+  |]
+
+let make () =
+  <div class_="w-full sm:max-w-sm">
+    <Scroll_shadow
+      hide_scroll_bar=true
+      class_="max-h-48 rounded-xl border border-border/80 bg-linear-to-b \
+              from-neutral-50/90 to-white p-4 ring-1 ring-black/5 \
+              dark:from-neutral-900/80 dark:to-neutral-900 dark:ring-white/10"
+      size=48
+      variant=`fade>
+      <div class_="space-y-3">
+        <For each=(fun () -> entries)>
+          (fun entry _ ->
+            <p
+              class_="text-sm leading-relaxed text-neutral-600 \
+                      dark:text-neutral-400">
+              (fun () -> Solidtype.Jsx.string entry)
+            </p>)
+        </For>
+      </div>
+    </Scroll_shadow>
+  </div>

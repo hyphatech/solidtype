@@ -1,0 +1,177 @@
+(* HeroUI's ScrollShadow, beside the same ScrollShadow in React, each given
+   the same measurements, since jsdom has no layout: the edges each marks as
+   it scrolls, and as its visibility is given. *)
+
+module Scroll_shadow = Solidtype_heroui.Scroll_shadow
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?orientation:string ->
+  ?visibility:string ->
+  ?is_enabled:(bool[@mel.as "isEnabled"]) ->
+  ?hide_scroll_bar:(bool[@mel.as "hideScrollBar"]) ->
+  ?size:int ->
+  ?offset:int ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ScrollShadow.tsx"]
+
+  external step : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ScrollShadow.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ScrollShadow.tsx"]
+end
+
+type descriptor
+
+external descriptor : value:int -> writable:bool -> unit -> descriptor = ""
+[@@mel.obj]
+
+external define : Dom.element -> string -> descriptor -> unit = "defineProperty"
+[@@mel.scope "Object"]
+
+external set_scroll : Dom.element -> string -> int -> unit = ""
+[@@mel.set_index]
+
+type event
+
+external event : string -> event = "Event" [@@mel.new]
+external dispatch : Dom.element -> event -> bool = "dispatchEvent" [@@mel.send]
+
+(* Three hundred pixels of content in a hundred: what a page with layout
+   would measure. *)
+let measure e =
+  List.iter
+    (fun (name, value) -> define e name (descriptor ~value ~writable:true ()))
+    [
+      ("scrollHeight", 300);
+      ("clientHeight", 100);
+      ("scrollWidth", 300);
+      ("clientWidth", 100);
+      ("scrollTop", 0);
+      ("scrollLeft", 0);
+    ]
+
+let scroll_to e ~at () =
+  set_scroll e "scrollTop" at;
+  set_scroll e "scrollLeft" at;
+  ignore (dispatch e (event "scroll") : bool)
+
+(* The shadow scrolled to the top, the middle and the bottom: its attributes
+   after each, but its children's. *)
+let walk ~step e =
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, T.attributes e) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" (fun () -> ()) in
+  let* () = after "measured" (scroll_to e ~at:0) in
+  let* () = after "in the middle" (scroll_to e ~at:100) in
+  let* () = after "at the end" (scroll_to e ~at:200) in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let solidtype_step action =
+  action ();
+  Js.Promise.resolve ()
+
+let both ?orientation ?visibility ?is_enabled ?hide_scroll_bar ?size ?offset ()
+    =
+  T.render (fun () ->
+      <Scroll_shadow
+        ?orientation=(fun () -> orientation)
+        ?visibility=(fun () -> visibility)
+        ?is_enabled=(fun () -> is_enabled)
+        ?hide_scroll_bar=(fun () -> hide_scroll_bar)
+        ?size=(fun () -> size)
+        ?offset=(fun () -> offset)
+        class_="max-h-[100px]">
+        <p>"One"</p> <p>"Two"</p> <p>"Three"</p>
+      </Scroll_shadow>);
+  let mine =
+    match T.query "[data-slot=scroll-shadow]" with
+    | Some e -> e
+    | None -> T.body
+  in
+  measure mine;
+  let* solidtype = walk ~step:solidtype_step mine in
+  T.cleanup ();
+  let theirs =
+    Twin.render
+      (props
+         ?orientation:
+           (Option.map
+              (function `vertical -> "vertical" | `horizontal -> "horizontal")
+              orientation)
+         ?visibility:
+           (Option.map
+              (function
+                | `auto -> "auto"
+                | `top -> "top"
+                | `bottom -> "bottom"
+                | `left -> "left"
+                | `right -> "right"
+                | `both -> "both"
+                | `none -> "none")
+              visibility)
+         ?is_enabled ?hide_scroll_bar ?size ?offset ())
+  in
+  measure theirs;
+  let* react = walk ~step:Twin.step theirs in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Scroll_shadow" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "marks the edges it hides content at, as React's"
+        (fun () ->
+          let* solidtype, react = both () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "marks them across, as React's does" (fun () ->
+          let* solidtype, react = both ~orientation:`horizontal () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "marks them past its offset, as React's does" (fun () ->
+          let* solidtype, react = both ~offset:120 ~size:24 () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "marks the edge it is given, as React's does" (fun () ->
+          let* solidtype, react = both ~visibility:`top () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "marks both edges it is given, as React's does"
+        (fun () ->
+          let* solidtype, react =
+            both ~visibility:`both ~hide_scroll_bar:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "tells each change of the edges it hides content at"
+        (fun () ->
+          let told = ref [] in
+          T.render (fun () ->
+              <Scroll_shadow
+                on_visibility_change=(fun edge -> told := edge :: !told)>
+                <p>"One"</p>
+              </Scroll_shadow>);
+          match T.query "[data-slot=scroll-shadow]" with
+          | Some e ->
+              measure e;
+              let* (_ : (string * string) array) =
+                walk ~step:solidtype_step e
+              in
+              Js.Promise.resolve
+                E.(
+                  expect (List.rev !told)
+                  |> toEqual [ `none; `bottom; `both; `top ])
+          | None -> Js.Promise.resolve E.(expect "no shadow" |> toBe ""));
+      Jest.testPromise "marks nothing while disabled, as React's" (fun () ->
+          let* solidtype, react = both ~is_enabled:false () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

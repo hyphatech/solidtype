@@ -1,0 +1,21 @@
+module For = Solidtype.For
+module Scroll_shadow = Solidtype_heroui.Scroll_shadow
+
+let lorem =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pulvinar \
+   risus non risus hendrerit venenatis. Pellentesque sit amet hendrerit risus, \
+   sed porttitor quam. Morbi accumsan cursus enim, sed ultricies sapien."
+
+let paragraphs () =
+  <div class_="space-y-4">
+    <For each=(fun () -> Array.make 10 lorem)>
+      (fun text _ -> <p>(fun () -> Solidtype.Jsx.string text)</p>)
+    </For>
+  </div>
+
+let make () =
+  <div class_="w-full p-0 sm:max-w-sm">
+    <Scroll_shadow class_="max-h-[240px] p-4" size=80>
+      (fun () -> Solidtype.Jsx.element (paragraphs ()))
+    </Scroll_shadow>
+  </div>

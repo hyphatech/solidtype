@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Scroll_shadow`: HeroUI's ScrollShadow, faded at each edge
+  it hides content at, measured as it scrolls, as it is resized and as its
+  content changes, or at the edges its `visibility` gives.
 - `Solidtype_heroui.Empty_state`: HeroUI's EmptyState, which says "No
   results found" unless it is given children.
 - `Solidtype_heroui.Typography`: HeroUI's Typography, each type the element
