@@ -5,3 +5,5 @@ ppx/kobalte_names.ml
 kobalte/types.ml
 kobalte/types.mli
 kobalte/solidtype_kobalte.mli
+heroui/styles.ml
+heroui/styles.mli

@@ -16,10 +16,10 @@ let%component make
     ~(children : Solidtype.Jsx.content) () =
   <Kobalte.Root
     class_=(fun () ->
-             Styles.button
-               (Styles.button_options ~variant:(variant ()) ~size:(size ())
+             Styles.Button.classes
+               (Styles.Button.options ~variant:(variant ()) ~size:(size ())
                   ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
-                  ?class_name:(class_ ()) ()))
+                  ?class_:(class_ ()) ()))
     disabled=(fun () -> disabled ())
     ref=(fun b -> Interaction.track ~disabled:(fun[@u] () -> disabled ()) b)
     type_=(fun () -> type_ ())

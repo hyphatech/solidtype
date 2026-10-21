@@ -39,6 +39,7 @@ lint: node_modules ## check formatting, types, the release build and bindings
 	bun run tsc -p generate
 	$(OPAM) bun generate/html.ts --check
 	$(OPAM) bun generate/kobalte.ts --check
+	$(OPAM) bun generate/heroui.ts --check
 
 fmt: ## format the code
 	$(OPAM) dune fmt
@@ -65,6 +66,7 @@ docs: build node_modules ## build the documentation into _build/docs
 docs-serve: build node_modules ## serve the documentation on DOCS_PORT, rebuilt as pages change
 	bun --bun astro dev --root docs --open --port $(DOCS_PORT)
 
-generate: node_modules ## write the bindings from Solid's and Kobalte's types
+generate: node_modules ## write the bindings from Solid's, Kobalte's and HeroUI's types
 	$(OPAM) bun generate/html.ts
 	$(OPAM) bun generate/kobalte.ts
+	$(OPAM) bun generate/heroui.ts

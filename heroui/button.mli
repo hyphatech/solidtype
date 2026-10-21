@@ -1,7 +1,7 @@
 (** HeroUI's Button: Kobalte's [Button.Root], a native [<button>], with HeroUI's
-    classes from {!Styles.button}. Its look is HeroUI's props -- [variant],
-    [size], [full_width], [is_icon_only] -- and its behaviour Kobalte's:
-    [disabled], [type_], [on_click].
+    classes from {!Styles.Button.classes}. Its look is HeroUI's props --
+    [variant], [size], [full_width], [is_icon_only] -- and its behaviour
+    Kobalte's: [disabled], [type_], [on_click].
 
     {[
       <Button variant=`ghost size=`sm on_click=(fun _ -> save ())>"Save"</Button>

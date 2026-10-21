@@ -9,7 +9,11 @@
   classes from `@heroui/styles`, which an application installs beside
   `@kobalte/core`, and the state HeroUI's styles read -- hovered, pressed,
   focused, focus-visible, disabled -- kept as React Aria keeps it, by
-  `Interaction`, which a port gives the element Kobalte renders.
+  `Interaction`, which a port gives the element Kobalte renders; and
+  `Styles`, every variant function of `@heroui/styles`, generated from its
+  declarations: `Styles.Button.classes (Styles.Button.options ~variant:`ghost
+  ())`, and for a component of several parts a class string per part,
+  `Styles.Checkbox.base (Styles.Checkbox.slots options)`.
 - Breaking: Kobalte's types are read as a browser has them, so
   `Solidtype_kobalte.Types` no longer holds Bun's server types (`BunFile`,
   `S3File`, `Buffer`, `Stats`, `Archive`, its `Image`) or Node's, and

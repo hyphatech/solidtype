@@ -13,7 +13,10 @@ export type Type =
   // A type of the binding's own, by its module, which the file it is printed
   // in decides how to name.
   | { kind: "ref"; module: string; args: Type[] }
-  | { kind: "tags"; tags: string[] }
+  // A closed set of strings; with [js], each tag's string where it is not its
+  // name. Every tag is then named, since Melange writes undefined for a tag
+  // left unnamed where others are.
+  | { kind: "tags"; tags: string[]; js?: string[] }
   | { kind: "tuple"; items: Type[] }
   | { kind: "arrow"; params: Param[]; result: Type };
 
@@ -71,8 +74,10 @@ export function print(t: Type, ref: (module: string) => string): string {
       return applied(t.name, t.args);
     case "ref":
       return applied(ref(t.module), t.args);
-    case "tags":
-      return `[ ${t.tags.map((s) => `\`${s}`).join(" | ")} ]`;
+    case "tags": {
+      const js = t.js;
+      return `[ ${t.tags.map((s, i) => (js ? `\`${s} [@mel.as ${JSON.stringify(js[i])}]` : `\`${s}`)).join(" | ")} ]`;
+    }
     case "tuple":
       return `(${t.items.map((i) => paren(i, ref)).join(" * ")})`;
     case "arrow": {

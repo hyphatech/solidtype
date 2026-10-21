@@ -51,7 +51,7 @@ kobalte/             solidtype-kobalte: Kobalte's components part by part,
 heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
-                     bound by hand until a generator writes them
+                     generated
   interaction        the state React Aria writes on an element and HeroUI's
                      styles read, kept as React Aria keeps it
 docs/                the documentation, a Starlight site: each port's page
@@ -79,6 +79,7 @@ generate/            what writes the generated bindings from Solid's and
                      a library's generator says only what is its own
   kobalte            Kobalte's: which entries, how its parts and options are
                      named, its shared props, roots split by `multiple`
+  heroui             HeroUI's variant functions, from @heroui/styles
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
@@ -130,7 +131,8 @@ test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      by vitest, and its state beside the same component in
-                     React, its twin in twins/
+                     React, its twin in twins/; and the variant functions,
+                     each against HeroUI's own call
 test/ppx/            what the ppx writes for each JSX form
 test/does_not_compile.t
                      each mistake the types refuse, built against the
@@ -289,6 +291,20 @@ break.
   polymorphic. Why: Kobalte's parts are hundreds, and a binding by hand
   would be a second copy of its types. Test: `make lint` runs the
   generator with `--check`.
+- **HeroUI's variant functions are generated from @heroui/styles'
+  declarations**, by `generate/heroui.ts` into `heroui/styles.ml` and its
+  `.mli`, on the same core as Kobalte's: a module per function,
+  `buttonVariants` is `Styles.Button`, with `options`, its variants as
+  optional arguments and `class_`, and `classes`, its class string, or for
+  a component of several parts `slots` and a string per part. A variant
+  whose keys are `true` and `false` is a `bool`; any other is its keys as
+  tags by the one spelling rule, a space taken as a hyphen, each named by
+  `[@mel.as]`, since Melange writes `undefined` for a tag left unnamed where
+  others are. HeroUI's components are React's and are ported by hand;
+  only their classes are bound. Why: a port's look is HeroUI's own
+  classes, never a copy of them. Test: `make lint` runs the generator with
+  `--check`, and `test/heroui/styles_test.ml` checks calls against
+  HeroUI's own.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;
