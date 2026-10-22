@@ -65,6 +65,8 @@ docs/                the documentation, a Starlight site: each port's page
   islands/react/     HeroUI's components in React, rendered into a host
                      an island owns: the one place the documentation runs
                      React
+prds/               the PRDs of work being decided and built, and which
+                     document owns each kind of fact once it lands
 generate/            what writes the generated bindings from Solid's and
                      Kobalte's own types: `make generate`
   names              the one spelling of a name, shared by both
