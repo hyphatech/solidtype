@@ -57,9 +57,9 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
   field              what a switch, a checkbox and a radio share: the state
                      their content declares, a value controlled or kept, and
                      the content, on a Kobalte component's label and input
-docs/                the documentation, a Starlight site: each port's page
-                     shows it beside the same component in React, with its
-                     source
+docs/                the documentation, a Starlight site in Hypha's look,
+                     from starlight-theme-hypha: each port's page shows it
+                     beside the same component in React, with its source
   islands/           the pages' OCaml: each demo, and the comparison of a
                      port's element with React's, attribute by attribute
   islands/react/     HeroUI's components in React, rendered into a host

@@ -1,0 +1,13 @@
+/* An API table's columns: React's name, solidtype's, the type, then a
+   default where there is one and the description. A type as long as a
+   variant's tags breaks between them, each line its own chip, in a column
+   wide enough that an arrow, after which a browser would break the line, is
+   never parted from its head. */
+.sl-markdown-content td:nth-child(3):not(:where(.not-content *)) {
+  min-width: 10rem;
+}
+.sl-markdown-content td:nth-child(3):not(:where(.not-content *)) code {
+  white-space: normal;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
