@@ -1,6 +1,6 @@
 ---
-// Starlight's footer, then hypha.pub's: a rule and Hypha's mark leading to
-// hyphatech.io. The header's links are not repeated.
+// Starlight's footer, its links to the pages before and after, and room
+// below them before the page ends.
 import EditLink from "@astrojs/starlight/components/EditLink.astro";
 import LastUpdated from "@astrojs/starlight/components/LastUpdated.astro";
 import Pagination from "@astrojs/starlight/components/Pagination.astro";
@@ -12,12 +12,6 @@ import Pagination from "@astrojs/starlight/components/Pagination.astro";
     <LastUpdated />
   </div>
   <Pagination />
-  <div class="hypha">
-    <a href="https://hyphatech.io" target="_blank" rel="noopener" class="mark">
-      <img src="/hypha.webp" alt="" width="52" height="84" />
-      <span>hypha</span>
-    </a>
-  </div>
 </footer>
 
 <style>
@@ -25,6 +19,7 @@ import Pagination from "@astrojs/starlight/components/Pagination.astro";
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    padding-bottom: 7rem;
   }
   .meta {
     display: flex;
@@ -37,26 +32,5 @@ import Pagination from "@astrojs/starlight/components/Pagination.astro";
   }
   .meta:empty {
     display: none;
-  }
-  .hypha {
-    margin-top: 4rem;
-    border-top: 1px solid var(--rule);
-    padding-block: 2.5rem;
-  }
-  .mark {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--paper);
-    text-decoration: none;
-  }
-  .mark img {
-    width: auto;
-    height: 1.5rem;
-  }
-  .mark span {
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1;
   }
 </style>

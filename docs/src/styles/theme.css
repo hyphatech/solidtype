@@ -38,10 +38,18 @@
   --measure: 42rem;
   --sidebar: 12rem;
   --column-gap: 2.5rem;
+  /* The one line the navigation, the title and the contents start on,
+     below the header's rule. */
+  --page-top: 2.5rem;
 }
 @media (min-width: 40rem) {
   :root {
     --gutter: 1.5rem;
+  }
+}
+@media (min-width: 48rem) {
+  :root {
+    --page-top: 3rem;
   }
 }
 @media (min-width: 64rem) {
@@ -170,9 +178,19 @@ site-search dialog {
   text-transform: uppercase;
   color: var(--graphite);
 }
+/* A group's heading set at its label's size, on a line no taller than the
+   label's: its capitals then stand on the page's top line, beside the
+   title's and the contents' label. */
 .sidebar-content summary {
-  padding-inline: 0;
+  padding: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
   color: var(--graphite);
+}
+/* Within the line, which a taller caret would stretch. */
+.sidebar-content summary .caret {
+  width: 1rem;
+  height: 1rem;
 }
 /* A group shutting turns its caret back as it starts, not when it is shut. */
 .sidebar-content details[data-closing] > summary .caret {

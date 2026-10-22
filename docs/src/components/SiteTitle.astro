@@ -1,11 +1,12 @@
 ---
-// The wordmark, as hypha.pub's: Hypha's mark, then the library's name.
+// The wordmark, as hypha.pub's: Hypha's mark, then "hypha" and, in
+// graphite, the site's name after a dot, as hypha.pub is "hypha.pub".
 const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
 ---
 
-<a href={siteTitleHref} class="wordmark" aria-label={`${siteTitle}, home`}>
+<a href={siteTitleHref} class="wordmark" aria-label={`hypha.${siteTitle}, home`}>
   <img src="/hypha.webp" alt="" width="52" height="84" />
-  <span translate="no">{siteTitle}</span>
+  <span translate="no">hypha<span class="site">.{siteTitle}</span></span>
 </a>
 
 <style>
@@ -26,5 +27,8 @@ const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.01em;
+  }
+  .site {
+    color: var(--graphite);
   }
 </style>
