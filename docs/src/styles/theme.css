@@ -1,8 +1,10 @@
-/* The documentation in hypha.pub's look: hyphatech.io's palette, faces and
-   grid, copied from hypha.pub's src/styles/site.css, not imported. A change
-   to the system belongs there first. Night only, as hypha.pub: its code
-   theme has no paper. Unlayered, so it wins over Starlight's own; it names
-   Starlight's parts and the page's text, never what a demo renders. */
+/* The documentation in hypha.pub's look: hyphatech.io's faces, grid and
+   roles, copied from hypha.pub's src/styles/site.css, not imported. A change
+   to the system belongs there first. Its night is a documentation site's
+   own, the blue of Spindle's, hue 225, so a reference is told from the
+   writing at a glance. Night only, as hypha.pub. Unlayered, so it wins over
+   Starlight's own; it names Starlight's parts and the page's text, never
+   what a demo renders. */
 
 @import "@fontsource/inter-tight/400.css";
 @import "@fontsource/inter-tight/500.css";
@@ -10,11 +12,11 @@
 
 /* `accent` is for marks, never text: text is ink and graphite only. */
 :root {
-  --night: #15120e;
-  --paper: #f3efe8;
-  --graphite: #948c83; /* 5.6:1 on night */
-  --rule: #3d362c;
-  --accent-mark: #d4a820;
+  --night: hsl(225 15% 5%);
+  --paper: hsl(225 15% 90%);
+  --graphite: hsl(225 10% 58%); /* 6.3:1 on night */
+  --rule: hsl(225 14% 17%);
+  --accent-mark: hsl(231 72% 72%);
   /* Surfaces lift the ground toward ink instead of using shadows. Mixed in
      oklab: oklch loses the near-grey ground's hue. */
   --panel: color-mix(in oklab, var(--paper) 4%, var(--night));
@@ -127,6 +129,13 @@ site-search button[data-open-modal] {
     border-color 120ms var(--ease-state),
     color 120ms var(--ease-state);
 }
+/* Wider, a field with room to read what it asks for. */
+@media (min-width: 50rem) {
+  site-search button[data-open-modal] {
+    width: 18rem;
+    max-width: none;
+  }
+}
 /* On a phone, where Starlight shows the icon alone, the same square as the
    menu's button beside it. */
 @media (max-width: 49.99rem) {
@@ -164,6 +173,10 @@ site-search dialog {
 .sidebar-content summary {
   padding-inline: 0;
   color: var(--graphite);
+}
+/* A group shutting turns its caret back as it starts, not when it is shut. */
+.sidebar-content details[data-closing] > summary .caret {
+  transform: none;
 }
 .sidebar-content .top-level > li + li {
   margin-top: 1.75rem;

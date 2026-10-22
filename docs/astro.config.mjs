@@ -33,7 +33,7 @@ export default defineConfig({
       head: [
         { tag: "link", attrs: { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" } },
         { tag: "link", attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" } },
-        { tag: "meta", attrs: { name: "theme-color", content: "#15120E" } },
+        { tag: "meta", attrs: { name: "theme-color", content: "#0B0C0F" } },
       ],
       // The page's frame is hypha.pub's grid, not Starlight's.
       components: {

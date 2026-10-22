@@ -11,7 +11,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 ---
 
 <div class="page">
-  <header class="header"><slot name="header" /></header>
+  <header class="site-header"><slot name="header" /></header>
   <div class="grid">
     {
       hasSidebar && (
@@ -30,13 +30,50 @@ const { hasSidebar } = Astro.locals.starlightRoute;
                 reset();
                 wide.addEventListener("change", reset);
                 this.addEventListener("toggle", ({ newState }) => {
-                  document.querySelectorAll<HTMLElement>(".main-frame, .sl-skip-link, .page > .header").forEach((el) => {
+                  document.querySelectorAll<HTMLElement>(".main-frame, .sl-skip-link, .site-header").forEach((el) => {
                     el.toggleAttribute("inert", newState === "open");
                   });
                 });
               }
             }
             customElements.define("sl-sidebar-pane", StarlightSidebarPane);
+          </script>
+          <script>
+            // A group of the navigation slides open and shut, its height
+            // animated from wherever it stands, so a second click turns it
+            // back. Its state changes after the click has passed, so that
+            // Starlight's script, which reads it at the click, keeps which
+            // groups are open from page to page.
+            const still = matchMedia("(prefers-reduced-motion: reduce)");
+            document.querySelectorAll<HTMLDetailsElement>("#starlight__sidebar details").forEach((details) => {
+              const summary = details.querySelector<HTMLElement>(":scope > summary");
+              if (!summary) return;
+              let running: Animation | undefined;
+              let open = details.open;
+              summary.addEventListener("click", (event) => {
+                if (still.matches) return;
+                event.preventDefault();
+                open = !open;
+                setTimeout(() => {
+                  const from = details.getBoundingClientRect().height;
+                  running?.cancel();
+                  details.open = true;
+                  details.toggleAttribute("data-closing", !open);
+                  const to = open ? details.getBoundingClientRect().height : summary.getBoundingClientRect().height;
+                  details.style.overflow = "hidden";
+                  running = details.animate(
+                    { height: [`${from}px`, `${to}px`] },
+                    { duration: 220, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+                  );
+                  running.onfinish = () => {
+                    details.open = open;
+                    details.removeAttribute("data-closing");
+                    details.style.overflow = "";
+                    running = undefined;
+                  };
+                });
+              });
+            });
           </script>
           <sl-sidebar-pane popover="" id="starlight__sidebar" class="sidebar-pane">
             <div class="sheet-bar">
@@ -56,7 +93,8 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 </div>
 
 <style>
-  .header {
+  /* Not `.header`, which HeroUI's styles take for a label of their own. */
+  .site-header {
     border-bottom: 1px solid var(--rule);
   }
   .grid {
