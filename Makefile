@@ -9,11 +9,19 @@ help: ## list targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-10s %s\n", $$1, $$2}'
 
+PACKAGES = $(basename $(wildcard *.opam))
+
+# The packages' opam files carry no version, the tag's alone, so opam takes
+# a released one's from Hypha's repository and an unreleased one's as dev,
+# and their `= version` then disagree. Pinned at one version while their
+# dependencies install, they agree; unpinned after, the switch holds no pin.
 setup: ## create the switch and install dependencies
 	@command -v bun >/dev/null 2>&1 || echo "The plugin and the example need Bun 1.3 or later."
 	@opam switch list --short | grep -qx $(SWITCH) || opam switch create $(SWITCH) --empty -y
 	opam repo add hypha https://github.com/hyphatech/opam-repository.git --switch=$(SWITCH) --rank=1
-	opam install . --switch=$(SWITCH) --deps-only --with-test --with-dev-setup -y
+	opam pin add -k path . --switch=$(SWITCH) --with-version=dev --no-action -y
+	opam install . --switch=$(SWITCH) --deps-only --with-test --with-dev-setup -y; \
+	  status=$$?; opam pin remove $(PACKAGES) --switch=$(SWITCH) --no-action -y; exit $$status
 	bun install --frozen-lockfile
 
 build: ## build everything
