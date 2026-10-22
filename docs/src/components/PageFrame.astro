@@ -2,10 +2,11 @@
 // The page on hypha.pub's grid: a header across the window over a rule, and
 // beneath it the page's width, 72rem, the navigation in its margin and the
 // page in the rest. On a phone the navigation is a sheet over the page,
-// opened from the header. Starlight's scripts find the sheet by its id,
+// opened from the header; the site's footer ends it. Starlight's scripts find the sheet by its id,
 // which keeps its scroll and its open groups from page to page.
 import X from "@lucide/astro/icons/x";
 import Icon from "./Icon.astro";
+import SiteFooter from "./SiteFooter.astro";
 
 const { hasSidebar } = Astro.locals.starlightRoute;
 ---
@@ -30,7 +31,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
                 reset();
                 wide.addEventListener("change", reset);
                 this.addEventListener("toggle", ({ newState }) => {
-                  document.querySelectorAll<HTMLElement>(".main-frame, .sl-skip-link, .site-header").forEach((el) => {
+                  document.querySelectorAll<HTMLElement>(".main-frame, .sl-skip-link, .site-header, .site-footer").forEach((el) => {
                     el.toggleAttribute("inert", newState === "open");
                   });
                 });
@@ -90,6 +91,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     }
     <div class="main-frame"><slot /></div>
   </div>
+  <SiteFooter />
 </div>
 
 <style>

@@ -32,6 +32,15 @@ const { code, title } = Astro.props;
     padding: 3rem 1.5rem;
     background: var(--background);
   }
+  /* On a phone, to the screen's edges, as hypha.pub's code is: the gutter
+     is room the preview needs more. */
+  @media (max-width: 39.99rem) {
+    .example {
+      margin-inline: calc(-1 * var(--gutter));
+      border-inline: 0;
+      border-radius: 0;
+    }
+  }
   /* The frame's rule is the code's: none of its own inside it. */
   .example :global(.expressive-code) {
     margin: 0;

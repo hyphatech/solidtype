@@ -1,0 +1,71 @@
+---
+// hypha.pub's footer: across the window over a rule, its contents on the
+// page's width, Hypha's mark at the start and the header's links at the end.
+import SocialIcons from "./SocialIcons.astro";
+---
+
+<footer class="site-footer print:hidden">
+  <div class="bar">
+    <a href="https://hyphatech.io" target="_blank" rel="noopener" class="mark">
+      <img src="/hypha.webp" alt="" width="52" height="84" />
+      <span translate="no">hypha</span>
+    </a>
+    <nav class="links" aria-label="Elsewhere"><SocialIcons /></nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 7rem;
+    border-top: 1px solid var(--rule);
+  }
+  .bar {
+    display: grid;
+    align-items: start;
+    gap: 2.5rem;
+    margin-inline: auto;
+    max-width: var(--page);
+    padding: 3rem var(--gutter);
+  }
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: start;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  img {
+    width: auto;
+    height: 1.5rem;
+  }
+  span {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  /* A finger's target: the links' own height, without the gap between. */
+  @media (pointer: coarse) {
+    .mark {
+      min-height: 2.75rem;
+    }
+    .links {
+      gap: 0;
+    }
+    .links :global(a) {
+      min-height: 2.75rem;
+    }
+  }
+  @media (min-width: 48rem) {
+    .bar {
+      grid-template-columns: 1fr auto;
+      gap: 4rem;
+    }
+  }
+</style>
