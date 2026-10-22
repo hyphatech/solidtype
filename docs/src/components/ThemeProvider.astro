@@ -1,0 +1,9 @@
+---
+// Night only, whatever a visitor once chose under another theme: HeroUI's
+// demos follow data-theme, so they are drawn dark too. Inline, before the
+// page paints.
+---
+
+<script is:inline>
+  document.documentElement.dataset.theme = "dark";
+</script>

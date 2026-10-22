@@ -1,6 +1,7 @@
 ---
-// One example, as HeroUI's documentation frames one: the component live, and
-// its code beneath, the code the preview runs.
+// One example: the component live, on HeroUI's own ground, so it looks as
+// it does on heroui.com, and its code beneath, the code the preview runs, in
+// a frame of the site's rule.
 import { Code } from "@astrojs/starlight/components";
 
 interface Props {
@@ -18,9 +19,9 @@ const { code, title } = Astro.props;
 
 <style>
   .example {
-    margin-block: 1.5rem;
-    border: 1px solid var(--separator);
-    border-radius: 1rem;
+    margin-block: 1.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-panel);
     overflow: hidden;
   }
   .preview {
@@ -31,12 +32,17 @@ const { code, title } = Astro.props;
     padding: 3rem 1.5rem;
     background: var(--background);
   }
+  /* The frame's rule is the code's: none of its own inside it. */
   .example :global(.expressive-code) {
     margin: 0;
+    --ec-brdCol: transparent;
+    --ec-brdRad: 0;
+    --ec-frm-edTabBarBrdCol: transparent;
   }
   .example :global(.expressive-code .frame) {
+    border: none;
     border-radius: 0;
     box-shadow: none;
-    border-top: 1px solid var(--separator);
+    border-top: 1px solid var(--rule);
   }
 </style>

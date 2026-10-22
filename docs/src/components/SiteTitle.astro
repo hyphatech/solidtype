@@ -1,0 +1,30 @@
+---
+// The wordmark, as hypha.pub's: Hypha's mark, then the library's name.
+const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="wordmark" aria-label={`${siteTitle}, home`}>
+  <img src="/hypha.webp" alt="" width="52" height="84" />
+  <span translate="no">{siteTitle}</span>
+</a>
+
+<style>
+  .wordmark {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  img {
+    width: auto;
+    height: 1.75rem;
+  }
+  span {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+</style>

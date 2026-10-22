@@ -1,6 +1,6 @@
 ---
-// A page's title with its description beneath, as HeroUI's documentation
-// heads a page.
+// A page's title as hypha.pub heads a post: the title in the slab, its
+// description beneath as the lede, in graphite.
 // The id Starlight's own title takes, which its table of contents links to
 // as "Overview"; Starlight does not export it.
 const PAGE_TITLE_ID = "_top";
@@ -8,14 +8,28 @@ const { title, description } = Astro.locals.starlightRoute.entry.data;
 ---
 
 <h1 id={PAGE_TITLE_ID}>{title}</h1>
-{description && <p class="page-description">{description}</p>}
+{description && <p class="lede">{description}</p>}
 
 <style>
   h1 {
-    margin-top: 1rem;
-    font-size: var(--sl-text-h1);
-    line-height: var(--sl-line-height-headings);
-    font-weight: 600;
-    color: var(--sl-color-white);
+    margin-top: 2.5rem;
+    max-width: 42rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.375rem, 4.8vw, 3.5rem);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: var(--paper);
+  }
+  .lede {
+    margin-top: 1.25rem;
+    max-width: 42rem;
+    font-family: var(--font-serif);
+    font-size: clamp(1.125rem, 1.6vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--graphite);
   }
 </style>

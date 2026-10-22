@@ -1,0 +1,74 @@
+---
+// Starlight's footer, then hypha.pub's: a rule, Hypha's mark leading to
+// hyphatech.io, and the header's links again.
+import EditLink from "@astrojs/starlight/components/EditLink.astro";
+import LastUpdated from "@astrojs/starlight/components/LastUpdated.astro";
+import Pagination from "@astrojs/starlight/components/Pagination.astro";
+import SocialIcons from "./SocialIcons.astro";
+---
+
+<footer>
+  <div class="meta">
+    <EditLink />
+    <LastUpdated />
+  </div>
+  <Pagination />
+  <div class="hypha">
+    <a href="https://hyphatech.io" target="_blank" rel="noopener" class="mark">
+      <img src="/hypha.webp" alt="" width="52" height="84" />
+      <span>hypha</span>
+    </a>
+    <nav aria-label="Elsewhere"><SocialIcons /></nav>
+  </div>
+</footer>
+
+<style>
+  footer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem 3rem;
+    margin-top: 3rem;
+    color: var(--graphite);
+    font-size: 0.875rem;
+  }
+  .meta:empty {
+    display: none;
+  }
+  .hypha {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 4rem;
+    border-top: 1px solid var(--rule);
+    padding-block: 2.5rem;
+  }
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .mark img {
+    width: auto;
+    height: 1.5rem;
+  }
+  .mark span {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+</style>

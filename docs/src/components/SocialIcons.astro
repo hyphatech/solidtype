@@ -1,0 +1,39 @@
+---
+// The header's links, as hypha.pub's: an icon and a word, in graphite.
+// Another site opens in a tab of its own, so the reader keeps their place.
+import Layers from "@lucide/astro/icons/layers";
+import CodeXml from "@lucide/astro/icons/code-xml";
+import Icon from "./Icon.astro";
+
+const links = [
+  { label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: Layers },
+  { label: "GitHub", href: "https://github.com/hyphatech/solidtype", icon: CodeXml },
+];
+---
+
+{
+  links.map((link) => (
+    <a href={link.href} target="_blank" rel="noopener">
+      <Icon icon={link.icon} />
+      {link.label}
+    </a>
+  ))
+}
+
+<style>
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--graphite);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color 120ms var(--ease-state);
+  }
+  a:hover {
+    color: var(--paper);
+  }
+</style>
