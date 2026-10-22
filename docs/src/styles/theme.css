@@ -27,6 +27,25 @@
   --radius-control: 4px;
   --radius-panel: 10px;
   --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* The grid: the page's width, the margin that holds the navigation, the
+     measure, about 85 characters at 17px, and the column beside it. */
+  --page: 72rem;
+  --gutter: 1rem;
+  --margin: 11.5rem;
+  --measure: 42rem;
+  --sidebar: 12rem;
+  --column-gap: 2.5rem;
+}
+@media (min-width: 40rem) {
+  :root {
+    --gutter: 1.5rem;
+  }
+}
+@media (min-width: 64rem) {
+  :root {
+    --margin: calc(100% / 6);
+  }
 }
 
 /* Starlight's tokens, from the system's roles. Its grays run from text to
@@ -66,11 +85,13 @@
   --sl-font-mono: var(--font-mono);
   --sl-line-height: 1.7;
 
+  /* The page's own frame lays it out; Starlight's measures are spent. */
   --sl-nav-height: 4rem;
-  --sl-nav-pad-x: 1.5rem;
-  --sl-sidebar-width: 16rem;
-  --sl-content-width: 46rem;
-  --sl-content-pad-x: 2.5rem;
+  --sl-mobile-toc-height: 0rem;
+  --sl-main-pad: 0;
+
+  /* Anchors land clear of the window's edge: the header scrolls away. */
+  scroll-padding-top: 2rem;
 }
 
 html {
@@ -106,6 +127,16 @@ site-search button[data-open-modal] {
     border-color 120ms var(--ease-state),
     color 120ms var(--ease-state);
 }
+/* On a phone, where Starlight shows the icon alone, the same square as the
+   menu's button beside it. */
+@media (max-width: 49.99rem) {
+  site-search button[data-open-modal] {
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+  }
+}
 site-search button[data-open-modal]:hover {
   border-color: var(--graphite);
   color: var(--paper);
@@ -119,26 +150,6 @@ site-search dialog {
   border-radius: var(--radius-panel);
   background: var(--night);
 }
-/* Starlight rules the links off from a theme picker the site has not. */
-.social-icons::after {
-  display: none;
-}
-.social-icons {
-  gap: 1.5rem;
-}
-
-/* No rule between the title and the text, as under a post's lede. */
-.content-panel + .content-panel {
-  border-top: none;
-}
-
-/* The navigation: no rule between it, the page and the contents, as on
-   hypha.pub, whose columns are kept apart by the grid alone. */
-.sidebar-pane,
-.right-sidebar {
-  border-inline: none;
-}
-
 /* A group's label as hypha.pub's labels: small capitals in graphite. Its
    links hang from one rule, the current one marked on it in ink, as the
    post's contents are. */
@@ -196,8 +207,7 @@ site-search dialog {
 
 /* The page's contents, as hypha.pub's: a label, then the sections on a
    rule, the one being read in ink. */
-starlight-toc h2,
-mobile-starlight-toc .toggle {
+starlight-toc h2 {
   font-family: var(--font-sans);
   font-size: 0.75rem;
   font-weight: 500;
@@ -207,11 +217,15 @@ mobile-starlight-toc .toggle {
 }
 starlight-toc h2 {
   margin-bottom: 1rem;
+  line-height: 1.4;
 }
 starlight-toc nav > ul {
   border-inline-start: 1px solid var(--rule);
 }
 starlight-toc a {
+  display: block;
+  text-decoration: none;
+  overflow-wrap: anywhere;
   margin-inline-start: -1px;
   border-inline-start: 1px solid transparent;
   border-radius: 0;
@@ -228,10 +242,6 @@ starlight-toc a[aria-current="true"],
 starlight-toc a[aria-current="true"]:hover {
   border-inline-start-color: var(--paper);
   color: var(--paper);
-}
-mobile-starlight-toc nav {
-  border-bottom: 1px solid var(--rule);
-  background: var(--night);
 }
 
 /* The page's own text, on hypha.pub's prose: headings in the slab at its

@@ -1,0 +1,23 @@
+---
+// The header's links at the foot of the navigation's sheet, where a phone's
+// header has no room for them; wider, the header shows them.
+import SocialIcons from "./SocialIcons.astro";
+---
+
+<nav class="elsewhere" aria-label="Elsewhere"><SocialIcons /></nav>
+
+<style>
+  .elsewhere {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 1.5rem;
+  }
+  @media (min-width: 48rem) {
+    .elsewhere {
+      display: none;
+    }
+  }
+</style>

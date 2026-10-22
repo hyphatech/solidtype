@@ -1,0 +1,15 @@
+---
+// A part of the page -- its title, then its text -- without Starlight's own
+// width or padding: the grid gives both.
+---
+
+<div class="content-panel"><slot /></div>
+
+<style>
+  .content-panel > :global(* + *) {
+    margin-top: 1.5rem;
+  }
+  .content-panel + .content-panel {
+    margin-top: 3rem;
+  }
+</style>

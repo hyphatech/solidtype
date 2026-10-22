@@ -1,0 +1,22 @@
+---
+// The page's contents, sticky beside the text and scrolling on their own
+// when longer than the window. Its padding, taken back by its margin, is
+// room for a link's focus ring.
+import TableOfContents from "@astrojs/starlight/components/TableOfContents.astro";
+---
+
+<div class="sticky">
+  <TableOfContents />
+</div>
+
+<style>
+  .sticky {
+    position: sticky;
+    top: 0;
+    max-height: 100dvh;
+    overflow-y: auto;
+    margin-inline: -0.375rem;
+    padding: 3.5rem 0.375rem 2rem;
+    scrollbar-width: none;
+  }
+</style>

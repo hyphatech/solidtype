@@ -12,7 +12,7 @@ const { title, description } = Astro.locals.starlightRoute.entry.data;
 
 <style>
   h1 {
-    margin-top: 2.5rem;
+    margin-top: 3.5rem;
     max-width: 42rem;
     font-family: var(--font-serif);
     font-size: clamp(2.375rem, 4.8vw, 3.5rem);
@@ -31,5 +31,10 @@ const { title, description } = Astro.locals.starlightRoute.entry.data;
     font-weight: 400;
     line-height: 1.5;
     color: var(--graphite);
+  }
+  @media (min-width: 48rem) {
+    h1 {
+      margin-top: 6rem;
+    }
   }
 </style>

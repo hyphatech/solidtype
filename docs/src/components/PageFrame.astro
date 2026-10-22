@@ -1,0 +1,139 @@
+---
+// The page on hypha.pub's grid: a header across the window over a rule, and
+// beneath it the page's width, 72rem, the navigation in its margin and the
+// page in the rest. On a phone the navigation is a sheet over the page,
+// opened from the header. Starlight's scripts find the sheet by its id,
+// which keeps its scroll and its open groups from page to page.
+import X from "@lucide/astro/icons/x";
+import Icon from "./Icon.astro";
+
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="page">
+  <header class="header"><slot name="header" /></header>
+  <div class="grid">
+    {
+      hasSidebar && (
+        <nav class="sidebar print:hidden" aria-label={Astro.locals.t("sidebarNav.accessibleLabel")}>
+          <script>
+            // On a phone the navigation is a popover, which opens and closes
+            // without script; wider, it is part of the page and the popover is
+            // dropped. While it is open, the page behind it takes no focus.
+            class StarlightSidebarPane extends HTMLElement {
+              constructor() {
+                super();
+                const wide = matchMedia("(min-width: 48rem)");
+                const reset = () => {
+                  this.popover = wide.matches ? null : "auto";
+                };
+                reset();
+                wide.addEventListener("change", reset);
+                this.addEventListener("toggle", ({ newState }) => {
+                  document.querySelectorAll<HTMLElement>(".main-frame, .sl-skip-link, .page > .header").forEach((el) => {
+                    el.toggleAttribute("inert", newState === "open");
+                  });
+                });
+              }
+            }
+            customElements.define("sl-sidebar-pane", StarlightSidebarPane);
+          </script>
+          <sl-sidebar-pane popover="" id="starlight__sidebar" class="sidebar-pane">
+            <div class="sheet-bar">
+              <button type="button" popovertarget="starlight__sidebar" popovertargetaction="hide" aria-label="Close the menu">
+                <Icon icon={X} size="md" />
+              </button>
+            </div>
+            <div class="sidebar-content">
+              <slot name="sidebar" />
+            </div>
+          </sl-sidebar-pane>
+        </nav>
+      )
+    }
+    <div class="main-frame"><slot /></div>
+  </div>
+</div>
+
+<style>
+  .header {
+    border-bottom: 1px solid var(--rule);
+  }
+  .grid {
+    margin-inline: auto;
+    max-width: var(--page);
+    padding-inline: var(--gutter);
+  }
+  .main-frame {
+    min-width: 0;
+  }
+
+  /* A sheet over the page, under its own bar with the way out. */
+  .sidebar-pane {
+    border: none;
+    padding: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    color: inherit;
+    position: fixed;
+    inset: 0;
+    z-index: var(--sl-z-index-menu);
+    overflow-y: auto;
+    background: var(--night);
+  }
+  .sheet-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 4rem;
+    padding-inline: var(--gutter);
+    border-bottom: 1px solid var(--rule);
+  }
+  .sheet-bar button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-control);
+    background: var(--panel);
+    color: var(--graphite);
+    cursor: pointer;
+  }
+  .sidebar-content {
+    padding: 2rem var(--gutter) 3rem;
+  }
+
+  /* Wider, the navigation is the margin: sticky beside the page, scrolling
+     on its own when it is longer than the window. Its padding, taken back
+     by its margin, is room for a link's focus ring. */
+  @media (min-width: 48rem) {
+    .grid {
+      display: grid;
+      grid-template-columns: calc(var(--margin) - var(--column-gap)) minmax(0, 1fr);
+      column-gap: var(--column-gap);
+    }
+    .sidebar-pane {
+      display: block;
+      position: sticky;
+      inset: auto;
+      top: 0;
+      z-index: auto;
+      height: auto;
+      max-height: 100dvh;
+      margin: 0 -0.375rem;
+      padding: 0 0.375rem;
+      background: none;
+      scrollbar-width: none;
+    }
+    .sheet-bar {
+      display: none;
+    }
+    .sidebar-content {
+      padding: 3.5rem 0 2rem;
+    }
+  }
+</style>

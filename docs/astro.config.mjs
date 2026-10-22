@@ -35,13 +35,20 @@ export default defineConfig({
         { tag: "link", attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" } },
         { tag: "meta", attrs: { name: "theme-color", content: "#15120E" } },
       ],
+      // The page's frame is hypha.pub's grid, not Starlight's.
       components: {
+        ContentPanel: "./src/components/ContentPanel.astro",
         Footer: "./src/components/Footer.astro",
+        Header: "./src/components/Header.astro",
+        MobileMenuFooter: "./src/components/MobileMenuFooter.astro",
+        PageFrame: "./src/components/PageFrame.astro",
+        PageSidebar: "./src/components/PageSidebar.astro",
         PageTitle: "./src/components/PageTitle.astro",
         SiteTitle: "./src/components/SiteTitle.astro",
         SocialIcons: "./src/components/SocialIcons.astro",
         ThemeProvider: "./src/components/ThemeProvider.astro",
         ThemeSelect: "./src/components/ThemeSelect.astro",
+        TwoColumnContent: "./src/components/TwoColumnContent.astro",
       },
       // Code as hypha.pub sets it: a panel on a rule, no shadow.
       expressiveCode: {
