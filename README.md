@@ -26,8 +26,8 @@ opam repo add hypha https://github.com/hyphatech/opam-repository.git
 opam install solidtype    # and solidtype-kobalte, solidtype-heroui
 ```
 
-The Vite plugin is an asset of each GitHub release. A whole page, from
-`dune-project` to Vite: [getting started](https://hyphatech.github.io/solidtype/).
+A whole page, from `dune-project` to Vite:
+[getting started](https://hyphatech.github.io/solidtype/).
 
 ## Example
 
