@@ -3,7 +3,7 @@ OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
 
 .DEFAULT_GOAL := help
-.PHONY: help setup build test lint fmt example example-serve example-dev docs docs-serve generate
+.PHONY: help setup build test lint fmt example example-serve docs docs-serve generate
 
 help: ## list targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -50,13 +50,6 @@ example: build node_modules ## build the example, as a Vite page and an Astro on
 
 example-serve: example ## serve the example and its API on http://localhost:4420
 	_build/default/example/server/serve.exe
-
-# Three processes, each in a terminal of its own: dune rebuilds the OCaml
-# as it changes, the server answers /api, Vite serves the page and proxies.
-example-dev: example ## print the commands that run the example in development
-	@echo "$(OPAM) dune build --watch"
-	@echo "_build/default/example/server/serve.exe"
-	@echo "bun --bun vite --config example/vite.config.ts"
 
 docs: build node_modules ## build the documentation into _build/docs
 	bun --bun astro build --root docs

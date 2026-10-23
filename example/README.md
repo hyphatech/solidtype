@@ -10,7 +10,6 @@ as they are here.
 ```sh
 make example        # the page, and the Astro page that mounts the same board
 make example-serve  # the API and the built page on http://localhost:4420
-make example-dev    # the three commands for development, each in its terminal
 ```
 
 `/docs` is the API's interactive document.
