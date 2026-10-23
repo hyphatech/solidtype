@@ -61,10 +61,11 @@ example-dev: example ## print the commands that run the example in development
 docs: build node_modules ## build the documentation into _build/docs
 	bun --bun astro build --root docs
 
-# Astro serves the pages as they change; `dune build --watch`, beside it,
-# rebuilds the OCaml they show.
-docs-serve: build node_modules ## serve the documentation on DOCS_PORT, rebuilt as pages change
-	bun --bun astro dev --root docs --open --port $(DOCS_PORT)
+# The built documentation, as a host serves it: Pagefind's index exists only
+# in a build, and a page served as it changes loads its styles after its
+# text. Run from docs/, where Astro finds its config again.
+docs-serve: docs ## serve the built documentation on DOCS_PORT, search included
+	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
 
 generate: node_modules ## write the bindings from Solid's, Kobalte's and HeroUI's types
 	$(OPAM) bun generate/html.ts

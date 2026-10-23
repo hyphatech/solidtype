@@ -25,7 +25,7 @@ make example        # the board, built by Vite into _build/example-dist, and
 make example-serve  # the board and its API, served on http://localhost:4420
 make example-dev    # the three commands that run the board in development
 make docs           # the documentation, built by Astro into _build/docs
-make docs-serve     # the documentation, served on DOCS_PORT as it changes
+make docs-serve     # the documentation built, served on DOCS_PORT with search
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
