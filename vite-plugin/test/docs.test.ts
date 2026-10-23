@@ -13,7 +13,7 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
   const build = Bun.spawnSync(["bun", "--bun", "astro", "build", "--root", "docs"], { cwd: root, stdout: "pipe", stderr: "pipe" });
   expect(build.exitCode, build.stderr.toString()).toBe(0);
   const html = readFileSync(`${root}_build/docs/heroui/button/index.html`, "utf8");
-  const islands = [...html.matchAll(/<astro-island [^>]*component-url="\/_astro\/(\w+)\.[^"]*"[^>]*client="(\w+)"/g)].map((m) => `${m[1]} ${m[2]}`);
+  const islands = [...html.matchAll(/<astro-island [^>]*component-url="\/solidtype\/_astro\/(\w+)\.[^"]*"[^>]*client="(\w+)"/g)].map((m) => `${m[1]} ${m[2]}`);
   expect(islands).toEqual([
     "button_usage visible",
     "button_variants visible",

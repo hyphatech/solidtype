@@ -218,7 +218,7 @@ Drafted here; they reach `AGENTS.md` when the work lands.
 ## Stages
 
 Each port is one worktree from `main` and one commit, with its test, its
-page, its line in `coverage.mdx`, the README and `CHANGES.md`.
+page, its line in `coverage.mdx` and `CHANGES.md`.
 
 ### Group 1: no behaviour to port
 - [x] CloseButton, ButtonGroup, Surface, Card, Kbd, Spinner, Skeleton,

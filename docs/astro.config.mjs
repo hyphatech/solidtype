@@ -12,11 +12,14 @@ import solidtype from "vite-plugin-solidtype";
 // component in React, with its source. The demos are OCaml, compiled by
 // Melange into the repository's _build; two JSX compilers share the site,
 // React's kept to islands/react, where HeroUI's React components are
-// rendered, and Solid's to everything else.
+// rendered, and Solid's to everything else. It is published to GitHub Pages
+// by .github/workflows/docs.yml, under the repository's name.
 const repository = fileURLToPath(new URL("..", import.meta.url));
 const reactFiles = /\/islands\/react\/[^/]+\.tsx$/;
 
 export default defineConfig({
+  site: "https://hyphatech.github.io",
+  base: "/solidtype",
   outDir: `${repository}_build/docs`,
   output: "static",
   integrations: [
@@ -36,8 +39,8 @@ export default defineConfig({
       customCss: ["./src/styles/heroui.css", "./src/styles/api.css"],
       favicon: "/favicon-32.png",
       head: [
-        { tag: "link", attrs: { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" } },
-        { tag: "link", attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" } },
+        { tag: "link", attrs: { rel: "icon", type: "image/png", sizes: "16x16", href: "/solidtype/favicon-16.png" } },
+        { tag: "link", attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/solidtype/apple-touch-icon.png" } },
       ],
       sidebar: [
         { label: "Start here", items: ["index", "start/how-it-works", "start/melange", "start/vite", "start/conventions"] },

@@ -23,7 +23,8 @@ make fmt            # format in place
 make example        # the board, built by Vite into _build/example-dist, and
                     # its Astro page, into _build/example-astro
 make example-serve  # the board and its API, served on http://localhost:4420
-make docs           # the documentation, built by Astro into _build/docs
+make docs           # the documentation, built by Astro into _build/docs,
+                    # as .github/workflows/docs.yml publishes it from main
 make docs-serve     # the documentation built, served on DOCS_PORT with search
 ```
 
@@ -367,3 +368,8 @@ version, so a binding and the plugin that reads its markers never
 disagree. The plugin is compiled and packed by `vite-plugin/pack.ts` and
 attached to the GitHub release by `.github/workflows/release.yml`, which
 an application names by its URL.
+
+The documentation is published to GitHub Pages, at
+hyphatech.github.io/solidtype, by `.github/workflows/docs.yml` on every
+push to `main`, so what it says is what `main` does. The README is short
+and points to it.
