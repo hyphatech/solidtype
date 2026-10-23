@@ -21,11 +21,13 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "solidtype",
+      logo: { src: "starlight-theme-hypha/assets/hypha.webp" },
       // Hypha's look, from its theme; heroui.css keeps the demos in HeroUI's,
       // and api.css sets this site's API tables. The theme's sheet follows
       // HeroUI's, whose Tailwind defines a `--font-sans` of its own.
       plugins: [
         hypha({
+          brand: "hypha",
           github: "hyphatech/solidtype",
           tabs: { "Start here": "rocket", HeroUI: "component" },
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
