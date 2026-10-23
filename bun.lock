@@ -33,7 +33,7 @@
         "react-aria-components": "^1.21.1",
         "react-dom": "^19.2.0",
         "solid-js": "~1.9.17",
-        "starlight-theme-hypha": "github:hyphatech/starlight-theme-hypha#v0.2.2",
+        "starlight-theme-hypha": "github:hyphatech/starlight-theme-hypha#v0.3.0",
         "tailwindcss": "^4.3.3",
         "tw-animate-css": "1.4.0",
         "typescript": "^5.9.3",
@@ -1050,7 +1050,7 @@
 
     "space-separated-tokens": ["space-separated-tokens@2.0.2", "", {}, "sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q=="],
 
-    "starlight-theme-hypha": ["starlight-theme-hypha@github:hyphatech/starlight-theme-hypha#66d9219", { "dependencies": { "@fontsource-variable/roboto-slab": "^5.3.0", "@fontsource/inter-tight": "^5.3.0", "@lucide/astro": "1.48.0", "@tailwindcss/vite": "^4.3.3", "tailwindcss": "^4.3.3" }, "peerDependencies": { "@astrojs/starlight": "~0.42.6", "astro": "^7.3.3" } }, "hyphatech-starlight-theme-hypha-66d9219", "sha512-hIGzgMgBQwmy6L8cS1sjh4Lp9vsgD3CQ0E7ujLoL2Oj1pnkr96M14zm44jAWs7ow2JvGpDn4/zJYilgdeK9KRA=="],
+    "starlight-theme-hypha": ["starlight-theme-hypha@github:hyphatech/starlight-theme-hypha#22bc9b9", { "dependencies": { "@fontsource-variable/roboto-slab": "^5.3.0", "@fontsource/inter-tight": "^5.3.0", "@lucide/astro": "1.48.0", "@tailwindcss/vite": "^4.3.3", "tailwindcss": "^4.3.3" }, "peerDependencies": { "@astrojs/starlight": "~0.42.6", "astro": "^7.3.3" } }, "hyphatech-starlight-theme-hypha-22bc9b9", "sha512-cX1fLrchBo6mew30I9rC0itsU688kyi5rBXzhE5I3N+qnp74a8E5hafbGGYKopGrGm2cAANhzRcGPslFKn5V6Q=="],
 
     "std-env": ["std-env@4.3.0", "", {}, "sha512-OtU/EgQ1kIm5KwqQpBC6ZEMXrZRui11w8zgfTWp8cdO9B8OaPsbA8bTHO2P+HNo1VlUTGMVBwPhydu6poeXiag=="],
 
