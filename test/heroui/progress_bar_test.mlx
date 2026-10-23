@@ -1,0 +1,150 @@
+(* HeroUI's ProgressBar on Kobalte's Progress, beside the same bar in React: every part,
+   which names which, its value as a reader and the output read it, and its
+   fill's width. *)
+
+module Label = Solidtype_heroui.Label
+module Progress_bar = Solidtype_heroui.Progress_bar
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?value:float ->
+  ?is_indeterminate:(bool[@mel.as "isIndeterminate"]) ->
+  ?min_value:(float[@mel.as "minValue"]) ->
+  ?max_value:(float[@mel.as "maxValue"]) ->
+  ?color:string ->
+  ?size:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ProgressBar.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ProgressBar.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+(* Kobalte's own state, present and empty, which no style of HeroUI's reads,
+   and the label's [for], which names no input in a bar. *)
+let kobalte_only e name =
+  String.length name > 5
+  && String.equal (String.sub name 0 5) "data-"
+  && Option.equal String.equal (T.attribute e name) (Some "")
+  || String.equal name "for"
+  (* Kobalte's progress, loading or complete, which no style of HeroUI's
+     reads. *)
+  || String.equal name "data-progress"
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let named =
+        List.filter_map
+          (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+          [ "aria-labelledby" ]
+      in
+      (* A style as its declarations, however a framework spaces them. *)
+      let style =
+        match T.attribute e "style" with
+        | Some st -> " style=" ^ String.trim st
+        | None -> ""
+      in
+      String.concat " "
+        (tag_name e
+        :: (T.attributes_but
+              ("id" :: "aria-labelledby" :: "style"
+              :: List.filter (kobalte_only e)
+                   (Array.to_list (T.attribute_names e)))
+              e
+           ^ style)
+        :: named)
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let both ?value ?is_indeterminate ?min_value ?max_value ?color ?size () =
+  T.render (fun () ->
+      <Progress_bar
+        ?value=(fun () -> value)
+        ?is_indeterminate=(fun () -> is_indeterminate)
+        ?min_value=(fun () -> min_value)
+        ?max_value=(fun () -> max_value)
+        ?color=(fun () -> color)
+        ?size=(fun () -> size)
+        class_="w-64">
+        <Label>"Loading"</Label>
+        <Progress_bar.Output />
+        <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+      </Progress_bar>);
+  let host =
+    match T.query "[data-slot=progress-bar]" with
+    | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
+    | None -> T.body
+  in
+  let solidtype = shown host in
+  T.cleanup ();
+  let react =
+    shown
+      (Twin.render
+         (props ?value ?is_indeterminate ?min_value ?max_value
+            ?color:
+              (Option.map
+                 (function
+                   | `default -> "default"
+                   | `accent -> "accent"
+                   | `success -> "success"
+                   | `warning -> "warning"
+                   | `danger -> "danger")
+                 color)
+            ?size:
+              (Option.map
+                 (function `sm -> "sm" | `md -> "md" | `lg -> "lg")
+                 size)
+            ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Progress_bar" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a bar of its value, as React's is" (fun () ->
+          let solidtype, react = both ~value:60. () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is its value within its range, as React's is" (fun () ->
+          let solidtype, react =
+            both ~value:30. ~min_value:10. ~max_value:50. ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is each color and size, as React's is" (fun () ->
+          let solidtype, react = both ~value:90. ~color:`danger ~size:`lg () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is indeterminate, as React's is" (fun () ->
+          let solidtype, react = both ~is_indeterminate:true () in
+          E.(expect solidtype |> toEqual react)))

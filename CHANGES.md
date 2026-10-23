@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Progress_bar`: HeroUI's ProgressBar on Kobalte's
+  Progress, determinate or indeterminate, its colors and sizes, its output
+  Kobalte's formatting of its value.
 - `Solidtype_heroui.Meter`: HeroUI's Meter on Kobalte's, a quantity within a
   range, its colors and sizes, its output Kobalte's formatting of its value.
 - `Solidtype_heroui.Alert`: HeroUI's Alert, its statuses and their icons,

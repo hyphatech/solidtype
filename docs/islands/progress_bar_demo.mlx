@@ -1,0 +1,56 @@
+module S = Solidtype.Solid
+module Label = Solidtype_heroui.Label
+module Progress_bar = Solidtype_heroui.Progress_bar
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let colors =
+  [|
+    (`accent, "accent");
+    (`default, "default");
+    (`success, "success");
+    (`warning, "warning");
+    (`danger, "danger");
+  |]
+
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+
+let make () =
+  let color, set_color = S.create_signal (`accent, "accent") in
+  let size, set_size = S.create_signal (`md, "md") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="color"
+        choices=(fun () -> colors)
+        picked=(fun () -> S.get color)
+        on_pick=(Controls.choose colors set_color)
+      />
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=progress-bar]"
+      solidtype=(<Progress_bar
+                   value=60.
+                   color=(fun () -> fst (S.get color))
+                   size=(fun () -> fst (S.get size))
+                   class_="w-56">
+                   <Label>"Loading"</Label>
+                   <Progress_bar.Output />
+                   <Progress_bar.Track>
+                     <Progress_bar.Fill />
+                   </Progress_bar.Track>
+                 </Progress_bar>)
+      react=(fun host ->
+              Heroui_react.progress_bar host
+                (Heroui_react.progress_bar_props
+                   ~color:(snd (S.get color))
+                   ~size:(snd (S.get size))
+                   ()))
+    />
+  </section>

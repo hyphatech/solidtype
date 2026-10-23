@@ -345,3 +345,13 @@ external meter_props : color:string -> size:string -> unit -> meter_props = ""
 
 external meter : Dom.htmlDivElement -> meter_props -> unit = "meter"
 [@@mel.module "./react/heroui.tsx"]
+
+type progress_bar_props
+
+external progress_bar_props :
+  color:string -> size:string -> unit -> progress_bar_props = ""
+[@@mel.obj]
+
+external progress_bar : Dom.htmlDivElement -> progress_bar_props -> unit
+  = "progressBar"
+[@@mel.module "./react/heroui.tsx"]

@@ -1,0 +1,31 @@
+module Label = Solidtype_heroui.Label
+module Progress_bar = Solidtype_heroui.Progress_bar
+
+let make () =
+  <div class_="flex w-64 flex-col gap-6">
+    <Progress_bar color=`default value=50.>
+      <Label>"Default"</Label>
+      <Progress_bar.Output />
+      <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+    </Progress_bar>
+    <Progress_bar color=`accent value=50.>
+      <Label>"Accent"</Label>
+      <Progress_bar.Output />
+      <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+    </Progress_bar>
+    <Progress_bar color=`success value=50.>
+      <Label>"Success"</Label>
+      <Progress_bar.Output />
+      <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+    </Progress_bar>
+    <Progress_bar color=`warning value=50.>
+      <Label>"Warning"</Label>
+      <Progress_bar.Output />
+      <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+    </Progress_bar>
+    <Progress_bar color=`danger value=50.>
+      <Label>"Danger"</Label>
+      <Progress_bar.Output />
+      <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+    </Progress_bar>
+  </div>

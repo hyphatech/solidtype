@@ -1,0 +1,8 @@
+module Label = Solidtype_heroui.Label
+module Progress_bar = Solidtype_heroui.Progress_bar
+
+let make () =
+  <Progress_bar class_="w-64" is_indeterminate=true>
+    <Label>"Loading..."</Label>
+    <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+  </Progress_bar>

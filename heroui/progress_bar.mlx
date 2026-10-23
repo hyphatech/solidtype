@@ -1,0 +1,120 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Progress
+
+(* What a bar's parts read of it: its classes, and how far along its range
+   its value is, from 0 to 100, unless it is indeterminate. *)
+type bar = {
+  slots : unit -> Styles.ProgressBar.slots;
+  percent : unit -> float option;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = bar
+end)
+
+let within part =
+  match Context.use () with
+  | Some m -> m
+  | None -> invalid_arg (part ^ " is used inside a Progress_bar")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Kobalte_label = Field.As_span (struct
+  let component = Kobalte.Label.component
+end)
+
+module Kobalte_value = Field.As_span (struct
+  let component = Kobalte.ValueLabel.component
+end)
+
+(* A label in a bar is Kobalte's, a span, which names it. *)
+let label : Label.slot =
+ fun[@u] classes children ->
+  <Kobalte_label as_="span" class_=(fun () -> classes ()) data_slot="label">
+    (fun () -> children ())
+  </Kobalte_label>
+
+module Output = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let m = within "Progress_bar.Output" in
+    let classes () =
+      after (Styles.ProgressBar.output (m.slots ())) (class_ ())
+    in
+    <Show
+      when_=(fun () -> Option.is_some (children ()))
+      fallback=(<Kobalte_value
+                  as_="span"
+                  class_=(fun () -> classes ())
+                  data_slot="progress-bar-output"
+                />)>
+      <span class_=(fun () -> classes ()) data_slot="progress-bar-output">
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </span>
+    </Show>
+end
+
+module Track = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let m = within "Progress_bar.Track" in
+    <div
+      class_=(fun () ->
+               after (Styles.ProgressBar.track (m.slots ())) (class_ ()))
+      data_slot="progress-bar-track">
+      (fun () -> children ())
+    </div>
+end
+
+module Fill = struct
+  let%component make ?(class_ : string option) () =
+    let m = within "Progress_bar.Fill" in
+    <div
+      class_=(fun () ->
+               after (Styles.ProgressBar.fill (m.slots ())) (class_ ()))
+      ?style=(fun () ->
+               Option.map
+                 (fun p -> "width: " ^ Js.Float.toString p ^ "%;")
+                 (m.percent ()))
+      data_slot="progress-bar-fill"
+    />
+end
+
+let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
+    ?(min_value : float = 0.) ?(max_value : float = 100.)
+    ?(color : [ `default | `accent | `success | `warning | `danger ] option)
+    ?(size : [ `sm | `md | `lg ] option) ?(aria_label : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let m =
+    {
+      slots =
+        (fun () ->
+          Styles.ProgressBar.slots
+            (Styles.ProgressBar.options ?color:(color ()) ?size:(size ()) ()));
+      percent =
+        (fun () ->
+          let range = max_value () -. min_value () in
+          if is_indeterminate () then None
+          else if range <= 0. then Some 0.
+          else
+            Some
+              (Float.min 100.
+                 (Float.max 0. ((value () -. min_value ()) /. range *. 100.))));
+    }
+  in
+  <Context.Provider value=(fun () -> m)>
+    <Kobalte.Root
+      value=(fun () -> value ())
+      indeterminate=(fun () -> is_indeterminate ())
+      min_value=(fun () -> min_value ())
+      max_value=(fun () -> max_value ())
+      ?aria_label
+      class_=(fun () ->
+               after (Styles.ProgressBar.base (m.slots ())) (class_ ()))
+      data_slot="progress-bar">
+      <Label.Slot.Provider value=(fun () -> label)>
+        (fun () -> children ())
+      </Label.Slot.Provider>
+    </Kobalte.Root>
+  </Context.Provider>

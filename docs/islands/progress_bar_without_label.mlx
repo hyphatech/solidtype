@@ -1,0 +1,6 @@
+module Progress_bar = Solidtype_heroui.Progress_bar
+
+let make () =
+  <Progress_bar class_="w-64" aria_label="Loading progress" value=45.>
+    <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+  </Progress_bar>
