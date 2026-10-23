@@ -59,6 +59,7 @@ let%component make
                          Solidtype.Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Solidtype.Jsx.flag (Interaction.disabled i))
     type_=(fun () -> type_ ())
-    on_click=(fun e -> ignore (on_click e : unit option))>
+    on_click=(fun e -> ignore (on_click e : unit option))
+    props=(Props.others props)>
     (fun () -> children ())
   </Kobalte.Root>

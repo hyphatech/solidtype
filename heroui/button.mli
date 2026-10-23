@@ -35,7 +35,7 @@ module Props : sig
     ?on_click:(Dom.mouseEvent -> unit) ->
     ?aria_label:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

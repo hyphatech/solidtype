@@ -18,7 +18,8 @@ module Icon = struct
       fallback=(<span
                   class_=(fun () -> icon ())
                   data_default_icon="true"
-                  data_slot="link-icon">
+                  data_slot="link-icon"
+                  props=(Props.others props)>
                   <svg
                     aria_hidden=true
                     fill="none"
@@ -62,6 +63,7 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
     data_focused=(fun () -> Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+    props=(Props.others props)>
     (fun () -> children ())
   </Kobalte.Root>

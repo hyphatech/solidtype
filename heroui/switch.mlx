@@ -28,7 +28,8 @@ module Content = struct
     <Field_content
       field=(fun () -> s.field)
       slot="switch-content"
-      class_=(fun () -> after (Styles.Switch.content (s.slots ())) (class_ ()))>
+      class_=(fun () -> after (Styles.Switch.content (s.slots ())) (class_ ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </Field_content>
 end
@@ -38,7 +39,8 @@ module Control = struct
     let s = within "Switch.Control" in
     <span
       class_=(fun () -> after (Styles.Switch.control (s.slots ())) (class_ ()))
-      data_slot="switch-control">
+      data_slot="switch-control"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -49,6 +51,7 @@ module Thumb = struct
     <span
       class_=(fun () -> after (Styles.Switch.thumb (s.slots ())) (class_ ()))
       data_slot="switch-thumb"
+      props=(Props.others props)
     />
 end
 
@@ -114,7 +117,8 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Root>
   </Context.Provider>

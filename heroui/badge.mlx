@@ -7,7 +7,8 @@ module Anchor = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
       class_=(fun () -> after "badge-anchor" (class_ ()))
-      data_slot="badge-anchor">
+      data_slot="badge-anchor"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -19,7 +20,9 @@ module Label = struct
 
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after (label ()) (class_ ())) data_slot="badge-label">
+      class_=(fun () -> after (label ()) (class_ ()))
+      data_slot="badge-label"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -42,7 +45,8 @@ let%component make
                   (Styles.Badge.options ~color:(color ())
                      ~placement:(placement ()) ~size:(size ())
                      ~variant:(variant ()) ?class_:(class_ ()) ())))
-    data_slot="badge">
+    data_slot="badge"
+    props=(Props.others props)>
     (fun () ->
       let c = children () in
       if text c then Jsx.element <Label>(fun () -> c)</Label> else c)

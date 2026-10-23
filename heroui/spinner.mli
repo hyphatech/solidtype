@@ -19,7 +19,7 @@ module Props : sig
     ?size:[ `sm | `md | `lg | `xl ] Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

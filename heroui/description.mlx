@@ -1,6 +1,11 @@
 module Jsx = Solidtype.Jsx
 
-type slot = ((unit -> string) -> (unit -> Jsx.content) -> Jsx.element[@u])
+type slot =
+  ((unit -> string) ->
+   unit Solidtype.Solid.rest ->
+   (unit -> Jsx.content) ->
+   Jsx.element
+  [@u])
 
 (* How a description renders where a part above gives it its element, as
    React Aria's TextContext does: a field's description, which the field's
@@ -15,9 +20,13 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
       (Styles.Description.options ?class_:(class_ ()) ())
   in
   match Slot.use () with
-  | Some render -> render classes (fun () -> children ()) [@u]
+  | Some render ->
+      render classes (Props.others props) (fun () -> children ()) [@u]
   | None ->
       <span
-        class_=(fun () -> classes ()) slot="description" data_slot="description">
+        class_=(fun () -> classes ())
+        slot="description"
+        data_slot="description"
+        props=(Props.others props)>
         (fun () -> children ())
       </span>

@@ -46,7 +46,8 @@ module Indicator = struct
     let a = within "Alert.Indicator" in
     <div
       class_=(fun () -> after (Styles.Alert.indicator (a.slots ())) (class_ ()))
-      data_slot="alert-indicator">
+      data_slot="alert-indicator"
+      props=(Props.others props)>
       <Show
         when_=(fun () -> Option.is_some (children ()))
         fallback=(<svg
@@ -75,7 +76,8 @@ module Content = struct
     let a = within "Alert.Content" in
     <div
       class_=(fun () -> after (Styles.Alert.content (a.slots ())) (class_ ()))
-      data_slot="alert-content">
+      data_slot="alert-content"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -85,7 +87,8 @@ module Title = struct
     let a = within "Alert.Title" in
     <p
       class_=(fun () -> after (Styles.Alert.title (a.slots ())) (class_ ()))
-      data_slot="alert-title">
+      data_slot="alert-title"
+      props=(Props.others props)>
       (fun () -> children ())
     </p>
 end
@@ -96,7 +99,8 @@ module Description = struct
     <span
       class_=(fun () ->
                after (Styles.Alert.description (a.slots ())) (class_ ()))
-      data_slot="alert-description">
+      data_slot="alert-description"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -118,7 +122,8 @@ let%component make ?(status : status = `default)
       <div
         ?role
         class_=(fun () -> after (Styles.Alert.base (a.slots ())) (class_ ()))
-        data_slot="alert-root">
+        data_slot="alert-root"
+        props=(Props.others props)>
         (fun () -> children ())
       </div>
     </Surface.Context.Provider>

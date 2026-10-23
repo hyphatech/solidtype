@@ -16,7 +16,7 @@ module Icon : sig
   module Props : sig
     type t
 
-    val check : ?props:t -> unit -> unit
+    val check : ?props:t Solidtype.Solid.rest -> unit -> unit
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -33,7 +33,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

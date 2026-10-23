@@ -30,8 +30,9 @@ end)
 
 (* A label in a meter is Kobalte's, a span, which names it. *)
 let label : Label.slot =
- fun[@u] classes children ->
-  <Kobalte_label as_="span" class_=(fun () -> classes ()) data_slot="label">
+ fun[@u] classes others children ->
+  <Kobalte_label
+    as_="span" class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
   </Kobalte_label>
 
@@ -46,6 +47,7 @@ module Output = struct
                   as_="span"
                   class_=(fun () -> classes ())
                   data_slot="meter-output"
+                  props=(Props.others props)
                 />)>
       <span class_=(fun () -> classes ()) data_slot="meter-output">
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
@@ -58,7 +60,8 @@ module Track = struct
     let m = within "Meter.Track" in
     <div
       class_=(fun () -> after (Styles.Meter.track (m.slots ())) (class_ ()))
-      data_slot="meter-track">
+      data_slot="meter-track"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -70,6 +73,7 @@ module Fill = struct
       class_=(fun () -> after (Styles.Meter.fill (m.slots ())) (class_ ()))
       style=(fun () -> "width: " ^ Js.Float.toString (m.percent ()) ^ "%;")
       data_slot="meter-fill"
+      props=(Props.others props)
     />
 end
 
@@ -124,7 +128,8 @@ let%component make ~(value : float) ?(min_value : float = 0.)
       ?aria_label
       get_value_label=value_label
       class_=(fun () -> after (Styles.Meter.base (m.slots ())) (class_ ()))
-      data_slot="meter">
+      data_slot="meter"
+      props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         (fun () -> children ())
       </Label.Slot.Provider>

@@ -50,9 +50,12 @@ let fill_span s =
 
 (* A label in a slider is Kobalte's, which names it and its thumbs. *)
 let label id : Label.slot =
- fun[@u] classes children ->
+ fun[@u] classes others children ->
   <Kobalte.Label
-    id=(fun () -> id) class_=(fun () -> classes ()) data_slot="label">
+    id=(fun () -> id)
+    class_=(fun () -> classes ())
+    data_slot="label"
+    props=others>
     (fun () -> children ())
   </Kobalte.Label>
 
@@ -70,7 +73,8 @@ module Output = struct
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_orientation=(fun () ->
                          Jsx.data (orientation_name (s.orientation ())))
-      data_slot="slider-output">
+      data_slot="slider-output"
+      props=(Props.others props)>
       (fun () ->
         match children () with
         | Some given -> given
@@ -98,7 +102,8 @@ module Track = struct
       data_fill_end=(fun () -> Jsx.flag (snd (filled ())))
       data_orientation=(fun () ->
                          Jsx.data (orientation_name (s.orientation ())))
-      data_slot="slider-track">
+      data_slot="slider-track"
+      props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Track>
 end
@@ -121,6 +126,7 @@ module Fill = struct
                   ^ ";")
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_slot="slider-fill"
+      props=(Props.others props)
     />
 end
 
@@ -172,7 +178,8 @@ module Thumb = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_slot="slider-thumb">
+      data_slot="slider-thumb"
+      props=(Props.others props)>
       <Kobalte.Input />
       (fun () -> match children () with Some c -> c | None -> Jsx.string "")
     </Kobalte.Thumb>
@@ -259,7 +266,8 @@ let%component make ?(value : float array option)
       on_focus_out=(Field.on_leave (fun e ->
                         in_form.left ();
                         on_blur e))
-      data_slot="slider">
+      data_slot="slider"
+      props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label label_id)>
         (fun () -> children ())
       </Label.Slot.Provider>

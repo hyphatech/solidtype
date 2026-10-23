@@ -73,7 +73,8 @@ module Group = struct
         data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
-        data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+        props=(Props.others props)>
         (fun () -> children ())
       </div>
     </Group_context.Provider>
@@ -85,7 +86,8 @@ module Prefix = struct
     <div
       class_=(fun () ->
                after (Styles.DateInputGroup.prefix (slots ())) (class_ ()))
-      data_slot="date-input-group-prefix">
+      data_slot="date-input-group-prefix"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -96,7 +98,8 @@ module Suffix = struct
     <div
       class_=(fun () ->
                after (Styles.DateInputGroup.suffix (slots ())) (class_ ()))
-      data_slot="date-input-group-suffix">
+      data_slot="date-input-group-suffix"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -117,7 +120,8 @@ module Input = struct
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
-      data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      props=(Props.others props)>
       (fun segment ->
         let literals side =
           <For each=(fun () -> side (f.around (S.get segment)))>
@@ -167,7 +171,8 @@ module Segment = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-      data_readonly=(fun () -> Jsx.flag (f.read_only ()))>
+      data_readonly=(fun () -> Jsx.flag (f.read_only ()))
+      props=(Props.others props)>
       (* Kobalte's placeholder is a dash an hour, React Aria's two. *)
       (fun () ->
         match segment () with
@@ -358,7 +363,8 @@ let%component make ?(value : Time.t option) ?(default_value : Time.t option)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
         <Parts>(fun () -> children ())</Parts>
       </Field_error.Message.Provider>

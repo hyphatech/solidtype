@@ -271,18 +271,24 @@ break.
   out: `Jsx.flag b` is `"true"` or nothing, React Aria's convention. The
   ppx takes `data_*` on an element and on a component, which passes it on
   to its element, outside the component's check, as TSX leaves a
-  hyphenated attribute unchecked. A port's state -- `data-hovered`,
+  hyphenated attribute unchecked: a component spreads `Props.others
+  props`, the props it does not name, on its element, after its own
+  attributes, as HeroUI's React components spread theirs. A port's state -- `data-hovered`,
   `data-selected` -- is so declared, and `heroui/interaction` only
   listens. Why: an attribute Solid writes is in the HTML a page is
   prerendered with and never races one the component writes itself; one
   set from a `ref` is neither. Test: `test/server/data_attributes_test.mlx`,
-  `test/does_not_compile.t`, and each port's test against its React twin.
+  `test/does_not_compile.t`, `test/heroui/data_attributes_test.mlx`, which
+  gives one to every part of every port, and each port's test against its
+  React twin.
 - **A spread is `props=p`, and no prop is named `props`.** MLX has no
   syntax for TSX's `{...p}` and writes every attribute as an OCaml label,
   so a spread takes one name: the ppx reads it as a spread on an element
-  or a component, each check takes it beside the props, `Dynamic` is
-  given its component's props by it, and a component's parameter may not
-  take it. Why: one name kept from props, as JSX keeps `key` and `ref`,
+  or a component, each check takes it beside the props -- a component's
+  as a rest of its own props, `Props.omit`, or the rest any component
+  passes on, `Props.others`, and a Kobalte part's as any rest -- `Dynamic`
+  is given its component's props by it, and a component's parameter may
+  not take it. Why: one name kept from props, as JSX keeps `key` and `ref`,
   lets a spread read as JSX; a prop of the same name would be a duplicate
   label, reported far from its cause. Test: `test/does_not_compile.t`.
 - **Kobalte's binding is generated from its declarations**, by

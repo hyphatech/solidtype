@@ -27,7 +27,7 @@ module Image : sig
       ?crossorigin:[ `anonymous | `use_credentials ] Solidtype.Check.value ->
       ?loading:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -46,7 +46,7 @@ module Fallback : sig
       ?color:color Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -65,7 +65,7 @@ module Props : sig
     ?fallback_delay:float Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

@@ -123,6 +123,20 @@ let () =
             both ~size:`lg ~color:`success ~variant:`soft ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "passes a data- attribute on to its image" (fun () ->
+          Twin.load_images ();
+          T.render (fun () ->
+              <Avatar>
+                <Avatar.Image data_testid="image" src="/ada.png" />
+                <Avatar.Fallback>"AL"</Avatar.Fallback>
+              </Avatar>);
+          let* () = Twin.settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                (Option.map T.attributes (T.query "img[data-testid=image]"))
+              |> toEqual
+                   (Some "class=avatar__image data-testid=image src=/ada.png")));
       Jest.testPromise "has its fallback's own color, as React's" (fun () ->
           let* solidtype, react =
             both ~color:`accent ~fallback_color:`danger ()

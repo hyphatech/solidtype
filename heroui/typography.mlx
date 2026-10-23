@@ -32,7 +32,8 @@ let name : type_ -> string = function
   | `h6 -> "h6"
 
 (* Text of a type, which every primitive is. *)
-let text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children =
+let text ~others ~type_ ~align ~color ~weight ~truncate ~element_type ~class_
+    children =
   <Dynamic.Element
     component=(fun () ->
                 match element_type () with
@@ -49,7 +50,8 @@ let text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children =
              in
              match class_ () with Some c -> base ^ " " ^ c | None -> base)
     data_slot="typography"
-    data_type=(fun () -> Jsx.data (name (type_ ())))>
+    data_type=(fun () -> Jsx.data (name (type_ ())))
+    props=others>
     (fun () -> children ())
   </Dynamic.Element>
 
@@ -57,7 +59,8 @@ let%component make ?(type_ : type_ = `body) ?(align : align option)
     ?(color : color option) ?(weight : weight option) ?(truncate : bool option)
     ?(element_type : string option) ?(class_ : string option)
     ~(children : Jsx.content) () =
-  text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children
+  text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
+    ~element_type ~class_ children
 
 module Heading = struct
   let%component make ?(level : int = 1) ?(align : align option)
@@ -76,7 +79,8 @@ module Heading = struct
           invalid_arg
             ("Typography.Heading's level is 1 to 6, not " ^ string_of_int n)
     in
-    text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children
+    text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
+      ~element_type ~class_ children
 end
 
 module Paragraph = struct
@@ -87,7 +91,8 @@ module Paragraph = struct
     let type_ () =
       match size () with `base -> `body | `sm -> `body_sm | `xs -> `body_xs
     in
-    text ~type_ ~align ~color ~weight ~truncate ~element_type ~class_ children
+    text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
+      ~element_type ~class_ children
 end
 
 module Code = struct
@@ -95,7 +100,7 @@ module Code = struct
       ?(weight : weight option) ?(truncate : bool option)
       ?(element_type : string option) ?(class_ : string option)
       ~(children : Jsx.content) () =
-    text
+    text ~others:(Props.others props)
       ~type_:(fun () -> `code)
       ~align ~color ~weight ~truncate ~element_type ~class_ children
 end
@@ -109,7 +114,8 @@ module Prose = struct
                    (Styles.Typography.slots (Styles.Typography.options ()))
                in
                match class_ () with Some c -> prose ^ " " ^ c | None -> prose)
-      data_slot="prose">
+      data_slot="prose"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end

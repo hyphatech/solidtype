@@ -31,7 +31,7 @@ module Output : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -48,7 +48,7 @@ module Track : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -62,7 +62,11 @@ module Fill : sig
   module Props : sig
     type t
 
-    val check : ?class_:string Solidtype.Check.value -> ?props:t -> unit -> unit
+    val check :
+      ?class_:string Solidtype.Check.value ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -85,7 +89,7 @@ module Props : sig
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

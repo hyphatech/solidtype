@@ -1,0 +1,459 @@
+(* A data- attribute given to a port reaches the port's own element, as
+   HeroUI's React components spread the rest of their props on theirs: each
+   part of each port is given [data-testid], its name, which must be on the
+   element its selector finds. An avatar's image, which shows only once it
+   has loaded, is checked by the avatar's own test. *)
+
+module H = Solidtype_heroui
+module Alert = H.Alert
+module Avatar = H.Avatar
+module Avatar_group = H.Avatar_group
+module Badge = H.Badge
+module Button = H.Button
+module Button_group = H.Button_group
+module Card = H.Card
+module Checkbox = H.Checkbox
+module Checkbox_group = H.Checkbox_group
+module Chip = H.Chip
+module Close_button = H.Close_button
+module Description = H.Description
+module Empty_state = H.Empty_state
+module Field_error = H.Field_error
+module Fieldset = H.Fieldset
+module Form = H.Form
+module Input = H.Input
+module Input_group = H.Input_group
+module Kbd = H.Kbd
+module Label = H.Label
+module Link = H.Link
+module Meter = H.Meter
+module Number_field = H.Number_field
+module Progress_bar = H.Progress_bar
+module Progress_circle = H.Progress_circle
+module Radio = H.Radio
+module Radio_group = H.Radio_group
+module Scroll_shadow = H.Scroll_shadow
+module Search_field = H.Search_field
+module Separator = H.Separator
+module Skeleton = H.Skeleton
+module Slider = H.Slider
+module Spinner = H.Spinner
+module Surface = H.Surface
+module Switch = H.Switch
+module Switch_group = H.Switch_group
+module Text_area = H.Text_area
+module Text_field = H.Text_field
+module Time_field = H.Time_field
+module Toast = H.Toast
+module Typography = H.Typography
+module E = Jest.Expect
+module T = Testing
+
+external matches : Dom.element -> string -> bool = "matches" [@@mel.send]
+
+(* Each part's name whose attribute is missing, or on an element its selector
+   does not find. *)
+let misplaced parts =
+  parts
+  |> List.filter_map (fun (name, selector) ->
+      match T.query ("[data-testid=\"" ^ name ^ "\"]") with
+      | Some e when matches e selector -> None
+      | Some e -> Some (name ^ " on " ^ T.attributes e)
+      | None -> Some (name ^ " missing"))
+  |> Array.of_list
+
+let () =
+  Jest.describe "A data- attribute given to a port" (fun () ->
+      Jest.afterEach (fun () ->
+          Toast.clear ();
+          T.cleanup ());
+      Jest.test "reaches each part of a port of no behaviour" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Alert data_testid="Alert">
+                  <Alert.Indicator data_testid="Alert.Indicator" />
+                  <Alert.Content data_testid="Alert.Content">
+                    <Alert.Title data_testid="Alert.Title">"Title"</Alert.Title>
+                    <Alert.Description data_testid="Alert.Description">
+                      "Description"
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert>
+                <Avatar_group data_testid="Avatar_group">
+                  <Avatar data_testid="Avatar">
+                    <Avatar.Fallback data_testid="Avatar.Fallback">
+                      "JD"
+                    </Avatar.Fallback>
+                  </Avatar>
+                  <Avatar_group.Count data_testid="Avatar_group.Count">
+                    "+3"
+                  </Avatar_group.Count>
+                </Avatar_group>
+                <Badge.Anchor data_testid="Badge.Anchor">
+                  <Badge data_testid="Badge">
+                    <Badge.Label data_testid="Badge.Label">"5"</Badge.Label>
+                  </Badge>
+                </Badge.Anchor>
+                <Button_group data_testid="Button_group">
+                  <Button data_testid="Button">"First"</Button>
+                  <Button>
+                    <Button_group.Separator data_testid="Button_group.Separator"
+                    />
+                    "Second"
+                  </Button>
+                </Button_group>
+                <Card data_testid="Card">
+                  <Card.Header data_testid="Card.Header">
+                    <Card.Title data_testid="Card.Title">"Title"</Card.Title>
+                    <Card.Description data_testid="Card.Description">
+                      "Description"
+                    </Card.Description>
+                  </Card.Header>
+                  <Card.Content data_testid="Card.Content">
+                    "Content"
+                  </Card.Content>
+                  <Card.Footer data_testid="Card.Footer">"Footer"</Card.Footer>
+                </Card>
+                <Chip data_testid="Chip">
+                  <Chip.Label data_testid="Chip.Label">"Label"</Chip.Label>
+                </Chip>
+                <Close_button data_testid="Close_button">
+                  <Close_button.Icon data_testid="Close_button.Icon" />
+                </Close_button>
+                <Empty_state data_testid="Empty_state">"Empty"</Empty_state>
+                <Kbd data_testid="Kbd">
+                  <Kbd.Abbr data_testid="Kbd.Abbr" key_value=`command />
+                  <Kbd.Content data_testid="Kbd.Content">"K"</Kbd.Content>
+                </Kbd>
+                <Link data_testid="Link" href="#">
+                  "Link" <Link.Icon data_testid="Link.Icon" />
+                </Link>
+                <Scroll_shadow data_testid="Scroll_shadow">
+                  "Text"
+                </Scroll_shadow>
+                <Separator data_testid="Separator" />
+                <Skeleton data_testid="Skeleton" />
+                <Spinner data_testid="Spinner" />
+                <Surface data_testid="Surface">"Surface"</Surface>
+                <Typography data_testid="Typography">"Body"</Typography>
+                <Typography.Heading data_testid="Typography.Heading" level=2>
+                  "Heading"
+                </Typography.Heading>
+                <Typography.Paragraph data_testid="Typography.Paragraph">
+                  "Paragraph"
+                </Typography.Paragraph>
+                <Typography.Code data_testid="Typography.Code">
+                  "code"
+                </Typography.Code>
+                <Typography.Prose data_testid="Typography.Prose">
+                  "Prose"
+                </Typography.Prose>
+              </div>);
+          E.(
+            expect
+              (misplaced
+                 [
+                   ("Alert", "[data-slot=alert-root]");
+                   ("Alert.Indicator", "[data-slot=alert-indicator]");
+                   ("Alert.Content", "[data-slot=alert-content]");
+                   ("Alert.Title", "[data-slot=alert-title]");
+                   ("Alert.Description", "[data-slot=alert-description]");
+                   ("Avatar_group", "[data-slot=avatar-group]");
+                   ("Avatar", ".avatar");
+                   ("Avatar.Fallback", "[data-slot=avatar-fallback]");
+                   ("Avatar_group.Count", "[data-slot=avatar-group-count]");
+                   ("Badge.Anchor", "[data-slot=badge-anchor]");
+                   ("Badge", "[data-slot=badge]");
+                   ("Badge.Label", "[data-slot=badge-label]");
+                   ("Button_group", "[data-slot=button-group]");
+                   ("Button", "[data-slot=button]");
+                   ( "Button_group.Separator",
+                     "[data-slot=button-group-separator]" );
+                   ("Card", "[data-slot=card]");
+                   ("Card.Header", "[data-slot=card-header]");
+                   ("Card.Title", "[data-slot=card-title]");
+                   ("Card.Description", "[data-slot=card-description]");
+                   ("Card.Content", "[data-slot=card-content]");
+                   ("Card.Footer", "[data-slot=card-footer]");
+                   ("Chip", "[data-slot=chip]");
+                   ("Chip.Label", "[data-slot=chip-label]");
+                   ("Close_button", "[data-slot=close-button]");
+                   ("Close_button.Icon", "[data-slot=close-button-icon]");
+                   ("Empty_state", "[data-slot=empty-state]");
+                   ("Kbd", "kbd");
+                   ("Kbd.Abbr", "abbr");
+                   ("Kbd.Content", "kbd > span");
+                   ("Link", "[data-slot=link]");
+                   ("Link.Icon", "[data-slot=link-icon]");
+                   ("Scroll_shadow", "[data-slot=scroll-shadow]");
+                   ("Separator", "[role=separator]");
+                   ("Skeleton", ".skeleton");
+                   ("Spinner", "[data-slot=spinner]");
+                   ("Surface", "[data-slot=surface]");
+                   ("Typography", "[data-slot=typography]");
+                   ("Typography.Heading", "h2");
+                   ("Typography.Paragraph", "p");
+                   ("Typography.Code", "code");
+                   ("Typography.Prose", "[data-slot=prose]");
+                 ])
+            |> toEqual [||]));
+      Jest.test "reaches each part of a field" (fun () ->
+          T.render (fun () ->
+              <Form data_testid="Form">
+                <Fieldset data_testid="Fieldset">
+                  <Fieldset.Legend data_testid="Fieldset.Legend">
+                    "Legend"
+                  </Fieldset.Legend>
+                  <Fieldset.Group data_testid="Fieldset.Group">
+                    <Text_field data_testid="Text_field" is_invalid=true>
+                      <Label data_testid="Label">"Name"</Label>
+                      <Input data_testid="Input" />
+                      <Description data_testid="Description">
+                        "Description"
+                      </Description>
+                      <Field_error data_testid="Field_error">
+                        "Error"
+                      </Field_error>
+                    </Text_field>
+                    <Text_field>
+                      <Label>"Bio"</Label> <Text_area data_testid="Text_area" />
+                    </Text_field>
+                    <Text_field>
+                      <Label>"Email"</Label>
+                      <Input_group data_testid="Input_group">
+                        <Input_group.Prefix data_testid="Input_group.Prefix">
+                          "@"
+                        </Input_group.Prefix>
+                        <Input_group.Input data_testid="Input_group.Input" />
+                        <Input_group.Suffix data_testid="Input_group.Suffix">
+                          ".com"
+                        </Input_group.Suffix>
+                      </Input_group>
+                    </Text_field>
+                    <Checkbox_group data_testid="Checkbox_group">
+                      <Label>"Interests"</Label>
+                      <Checkbox data_testid="Checkbox" value="coding">
+                        <Checkbox.Content data_testid="Checkbox.Content">
+                          <Checkbox.Control data_testid="Checkbox.Control">
+                            <Checkbox.Indicator data_testid="Checkbox.Indicator"
+                            />
+                          </Checkbox.Control>
+                          "Coding"
+                        </Checkbox.Content>
+                      </Checkbox>
+                    </Checkbox_group>
+                    <Radio_group data_testid="Radio_group">
+                      <Label>"Plan"</Label>
+                      <Radio data_testid="Radio" value="basic">
+                        <Radio.Content data_testid="Radio.Content">
+                          <Radio.Control data_testid="Radio.Control">
+                            <Radio.Indicator data_testid="Radio.Indicator" />
+                          </Radio.Control>
+                          "Basic"
+                        </Radio.Content>
+                      </Radio>
+                    </Radio_group>
+                    <Switch_group data_testid="Switch_group">
+                      <Switch data_testid="Switch">
+                        <Switch.Content data_testid="Switch.Content">
+                          <Switch.Control data_testid="Switch.Control">
+                            <Switch.Thumb data_testid="Switch.Thumb" />
+                          </Switch.Control>
+                          "Notify"
+                        </Switch.Content>
+                      </Switch>
+                    </Switch_group>
+                    <Number_field data_testid="Number_field" default_value=1.>
+                      <Label>"Width"</Label>
+                      <Number_field.Group data_testid="Number_field.Group">
+                        <Number_field.Decrement_button
+                          data_testid="Number_field.Decrement_button"
+                        />
+                        <Number_field.Input data_testid="Number_field.Input" />
+                        <Number_field.Increment_button
+                          data_testid="Number_field.Increment_button"
+                        />
+                      </Number_field.Group>
+                    </Number_field>
+                    <Search_field data_testid="Search_field">
+                      <Label>"Search"</Label>
+                      <Search_field.Group data_testid="Search_field.Group">
+                        <Search_field.Search_icon
+                          data_testid="Search_field.Search_icon"
+                        />
+                        <Search_field.Input data_testid="Search_field.Input" />
+                        <Search_field.Clear_button
+                          data_testid="Search_field.Clear_button"
+                        />
+                      </Search_field.Group>
+                    </Search_field>
+                    <Slider
+                      data_testid="Slider" default_value=(fun () -> [| 30. |])>
+                      <Label>"Volume"</Label>
+                      <Slider.Output data_testid="Slider.Output" />
+                      <Slider.Track data_testid="Slider.Track">
+                        <Slider.Fill data_testid="Slider.Fill" />
+                        <Slider.Thumb data_testid="Slider.Thumb" />
+                      </Slider.Track>
+                    </Slider>
+                    <Time_field data_testid="Time_field">
+                      <Label>"Time"</Label>
+                      <Time_field.Group data_testid="Time_field.Group">
+                        <Time_field.Prefix data_testid="Time_field.Prefix">
+                          "at"
+                        </Time_field.Prefix>
+                        <Time_field.Input data_testid="Time_field.Input">
+                          (fun segment ->
+                            <Time_field.Segment
+                              data_testid="Time_field.Segment"
+                              segment=(fun () -> Solidtype.Solid.get segment)
+                            />)
+                        </Time_field.Input>
+                        <Time_field.Suffix data_testid="Time_field.Suffix">
+                          "UTC"
+                        </Time_field.Suffix>
+                      </Time_field.Group>
+                    </Time_field>
+                  </Fieldset.Group>
+                  <Fieldset.Actions data_testid="Fieldset.Actions">
+                    <Button>"Save"</Button>
+                  </Fieldset.Actions>
+                </Fieldset>
+              </Form>);
+          E.(
+            expect
+              (misplaced
+                 [
+                   ("Form", "[data-slot=form]");
+                   ("Fieldset", "[data-slot=fieldset]");
+                   ("Fieldset.Legend", "[data-slot=fieldset-legend]");
+                   ("Fieldset.Group", "[data-slot=fieldset-field-group]");
+                   ("Fieldset.Actions", "[data-slot=fieldset-actions]");
+                   ("Text_field", "[data-slot=textfield]");
+                   ("Label", "[data-slot=label]");
+                   ("Input", "[data-slot=input]");
+                   ("Description", "[data-slot=description]");
+                   ("Field_error", ".field-error");
+                   ("Text_area", "[data-slot=textarea]");
+                   ("Input_group", "[data-slot=input-group]");
+                   ("Input_group.Prefix", "[data-slot=input-group-prefix]");
+                   ("Input_group.Input", "[data-slot=input-group-input]");
+                   ("Input_group.Suffix", "[data-slot=input-group-suffix]");
+                   ("Checkbox_group", "[data-slot=checkbox-group]");
+                   ("Checkbox", "[data-slot=checkbox]");
+                   ("Checkbox.Content", "[data-slot=checkbox-content]");
+                   ("Checkbox.Control", "[data-slot=checkbox-control]");
+                   ("Checkbox.Indicator", "[data-slot=checkbox-indicator]");
+                   ("Radio_group", "[data-slot=radio-group]");
+                   ("Radio", "[data-slot=radio]");
+                   ("Radio.Content", "[data-slot=radio-content]");
+                   ("Radio.Control", "[data-slot=radio-control]");
+                   ("Radio.Indicator", "[data-slot=radio-indicator]");
+                   ("Switch_group", "[data-slot=switch-group]");
+                   ("Switch", "[data-slot=switch]");
+                   ("Switch.Content", "[data-slot=switch-content]");
+                   ("Switch.Control", "[data-slot=switch-control]");
+                   ("Switch.Thumb", "[data-slot=switch-thumb]");
+                   ("Number_field", "[data-slot=number-field]");
+                   ("Number_field.Group", "[data-slot=number-field-group]");
+                   ( "Number_field.Decrement_button",
+                     "[data-slot=number-field-decrement-button]" );
+                   ("Number_field.Input", "[data-slot=number-field-input]");
+                   ( "Number_field.Increment_button",
+                     "[data-slot=number-field-increment-button]" );
+                   ("Search_field", "[data-slot=search-field]");
+                   ("Search_field.Group", "[data-slot=search-field-group]");
+                   ( "Search_field.Search_icon",
+                     "[data-slot=search-field-search-icon]" );
+                   ("Search_field.Input", "[data-slot=search-field-input]");
+                   ( "Search_field.Clear_button",
+                     "[data-slot=search-field-clear-button]" );
+                   ("Slider", "[data-slot=slider]");
+                   ("Slider.Output", "[data-slot=slider-output]");
+                   ("Slider.Track", "[data-slot=slider-track]");
+                   ("Slider.Fill", "[data-slot=slider-fill]");
+                   ("Slider.Thumb", "[data-slot=slider-thumb]");
+                   ("Time_field", "[data-slot=time-field]");
+                   ("Time_field.Group", "[data-slot=date-input-group]");
+                   ("Time_field.Prefix", "[data-slot=date-input-group-prefix]");
+                   ("Time_field.Input", "[data-slot=date-input-group-input]");
+                   ("Time_field.Segment", "[data-slot=date-input-group-segment]");
+                   ("Time_field.Suffix", "[data-slot=date-input-group-suffix]");
+                 ])
+            |> toEqual [||]));
+      Jest.test "reaches each part of a status" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Meter data_testid="Meter" value=60.>
+                  <Label>"Storage"</Label>
+                  <Meter.Output data_testid="Meter.Output" />
+                  <Meter.Track data_testid="Meter.Track">
+                    <Meter.Fill data_testid="Meter.Fill" />
+                  </Meter.Track>
+                </Meter>
+                <Progress_bar data_testid="Progress_bar" value=60.>
+                  <Label>"Loading"</Label>
+                  <Progress_bar.Output data_testid="Progress_bar.Output" />
+                  <Progress_bar.Track data_testid="Progress_bar.Track">
+                    <Progress_bar.Fill data_testid="Progress_bar.Fill" />
+                  </Progress_bar.Track>
+                </Progress_bar>
+                <Progress_circle
+                  data_testid="Progress_circle" aria_label="Loading" value=60.>
+                  <Progress_circle.Track data_testid="Progress_circle.Track">
+                    <Progress_circle.Track_circle
+                      data_testid="Progress_circle.Track_circle"
+                    />
+                    <Progress_circle.Fill_circle
+                      data_testid="Progress_circle.Fill_circle"
+                    />
+                  </Progress_circle.Track>
+                </Progress_circle>
+                <Toast.Provider data_testid="Toast.Provider">
+                  (fun toast ->
+                    <Toast data_testid="Toast" toast=(fun () -> toast)>
+                      <Toast.Indicator data_testid="Toast.Indicator" />
+                      <Toast.Content data_testid="Toast.Content">
+                        <Toast.Title data_testid="Toast.Title">
+                          "Title"
+                        </Toast.Title>
+                        <Toast.Description data_testid="Toast.Description">
+                          "Description"
+                        </Toast.Description>
+                      </Toast.Content>
+                      <Toast.Action_button data_testid="Toast.Action_button">
+                        "Undo"
+                      </Toast.Action_button>
+                      <Toast.Close_button data_testid="Toast.Close_button" />
+                    </Toast>)
+                </Toast.Provider>
+              </div>);
+          let (_ : Toast.key) = Toast.show ~timeout_ms:0. "Saved" in
+          E.(
+            expect
+              (misplaced
+                 [
+                   ("Meter", "[data-slot=meter]");
+                   ("Meter.Output", "[data-slot=meter-output]");
+                   ("Meter.Track", "[data-slot=meter-track]");
+                   ("Meter.Fill", "[data-slot=meter-fill]");
+                   ("Progress_bar", "[data-slot=progress-bar]");
+                   ("Progress_bar.Output", "[data-slot=progress-bar-output]");
+                   ("Progress_bar.Track", "[data-slot=progress-bar-track]");
+                   ("Progress_bar.Fill", "[data-slot=progress-bar-fill]");
+                   ("Progress_circle", "[data-slot=progress-circle]");
+                   ("Progress_circle.Track", "[data-slot=progress-circle-track]");
+                   ( "Progress_circle.Track_circle",
+                     "[data-slot=progress-circle-track-circle]" );
+                   ( "Progress_circle.Fill_circle",
+                     "[data-slot=progress-circle-fill-circle]" );
+                   ("Toast.Provider", "[data-slot=toast-region]");
+                   ("Toast", "[data-slot=toast]");
+                   ("Toast.Indicator", "[data-slot=toast-indicator]");
+                   ("Toast.Content", "[data-slot=toast-content]");
+                   ("Toast.Title", "[data-slot=toast-title]");
+                   ("Toast.Description", "[data-slot=toast-description]");
+                   ("Toast.Action_button", "[data-slot=toast-action-button]");
+                   ("Toast.Close_button", "[data-slot=toast-close]");
+                 ])
+            |> toEqual [||])))

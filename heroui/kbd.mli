@@ -46,7 +46,7 @@ module Abbr : sig
     val check :
       key_value:key Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -63,7 +63,7 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -79,7 +79,7 @@ module Props : sig
     ?variant:[ `default | `light ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

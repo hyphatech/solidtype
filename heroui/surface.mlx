@@ -14,7 +14,8 @@ let%component make ?(variant : variant = `default) ?(class_ : string option)
                Styles.Surface.classes
                  (Styles.Surface.options ~variant:(variant ())
                     ?class_:(class_ ()) ()))
-      data_slot="surface">
+      data_slot="surface"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
   </Context.Provider>

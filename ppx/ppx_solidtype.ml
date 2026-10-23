@@ -789,14 +789,16 @@ let props_module ~loc props =
       (List.map check_param props
       @ [
           B.pparam_val ~loc (Optional spread) None
-            (B.ppat_constraint ~loc (B.ppat_any ~loc) [%type: [%t t] option]);
+            (B.ppat_constraint ~loc (B.ppat_any ~loc)
+               [%type: [%t t] Solidtype.Solid.rest option]);
           B.pparam_val ~loc Nolabel None [%pat? ()];
         ])
       None
       (Pfunction_body [%expr ()])
   in
   (* [omit props [| Text |]] names the props it leaves out by a variant of
-     the component's own, so a misspelt one does not compile. *)
+     the component's own, so a misspelt one does not compile; [others props]
+     leaves out all of them, for the component to pass the rest on. *)
   let omit =
     match props with
     | [] -> []
@@ -839,7 +841,16 @@ let props_module ~loc props =
               Solidtype.Solid.omit props (Array.map [%e js] names)];
         ]
   in
-  (* An interface may export the component without its [omit]. *)
+  let others =
+    let own =
+      B.pexp_array ~loc
+        (List.map (fun p -> B.estring ~loc (js_name p.label)) props)
+    in
+    [%stri
+      let others (props : [%t t]) : _ Solidtype.Solid.rest =
+        Solidtype.Solid.others props [%e own]]
+  in
+  (* An interface may export the component without its [omit] and [others]. *)
   let generated =
     B.pstr_attribute ~loc
       (attribute ~loc "ocaml.warning"
@@ -848,7 +859,7 @@ let props_module ~loc props =
   ( vars,
     B.pmod_structure ~loc
       ((generated :: type_t :: List.map getter props)
-      @ [ constructor; [%stri let check = [%e check]] ]
+      @ [ constructor; [%stri let check = [%e check]]; others ]
       @ omit) )
 
 (* Each prop is read where it is used: a value through a thunk, [text ()], a
@@ -926,9 +937,17 @@ let component_of (vb : value_binding) =
           { txt = Ldot (Lident "Props", "t"); loc }
           (List.map (fun _ -> B.ptyp_any ~loc) vars)
       in
-      (* With no props there is nothing to read, and nothing to spread. *)
+      (* With no props there is nothing to read, but still a rest to pass on. *)
       let make =
-        if List.is_empty props then [%expr fun (_ : [%t props_t]) -> [%e body]]
+        if List.is_empty props then
+          {
+            ([%expr fun (props : [%t props_t]) -> [%e body]]) with
+            pexp_attributes =
+              [
+                attribute ~loc "ocaml.warning"
+                  ~payload:(PStr [ B.pstr_eval ~loc (B.estring ~loc "-27") [] ]);
+              ];
+          }
         else
           [%expr
             fun (props : [%t props_t]) ->

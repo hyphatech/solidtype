@@ -9,10 +9,14 @@
     ]} *)
 
 type slot =
-  ((unit -> string) -> (unit -> Solidtype.Jsx.content) -> Solidtype.Jsx.element
+  ((unit -> string) ->
+   unit Solidtype.Solid.rest ->
+   (unit -> Solidtype.Jsx.content) ->
+   Solidtype.Jsx.element
   [@u])
-(** How a description renders below a part: given its classes and its children,
-    the element it is, which declares [data-slot="description"]. *)
+(** How a description renders below a part: given its classes, the rest of its
+    props -- its [data-] attributes -- and its children, the element it is,
+    which declares [data-slot="description"]. *)
 
 (** The {!slot} a part gives the descriptions below it. *)
 module Slot : sig
@@ -37,7 +41,7 @@ module Props : sig
   val check :
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

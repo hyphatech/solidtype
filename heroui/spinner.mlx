@@ -14,7 +14,8 @@ let%component make
                (Styles.Spinner.options ?color:(color ()) ?size:(size ())
                   ?class_:(class_ ()) ()))
     role=`status
-    data_slot="spinner">
+    data_slot="spinner"
+    props=(Props.others props)>
     <svg aria_hidden=true view_box="0 0 24 24" data_slot="spinner-icon">
       <defs>
         <linearGradient id=fading x1="50%" x2="50%" y1="5.271%" y2="91.793%">

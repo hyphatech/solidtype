@@ -12,7 +12,7 @@ module Props : sig
     ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
     ?variant:[ `default | `secondary | `tertiary ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

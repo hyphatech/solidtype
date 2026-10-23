@@ -8,7 +8,8 @@ let%component make ?(orientation : [ `horizontal | `vertical ] option)
     class_=(fun () ->
              let base = Styles.SwitchGroup.base (slots ()) in
              match class_ () with Some c -> base ^ " " ^ c | None -> base)
-    data_slot="switch-group">
+    data_slot="switch-group"
+    props=(Props.others props)>
     <div
       class_=(fun () -> Styles.SwitchGroup.items (slots ()))
       data_slot="switch-group-items">

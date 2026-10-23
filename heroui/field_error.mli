@@ -10,10 +10,14 @@
     @raise Invalid_argument as it is made, outside a field. *)
 
 type slot =
-  ((unit -> string) -> (unit -> Solidtype.Jsx.content) -> Solidtype.Jsx.element
+  ((unit -> string) ->
+   unit Solidtype.Solid.rest ->
+   (unit -> Solidtype.Jsx.content) ->
+   Solidtype.Jsx.element
   [@u])
-(** How an error renders in a field: given its classes and its children, the
-    element it is, which declares [data-slot="field-error"]. *)
+(** How an error renders in a field: given its classes, the rest of its props --
+    its [data-] attributes -- and its children, the element it is, which
+    declares [data-slot="field-error"]. *)
 
 (** A server's error for the field, which the field gives the errors inside it:
     while it is [Some], an error shows it in place of its own children. *)
@@ -56,7 +60,7 @@ module Props : sig
   val check :
     ?class_:string Solidtype.Check.value ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

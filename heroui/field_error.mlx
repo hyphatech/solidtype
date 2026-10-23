@@ -1,6 +1,11 @@
 module Jsx = Solidtype.Jsx
 
-type slot = ((unit -> string) -> (unit -> Jsx.content) -> Jsx.element[@u])
+type slot =
+  ((unit -> string) ->
+   unit Solidtype.Solid.rest ->
+   (unit -> Jsx.content) ->
+   Jsx.element
+  [@u])
 
 (* How a field's error renders, which the field gives it: Kobalte's error
    message, which the field shows while it is invalid. *)
@@ -27,5 +32,5 @@ let%component make ?(class_ : string option) ?(children : Jsx.content option) ()
     | None, None -> Jsx.string ""
   in
   match Slot.use () with
-  | Some render -> render classes content [@u]
+  | Some render -> render classes (Props.others props) content [@u]
   | None -> invalid_arg "Field_error is used inside a field"

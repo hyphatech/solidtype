@@ -92,6 +92,10 @@ let make (props : Props.t) = <input class_="field" props />
 `Solid.merge_props` gives props defaults, live, and `Props.omit`, which
 `let%component` writes, leaves some out of a spread by a variant of the
 component's own prop names, so a misspelt one is a compile error.
+`Props.others` leaves out all of them: what is left is what the
+component's check admits besides them, its `data-` attributes, which it
+passes on to its element, `props=(Props.others props)`. A component's
+spread is a rest of its own props, or that rest of any component's.
 
 ## A component chosen at run time
 
@@ -112,7 +116,7 @@ suspends until it arrives.
 |---|---|
 | `children(() => props.children)` | `Solid.children`, then `Solid.to_array` |
 | `mergeProps` | `Solid.merge_props` |
-| `splitProps` | `Solid.omit`, or `Props.omit` |
+| `splitProps` | `Solid.omit` and `Solid.others`, or `Props.omit` and `Props.others` |
 | `createUniqueId` | `Solid.create_unique_id` |
 | `lazy` | `Solid.lazy_` |
 | `<Dynamic>` | `Solidtype.Dynamic`, `Dynamic.Element` |

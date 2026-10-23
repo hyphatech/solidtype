@@ -28,7 +28,8 @@ module Content = struct
     <Field_content
       field=(fun () -> r.field)
       slot="radio-content"
-      class_=(fun () -> after (Styles.Radio.content (r.slots ())) (class_ ()))>
+      class_=(fun () -> after (Styles.Radio.content (r.slots ())) (class_ ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </Field_content>
 end
@@ -38,7 +39,8 @@ module Control = struct
     let r = within "Radio.Control" in
     <span
       class_=(fun () -> after (Styles.Radio.control (r.slots ())) (class_ ()))
-      data_slot="radio-control">
+      data_slot="radio-control"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -50,7 +52,8 @@ module Indicator = struct
     <span
       aria_hidden=true
       class_=(fun () -> after (Styles.Radio.indicator (r.slots ())) (class_ ()))
-      data_slot="radio-indicator">
+      data_slot="radio-indicator"
+      props=(Props.others props)>
       (fun () ->
         match children () with Some given -> given | None -> Jsx.string "")
     </span>
@@ -59,9 +62,12 @@ end
 (* A description in a radio is the radio's: Kobalte's, which its input is
    described by. *)
 let description : Description.slot =
- fun[@u] classes children ->
+ fun[@u] classes others children ->
   <Kobalte.ItemDescription
-    class_=(fun () -> classes ()) slot="description" data_slot="description">
+    class_=(fun () -> classes ())
+    slot="description"
+    data_slot="description"
+    props=others>
     (fun () -> children ())
   </Kobalte.ItemDescription>
 
@@ -110,7 +116,8 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (g.invalid ()))
       data_readonly=(fun () -> Jsx.flag (g.read_only ()))
-      data_required=(fun () -> Jsx.flag (g.required ()))>
+      data_required=(fun () -> Jsx.flag (g.required ()))
+      props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
         (fun () -> children ())
       </Description.Slot.Provider>

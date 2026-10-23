@@ -136,7 +136,8 @@ let%component make ?(action : string option)
       novalidate=true
       on_submit=submit
       on_reset=(fun e -> ignore (on_reset e : unit option))
-      data_slot="form">
+      data_slot="form"
+      props=(Props.others props)>
       (fun () -> children ())
     </form>
   </Context.Provider>

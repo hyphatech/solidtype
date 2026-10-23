@@ -82,17 +82,20 @@ end)
 (* A label in a group, but outside a radio's content, is the group's: Kobalte's
    label, which names it. *)
 let label : Label.slot =
- fun[@u] classes children ->
-  <Kobalte.Label class_=(fun () -> classes ()) data_slot="label">
+ fun[@u] classes others children ->
+  <Kobalte.Label class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
   </Kobalte.Label>
 
 (* A description in a group, but outside a radio, is the group's: Kobalte's
    description, which it is described by. *)
 let description : Description.slot =
- fun[@u] classes children ->
+ fun[@u] classes others children ->
   <Kobalte.Description
-    class_=(fun () -> classes ()) slot="description" data_slot="description">
+    class_=(fun () -> classes ())
+    slot="description"
+    data_slot="description"
+    props=others>
     (fun () -> children ())
   </Kobalte.Description>
 
@@ -160,7 +163,8 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
           (fun () -> children ())

@@ -67,7 +67,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

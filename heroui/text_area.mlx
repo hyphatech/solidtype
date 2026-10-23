@@ -1,19 +1,6 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
-
-(* Kobalte's part, given the rest of the props as a spread, which its
-   generated check does not take. *)
-module Kobalte = struct
-  module Props = struct
-    external check :
-      ?props:'props Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
-      Solidtype.Html.Textarea.check = "check"
-    [@@mel.module "vite-plugin-solidtype/markers"]
-  end
-
-  let component = Solidtype_kobalte.TextField.TextArea.component
-end
+module Kobalte = Solidtype_kobalte.TextField.TextArea
 
 module Props = struct
   type t
@@ -21,6 +8,7 @@ module Props = struct
   external check :
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
     ?full_width:bool Solidtype.Check.value ->
+    ?props:'spread Solidtype.Solid.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Textarea.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]

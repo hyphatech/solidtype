@@ -45,7 +45,8 @@ module Track = struct
                      ^ number (center *. 2.)
                      ^ " "
                      ^ number (center *. 2.)))
-      ?stroke_width=(fun () -> Option.map number (stroke_width ()))>
+      ?stroke_width=(fun () -> Option.map number (stroke_width ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </svg>
 end
@@ -65,6 +66,7 @@ module Track_circle = struct
       data_slot="progress-circle-track-circle"
       r=(fun () -> number (r ()))
       stroke_width=(fun () -> number (stroke_width ()))
+      props=(Props.others props)
     />
 end
 
@@ -96,6 +98,7 @@ module Fill_circle = struct
       stroke_width=(fun () -> number (stroke_width ()))
       transform=(fun () ->
                   "rotate(-90 " ^ number (cx ()) ^ " " ^ number (cy ()) ^ ")")
+      props=(Props.others props)
     />
 end
 
@@ -154,7 +157,8 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       get_value_label=value_label
       class_=(fun () ->
                after (Styles.ProgressCircle.base (c.slots ())) (class_ ()))
-      data_slot="progress-circle">
+      data_slot="progress-circle"
+      props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Root>
   </Context.Provider>

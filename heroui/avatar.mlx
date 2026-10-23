@@ -41,6 +41,7 @@ module Image = struct
                after
                  (Styles.Avatar.image (Styles.Avatar.slots (a.options ())))
                  (class_ ()))
+      props=(Props.others props)
     />
 end
 
@@ -54,7 +55,8 @@ module Fallback = struct
                  (Styles.Avatar.fallback
                     (Styles.Avatar.slots (a.options ?color:(color ()) ())))
                  (class_ ()))
-      data_slot="avatar-fallback">
+      data_slot="avatar-fallback"
+      props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Fallback>
 end
@@ -90,7 +92,8 @@ let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
         class_=(fun () ->
                  after
                    (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
-                   (class_ ()))>
+                   (class_ ()))
+        props=(Props.others props)>
         (fun () -> children ())
       </Kobalte.Root>
     </Context.Provider>

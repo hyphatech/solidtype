@@ -480,3 +480,12 @@ external split_props : 'props -> string array -> 'props * 'props rest
 [@@mel.module "solid-js"]
 
 let omit props names = snd (split_props props names)
+
+(* What a component's check admits besides its own props is its data-
+   attributes, which every element and component takes, so the rest may be
+   spread on any of them. *)
+external split_others : 'props -> string array -> 'props * 'other rest
+  = "splitProps"
+[@@mel.module "solid-js"]
+
+let others props names = snd (split_others props names)

@@ -74,6 +74,13 @@ A `data-` attribute is a `Jsx.data`, on an element and on a component,
 which passes it on to its element, as TSX lets a component take a
 hyphenated attribute: present, or absent while a flag is down, so a state
 is in the HTML a page is prerendered with.
+A component passes it on by spreading `Props.others props`, the props it
+does not name, on its element, after its own attributes:
+
+```ocaml
+let%component make ~(label : string) () =
+  <button class_="chip" props=(Props.others props)>(fun () -> Jsx.string (label ()))</button>
+```
 
 | TSX | OCaml |
 |---|---|

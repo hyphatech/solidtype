@@ -19,7 +19,7 @@ module Props : sig
   val check :
     ?animation_type:[ `shimmer | `pulse | `none ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

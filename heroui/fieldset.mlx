@@ -18,7 +18,8 @@ module Legend = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <legend
       class_=(fun () -> after (Styles.Fieldset.legend (slots ())) (class_ ()))
-      data_slot="fieldset-legend">
+      data_slot="fieldset-legend"
+      props=(Props.others props)>
       (fun () -> children ())
     </legend>
 end
@@ -28,7 +29,8 @@ module Group = struct
     <div
       class_=(fun () ->
                after (Styles.Fieldset.field_group (slots ())) (class_ ()))
-      data_slot="fieldset-field-group">
+      data_slot="fieldset-field-group"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -37,7 +39,8 @@ module Actions = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () -> after (Styles.Fieldset.actions (slots ())) (class_ ()))
-      data_slot="fieldset-actions">
+      data_slot="fieldset-actions"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -52,7 +55,8 @@ let%component make ?(disabled : bool = false) ?(name : string option)
     ?name
     class_=(fun () -> after (Styles.Fieldset.base (slots ())) (class_ ()))
     data_disabled=(fun () -> Jsx.flag (disabled ()))
-    data_slot="fieldset">
+    data_slot="fieldset"
+    props=(Props.others props)>
     <Context.Provider value=(fun () -> is_disabled)>
       (fun () -> children ())
     </Context.Provider>

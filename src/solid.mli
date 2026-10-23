@@ -274,3 +274,10 @@ val omit : 'props -> string array -> 'props rest
     Solid's [splitProps], whose other half is [props] read through its getters.
     A component written by [let%component] has [Props.omit], which takes its own
     props' names as a variant. *)
+
+val others : 'props -> string array -> 'other rest
+(** [others props names] is [props] without [names], its component's own props,
+    live, for a spread on any element or component, as TSX passes a component's
+    rest on: what is left is what its check admits besides them, its [data-]
+    attributes, which every element and component takes. A component written by
+    [let%component] has [Props.others], which leaves out all of its own. *)

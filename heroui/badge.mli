@@ -17,7 +17,7 @@ module Anchor : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -34,7 +34,7 @@ module Label : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -57,7 +57,7 @@ module Props : sig
     ?variant:[ `primary | `secondary | `soft ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

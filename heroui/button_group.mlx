@@ -33,6 +33,7 @@ module Separator = struct
                | Some c -> separator ^ " " ^ c
                | None -> separator)
       data_slot="button-group-separator"
+      props=(Props.others props)
     />
 end
 
@@ -67,7 +68,8 @@ let%component make
                | Some c -> base ^ " " ^ c
                | None -> base)
       data_slot="button-group"
-      data_disabled=(fun () -> Jsx.flag (disabled ()))>
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
   </Context.Provider>

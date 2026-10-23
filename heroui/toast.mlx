@@ -433,7 +433,8 @@ module Indicator = struct
     let slots = slots_of "Toast.Indicator" in
     <div
       class_=(fun () -> after (Styles.Toast.indicator (slots ())) (class_ ()))
-      data_slot="toast-indicator">
+      data_slot="toast-indicator"
+      props=(Props.others props)>
       <Show
         when_=(fun () -> Option.is_some (children ()))
         fallback=(<svg
@@ -462,7 +463,8 @@ module Content = struct
     let slots = slots_of "Toast.Content" in
     <div
       class_=(fun () -> after (Styles.Toast.content (slots ())) (class_ ()))
-      data_slot="toast-content">
+      data_slot="toast-content"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -472,7 +474,8 @@ module Title = struct
     let slots = slots_of "Toast.Title" in
     <Kobalte.Title
       class_=(fun () -> after (Styles.Toast.title (slots ())) (class_ ()))
-      data_slot="toast-title">
+      data_slot="toast-title"
+      props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Title>
 end
@@ -482,7 +485,8 @@ module Description = struct
     let slots = slots_of "Toast.Description" in
     <Kobalte.Description
       class_=(fun () -> after (Styles.Toast.description (slots ())) (class_ ()))
-      data_slot="toast-description">
+      data_slot="toast-description"
+      props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Description>
 end
@@ -497,7 +501,8 @@ module Action_button = struct
       size=`sm
       class_=(fun () -> after (Styles.Toast.action (slots ())) (class_ ()))
       on_click=(fun _ -> ignore (on_press () : unit option))
-      data_slot="toast-action-button">
+      data_slot="toast-action-button"
+      props=(Props.others props)>
       (fun () -> children ())
     </Button>
 end
@@ -524,7 +529,8 @@ module Close_button = struct
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      props=(Props.others props)>
       <Close_button.Icon />
     </Solidtype_kobalte.Button.Root>
 end
@@ -664,7 +670,8 @@ module Item = struct
         data_hidden=(fun () -> Jsx.flag (hidden ()))
         data_index=(fun () -> Jsx.data (string_of_int (index ())))
         data_placement=(fun () -> Jsx.data (placement_name (s.placement ())))
-        data_slot="toast">
+        data_slot="toast"
+        props=(Props.others props)>
         (fun () -> children ())
       </Kobalte.Root>
     </Slots.Provider>
@@ -943,7 +950,8 @@ module Provider = struct
               ^ Js.Float.toString (scale_factor ())
               ^ "; --toast-width: " ^ width () ^ ";")
       data_expanded=(fun () -> Jsx.flag (expanded ()))
-      data_slot="toast-region">
+      data_slot="toast-region"
+      props=(Props.others props)>
       <Kobalte.List
         style="display: contents; margin: 0; padding: 0; list-style: none;"
       />

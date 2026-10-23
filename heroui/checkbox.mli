@@ -49,7 +49,7 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -68,7 +68,7 @@ module Control : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -88,7 +88,7 @@ module Indicator : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -116,7 +116,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

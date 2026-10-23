@@ -55,6 +55,7 @@ end) : sig
   module Props : sig
     val check :
       ?as_:string Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
@@ -79,7 +80,7 @@ end) : sig
     val check :
       ?label_id:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -101,7 +102,7 @@ module Content (_ : Kobalte) : sig
       slot:string Solidtype.Check.value ->
       class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end

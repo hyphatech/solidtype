@@ -9,7 +9,9 @@ module Label = struct
 
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after (label ()) (class_ ())) data_slot="chip-label">
+      class_=(fun () -> after (label ()) (class_ ()))
+      data_slot="chip-label"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -30,7 +32,8 @@ let%component make
                (Styles.Chip.slots
                   (Styles.Chip.options ~color:(color ()) ?size:(size ())
                      ~variant:(variant ()) ?class_:(class_ ()) ())))
-    data_slot="chip">
+    data_slot="chip"
+    props=(Props.others props)>
     (fun () ->
       let c = children () in
       if text c then Jsx.element <Label>(fun () -> c)</Label> else c)

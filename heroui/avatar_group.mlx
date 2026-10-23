@@ -24,7 +24,7 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 
 (* Kobalte's image and fallback with an avatar's classes, as HeroUI's count is
    an avatar: an Avatar itself would read the group it is in. *)
-let counted ~size ~color ~variant ~class_ children =
+let counted ~others ~size ~color ~variant ~class_ children =
   let slots () =
     Styles.Avatar.slots
       (Styles.Avatar.options ?color:(color ()) ~size:(size ())
@@ -38,7 +38,8 @@ let counted ~size ~color ~variant ~class_ children =
                ^ Styles.AvatarGroup.count
                    (Styles.AvatarGroup.slots (Styles.AvatarGroup.options ())))
                (class_ ()))
-    data_slot="avatar-group-count">
+    data_slot="avatar-group-count"
+    props=others>
     <Kobalte.Fallback
       class_=(fun () -> Styles.Avatar.fallback (slots ()))
       data_slot="avatar-fallback">
@@ -55,7 +56,7 @@ module Count = struct
     let own field of_group () =
       match field () with Some v -> Some v | None -> Option.bind g of_group
     in
-    counted
+    counted ~others:(Props.others props)
       ~size:(fun () ->
         match own size (fun (g : group) -> Some (g.size ())) () with
         | Some s -> s
@@ -109,12 +110,16 @@ let%component make ?(size : size = `md) ?(color : color option)
                        (Styles.AvatarGroup.options ~is_grid:(is_grid ())
                           ~overlap:(overlap ()) ())))
                  (class_ ()))
-      data_slot="avatar-group">
+      data_slot="avatar-group"
+      props=(Props.others props)>
       (fun () -> children ())
       <Show when_=(fun () -> remaining () > 0)>
         (fun () ->
+          (* The group's own count, given no attributes but its own. *)
           Jsx.element
-          @@ counted ~size ~color ~variant
+          @@ counted
+               ~others:(S.others (Js.Obj.empty ()) [||])
+               ~size ~color ~variant
                ~class_:(fun () -> None)
                (fun () -> Jsx.string ("+" ^ string_of_int (remaining ()))))
       </Show>

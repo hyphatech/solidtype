@@ -13,7 +13,8 @@ module Icon = struct
       view_box="0 0 16 16"
       width="16"
       xmlns="http://www.w3.org/2000/svg"
-      data_slot="close-button-icon">
+      data_slot="close-button-icon"
+      props=(Props.others props)>
       <path
         clip_rule="evenodd"
         d="M3.47 3.47a.75.75 0 0 1 1.06 0L8 6.94l3.47-3.47a.75.75 0 1 1 1.06 \
@@ -45,7 +46,8 @@ let%component make ?(variant : [ `default ] = `default)
     data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
     type_=`button
-    on_click=(fun e -> ignore (on_click e : unit option))>
+    on_click=(fun e -> ignore (on_click e : unit option))
+    props=(Props.others props)>
     <Show
       when_=(fun () -> Option.is_some (children ()))
       fallback=(fun () -> <Icon />)>

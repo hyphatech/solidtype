@@ -28,7 +28,7 @@ module Some : sig
       some:'a option Check.value ->
       ?fallback:Jsx.element Check.value ->
       children:('a Solid.accessor -> Jsx.element, [ `render ]) Check.children ->
-      ?props:'a t ->
+      ?props:'a t Solid.rest ->
       unit ->
       unit
   end
@@ -47,7 +47,7 @@ module Keyed : sig
       some:'a option Check.value ->
       ?fallback:Jsx.element Check.value ->
       children:('a -> Jsx.element, [ `render ]) Check.children ->
-      ?props:'a t ->
+      ?props:'a t Solid.rest ->
       unit ->
       unit
   end

@@ -22,7 +22,7 @@ module Props : sig
     ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

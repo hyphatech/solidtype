@@ -29,7 +29,7 @@ module Track : sig
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -49,7 +49,7 @@ module Track_circle : sig
       ?r:float Solidtype.Check.value ->
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -71,7 +71,7 @@ module Fill_circle : sig
       ?r:float Solidtype.Check.value ->
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -97,7 +97,7 @@ module Props : sig
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

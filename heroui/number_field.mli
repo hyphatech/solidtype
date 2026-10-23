@@ -31,7 +31,7 @@ module Group : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -48,7 +48,7 @@ module Input : sig
     val check :
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -66,7 +66,7 @@ module Increment_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -84,7 +84,7 @@ module Decrement_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -116,7 +116,7 @@ module Props : sig
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

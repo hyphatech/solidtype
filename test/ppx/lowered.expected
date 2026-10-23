@@ -100,7 +100,9 @@ include
           ~children:(_ :
                       ('a -> Solidtype.Jsx.element, [ `render ])
                         Solidtype.Check.children)
-          ?props:(_ : 'a t option) () = ()
+          ?props:(_ : 'a t Solidtype.Solid.rest option) () = ()
+        let others (props : 'a t) : _ Solidtype.Solid.rest=
+          Solidtype.Solid.others props [|"text";"count";"onPick";"children"|]
         type name =
           | Text 
           | Count 
@@ -285,8 +287,10 @@ module Removable =
             external make :
               on_remove:((unit -> unit)[@mel.as "onRemove"]) -> unit -> t =
                 ""[@@mel.obj ]
-            let check ~on_remove:(_ : unit -> unit) ?props:(_ : t option) ()
-              = ()
+            let check ~on_remove:(_ : unit -> unit)
+              ?props:(_ : t Solidtype.Solid.rest option) () = ()
+            let others (props : t) : _ Solidtype.Solid.rest=
+              Solidtype.Solid.others props [|"onRemove"|]
             type name =
               | On_remove 
             let omit (props : t) (names : name array) :

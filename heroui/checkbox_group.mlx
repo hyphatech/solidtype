@@ -57,20 +57,22 @@ let%component make ?(variant : [ `primary | `secondary ] option)
      names the group, as React Aria's is; and a description one that
      describes it, and each checkbox's input. *)
   let label : Label.slot =
-   fun[@u] classes children ->
+   fun[@u] classes others children ->
     label_here ();
-    <span id=label_id class_=(fun () -> classes ()) data_slot="label">
+    <span
+      id=label_id class_=(fun () -> classes ()) data_slot="label" props=others>
       (fun () -> children ())
     </span>
   in
   let description : Description.slot =
-   fun[@u] classes children ->
+   fun[@u] classes others children ->
     description_here ();
     <span
       id=description_id
       class_=(fun () -> classes ())
       slot="description"
-      data_slot="description">
+      data_slot="description"
+      props=others>
       (fun () -> children ())
     </span>
   in
@@ -104,7 +106,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
           (fun () -> children ())

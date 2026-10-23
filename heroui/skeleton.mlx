@@ -27,10 +27,11 @@ let%component make ?(animation_type : [ `shimmer | `pulse | `none ] option)
   in
   <div
     class_=(fun () ->
-               let base =
-                 Styles.Skeleton.base
-                   (Styles.Skeleton.slots
-                      (Styles.Skeleton.options ?animation_type:(animation ()) ()))
-               in
-               match class_ () with Some c -> base ^ " " ^ c | None -> base)
+             let base =
+               Styles.Skeleton.base
+                 (Styles.Skeleton.slots
+                    (Styles.Skeleton.options ?animation_type:(animation ()) ()))
+             in
+             match class_ () with Some c -> base ^ " " ^ c | None -> base)
+    props=(Props.others props)
   />

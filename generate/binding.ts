@@ -426,7 +426,8 @@ function fixedElement(decl: ts.SignatureDeclaration): { element: string; own: ts
 }
 
 // One part's binding, its component [js] from [jsModule] and its props
-// check -- its options, then its children, then its element's attributes --
+// check -- its options, a spread, then its children, then its element's
+// attributes --
 // [where] naming it in what is not bound. [extra] are props of its own its
 // options do not hold, a library's shared props that are no attribute.
 export function part(src: Source, jsModule: string, where: string, decl: ts.SignatureDeclaration, options: ts.Type | null, extra: ts.Symbol[], js: string): void {
@@ -474,6 +475,9 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
     const checked = isArrow(t) ? `(${showOut(t)})` : `${argOut(t)} Solidtype.Check.value`;
     args.push(`${optional ? "?" : ""}${name}:${checked} ->`);
   }
+  // A spread, props=p, as TSX's {...p}: the rest of a component's props
+  // passed on, its data- attributes, which any part takes.
+  args.push("?props:'spread Solidtype.Solid.rest ->");
   const html = element ? element.charAt(0).toUpperCase() + element.slice(1) : null;
   const tail = `${children} unit -> unit`;
   const check = html && htmlModules.has(html) ? `(${tail}) Solidtype.Html.${html}.check` : tail;

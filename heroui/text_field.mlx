@@ -61,7 +61,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
         <Parts>(fun () -> children ())</Parts>
       </Field_error.Message.Provider>

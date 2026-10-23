@@ -30,7 +30,8 @@ module Content = struct
       field=(fun () -> c.field)
       slot="checkbox-content"
       class_=(fun () ->
-               after (Styles.Checkbox.content (c.slots ())) (class_ ()))>
+               after (Styles.Checkbox.content (c.slots ())) (class_ ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </Field_content>
 end
@@ -41,7 +42,8 @@ module Control = struct
     <span
       class_=(fun () ->
                after (Styles.Checkbox.control (c.slots ())) (class_ ()))
-      data_slot="checkbox-control">
+      data_slot="checkbox-control"
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -85,7 +87,8 @@ module Indicator = struct
       aria_hidden=true
       class_=(fun () ->
                after (Styles.Checkbox.indicator (c.slots ())) (class_ ()))
-      data_slot="checkbox-indicator">
+      data_slot="checkbox-indicator"
+      props=(Props.others props)>
       (fun () ->
         match children () with
         | Some given -> given
@@ -106,12 +109,13 @@ end)
 (* A description in a checkbox, but outside its content, is the checkbox's:
    Kobalte's, which its input is described by, beside its group's. *)
 let description : Description.slot =
- fun[@u] classes children ->
+ fun[@u] classes others children ->
   <Kobalte_description
     as_="span"
     class_=(fun () -> classes ())
     slot="description"
-    data_slot="description">
+    data_slot="description"
+    props=others>
     (fun () -> children ())
   </Kobalte_description>
 
@@ -227,7 +231,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_readonly=(fun () -> Jsx.flag (read_only ()))
       data_required=(fun () -> Jsx.flag (required ()))
-      data_invalid=(fun () -> Jsx.flag (invalid ()))>
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
+      props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
         (fun () -> children ())
       </Description.Slot.Provider>

@@ -12,7 +12,8 @@ module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () -> after (Styles.Card.header (slots ())) (class_ ()))
-      data_slot="card-header">
+      data_slot="card-header"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -23,7 +24,8 @@ module Title = struct
     <h3
       ?id
       class_=(fun () -> after (Styles.Card.title (slots ())) (class_ ()))
-      data_slot="card-title">
+      data_slot="card-title"
+      props=(Props.others props)>
       (fun () -> children ())
     </h3>
 end
@@ -32,7 +34,8 @@ module Description = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <p
       class_=(fun () -> after (Styles.Card.description (slots ())) (class_ ()))
-      data_slot="card-description">
+      data_slot="card-description"
+      props=(Props.others props)>
       (fun () -> children ())
     </p>
 end
@@ -41,7 +44,8 @@ module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () -> after (Styles.Card.content (slots ())) (class_ ()))
-      data_slot="card-content">
+      data_slot="card-content"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -50,7 +54,8 @@ module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () -> after (Styles.Card.footer (slots ())) (class_ ()))
-      data_slot="card-footer">
+      data_slot="card-footer"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -70,7 +75,8 @@ let%component make ?(variant : Surface.variant = `default)
                     (Styles.Card.slots
                        (Styles.Card.options ~variant:(variant ()) ())))
                  (class_ ()))
-      data_slot="card">
+      data_slot="card"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
   in

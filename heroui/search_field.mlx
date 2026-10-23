@@ -59,7 +59,8 @@ module Group = struct
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-      data_invalid=(fun () -> Jsx.flag (f.invalid ()))>
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -82,7 +83,8 @@ module Search_icon = struct
                   view_box="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                  data_slot="search-field-search-icon">
+                  data_slot="search-field-search-icon"
+                  props=(Props.others props)>
                   <path
                     clip_rule="evenodd"
                     d="M11.5 7a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0m-.82 4.74a6 \
@@ -126,6 +128,7 @@ module Input = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      props=(Props.others props)
     />
 end
 
@@ -156,7 +159,8 @@ module Clear_button = struct
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+      props=(Props.others props)>
       <Close_button.Icon />
     </Kobalte_button.Root>
 end
@@ -222,7 +226,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
         <Parts>(fun () -> children ())</Parts>
       </Field_error.Message.Provider>

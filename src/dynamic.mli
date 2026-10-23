@@ -14,11 +14,13 @@ val component : unit Jsx.component
 (** An element whose tag is chosen while the page runs,
     [<Dynamic.Element component=(fun () -> tag ())
      class_="box">...</Dynamic.Element>]: its attributes are the ones every HTML
-    element takes, {!Html.Element}'s, as TSX types a tag that is a string. *)
+    element takes, {!Html.Element}'s, as TSX types a tag that is a string, and a
+    spread, [props=(Props.others props)], the rest of a component's props. *)
 module Element : sig
   module Props : sig
     val check :
       component:string Check.value ->
+      ?props:'spread Solid.rest ->
       (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
       Html.Element.check
   end

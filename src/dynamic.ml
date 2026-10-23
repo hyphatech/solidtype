@@ -14,6 +14,7 @@ module Element = struct
        which nothing calls, since the ppx applies it under [if false]. *)
     external check :
       component:string Check.value ->
+      ?props:'spread Solid.rest ->
       (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
       Html.Element.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]

@@ -84,14 +84,17 @@ module Abbr = struct
   let%component make ~(key_value : key) ?(class_ : string option) () =
     <abbr
       class_=(fun () -> after (Styles.Kbd.abbr (slots ())) (class_ ()))
-      title=(fun () -> name (key_value ()))>
+      title=(fun () -> name (key_value ()))
+      props=(Props.others props)>
       (fun () -> Jsx.string (symbol (key_value ())))
     </abbr>
 end
 
 module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
-    <span class_=(fun () -> after (Styles.Kbd.content (slots ())) (class_ ()))>
+    <span
+      class_=(fun () -> after (Styles.Kbd.content (slots ())) (class_ ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </span>
 end
@@ -104,6 +107,7 @@ let%component make ?(variant : [ `default | `light ] option)
                (Styles.Kbd.base
                   (Styles.Kbd.slots
                      (Styles.Kbd.options ?variant:(variant ()) ())))
-               (class_ ()))>
+               (class_ ()))
+    props=(Props.others props)>
     (fun () -> children ())
   </kbd>

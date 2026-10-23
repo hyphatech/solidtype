@@ -65,7 +65,8 @@ module Group = struct
                after (Styles.NumberField.group (f.slots ())) (class_ ()))
       data_slot="number-field-group"
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-      data_invalid=(fun () -> Jsx.flag (f.invalid ()))>
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -86,6 +87,7 @@ module Input = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      props=(Props.others props)
     />
 end
 
@@ -139,7 +141,8 @@ module Increment_button = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       disabled=(fun () -> disabled ())
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+      props=(Props.others props)>
       <Show
         when_=(fun () -> Option.is_some (children ()))
         fallback=(fun () ->
@@ -173,7 +176,8 @@ module Decrement_button = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       disabled=(fun () -> disabled ())
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+      props=(Props.others props)>
       <Show
         when_=(fun () -> Option.is_some (children ()))
         fallback=(fun () ->
@@ -283,7 +287,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))>
+      data_required=(fun () -> Jsx.flag (is_required ()))
+      props=(Props.others props)>
       <Kobalte.HiddenInput />
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
         <Parts label_id=(fun () -> label_id)>(fun () -> children ())</Parts>

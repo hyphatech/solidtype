@@ -10,4 +10,5 @@ let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
              Styles.Separator.classes
                (Styles.Separator.options ~orientation:(orientation ())
                   ~variant:(variant ()) ?class_:(class_ ()) ()))
+    props=(Props.others props)
   />

@@ -244,6 +244,7 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
     data_top_bottom_scroll=(fun () -> (marks ()).top_bottom)
     data_left_scroll=(fun () -> (marks ()).left)
     data_right_scroll=(fun () -> (marks ()).right)
-    data_left_right_scroll=(fun () -> (marks ()).left_right)>
+    data_left_right_scroll=(fun () -> (marks ()).left_right)
+    props=(Props.others props)>
     (fun () -> children ())
   </div>

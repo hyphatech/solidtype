@@ -192,7 +192,8 @@ A prop the component does not take.
   1 | let make () = <Label text=(fun () -> "x") colour="red" />
                                                        ^^^^^
   Error: The function applied to this argument has type
-           ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
+           ?count:int Solidtype.Check.value ->
+           ?props:Label.Props.t Solidtype.Solid.rest -> unit
   This argument cannot be applied with label ~colour
   [1]
 
@@ -221,7 +222,8 @@ Children given to a component that takes none.
   1 | let make () = <Label text=(fun () -> "x")>"more"</Label>
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: The function applied to this argument has type
-           ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
+           ?count:int Solidtype.Check.value ->
+           ?props:Label.Props.t Solidtype.Solid.rest -> unit
   This argument cannot be applied with label ~children
   [1]
 
@@ -398,16 +400,37 @@ A Dynamic given no props, which its component needs.
   Hint: This function application is partial, maybe some arguments are missing.
   [1]
 
-A Dynamic element given props as one value, which it takes as attributes.
+A Dynamic element given props as one value, where it takes a spread, the
+rest of a component's props.
 
   $ cat > case.mlx <<'EOF'
   > let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") props=42 />
   > EOF
-  $ brief
+  $ build
   File "case.mlx", line 1, characters 75-77:
   1 | let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") props=42 />
                                                                                  ^^
-  This argument cannot be applied with label ~props
+  Error: The value solidtype__props has type int
+         but an expression was expected of type 'a Solidtype.Solid.rest
+  [1]
+
+A component given the rest of another component's props, which only its own
+props or the rest a component passes on, [Props.others], can be spread on.
+
+  $ cat > case.mlx <<'EOF'
+  > let%component make ~(shout : string) () =
+  >   ignore shout;
+  >   <Label text="x" props=(Props.omit props [| Shout |]) />
+  > EOF
+  $ build
+  File "case.mlx", line 3, characters 24-54:
+  3 |   <Label text="x" props=(Props.omit props [| Shout |]) />
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: The value solidtype__props has type Props.t Solidtype.Solid.rest
+         but an expression was expected of type
+           Label.Props.t Solidtype.Solid.rest
+         Type Props.t is not compatible with type Label.Props.t
+  [1]
 
 A Dynamic element given an attribute of the wrong type.
 

@@ -175,7 +175,7 @@ module Indicator : sig
       ?variant:variant Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -192,7 +192,7 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -209,7 +209,7 @@ module Title : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -226,7 +226,7 @@ module Description : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -253,7 +253,7 @@ module Action_button : sig
       ?on_press:(unit -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -270,7 +270,7 @@ module Close_button : sig
     val check :
       ?key:key Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -290,7 +290,7 @@ module Props : sig
     ?variant:variant Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end
@@ -319,7 +319,7 @@ module Provider : sig
       ?class_:string Solidtype.Check.value ->
       ?children:
         (queued -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end

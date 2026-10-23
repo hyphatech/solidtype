@@ -54,7 +54,7 @@ module Props : sig
     ?on_submit:(Dom.event -> unit) ->
     ?on_reset:(Dom.event -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

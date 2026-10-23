@@ -33,8 +33,9 @@ end)
 
 (* A label in a bar is Kobalte's, a span, which names it. *)
 let label : Label.slot =
- fun[@u] classes children ->
-  <Kobalte_label as_="span" class_=(fun () -> classes ()) data_slot="label">
+ fun[@u] classes others children ->
+  <Kobalte_label
+    as_="span" class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
   </Kobalte_label>
 
@@ -51,6 +52,7 @@ module Output = struct
                   as_="span"
                   class_=(fun () -> classes ())
                   data_slot="progress-bar-output"
+                  props=(Props.others props)
                 />)>
       <span class_=(fun () -> classes ()) data_slot="progress-bar-output">
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
@@ -64,7 +66,8 @@ module Track = struct
     <div
       class_=(fun () ->
                after (Styles.ProgressBar.track (m.slots ())) (class_ ()))
-      data_slot="progress-bar-track">
+      data_slot="progress-bar-track"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -80,6 +83,7 @@ module Fill = struct
                  (fun p -> "width: " ^ Js.Float.toString p ^ "%;")
                  (m.percent ()))
       data_slot="progress-bar-fill"
+      props=(Props.others props)
     />
 end
 
@@ -138,7 +142,8 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       get_value_label=value_label
       class_=(fun () ->
                after (Styles.ProgressBar.base (m.slots ())) (class_ ()))
-      data_slot="progress-bar">
+      data_slot="progress-bar"
+      props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         (fun () -> children ())
       </Label.Slot.Provider>

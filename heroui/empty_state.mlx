@@ -4,7 +4,8 @@ let%component make ?(class_ : string option)
     class_=(fun () ->
              Styles.EmptyState.classes
                (Styles.EmptyState.options ?class_:(class_ ()) ()))
-    data_slot="empty-state">
+    data_slot="empty-state"
+    props=(Props.others props)>
     (fun () ->
       match children () with
       | Some given -> given

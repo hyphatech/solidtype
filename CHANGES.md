@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Every HeroUI port passes on a `data-` attribute it is given, `data_testid`
+  and the rest, to its own element, after its own attributes as HeroUI's
+  React components spread theirs, so a caller's `data-slot` wins; until now
+  each one dropped it. A component written by `let%component` passes them
+  on likewise by spreading `Props.others props`, the props it does not name,
+  and `Solid.others` is that rest for a component written by hand.
+- Breaking: a component's check takes a spread as a rest of its own props,
+  `Props.omit` or `Props.others`, no longer as its whole props; every
+  Kobalte part, `Dynamic.Element`, `Input` and `Text_area` now take a spread,
+  any component's rest. A label's, a description's and an error's `slot` is
+  also given the part's rest, to spread on the element it renders.
 - `Solidtype_heroui.Toast`: HeroUI's Toast on Kobalte's, its provider, its
   stack collapsed and expanded, its parts, and `Toast.show`, the variant
   helpers, `update`, `promise`, `close`, `clear`, `pause_all` and

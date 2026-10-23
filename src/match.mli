@@ -20,7 +20,7 @@ module Some : sig
     val check :
       some:'a option Check.value ->
       children:('a Solid.accessor -> Jsx.element, [ `render ]) Check.children ->
-      ?props:'a t ->
+      ?props:'a t Solid.rest ->
       unit ->
       unit
   end
@@ -37,7 +37,7 @@ module Keyed : sig
     val check :
       some:'a option Check.value ->
       children:('a -> Jsx.element, [ `render ]) Check.children ->
-      ?props:'a t ->
+      ?props:'a t Solid.rest ->
       unit ->
       unit
   end

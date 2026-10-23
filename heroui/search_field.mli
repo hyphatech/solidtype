@@ -28,7 +28,7 @@ module Group : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -45,7 +45,7 @@ module Search_icon : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -62,7 +62,7 @@ module Input : sig
     val check :
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?props:t ->
+      ?props:t Solidtype.Solid.rest ->
       unit ->
       unit
   end
@@ -78,7 +78,11 @@ module Clear_button : sig
   module Props : sig
     type t
 
-    val check : ?class_:string Solidtype.Check.value -> ?props:t -> unit -> unit
+    val check :
+      ?class_:string Solidtype.Check.value ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -105,7 +109,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t ->
+    ?props:t Solidtype.Solid.rest ->
     unit ->
     unit
 end

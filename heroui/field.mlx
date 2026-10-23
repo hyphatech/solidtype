@@ -45,8 +45,8 @@ let on_leave on_blur e =
 (* A label inside a control's own clickable label is a span: a label in a
    label is not HTML. *)
 let inline : Label.slot =
- fun[@u] classes children ->
-  <span class_=(fun () -> classes ()) data_slot="label">
+ fun[@u] classes others children ->
+  <span class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
   </span>
 
@@ -59,6 +59,7 @@ end
    label and input share. *)
 module Label_props = struct
   external check :
+    ?props:'spread Solidtype.Solid.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Label.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]
@@ -66,6 +67,7 @@ end
 
 module Input_props = struct
   external check :
+    ?props:'spread Solidtype.Solid.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Input.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]
@@ -78,6 +80,7 @@ struct
   module Props = struct
     external check :
       ?as_:string Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
@@ -108,32 +111,35 @@ struct
 
   let%component make ?(label_id : string option) ~(children : Jsx.content) () =
     let label : Label.slot =
-     fun[@u] classes children ->
+     fun[@u] classes others children ->
       <Kobalte_label
         ?id=(fun () -> label_id ())
         class_=(fun () -> classes ())
-        data_slot="label">
+        data_slot="label"
+        props=others>
         (fun () -> children ())
       </Kobalte_label>
     in
     let description : Description.slot =
-     fun[@u] classes children ->
+     fun[@u] classes others children ->
       <Kobalte_description
         as_="span"
         class_=(fun () -> classes ())
         slot="description"
-        data_slot="description">
+        data_slot="description"
+        props=others>
         (fun () -> children ())
       </Kobalte_description>
     in
     let error : Field_error.slot =
-     fun[@u] classes children ->
+     fun[@u] classes others children ->
       <Kobalte_error
         as_="span"
         class_=(fun () -> classes ())
         slot="errorMessage"
         data_slot="field-error"
-        data_visible="true">
+        data_visible="true"
+        props=others>
         (fun () -> children ())
       </Kobalte_error>
     in
@@ -177,7 +183,8 @@ module Content (K : Kobalte) = struct
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> inline)>
         <Kobalte_input
           ?aria_label=(fun () -> f.aria_label ())

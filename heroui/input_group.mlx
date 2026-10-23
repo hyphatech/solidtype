@@ -31,7 +31,8 @@ module Prefix = struct
     <div
       class_=(fun () ->
                after (Styles.InputGroup.prefix (g.slots ())) (class_ ()))
-      data_slot="input-group-prefix">
+      data_slot="input-group-prefix"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -42,7 +43,8 @@ module Suffix = struct
     <div
       class_=(fun () ->
                after (Styles.InputGroup.suffix (g.slots ())) (class_ ()))
-      data_slot="input-group-suffix">
+      data_slot="input-group-suffix"
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
 end
@@ -131,7 +133,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (invalid ()))>
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
+      props=(Props.others props)>
       (fun () -> children ())
     </div>
   </Context.Provider>
