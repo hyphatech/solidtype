@@ -1,12 +1,14 @@
-/* HeroUI's styles inside Starlight's page: HeroUI's pieces one by one, never
-   its entry, which brings Tailwind's preflight and would reset Starlight's
-   own. Starlight's layer sits above base, so its page keeps its look; HeroUI's
-   theme follows Starlight's data-theme, so dark mode is one switch. */
+/* The page's one Tailwind build: the theme's components, and HeroUI's styles
+   inside Starlight's page, HeroUI's pieces one by one, never its entry, which
+   brings Tailwind's preflight and would reset Starlight's own. Starlight's
+   layer sits above base, so its page keeps its look; HeroUI's theme follows
+   Starlight's data-theme, so dark mode is one switch. */
 @layer base, starlight, theme, components, utilities;
 
 @import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import "starlight-theme-hypha/styles/tailwind.css";
 @import "tw-animate-css";
 
 @import "@heroui/styles/base/base.css" layer(base);
