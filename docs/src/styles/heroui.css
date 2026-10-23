@@ -1,30 +1,64 @@
-/* The page's one Tailwind build: the theme's components, and HeroUI's styles
-   inside Starlight's page, HeroUI's pieces one by one, never its entry, which
-   brings Tailwind's preflight and would reset Starlight's own. Starlight's
-   layer sits above base, so its page keeps its look; HeroUI's theme follows
-   Starlight's data-theme, so dark mode is one switch. */
-@layer base, starlight, theme, components, utilities;
+/* HeroUI's Tailwind build, for the examples. The theme's is its own,
+   prefixed and in its layer, `hypha`, so the two share no class and no
+   variable, and HeroUI's layers, after the theme's, win over it. HeroUI's
+   pieces as its README gives them, never its entry, which brings Tailwind's
+   preflight and would reset Starlight's page: the prelude its components
+   need, then the components ported, no others, in its own order, shared
+   ones first, so a block it has that no port uses, `.header`, never meets
+   a page's class of that name. HeroUI's theme follows Starlight's
+   data-theme, so dark mode is one switch. */
+@layer base, starlight, hypha, theme, components, utilities;
 
-@import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
-@import "starlight-theme-hypha/styles/tailwind.css";
 @import "tw-animate-css";
 
 @import "@heroui/styles/base/base.css" layer(base);
-@import "@heroui/styles/components/index.css" layer(components);
-@import "@heroui/styles/themes/default" layer(theme);
 @import "@heroui/styles/utilities";
 @import "@heroui/styles/variants";
+@import "@heroui/styles/themes/default" layer(theme);
 
-/* HeroUI's theme declares Tailwind's --color-accent again, inline, so the
-   theme's accent never reaches :root, where its selection, its focus ring
-   and Starlight's accent read it: selected text took the ground's colour
-   on no highlight. The theme's value is put back there; HeroUI's own
-   utilities read --accent and are unchanged. */
-:root {
-  --color-accent: hsl(calc(var(--hue) + 6) 72% 72%);
-}
+@import "@heroui/styles/components/close-button.css" layer(components);
+@import "@heroui/styles/components/description.css" layer(components);
+@import "@heroui/styles/components/field-error.css" layer(components);
+@import "@heroui/styles/components/label.css" layer(components);
+@import "@heroui/styles/components/link.css" layer(components);
+@import "@heroui/styles/components/button.css" layer(components);
+@import "@heroui/styles/components/button-group.css" layer(components);
+@import "@heroui/styles/components/slider.css" layer(components);
+@import "@heroui/styles/components/switch.css" layer(components);
+@import "@heroui/styles/components/switch-group.css" layer(components);
+@import "@heroui/styles/components/badge.css" layer(components);
+@import "@heroui/styles/components/chip.css" layer(components);
+@import "@heroui/styles/components/alert.css" layer(components);
+@import "@heroui/styles/components/empty-state.css" layer(components);
+@import "@heroui/styles/components/skeleton.css" layer(components);
+@import "@heroui/styles/components/meter.css" layer(components);
+@import "@heroui/styles/components/progress-bar.css" layer(components);
+@import "@heroui/styles/components/progress-circle.css" layer(components);
+@import "@heroui/styles/components/spinner.css" layer(components);
+@import "@heroui/styles/components/toast.css" layer(components);
+@import "@heroui/styles/components/checkbox-group.css" layer(components);
+@import "@heroui/styles/components/checkbox.css" layer(components);
+@import "@heroui/styles/components/fieldset.css" layer(components);
+@import "@heroui/styles/components/input.css" layer(components);
+@import "@heroui/styles/components/input-group.css" layer(components);
+@import "@heroui/styles/components/number-field.css" layer(components);
+@import "@heroui/styles/components/radio-group.css" layer(components);
+@import "@heroui/styles/components/radio.css" layer(components);
+@import "@heroui/styles/components/textfield.css" layer(components);
+@import "@heroui/styles/components/search-field.css" layer(components);
+@import "@heroui/styles/components/textarea.css" layer(components);
+@import "@heroui/styles/components/time-field.css" layer(components);
+@import "@heroui/styles/components/date-input-group.css" layer(components);
+@import "@heroui/styles/components/card.css" layer(components);
+@import "@heroui/styles/components/separator.css" layer(components);
+@import "@heroui/styles/components/surface.css" layer(components);
+@import "@heroui/styles/components/avatar.css" layer(components);
+@import "@heroui/styles/components/avatar-group.css" layer(components);
+@import "@heroui/styles/components/kbd.css" layer(components);
+@import "@heroui/styles/components/typography.css" layer(components);
+@import "@heroui/styles/components/scroll-shadow.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's

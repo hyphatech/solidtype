@@ -20,8 +20,8 @@ const { code, title } = Astro.props;
 <style>
   .example {
     margin-block: 1.75rem;
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-panel);
+    border: 1px solid var(--hypha-color-rule);
+    border-radius: var(--hypha-radius-panel);
     overflow: hidden;
   }
   .preview {
@@ -36,7 +36,7 @@ const { code, title } = Astro.props;
      is room the preview needs more. */
   @media (max-width: 39.99rem) {
     .example {
-      margin-inline: calc(-1 * var(--gutter));
+      margin-inline: calc(-1 * var(--hypha-gutter));
       border-inline: 0;
       border-radius: 0;
     }
@@ -52,6 +52,6 @@ const { code, title } = Astro.props;
     border: none;
     border-radius: 0;
     box-shadow: none;
-    border-top: 1px solid var(--rule);
+    border-top: 1px solid var(--hypha-color-rule);
   }
 </style>

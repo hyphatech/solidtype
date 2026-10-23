@@ -24,8 +24,7 @@ export default defineConfig({
       title: "solidtype",
       logo: { src: "starlight-theme-hypha/assets/hypha.webp" },
       // Hypha's look, from its theme; heroui.css keeps the demos in HeroUI's,
-      // and api.css sets this site's API tables. The theme's sheet follows
-      // HeroUI's, whose Tailwind defines a `--font-sans` of its own.
+      // and api.css sets this site's API tables.
       plugins: [
         hypha({
           brand: "hypha",
@@ -34,7 +33,7 @@ export default defineConfig({
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
         }),
       ],
-      customCss: ["./src/styles/heroui.css", "starlight-theme-hypha/styles/theme.css", "./src/styles/api.css"],
+      customCss: ["./src/styles/heroui.css", "./src/styles/api.css"],
       favicon: "/favicon-32.png",
       head: [
         { tag: "link", attrs: { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" } },
