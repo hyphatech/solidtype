@@ -22,8 +22,8 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
     "button_icon_only visible",
     "button_full_width visible",
     "button_disabled visible",
-    "button_demo load",
     "button_tailwind visible",
+    "button_demo load",
   ]);
   // Usage's button, then Variants' each.
   const classes = [...html.matchAll(/<button data-hk="\w+" type="button" class="([^"]*)"/g)].map((m) => m[1]?.trim());
