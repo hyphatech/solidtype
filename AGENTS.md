@@ -13,17 +13,19 @@ agent. Users start at [README.md](README.md).
 ## Commands
 
 ```sh
-make setup    # once: the switch hypha-solidtype, all dependencies, and Bun's
-make test     # the ppx's lowering, each island against its twin, the example's tests
-make lint     # formatting, the plugin's and the generators' types, the release
-              # build, and the generated bindings
-make fmt      # format in place
-make example  # the board, built by Vite into _build/example-dist, and its
-              # Astro page, into _build/example-astro
-make serve    # the board and its API, served on http://localhost:4420
-make dev      # the three commands that run the board in development
-make docs     # the documentation, built by Astro into _build/docs
-make docs-serve # the documentation, served on DOCS_PORT as it changes
+make setup          # once: the switch hypha-solidtype, all dependencies, and
+                    # Bun's
+make test           # the ppx's lowering, each island against its twin, the
+                    # example's tests
+make lint           # formatting, the plugin's and the generators' types, the
+                    # release build, and the generated bindings
+make fmt            # format in place
+make example        # the board, built by Vite into _build/example-dist, and
+                    # its Astro page, into _build/example-astro
+make example-serve  # the board and its API, served on http://localhost:4420
+make example-dev    # the three commands that run the board in development
+make docs           # the documentation, built by Astro into _build/docs
+make docs-serve     # the documentation, served on DOCS_PORT as it changes
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -117,7 +119,7 @@ example/             a kanban board: a whole application on the
   src/               the board's islands in .mlx, and api.ml, its client
                      printed from server/ as the build runs
   server/            a Spindle app: the tasks' store, the routes over it,
-                     which the board is called against and `make serve`
+                     which the board is called against and `make example-serve`
                      serves, their tests, and their command line,
                      Spindle's, which prints the board's client and the
                      twins' schemas

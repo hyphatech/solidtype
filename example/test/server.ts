@@ -1,4 +1,4 @@
-// The example's server for the island tests, as `make serve` runs it,
+// The example's server for the island tests, as `make example-serve` runs it,
 // once it says it listens, and stopped when the run ends. It serves the
 // page Vite builds, which `bun run test` builds first. It is the real
 // server, as the board calls it; its log is kept, and shown only when it

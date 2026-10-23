@@ -21,7 +21,7 @@ export default defineConfig({
           name: "browser",
           environment: "jsdom",
           // The example's board calls its server, from a page on the server's
-          // origin, as `make serve` serves it.
+          // origin, as `make example-serve` serves it.
           environmentOptions: { jsdom: { url: "http://localhost:4420/" } },
           globalSetup: ["example/test/server.ts"],
           // What jsdom lacks, stood in for in every test file.
