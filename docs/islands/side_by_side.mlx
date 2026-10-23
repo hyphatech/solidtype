@@ -124,8 +124,8 @@ let%component make ?(compared : string = ":scope > *")
           "solidtype — OCaml, on Solid and Kobalte"
         </figcaption>
         <div
-          class_="flex min-h-24 items-center justify-center rounded-xl border \
-                  border-separator p-6"
+          class_="heroui-ground flex min-h-24 items-center justify-center \
+                  rounded-xl border border-separator p-6"
           ref=(fun el -> solidtype_host := Some el)>
           (fun () -> Jsx.element (solidtype ()))
         </div>
@@ -135,8 +135,8 @@ let%component make ?(compared : string = ":scope > *")
           "React — TypeScript, on React Aria"
         </figcaption>
         <div
-          class_="flex min-h-24 items-center justify-center rounded-xl border \
-                  border-separator p-6"
+          class_="heroui-ground flex min-h-24 items-center justify-center \
+                  rounded-xl border border-separator p-6"
           ref=(fun el -> react_host := Some el)
         />
       </figure>

@@ -17,5 +17,19 @@
 @import "@heroui/styles/utilities";
 @import "@heroui/styles/variants";
 
+/* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
+   browser's size and line, in HeroUI's foreground -- for an example's
+   preview and each side of a comparison: HeroUI's components set none of
+   these and take the page's, here the documentation's prose. */
+@import "@fontsource-variable/inter";
+
+.heroui-ground {
+  font-family: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: var(--foreground);
+}
+
 /* Tailwind reads the demos' classes from their .mlx sources. */
 @source "../../islands";

@@ -131,7 +131,9 @@ module Circle_dollar = struct
       fill="none"
       role=`img
       aria_label="Dollar sign icon"
-      class_="size-6 text-accent">
+                 (* HeroUI's example names [text-primary], which HeroUI 3 has not, so
+         heroui.com draws it in the text's colour, as here. *)
+      class_="size-6">
       <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke_width="1.5" />
       <path
         d="M9.75 6C9.75 5.31 8.97 4.75 8 4.75C7.03 4.75 6.25 5.31 6.25 6C6.25 \
