@@ -273,9 +273,9 @@ break.
   to its element, outside the component's check, as TSX leaves a
   hyphenated attribute unchecked: a component spreads `Props.others
   props`, the props it does not name, on its element, after its own
-  attributes, as HeroUI's React components spread theirs. A port's state -- `data-hovered`,
-  `data-selected` -- is so declared, and `heroui/interaction` only
-  listens. Why: an attribute Solid writes is in the HTML a page is
+  attributes, as HeroUI's React components spread theirs. A port's state
+  -- `data-hovered`, `data-selected` -- is so declared, and
+  `heroui/interaction` only listens. Why: an attribute Solid writes is in the HTML a page is
   prerendered with and never races one the component writes itself; one
   set from a `ref` is neither. Test: `test/server/data_attributes_test.mlx`,
   `test/does_not_compile.t`, `test/heroui/data_attributes_test.mlx`, which
