@@ -15,10 +15,12 @@ external props :
   size:[ `sm | `md | `lg ] ->
   default_selected:(bool[@mel.as "defaultSelected"]) ->
   is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
   is_read_only:(bool[@mel.as "isReadOnly"]) ->
   is_required:(bool[@mel.as "isRequired"]) ->
   name:string ->
   ?aria_label:(string[@mel.as "aria-label"]) ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -53,7 +55,9 @@ let shown () =
           T.class_name e,
           T.attribute e "data-selected",
           T.attribute e "data-disabled",
-          (T.attribute e "data-readonly", T.attribute e "data-required") ))
+          ( T.attribute e "data-readonly",
+            T.attribute e "data-required",
+            T.attribute e "data-invalid" ) ))
   in
   let input = T.by_role "switch" in
   ( parts,
@@ -61,12 +65,13 @@ let shown () =
       T.attribute input "disabled",
       ( T.attribute input "name",
         T.attribute input "required",
-        T.attribute input "aria-label" ) ) )
+        T.attribute input "aria-label",
+        T.attribute input "aria-invalid" ) ) )
 
 (* The port, then the same Switch in React, each alone on the page, shown,
    then walked by its content, the field's state after each step too. *)
-let both ?(read_only = false) ?(required = false) ?aria_label ~size ~selected
-    ~disabled () =
+let both ?(read_only = false) ?(required = false) ?(invalid = false) ?aria_label
+    ~size ~selected ~disabled () =
   let walk () =
     let shown_before = shown () in
     let content = part "switch-content" in
@@ -79,6 +84,7 @@ let both ?(read_only = false) ?(required = false) ?aria_label ~size ~selected
         size=(fun () -> size)
         default_selected=(fun () -> selected)
         is_disabled=(fun () -> disabled)
+        is_invalid=(fun () -> invalid)
         is_read_only=(fun () -> read_only)
         is_required=(fun () -> required)
         name="wifi"
@@ -92,7 +98,8 @@ let both ?(read_only = false) ?(required = false) ?aria_label ~size ~selected
   T.cleanup ();
   Twin.render
     (props ~size ~default_selected:selected ~is_disabled:disabled
-       ~is_read_only:read_only ~is_required:required ~name:"wifi" ?aria_label ());
+       ~is_invalid:invalid ~is_read_only:read_only ~is_required:required
+       ~name:"wifi" ?aria_label ());
   let* react = walk () in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
@@ -110,6 +117,11 @@ let () =
             both ~size:`lg ~selected:true ~disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is invalid as React's is" (fun () ->
+          let* solidtype, react =
+            both ~invalid:true ~size:`md ~selected:false ~disabled:false ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is disabled as React Aria's is" (fun () ->
           let* solidtype, react =
             both ~size:`sm ~selected:true ~disabled:true ()
@@ -122,3 +134,29 @@ let () =
               ~selected:true ~disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react)))
+
+let () =
+  Jest.describe "Switch, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=switch]" (fun on_blur ->
+                T.render (fun () ->
+                    <Switch on_blur>
+                      <Switch.Content>
+                        <Switch.Control><Switch.Thumb /></Switch.Control>
+                        <Label>"Wi-Fi"</Label>
+                      </Switch.Content>
+                    </Switch>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=switch]" (fun on_blur ->
+                Twin.render
+                  (props ~size:`md ~default_selected:false ~is_disabled:false
+                     ~is_read_only:false ~is_required:false ~name:"wifi"
+                     ~on_blur ()))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

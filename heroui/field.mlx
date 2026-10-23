@@ -25,6 +25,23 @@ let controlled ~value ~default ~on_change =
   in
   (get, set)
 
+external related_target : Dom.focusEvent -> Dom.element Js.Nullable.t
+  = "relatedTarget"
+[@@mel.get]
+
+external current_target : Dom.focusEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+
+let on_leave on_blur e =
+  let left =
+    match Js.Nullable.toOption (related_target e) with
+    | Some next -> not (contains (current_target e) next)
+    | None -> true
+  in
+  if left then ignore (on_blur e)
+
 (* A label inside a control's own clickable label is a span: a label in a
    label is not HTML. *)
 let inline : Label.slot =

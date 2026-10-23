@@ -118,9 +118,9 @@ needs is added above it, never inside each field:
 - **A field is driven from outside.** It takes `value`, `on_change`,
   `on_blur`, `name`, `is_invalid` and its `Field_error`, which the
   application's state drives, and validates nothing itself. Its value may
-  still be kept, for a field nothing drives. Every field already takes
-  `value`, `on_change` and `name`, and all but `Switch` and `Slider`
-  `is_invalid`; none yet takes `on_blur`.
+  still be kept, for a field nothing drives. Every field takes `value`,
+  `on_change`, `name` and `on_blur`, called once focus leaves the field,
+  and all but `Slider`, whose HeroUI has none, `is_invalid`.
 - **A `Form` is a `<form>` and a context.** A field inside one registers
   its name, whether it is invalid, and how it is focused -- a radio group
   its checked radio or its first -- in the order of the page. On submit
@@ -227,8 +227,8 @@ page, its line in `coverage.mdx`, the README and `CHANGES.md`.
   disabled and invalid
 - [x] Fieldset, SwitchGroup, CheckboxGroup, NumberField, Slider,
   SearchField, InputGroup
-- [ ] Every field driven from outside: `on_blur` on each, `is_invalid` on
-  `Switch` and `Slider`
+- [x] Every field driven from outside: `on_blur` on each, `is_invalid` on
+  `Switch`
 - [ ] Form: a field's registration, a submit refused and the first invalid
   field focused, `validation_errors` by name
 - [ ] TimeField, on Kobalte's

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `on_blur` on every HeroUI field -- `Text_field`, `Number_field`,
+  `Search_field`, `Checkbox`, `Checkbox_group`, `Radio_group`, `Switch`
+  and `Slider` -- called once focus leaves the field for an element outside
+  it, so a form tells a field left. `Field.on_leave` is that handler, for a
+  field of an application's own.
+- `Solidtype_heroui.Switch` takes `is_invalid`, as HeroUI's does.
 - `format_options` on `Solidtype_heroui.Number_field`, `Meter`,
   `Progress_bar` and `Slider`, HeroUI's `formatOptions`: a currency, a
   percent or a unit, in Kobalte's locale. A slider's output and thumbs show

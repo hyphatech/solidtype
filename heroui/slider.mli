@@ -104,6 +104,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
+    ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->
     unit ->

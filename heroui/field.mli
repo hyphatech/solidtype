@@ -32,6 +32,12 @@ val controlled :
     kept, [default] at first. Setting it keeps the value and calls [on_change],
     whose result is ignored, so an optional callback is given as it comes. *)
 
+val on_leave : (Dom.focusEvent -> 'a) -> Dom.focusEvent -> unit
+(** [on_leave on_blur] is a field's [on_focus_out]: it calls [on_blur] when
+    focus leaves the field's element for one outside it, or for none, and not as
+    focus moves between the controls inside it, so a form reads a field left
+    once. [on_blur]'s result is ignored, as {!controlled}'s [on_change] is. *)
+
 (** The parts of a Kobalte component that make a field's content: its label and
     the input inside it. *)
 module type Kobalte = sig

@@ -192,7 +192,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(name : string option) ?(aria_label : string option)
     ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
-    ~(children : Jsx.content) () =
+    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -272,6 +272,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?text_value
       class_=(fun () ->
                after (Styles.NumberField.base (f.slots ())) (class_ ()))
+      on_focus_out=(Field.on_leave on_blur)
       data_slot="number-field"
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (is_invalid ()))

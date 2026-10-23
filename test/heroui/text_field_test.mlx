@@ -24,6 +24,7 @@ external field :
   ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
   ?default_value:(string[@mel.as "defaultValue"]) ->
   ?multiline:bool ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   field = ""
 [@@mel.obj]
@@ -297,3 +298,23 @@ let () =
           S.set set_value "Grace";
           Js.Promise.resolve
             E.(expect (value_of (input_of T.body)) |> toBe "Grace")))
+
+let () =
+  Jest.describe "Text_field, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=textfield]" (fun on_blur ->
+                T.render (fun () ->
+                    <Text_field on_blur>
+                      <Label>"Name"</Label> <Input />
+                    </Text_field>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=textfield]" (fun on_blur ->
+                ignore (Twin.field (field ~on_blur ()) : Dom.element))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

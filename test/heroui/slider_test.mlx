@@ -20,6 +20,7 @@ external props :
   ?is_disabled:(bool[@mel.as "isDisabled"]) ->
   ?format_options:
     (Solidtype_kobalte.Types.NumberFormatOptions.t[@mel.as "formatOptions"]) ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -290,3 +291,34 @@ let () =
       Jest.testPromise "steps nothing while disabled, as React's" (fun () ->
           let* r = both ~default_value:[| 30. |] ~is_disabled:true () in
           same r))
+
+let () =
+  Jest.describe "Slider, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=slider]" (fun on_blur ->
+                T.render (fun () ->
+                    <Slider default_value=(fun () -> [| 20.; 60. |]) on_blur>
+                      <Label>"Volume"</Label>
+                      <Slider.Track>
+                        <Slider.Fill />
+                        <Slider.Thumb index=0 />
+                        <Slider.Thumb index=1 />
+                      </Slider.Track>
+                    </Slider>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=slider]" (fun on_blur ->
+                ignore
+                  (Twin.render
+                     (props ~default_value:[| 20.; 60. |] ~on_blur ())
+                     (fun (_ : float array) -> ())
+                    : Dom.element))
+          in
+          Twin.cleanup ();
+          (* React's Slider takes no onBlur; a form needs it as of any
+             field. *)
+          E.(expect (solidtype, react) |> toEqual (1, 0))))

@@ -132,13 +132,14 @@ Each prop beside the name HeroUI's React component gives it.
 | `onChange` | `on_change` | `bool -> unit` | | Called as it is toggled |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
 | `children` | `children` | elements | | Its content, and its control |
 | `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its state |
 | `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
 | `name` | `name` | `string` | | Its name in a form |
 | `value` | `value` | `string` | | Its value in a form, while it is on |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
-| `isInvalid` | — | | | Not yet |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
 
 ### Switch.Content, Switch.Control and Switch.Thumb
 

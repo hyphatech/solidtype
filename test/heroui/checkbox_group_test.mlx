@@ -20,6 +20,7 @@ external props :
   ?is_invalid:(bool[@mel.as "isInvalid"]) ->
   ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
   ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -257,3 +258,42 @@ let () =
               (Option.bind (T.query "[data-slot=checkbox-group]") (fun e ->
                    T.attribute e "data-disabled"))
             |> toEqual (Some "true"))))
+
+let () =
+  Jest.describe "Checkbox_group, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=checkbox-group]" (fun on_blur ->
+                T.render (fun () ->
+                    <Checkbox_group on_blur>
+                      <Label>"Interests"</Label>
+                      <Checkbox value="coding">
+                        <Checkbox.Content>
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                          "Coding"
+                        </Checkbox.Content>
+                      </Checkbox>
+                      <Checkbox value="music">
+                        <Checkbox.Content>
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                          "Music"
+                        </Checkbox.Content>
+                      </Checkbox>
+                    </Checkbox_group>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=checkbox-group]" (fun on_blur ->
+                ignore
+                  (Twin.render (props ~on_blur ()) (fun (_ : string array) ->
+                       ())
+                    : Dom.element))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

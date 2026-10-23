@@ -55,9 +55,10 @@ end
 let%component make ?(size : [ `lg | `md | `sm ] = `md)
     ?(is_selected : bool option) ?(default_selected : bool = false)
     ?(on_change : (bool -> unit) option) ?(is_disabled : bool = false)
-    ?(is_read_only : bool = false) ?(is_required : bool = false)
-    ?(name : string option) ?(value : string option)
-    ?(aria_label : string option) ?(class_ : string option)
+    ?(is_invalid : bool = false) ?(is_read_only : bool = false)
+    ?(is_required : bool = false) ?(name : string option)
+    ?(value : string option) ?(aria_label : string option)
+    ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ~(children : Jsx.content) () =
   (* The state is the switch's, read by Kobalte and by every part alike. *)
   let on, change =
@@ -75,7 +76,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
           selected = on;
           indeterminate = (fun () -> false);
           disabled = (fun () -> is_disabled ());
-          invalid = (fun () -> false);
+          invalid = (fun () -> is_invalid ());
           read_only = (fun () -> is_read_only ());
           required = (fun () -> is_required ());
           aria_label;
@@ -96,12 +97,15 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       disabled=(fun () -> is_disabled ())
       read_only=(fun () -> is_read_only ())
       required=(fun () -> is_required ())
+      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
       ?name
       ?value
       class_=(fun () -> Styles.Switch.base (s.slots ()))
+      on_focus_out=(Field.on_leave on_blur)
       data_slot="switch"
       data_selected=(fun () -> Jsx.flag (on ()))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
       (fun () -> children ())

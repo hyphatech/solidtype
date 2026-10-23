@@ -16,6 +16,7 @@ external props :
   ?full_width:(bool[@mel.as "fullWidth"]) ->
   ?is_disabled:(bool[@mel.as "isDisabled"]) ->
   ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -207,3 +208,32 @@ let () =
       Jest.testPromise "is invalid, as React's is" (fun () ->
           let* r = both ~is_invalid:true () in
           same r))
+
+let () =
+  Jest.describe "Search_field, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=search-field]" (fun on_blur ->
+                T.render (fun () ->
+                    <Search_field on_blur>
+                      <Label>"Search"</Label>
+                      <Search_field.Group>
+                        <Search_field.Search_icon />
+                        <Search_field.Input />
+                        <Search_field.Clear_button />
+                      </Search_field.Group>
+                    </Search_field>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=search-field]" (fun on_blur ->
+                ignore
+                  (Twin.render (props ~on_blur ())
+                     (fun (_ : string) -> ())
+                     (fun (_ : string) -> ())
+                    : Dom.element))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

@@ -24,8 +24,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(default_value : string option) ?(on_change : (string -> unit) option)
     ?(is_required : bool = false) ?(is_invalid : bool = false)
     ?(is_disabled : bool = false) ?(is_read_only : bool = false)
-    ?(name : string option) ?(class_ : string option) ~(children : Jsx.content)
-    () =
+    ?(name : string option) ?(class_ : string option)
+    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
   let f =
     {
       variant;
@@ -49,6 +49,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                Styles.TextField.classes
                  (Styles.TextField.options ?full_width:(full_width ())
                     ?class_:(class_ ()) ()))
+      on_focus_out=(Field.on_leave on_blur)
       data_slot="textfield"
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_invalid=(fun () -> Jsx.flag (is_invalid ()))

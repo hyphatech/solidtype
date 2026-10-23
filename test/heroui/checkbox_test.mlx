@@ -20,6 +20,7 @@ external props :
   is_read_only:(bool[@mel.as "isReadOnly"]) ->
   is_required:(bool[@mel.as "isRequired"]) ->
   name:string ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -152,3 +153,32 @@ let () =
               ~indeterminate:false ~disabled:false ~invalid:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react)))
+
+let () =
+  Jest.describe "Checkbox, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=checkbox]" (fun on_blur ->
+                T.render (fun () ->
+                    <Checkbox on_blur>
+                      <Checkbox.Content>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        <Label>"Accept terms"</Label>
+                      </Checkbox.Content>
+                    </Checkbox>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=checkbox]" (fun on_blur ->
+                Twin.render
+                  (props ~variant:`primary ~default_selected:false
+                     ~is_indeterminate:false ~is_disabled:false
+                     ~is_invalid:false ~is_read_only:false ~is_required:false
+                     ~name:"terms" ~on_blur ()))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

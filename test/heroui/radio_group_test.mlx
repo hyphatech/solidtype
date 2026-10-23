@@ -24,6 +24,7 @@ external props :
   is_read_only:(bool[@mel.as "isReadOnly"]) ->
   is_required:(bool[@mel.as "isRequired"]) ->
   name:string ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -210,3 +211,39 @@ let () =
               ~starter_disabled:false ()
           in
           Js.Promise.resolve E.(expect solidtype |> toEqual react)))
+
+let () =
+  Jest.describe "Radio_group, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=radio-group]" (fun on_blur ->
+                T.render (fun () ->
+                    <Radio_group on_blur>
+                      <Label>"Plan"</Label>
+                      <Radio value="starter">
+                        <Radio.Content>
+                          <Radio.Control><Radio.Indicator /></Radio.Control>
+                          "Starter"
+                        </Radio.Content>
+                      </Radio>
+                      <Radio value="pro">
+                        <Radio.Content>
+                          <Radio.Control><Radio.Indicator /></Radio.Control>
+                          "Pro"
+                        </Radio.Content>
+                      </Radio>
+                    </Radio_group>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=radio-group]" (fun on_blur ->
+                Twin.render
+                  (props ~variant:`primary ~default_value:"starter"
+                     ~orientation:`vertical ~is_disabled:false ~is_invalid:false
+                     ~starter_disabled:false ~is_read_only:false
+                     ~is_required:false ~name:"plan" ~on_blur ()))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

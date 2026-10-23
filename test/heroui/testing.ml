@@ -121,3 +121,34 @@ let attributes_but but e =
   |> String.concat " "
 
 let attributes e = attributes_but [] e
+
+external query_all_in : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+external create_element : string -> Dom.element = "createElement"
+[@@mel.scope "document"]
+
+external append : Dom.element -> Dom.element -> Dom.element = "appendChild"
+[@@mel.send]
+
+external remove : Dom.element -> unit = "remove" [@@mel.send]
+
+(* How many times a field tells it is left as focus moves into each of its
+   controls in turn, and then out of it to a button after it: [render on_blur]
+   renders the field, found by [root], telling [on_blur] each time. *)
+let blurs ~root render =
+  let told = ref 0 in
+  render (fun (_ : Dom.focusEvent) -> incr told);
+  let outside = append body (create_element "button") in
+  (match query root with
+  | Some field ->
+      Js.Array.from
+        (query_all_in field "input:not([type=hidden]), textarea, [role=slider]")
+      |> Array.iter focus
+  | None -> ());
+  focus outside;
+  remove outside;
+  !told

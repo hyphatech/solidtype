@@ -24,6 +24,7 @@ external props :
   ?step:float ->
   ?format_options:
     (Solidtype_kobalte.Types.NumberFormatOptions.t[@mel.as "formatOptions"]) ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -259,3 +260,30 @@ let () =
               ()
           in
           same r))
+
+let () =
+  Jest.describe "Number_field, left" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "tells it is left once focus leaves it, as React's does"
+        (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=number-field]" (fun on_blur ->
+                T.render (fun () ->
+                    <Number_field on_blur>
+                      <Label>"Width"</Label>
+                      <Number_field.Group>
+                        <Number_field.Decrement_button />
+                        <Number_field.Input />
+                        <Number_field.Increment_button />
+                      </Number_field.Group>
+                    </Number_field>))
+          in
+          T.cleanup ();
+          let react =
+            T.blurs ~root:"[data-slot=number-field]" (fun on_blur ->
+                ignore
+                  (Twin.render (props ~on_blur ()) (fun (_ : float) -> ())
+                    : Dom.element))
+          in
+          Twin.cleanup ();
+          E.(expect (solidtype, react) |> toEqual (1, 1))))

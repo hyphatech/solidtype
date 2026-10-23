@@ -187,7 +187,7 @@ let%component make ?(value : float array option)
     ?(is_disabled : bool option) ?(name : string option)
     ?(aria_label : string option) ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
-    ~(children : Jsx.content) () =
+    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
   (* Each value as HeroUI's formatOptions asks, a decimal by default, in
      Kobalte's locale: Kobalte formats a thumb's value as a decimal alone. *)
   let formatter =
@@ -250,6 +250,7 @@ let%component make ?(value : float array option)
       class_=(fun () -> after (Styles.Slider.base (s.slots ())) (class_ ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
+      on_focus_out=(Field.on_leave on_blur)
       data_slot="slider">
       <Label.Slot.Provider value=(fun () -> label label_id)>
         (fun () -> children ())

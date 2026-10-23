@@ -102,8 +102,8 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(orientation : [ `horizontal | `vertical ] = `vertical)
     ?(is_disabled : bool option) ?(is_invalid : bool = false)
     ?(is_read_only : bool = false) ?(is_required : bool = false)
-    ?(name : string option) ?(class_ : string option) ~(children : Jsx.content)
-    () =
+    ?(name : string option) ?(class_ : string option)
+    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -142,6 +142,7 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
                Styles.RadioGroup.classes
                  (Styles.RadioGroup.options ~variant:(variant ())
                     ?class_:(class_ ()) ()))
+      on_focus_out=(Field.on_leave on_blur)
       data_slot="radio-group"
       data_orientation=(fun () ->
                          Jsx.data

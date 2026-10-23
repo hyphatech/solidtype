@@ -114,6 +114,7 @@ module Props : sig
     ?value:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->
     unit ->
