@@ -36,11 +36,15 @@ bindings, and [HeroUI](heroui/coverage/) the components built on them.
 
 ## Install
 
+It needs opam, with a switch of OCaml 5.5 or later, and
+[Bun](https://bun.sh) 1.3 or later, which installs the JavaScript side and
+runs Vite 8.
+
 The OCaml side, from Hypha's opam repository:
 
 ```sh
 opam repo add hypha https://github.com/hyphatech/opam-repository.git
-opam install solidtype ppx_solidtype mlx    # and solidtype-kobalte for Kobalte
+opam install solidtype    # and solidtype-kobalte for Kobalte
 ```
 
 The JavaScript side, with Vite and the plugin, which is an asset of each

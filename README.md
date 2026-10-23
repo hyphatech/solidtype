@@ -107,11 +107,15 @@ let make (props : Props.t) = <input class_="field" props />
 
 ## Getting started
 
+It needs opam, with a switch of OCaml 5.5 or later, and
+[Bun](https://bun.sh) 1.3 or later, which installs the JavaScript side and
+runs Vite 8.
+
 The OCaml side, from Hypha's opam repository:
 
 ```sh
 opam repo add hypha https://github.com/hyphatech/opam-repository.git
-opam install solidtype ppx_solidtype mlx    # and solidtype-kobalte for Kobalte
+opam install solidtype    # and solidtype-kobalte for Kobalte
 ```
 
 `dune-project` reads `.mlx` files:
