@@ -1,7 +1,11 @@
 # solidtype
 
-Solid, typed: OCaml front ends on [SolidJS](https://www.solidjs.com) and
-[Kobalte](https://kobalte.dev), compiled by [Melange](https://melange.re).
+Write [SolidJS](https://www.solidjs.com) components in OCaml. You write JSX
+in `.mlx` files, [Melange](https://melange.re) compiles them, and the
+browser gets the same code Solid's own compiler would produce, with OCaml's
+types checking your props, attributes and reactive reads. Bindings for
+[Kobalte](https://kobalte.dev) and a port of [HeroUI](https://heroui.com)'s
+components come with it.
 
 [![ci](https://img.shields.io/github/actions/workflow/status/hyphatech/solidtype/ci.yml?branch=main&label=ci)](https://github.com/hyphatech/solidtype/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/hyphatech/solidtype?label=release)](https://github.com/hyphatech/solidtype/releases)
@@ -11,25 +15,12 @@ Solid, typed: OCaml front ends on [SolidJS](https://www.solidjs.com) and
 
 **Documentation**: [hyphatech.github.io/solidtype](https://hyphatech.github.io/solidtype/)
 
-## Features
-
-- **Solid's own output**: a component in OCaml's JSX reaches the browser as the code Solid's compiler emits for the same JSX, prerendered and hydrated too.
-- **Typed**: a reactive read in the wrong place, a prop left out or an attribute an element does not take does not compile.
-- **Solid 1.9, whole**: signals, resources, stores, its components and its renderer, server rendering included.
-- **Kobalte 0.13, whole**: `solidtype-kobalte`, generated from Kobalte's own declarations.
-- **HeroUI 3.2's design**: `solidtype-heroui`, ported onto Kobalte by hand, each component beside the same one in React; [which are ported](https://hyphatech.github.io/solidtype/heroui/coverage/).
-
-## Install
+## Quickstart
 
 ```sh
 opam repo add hypha https://github.com/hyphatech/opam-repository.git
-opam install solidtype    # and solidtype-kobalte, solidtype-heroui
+opam install solidtype
 ```
-
-A whole page, from `dune-project` to Vite:
-[getting started](https://hyphatech.github.io/solidtype/).
-
-## Example
 
 ```ocaml
 module Jsx = Solidtype.Jsx
@@ -42,9 +33,8 @@ let make () =
   </button>
 ```
 
-## Contributing
-
-See [AGENTS.md](AGENTS.md).
+Setting up dune and Vite to build it:
+[Getting Started](https://hyphatech.github.io/solidtype/).
 
 ## Licence
 
