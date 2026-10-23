@@ -1,11 +1,7 @@
 # solidtype
 
-Write [SolidJS](https://www.solidjs.com) components in OCaml. You write JSX
-in `.mlx` files, [Melange](https://melange.re) compiles them, and the
-browser gets the same code Solid's own compiler would produce, with OCaml's
-types checking your props, attributes and reactive reads. Bindings for
-[Kobalte](https://kobalte.dev) and a port of [HeroUI](https://heroui.com)'s
-components come with it.
+SolidJS for OCaml, typed end to end, with [Kobalte](https://kobalte.dev) and
+[HeroUI](https://heroui.com) components.
 
 [![ci](https://img.shields.io/github/actions/workflow/status/hyphatech/solidtype/ci.yml?branch=main&label=ci)](https://github.com/hyphatech/solidtype/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/hyphatech/solidtype?label=release)](https://github.com/hyphatech/solidtype/releases)
