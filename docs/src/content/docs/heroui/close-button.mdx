@@ -19,8 +19,6 @@ import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islan
 gives, HeroUI's cross, and the state its styles read, declared as React Aria
 writes it.
 
-HeroUI's documentation: [CloseButton](https://heroui.com/en/docs/react/components/close-button).
-
 ## Usage
 
 <Example code={usage} title="close_button_usage.mlx"><Usage.make client:visible /></Example>
@@ -36,18 +34,6 @@ HeroUI's documentation: [CloseButton](https://heroui.com/en/docs/react/component
 Its children take the place of HeroUI's cross.
 
 <Example code={customIcon} title="close_button_custom_icon.mlx"><CustomIcon.make client:visible /></Example>
-
-## Beside React
-
-The same HeroUI CloseButton twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two elements:
-a marked row is one they disagree on, and a dimmed row is a framework's own --
-Solid's hydration key, React Aria's markers and the id it generates -- which no
-style reads. Hover, focus and press them to see the state each sets.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -106,3 +92,17 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | HeroUI's cross | Its icon |
 | render props | — | | | Not yet |
+
+## Beside React
+
+HeroUI documents the same component in React: [CloseButton](https://heroui.com/en/docs/react/components/close-button).
+
+The same HeroUI CloseButton twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two elements:
+a marked row is one they disagree on, and a dimmed row is a framework's own --
+Solid's hydration key, React Aria's markers and the id it generates -- which no
+style reads. Hover, focus and press them to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

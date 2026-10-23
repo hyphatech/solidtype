@@ -20,8 +20,6 @@ a badge is given becomes its `Badge.Label`, as in React. A badge has no
 behaviour, so it is HeroUI's spans as they are. Where HeroUI's examples mark
 an Avatar, these mark a square, until Avatar is ported.
 
-HeroUI's documentation: [Badge](https://heroui.com/en/docs/react/components/badge).
-
 ## Usage
 
 <Example code={BadgeUsageCode} title="badge_usage.mlx"><BadgeUsage.make client:visible /></Example>
@@ -44,17 +42,6 @@ HeroUI's documentation: [Badge](https://heroui.com/en/docs/react/components/badg
 
 HeroUI's Dot Badge, a badge with no content, and the colors it shows: the
 port's badge takes content.
-
-## Beside React
-
-The same HeroUI Badge twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two badges: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -106,3 +93,16 @@ string React takes, a hyphen written as an underscore: `` `top_right `` is
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | What it holds |
+
+## Beside React
+
+HeroUI documents the same component in React: [Badge](https://heroui.com/en/docs/react/components/badge).
+
+The same HeroUI Badge twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two badges: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

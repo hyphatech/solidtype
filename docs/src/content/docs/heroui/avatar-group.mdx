@@ -26,8 +26,6 @@ avatars inside it its `size`, `color` and `variant`, each where an avatar sets
 none itself, shows the first `max` of them, and counts the rest. Kobalte has
 no group.
 
-HeroUI's documentation: [AvatarGroup](https://heroui.com/en/docs/react/components/avatar-group).
-
 ## Usage
 
 <Example code={UsageCode} title="avatar_group_usage.mlx"><Usage.make client:visible /></Example>
@@ -81,16 +79,6 @@ avatar joins its group as it is made, and is counted in the order the
 avatars were made: an avatar a `For` adds later is counted after the others,
 wherever it is shown.
 
-## Beside React
-
-The same HeroUI AvatarGroup twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two groups: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
-
 ## Customization
 
 ### Tailwind CSS
@@ -143,3 +131,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `variant` | `variant` | `` [ `default \| `soft ] `` | Its variant, else the group's |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | The count, "+3" |
+
+## Beside React
+
+HeroUI documents the same component in React: [AvatarGroup](https://heroui.com/en/docs/react/components/avatar-group).
+
+The same HeroUI AvatarGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

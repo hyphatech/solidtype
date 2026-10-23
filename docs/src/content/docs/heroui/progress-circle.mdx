@@ -26,8 +26,6 @@ the circle that spins as HeroUI's styles animate it. No label names it, so it
 is named by its `aria_label`, and a reader is told its value as Kobalte formats
 it, a percentage.
 
-HeroUI's documentation: [ProgressCircle](https://heroui.com/en/docs/react/components/progress-circle).
-
 ## Usage
 
 <Example code={UsageCode} title="progress_circle_usage.mlx"><Usage.make client:visible /></Example>
@@ -69,16 +67,6 @@ radius, so a circle of any size shows its value: HeroUI's measures it on the
 default radius whatever `r` it is given.
 
 <Example code={CustomSvgCode} title="progress_circle_custom_svg.mlx"><CustomSvg.make client:visible /></Example>
-
-## Beside React
-
-The same HeroUI ProgressCircle twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two circles: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Styling Reference
 
@@ -125,3 +113,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `r` | `r` | `float` | `16.` | Its radius |
 | `strokeWidth` | `stroke_width` | `float` | `4.` | Its stroke |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
+
+## Beside React
+
+HeroUI documents the same component in React: [ProgressCircle](https://heroui.com/en/docs/react/components/progress-circle).
+
+The same HeroUI ProgressCircle twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two circles: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

@@ -21,8 +21,6 @@ HeroUI's own `linkVariants` gives, and `Link.Icon`, HeroUI's arrow. Its state
 is declared as React Aria writes it: Enter presses a link, and Space does
 not.
 
-HeroUI's documentation: [Link](https://heroui.com/en/docs/react/components/link).
-
 ## Usage
 
 <Example code={LinkUsageCode} title="link_usage.mlx"><LinkUsage.make client:visible /></Example>
@@ -48,17 +46,6 @@ HeroUI's documentation: [Link](https://heroui.com/en/docs/react/components/link)
 ### Not yet
 
 HeroUI's Render Function, which needs `render`.
-
-## Beside React
-
-The same HeroUI Link twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two links: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -110,3 +97,16 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | Its icon; HeroUI's arrow when none is given |
+
+## Beside React
+
+HeroUI documents the same component in React: [Link](https://heroui.com/en/docs/react/components/link).
+
+The same HeroUI Link twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two links: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

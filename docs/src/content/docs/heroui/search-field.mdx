@@ -30,8 +30,6 @@ Escape clears it, Enter submits it, and its clear button clears it and gives
 its input the focus back, as React Aria's does. Kobalte's `Search` is a
 combobox; HeroUI's search field is a text field, which this is.
 
-HeroUI's documentation: [SearchField](https://heroui.com/en/docs/react/components/search-field).
-
 ## Usage
 
 <Example code={UsageCode} title="search_field_usage.mlx"><Usage.make client:visible /></Example>
@@ -94,16 +92,6 @@ magnifier, inside a span with its class.
 HeroUI's validation examples need React Aria's `validate`, which is not
 ported yet.
 
-## Beside React
-
-The same HeroUI SearchField twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two groups: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
-
 ## Styling Reference
 
 ### CSS Classes
@@ -148,3 +136,15 @@ Each prop beside the name HeroUI's React component gives it.
 
 Each takes `class_`, added after HeroUI's class; the input a `placeholder`;
 the icon `children`, drawn in place of HeroUI's magnifier.
+
+## Beside React
+
+HeroUI documents the same component in React: [SearchField](https://heroui.com/en/docs/react/components/search-field).
+
+The same HeroUI SearchField twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

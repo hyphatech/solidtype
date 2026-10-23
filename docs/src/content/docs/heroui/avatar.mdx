@@ -23,8 +23,6 @@ classes HeroUI's own `avatarVariants` gives. Kobalte renders its image once it
 has loaded, and its fallback until then or where it cannot, as Radix's avatar
 does under HeroUI's.
 
-HeroUI's documentation: [Avatar](https://heroui.com/en/docs/react/components/avatar).
-
 ## Usage
 
 <Example code={UsageCode} title="avatar_usage.mlx"><Usage.make client:visible /></Example>
@@ -63,16 +61,6 @@ Kobalte reads on its root, where Radix takes `delayMs` on the fallback.
 
 HeroUI's Custom Image Component example renders another image component in
 place of the `<img>`, by `asChild`, which the port does not take.
-
-## Beside React
-
-The same HeroUI Avatar twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two avatars: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -146,3 +134,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | Its color, else the avatar's |
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | Initials or an icon |
+
+## Beside React
+
+HeroUI documents the same component in React: [Avatar](https://heroui.com/en/docs/react/components/avatar).
+
+The same HeroUI Avatar twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two avatars: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

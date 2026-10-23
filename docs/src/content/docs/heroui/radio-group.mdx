@@ -28,8 +28,6 @@ describes that radio's input. Its state is declared as React Aria writes it:
 Space chooses a radio and the arrow keys move the choice, and Enter presses a
 radio's content as React Aria's does, though it chooses nothing.
 
-HeroUI's documentation: [Radio Group](https://heroui.com/en/docs/react/components/radio-group).
-
 ## Usage
 
 <Example code={RadioGroupUsageCode} title="radio_group_usage.mlx"><RadioGroupUsage.make client:visible /></Example>
@@ -61,18 +59,6 @@ HeroUI's documentation: [Radio Group](https://heroui.com/en/docs/react/component
 HeroUI's In Surface, until Surface is ported; Validation and Delivery &
 Payment, which need a form and `FieldError`; Custom Indicator, whose
 indicator is a render prop; and Render Function, which needs `render`.
-
-## Beside React
-
-The same HeroUI RadioGroup twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two first
-contents: a marked row is one they disagree on, and a dimmed row is a
-framework's own, which no style reads. A description is Kobalte's `<div>`
-where React Aria's is a `<span>`; each is the one its input is described by.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -160,3 +146,17 @@ string React takes.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | What it holds; optional on the indicator |
+
+## Beside React
+
+HeroUI documents the same component in React: [Radio Group](https://heroui.com/en/docs/react/components/radio-group).
+
+The same HeroUI RadioGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two first
+contents: a marked row is one they disagree on, and a dimmed row is a
+framework's own, which no style reads. A description is Kobalte's `<div>`
+where React Aria's is a `<span>`; each is the one its input is described by.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

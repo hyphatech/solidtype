@@ -26,8 +26,6 @@ at. It measures itself as it scrolls, as it is resized and as its content
 changes, as HeroUI's hook does, and declares each edge as that hook writes
 it. Kobalte has no scroll shadow.
 
-HeroUI's documentation: [ScrollShadow](https://heroui.com/en/docs/react/components/scroll-shadow).
-
 ## Usage
 
 <Example code={UsageCode} title="scroll_shadow_usage.mlx"><Usage.make client:visible /></Example>
@@ -56,16 +54,6 @@ HeroUI's documentation: [ScrollShadow](https://heroui.com/en/docs/react/componen
 at.
 
 <Example code={VisibilityChangeCode} title="scroll_shadow_visibility_change.mlx"><VisibilityChange.make client:visible /></Example>
-
-## Beside React
-
-The same HeroUI ScrollShadow twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two: a marked
-row is one they disagree on. Scroll them to see the edges each marks.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -139,3 +127,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `onVisibilityChange` | `on_visibility_change` | `Scroll_shadow.edge -> unit` | | Told each change of the edges measured |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | What it scrolls |
+
+## Beside React
+
+HeroUI documents the same component in React: [ScrollShadow](https://heroui.com/en/docs/react/components/scroll-shadow).
+
+The same HeroUI ScrollShadow twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two: a marked
+row is one they disagree on. Scroll them to see the edges each marks.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

@@ -24,8 +24,6 @@ output shows its value as Kobalte formats it for the reader's locale, a
 percentage, and its fill is as wide in its track as its value is far along
 its range.
 
-HeroUI's documentation: [Meter](https://heroui.com/en/docs/react/components/meter).
-
 ## Usage
 
 <Example code={UsageCode} title="meter_usage.mlx"><Usage.make client:visible /></Example>
@@ -68,16 +66,6 @@ value's share of its range, and any other style the value itself.
 
 <Example code={FormatCode} title="meter_format.mlx"><Format.make client:visible /></Example>
 
-## Beside React
-
-The same HeroUI Meter twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two meters: a marked
-row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
-
 ## Styling Reference
 
 ### CSS Classes
@@ -108,3 +96,15 @@ Each prop beside the name HeroUI's React component gives it.
 
 Each takes `class_`, added after HeroUI's class; the output `children`, in
 place of its value.
+
+## Beside React
+
+HeroUI documents the same component in React: [Meter](https://heroui.com/en/docs/react/components/meter).
+
+The same HeroUI Meter twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two meters: a marked
+row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

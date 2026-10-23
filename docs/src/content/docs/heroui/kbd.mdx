@@ -23,8 +23,6 @@ import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islan
 `<abbr>`'s title, as HeroUI's are. A key has no behaviour, so no Kobalte
 component underlies it.
 
-HeroUI's documentation: [Kbd](https://heroui.com/en/docs/react/components/kbd).
-
 ## Usage
 
 <Example code={UsageCode} title="kbd_usage.mlx"><Usage.make client:visible /></Example>
@@ -55,16 +53,6 @@ HeroUI's documentation: [Kbd](https://heroui.com/en/docs/react/components/kbd).
 ### Special Keys
 
 <Example code={SpecialCode} title="kbd_special.mlx"><Special.make client:visible /></Example>
-
-## Beside React
-
-The same HeroUI Kbd twice, under the same props: in solidtype on the left, in
-React on the right. Below them, every attribute of the two keys: a marked row
-is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -156,3 +144,15 @@ Each key, the name React gives it, and its symbol and title:
 | `` `fn `` | `"fn"` | Fn Fn |
 | `` `win `` | `"win"` | ⌘ Win |
 | `` `alt `` | `"alt"` | ⌥ Alt |
+
+## Beside React
+
+HeroUI documents the same component in React: [Kbd](https://heroui.com/en/docs/react/components/kbd).
+
+The same HeroUI Kbd twice, under the same props: in solidtype on the left, in
+React on the right. Below them, every attribute of the two keys: a marked row
+is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

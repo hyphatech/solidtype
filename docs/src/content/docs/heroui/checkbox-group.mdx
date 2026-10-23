@@ -23,8 +23,6 @@ group checks and is told of. Its label names it and its description describes
 it and each checkbox, as React Aria's do; a checkbox's own description
 describes it alone.
 
-HeroUI's documentation: [CheckboxGroup](https://heroui.com/en/docs/react/components/checkbox-group).
-
 ## Usage
 
 <Example code={UsageCode} title="checkbox_group_usage.mlx"><Usage.make client:visible /></Example>
@@ -50,16 +48,6 @@ it.
 
 HeroUI's Validation example validates the group on a form's submission, by
 React Aria's native validation, which is not ported yet; `is_invalid` marks it.
-
-## Beside React
-
-The same HeroUI CheckboxGroup twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two groups: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Styling Reference
 
@@ -93,3 +81,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
 | `children` | `children` | elements | | Its label, description and checkboxes |
+
+## Beside React
+
+HeroUI documents the same component in React: [CheckboxGroup](https://heroui.com/en/docs/react/components/checkbox-group).
+
+The same HeroUI CheckboxGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

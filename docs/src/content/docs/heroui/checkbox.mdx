@@ -27,8 +27,6 @@ field, `Checkbox.Content`, the clickable label that holds Kobalte's input,
 `Checkbox.Control`, `Checkbox.Indicator` with HeroUI's own check and dash, and
 HeroUI's `Label`. Its state is declared as React Aria writes it.
 
-HeroUI's documentation: [Checkbox](https://heroui.com/en/docs/react/components/checkbox).
-
 ## Usage
 
 <Example code={CheckboxUsageCode} title="checkbox_usage.mlx"><CheckboxUsage.make client:visible /></Example>
@@ -68,17 +66,6 @@ HeroUI's documentation: [Checkbox](https://heroui.com/en/docs/react/components/c
 HeroUI's External Label, which needs an `id` the label names; With
 Description and Form Integration, until their parts are ported; and Render
 Props and Render Function.
-
-## Beside React
-
-The same HeroUI Checkbox twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two contents: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -143,3 +130,16 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | What it holds; the indicator's own mark when given |
+
+## Beside React
+
+HeroUI documents the same component in React: [Checkbox](https://heroui.com/en/docs/react/components/checkbox).
+
+The same HeroUI Checkbox twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two contents: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

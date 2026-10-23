@@ -27,8 +27,6 @@ import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islan
 wrapper that hides its content while it loads, with a role and sizes of its
 own; HeroUI's is the placeholder alone, which this is, with no behaviour.
 
-HeroUI's documentation: [Skeleton](https://heroui.com/en/docs/react/components/skeleton).
-
 ## Usage
 
 <Example code={UsageCode} title="skeleton_usage.mlx"><Usage.make client:visible /></Example>
@@ -61,16 +59,6 @@ on their container, and `` animation_type=`none `` on each.
 ### Animation Types
 
 <Example code={AnimationTypesCode} title="skeleton_animation_types.mlx"><AnimationTypes.make client:visible /></Example>
-
-## Beside React
-
-The same HeroUI Skeleton twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two: a marked
-row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -137,3 +125,15 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|---|
 | `animationType` | `animation_type` | `` [ `shimmer \| `pulse \| `none ] `` | the page's `--skeleton-animation`, else `` `shimmer `` | How it moves |
 | `className` | `class_` | `string` | | Added after HeroUI's classes: its shape |
+
+## Beside React
+
+HeroUI documents the same component in React: [Skeleton](https://heroui.com/en/docs/react/components/skeleton).
+
+The same HeroUI Skeleton twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two: a marked
+row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

@@ -29,8 +29,6 @@ import SwitchGroupHorizontalCode from "../../../../islands/switch_group_horizont
 `Switch.Control` and `Switch.Thumb`, and HeroUI's `Label`. Its state is
 declared as React Aria writes it: Space toggles a switch, and Enter does not.
 
-HeroUI's documentation: [Switch](https://heroui.com/en/docs/react/components/switch).
-
 ## Usage
 
 <Example code={SwitchUsageCode} title="switch_usage.mlx"><SwitchUsage.make client:visible /></Example>
@@ -76,17 +74,6 @@ the classes HeroUI's own `switchGroupVariants` gives; each switch is its own.
 
 HeroUI's With Icons, With Description and Form Integration, until their parts
 are ported; and Render Props and Render Function.
-
-## Beside React
-
-The same HeroUI Switch twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two contents: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -157,3 +144,16 @@ Each prop beside the name HeroUI's React component gives it.
 | `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | How its switches are laid out |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its switches |
+
+## Beside React
+
+HeroUI documents the same component in React: [Switch](https://heroui.com/en/docs/react/components/switch).
+
+The same HeroUI Switch twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two contents: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

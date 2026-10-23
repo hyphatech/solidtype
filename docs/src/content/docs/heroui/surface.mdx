@@ -17,8 +17,6 @@ import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islan
 behaviour: it gives what is inside it its variant, by `Surface.Context`, so a
 part can choose the colours that stand out on it.
 
-HeroUI's documentation: [Surface](https://heroui.com/en/docs/react/components/surface).
-
 ## Usage
 
 <Example code={UsageCode} title="surface_usage.mlx"><Usage.make client:visible /></Example>
@@ -51,16 +49,6 @@ let on_surface () =
 
 HeroUI's With Form Components example needs Input and TextArea, which are not
 ported yet.
-
-## Beside React
-
-The same HeroUI Surface twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two elements: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -106,3 +94,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its content |
 | `SurfaceContext` | `Surface.Context` | `(unit -> variant) option` | | The variant a part inside it reads |
+
+## Beside React
+
+HeroUI documents the same component in React: [Surface](https://heroui.com/en/docs/react/components/surface).
+
+The same HeroUI Surface twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two elements: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

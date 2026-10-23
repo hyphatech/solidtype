@@ -20,8 +20,6 @@ import ChipIconsCode from "../../../../islands/chip_icons.mlx?raw";
 `chipVariants` gives. Text a chip is given becomes its `Chip.Label`, as in
 React. A chip has no behaviour, so it is HeroUI's spans as they are.
 
-HeroUI's documentation: [Chip](https://heroui.com/en/docs/react/components/chip).
-
 ## Usage
 
 <Example code={ChipUsageCode} title="chip_usage.mlx"><ChipUsage.make client:visible /></Example>
@@ -47,17 +45,6 @@ HeroUI's documentation: [Chip](https://heroui.com/en/docs/react/components/chip)
 ### Not yet
 
 Nothing of HeroUI's examples: each is here.
-
-## Beside React
-
-The same HeroUI Chip twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two chips: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -105,3 +92,16 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | Its text |
+
+## Beside React
+
+HeroUI documents the same component in React: [Chip](https://heroui.com/en/docs/react/components/chip).
+
+The same HeroUI Chip twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two chips: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

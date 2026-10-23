@@ -21,8 +21,6 @@ say, from its own state, by its `is_invalid`; when its error shows is the
 application's too, from the field's `on_blur`. The form asks the browser to
 validate nothing, `novalidate`, since a field's input may be one Kobalte hides.
 
-HeroUI's documentation: [Form](https://heroui.com/en/docs/react/components/form).
-
 ## Usage
 
 The rules are the application's, from its signals; each error shows once its
@@ -54,12 +52,6 @@ as React's does, or until the errors are given again.
 HeroUI's `onInvalid`, to choose what a refused submit focuses, and the
 `render` function.
 
-## Beside React
-
-HeroUI's Form has no classes and no state of its own to compare; its test runs
-the same server error through the port and HeroUI's React Form, shown, typed
-into and left.
-
 ## Styling Reference
 
 `Form` renders a `<form>` with no classes of HeroUI's. Its fields' look comes
@@ -79,3 +71,11 @@ from their own components.
 | `className` | `class_` | `string` | | Its classes |
 | `validationBehavior` | — | | | A field validates nothing itself: it is invalid as the application says |
 | `onInvalid` | — | | | Not yet: a refused submit focuses the first invalid field |
+
+## Beside React
+
+HeroUI documents the same component in React: [Form](https://heroui.com/en/docs/react/components/form).
+
+HeroUI's Form has no classes and no state of its own to compare; its test runs
+the same server error through the port and HeroUI's React Form, shown, typed
+into and left.

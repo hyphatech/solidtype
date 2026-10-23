@@ -22,8 +22,6 @@ icon. Its gradients take ids of their own from Solid's `createUniqueId`, so
 two spinners on a page never share one, and a prerendered page hydrates with
 the same ids. A spinner has no behaviour, so no Kobalte component underlies it.
 
-HeroUI's documentation: [Spinner](https://heroui.com/en/docs/react/components/spinner).
-
 ## Usage
 
 <Example code={UsageCode} title="spinner_usage.mlx"><Usage.make client:visible /></Example>
@@ -45,16 +43,6 @@ An animation utility changes how fast one spinner turns; with
 motion.
 
 <Example code={SpeedCode} title="spinner_speed.mlx"><Speed.make client:visible /></Example>
-
-## Beside React
-
-The same HeroUI Spinner twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two spinners: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -102,3 +90,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `color` | `color` | `` [ `accent \| `current \| `danger \| `success \| `warning ] `` | `` `accent `` | Its color |
 | `aria-label` | `aria_label` | `string` | `"Loading"` | Its name |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+## Beside React
+
+HeroUI documents the same component in React: [Spinner](https://heroui.com/en/docs/react/components/spinner).
+
+The same HeroUI Spinner twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two spinners: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

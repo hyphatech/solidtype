@@ -19,8 +19,6 @@ own `cardVariants` gives. Kobalte has no card, and a card has no behaviour: a
 card but a transparent one is a surface, which it gives what is inside it by
 `Surface.Context`, as HeroUI's does.
 
-HeroUI's documentation: [Card](https://heroui.com/en/docs/react/components/card).
-
 ## Usage
 
 <Example code={UsageCode} title="card_usage.mlx"><Usage.make client:visible /></Example>
@@ -59,16 +57,6 @@ A card's variant says how prominent it is, as a surface's does:
 
 HeroUI's With Avatar, With Images and With Form examples need Avatar, Input
 and TextField, which are not ported yet.
-
-## Beside React
-
-The same HeroUI Card twice, under the same props: in solidtype on the left, in
-React on the right. Below them, every attribute of the two cards: a marked row
-is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
 
 ## Customization
 
@@ -144,3 +132,15 @@ Each prop beside the name HeroUI's React component gives it.
 | `id` | `id` | `string` | Its id, for a card it names |
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | The title, an `<h3>` |
+
+## Beside React
+
+HeroUI documents the same component in React: [Card](https://heroui.com/en/docs/react/components/card).
+
+The same HeroUI Card twice, under the same props: in solidtype on the left, in
+React on the right. Below them, every attribute of the two cards: a marked row
+is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
