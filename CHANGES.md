@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.2.0 (2026-10-23)
 
 - `Solidtype_heroui.Toggle_button` and `Toggle_button_group`: HeroUI's
   ToggleButton and ToggleButtonGroup on Kobalte's toggle button and toggle
