@@ -233,7 +233,7 @@ page, its line in `coverage.mdx`, the README and `CHANGES.md`.
   `Switch`
 - [x] Form: a field's registration, a submit refused and the first invalid
   field focused, `validation_errors` by name
-- [ ] TimeField, on Kobalte's
+- [x] TimeField, on Kobalte's
 - [ ] ErrorMessage, with Calendar in group 7
 
 ### Group 3: status

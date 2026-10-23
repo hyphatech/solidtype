@@ -1,0 +1,23 @@
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+
+let make () =
+  <Time_field class_="w-64" name="time">
+    <Label>"Time"</Label>
+    <Time_field.Group>
+      <Time_field.Prefix>
+        <svg
+          class_="size-4 text-muted"
+          view_box="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke_width="1.5">
+          <circle cx="8" cy="8" r="6.25" /> <path d="M8 4.5V8l2.5 1.5" />
+        </svg>
+      </Time_field.Prefix>
+      <Time_field.Input>
+        (fun segment ->
+          <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment) />)
+      </Time_field.Input>
+    </Time_field.Group>
+  </Time_field>

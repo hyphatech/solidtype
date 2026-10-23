@@ -355,3 +355,13 @@ external progress_bar_props :
 external progress_bar : Dom.htmlDivElement -> progress_bar_props -> unit
   = "progressBar"
 [@@mel.module "./react/heroui.tsx"]
+
+type time_field_props
+
+external time_field_props :
+  variant:string -> is_disabled:bool -> unit -> time_field_props = ""
+[@@mel.obj]
+
+external time_field : Dom.htmlDivElement -> time_field_props -> unit
+  = "timeField"
+[@@mel.module "./react/heroui.tsx"]

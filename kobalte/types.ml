@@ -7,7 +7,6 @@ type ('a, 'b) either
 type t_array_buffer
 type t_big_int_to_locale_string_options
 type t_blob
-type t_date_time_format_part
 type t_number_format_part
 type t_readable_stream
 type t_resolved_collator_options
@@ -118,6 +117,7 @@ type t_combobox_data_set
 type t_combobox_context_value_on_input_key_down
 type t_context_menu_context_value_set_anchor_rect
 type t_hover_card_data_set
+type t_date_time_format_part
 type t_date_time_format_format_range
 type t_selection_manager
 type t_menubar_data_set
@@ -168,11 +168,6 @@ end
 (* The standard library's Blob, opaque. *)
 module Blob = struct
   type t = t_blob
-end
-
-(* The standard library's DateTimeFormatPart, opaque. *)
-module DateTimeFormatPart = struct
-  type t = t_date_time_format_part
 end
 
 (* The standard library's NumberFormatPart, opaque. *)
@@ -1567,6 +1562,13 @@ end
 
 module HoverCardDataSet = struct
   type t = t_hover_card_data_set
+end
+
+module DateTimeFormatPart = struct
+  type t = t_date_time_format_part
+  external type_ : t -> [ `hour | `minute | `second | `dayPeriod | `day | `era | `literal | `month | `timeZoneName | `weekday | `year | `unknown | `fractionalSecond ] = "type" [@@mel.get]
+  external value : t -> string = "value" [@@mel.get]
+  external make : type_:([ `hour | `minute | `second | `dayPeriod | `day | `era | `literal | `month | `timeZoneName | `weekday | `year | `unknown | `fractionalSecond ] [@mel.as "type"]) -> value:(string [@mel.as "value"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module DateTimeFormat_FormatRange = struct

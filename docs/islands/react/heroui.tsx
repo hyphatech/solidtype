@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -503,6 +503,24 @@ export function progressBar(host: HTMLElement, props: ProgressBarProps): void {
           <ProgressBar.Fill />
         </ProgressBar.Track>
       </ProgressBar>,
+    ),
+  );
+}
+
+type TimeFieldProps = {
+  variant: "primary" | "secondary";
+  is_disabled: boolean;
+};
+
+export function timeField(host: HTMLElement, { variant, is_disabled }: TimeFieldProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <TimeField isDisabled={is_disabled} className="w-56" name="time">
+        <Label>Time</Label>
+        <TimeField.Group variant={variant}>
+          <TimeField.Input>{(segment) => <TimeField.Segment segment={segment} />}</TimeField.Input>
+        </TimeField.Group>
+      </TimeField>,
     ),
   );
 }

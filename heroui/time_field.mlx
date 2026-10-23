@@ -1,0 +1,367 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Kobalte = Solidtype_kobalte.TimeField
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+module Time = Types.Time
+
+type segment = [ `hour | `minute | `second | `dayPeriod ]
+
+(* What a field's parts read of it: its value, as Kobalte has it, and its
+   state. *)
+type field = {
+  value : unit -> Time.t option;
+  around : segment -> string array * string array;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+  read_only : unit -> bool;
+  full_width : unit -> bool option;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = field
+end)
+
+let within part =
+  match Context.use () with
+  | Some f -> f
+  | None -> invalid_arg (part ^ " is used inside a Time_field")
+
+(* A group's classes, which the parts inside it read. *)
+module Group_context = Solidtype.Context.Make_optional (struct
+  type t = unit -> Styles.DateInputGroup.slots
+end)
+
+let in_group part =
+  match Group_context.use () with
+  | Some slots -> slots
+  | None -> invalid_arg (part ^ " is used inside a Time_field.Group")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Parts = Field.Slots (struct
+  let label = Kobalte.Label.component
+  let description = Kobalte.Description.component
+  let error = Kobalte.ErrorMessage.component
+end)
+
+module Group = struct
+  let%component make ?(variant : [ `primary | `secondary ] option)
+      ?(full_width : bool option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let f = within "Time_field.Group" in
+    (* A group is as wide as it says, else as its field is. *)
+    let full_width () =
+      match full_width () with Some w -> Some w | None -> f.full_width ()
+    in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let slots () =
+      Styles.DateInputGroup.slots
+        (Styles.DateInputGroup.options ?full_width:(full_width ())
+           ?variant:(variant ()) ())
+    in
+    <Group_context.Provider value=(fun () -> slots)>
+      <div
+        role=`group
+        ref=(fun e -> Interaction.watch i e)
+        class_=(fun () ->
+                 after (Styles.DateInputGroup.base (slots ())) (class_ ()))
+        data_slot="date-input-group"
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+        (fun () -> children ())
+      </div>
+    </Group_context.Provider>
+end
+
+module Prefix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_group "Time_field.Prefix" in
+    <div
+      class_=(fun () ->
+               after (Styles.DateInputGroup.prefix (slots ())) (class_ ()))
+      data_slot="date-input-group-prefix">
+      (fun () -> children ())
+    </div>
+end
+
+module Suffix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_group "Time_field.Suffix" in
+    <div
+      class_=(fun () ->
+               after (Styles.DateInputGroup.suffix (slots ())) (class_ ()))
+      data_slot="date-input-group-suffix">
+      (fun () -> children ())
+    </div>
+end
+
+module Input = struct
+  let%component make ?(class_ : string option)
+      ~(children : segment S.accessor -> Jsx.element) () =
+    let f = within "Time_field.Input" in
+    let slots = in_group "Time_field.Input" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    (* React Aria's input is a group of its own, where Kobalte's presents. *)
+    <Kobalte.Input
+      role=`group
+      ref=(fun e -> Interaction.watch i e)
+      class_=(fun () ->
+               after (Styles.DateInputGroup.input (slots ())) (class_ ()))
+      data_slot="date-input-group-input"
+      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+      (fun segment ->
+        let literals side =
+          <For each=(fun () -> side (f.around (S.get segment)))>
+            (fun text _ ->
+              <span
+                aria_hidden=true
+                class_=(fun () -> Styles.DateInputGroup.segment (slots ()))
+                data_slot="date-input-group-segment"
+                data_type="literal"
+                data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+                data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+                (fun () -> Jsx.string text)
+              </span>)
+          </For>
+        in
+        Jsx.fragment [| literals fst; children segment; literals snd |])
+    </Kobalte.Input>
+end
+
+module Segment = struct
+  let%component make ~(segment : segment) ?(class_ : string option) () =
+    let f = within "Time_field.Segment" in
+    let slots = in_group "Time_field.Segment" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    (* A segment shows its placeholder while the field's value has no part
+       for it, AM or PM by its hour. *)
+    let placeholder () =
+      let part =
+        match segment () with
+        | `hour | `dayPeriod -> Time.hour
+        | `minute -> Time.minute
+        | `second -> Time.second
+      in
+      Option.is_none (Option.bind (f.value ()) part)
+    in
+    <Kobalte.Segment
+      segment=(fun () -> segment ())
+      ref=(fun e -> Interaction.watch i e)
+      class_=(fun () ->
+               after (Styles.DateInputGroup.segment (slots ())) (class_ ()))
+             (* Kobalte leaves a disabled segment editable, its text typed into. *)
+      content_editable=(fun () ->
+                         if f.disabled () || f.read_only () then "false"
+                         else "true")
+      data_slot="date-input-group-segment"
+      data_placeholder=(fun () -> Jsx.flag (placeholder ()))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+      data_readonly=(fun () -> Jsx.flag (f.read_only ()))>
+      (* Kobalte's placeholder is a dash an hour, React Aria's two. *)
+      (fun () ->
+        match segment () with
+        | (`hour | `minute | `second) when placeholder () ->
+            Jsx.string {js|––|js}
+        | `hour | `minute | `second | `dayPeriod -> Jsx.string "")
+    </Kobalte.Segment>
+end
+
+let thirteen () =
+  Js.Date.make ~year:2000. ~month:0. ~date:1. ~hours:13. ~minutes:0. ()
+
+(* Whether the reader's locale tells the time on a 12-hour clock, as React
+   Aria's default is: 13:00 in it, in Latin digits, names no 13. *)
+let twelve_hours formatter =
+  not
+    (Js.String.includes ~search:"13"
+       (Types.DateTimeFormat.format (S.get formatter)
+          ~date:(Types.Either.right (thirteen ()))
+          ()))
+
+let%component make ?(value : Time.t option) ?(default_value : Time.t option)
+    ?(on_change : (Time.t -> unit) option) ?(placeholder_value : Time.t option)
+    ?(min_value : Time.t option) ?(max_value : Time.t option)
+    ?(granularity : [ `hour | `minute | `second ] option)
+    ?(hour_cycle : [ `h12 | `h24 ] option)
+    ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+    ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+    ?(is_read_only : bool = false) ?(name : string option)
+    ?(aria_label : string option) ?(full_width : bool option)
+    ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ~(children : Jsx.content) () =
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let current, set =
+    Field.controlled
+      ~value:(fun () -> Option.map Option.some (value ()))
+      ~default:(default_value ())
+      ~on_change:
+        (Option.iter (fun v ->
+             in_form.changed ();
+             ignore (on_change v : unit option)))
+  in
+  (* A time partly typed is the field's alone, as React Aria keeps it: the
+     field's value changes, and its on_change is told, once every segment has
+     its part. Kobalte is given the time shown, either. *)
+  let typed, set_typed = S.create_signal None in
+  let shown () =
+    match S.get typed with Some t -> Some t | None -> current ()
+  in
+  let whole t =
+    let has part = Option.is_some (part t) in
+    has Time.hour
+    &&
+    match Option.value (granularity ()) ~default:`minute with
+    | `hour -> true
+    | `minute -> has Time.minute
+    | `second -> has Time.minute && has Time.second
+  in
+  let change t =
+    if whole t then (
+      S.set set_typed None;
+      set (Some t))
+    else S.set set_typed (Some t)
+  in
+  let formatter =
+    I18n.create_date_formatter
+      (Types.Either.left
+         (Types.DateTimeFormatOptions.make ~hour:"numeric"
+            ~numbering_system:"latn" ()))
+  in
+  let twelve () =
+    match hour_cycle () with
+    | Some `h12 -> true
+    | Some `h24 -> false
+    | None -> twelve_hours formatter
+  in
+  let granularity () = Option.value (granularity ()) ~default:`minute in
+  (* The time as the reader's locale writes it, its parts in order, for the
+     literals between them: React Aria's segments are those parts. *)
+  let written =
+    I18n.create_date_formatter
+      (Types.Either.right (fun[@u] () ->
+           let minute, second =
+             match granularity () with
+             | `hour -> (None, None)
+             | `minute -> (Some "2-digit", None)
+             | `second -> (Some "2-digit", Some "2-digit")
+           in
+           Types.DateTimeFormatOptions.make ~hour:"numeric" ?minute ?second
+             ~hour12:(twelve ()) ~numbering_system:"latn" ()))
+  in
+  let parts () =
+    Types.DateTimeFormat.format_to_parts (S.get written)
+      ~date:(Types.Either.right (thirteen ()))
+      ()
+    |> Array.to_list
+  in
+  let is segment (p : Types.DateTimeFormatPart.t) =
+    match (Types.DateTimeFormatPart.type_ p, segment) with
+    | `hour, `hour
+    | `minute, `minute
+    | `second, `second
+    | `dayPeriod, `dayPeriod ->
+        true
+    | _ -> false
+  in
+  (* Whether the locale writes an hour of one digit with a zero before it, as
+     React Aria's hour then does: 09 where it writes 9. *)
+  let padded () =
+    Types.DateTimeFormat.format_to_parts (S.get written)
+      ~date:
+        (Types.Either.right
+           (Js.Date.make ~year:2000. ~month:0. ~date:1. ~hours:9. ~minutes:0. ()))
+      ()
+    |> Array.exists (fun p ->
+        is `hour p && String.length (Types.DateTimeFormatPart.value p) = 2)
+  in
+  (* The locale's literal just before a segment, if any. *)
+  let before segment =
+    let rec find previous = function
+      | [] -> None
+      | p :: _ when is segment p -> previous
+      | p :: rest ->
+          let literal =
+            match Types.DateTimeFormatPart.type_ p with
+            | `literal -> Some (Types.DateTimeFormatPart.value p)
+            | _ -> None
+          in
+          find literal rest
+    in
+    find None (parts ())
+  in
+  (* React Aria isolates the time's digits, from the hour to its last part, as
+     Unicode's bidirectional isolates do, so they read left to right in any
+     language. *)
+  let around segment =
+    let own = Option.to_list (before segment) in
+    let last =
+      match (granularity (), segment) with
+      | `hour, `hour | `minute, `minute | `second, `second -> true
+      | (`hour | `minute | `second), _ -> false
+    in
+    ( Array.of_list
+        (match segment with
+        | `hour -> own @ [ {js|⁦|js} ]
+        | `minute | `second | `dayPeriod -> own),
+      if last then [| {js|⁩|js} |] else [||] )
+  in
+  let f =
+    {
+      value = shown;
+      around;
+      disabled = (fun () -> is_disabled ());
+      invalid;
+      read_only = (fun () -> is_read_only ());
+      full_width;
+    }
+  in
+  <Context.Provider value=(fun () -> f)>
+    <Kobalte.Root
+      ?value=(fun () -> shown ())
+      on_change=change
+      ?placeholder=(fun () -> placeholder_value ())
+      ?min=(fun () -> min_value ())
+      ?max=(fun () -> max_value ())
+      granularity=(fun () -> Types.Either.left (granularity ()))
+      hour_cycle=(fun () -> if twelve () then 12. else 24.)
+      force_leading_zeros=(fun () ->
+                            match should_force_leading_zeros () with
+                            | Some force -> force
+                            | None -> padded ())
+      validation_state=(fun () -> if invalid () then `invalid else `valid)
+      required=(fun () -> is_required ())
+      disabled=(fun () -> is_disabled ())
+      read_only=(fun () -> is_read_only ())
+      ?name
+      ?aria_label
+      class_=(fun () ->
+               Styles.TimeField.classes
+                 (Styles.TimeField.options ?full_width:(full_width ())
+                    ?class_:(class_ ()) ()))
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
+      data_slot="time-field"
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+      data_required=(fun () -> Jsx.flag (is_required ()))>
+      <Field_error.Message.Provider value=(fun () -> in_form.error)>
+        <Parts>(fun () -> children ())</Parts>
+      </Field_error.Message.Provider>
+      <Kobalte.HiddenInput />
+    </Kobalte.Root>
+  </Context.Provider>

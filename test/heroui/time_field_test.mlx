@@ -1,0 +1,246 @@
+(* HeroUI's TimeField on Kobalte's, beside the same field in React: every part
+   -- its label, group, input, each segment and the literals between them, its
+   description and error -- at rest, given a value, typed into, and in each
+   state. *)
+
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module Time = Solidtype_kobalte.Types.Time
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type clock
+
+external clock : ?hour:float -> ?minute:float -> ?second:float -> unit -> clock
+  = ""
+[@@mel.obj]
+
+external clock_hour : clock -> float option = "hour" [@@mel.get]
+external clock_minute : clock -> float option = "minute" [@@mel.get]
+
+type props
+
+external props :
+  ?default_value:(clock[@mel.as "defaultValue"]) ->
+  ?granularity:string ->
+  ?hour_cycle:(int[@mel.as "hourCycle"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?is_read_only:(bool[@mel.as "isReadOnly"]) ->
+  ?variant:string ->
+  ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((clock -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/TimeField.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TimeField.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TimeField.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+(* What HeroUI's styles read of a part and what a reader reaches: its state as
+   React Aria writes it, its role and its text. Ids, and the attributes each
+   framework writes for its own segments' editing, are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "data-type";
+    "data-placeholder";
+    "data-invalid";
+    "data-disabled";
+    "data-required";
+    "data-readonly";
+    "data-focused";
+    "data-focus-within";
+    "aria-hidden";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], [data-type]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             (* Kobalte's field is a group, React Aria's root a bare element
+                around its own group. *)
+             if
+               String.equal name "role"
+               && Option.equal String.equal
+                    (T.attribute e "data-slot")
+                    (Some "time-field")
+             then None
+             else
+               (* Kobalte's own state, present and empty, which no style of
+                  HeroUI's reads. *)
+               match T.attribute e name with
+               | Some "" | None -> None
+               | Some v -> Some (name ^ "=" ^ v))
+           state)
+      ^
+      match T.attribute e "data-type" with
+      | Some _ -> " " ^ text e
+      | None -> "")
+
+let segment host kind =
+  match
+    Js.Array.from (query_all host ("[data-type=" ^ kind ^ "]")) |> Array.to_list
+  with
+  | e :: _ -> e
+  | [] -> Js.Exn.raiseError ("no " ^ kind ^ " segment")
+
+let told_of c =
+  String.concat ":"
+    (List.map
+       (fun v -> Js.Float.toString (Option.value v ~default:(-1.)))
+       [ clock_hour c; clock_minute c ])
+
+(* The field shown, then its hour typed into, then its minute. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let at_rest = shown host in
+  let* () =
+    step (fun () ->
+        let* () = T.click user (segment host "hour") in
+        T.keyboard user "9")
+  in
+  let typed = (shown host, !told) in
+  let* () =
+    step (fun () ->
+        let* () = T.click user (segment host "minute") in
+        T.keyboard user "30")
+  in
+  Js.Promise.resolve (at_rest, typed, (shown host, !told))
+
+let both ?default_value ?granularity ?hour_cycle ?is_disabled ?is_invalid
+    ?is_required ?is_read_only ?variant () =
+  let told = ref "" in
+  T.render (fun () ->
+      <Time_field
+        ?default_value=(fun () ->
+                         Option.map
+                           (fun (h, m) -> Time.make ~hour:h ~minute:m ())
+                           default_value)
+        ?granularity=(fun () -> granularity)
+        ?hour_cycle=(fun () -> hour_cycle)
+        ?is_disabled=(fun () -> is_disabled)
+        ?is_invalid=(fun () -> is_invalid)
+        ?is_required=(fun () -> is_required)
+        ?is_read_only=(fun () -> is_read_only)
+        name="time"
+        class_="w-64"
+        on_change=(fun t ->
+                    told :=
+                      told_of
+                        (clock ?hour:(Time.hour t) ?minute:(Time.minute t) ()))>
+        <Label>"Time"</Label>
+        <Time_field.Group ?variant=(fun () -> variant)>
+          <Time_field.Input>
+            (fun segment ->
+              <Time_field.Segment segment=(fun () -> S.get segment) />)
+          </Time_field.Input>
+        </Time_field.Group>
+        <Description>"When it starts."</Description>
+        <Field_error>"Pick a time."</Field_error>
+      </Time_field>);
+  let host =
+    match T.query "[data-slot=time-field]" with
+    | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
+    | None -> T.body
+  in
+  let* solidtype = walk ~step:(fun action -> action ()) host told in
+  T.cleanup ();
+  let told' = ref "" in
+  let host =
+    Twin.render
+      (props
+         ?default_value:
+           (Option.map (fun (h, m) -> clock ~hour:h ~minute:m ()) default_value)
+         ?granularity:
+           (Option.map
+              (function
+                | `hour -> "hour" | `minute -> "minute" | `second -> "second")
+              granularity)
+         ?hour_cycle:
+           (Option.map (function `h12 -> 12 | `h24 -> 24) hour_cycle)
+         ?is_disabled ?is_invalid ?is_required ?is_read_only
+         ?variant:
+           (Option.map
+              (function `primary -> "primary" | `secondary -> "secondary")
+              variant)
+         ())
+      (fun c -> told' := told_of c)
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Time_field" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is every part, typed into, as React's is" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "shows its value, as React's does" (fun () ->
+          let* r = both ~default_value:(14., 30.) () in
+          same r);
+      Jest.testPromise "is on a 24-hour clock to the second, as React's is"
+        (fun () ->
+          let* r = both ~hour_cycle:`h24 ~granularity:`second () in
+          same r);
+      Jest.testPromise "is invalid and required, as React's is" (fun () ->
+          let* r = both ~is_invalid:true ~is_required:true () in
+          same r);
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          let* r = both ~is_disabled:true ~default_value:(9., 5.) () in
+          same r);
+      Jest.testPromise "is secondary, as React's is" (fun () ->
+          let* r = both ~variant:`secondary () in
+          same r);
+      Jest.test "tells it is left once focus leaves it" (fun () ->
+          let solidtype =
+            T.blurs ~root:"[data-slot=time-field]" (fun on_blur ->
+                T.render (fun () ->
+                    <Time_field on_blur>
+                      <Label>"Time"</Label>
+                      <Time_field.Group>
+                        <Time_field.Input>
+                          (fun segment ->
+                            <Time_field.Segment
+                              segment=(fun () -> S.get segment)
+                            />)
+                        </Time_field.Input>
+                      </Time_field.Group>
+                    </Time_field>))
+          in
+          (* React's TimeField tells its onBlur more than once on the way
+             through its segments and out; a form reads a field left once, as
+             every other port tells it. *)
+          E.(expect solidtype |> toEqual 1)))

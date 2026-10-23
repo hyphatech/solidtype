@@ -1,0 +1,40 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Time = Solidtype_kobalte.Types.Time
+
+let two n = (if n < 10. then "0" else "") ^ Js.Float.toString n
+
+let make () =
+  let time, set_time =
+    S.create_signal (Some (Time.make ~hour:9. ~minute:45. ()))
+  in
+  <div class_="flex flex-col gap-2">
+    <Time_field
+      class_="w-64"
+      name="time"
+      ?value=(fun () -> S.get time)
+      on_change=(fun t -> S.set set_time (Some t))>
+      <Label>"Time"</Label>
+      <Time_field.Group>
+        <Time_field.Input>
+          (fun segment ->
+            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
+            />)
+        </Time_field.Input>
+      </Time_field.Group>
+    </Time_field>
+    <p class_="text-sm text-muted">
+      (fun () ->
+        Jsx.string
+          (match S.get time with
+          | Some t ->
+              "Selected: "
+              ^ two (Option.value (Time.hour t) ~default:0.)
+              ^ ":"
+              ^ two (Option.value (Time.minute t) ~default:0.)
+          | None -> "No time selected"))
+    </p>
+  </div>

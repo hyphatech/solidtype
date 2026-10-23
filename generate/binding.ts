@@ -147,7 +147,7 @@ function anonymousModule(type: ts.Type, where: string): Named {
 
 const readable = new Set([
   "File", "DateTimeFormatOptions", "NumberFormatOptions", "CollatorOptions",
-  "Collator", "NumberFormat", "DateTimeFormat",
+  "Collator", "NumberFormat", "DateTimeFormat", "DateTimeFormatPart",
 ]);
 const opaques = new Set<string>();
 function opaque(name: string): string {

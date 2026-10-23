@@ -23,6 +23,11 @@ external element : element -> content = "%identity"
 val nothing : element
 (** An element that renders nothing, for an optional one left out. *)
 
+external fragment : element array -> element = "%identity"
+(** [fragment [| a; b |]] is [a] and [b] side by side where one element is
+    given, as JSX's [<>...</>] is: Solid renders an array of elements in order,
+    as one. *)
+
 type data
 (** A [data-] attribute's value, on an element or a component: present, or
     absent, as React Aria writes a state, ["true"] or no attribute.

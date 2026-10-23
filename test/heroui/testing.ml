@@ -146,7 +146,9 @@ let blurs ~root render =
   (match query root with
   | Some field ->
       Js.Array.from
-        (query_all_in field "input:not([type=hidden]), textarea, [role=slider]")
+        (query_all_in field
+           "input:not([type=hidden]), textarea, [role=slider], \
+            [role=spinbutton]")
       |> Array.iter focus
   | None -> ());
   focus outside;

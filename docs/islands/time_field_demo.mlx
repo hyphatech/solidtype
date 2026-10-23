@@ -1,0 +1,48 @@
+module S = Solidtype.Solid
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=time-field]"
+      solidtype=(<Time_field
+                   is_disabled=(fun () -> S.get disabled)
+                   class_="w-56"
+                   name="time">
+                   <Label>"Time"</Label>
+                   <Time_field.Group variant=(fun () -> fst (S.get variant))>
+                     <Time_field.Input>
+                       (fun segment ->
+                         <Time_field.Segment segment=(fun () -> S.get segment)
+                         />)
+                     </Time_field.Input>
+                   </Time_field.Group>
+                 </Time_field>)
+      react=(fun host ->
+              Heroui_react.time_field host
+                (Heroui_react.time_field_props
+                   ~variant:(snd (S.get variant))
+                   ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

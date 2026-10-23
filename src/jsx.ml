@@ -14,6 +14,9 @@ external of_undefined : unit Js.undefined -> element = "%identity"
 (* Solid renders an undefined child as nothing. *)
 let nothing = of_undefined Js.undefined
 
+(* Solid renders an array of elements, as a fragment, in order. *)
+external fragment : element array -> element = "%identity"
+
 (* A data- attribute's value: a string, or undefined, which Solid writes as
    no attribute, on the server as in the browser. *)
 type data = string Js.undefined

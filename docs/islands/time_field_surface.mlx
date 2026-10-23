@@ -1,0 +1,19 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="flex w-full max-w-sm flex-col gap-4 rounded-3xl p-6">
+    <Time_field class_="w-full" name="time">
+      <Label>"Time"</Label>
+      <Time_field.Group variant=`secondary>
+        <Time_field.Input>
+          (fun segment ->
+            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
+            />)
+        </Time_field.Input>
+      </Time_field.Group>
+      <Description>"Enter a time"</Description>
+    </Time_field>
+  </Surface>

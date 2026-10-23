@@ -1,0 +1,181 @@
+---
+title: TimeField
+description: A time of day, typed or stepped segment by segment.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_usage.jsx";
+import UsageCode from "../../../../islands/time_field_usage.mlx?raw";
+import * as Icons from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_icons.jsx";
+import IconsCode from "../../../../islands/time_field_icons.mlx?raw";
+import * as Surface from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_surface.jsx";
+import SurfaceCode from "../../../../islands/time_field_surface.mlx?raw";
+import * as WithDescription from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_description.jsx";
+import WithDescriptionCode from "../../../../islands/time_field_description.mlx?raw";
+import * as Required from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_required.jsx";
+import RequiredCode from "../../../../islands/time_field_required.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_disabled.jsx";
+import DisabledCode from "../../../../islands/time_field_disabled.mlx?raw";
+import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_full_width.jsx";
+import FullWidthCode from "../../../../islands/time_field_full_width.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_controlled.jsx";
+import ControlledCode from "../../../../islands/time_field_controlled.mlx?raw";
+import * as Granularity from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_granularity.jsx";
+import GranularityCode from "../../../../islands/time_field_granularity.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/time_field_demo.jsx";
+
+`Solidtype_heroui.Time_field` is Kobalte's `TimeField.Root`, with the classes
+HeroUI's own `timeFieldVariants` gives, and its group, input and segments
+HeroUI's `dateInputGroupVariants`. Each part of the time -- the hour, the
+minute, the second and AM or PM -- is a segment, typed into or stepped by the
+arrow keys. Its label names it, its description describes it, its error shows
+while it is invalid, and it submits its value with a form, by Kobalte's hidden
+input.
+
+Its value is Kobalte's `Types.Time`, an hour, a minute and a second, made by
+`Solidtype_kobalte.Types.Time.make ~hour:14. ~minute:30. ()`.
+
+## Usage
+
+<Example code={UsageCode} title="time_field_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Time_field>
+  <Label />
+  <Time_field.Group>
+    <Time_field.Input>
+      (fun segment -> <Time_field.Segment segment=(fun () -> S.get segment) />)
+    </Time_field.Input>
+  </Time_field.Group>
+  <Description />
+  <Field_error />
+</Time_field>
+```
+
+## Examples
+
+### With Icons
+
+<Example code={IconsCode} title="time_field_icons.mlx"><Icons.make client:visible /></Example>
+
+### On Surface
+
+<Example code={SurfaceCode} title="time_field_surface.mlx"><Surface.make client:visible /></Example>
+
+### With Description
+
+<Example code={WithDescriptionCode} title="time_field_description.mlx"><WithDescription.make client:visible /></Example>
+
+### Required Field
+
+<Example code={RequiredCode} title="time_field_required.mlx"><Required.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={DisabledCode} title="time_field_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Full Width
+
+<Example code={FullWidthCode} title="time_field_full_width.mlx"><FullWidth.make client:visible /></Example>
+
+### Keyboard
+
+A segment is typed into, or stepped by the arrow keys, Page Up and Page Down,
+Home and End, as Kobalte's are; an arrow key on an empty segment steps it from
+zero. Left and Right move between the segments, which stand in Kobalte's
+order, hour, minute, second, then AM or PM, with the reader's locale's
+literals between them.
+
+### Controlled
+
+The field's value changes, and its `on_change` is told, once every segment has
+its part, as React's does; a time partly typed is the field's alone.
+
+<Example code={ControlledCode} title="time_field_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### Granularity and Hour Cycle
+
+`granularity` is the smallest part it shows, and `hour_cycle` its clock, else
+the reader's locale's.
+
+<Example code={GranularityCode} title="time_field_granularity.mlx"><Granularity.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's Validation examples use a `validate` on the field, which a port leaves
+to the application's state, by `is_invalid`, and to a [Form](../form/). Its
+Render Function, and a time zone's name, `hideTimeZone`, for a zoned value.
+
+## Beside React
+
+The same HeroUI TimeField twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two fields: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.time-field`, and its full width `.time-field--full-width`
+- `.date-input-group`, `.date-input-group--primary`,
+  `.date-input-group--secondary`, `.date-input-group__input`,
+  `.date-input-group__segment`, `.date-input-group__prefix`,
+  `.date-input-group__suffix`
+
+### Interactive States
+
+- the field: `[data-invalid="true"]`, `[data-required="true"]`,
+  `[data-disabled="true"]`
+- the group: `[data-hovered="true"]`, `[data-focus-within="true"]`,
+  `[data-focus-visible="true"]`
+- a segment: `[data-focused="true"]`, `[data-placeholder="true"]`,
+  `[data-type="literal"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### TimeField
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `Types.Time.t` | | Its value, controlled |
+| `defaultValue` | `default_value` | `Types.Time.t` | | Its value at first, kept by itself |
+| `onChange` | `on_change` | `Types.Time.t -> unit` | | Called once every segment has its part |
+| `placeholderValue` | `placeholder_value` | `Types.Time.t` | | What an arrow key steps an empty segment from |
+| `minValue` | `min_value` | `Types.Time.t` | | The earliest time |
+| `maxValue` | `max_value` | `Types.Time.t` | | The latest time |
+| `granularity` | `granularity` | `` [ `hour \| `minute \| `second ] `` | `` `minute `` | The smallest part it shows |
+| `hourCycle` | `hour_cycle` | `` [ `h12 \| `h24 ] `` | the locale's | Its clock |
+| `shouldForceLeadingZeros` | `should_force_leading_zeros` | `bool` | the locale's | Whether an hour of one digit has a zero before it |
+| `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its value |
+| `name` | `name` | `string` | | Its name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name where no label names it |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
+| `validate`, `validationBehavior` | — | | | A field validates nothing itself: it is invalid as the application says |
+| `hideTimeZone` | — | | | Not yet |
+
+### TimeField.Group
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
+| `fullWidth` | `full_width` | `bool` | its field's | Whether it takes its container's width |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### TimeField.Input, TimeField.Segment, TimeField.Prefix, TimeField.Suffix
+
+Each takes `class_`, added after HeroUI's class; the input, a function of each
+segment, rendering it; a segment, the `segment` it is; a prefix and a suffix,
+their `children`.

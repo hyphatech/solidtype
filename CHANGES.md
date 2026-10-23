@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Time_field`: HeroUI's TimeField on Kobalte's, a time of
+  day in segments typed or stepped, its group, input, segments, prefix and
+  suffix, its clock and leading zeros the locale's, its separators the
+  locale's, as React Aria's, and its value told once every segment has its
+  part.
+- `Solidtype.Jsx.fragment`: several elements side by side where one is
+  given, as JSX's `<>...</>` is.
+- `Solidtype_kobalte.Types.DateTimeFormatPart` reads a part's `type_` and
+  `value`, for `I18n.create_date_formatter`'s `format_to_parts`.
 - `Solidtype_heroui.Form`: HeroUI's Form, a `<form>` that refuses a submit
   while a field inside it is invalid and focuses the first, and shows a
   server's `validation_errors` on the fields they name until each is changed
