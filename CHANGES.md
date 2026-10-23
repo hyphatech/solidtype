@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Toast`: HeroUI's Toast on Kobalte's, its provider, its
+  stack collapsed and expanded, its parts, and `Toast.show`, the variant
+  helpers, `update`, `promise`, `close`, `clear`, `pause_all` and
+  `resume_all` on HeroUI's queue or one of its own. An update keeps what it
+  does not name, as HeroUI documents and its own does not; a promise's
+  failure and a failing `success` are told apart; its hotkey fires with its
+  own modifiers alone.
 - `Solidtype_heroui.Progress_circle`: HeroUI's ProgressCircle on Kobalte's
   Progress, an arc round a circle, determinate or indeterminate, its colors,
   sizes and format options; a circle of another radius draws its arc on that

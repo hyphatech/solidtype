@@ -1,0 +1,22 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  <Button
+    size=`sm
+    variant=`secondary
+    on_click=(fun _ ->
+                 let key = ref None in
+                 key :=
+                   Some
+                     (Toast.show
+                        ~description:
+                          "Bob sent you an invitation to join HeroUI team"
+                        ~action:
+                          (Toast.action ~variant:`tertiary
+                             ~on_press:(fun () ->
+                               Option.iter (fun k -> Toast.close k) !key)
+                             "Dismiss")
+                        "You have been invited to join a team"))>
+    "Show toast"
+  </Button>

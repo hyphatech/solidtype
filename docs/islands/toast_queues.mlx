@@ -1,0 +1,30 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  let notifications = Toast.Queue.create ~max_visible_toasts:2 () in
+  let errors = Toast.Queue.create ~max_visible_toasts:3 () in
+  <div class_="flex flex-wrap gap-2">
+    <Toast.Provider placement=`bottom_start queue=(fun () -> notifications) />
+    <Toast.Provider placement=`bottom_end queue=(fun () -> errors) />
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~queue:notifications
+                        ~description:"You have a new message" "New notification"
+                       : Toast.key))>
+      "Add notification (max 2)"
+    </Button>
+    <Button
+      size=`sm
+      variant=`danger_soft
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.danger ~queue:errors
+                        ~description:"Failed to save changes" "Error occurred"
+                       : Toast.key))>
+      "Add error (max 3)"
+    </Button>
+  </div>

@@ -1,0 +1,17 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  let q = Toast.Queue.create () in
+  <div>
+    <Toast.Provider is_expanded=true placement=`top queue=(fun () -> q) />
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   List.iter
+                     (fun t -> ignore (Toast.show ~queue:q t : Toast.key))
+                     [ "File uploaded"; "Comment added"; "Settings saved" ])>
+      "Show three"
+    </Button>
+  </div>

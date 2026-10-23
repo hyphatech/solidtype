@@ -1,0 +1,951 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Toast
+module Types = Solidtype_kobalte.Types
+
+type key = int
+type variant = [ `default | `accent | `success | `warning | `danger ]
+type indicator = Variant_icon | Icon of Jsx.element | No_icon
+
+type button_variant =
+  [ `primary
+  | `secondary
+  | `tertiary
+  | `outline
+  | `ghost
+  | `danger
+  | `danger_soft ]
+
+type action = {
+  label : string;
+  on_press : unit -> unit;
+  button : button_variant;
+}
+
+let action ?(variant = `tertiary) ~on_press label =
+  { label; on_press; button = variant }
+
+type content = {
+  title : string;
+  description : string option;
+  variant : variant;
+  indicator : indicator;
+  act : action option;
+  loading : bool;
+}
+
+external set_timeout : f:(unit -> unit) -> int -> Js.Global.timeoutId
+  = "setTimeout"
+
+external clear_timeout : Js.Global.timeoutId -> unit = "clearTimeout"
+
+(* A toast's countdown, which a pause stops and a resume continues, as
+   HeroUI's queue keeps one. *)
+type timer = {
+  mutable remaining : float;
+  mutable started : float;
+  mutable running : Js.Global.timeoutId option;
+  fire : unit -> unit;
+}
+
+(* A toast as its queue holds it: [kobalte] is the id Kobalte's toaster gave
+   it. *)
+type queued = {
+  key : key;
+  mutable kobalte : float;
+  content : content S.accessor;
+  set_content : content S.setter;
+  exiting : bool S.accessor;
+  set_exiting : bool S.setter;
+  mutable on_close : (unit -> unit) option;
+  mutable timer : timer option;
+}
+
+module Queue = struct
+  type t = {
+    entries : queued list S.accessor;
+    set_entries : queued list S.setter;
+    max_visible_toasts : int option;
+    exit_duration_ms : float;
+    (* The region a queue of its own shows its toasts in; the default queue's
+       is Kobalte's default region. *)
+    region : string option;
+    render : (queued -> Jsx.element) option S.accessor;
+    set_render : (queued -> Jsx.element) option S.setter;
+    (* What holds every countdown: the stack's hover or focus, the page
+       hidden, or the caller. *)
+    mutable holds : string list;
+    mutable next : int;
+  }
+
+  let regions = ref 0
+
+  let make ?max_visible_toasts ?(exit_duration_ms = 300.) ~region () =
+    let entries, set_entries = S.create_signal [] in
+    let render, set_render = S.create_signal None in
+    {
+      entries;
+      set_entries;
+      max_visible_toasts;
+      exit_duration_ms;
+      region;
+      render;
+      set_render;
+      holds = [];
+      next = 0;
+    }
+
+  let create ?max_visible_toasts ?exit_duration_ms () =
+    incr regions;
+    make ?max_visible_toasts ?exit_duration_ms
+      ~region:(Some ("toast-queue-" ^ string_of_int !regions))
+      ()
+
+  let shared = lazy (make ~region:None ())
+  let default () = Lazy.force shared
+end
+
+let queue_of = function Some q -> q | None -> Queue.default ()
+
+let start (q : Queue.t) t =
+  match (t.running, q.holds) with
+  | None, [] when t.remaining > 0. ->
+      t.started <- Js.Date.now ();
+      t.running <-
+        Some
+          (set_timeout
+             ~f:(fun () ->
+               t.running <- None;
+               t.remaining <- 0.;
+               t.fire ())
+             (int_of_float t.remaining))
+  | _ -> ()
+
+let stop t =
+  match t.running with
+  | Some id ->
+      clear_timeout id;
+      t.running <- None;
+      t.remaining <- t.remaining -. (Js.Date.now () -. t.started)
+  | None -> ()
+
+let hold (q : Queue.t) source =
+  if not (List.exists (String.equal source) q.holds) then (
+    let was_free = match q.holds with [] -> true | _ :: _ -> false in
+    q.holds <- source :: q.holds;
+    if was_free then
+      List.iter (fun e -> Option.iter stop e.timer) (S.get q.entries))
+
+let release (q : Queue.t) source =
+  q.holds <- List.filter (fun s -> not (String.equal s source)) q.holds;
+  if match q.holds with [] -> true | _ :: _ -> false then
+    List.iter (fun e -> Option.iter (start q) e.timer) (S.get q.entries)
+
+let find (q : Queue.t) key =
+  List.find_opt (fun e -> e.key = key) (S.untrack (fun () -> S.get q.entries))
+
+(* Gone from the queue and from Kobalte's region. *)
+let remove (q : Queue.t) e =
+  Option.iter stop e.timer;
+  ignore (Types.Toast_Toaster.dismiss Kobalte.toaster e.kobalte : float);
+  S.set q.set_entries
+    (List.filter (fun x -> x != e) (S.untrack (fun () -> S.get q.entries)))
+
+type media
+
+external match_media : string -> media = "matchMedia" [@@mel.scope "window"]
+external matches : media -> bool = "matches" [@@mel.get]
+
+external media_listen : media -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external media_unlisten : media -> string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.send]
+
+let reduced_motion () = matches (match_media "(prefers-reduced-motion: reduce)")
+
+let close ?queue key =
+  let q = queue_of queue in
+  match find q key with
+  | Some e when not (S.untrack (fun () -> S.get e.exiting)) ->
+      Option.iter stop e.timer;
+      let on_close = e.on_close in
+      e.on_close <- None;
+      if q.exit_duration_ms > 0. && not (reduced_motion ()) then (
+        S.set e.set_exiting true;
+        ignore
+          (set_timeout
+             ~f:(fun () -> remove q e)
+             (int_of_float q.exit_duration_ms)
+            : Js.Global.timeoutId))
+      else remove q e;
+      Option.iter (fun f -> f ()) on_close
+  | Some _ | None -> ()
+
+let countdown q key timeout_ms =
+  if timeout_ms > 0. then
+    Some
+      {
+        remaining = timeout_ms;
+        started = 0.;
+        running = None;
+        fire = (fun () -> close ~queue:q key);
+      }
+  else None
+
+(* The toast Kobalte renders: whatever the provider renders it as. *)
+let rendered (q : Queue.t) e =
+  match S.get q.render with Some render -> render e | None -> Jsx.nothing
+
+let add (q : Queue.t) content ~timeout_ms ~on_close =
+  q.next <- q.next + 1;
+  let key = q.next in
+  let content, set_content = S.create_signal content in
+  let exiting, set_exiting = S.create_signal false in
+  let e =
+    {
+      key;
+      kobalte = 0.;
+      content;
+      set_content;
+      exiting;
+      set_exiting;
+      on_close;
+      timer = countdown q key timeout_ms;
+    }
+  in
+  S.set q.set_entries (e :: S.untrack (fun () -> S.get q.entries));
+  e.kobalte <-
+    Types.Toast_Toaster.show Kobalte.toaster
+      (fun _ -> rendered q e)
+      ?options:
+        (Option.map
+           (fun region -> Types.ShowToastOptions.make ~region ())
+           q.region)
+      ();
+  Option.iter (start q) e.timer;
+  key
+
+let show ?queue ?description ?(variant = `default) ?(indicator = Variant_icon)
+    ?action ?(is_loading = false) ?(timeout_ms = 4000.) ?on_close title =
+  add (queue_of queue)
+    {
+      title;
+      description;
+      variant;
+      indicator;
+      act = action;
+      loading = is_loading;
+    }
+    ~timeout_ms ~on_close
+
+let success ?queue ?description ?indicator ?action ?timeout_ms ?on_close title =
+  show ?queue ?description ~variant:`success ?indicator ?action ?timeout_ms
+    ?on_close title
+
+let info ?queue ?description ?indicator ?action ?timeout_ms ?on_close title =
+  show ?queue ?description ~variant:`accent ?indicator ?action ?timeout_ms
+    ?on_close title
+
+let warning ?queue ?description ?indicator ?action ?timeout_ms ?on_close title =
+  show ?queue ?description ~variant:`warning ?indicator ?action ?timeout_ms
+    ?on_close title
+
+let danger ?queue ?description ?indicator ?action ?timeout_ms ?on_close title =
+  show ?queue ?description ~variant:`danger ?indicator ?action ?timeout_ms
+    ?on_close title
+
+(* What an update does not name stays as it was, as HeroUI's documents it:
+   HeroUI's own drops it. *)
+let update ?queue ?description ?variant ?indicator ?action ?is_loading
+    ?timeout_ms ?on_close key title =
+  let q = queue_of queue in
+  match find q key with
+  | Some e when not (S.untrack (fun () -> S.get e.exiting)) ->
+      let was = S.untrack (fun () -> S.get e.content) in
+      S.set e.set_content
+        {
+          title;
+          description =
+            (match description with
+            | Some d -> Some d
+            | None -> was.description);
+          variant = Option.value variant ~default:was.variant;
+          indicator = Option.value indicator ~default:was.indicator;
+          act = (match action with Some a -> Some a | None -> was.act);
+          loading = Option.value is_loading ~default:was.loading;
+        };
+      Option.iter (fun f -> e.on_close <- Some f) on_close;
+      Option.iter
+        (fun ms ->
+          Option.iter stop e.timer;
+          e.timer <- countdown q key ms;
+          Option.iter (start q) e.timer)
+        timeout_ms;
+      key
+  | Some _ | None ->
+      show ~queue:q ?description ?variant ?indicator ?action ?is_loading
+        ?timeout_ms ?on_close title
+
+let promise ?queue p ~loading ~success ~error =
+  let q = queue_of queue in
+  let key = show ~queue:q ~is_loading:true ~timeout_ms:0. loading in
+  (* The promise's failure and a failing [success] are told apart, where
+     HeroUI's shows [error] for both. *)
+  let settled =
+    p
+    |> Js.Promise.then_ (fun v -> Js.Promise.resolve (Ok v))
+    |> Js.Promise.catch (fun e -> Js.Promise.resolve (Error e))
+  in
+  ignore
+    (settled
+     |> Js.Promise.then_ (fun outcome ->
+         let title, variant =
+           match outcome with
+           | Ok v -> (success v, `success)
+           | Error e -> (error e, `danger)
+         in
+         ignore
+           (update ~queue:q ~variant ~is_loading:false ~timeout_ms:4000. key
+              title
+             : key);
+         Js.Promise.resolve ())
+      : unit Js.Promise.t);
+  key
+
+let clear ?queue () =
+  let q = queue_of queue in
+  List.iter
+    (fun e -> close ~queue:q e.key)
+    (S.untrack (fun () -> S.get q.entries))
+
+let pause_all ?queue () = hold (queue_of queue) "external"
+let resume_all ?queue () = release (queue_of queue) "external"
+let key e = e.key
+let title e = (S.get e.content).title
+let description e = (S.get e.content).description
+let toast_variant e = (S.get e.content).variant
+let is_loading e = (S.get e.content).loading
+
+(* What a toast's parts read of the stack it is in. *)
+type stack = {
+  queue : Queue.t;
+  placement :
+    unit ->
+    [ `top_start | `top | `top_end | `bottom_start | `bottom | `bottom_end ];
+  gap : unit -> float;
+  scale_factor : unit -> float;
+  max_visible : unit -> int;
+  expanded : unit -> bool;
+  heights : (key * float) list S.accessor;
+  set_height : key -> float -> unit;
+  forget_height : key -> unit;
+}
+
+module Stack = Solidtype.Context.Make_optional (struct
+  type t = stack
+end)
+
+let in_stack part =
+  match Stack.use () with
+  | Some s -> s
+  | None -> invalid_arg (part ^ " is used inside a Toast.Provider")
+
+(* A toast's classes, which its parts read. *)
+module Slots = Solidtype.Context.Make_optional (struct
+  type t = unit -> Styles.Toast.slots
+end)
+
+let slots_of part =
+  match Slots.use () with
+  | Some slots -> slots
+  | None -> invalid_arg (part ^ " is used inside a Toast")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+let px n = Js.Float.toString n ^ "px"
+
+external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external scroll_height : _ Dom.element_like -> float = "scrollHeight"
+[@@mel.get]
+
+type observer
+
+external mutation_observer : (unit -> unit) -> observer = "MutationObserver"
+[@@mel.new]
+
+type observed
+
+external observed :
+  ?attributes:bool ->
+  ?attribute_filter:(string array[@mel.as "attributeFilter"]) ->
+  ?character_data:(bool[@mel.as "characterData"]) ->
+  ?child_list:(bool[@mel.as "childList"]) ->
+  ?subtree:bool ->
+  unit ->
+  observed = ""
+[@@mel.obj]
+
+external observe : observer -> _ Dom.element_like -> observed -> unit
+  = "observe"
+[@@mel.send]
+
+external resize_observer : (unit -> unit) -> observer = "ResizeObserver"
+[@@mel.new]
+
+external observe_size : observer -> _ Dom.element_like -> unit = "observe"
+[@@mel.send]
+
+external disconnect : observer -> unit = "disconnect" [@@mel.send]
+
+(* HeroUI's icon for each variant: info for the default and accent. *)
+let icon_path : variant -> string = function
+  | `default | `accent ->
+      "M8 13.5a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11M8 15A7 7 0 1 0 8 1a7 7 0 \
+       0 0 0 14m1-9.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-.25 3a.75.75 0 0 0-1.5 \
+       0V11a.75.75 0 0 0 1.5 0z"
+  | `success ->
+      "M13.5 8a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M15 8A7 7 0 1 1 1 8a7 7 0 \
+       0 1 14 0m-3.9-1.55a.75.75 0 1 0-1.2-.9L7.419 8.858L6.03 7.47a.75.75 0 0 \
+       0-1.06 1.06l2 2a.75.75 0 0 0 1.13-.08z"
+  | `warning ->
+      "M7.134 2.994L2.217 11.5a1 1 0 0 0 .866 1.5h9.834a1 1 0 0 0 \
+       .866-1.5L8.866 2.993a1 1 0 0 0-1.732 \
+       0m3.03-.75c-.962-1.665-3.366-1.665-4.329 0L.918 10.749c-.963 1.666.24 \
+       3.751 2.165 3.751h9.834c1.925 0 3.128-2.085 2.164-3.751zM8 5a.75.75 0 0 \
+       1 .75.75v2a.75.75 0 0 1-1.5 0v-2A.75.75 0 0 1 8 5m1 5.75a1 1 0 1 1-2 \
+       0a1 1 0 0 1 2 0"
+  | `danger ->
+      "M8 13.5a5.5 5.5 0 1 0 0-11a5.5 5.5 0 0 0 0 11M8 15A7 7 0 1 0 8 1a7 7 0 \
+       0 0 0 14m1-4.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0M8.75 5a.75.75 0 0 0-1.5 \
+       0v2.5a.75.75 0 0 0 1.5 0z"
+
+module Indicator = struct
+  let%component make ?(variant : variant = `default) ?(class_ : string option)
+      ?(children : Jsx.content option) () =
+    let slots = slots_of "Toast.Indicator" in
+    <div
+      class_=(fun () -> after (Styles.Toast.indicator (slots ())) (class_ ()))
+      data_slot="toast-indicator">
+      <Show
+        when_=(fun () -> Option.is_some (children ()))
+        fallback=(<svg
+                    aria_hidden=true
+                    fill="none"
+                    height="16"
+                    role=`presentation
+                    view_box="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    data_slot="toast-default-icon">
+                    <path
+                      clip_rule="evenodd"
+                      d=(fun () -> icon_path (variant ()))
+                      fill="currentColor"
+                      fill_rule="evenodd"
+                    />
+                  </svg>)>
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </Show>
+    </div>
+end
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = slots_of "Toast.Content" in
+    <div
+      class_=(fun () -> after (Styles.Toast.content (slots ())) (class_ ()))
+      data_slot="toast-content">
+      (fun () -> children ())
+    </div>
+end
+
+module Title = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = slots_of "Toast.Title" in
+    <Kobalte.Title
+      class_=(fun () -> after (Styles.Toast.title (slots ())) (class_ ()))
+      data_slot="toast-title">
+      (fun () -> children ())
+    </Kobalte.Title>
+end
+
+module Description = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = slots_of "Toast.Description" in
+    <Kobalte.Description
+      class_=(fun () -> after (Styles.Toast.description (slots ())) (class_ ()))
+      data_slot="toast-description">
+      (fun () -> children ())
+    </Kobalte.Description>
+end
+
+module Action_button = struct
+  let%component make ?(variant : button_variant = `tertiary)
+      ?(on_press : (unit -> unit) option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let slots = slots_of "Toast.Action_button" in
+    <Button
+      variant=(fun () -> variant ())
+      size=`sm
+      class_=(fun () -> after (Styles.Toast.action (slots ())) (class_ ()))
+      on_click=(fun _ -> ignore (on_press () : unit option))
+      data_slot="toast-action-button">
+      (fun () -> children ())
+    </Button>
+end
+
+(* HeroUI's close button, drawn here rather than by {!Close_button}, which
+   names its own slot over the toast's, [toast-close], that HeroUI's styles
+   read. *)
+module Close_button = struct
+  let%component make ?(key : key option) ?(class_ : string option) () =
+    let s = in_stack "Toast.Close_button" in
+    let slots = slots_of "Toast.Close_button" in
+    let i = Interaction.create () in
+    <Solidtype_kobalte.Button.Root
+      aria_label="Close"
+      class_=(fun () ->
+               Styles.CloseButton.classes
+                 (Styles.CloseButton.options
+                    ~class_:(after (Styles.Toast.close (slots ())) (class_ ()))
+                    ()))
+      ref=(fun b -> Interaction.watch i b)
+      type_=`button
+      on_click=(fun _ -> Option.iter (fun k -> close ~queue:s.queue k) (key ()))
+      data_slot="toast-close"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
+      <Close_button.Icon />
+    </Solidtype_kobalte.Button.Root>
+end
+
+let placement_name = function
+  | `top_start -> "top start"
+  | `top -> "top"
+  | `top_end -> "top end"
+  | `bottom_start -> "bottom start"
+  | `bottom -> "bottom"
+  | `bottom_end -> "bottom end"
+
+module Item = struct
+  let%component make ~(toast : queued) ?(variant : variant option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let s = in_stack "Toast" in
+    let e = toast () in
+    let variant () =
+      match variant () with Some v -> v | None -> (S.get e.content).variant
+    in
+    let slots () =
+      Styles.Toast.slots
+        (Styles.Toast.options ~placement:(s.placement ()) ~variant:(variant ())
+           ())
+    in
+    let all () = S.get s.queue.entries in
+    (* Closing toasts leave the stack's layout, the others closing up while it
+     exits in its own place. *)
+    let laid_out () =
+      List.filter (fun x -> x == e || not (S.get x.exiting)) (all ())
+    in
+    let position x list =
+      let rec go i = function
+        | [] -> -1
+        | y :: _ when y == x -> i
+        | _ :: rest -> go (i + 1) rest
+      in
+      go 0 list
+    in
+    let index () = position e (laid_out ()) in
+    let frontmost () = index () <= 0 in
+    let hidden () = (not (S.get e.exiting)) && index () >= s.max_visible () in
+    let height_of k = List.assoc_opt k (S.get s.heights) in
+    let own () = height_of e.key in
+    let front () =
+      match laid_out () with
+      | x :: _ -> (
+          match height_of x.key with
+          | Some h -> h
+          | None -> Option.value (own ()) ~default:0.)
+      | [] -> 0.
+    in
+    let before () =
+      let rec go i acc = function
+        | x :: rest when i < index () ->
+            go (i + 1)
+              (acc +. Option.value (height_of x.key) ~default:(front ()))
+              rest
+        | _ -> acc
+      in
+      go 0 0. (laid_out ())
+    in
+    let style () =
+      let i = float_of_int (index ()) in
+      let full = position e (all ()) in
+      String.concat "; "
+        ([
+           "--offset-collapsed: " ^ px (i *. s.gap ());
+           "--offset-expanded: " ^ px (before () +. (i *. s.gap ()));
+           "--scale-collapsed: "
+           ^ Js.Float.toString (1. -. (i *. s.scale_factor ()));
+           "--front-height: " ^ px (front ());
+           "z-index: "
+           ^ string_of_int
+               (if S.get e.exiting then 0 else List.length (all ()) - full);
+         ]
+        @
+        match own () with
+        | Some h -> [ "--toast-height: " ^ px h ]
+        | None -> [])
+      ^ ";"
+    in
+    let entering, set_entering = S.create_signal true in
+    let measure el =
+      let height = scroll_height el in
+      s.set_height e.key height
+    in
+    let watch el =
+      ignore
+        (request_frame (fun _ ->
+             ignore (request_frame (fun _ -> S.set set_entering false) : int))
+          : int);
+      measure el;
+      let scheduled = ref false in
+      let schedule () =
+        if not !scheduled then (
+          scheduled := true;
+          ignore
+            (request_frame (fun _ ->
+                 scheduled := false;
+                 measure el)
+              : int))
+      in
+      let mutations = mutation_observer schedule in
+      observe mutations el
+        (observed ~attributes:true ~attribute_filter:[| "class" |]
+           ~character_data:true ~child_list:true ~subtree:true ());
+      let sizes = resize_observer schedule in
+      observe_size sizes el;
+      S.on_cleanup (fun () ->
+          disconnect mutations;
+          disconnect sizes;
+          s.forget_height e.key)
+    in
+    <Slots.Provider value=(fun () -> slots)>
+      <Kobalte.Root
+        toast_id=(fun () -> e.kobalte)
+        persistent=true
+                   (* Escape folds HeroUI's stack; it does not close a toast. *)
+        on_escape_key_down=(fun ev -> prevent_default ev)
+        ref=(fun el -> watch el)
+        class_=(fun () -> after (Styles.Toast.toast (slots ())) (class_ ()))
+        style=(fun () -> style ())
+        tab_index=(fun () ->
+                    if
+                      frontmost ()
+                      || (s.expanded () && not (hidden () || S.get e.exiting))
+                    then "0"
+                    else "-1")
+        ?aria_hidden=(fun () ->
+                       if hidden () || S.get e.exiting then Some true else None)
+        ?inert=(fun () -> if hidden () then Some true else None)
+        data_entering=(fun () -> Jsx.flag (S.get entering))
+        data_exiting=(fun () -> Jsx.flag (S.get e.exiting))
+        data_expanded=(fun () -> Jsx.flag (s.expanded ()))
+        data_frontmost=(fun () -> Jsx.flag (frontmost ()))
+        data_hidden=(fun () -> Jsx.flag (hidden ()))
+        data_index=(fun () -> Jsx.data (string_of_int (index ())))
+        data_placement=(fun () -> Jsx.data (placement_name (s.placement ())))
+        data_slot="toast">
+        (fun () -> children ())
+      </Kobalte.Root>
+    </Slots.Provider>
+end
+
+include Item
+
+(* Whether the page is a phone's, where HeroUI's toast puts its action under
+   its text. *)
+let narrow () =
+  let media = match_media "(max-width: 768px)" in
+  let is, set = S.create_signal (matches media) in
+  let changed (_ : Dom.event) = S.set set (matches media) in
+  media_listen media "change" changed;
+  S.on_cleanup (fun () -> media_unlisten media "change" changed);
+  is
+
+(* HeroUI's own toast, of a queued toast's content. *)
+let default_toast e =
+  let c () = S.get e.content in
+  let phone = narrow () in
+  let action () = match (c ()).act with Some a -> Some a | None -> None in
+  let button a =
+    <Action_button
+      variant=(fun () -> a.button) on_press=(fun () -> a.on_press ())>
+      (fun () -> Jsx.string a.label)
+    </Action_button>
+  in
+  let action_in inside () =
+    match action () with
+    | Some a when Bool.equal (S.get phone) inside -> Jsx.element (button a)
+    | Some _ | None -> Jsx.string ""
+  in
+  <Item toast=(fun () -> e) variant=(fun () -> (c ()).variant)>
+    (fun () ->
+      match ((c ()).indicator, (c ()).loading) with
+      | _, true ->
+          Jsx.element
+            <Indicator variant=(fun () -> (c ()).variant)>
+              <Spinner color=`current size=`sm />
+            </Indicator>
+      | No_icon, false -> Jsx.string ""
+      | Icon icon, false ->
+          Jsx.element
+            <Indicator variant=(fun () -> (c ()).variant)>
+              (fun () -> Jsx.element icon)
+            </Indicator>
+      | Variant_icon, false ->
+          Jsx.element <Indicator variant=(fun () -> (c ()).variant) />)
+    <Content>
+      (fun () ->
+        if String.length (c ()).title > 0 then
+          Jsx.element <Title>(fun () -> Jsx.string (c ()).title)</Title>
+        else Jsx.string "")
+      (fun () ->
+        match (c ()).description with
+        | Some d ->
+            Jsx.element <Description>(fun () -> Jsx.string d)</Description>
+        | None -> Jsx.string "")
+      (action_in true)
+    </Content>
+    (action_in false)
+    <Close_button key=(fun () -> e.key) />
+  </Item>
+
+(* The page's events the region listens to, as HeroUI's does. *)
+external add_listener :
+  _ Dom.element_like -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external on_document : string -> (Dom.event -> unit) -> bool -> unit
+  = "addEventListener"
+[@@mel.scope "document"]
+
+external off_document : string -> (Dom.event -> unit) -> bool -> unit
+  = "removeEventListener"
+[@@mel.scope "document"]
+
+external pointer_type : Dom.event -> string = "pointerType" [@@mel.get]
+external key_name : Dom.event -> string = "key" [@@mel.get]
+external code : Dom.event -> string = "code" [@@mel.get]
+external modifier : Dom.event -> string -> bool = "" [@@mel.get_index]
+
+external related : Dom.event -> Dom.htmlElement Js.Nullable.t = "relatedTarget"
+[@@mel.get]
+
+external target : Dom.event -> Dom.htmlElement = "target" [@@mel.get]
+external event_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+external contains : _ Dom.element_like -> _ Dom.element_like -> bool
+  = "contains"
+[@@mel.send]
+
+external focused : Dom.htmlElement Js.Nullable.t = "activeElement"
+[@@mel.scope "document"]
+
+external page_hidden : bool = "hidden" [@@mel.scope "document"]
+external focus : _ Dom.element_like -> unit = "focus" [@@mel.send]
+external blur : Dom.htmlElement -> unit = "blur" [@@mel.send]
+
+let modifiers = [ "altKey"; "ctrlKey"; "metaKey"; "shiftKey" ]
+
+(* A hotkey's modifiers are held and the others up, as HeroUI's are, so Alt
+   and T does not fire on Control, Alt and T: Kobalte's own hotkey would. *)
+let pressed hotkey ev =
+  Array.length hotkey > 0
+  && List.for_all
+       (fun m ->
+         Bool.equal (modifier ev m) (Array.exists (String.equal m) hotkey))
+       modifiers
+  && Array.for_all
+       (fun k ->
+         List.exists (String.equal k) modifiers || String.equal (code ev) k)
+       hotkey
+
+module Provider = struct
+  let%component make
+      ?(placement :
+          [ `top_start
+          | `top
+          | `top_end
+          | `bottom_start
+          | `bottom
+          | `bottom_end ] =
+        `bottom) ?(gap : float = 12.) ?(is_expanded : bool = false)
+      ?(max_visible_toasts : int option)
+      ?(hotkey : string array = [| "altKey"; "KeyT" |])
+      ?(scale_factor : float = 0.05) ?(width : string = "460px")
+      ?(queue : Queue.t option) ?(class_ : string option)
+      ?(children : (queued -> Jsx.element) option) () =
+    let q = queue_of (queue ()) in
+    let heights, set_heights = S.create_signal [] in
+    let interacting, set_interacting = S.create_signal false in
+    let active () =
+      List.filter (fun e -> not (S.get e.exiting)) (S.get q.entries)
+    in
+    let expanded () =
+      (is_expanded () || S.get interacting) && List.length (active ()) > 1
+    in
+    let s =
+      {
+        queue = q;
+        placement;
+        gap;
+        scale_factor;
+        max_visible =
+          (fun () ->
+            match max_visible_toasts () with
+            | Some n -> n
+            | None -> Option.value q.max_visible_toasts ~default:3);
+        expanded;
+        heights;
+        set_height =
+          (fun k h ->
+            let was = S.untrack (fun () -> S.get heights) in
+            if not (Option.equal Float.equal (List.assoc_opt k was) (Some h))
+            then S.set set_heights ((k, h) :: List.remove_assoc k was));
+        forget_height =
+          (fun k ->
+            S.set set_heights
+              (List.remove_assoc k (S.untrack (fun () -> S.get heights))));
+      }
+    in
+    (* Interacting with the stack holds every countdown; forcing it open does
+       not. *)
+    S.create_effect (fun () ->
+        if S.get interacting then hold q "interaction"
+        else release q "interaction");
+    let visibility (_ : Dom.event) =
+      if page_hidden then hold q "visibility" else release q "visibility"
+    in
+    (* The page's listeners are a browser's: the server has no document. *)
+    S.on_mount (fun () ->
+        on_document "visibilitychange" visibility false;
+        S.on_cleanup (fun () ->
+            off_document "visibilitychange" visibility false;
+            release q "visibility"));
+    let pointer_within = ref false in
+    let watch region =
+      let outside () =
+        if not !pointer_within then
+          match Js.Nullable.toOption focused with
+          | Some a when contains region a -> ()
+          | Some _ | None -> S.set set_interacting false
+      in
+      let enter ev =
+        if not (String.equal (pointer_type ev) "touch") then (
+          pointer_within := true;
+          S.set set_interacting true)
+      in
+      add_listener region "pointerenter" enter;
+      add_listener region "pointermove" enter;
+      add_listener region "pointerleave" (fun ev ->
+          if not (String.equal (pointer_type ev) "touch") then (
+            pointer_within := false;
+            outside ()));
+      add_listener region "focusin" (fun _ -> S.set set_interacting true);
+      add_listener region "focusout" (fun ev ->
+          match Js.Nullable.toOption (related ev) with
+          | Some next when contains region next -> ()
+          | Some _ | None -> outside ());
+      add_listener region "keydown" (fun ev ->
+          if String.equal (key_name ev) "Escape" then (
+            (match Js.Nullable.toOption focused with
+            | Some a when contains region a -> blur a
+            | Some _ | None -> ());
+            pointer_within := false;
+            S.set set_interacting false));
+      (* No pointerleave comes when the toast under the pointer is removed;
+         the pointer over anything outside the region is the sign. *)
+      let over ev =
+        if
+          not
+            (String.equal (pointer_type ev) "touch"
+            || contains region (target ev))
+        then (
+          pointer_within := false;
+          outside ())
+      in
+      let hot ev =
+        if pressed (hotkey ()) ev then (
+          event_default ev;
+          focus region)
+      in
+      on_document "pointerover" over true;
+      on_document "keydown" hot false;
+      S.on_cleanup (fun () ->
+          off_document "pointerover" over true;
+          off_document "keydown" hot false)
+    in
+    S.set q.set_render
+      (Some
+         (fun e ->
+           <Stack.Provider value=(fun () -> s)>
+             (fun () ->
+               Jsx.element
+                 (match children e with
+                 | Some el -> el
+                 | None -> default_toast e))
+           </Stack.Provider>));
+    <Kobalte.Region
+      ?region_id=(fun () -> q.region)
+                 (* The port's own hotkey stands in for Kobalte's, which it switches off
+         with a key no event has: Kobalte takes an empty hotkey for every key,
+         and would focus its list on each one pressed. *)
+      hotkey=(fun () -> [| "" |])
+      limit=(fun () -> 1e9)
+            (* Named as React Aria names its region, by how many toasts it holds,
+         where Kobalte's would name its hotkey, which the port keeps. *)
+      translations=(fun () ->
+                     Types.Toast_Region_Translations.make
+                       ~notifications:(fun _ ->
+                         match List.length (S.get q.entries) with
+                         | 1 -> "1 notification."
+                         | n -> string_of_int n ^ " notifications.")
+                       ())
+      pause_on_interaction=false
+      pause_on_page_idle=false
+      ref=(fun el -> watch el)
+      class_=(fun () ->
+               after
+                 (Styles.Toast.region
+                    (Styles.Toast.slots
+                       (Styles.Toast.options ~placement:(placement ()) ())))
+                 (class_ ()))
+             (* Kobalte's region on the top layer asks for the pointer, inline, over
+         HeroUI's region, which lets it through to the page but for its
+         toasts. *)
+      style=(fun () ->
+              "pointer-events: none; --gap: "
+              ^ px (gap ())
+              ^ "; --placement: "
+              ^ placement_name (placement ())
+              ^ "; --scale-factor: "
+              ^ Js.Float.toString (scale_factor ())
+              ^ "; --toast-width: " ^ width () ^ ";")
+      data_expanded=(fun () -> Jsx.flag (expanded ()))
+      data_slot="toast-region">
+      <Kobalte.List
+        style="display: contents; margin: 0; padding: 0; list-style: none;"
+      />
+    </Kobalte.Region>
+end

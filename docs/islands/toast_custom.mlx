@@ -1,0 +1,30 @@
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  let q = Toast.Queue.create () in
+  <div>
+    <Toast.Provider placement=`top_end queue=(fun () -> q)>
+      (fun toast ->
+        <Toast toast=(fun () -> toast) variant=`accent>
+          <Toast.Indicator variant=`accent />
+          <Toast.Content>
+            <Toast.Title>
+              (fun () -> Jsx.string (Toast.title toast))
+            </Toast.Title>
+            <Toast.Description>
+              "Rendered by the page's own function"
+            </Toast.Description>
+          </Toast.Content>
+          <Toast.Close_button key=(fun () -> Toast.key toast) />
+        </Toast>)
+    </Toast.Provider>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore (Toast.show ~queue:q "A toast of its own" : Toast.key))>
+      "Show custom toast"
+    </Button>
+  </div>

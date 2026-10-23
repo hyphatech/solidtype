@@ -1,0 +1,5 @@
+module Toast = Solidtype_heroui.Toast
+
+(* The page's one region for the default queue, as an application renders it
+   at its root. *)
+let make () = <Toast.Provider />

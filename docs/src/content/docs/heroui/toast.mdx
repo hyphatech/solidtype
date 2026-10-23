@@ -1,0 +1,184 @@
+---
+title: Toast
+description: Brief messages, shown in a stack, closing themselves.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Provider from "../../../../../_build/default/docs/islands/out/docs/islands/toast_provider.jsx";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/toast_usage.jsx";
+import UsageCode from "../../../../islands/toast_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/toast_variants.jsx";
+import VariantsCode from "../../../../islands/toast_variants.mlx?raw";
+import * as Placements from "../../../../../_build/default/docs/islands/out/docs/islands/toast_placements.jsx";
+import PlacementsCode from "../../../../islands/toast_placements.mlx?raw";
+import * as Expanded from "../../../../../_build/default/docs/islands/out/docs/islands/toast_expanded.jsx";
+import ExpandedCode from "../../../../islands/toast_expanded.mlx?raw";
+import * as Simple from "../../../../../_build/default/docs/islands/out/docs/islands/toast_simple.jsx";
+import SimpleCode from "../../../../islands/toast_simple.mlx?raw";
+import * as Indicators from "../../../../../_build/default/docs/islands/out/docs/islands/toast_indicators.jsx";
+import IndicatorsCode from "../../../../islands/toast_indicators.mlx?raw";
+import * as Custom from "../../../../../_build/default/docs/islands/out/docs/islands/toast_custom.jsx";
+import CustomCode from "../../../../islands/toast_custom.mlx?raw";
+import * as Promise from "../../../../../_build/default/docs/islands/out/docs/islands/toast_promise.jsx";
+import PromiseCode from "../../../../islands/toast_promise.mlx?raw";
+import * as Callbacks from "../../../../../_build/default/docs/islands/out/docs/islands/toast_callbacks.jsx";
+import CallbacksCode from "../../../../islands/toast_callbacks.mlx?raw";
+import * as Queues from "../../../../../_build/default/docs/islands/out/docs/islands/toast_queues.jsx";
+import QueuesCode from "../../../../islands/toast_queues.mlx?raw";
+
+<Provider.make client:load />
+
+`Solidtype_heroui.Toast` shows brief messages in a stack, on Kobalte's toast
+region, its list and its toasts, with the classes HeroUI's own `toastVariants`
+gives. A `Toast.Provider`, rendered once at the root of the page, shows the
+toasts a queue holds; `Toast.show` and its kin add, change and close them, from
+anywhere.
+
+The stack is HeroUI's: the newest toast in front, those behind it smaller and
+offset, at most three shown, and all of them laid out apart while the stack is
+hovered or holds the focus, which also holds every toast's countdown, as does
+the page while it is hidden. Alt and T moves the focus to it, and Escape folds
+it; a closing toast stays for its exit before it is gone.
+
+## Usage
+
+<Example code={UsageCode} title="toast_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Toast.Provider>
+  (fun toast ->
+    <Toast toast=(fun () -> toast)>
+      <Toast.Indicator />
+      <Toast.Content>
+        <Toast.Title /> <Toast.Description />
+      </Toast.Content>
+      <Toast.Action_button />
+      <Toast.Close_button key=(fun () -> Toast.key toast) />
+    </Toast>)
+</Toast.Provider>
+```
+
+## Examples
+
+### Variants
+
+<Example code={VariantsCode} title="toast_variants.mlx"><Variants.make client:visible /></Example>
+
+### Placements
+
+A queue of its own for each placement, each with its region.
+
+<Example code={PlacementsCode} title="toast_placements.mlx"><Placements.make client:visible /></Example>
+
+### Expanded Stack
+
+`is_expanded` lays the stack out apart without a hover, and holds no countdown.
+
+<Example code={ExpandedCode} title="toast_expanded.mlx"><Expanded.make client:visible /></Example>
+
+### Simple Toasts
+
+<Example code={SimpleCode} title="toast_simple.mlx"><Simple.make client:visible /></Example>
+
+### Custom Indicators
+
+<Example code={IndicatorsCode} title="toast_indicators.mlx"><Indicators.make client:visible /></Example>
+
+### Custom Toast Rendering
+
+<Example code={CustomCode} title="toast_custom.mlx"><Custom.make client:visible /></Example>
+
+### Promise & Loading
+
+`Toast.promise` shows a spinner and changes the same toast in place as the
+promise settles; a promise that fails and a `success` that fails are told
+apart. `Toast.update` keeps what it does not name, as HeroUI documents it.
+
+<Example code={PromiseCode} title="toast_promise.mlx"><Promise.make client:visible /></Example>
+
+### Callbacks
+
+<Example code={CallbacksCode} title="toast_callbacks.mlx"><Callbacks.make client:visible /></Example>
+
+### Custom Queues
+
+<Example code={QueuesCode} title="toast_queues.mlx"><Queues.make client:visible /></Example>
+
+### Setup
+
+Render the provider once, at the root of the page:
+
+```ocaml
+let make () =
+  <main>
+    <Toast.Provider />
+    <Button on_click=(fun _ -> ignore (Toast.show "Simple message" : Toast.key))>
+      "Show toast"
+    </Button>
+  </main>
+```
+
+## Beside React
+
+A toast's region is fixed to the page, so this page shows no two side by side.
+Its test runs the same steps through the port and HeroUI's React Toast --
+three shown, the stack hovered and left, the frontmost closed through its
+exit, one updated, two more than it shows -- and compares the region and every
+toast after each.
+
+## Styling Reference
+
+### CSS Classes
+
+- `.toast-region`, and its placements `.toast-region--top-start` to
+  `.toast-region--bottom-end`
+- `.toast`, and its variants `.toast--default`, `.toast--accent`,
+  `.toast--success`, `.toast--warning`, `.toast--danger`
+- `.toast__indicator`, `.toast__content`, `.toast__title`,
+  `.toast__description`, `.toast__action`, `.toast__close-button`
+
+### Interactive States
+
+- `[data-frontmost]`, `[data-index]`, `[data-placement]`, `[data-entering]`,
+  `[data-exiting]`, `[data-expanded]`, `[data-hidden]`
+
+## API Reference
+
+### Toast.Provider
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `placement` | `placement` | `` [ `top_start \| `top \| `top_end \| `bottom_start \| `bottom \| `bottom_end ] `` | `` `bottom `` | Where its region is |
+| `gap` | `gap` | `float` | `12.` | The gap between toasts, in pixels |
+| `isExpanded` | `is_expanded` | `bool` | `false` | Whether the stack is laid out apart |
+| `maxVisibleToasts` | `max_visible_toasts` | `int` | `3` | How many it shows at once |
+| `hotkey` | `hotkey` | `string array` | `[\| "altKey"; "KeyT" \|]` | What moves the focus to it: modifiers by their name, other keys by their code, the modifiers left out up |
+| `scaleFactor` | `scale_factor` | `float` | `0.05` | How much smaller each toast behind is |
+| `width` | `width` | `string` | `"460px"` | A toast's width |
+| `queue` | `queue` | `Toast.Queue.t` | the default | The queue it shows |
+| `children` | `children` | `Toast.queued -> element` | HeroUI's toast | How each toast is rendered |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### toast
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `toast(title, options)` | `Toast.show title` | `Toast.key` | | Adds a toast |
+| `toast.success`, `info`, `warning`, `danger` | `Toast.success`, `info`, `warning`, `danger` | `Toast.key` | | Adds one of that variant, `info` the accent |
+| `toast.update` | `Toast.update key title` | `Toast.key` | | Changes it in place, keeping what it does not name |
+| `toast.promise` | `Toast.promise p ~loading ~success ~error` | `Toast.key` | | A spinner, then the outcome |
+| `toast.close`, `clear`, `pauseAll`, `resumeAll` | `Toast.close`, `clear`, `pause_all`, `resume_all` | | | |
+| `description` | `description` | `string` | | Its text under the title |
+| `variant` | `variant` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `default `` | Its look |
+| `indicator` | `indicator` | `Toast.Variant_icon \| Icon of element \| No_icon` | `Variant_icon` | Its icon |
+| `actionProps` | `action` | `Toast.action ~on_press label` | | A button it offers |
+| `isLoading` | `is_loading` | `bool` | `false` | A spinner for its icon |
+| `timeout` | `timeout_ms` | `float` | `4000.` | When it closes itself; `0.` stays |
+| `onClose` | `on_close` | `unit -> unit` | | Called as it begins to close |
+
+### ToastQueue
+
+`Toast.Queue.create ?max_visible_toasts ?exit_duration_ms ()` is a queue of its
+own, shown by a provider given it; each takes `?queue`.

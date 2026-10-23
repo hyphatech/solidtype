@@ -1,0 +1,45 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let after ms value =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve value [@u])) ms
+      in
+      ())
+
+let make () =
+  <div class_="flex flex-wrap gap-2">
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.promise (after 2000 "report.pdf")
+                        ~loading:"Uploading file..."
+                        ~success:(fun name -> "File " ^ name ^ " uploaded")
+                        ~error:(fun _ -> "Failed to upload file")
+                       : Toast.key))>
+      "Upload"
+    </Button>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   let key =
+                     Toast.show ~is_loading:true ~timeout_ms:0.
+                       "Creating event..."
+                   in
+                   ignore
+                     (after 2000 ()
+                      |> Js.Promise.then_ (fun () ->
+                          ignore
+                            (Toast.update key ~variant:`success
+                               ~is_loading:false ~timeout_ms:4000.
+                               "Event created"
+                              : Toast.key);
+                          Js.Promise.resolve ())
+                       : unit Js.Promise.t))>
+      "Create event"
+    </Button>
+  </div>

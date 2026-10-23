@@ -1,0 +1,56 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  <div class_="flex flex-wrap gap-2">
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~variant:`default
+                        ~description:"A default toast" "Default"
+                       : Toast.key))>
+      "Default"
+    </Button>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~variant:`accent ~description:"A accent toast"
+                        "Accent"
+                       : Toast.key))>
+      "Accent"
+    </Button>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~variant:`success
+                        ~description:"A success toast" "Success"
+                       : Toast.key))>
+      "Success"
+    </Button>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~variant:`warning
+                        ~description:"A warning toast" "Warning"
+                       : Toast.key))>
+      "Warning"
+    </Button>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~variant:`danger ~description:"A danger toast"
+                        "Danger"
+                       : Toast.key))>
+      "Danger"
+    </Button>
+  </div>

@@ -243,7 +243,7 @@ page, its line in `coverage.mdx`, the README and `CHANGES.md`.
   ProgressBar's through `getValueLabel`; Slider's output and thumbs, by
   Kobalte's number formatter
 - [x] ProgressCircle
-- [ ] Toast
+- [x] Toast
 
 ### Group 4: navigation and disclosure
 - [ ] Breadcrumbs, Pagination, Tabs, Accordion, Disclosure,

@@ -33,3 +33,17 @@ CSS.escape ??= (value: string) => {
   }
   return out;
 };
+// Nor has it matchMedia, by which HeroUI's toast asks whether the page is a
+// phone's and whether its reader asks for less motion: a page that matches
+// no query stands in, as a wide screen with motion would.
+window.matchMedia ??= (query: string) =>
+  ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }) as MediaQueryList;

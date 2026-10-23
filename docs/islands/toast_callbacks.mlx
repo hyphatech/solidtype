@@ -1,0 +1,24 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  let closed, set_closed = S.create_signal 0 in
+  <div class_="flex flex-col items-start gap-2">
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show
+                        ~on_close:(fun () ->
+                          S.set set_closed (S.get closed + 1))
+                        "Closing is counted"
+                       : Toast.key))>
+      "Show toast"
+    </Button>
+    <p class_="text-sm text-muted">
+      (fun () -> Jsx.string ("Closed: " ^ string_of_int (S.get closed)))
+    </p>
+  </div>

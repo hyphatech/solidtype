@@ -1,0 +1,359 @@
+(* HeroUI's Toast on Kobalte's, beside the same toasts in React: the region
+   and every toast in its stack -- its place, its state and the variables
+   HeroUI's styles lay it out by, its parts -- as toasts are shown, the stack
+   is hovered, the frontmost is closed, one is updated, and more are shown than
+   it shows at once. *)
+
+module Toast = Solidtype_heroui.Toast
+
+(* What the failing upload rejects with. *)
+exception Down
+
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type provider
+
+external provider :
+  ?placement:string ->
+  ?max_visible_toasts:(int[@mel.as "maxVisibleToasts"]) ->
+  unit ->
+  provider = ""
+[@@mel.obj]
+
+type options
+
+external options :
+  ?description:string ->
+  ?variant:string ->
+  ?timeout:float ->
+  ?is_loading:(bool[@mel.as "isLoading"]) ->
+  ?action:string ->
+  unit ->
+  options = ""
+[@@mel.obj]
+
+module Twin = struct
+  external mount : provider -> Dom.element = "mount"
+  [@@mel.module "./twins/Toast.tsx"]
+
+  external show : string -> options -> string = "show"
+  [@@mel.module "./twins/Toast.tsx"]
+
+  external update : string -> string -> options -> unit = "update"
+  [@@mel.module "./twins/Toast.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Toast.tsx"]
+
+  external close : string -> unit = "close" [@@mel.module "./twins/Toast.tsx"]
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Toast.tsx"]
+end
+
+external query_all : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external active : Dom.element Js.Nullable.t = "activeElement"
+[@@mel.scope "document"]
+
+type setup_options
+
+external setup_options :
+  ?pointer_events_check:(int[@mel.as "pointerEventsCheck"]) ->
+  unit ->
+  setup_options = ""
+[@@mel.obj]
+
+(* user-event, told not to check pointer-events: the page here loads none of
+   HeroUI's styles, so a toast inherits its region's [none] where HeroUI's
+   class gives it the pointer back. *)
+external setup : setup_options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* A wait, for the frames a toast enters in and the time it exits in. *)
+(* Melange reads [resolve () [@u]] as a call of no argument, so the wait
+   resolves to [true], then to [()]. *)
+let wait ms =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+let variant_name = function
+  | `default -> "default"
+  | `accent -> "accent"
+  | `success -> "success"
+  | `warning -> "warning"
+  | `danger -> "danger"
+
+(* What HeroUI's styles and a reader read of an element: these attributes and
+   these of its style's variables. *)
+let read names e =
+  List.filter_map
+    (fun name -> Option.map (fun v -> name ^ "=" ^ v) (T.attribute e name))
+    names
+  |> String.concat " "
+
+(* A style's declarations, but two of Kobalte's: the pointer its region asks
+   for, which the port gives back as HeroUI's class has it, and a toast's text
+   kept from selection as it is swiped. *)
+let style_of e =
+  match T.attribute e "style" with
+  | None -> ""
+  | Some style ->
+      String.split_on_char ';' style
+      |> List.map String.trim
+      |> List.filter (fun d ->
+          String.length d > 0
+          && not
+               (List.exists (String.equal d)
+                  [ "pointer-events: none"; "user-select: none" ]))
+      |> List.sort String.compare |> String.concat "; "
+
+let part ?selector e slot =
+  let selector = Option.value selector ~default:("[data-slot=" ^ slot ^ "]") in
+  match Js.Null.toOption (query_in e selector) with
+  | Some p -> slot ^ "(" ^ text p ^ ")"
+  | None -> ""
+
+let toast e =
+  String.concat " | "
+    [
+      read
+        [
+          "class";
+          "data-index";
+          "data-frontmost";
+          "data-hidden";
+          "data-expanded";
+          "data-placement";
+          "data-exiting";
+          "tabindex";
+          "aria-hidden";
+        ]
+        e;
+      style_of e;
+      part e "toast-indicator";
+      part e "toast-title";
+      part e "toast-description";
+      (* By its class: HeroUI names its slot, the port's Button its own. *)
+      part ~selector:".toast__action" e "toast-action-button";
+      (match Js.Null.toOption (query_in e "[data-slot=toast-close]") with
+      | Some _ -> "close"
+      | None -> "");
+    ]
+
+let exiting e = Option.is_some (T.attribute e "data-exiting")
+
+let index e =
+  Option.bind (T.attribute e "data-index") int_of_string_opt
+  |> Option.value ~default:max_int
+
+(* The region, and its toasts by their place in the stack, the front first:
+   each framework keeps its own order of them in the page. *)
+let shown () =
+  let region =
+    match T.query "[data-slot=toast-region]" with
+    | Some r ->
+        read [ "class"; "data-expanded"; "aria-label" ] r ^ " | " ^ style_of r
+    | None -> "no region"
+  in
+  let toasts =
+    Js.Array.from (query_all "[data-slot=toast]")
+    |> Array.to_list
+    |> List.stable_sort (fun a b ->
+        match Int.compare (index a) (index b) with
+        | 0 -> Bool.compare (exiting a) (exiting b)
+        | c -> c)
+    |> List.map toast
+  in
+  (region, toasts)
+
+(* The steps, each through [show], [update] and [close] of one framework, and
+   what the page shows after each. *)
+let walk ~step ~show ~update ~close () =
+  let user = setup (setup_options ~pointer_events_check:0 ()) in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    let* () = wait 50 in
+    seen := (name, shown ()) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let keys = ref [] in
+  let* () =
+    after "three shown" (fun () ->
+        keys :=
+          [
+            show "First" (Some "One") `default;
+            show "Second" None `success;
+            show "Third" (Some "Three") `danger;
+          ];
+        Js.Promise.resolve ())
+  in
+  let* () =
+    after "hovered" (fun () ->
+        match T.query "[data-slot=toast-region]" with
+        | Some r -> T.hover user r
+        | None -> Js.Promise.resolve ())
+  in
+  let* () =
+    after "left" (fun () ->
+        match T.query "[data-slot=toast-region]" with
+        | Some r -> T.unhover user r
+        | None -> Js.Promise.resolve ())
+  in
+  let* () =
+    after "frontmost closed" (fun () ->
+        (match List.rev !keys with k :: _ -> close k | [] -> ());
+        Js.Promise.resolve ())
+  in
+  let* () = after "exited" (fun () -> wait 400) in
+  let* () =
+    after "updated" (fun () ->
+        (match !keys with _ :: k :: _ -> update k "Saved" | _ -> ());
+        Js.Promise.resolve ())
+  in
+  let* () =
+    after "more than shown" (fun () ->
+        keys :=
+          !keys @ [ show "Fourth" None `accent; show "Fifth" None `warning ];
+        Js.Promise.resolve ())
+  in
+  Js.Promise.resolve (List.rev !seen)
+
+let () =
+  Jest.describe "Toast" (fun () ->
+      Jest.afterEach (fun () ->
+          Toast.clear ();
+          T.cleanup ());
+      Jest.testPromise "is HeroUI's stack, shown, hovered, closed, updated"
+        (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let* solidtype =
+            walk
+              ~step:(fun action -> action ())
+              ~show:(fun title description variant ->
+                Toast.show ?description ~variant ~timeout_ms:0. title)
+              ~update:(fun key title ->
+                let (_ : Toast.key) =
+                  Toast.update key ~variant:`success title
+                in
+                ())
+              ~close:Toast.close ()
+          in
+          Toast.clear ();
+          T.cleanup ();
+          let* () = wait 400 in
+          let (_ : Dom.element) = Twin.mount (provider ()) in
+          let* react =
+            walk ~step:Twin.step
+              ~show:(fun title description variant ->
+                Twin.show title
+                  (options ?description ~variant:(variant_name variant)
+                     ~timeout:0. ()))
+              ~update:(fun key title ->
+                Twin.update key title (options ~variant:"success" ()))
+              ~close:Twin.close ()
+          in
+          Twin.cleanup ();
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "shows a spinner and an action, as React's does"
+        (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let (_ : Toast.key) =
+            Toast.show ~is_loading:true ~timeout_ms:0. "Saving"
+          in
+          let (_ : Toast.key) =
+            Toast.show
+              ~action:(Toast.action ~on_press:(fun () -> ()) "Dismiss")
+              ~timeout_ms:0. "Invited"
+          in
+          let* () = wait 50 in
+          let solidtype = shown () in
+          Toast.clear ();
+          T.cleanup ();
+          let* () = wait 400 in
+          let (_ : Dom.element) = Twin.mount (provider ()) in
+          let (_ : string) =
+            Twin.show "Saving" (options ~is_loading:true ~timeout:0. ())
+          in
+          let (_ : string) =
+            Twin.show "Invited" (options ~action:"Dismiss" ~timeout:0. ())
+          in
+          let* () = wait 50 in
+          let react = shown () in
+          Twin.cleanup ();
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "keeps what an update does not name" (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let key = Toast.show ~description:"Today" ~timeout_ms:0. "Saving" in
+          let (_ : Toast.key) = Toast.update key ~variant:`success "Saved" in
+          let* () = wait 50 in
+          Js.Promise.resolve
+            E.(
+              expect (Option.map text (T.query "[data-slot=toast-description]"))
+              |> toEqual (Some "Today")));
+      Jest.testPromise "closes itself after its timeout, unless paused"
+        (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let count () =
+            Array.length (Js.Array.from (query_all "[data-slot=toast]"))
+          in
+          Toast.pause_all ();
+          let (_ : Toast.key) = Toast.show ~timeout_ms:50. "Held" in
+          let* () = wait 450 in
+          let held = count () in
+          Toast.resume_all ();
+          let* () = wait 450 in
+          Js.Promise.resolve E.(expect (held, count ()) |> toEqual (1, 0)));
+      Jest.testPromise "tells a promise's failure from its success's" (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let titles () =
+            Js.Array.from (query_all "[data-slot=toast-title]")
+            |> Array.map text |> Array.to_list
+          in
+          let (_ : Toast.key) =
+            Toast.promise (Js.Promise.resolve 3) ~loading:"Uploading"
+              ~success:(fun n -> string_of_int n ^ " uploaded")
+              ~error:(fun _ -> "Failed")
+          in
+          let (_ : Toast.key) =
+            Toast.promise (Js.Promise.reject Down) ~loading:"Saving"
+              ~success:(fun () -> "Saved")
+              ~error:(fun _ -> "Not saved")
+          in
+          let* () = wait 50 in
+          Js.Promise.resolve
+            E.(
+              expect (List.sort String.compare (titles ()))
+              |> toEqual [ "3 uploaded"; "Not saved" ]));
+      Jest.testPromise "is reached by its hotkey alone" (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let (_ : Toast.key) = Toast.show ~timeout_ms:0. "Hello" in
+          let* () = wait 50 in
+          let user = T.setup () in
+          let region_focused () =
+            match
+              (T.query "[data-slot=toast-region]", Js.Nullable.toOption active)
+            with
+            | Some r, Some a -> r == a
+            | _ -> false
+          in
+          let* () = T.keyboard user "{Control>}{Alt>}[KeyT]{/Alt}{/Control}" in
+          let with_control = region_focused () in
+          let* () = T.keyboard user "{Alt>}[KeyT]{/Alt}" in
+          Js.Promise.resolve
+            E.(
+              expect (with_control, region_focused ()) |> toEqual (false, true))))

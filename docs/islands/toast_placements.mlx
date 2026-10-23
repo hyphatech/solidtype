@@ -1,0 +1,46 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let placements =
+  [|
+    (`top_start, "top start");
+    (`top, "top");
+    (`top_end, "top end");
+    (`bottom_start, "bottom start");
+    (`bottom, "bottom");
+    (`bottom_end, "bottom end");
+  |]
+
+let make () =
+  (* A queue and a region for each placement. *)
+  let queues =
+    Array.map
+      (fun (p, name) -> (p, name, Toast.Queue.create ~max_visible_toasts:3 ()))
+      placements
+  in
+  <div class_="flex flex-wrap justify-center gap-2">
+    (fun () ->
+      Solidtype.Jsx.element
+      @@ Solidtype.Jsx.fragment
+           (Array.map
+              (fun (p, _, q) ->
+                <Toast.Provider placement=(fun () -> p) queue=(fun () -> q) />)
+              queues))
+    (fun () ->
+      Solidtype.Jsx.element
+      @@ Solidtype.Jsx.fragment
+           (Array.map
+              (fun (_, name, q) ->
+                <Button
+                  size=`sm
+                  variant=`secondary
+                  on_click=(fun _ ->
+                             ignore
+                               (Toast.show ~queue:q
+                                  ~description:"Event has been created"
+                                  "Event created"
+                                 : Toast.key))>
+                  (fun () -> Solidtype.Jsx.string name)
+                </Button>)
+              queues))
+  </div>
