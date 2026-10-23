@@ -1,0 +1,142 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+type field = {
+  error : unit -> string option;
+  changed : unit -> unit;
+  left : unit -> unit;
+  root : Dom.htmlDivElement -> unit;
+}
+
+(* A field as the form keeps it, to ask on a submit. *)
+type entry = {
+  element : unit -> Dom.htmlDivElement option;
+  name : unit -> string option;
+  invalid : unit -> bool;
+}
+
+type form = {
+  add : entry -> unit;
+  remove : entry -> unit;
+  error : string -> string option;
+  clear : string -> unit;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = form
+end)
+
+let field ~name ~invalid =
+  match Context.use () with
+  | None ->
+      {
+        error = (fun () -> None);
+        changed = (fun () -> ());
+        left = (fun () -> ());
+        root = (fun (_ : Dom.htmlDivElement) -> ());
+      }
+  | Some form ->
+      let element, set_element = S.create_signal None in
+      let entry = { element = (fun () -> S.get element); name; invalid } in
+      form.add entry;
+      S.on_cleanup (fun () -> form.remove entry);
+      let changed = ref false in
+      {
+        error = (fun () -> Option.bind (name ()) form.error);
+        changed = (fun () -> changed := true);
+        left =
+          (fun () ->
+            if !changed then (
+              changed := false;
+              Option.iter form.clear (name ())));
+        root = (fun e -> S.set set_element (Some e));
+      }
+
+external compare_document_position :
+  Dom.htmlDivElement -> Dom.htmlDivElement -> int = "compareDocumentPosition"
+[@@mel.send]
+
+external query : Dom.htmlDivElement -> string -> Dom.element Js.Null.t
+  = "querySelector"
+[@@mel.send]
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* Node.DOCUMENT_POSITION_PRECEDING: the second element comes before the
+   first. *)
+let preceding = 2
+
+let first_in_page elements =
+  List.fold_left
+    (fun first e ->
+      match first with
+      | Some f when compare_document_position f e land preceding <> 0 -> Some e
+      | Some f -> Some f
+      | None -> Some e)
+    None elements
+
+(* A field's control, as Tab would reach it: a radio group's checked radio,
+   else the first control inside it Tab stops at, past the input Kobalte hides
+   to submit a value. *)
+let control root =
+  [
+    "input[type=radio]:checked";
+    "input:not([type=hidden]):not([disabled]):not([tabindex='-1']), textarea, \
+     [role=slider]";
+  ]
+  |> List.find_map (fun selector -> Js.Null.toOption (query root selector))
+
+let%component make ?(action : string option)
+    ?(method_ : [ `dialog | `post | `get ] option) ?(aria_label : string option)
+    ?(aria_labelledby : string option) ?(class_ : string option)
+    ?(validation_errors : (string * string) list option)
+    ?(on_submit : (Dom.event -> unit) option)
+    ?(on_reset : (Dom.event -> unit) option) ~(children : Jsx.content) () =
+  let entries = ref [] in
+  (* The names whose server error a change has cleared, until the errors are
+     given again. *)
+  let cleared, set_cleared = S.create_signal [] in
+  S.create_effect (fun () ->
+      let (_ : (string * string) list option) = validation_errors () in
+      S.set set_cleared []);
+  let error name =
+    if List.exists (String.equal name) (S.get cleared) then None
+    else
+      Option.bind (validation_errors ()) (fun errors ->
+          List.assoc_opt name errors)
+  in
+  let form =
+    {
+      add = (fun e -> entries := e :: !entries);
+      remove = (fun e -> entries := List.filter (fun x -> x != e) !entries);
+      error;
+      clear = (fun name -> S.set set_cleared (name :: S.get cleared));
+    }
+  in
+  let invalid (e : entry) =
+    e.invalid () || Option.is_some (Option.bind (e.name ()) error)
+  in
+  let submit event =
+    match List.filter invalid !entries with
+    | [] -> ignore (on_submit event : unit option)
+    | refused ->
+        prevent_default event;
+        List.filter_map (fun (e : entry) -> e.element ()) refused
+        |> first_in_page
+        |> Option.iter (fun root -> Option.iter focus (control root))
+  in
+  <Context.Provider value=(fun () -> form)>
+    <form
+      ?action
+      ?method_
+      ?aria_label
+      ?aria_labelledby
+      ?class_
+      novalidate=true
+      on_submit=submit
+      on_reset=(fun e -> ignore (on_reset e : unit option))
+      data_slot="form">
+      (fun () -> children ())
+    </form>
+  </Context.Provider>

@@ -1,0 +1,24 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  (* What a server answered, by field name: here, every name is taken. *)
+  let errors, set_errors = S.create_signal [] in
+  <Form
+    class_="flex w-96 flex-col gap-4"
+    validation_errors=(fun () -> S.get errors)
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_errors [ ("username", "This username is taken.") ])>
+    <Text_field name="username">
+      <Label>"Username"</Label> <Input placeholder="jane_doe" /> <Field_error />
+    </Text_field>
+    <Button class_="self-start" type_=`submit>"Sign up"</Button>
+  </Form>

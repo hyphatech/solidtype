@@ -126,6 +126,12 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   (* The state is the checkbox's, read by Kobalte and by every part alike: in
      a group, whether its value is checked there, and the group's state. *)
   let group = Checkbox_group.Context.use () in
+  (* In a group, the group is the form's field. *)
+  let in_form =
+    match group with
+    | Some _ -> Form.field ~name:(fun () -> None) ~invalid:(fun () -> false)
+    | None -> Form.field ~name ~invalid:(fun () -> is_invalid ())
+  in
   let own_on, own_change =
     Field.controlled ~value:is_selected ~default:(default_selected ())
       ~on_change
@@ -140,10 +146,18 @@ let%component make ?(variant : [ `primary | `secondary ] option)
           fun now ->
             g.set v now;
             ignore (on_change now : unit option) )
-    | Some _, None | None, _ -> (own_on, own_change)
+    | Some _, None | None, _ ->
+        ( own_on,
+          fun now ->
+            in_form.changed ();
+            own_change now )
   in
   let disabled = in_group (fun g -> g.disabled ()) is_disabled in
-  let invalid = in_group (fun g -> g.invalid ()) is_invalid in
+  let invalid =
+    in_group
+      (fun g -> g.invalid ())
+      (fun () -> is_invalid () || Option.is_some (in_form.error ()))
+  in
   let read_only = in_group (fun g -> g.read_only ()) is_read_only in
   (* A required group asks for one value checked, never each checkbox. *)
   let required () = is_required () in
@@ -203,7 +217,10 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?value
       validation_state=(fun () -> if invalid () then `invalid else `valid)
       class_=(fun () -> Styles.Checkbox.base (c.slots ()))
-      on_focus_out=(Field.on_leave on_blur)
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
       data_slot="checkbox"
       data_selected=(fun () -> Jsx.flag (on ()))
       data_indeterminate=(fun () -> Jsx.flag (is_indeterminate ()))

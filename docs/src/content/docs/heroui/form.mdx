@@ -1,0 +1,79 @@
+---
+title: Form
+description: Fields submitted together, a submit refused while one is invalid.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/form_usage.jsx";
+import UsageCode from "../../../../islands/form_usage.mlx?raw";
+import * as ServerErrors from "../../../../../_build/default/docs/islands/out/docs/islands/form_server_errors.jsx";
+import ServerErrorsCode from "../../../../islands/form_server_errors.mlx?raw";
+
+`Solidtype_heroui.Form` is a `<form>`, to which HeroUI gives no classes of its
+own. Kobalte has no form: it is built here, above Kobalte's fields. Every field
+inside it -- a text field, a number field, a search field, a checkbox, a
+checkbox group, a radio group, a switch, a slider -- tells it its name and
+whether it is invalid. A submit while one is invalid is refused, and the first
+such field, in the page's order, is focused instead.
+
+A field validates nothing itself. Whether it is invalid is the application's to
+say, from its own state, by its `is_invalid`; when its error shows is the
+application's too, from the field's `on_blur`. The form asks the browser to
+validate nothing, `novalidate`, since a field's input may be one Kobalte hides.
+
+## Usage
+
+The rules are the application's, from its signals; each error shows once its
+field is left.
+
+<Example code={UsageCode} title="form_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Form on_submit=save>
+  (* fields *)
+  <Button type_=`submit>"Save"</Button>
+</Form>
+```
+
+## Examples
+
+### Server Errors
+
+`validation_errors`, a server's errors by field name, makes each field it names
+invalid, shown by its `Field_error`, until the field is changed and then left,
+as React's does, or until the errors are given again.
+
+<Example code={ServerErrorsCode} title="form_server_errors.mlx"><ServerErrors.make client:visible /></Example>
+
+### Not yet
+
+HeroUI's `onInvalid`, to choose what a refused submit focuses, and the
+`render` function.
+
+## Beside React
+
+HeroUI's Form has no classes and no state of its own to compare; its test runs
+the same server error through the port and HeroUI's React Form, shown, typed
+into and left.
+
+## Styling Reference
+
+`Form` renders a `<form>` with no classes of HeroUI's. Its fields' look comes
+from their own components.
+
+## API Reference
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `onSubmit` | `on_submit` | `Dom.event -> unit` | | Called on a submit while every field is valid |
+| `onReset` | `on_reset` | `Dom.event -> unit` | | Called as it is reset |
+| `validationErrors` | `validation_errors` | `(string * string) list` | | A server's errors, by field name |
+| `action` | `action` | `string` | | Where it is submitted |
+| `method` | `method_` | `` [ `get \| `post \| `dialog ] `` | | How it is submitted |
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `aria-labelledby` | `aria_labelledby` | `string` | | The element that names it |
+| `className` | `class_` | `string` | | Its classes |
+| `validationBehavior` | — | | | A field validates nothing itself: it is invalid as the application says |
+| `onInvalid` | — | | | Not yet: a refused submit focuses the first invalid field |

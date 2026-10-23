@@ -8,10 +8,24 @@ module Slot = Solidtype.Context.Make_optional (struct
   type t = slot
 end)
 
-let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+(* A server's error for the field, which a form gives it and which stands in
+   for the error's own words while it lasts. *)
+module Message = Solidtype.Context.Make_optional (struct
+  type t = unit -> string option
+end)
+
+let%component make ?(class_ : string option) ?(children : Jsx.content option) ()
+    =
   let classes () =
     Styles.FieldError.classes (Styles.FieldError.options ?class_:(class_ ()) ())
   in
+  let message = Option.value (Message.use ()) ~default:(fun () -> None) in
+  let content () =
+    match (message (), children ()) with
+    | Some m, _ -> Jsx.string m
+    | None, Some c -> c
+    | None, None -> Jsx.string ""
+  in
   match Slot.use () with
-  | Some render -> render classes (fun () -> children ()) [@u]
+  | Some render -> render classes content [@u]
   | None -> invalid_arg "Field_error is used inside a field"

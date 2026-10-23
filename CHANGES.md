@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Form`: HeroUI's Form, a `<form>` that refuses a submit
+  while a field inside it is invalid and focuses the first, and shows a
+  server's `validation_errors` on the fields they name until each is changed
+  and left. Every field joins the form it is in; `Field_error` takes no
+  children where a server's error is all it shows.
 - `on_blur` on every HeroUI field -- `Text_field`, `Number_field`,
   `Search_field`, `Checkbox`, `Checkbox_group`, `Radio_group`, `Switch`
   and `Slider` -- called once focus leaves the field for an element outside

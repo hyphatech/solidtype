@@ -207,6 +207,9 @@ let%component make ?(value : float array option)
       ~default:(Option.value (default_value ()) ~default:[| min_value () |])
       ~on_change
   in
+  (* A slider is never invalid by itself, HeroUI's having no isInvalid, but
+     a server's error for it refuses a submit. *)
+  let in_form = Form.field ~name ~invalid:(fun () -> false) in
   (* Kobalte tells its values as it is made too; a change is values other
      than these. *)
   let change now =
@@ -214,7 +217,9 @@ let%component make ?(value : float array option)
     let same =
       Array.length now = Array.length was && Array.for_all2 Float.equal now was
     in
-    if not same then set now
+    if not same then (
+      in_form.changed ();
+      set now)
   in
   let id = S.create_unique_id () in
   let label_id = id ^ "-label" in
@@ -250,7 +255,10 @@ let%component make ?(value : float array option)
       class_=(fun () -> after (Styles.Slider.base (s.slots ())) (class_ ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
-      on_focus_out=(Field.on_leave on_blur)
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
       data_slot="slider">
       <Label.Slot.Provider value=(fun () -> label label_id)>
         (fun () -> children ())

@@ -126,7 +126,9 @@ needs is added above it, never inside each field:
   its checked radio or its first -- in the order of the page. On submit
   the form refuses while one is invalid and focuses the first; given
   `validation_errors`, a server's errors by name, each field shows its own
-  as invalid. A field outside a `Form` behaves as it does today.
+  as invalid, until it is changed and then left, as React Aria commits a
+  change. The form sets `novalidate`. A field outside a `Form` behaves as
+  it does today.
 - **Values, rules and their timing are the application's**, in Solid's
   store: a field reads its value and its validity from it, and a rule
   across fields reads both. A form library is no part of this work; one
@@ -229,7 +231,7 @@ page, its line in `coverage.mdx`, the README and `CHANGES.md`.
   SearchField, InputGroup
 - [x] Every field driven from outside: `on_blur` on each, `is_invalid` on
   `Switch`
-- [ ] Form: a field's registration, a submit refused and the first invalid
+- [x] Form: a field's registration, a submit refused and the first invalid
   field focused, `validation_errors` by name
 - [ ] TimeField, on Kobalte's
 - [ ] ErrorMessage, with Calendar in group 7

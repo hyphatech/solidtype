@@ -1,0 +1,88 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* The form's rules, from its own state: each field's error, if any. *)
+let email_error v =
+  match String.index_opt v '@' with
+  | Some at when at > 0 && String.contains_from v at '.' -> None
+  | Some _ | None -> Some "Please enter a valid email address"
+
+let password_error v =
+  let has p = String.exists p v in
+  if String.length v < 8 then Some "Password must be at least 8 characters"
+  else if not (has (fun c -> c >= 'A' && c <= 'Z')) then
+    Some "Password must contain at least one uppercase letter"
+  else if not (has (fun c -> c >= '0' && c <= '9')) then
+    Some "Password must contain at least one number"
+  else None
+
+let make () =
+  let email, set_email = S.create_signal "" in
+  let password, set_password = S.create_signal "" in
+  (* An error shows once its field is left, or the form submitted. *)
+  let left, set_left = S.create_signal [] in
+  let leave name () = S.set set_left (name :: S.get left) in
+  let shown name error () =
+    if List.exists (String.equal name) (S.get left) then error () else None
+  in
+  let email_shown = shown "email" (fun () -> email_error (S.get email)) in
+  let password_shown =
+    shown "password" (fun () -> password_error (S.get password))
+  in
+  let sent, set_sent = S.create_signal false in
+  <Form
+    class_="flex w-96 flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_sent true)
+    on_reset=(fun _ ->
+               S.set set_email "";
+               S.set set_password "";
+               S.set set_left [];
+               S.set set_sent false)>
+    <Text_field
+      is_required=true
+      name="email"
+      value=(fun () -> S.get email)
+      on_change=(S.set set_email)
+      on_blur=(fun _ -> leave "email" ())
+      is_invalid=(fun () -> Option.is_some (email_error (S.get email)))>
+      <Label>"Email"</Label>
+      <Input placeholder="john@example.com" />
+      <Field_error>
+        (fun () -> Jsx.string (Option.value (email_shown ()) ~default:""))
+      </Field_error>
+    </Text_field>
+    <Text_field
+      is_required=true
+      name="password"
+      value=(fun () -> S.get password)
+      on_change=(S.set set_password)
+      on_blur=(fun _ -> leave "password" ())
+      is_invalid=(fun () -> Option.is_some (password_error (S.get password)))>
+      <Label>"Password"</Label>
+      <Input placeholder="Enter your password" type_="password" />
+      <Description>
+        "Must be at least 8 characters with 1 uppercase and 1 number"
+      </Description>
+      <Field_error>
+        (fun () -> Jsx.string (Option.value (password_shown ()) ~default:""))
+      </Field_error>
+    </Text_field>
+    <div class_="flex gap-2">
+      <Button type_=`submit>"Submit"</Button>
+      <Button type_=`reset variant=`secondary>"Reset"</Button>
+    </div>
+    <p class_="text-sm text-muted">
+      (fun () -> Jsx.string (if S.get sent then "Submitted." else ""))
+    </p>
+  </Form>

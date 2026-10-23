@@ -39,8 +39,12 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let disabled () =
     match is_disabled () with Some d -> d | None -> in_fieldset ()
   in
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let values, choose =
-    Field.controlled ~value ~default:(default_value ()) ~on_change
+    Field.controlled ~value ~default:(default_value ()) ~on_change:(fun v ->
+        in_form.changed ();
+        on_change v)
   in
   let checked v = List.exists (String.equal v) (values ()) in
   let set v on =
@@ -76,7 +80,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       set;
       variant;
       disabled;
-      invalid = (fun () -> is_invalid ());
+      invalid;
       read_only = (fun () -> is_read_only ());
       name = (fun () -> name ());
       described_by;
@@ -92,10 +96,13 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                Styles.CheckboxGroup.classes
                  (Styles.CheckboxGroup.options ?variant:(variant ())
                     ?class_:(class_ ()) ()))
-      on_focus_out=(Field.on_leave on_blur)
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
       data_slot="checkbox-group"
       data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
       <Label.Slot.Provider value=(fun () -> label)>

@@ -211,11 +211,14 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ~default:(snapped (Option.value (default_value ()) ~default:Float.nan))
       ~on_change
   in
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let change v =
     let v = snapped v in
     let now = current () in
-    if not (Float.equal v now || (Float.is_nan v && Float.is_nan now)) then
-      set v
+    if not (Float.equal v now || (Float.is_nan v && Float.is_nan now)) then (
+      in_form.changed ();
+      set v)
   in
   (* A button steps the value while its step would move it. *)
   let can moved () =
@@ -250,7 +253,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
             (Styles.NumberField.options ?full_width:(full_width ())
                ?variant:(variant ()) ()));
       disabled;
-      invalid = (fun () -> is_invalid ());
+      invalid;
       can_increment = can (fun v -> v +. step ());
       can_decrement = can (fun v -> v -. step ());
     }
@@ -262,7 +265,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?min_value
       ?max_value
       step=(fun () -> step ())
-      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      validation_state=(fun () -> if invalid () then `invalid else `valid)
       required=(fun () -> is_required ())
       disabled=(fun () -> disabled ())
       read_only=(fun () -> is_read_only ())
@@ -272,13 +275,18 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?text_value
       class_=(fun () ->
                after (Styles.NumberField.base (f.slots ())) (class_ ()))
-      on_focus_out=(Field.on_leave on_blur)
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
       data_slot="number-field"
       data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
       <Kobalte.HiddenInput />
-      <Parts label_id=(fun () -> label_id)>(fun () -> children ())</Parts>
+      <Field_error.Message.Provider value=(fun () -> in_form.error)>
+        <Parts label_id=(fun () -> label_id)>(fun () -> children ())</Parts>
+      </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

@@ -1,0 +1,189 @@
+(* HeroUI's Form: a submit refused while a field inside it is invalid, the
+   first such field focused, and a server's error shown on the field it names
+   until the field is changed, beside the same form in React. *)
+
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+module Text_field = Solidtype_heroui.Text_field
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?validation_errors:(string Js.Dict.t[@mel.as "validationErrors"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Form.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Form.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Form.tsx"]
+end
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+let part slot =
+  match T.query ("[data-slot=" ^ slot ^ "]") with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("no " ^ slot)
+
+let submit user = T.click user (part "button")
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+let input () =
+  match Js.Null.toOption (query_in (part "textfield") "input") with
+  | Some e -> e
+  | None -> Js.Exn.raiseError "no input"
+
+(* What a reader and HeroUI's styles read of the field: whether it is invalid,
+   and its error, if any is shown. *)
+let shown () =
+  ( T.attribute (part "textfield") "data-invalid",
+    Option.map text (T.query "[data-slot=field-error]") )
+
+(* The field shown, changed by a key typed into it, then left by Tab. *)
+let walk ~step () =
+  let user = T.setup () in
+  let before = shown () in
+  let* () =
+    step (fun () ->
+        let* () = T.click user (input ()) in
+        T.keyboard user "a")
+  in
+  let typed = shown () in
+  let* () = step (fun () -> T.tab user) in
+  Js.Promise.resolve (before, typed, shown ())
+
+let () =
+  Jest.describe "Form" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "submits while every field is valid" (fun () ->
+          let submitted = ref 0 in
+          T.render (fun () ->
+              <Form
+                on_submit=(fun e ->
+                            prevent_default e;
+                            incr submitted)>
+                <Text_field name="email">
+                  <Label>"Email"</Label> <Input />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve E.(expect !submitted |> toBe 1));
+      Jest.testPromise
+        "refuses a submit while a field is invalid, and focuses the first"
+        (fun () ->
+          let submitted = ref 0 in
+          T.render (fun () ->
+              <Form
+                on_submit=(fun e ->
+                            prevent_default e;
+                            incr submitted)>
+                <Text_field name="email">
+                  <Label>"Email"</Label> <Input />
+                </Text_field>
+                <Number_field name="age" is_invalid=true>
+                  <Label>"Age"</Label>
+                  <Number_field.Group>
+                    <Number_field.Input />
+                  </Number_field.Group>
+                </Number_field>
+                <Text_field name="city" is_invalid=true>
+                  <Label>"City"</Label> <Input />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(
+              expect (!submitted, T.attribute active "role")
+              |> toEqual (0, Some "spinbutton")));
+      Jest.testPromise "focuses an invalid radio group's checked radio"
+        (fun () ->
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Radio_group name="plan" default_value="pro" is_invalid=true>
+                  <Label>"Plan"</Label>
+                  <Radio value="starter">
+                    <Radio.Content>
+                      <Radio.Control><Radio.Indicator /></Radio.Control>
+                      "Starter"
+                    </Radio.Content>
+                  </Radio>
+                  <Radio value="pro">
+                    <Radio.Content>
+                      <Radio.Control><Radio.Indicator /></Radio.Control> "Pro"
+                    </Radio.Content>
+                  </Radio>
+                </Radio_group>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(expect (T.attribute active "value") |> toEqual (Some "pro")));
+      Jest.testPromise "refuses a submit while a server's error stands"
+        (fun () ->
+          let submitted = ref 0 in
+          T.render (fun () ->
+              <Form
+                validation_errors=(fun () -> [ ("email", "Taken") ])
+                on_submit=(fun e ->
+                            prevent_default e;
+                            incr submitted)>
+                <Text_field name="email">
+                  <Label>"Email"</Label> <Input /> <Field_error />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve E.(expect !submitted |> toBe 0));
+      Jest.testPromise
+        "shows a server's error until its field is changed and left, as React's"
+        (fun () ->
+          T.render (fun () ->
+              <Form
+                validation_errors=(fun () -> [ ("email", "Taken") ])
+                on_submit=prevent_default>
+                <Text_field name="email">
+                  <Label>"Email"</Label> <Input /> <Field_error />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* solidtype = walk ~step:(fun action -> action ()) () in
+          T.cleanup ();
+          let errors = Js.Dict.empty () in
+          Js.Dict.set errors "email" "Taken";
+          let (_ : Dom.element) =
+            Twin.render (props ~validation_errors:errors ())
+          in
+          let* react = walk ~step:Twin.step () in
+          Twin.cleanup ();
+          Js.Promise.resolve
+            E.(
+              expect (solidtype, react)
+              |> toEqual
+                   ( ( (Some "true", Some "Taken"),
+                       (Some "true", Some "Taken"),
+                       (None, None) ),
+                     ( (Some "true", Some "Taken"),
+                       (Some "true", Some "Taken"),
+                       (None, None) ) ))))

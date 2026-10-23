@@ -109,19 +109,24 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
   let is_disabled () =
     match is_disabled () with Some d -> d | None -> in_fieldset ()
   in
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   (* The value is the group's, read by Kobalte and by every radio alike;
      none is Kobalte's own empty value, as a form's reset leaves it. *)
   let chosen, choose =
     Field.controlled
       ~value:(fun () -> Option.map Option.some (value ()))
       ~default:(default_value ())
-      ~on_change:(Option.iter (fun v -> ignore (on_change v : unit option)))
+      ~on_change:
+        (Option.iter (fun v ->
+             in_form.changed ();
+             ignore (on_change v : unit option)))
   in
   let g =
     {
       value = chosen;
       disabled = (fun () -> is_disabled ());
-      invalid = (fun () -> is_invalid ());
+      invalid;
       read_only = (fun () -> is_read_only ());
       required = (fun () -> is_required ());
     }
@@ -137,12 +142,15 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       ?name
       on_key_down=(fun e -> if is_read_only () then move_focus e)
       on_click=(fun e -> if is_read_only () then keep_choice e)
-      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      validation_state=(fun () -> if invalid () then `invalid else `valid)
       class_=(fun () ->
                Styles.RadioGroup.classes
                  (Styles.RadioGroup.options ~variant:(variant ())
                     ?class_:(class_ ()) ()))
-      on_focus_out=(Field.on_leave on_blur)
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
       data_slot="radio-group"
       data_orientation=(fun () ->
                          Jsx.data
@@ -150,7 +158,7 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
                            | `horizontal -> "horizontal"
                            | `vertical -> "vertical"))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
       <Label.Slot.Provider value=(fun () -> label)>

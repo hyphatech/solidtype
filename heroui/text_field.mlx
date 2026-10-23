@@ -26,11 +26,13 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_disabled : bool = false) ?(is_read_only : bool = false)
     ?(name : string option) ?(class_ : string option)
     ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let f =
     {
       variant;
       disabled = (fun () -> is_disabled ());
-      invalid = (fun () -> is_invalid ());
+      invalid;
       read_only = (fun () -> is_read_only ());
       required = (fun () -> is_required ());
     }
@@ -39,8 +41,10 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     <Kobalte.Root
       ?value
       ?default_value
-      on_change=(fun v -> ignore (on_change v : unit option))
-      validation_state=(fun () -> if is_invalid () then `invalid else `valid)
+      on_change=(fun v ->
+                  in_form.changed ();
+                  ignore (on_change v : unit option))
+      validation_state=(fun () -> if invalid () then `invalid else `valid)
       required=(fun () -> is_required ())
       disabled=(fun () -> is_disabled ())
       read_only=(fun () -> is_read_only ())
@@ -49,12 +53,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                Styles.TextField.classes
                  (Styles.TextField.options ?full_width:(full_width ())
                     ?class_:(class_ ()) ()))
-      on_focus_out=(Field.on_leave on_blur)
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
       data_slot="textfield"
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      data_invalid=(fun () -> Jsx.flag (is_invalid ()))
+      data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))>
-      <Parts>(fun () -> children ())</Parts>
+      <Field_error.Message.Provider value=(fun () -> in_form.error)>
+        <Parts>(fun () -> children ())</Parts>
+      </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>
