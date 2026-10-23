@@ -17,6 +17,15 @@
 @import "@heroui/styles/utilities";
 @import "@heroui/styles/variants";
 
+/* HeroUI's theme declares Tailwind's --color-accent again, inline, so the
+   theme's accent never reaches :root, where its selection, its focus ring
+   and Starlight's accent read it: selected text took the ground's colour
+   on no highlight. The theme's value is put back there; HeroUI's own
+   utilities read --accent and are unchanged. */
+:root {
+  --color-accent: hsl(calc(var(--hue) + 6) 72% 72%);
+}
+
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
    preview and each side of a comparison: HeroUI's components set none of
