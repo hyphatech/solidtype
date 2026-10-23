@@ -1,0 +1,22 @@
+module Progress_circle = Solidtype_heroui.Progress_circle
+
+let make () =
+  <div class_="flex items-end gap-6">
+    <Progress_circle aria_label="Thin circle" value=60.>
+      <Progress_circle.Track stroke_width=2. view_box="0 0 36 36">
+        <Progress_circle.Track_circle cx=18. cy=18. r=17. stroke_width=2. />
+        <Progress_circle.Fill_circle cx=18. cy=18. r=17. stroke_width=2. />
+      </Progress_circle.Track>
+    </Progress_circle>
+    <Progress_circle aria_label="Default circle" value=60.>
+      <Progress_circle.Track>
+        <Progress_circle.Track_circle /> <Progress_circle.Fill_circle />
+      </Progress_circle.Track>
+    </Progress_circle>
+    <Progress_circle aria_label="Thick circle" value=60.>
+      <Progress_circle.Track stroke_width=6. view_box="0 0 36 36">
+        <Progress_circle.Track_circle cx=18. cy=18. r=15. stroke_width=6. />
+        <Progress_circle.Fill_circle cx=18. cy=18. r=15. stroke_width=6. />
+      </Progress_circle.Track>
+    </Progress_circle>
+  </div>

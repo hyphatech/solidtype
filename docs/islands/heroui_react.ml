@@ -365,3 +365,13 @@ external time_field_props :
 external time_field : Dom.htmlDivElement -> time_field_props -> unit
   = "timeField"
 [@@mel.module "./react/heroui.tsx"]
+
+type progress_circle_props
+
+external progress_circle_props :
+  color:string -> size:string -> unit -> progress_circle_props = ""
+[@@mel.obj]
+
+external progress_circle : Dom.htmlDivElement -> progress_circle_props -> unit
+  = "progressCircle"
+[@@mel.module "./react/heroui.tsx"]

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Progress_circle`: HeroUI's ProgressCircle on Kobalte's
+  Progress, an arc round a circle, determinate or indeterminate, its colors,
+  sizes and format options; a circle of another radius draws its arc on that
+  radius, where HeroUI's measures it on the default one.
 - `Solidtype_heroui.Time_field`: HeroUI's TimeField on Kobalte's, a time of
   day in segments typed or stepped, its group, input, segments, prefix and
   suffix, its clock and leading zeros the locale's, its separators the

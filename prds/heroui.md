@@ -242,7 +242,8 @@ page, its line in `coverage.mdx`, the README and `CHANGES.md`.
 - [x] Format options: NumberField's `formatOptions`, Kobalte's; Meter's and
   ProgressBar's through `getValueLabel`; Slider's output and thumbs, by
   Kobalte's number formatter
-- [ ] ProgressCircle, Toast
+- [x] ProgressCircle
+- [ ] Toast
 
 ### Group 4: navigation and disclosure
 - [ ] Breadcrumbs, Pagination, Tabs, Accordion, Disclosure,

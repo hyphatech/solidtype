@@ -1,0 +1,8 @@
+module Progress_circle = Solidtype_heroui.Progress_circle
+
+let make () =
+  <Progress_circle aria_label="Loading" is_indeterminate=true>
+    <Progress_circle.Track>
+      <Progress_circle.Track_circle /> <Progress_circle.Fill_circle />
+    </Progress_circle.Track>
+  </Progress_circle>

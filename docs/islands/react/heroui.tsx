@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -521,6 +521,24 @@ export function timeField(host: HTMLElement, { variant, is_disabled }: TimeField
           <TimeField.Input>{(segment) => <TimeField.Segment segment={segment} />}</TimeField.Input>
         </TimeField.Group>
       </TimeField>,
+    ),
+  );
+}
+
+type ProgressCircleProps = {
+  color: "default" | "accent" | "success" | "warning" | "danger";
+  size: "sm" | "md" | "lg";
+};
+
+export function progressCircle(host: HTMLElement, props: ProgressCircleProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ProgressCircle {...props} value={60} aria-label="Loading">
+        <ProgressCircle.Track>
+          <ProgressCircle.TrackCircle />
+          <ProgressCircle.FillCircle />
+        </ProgressCircle.Track>
+      </ProgressCircle>,
     ),
   );
 }

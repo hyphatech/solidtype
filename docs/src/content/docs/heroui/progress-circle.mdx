@@ -1,0 +1,125 @@
+---
+title: ProgressCircle
+description: Progress of an operation, as an arc round a circle.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_usage.jsx";
+import UsageCode from "../../../../islands/progress_circle_usage.mlx?raw";
+import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_sizes.jsx";
+import SizesCode from "../../../../islands/progress_circle_sizes.mlx?raw";
+import * as Colors from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_colors.jsx";
+import ColorsCode from "../../../../islands/progress_circle_colors.mlx?raw";
+import * as Indeterminate from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_indeterminate.jsx";
+import IndeterminateCode from "../../../../islands/progress_circle_indeterminate.mlx?raw";
+import * as WithLabel from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_label.jsx";
+import WithLabelCode from "../../../../islands/progress_circle_label.mlx?raw";
+import * as CustomSvg from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_custom_svg.jsx";
+import CustomSvgCode from "../../../../islands/progress_circle_custom_svg.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/progress_circle_demo.jsx";
+
+`Solidtype_heroui.Progress_circle` is Kobalte's `Progress.Root`, a
+`<div role="progressbar">`, with the classes HeroUI's own
+`progressCircleVariants` gives. Its fill is an arc round its track, from the
+top, as far as its value is along its range, or, indeterminate, a quarter of
+the circle that spins as HeroUI's styles animate it. No label names it, so it
+is named by its `aria_label`, and a reader is told its value as Kobalte formats
+it, a percentage.
+
+## Usage
+
+<Example code={UsageCode} title="progress_circle_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Progress_circle value=60. aria_label="Loading">
+  <Progress_circle.Track>
+    <Progress_circle.Track_circle />
+    <Progress_circle.Fill_circle />
+  </Progress_circle.Track>
+</Progress_circle>
+```
+
+## Examples
+
+### Sizes
+
+<Example code={SizesCode} title="progress_circle_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Colors
+
+<Example code={ColorsCode} title="progress_circle_colors.mlx"><Colors.make client:visible /></Example>
+
+### Indeterminate
+
+<Example code={IndeterminateCode} title="progress_circle_indeterminate.mlx"><Indeterminate.make client:visible /></Example>
+
+### With Label
+
+<Example code={WithLabelCode} title="progress_circle_label.mlx"><WithLabel.make client:visible /></Example>
+
+### Custom SVG Props
+
+A circle's `r`, `cx`, `cy` and `stroke_width`, and the track's `view_box` and
+`stroke_width`, change the drawing. The fill's arc is measured on its own
+radius, so a circle of any size shows its value: HeroUI's measures it on the
+default radius whatever `r` it is given.
+
+<Example code={CustomSvgCode} title="progress_circle_custom_svg.mlx"><CustomSvg.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI ProgressCircle twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two circles: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.progress-circle`, and its colors `.progress-circle--default`,
+  `.progress-circle--accent`, `.progress-circle--success`,
+  `.progress-circle--warning`, `.progress-circle--danger`, and sizes
+  `.progress-circle--sm`, `.progress-circle--md`, `.progress-circle--lg`
+- `.progress-circle__track`, `.progress-circle__track-circle`,
+  `.progress-circle__fill-circle`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### ProgressCircle
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `value` | `value` | `float` | `0.` | Its value |
+| `minValue` | `min_value` | `float` | `0.` | The least value |
+| `maxValue` | `max_value` | `float` | `100.` | The greatest value |
+| `isIndeterminate` | `is_indeterminate` | `bool` | `false` | Whether its progress cannot be known |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `accent `` | Its arc's color |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its size |
+| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | a percent | How its value is told to a reader |
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### ProgressCircle.Track
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `viewBox` | `view_box` | `string` | `"0 0 36 36"` | The drawing's box |
+| `strokeWidth` | `stroke_width` | `float` | | Its circles' stroke, where they set none |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### ProgressCircle.TrackCircle, ProgressCircle.FillCircle
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `cx`, `cy` | `cx`, `cy` | `float` | `18.` | Its center |
+| `r` | `r` | `float` | `16.` | Its radius |
+| `strokeWidth` | `stroke_width` | `float` | `4.` | Its stroke |
+| `className` | `class_` | `string` | | Added after HeroUI's class |

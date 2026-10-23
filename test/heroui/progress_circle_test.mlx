@@ -1,0 +1,159 @@
+(* HeroUI's ProgressCircle on Kobalte's Progress, beside the same circle in
+   React: every part, its value as a reader reads it, and its fill's arc. *)
+
+module Progress_circle = Solidtype_heroui.Progress_circle
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  ?value:float ->
+  ?is_indeterminate:(bool[@mel.as "isIndeterminate"]) ->
+  ?min_value:(float[@mel.as "minValue"]) ->
+  ?max_value:(float[@mel.as "maxValue"]) ->
+  ?color:string ->
+  ?size:string ->
+  ?radius:float ->
+  ?stroke_width:(float[@mel.as "strokeWidth"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ProgressCircle.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ProgressCircle.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+(* Every attribute of every part, but the id each framework makes, Kobalte's
+   own state -- [data-progress], and the attributes it writes present and
+   empty -- which no style of HeroUI's reads, and those [but] names. *)
+let shown ?(but = []) host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let empty =
+        Array.to_list (T.attribute_names e)
+        |> List.filter (fun name ->
+            Option.equal String.equal (T.attribute e name) (Some ""))
+      in
+      String.lowercase_ascii (tag_name e)
+      ^ " "
+      ^ T.attributes_but (("data-progress" :: empty) @ but) e)
+
+let both ?(but = []) ?value ?is_indeterminate ?min_value ?max_value ?color ?size
+    ?radius ?stroke_width () =
+  T.render (fun () ->
+      <Progress_circle
+        ?value=(fun () -> value)
+        ?is_indeterminate=(fun () -> is_indeterminate)
+        ?min_value=(fun () -> min_value)
+        ?max_value=(fun () -> max_value)
+        ?color=(fun () -> color)
+        ?size=(fun () -> size)
+        aria_label="Loading">
+        <Progress_circle.Track
+          ?stroke_width=(fun () -> stroke_width)
+          ?view_box=(fun () ->
+                      Option.map (fun (_ : float) -> "0 0 36 36") stroke_width)>
+          <Progress_circle.Track_circle
+            ?cx=(fun () -> Option.map (fun (_ : float) -> 18.) radius)
+            ?cy=(fun () -> Option.map (fun (_ : float) -> 18.) radius)
+            ?r=(fun () -> radius)
+            ?stroke_width=(fun () -> stroke_width)
+          />
+          <Progress_circle.Fill_circle
+            ?cx=(fun () -> Option.map (fun (_ : float) -> 18.) radius)
+            ?cy=(fun () -> Option.map (fun (_ : float) -> 18.) radius)
+            ?r=(fun () -> radius)
+            ?stroke_width=(fun () -> stroke_width)
+          />
+        </Progress_circle.Track>
+      </Progress_circle>);
+  let host =
+    match T.query "[data-slot=progress-circle]" with
+    | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
+    | None -> T.body
+  in
+  let solidtype = shown ~but host in
+  T.cleanup ();
+  let react =
+    shown ~but
+      (Twin.render
+         (props ?value ?is_indeterminate ?min_value ?max_value
+            ?color:
+              (Option.map
+                 (function
+                   | `default -> "default"
+                   | `accent -> "accent"
+                   | `success -> "success"
+                   | `warning -> "warning"
+                   | `danger -> "danger")
+                 color)
+            ?size:
+              (Option.map
+                 (function `sm -> "sm" | `md -> "md" | `lg -> "lg")
+                 size)
+            ?radius ?stroke_width ()))
+  in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let fill () =
+  match T.query "[data-slot=progress-circle-fill-circle]" with
+  | Some e ->
+      (T.attribute e "stroke-dasharray", T.attribute e "stroke-dashoffset")
+  | None -> (None, None)
+
+let () =
+  Jest.describe "Progress_circle" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a circle of its value, as React's is" (fun () ->
+          let solidtype, react = both ~value:60. () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is its value within its range, as React's is" (fun () ->
+          let solidtype, react =
+            both ~value:30. ~min_value:10. ~max_value:50. ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is each color and size, as React's is" (fun () ->
+          let solidtype, react = both ~value:90. ~color:`danger ~size:`lg () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is indeterminate, as React's is" (fun () ->
+          let solidtype, react = both ~is_indeterminate:true () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "takes a circle's own size, as React's does" (fun () ->
+          let solidtype, react =
+            both
+              ~but:[ "stroke-dasharray"; "stroke-dashoffset" ]
+              ~value:60. ~radius:17. ~stroke_width:2. ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its arc on a circle's own radius, where React's does not"
+        (fun () ->
+          T.render (fun () ->
+              <Progress_circle value=60. aria_label="Loading">
+                <Progress_circle.Track>
+                  <Progress_circle.Track_circle r=17. />
+                  <Progress_circle.Fill_circle r=17. />
+                </Progress_circle.Track>
+              </Progress_circle>);
+          (* The circle's whole length, 2 pi r, and the part not yet done. *)
+          let length = 2. *. Js.Math._PI *. 17. in
+          E.(
+            expect (fill ())
+            |> toEqual
+                 ( Some (Js.Float.toString length),
+                   Some (Js.Float.toString (length -. (60. /. 100. *. length)))
+                 ))))

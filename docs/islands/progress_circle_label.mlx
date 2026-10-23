@@ -1,0 +1,12 @@
+module Label = Solidtype_heroui.Label
+module Progress_circle = Solidtype_heroui.Progress_circle
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Progress_circle aria_label="Loading" value=75.>
+      <Progress_circle.Track>
+        <Progress_circle.Track_circle /> <Progress_circle.Fill_circle />
+      </Progress_circle.Track>
+    </Progress_circle>
+    <Label>"75% Complete"</Label>
+  </div>

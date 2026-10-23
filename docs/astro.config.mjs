@@ -39,7 +39,7 @@ export default defineConfig({
       ],
       sidebar: [
         { label: "Start here", items: ["index"] },
-        { label: "HeroUI", items: ["heroui/coverage", "heroui/alert", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/description", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/meter", "heroui/number-field", "heroui/progress-bar", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/typography"] },
+        { label: "HeroUI", items: ["heroui/coverage", "heroui/alert", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/description", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/meter", "heroui/number-field", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/typography"] },
       ],
     }),
     solid({ exclude: [reactFiles] }),

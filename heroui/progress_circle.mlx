@@ -1,0 +1,160 @@
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.Progress
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+
+(* What a circle's parts read of it: its classes, and how far along its range
+   its value is, from 0 to 100, unless it is indeterminate. *)
+type circle = {
+  slots : unit -> Styles.ProgressCircle.slots;
+  percent : unit -> float option;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = circle
+end)
+
+let within part =
+  match Context.use () with
+  | Some c -> c
+  | None -> invalid_arg (part ^ " is used inside a Progress_circle")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* HeroUI's drawing: a circle of 36 units, its stroke 4 wide, its radius
+   inside the stroke. *)
+let center = 18.
+let stroke = 4.
+let radius = center -. (stroke /. 2.)
+let number = Js.Float.toString
+
+module Track = struct
+  let%component make ?(view_box : string option) ?(stroke_width : float option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let c = within "Progress_circle.Track" in
+    <svg
+      class_=(fun () ->
+               after (Styles.ProgressCircle.track (c.slots ())) (class_ ()))
+      data_slot="progress-circle-track"
+      fill="none"
+      view_box=(fun () ->
+                 Option.value (view_box ())
+                   ~default:
+                     ("0 0 "
+                     ^ number (center *. 2.)
+                     ^ " "
+                     ^ number (center *. 2.)))
+      ?stroke_width=(fun () -> Option.map number (stroke_width ()))>
+      (fun () -> children ())
+    </svg>
+end
+
+module Track_circle = struct
+  let%component make ?(cx : float = center) ?(cy : float = center)
+      ?(r : float = radius) ?(stroke_width : float = stroke)
+      ?(class_ : string option) () =
+    let c = within "Progress_circle.Track_circle" in
+    <circle
+      class_=(fun () ->
+               after
+                 (Styles.ProgressCircle.track_circle (c.slots ()))
+                 (class_ ()))
+      cx=(fun () -> number (cx ()))
+      cy=(fun () -> number (cy ()))
+      data_slot="progress-circle-track-circle"
+      r=(fun () -> number (r ()))
+      stroke_width=(fun () -> number (stroke_width ()))
+    />
+end
+
+module Fill_circle = struct
+  let%component make ?(cx : float = center) ?(cy : float = center)
+      ?(r : float = radius) ?(stroke_width : float = stroke)
+      ?(class_ : string option) () =
+    let c = within "Progress_circle.Fill_circle" in
+    (* Its length on its own radius: HeroUI's measures it on the default one
+       whatever [r] it is given, so a circle of another size draws the wrong
+       arc. *)
+    let length () = 2. *. Js.Math._PI *. r () in
+    <circle
+      class_=(fun () ->
+               after
+                 (Styles.ProgressCircle.fill_circle (c.slots ()))
+                 (class_ ()))
+      cx=(fun () -> number (cx ()))
+      cy=(fun () -> number (cy ()))
+      data_slot="progress-circle-fill-circle"
+      r=(fun () -> number (r ()))
+      stroke_dasharray=(fun () -> number (length ()))
+      stroke_dashoffset=(fun () ->
+                          match c.percent () with
+                          | Some p ->
+                              number (length () -. (p /. 100. *. length ()))
+                          | None -> number (length () *. 0.75))
+      stroke_linecap="round"
+      stroke_width=(fun () -> number (stroke_width ()))
+      transform=(fun () ->
+                  "rotate(-90 " ^ number (cx ()) ^ " " ^ number (cy ()) ^ ")")
+    />
+end
+
+let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
+    ?(min_value : float = 0.) ?(max_value : float = 100.)
+    ?(color : [ `default | `accent | `success | `warning | `danger ] option)
+    ?(size : [ `sm | `md | `lg ] option) ?(aria_label : string option)
+    ?(class_ : string option)
+    ?(format_options : Types.NumberFormatOptions.t option)
+    ~(children : Jsx.content) () =
+  (* HeroUI's formatOptions as it reads them, a percent by default: a percent
+     is the value's share of its range, any other style the value itself. *)
+  let options () =
+    match format_options () with
+    | Some o -> o
+    | None -> Types.NumberFormatOptions.make ~style:`percent ()
+  in
+  let formatter =
+    I18n.create_number_formatter (Types.Either.right (fun[@u] () -> options ()))
+  in
+  let value_label params =
+    let value = Types.GetValueLabelParams.value params in
+    let min = Types.GetValueLabelParams.min params in
+    let range = Types.GetValueLabelParams.max params -. min in
+    let shown =
+      match Types.NumberFormatOptions.style (options ()) with
+      | Some `percent -> if range <= 0. then 0. else (value -. min) /. range
+      | Some (`decimal | `currency | `unit) | None -> value
+    in
+    Types.NumberFormat.format (Solidtype.Solid.get formatter) shown
+  in
+  let c =
+    {
+      slots =
+        (fun () ->
+          Styles.ProgressCircle.slots
+            (Styles.ProgressCircle.options ?color:(color ()) ?size:(size ()) ()));
+      percent =
+        (fun () ->
+          let range = max_value () -. min_value () in
+          if is_indeterminate () then None
+          else if range <= 0. then Some 0.
+          else
+            Some
+              (Float.min 100.
+                 (Float.max 0. ((value () -. min_value ()) /. range *. 100.))));
+    }
+  in
+  <Context.Provider value=(fun () -> c)>
+    <Kobalte.Root
+      value=(fun () -> value ())
+      indeterminate=(fun () -> is_indeterminate ())
+      min_value=(fun () -> min_value ())
+      max_value=(fun () -> max_value ())
+      ?aria_label
+      get_value_label=value_label
+      class_=(fun () ->
+               after (Styles.ProgressCircle.base (c.slots ())) (class_ ()))
+      data_slot="progress-circle">
+      (fun () -> children ())
+    </Kobalte.Root>
+  </Context.Provider>
