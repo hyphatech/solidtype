@@ -1,0 +1,56 @@
+---
+title: Async
+description: Resources, Suspense and transitions, with OCaml's options and results.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Resource from "../../../../../_build/default/docs/islands/out/docs/islands/solid_resource.jsx";
+import resource from "../../../../islands/solid_resource.mlx?raw";
+
+## Resources
+
+A resource is a value fetched asynchronously, as a `Js.Promise.t`, and
+read like a signal. `Solid.create_resource_from` fetches again whenever its
+source changes:
+
+<Example code={resource} title="solid_resource.mlx"><Resource.make client:only="solid-js" /></Example>
+
+The source is a thunk of an `option`: while it is `None`, nothing is
+fetched. Solid's own skips a source that is `false`, `null` or `undefined`;
+solidtype boxes the source, so `Some false` and `Some 0` are fetched as any
+other value. `Solid.create_resource` fetches once, with no source.
+
+What the resource gives:
+
+| Call | What it gives |
+|---|---|
+| `Solid.read r` | the value, tracked; `None` before the first. An errored resource raises its error, which an `ErrorBoundary` catches |
+| `Solid.latest r` | the last value, held while it is fetched again |
+| `Solid.state r` | `Unresolved`, `Pending`, `Ready`, `Refreshing` or `Errored`, a variant to `match` |
+| `Solid.loading r`, `Solid.error r` | a `bool`, and an `exn option` |
+| `Solid.mutate actions v`, `Solid.refetch actions` | set the value without fetching, or fetch again |
+
+The fetch is told what it fetches over, as a record:
+`{ value; refetching }`.
+
+## Suspense
+
+A resource read inside `Suspense` shows its fallback while the resource
+loads, as above. `SuspenseList` orders several. On the server, a page
+rendered with `Server.render_to_string_async` waits for every resource read,
+and `render_to_stream` sends each part as it resolves; see
+[Rendering](../rendering/).
+
+## Transitions
+
+`Solid.start_transition f` runs `f` so that its updates show together, once
+what they suspend on has resolved; the page keeps showing the old state
+meanwhile, rather than a fallback. `Solid.use_transition ()` gives whether
+one is pending, and what starts one.
+
+## Errors
+
+A promise in Melange's binding may reject, and a rejection nothing handles
+is lost. A fetch that may fail resolves to a `result` at the point where it
+is bound -- `Js.Promise.catch` there -- so the resource's value is
+`(data, error) result`, and the page `match`es it as any other value.

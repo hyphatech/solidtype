@@ -1,0 +1,93 @@
+---
+title: Control flow
+description: Show, For, Index, Switch and Match, ErrorBoundary and Portal, with OCaml's options and matches.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Flow from "../../../../../_build/default/docs/islands/out/docs/islands/solid_flow.jsx";
+import flow from "../../../../islands/solid_flow.mlx?raw";
+
+Solid's control flow is components, so that each branch and each item is
+created once and kept, never rendered again from scratch. solidtype binds
+each as a module of its own, named as Solid names it, and adds the forms
+OCaml's options and matches want.
+
+<Example code={flow} title="solid_flow.mlx"><Flow.make client:visible /></Example>
+
+## Show
+
+```ocaml
+<Show when_=(fun () -> Solid.get ready) fallback=(<p>"Loading"</p>)>
+  <Dashboard />
+</Show>
+```
+
+`when_` is a `bool`. Solid tests its condition for truth, and Melange
+writes `Some 0`, `Some ""` and a variant's first constant constructor as
+values JavaScript reads as false, so solidtype never hands Solid an OCaml
+value to test. An `option` is shown by `Show.Some`, whose child is given a
+read of the value while it is `Some`:
+
+```ocaml
+<Show.Some some=(fun () -> Solid.get user)>
+  (fun user -> <p>(fun () -> Jsx.string (Solid.get user).name)</p>)
+</Show.Some>
+```
+
+`Show.Keyed` gives the value itself, and renders again whenever it changes.
+
+## For and Index
+
+`For` renders each item once, by identity, and moves its element when the
+list reorders; its child is the function that renders an item, given the
+item and a tracked index:
+
+```ocaml
+<For each=(fun () -> Solid.get tasks)>
+  (fun task i -> <li>(fun () -> Jsx.string task.title)</li>)
+</For>
+```
+
+`Index` renders each position once, and gives a tracked read of the item at
+it, for a list of values that change in place. Both take an `array`, which
+is what JavaScript holds.
+
+## Switch and Match
+
+A `Switch` whose only child is a thunk of a `match` gets a `Match` per case,
+written by the ppx:
+
+```ocaml
+<Switch>
+  (fun () ->
+    match Solid.get answer with
+    | Waiting -> <p>"waiting"</p>
+    | Ready n -> <p>(fun () -> Jsx.int n)</p>
+    | Refused why -> <p>(fun () -> Jsx.string why)</p>)
+</Switch>
+```
+
+The `match` is also checked whole, so a case left out is the compiler's
+warning, as in any `match`. A case that binds a variable becomes a
+`Match.Keyed`. The lowering names `Match`, so `Solidtype.Match` is in
+scope where it is used. Written out, `<Match when_=...>` takes a `bool`, and
+`Match.Some` and `Match.Keyed` an option, as `Show`'s forms do.
+
+## ErrorBoundary
+
+```ocaml
+<ErrorBoundary fallback=(fun exn reset -> <button on_click=(fun _ -> reset ())>"Retry"</button>)>
+  <Chart />
+</ErrorBoundary>
+```
+
+The fallback is given what was raised, an OCaml exception as it was
+raised and a value JavaScript threw as `Js.Exn.Error`, and a function that
+renders the children again.
+
+## Portal and Dynamic
+
+`Portal` mounts its children elsewhere, in `document.body` unless `mount`
+is given, while they stay this component's in the reactive graph.
+`Dynamic` renders a component chosen while the page runs; see
+[Components](../components/#a-component-chosen-at-run-time).

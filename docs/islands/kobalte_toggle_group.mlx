@@ -1,0 +1,49 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module ToggleGroup = Solidtype_kobalte.ToggleGroup
+
+let item =
+  "rounded-lg px-3 py-1 text-sm text-foreground hover:bg-default \
+   data-[pressed]:bg-accent data-[pressed]:text-accent-foreground"
+
+let make () =
+  let align, set_align = S.create_signal (Js.Nullable.return "left") in
+  let styles, set_styles = S.create_signal [| "bold" |] in
+  <div class_="flex flex-col items-start gap-3">
+    <ToggleGroup.Root
+      class_="flex gap-1"
+      aria_label="Alignment"
+      value=(fun () -> S.get align)
+      on_change=(S.set set_align)>
+      <ToggleGroup.Item class_=(fun () -> item) value="left">
+        "Left"
+      </ToggleGroup.Item>
+      <ToggleGroup.Item class_=(fun () -> item) value="center">
+        "Center"
+      </ToggleGroup.Item>
+      <ToggleGroup.Item class_=(fun () -> item) value="right">
+        "Right"
+      </ToggleGroup.Item>
+    </ToggleGroup.Root>
+    <ToggleGroup.Root_multiple
+      class_="flex gap-1"
+      aria_label="Style"
+      multiple=true
+      value=(fun () -> S.get styles)
+      on_change=(S.set set_styles)>
+      <ToggleGroup.Item class_=(fun () -> item) value="bold">
+        "Bold"
+      </ToggleGroup.Item>
+      <ToggleGroup.Item class_=(fun () -> item) value="italic">
+        "Italic"
+      </ToggleGroup.Item>
+    </ToggleGroup.Root_multiple>
+    <p class_="text-sm text-muted">
+      (fun () ->
+        let align =
+          Option.value (Js.Nullable.toOption (S.get align)) ~default:"none"
+        in
+        Jsx.string
+          (align ^ "; " ^ String.concat ", " (Array.to_list (S.get styles))))
+    </p>
+  </div>

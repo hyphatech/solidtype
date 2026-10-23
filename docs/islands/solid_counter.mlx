@@ -1,0 +1,11 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+let make () =
+  let count, set_count = S.create_signal 0 in
+  <button
+    class_="button button--primary"
+    type_=`button
+    on_click=(fun _ -> S.update set_count succ)>
+    "Clicked " (fun () -> Jsx.int (S.get count)) " times"
+  </button>

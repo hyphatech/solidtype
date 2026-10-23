@@ -1,0 +1,74 @@
+---
+title: Using Kobalte
+description: Kobalte's components in OCaml's JSX, styled by their own data attributes.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Switch from "../../../../../_build/default/docs/islands/out/docs/islands/kobalte_switch.jsx";
+import switchCode from "../../../../islands/kobalte_switch.mlx?raw";
+import * as ToggleGroup from "../../../../../_build/default/docs/islands/out/docs/islands/kobalte_toggle_group.jsx";
+import toggleGroup from "../../../../islands/kobalte_toggle_group.mlx?raw";
+import * as Select from "../../../../../_build/default/docs/islands/out/docs/islands/kobalte_select.jsx";
+import select from "../../../../islands/kobalte_select.mlx?raw";
+
+A Kobalte component is used as Kobalte's documentation shows it, part by
+part, in OCaml's JSX. Kobalte has no look of its own: it writes its state
+as `data-` attributes -- `data-checked`, `data-pressed`, `data-highlighted`
+-- which a stylesheet or Tailwind's `data-[...]:` variants style. The
+examples below are styled with Tailwind on HeroUI's colours.
+
+## Switch
+
+<Example code={switchCode} title="kobalte_switch.mlx"><Switch.make client:visible /></Example>
+
+The switch is controlled: `checked` is a thunk of a signal, and `on_change`
+is given the new value, a `bool`, as Kobalte's `onChange` is. Left out,
+`default_checked` sets where an uncontrolled switch starts. `Switch.Input`
+is the native checkbox Kobalte hides, which a form submits and focus
+reaches, so the control's focus ring is styled from it, `peer-focus-visible`.
+
+## Toggle group
+
+<Example code={toggleGroup} title="kobalte_toggle_group.mlx"><ToggleGroup.make client:visible /></Example>
+
+`ToggleGroup.Root` holds one value, or none: its `value` is a
+`string Js.Nullable.t`, since Kobalte reads `undefined` as uncontrolled and
+`null` as a controlled group with nothing pressed. `ToggleGroup.Root_multiple`
+holds several, a `string array`, and takes `multiple=true`. Each has the
+exact type of its value, where TypeScript has one component whose type
+turns on `multiple`.
+
+`class_=(fun () -> item)` gives each item a class held in a name. A name
+alone is passed to a component as it is, which a component's check takes
+only for a function, so a constant is passed as the thunk it is read by.
+
+## Select
+
+<Example code={select} title="kobalte_select.mlx"><Select.make client:visible /></Example>
+
+A select shows more of the binding:
+
+- **`options`** is an array of `(string, Types.<group>) Either.t`: Kobalte
+  takes an option or a group of options, values of different JavaScript
+  kinds, so each is wrapped by `Either.left` or `Either.right`, which
+  writes the value as it is.
+- **`item_component`** is a function prop, given Kobalte's item props, a
+  `Types.SelectBaseItemComponentProps.t`, read by its getters:
+  `Item_props.item props` is the item's collection node, and
+  `Node.raw_value` the option it holds.
+- **`Select.Value`**'s child is a function given the value's state,
+  `Types.SelectValueState.t`, whose `selected_option` is an accessor.
+- **`Select.Portal`** mounts the list in `document.body`, outside the
+  page's flow, as Kobalte's own does; the list is given HeroUI's ground
+  there, since it no longer inherits the example's.
+
+## Every component
+
+The binding holds every component in Kobalte's documentation, from
+Accordion to Tooltip, by the same rules. Each module's `.mli` is the
+reference for its parts and their props, in OCaml; Kobalte's documentation
+is the reference for what they do.
+
+[HeroUI](../../heroui/coverage/) is built on these components: each port is
+a Kobalte component with HeroUI's classes, and its page shows it beside
+HeroUI's own.

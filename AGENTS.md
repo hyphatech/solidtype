@@ -59,10 +59,13 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      their content declares, a value controlled or kept, and
                      the content, on a Kobalte component's label and input
 docs/                the documentation, a Starlight site in Hypha's look,
-                     from starlight-theme-hypha: each port's page shows it
-                     beside the same component in React, with its source
-  islands/           the pages' OCaml: each demo, and the comparison of a
-                     port's element with React's, attribute by attribute
+                     from starlight-theme-hypha: how the pieces work
+                     together and are set up, the Solid and Kobalte
+                     bindings, and each port's page, which shows it beside
+                     the same component in React, with its source
+  islands/           the pages' OCaml: each example, compiled, and the
+                     comparison of a port's element with React's,
+                     attribute by attribute
   islands/react/     HeroUI's components in React, rendered into a host
                      an island owns: the one place the documentation runs
                      React

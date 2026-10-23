@@ -1,0 +1,46 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module K = Solidtype_kobalte
+module Select = K.Select
+module Node = K.Types.CollectionNode
+module Item_props = K.Types.SelectBaseItemComponentProps
+module Value_state = K.Types.SelectValueState
+
+let make () =
+  <Select.Root
+    class_="flex w-56 flex-col gap-1"
+    options=(fun () ->
+              Array.map K.Types.Either.left [| "Apple"; "Banana"; "Cherry" |])
+    placeholder=(<span class_="text-muted">"Pick a fruit"</span>)
+    item_component=(fun props ->
+                     <Select.Item
+                       class_="flex cursor-default items-center \
+                               justify-between rounded-lg px-2 py-1 \
+                               outline-none data-[highlighted]:bg-default"
+                       item=(fun () -> Item_props.item props)>
+                       <Select.ItemLabel>
+                         (fun () ->
+                           Jsx.string (Node.raw_value (Item_props.item props)))
+                       </Select.ItemLabel>
+                       <Select.ItemIndicator>{js|✓|js}</Select.ItemIndicator>
+                     </Select.Item>)>
+    <Select.Label class_="text-sm">"Fruit"</Select.Label>
+    <Select.Trigger
+      class_="flex items-center justify-between rounded-xl border \
+              border-border bg-field px-3 py-2 text-left">
+      <Select.Value>
+        (fun state ->
+          <span>
+            (fun () -> Jsx.string (S.get (Value_state.selected_option state)))
+          </span>)
+      </Select.Value>
+      <Select.Icon>{js|▾|js}</Select.Icon>
+    </Select.Trigger>
+    <Select.Portal>
+      <Select.Content
+        class_="heroui-ground rounded-xl border border-border bg-overlay p-1 \
+                shadow-lg">
+        <Select.Listbox />
+      </Select.Content>
+    </Select.Portal>
+  </Select.Root>

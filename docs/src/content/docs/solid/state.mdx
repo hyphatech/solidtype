@@ -1,0 +1,56 @@
+---
+title: Stores and context
+description: State tracked field by field, and a value given to every component below a provider.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Store from "../../../../../_build/default/docs/islands/out/docs/islands/solid_store.jsx";
+import store from "../../../../islands/solid_store.mlx?raw";
+import * as Context from "../../../../../_build/default/docs/islands/out/docs/islands/solid_context.jsx";
+import context from "../../../../islands/solid_context.mlx?raw";
+
+## Stores
+
+`Solidtype.Store` binds `solid-js/store`: state whose every field is
+tracked on its own, so a change to one field reruns only what read it.
+
+A store's state is an OCaml record, which Melange writes as an object with
+the record's field names. Reading a field, `player.volume`, is a read Solid
+tracks, with no accessor to call:
+
+<Example code={store} title="solid_store.mlx"><Store.make client:visible /></Example>
+
+A change goes through the setter, in one of three ways:
+
+- **`Store.set setter value`** merges the value's fields into the store's,
+  as Solid's setter does with an object.
+- **`Store.modify setter (Store.produce f)`** changes the store by `f
+  draft`, where the draft's `mutable` fields are assigned in place.
+- **`Store.modify setter (Store.reconcile value)`** changes the store to the
+  value, keeping every part that is equal, so only what differs notifies;
+  arrays' items are matched by their `id` field, or by `~key`.
+
+Solid's path setter, `setStore("todos", 0, "done", true)`, is not bound,
+since OCaml cannot type a path of strings. `produce` says the same with a
+field assignment the compiler checks.
+
+A copy made by OCaml's functional update, `{ player with muted = true }`,
+is a plain object, no longer tracked: it is a value to give the setter, not
+a store. `Store.create_mutable` gives a store whose `mutable` fields are
+assigned directly, each assignment a change. `Store.unwrap` gives the plain
+object under a store, untracked.
+
+## Context
+
+A context is a value given to every component below its provider. Its
+provider is a component named in JSX, so a context is a module, made by a
+functor from its type and its default:
+
+<Example code={context} title="solid_context.mlx"><Context.make client:visible /></Example>
+
+`Locale.use ()` reads the nearest provider's value above the component, or
+the default with none. `Context.Make_optional` makes a context with no
+default, whose `use` gives an `option`.
+
+A value that changes is put in the context as a signal or a store, and read
+where it is used, so the provider's value itself is given once.

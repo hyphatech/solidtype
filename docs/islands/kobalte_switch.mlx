@@ -1,0 +1,27 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Switch = Solidtype_kobalte.Switch
+
+let make () =
+  let on, set_on = S.create_signal false in
+  <div class_="flex flex-col items-start gap-3">
+    <Switch.Root
+      class_="inline-flex items-center gap-3"
+      checked=(fun () -> S.get on)
+      on_change=(S.set set_on)>
+      <Switch.Input class_="peer" />
+      <Switch.Control
+        class_="inline-flex h-6 w-11 items-center rounded-full bg-default \
+                px-0.5 transition-colors data-[checked]:bg-accent \
+                peer-focus-visible:ring-2 peer-focus-visible:ring-focus">
+        <Switch.Thumb
+          class_="size-5 rounded-full bg-white shadow transition-transform \
+                  data-[checked]:translate-x-5"
+        />
+      </Switch.Control>
+      <Switch.Label>"Airplane mode"</Switch.Label>
+    </Switch.Root>
+    <p class_="text-sm text-muted">
+      (fun () -> Jsx.string (if S.get on then "On" else "Off"))
+    </p>
+  </div>

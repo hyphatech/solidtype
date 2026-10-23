@@ -1,0 +1,122 @@
+---
+title: Components
+description: A component in OCaml's JSX, its props, its children, and how the compiler checks them.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Greeting from "../../../../../_build/default/docs/islands/out/docs/islands/solid_greeting.jsx";
+import greeting from "../../../../islands/solid_greeting.mlx?raw";
+import * as Children from "../../../../../_build/default/docs/islands/out/docs/islands/solid_children.jsx";
+import children from "../../../../islands/solid_children.mlx?raw";
+
+A component is a function from its props to an element, as in Solid. It
+runs once; what changes afterwards is the thunks inside it, which Solid
+reruns. Every module of `solidtype` binds one part of Solid, named as Solid
+names it: `Solidtype.Solid` is `solid-js`, `Solidtype.Web` is
+`solid-js/web`, `Solidtype.Show` is `<Show>`.
+
+## `let%component`
+
+A component another component's JSX names is written with
+`let%component`. Its props are its labelled parameters, and it ends in
+`()`:
+
+<Example code={greeting} title="solid_greeting.mlx"><Greeting.make client:visible /></Example>
+
+From the parameters, the ppx writes the module's `Props` -- the props' type,
+a getter for each, and `check` -- and `make` and `component`. In the body a
+value prop is read as a thunk, `name ()`, since it is a live read of Solid's
+props, which Solid tracks. An optional parameter with a default,
+`?(greeting : string = "Hello")`, reads its default while the prop is left
+out; one without, `?(note : string option)`, reads an `option`.
+
+A component is a value, `Greeting.component`, and the tag `<Greeting />`
+names it. The module is the component: `<Greeting.Header />` is the
+component `Greeting.Header.component`.
+
+## Props are checked
+
+Each element of a component applies the component's `Props.check` to its
+props, which the compiler checks and Melange drops. The check takes one
+labelled argument per prop, optional where the prop is, so the compiler
+says what TSX's types would:
+
+```
+1 | let make () = <Label />
+                  ^^^^^^^^^
+Error: This expression has type text:string Solidtype.Check.value -> unit
+       but an expression was expected of type unit
+Hint: This function application is partial, maybe some arguments are missing.
+```
+
+```
+1 | let make () = <Label text=(fun () -> "x") colour="red" />
+                                                     ^^^^^
+Error: The function applied to this argument has type
+         ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
+This argument cannot be applied with label ~colour
+```
+
+A value prop is a `Check.value`: a literal, or a thunk that reads what
+changes. A thunk is never taken for a function prop, which a component
+would call; a function prop is the function itself, `on_close=(fun _ ->
+...)`. Two props typed by one type variable must agree, as in TSX.
+
+## Children
+
+Children are a prop, `children`. As `Jsx.content`, they are any JSX and are
+read where they go, `(fun () -> children ())`:
+
+<Example code={children} title="solid_children.mlx"><Children.make client:visible /></Example>
+
+A component may also take a function as its only child, which it calls, as
+`For` does: `~(children : item -> Jsx.element)`. A check names which kinds
+it takes: `[ `nodes ]` for elements, `[ `render ]` for a function, or both.
+
+A function prop that takes nothing is written `(fun _ -> ...)`, as
+`on_close` is above: `(fun () -> ...)` is a thunk, which would be read as a
+value.
+
+## Props written by hand
+
+Two components are written without `let%component`. A root, which a page or
+`Web.render` mounts and no JSX names, is `let make () = ...`. A component
+that passes its props on whole, as a spread, writes its `Props` by hand,
+its check's labels named as solidtype names a prop, and spreads them with
+the attribute `props`:
+
+```ocaml
+let make (props : Props.t) = <input class_="field" props />
+```
+
+`Solid.merge_props` gives props defaults, live, and `Props.omit`, which
+`let%component` writes, leaves some out of a spread by a variant of the
+component's own prop names, so a misspelt one is a compile error.
+
+## A component chosen at run time
+
+`Dynamic` renders whichever component a thunk gives, its props given as one
+value typed by that component, so a prop it needs is not left out:
+
+```ocaml
+<Dynamic component=(fun () -> pick ()) props=(Greeting.Props.make ~name:"Ada" ()) />
+```
+
+`Dynamic.Element` does the same for an element whose tag is a string.
+`Solid.lazy_` makes a component loaded when it is first rendered, which
+suspends until it arrives.
+
+## What else is bound
+
+| Solid | solidtype |
+|---|---|
+| `children(() => props.children)` | `Solid.children`, then `Solid.to_array` |
+| `mergeProps` | `Solid.merge_props` |
+| `splitProps` | `Solid.omit`, or `Props.omit` |
+| `createUniqueId` | `Solid.create_unique_id` |
+| `lazy` | `Solid.lazy_` |
+| `<Dynamic>` | `Solidtype.Dynamic`, `Dynamic.Element` |
+| `<Portal>` | `Solidtype.Portal` |
+
+Each module's `.mli` is its reference, and says where OCaml writes a form
+Solid's TypeScript has differently.

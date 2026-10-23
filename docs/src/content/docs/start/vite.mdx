@@ -1,0 +1,140 @@
+---
+title: Vite and Astro
+description: The plugin in Vite, in Astro, beside React, and under vitest.
+---
+
+[Vite](https://vite.dev) bundles what Melange emits. Two plugins take part:
+`vite-plugin-solidtype` rewrites solidtype's markers into JSX, and
+`vite-plugin-solid` compiles that JSX, as it compiles TSX. The rewrite runs
+first, `enforce: "pre"`, on every `.jsx` module, and leaves any module that
+does not import the markers as it is.
+
+## Vite
+
+```js
+// vite.config.js
+import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
+import solidtype from "vite-plugin-solidtype";
+
+export default defineConfig({ plugins: [solidtype(), solid()] });
+```
+
+Melange's output is under `_build`, so a page loads its entry module from
+there, `/_build/default/out/src/main.jsx`. A Vite root that is not the
+repository's own -- an `example/` or `web/` directory -- lets Vite's dev
+server read `_build` above it with `server.fs.allow`:
+
+```js
+import { fileURLToPath } from "node:url";
+
+const repository = fileURLToPath(new URL("..", import.meta.url));
+
+export default defineConfig({
+  root: fileURLToPath(new URL(".", import.meta.url)),
+  plugins: [solidtype(), solid()],
+  server: { fs: { allow: [repository] } },
+});
+```
+
+In development, two processes run side by side: `dune build --watch`
+rebuilds the OCaml as it changes, and `vite` serves the page from what dune
+last wrote. `vite build` bundles it once dune has built.
+
+Without the plugin, the page loads `vite-plugin-solidtype/markers`, which
+throws with an error that says to add `solidtype()` before `solid()`.
+
+## Astro
+
+An island written in OCaml mounts in an [Astro](https://astro.build) page
+as any Solid island does. Astro's Solid integration brings Solid's plugin;
+solidtype's goes in Vite's plugins, and runs first:
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import solid from "@astrojs/solid-js";
+import solidtype from "vite-plugin-solidtype";
+
+export default defineConfig({
+  integrations: [solid()],
+  vite: { plugins: [solidtype()] },
+});
+```
+
+A page imports the island's module from Melange's output by its namespace
+and mounts the component by name:
+
+```astro
+---
+import * as App from "../../_build/default/out/src/app.jsx";
+---
+
+<App.make client:load />
+```
+
+Astro compiles the island three ways, and the plugin runs under each: for
+the server, to prerender it; hydratable, for the browser to take over the
+prerendered HTML; and, with `client:only="solid-js"`, for the browser
+alone. The page holds that wiring and nothing else; what the island does is
+OCaml.
+
+Each example on this site is such an island: an `.mlx` file under
+`docs/islands`, imported by a page and shown beside its own source.
+
+## Beside React
+
+One Vite build can hold Solid and React, each compiler kept to its own
+files. This documentation does so, to show HeroUI's React components beside
+their ports:
+
+```js
+const reactFiles = /\/islands\/react\/[^/]+\.tsx$/;
+
+integrations: [
+  solid({ exclude: [reactFiles] }),
+  react({ include: [reactFiles] }),
+],
+vite: { plugins: [solidtype()] },
+```
+
+## vitest
+
+Tests run under [vitest](https://vitest.dev) with the same plugins, so a
+test renders a component exactly as the page does. A project per
+environment keeps Solid's builds apart:
+
+```ts
+// vitest.config.ts
+import { defineConfig } from "vitest/config";
+import solid from "vite-plugin-solid";
+import solidtype from "vite-plugin-solidtype";
+
+export default defineConfig({
+  test: {
+    projects: [
+      {
+        plugins: [solidtype(), solid()],
+        test: {
+          name: "browser",
+          environment: "jsdom",
+          include: ["_build/default/test/out/test/*_test.jsx"],
+        },
+      },
+      {
+        plugins: [solidtype(), solid({ ssr: true })],
+        resolve: { conditions: ["node"] },
+        test: {
+          name: "server",
+          environment: "node",
+          include: ["_build/default/test/server/out/test/server/*_test.jsx"],
+        },
+      },
+    ],
+  },
+});
+```
+
+The browser's tests run in jsdom against Solid's browser build. Rendering on
+the server runs in Node, compiled with `ssr: true`, where Solid resolves
+its server build.

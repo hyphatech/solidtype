@@ -1,0 +1,29 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Suspense = Solidtype.Suspense
+
+(* A fetch that takes most of a second, as a server's answer would. *)
+let quote n =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      ignore
+        (Js.Global.setTimeout
+           ~f:(fun () -> (resolve ("Quote number " ^ string_of_int n) [@u]))
+           700
+          : Js.Global.timeoutId))
+
+let make () =
+  let n, set_n = S.create_signal 1 in
+  let text, _ =
+    S.create_resource_from (fun () -> Some (S.get n)) (fun n _ -> quote n)
+  in
+  <div class_="flex w-72 flex-col items-start gap-3">
+    <Suspense fallback=(<p class_="text-muted">"Loading..."</p>)>
+      <p>(fun () -> Jsx.string (Option.value (S.read text) ~default:""))</p>
+    </Suspense>
+    <button
+      class_="button button--secondary"
+      type_=`button
+      on_click=(fun _ -> S.update set_n succ)>
+      "Next quote"
+    </button>
+  </div>

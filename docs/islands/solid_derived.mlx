@@ -1,0 +1,28 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+let make () =
+  let celsius, set_celsius = S.create_signal 20 in
+  let fahrenheit = S.create_memo (fun () -> (S.get celsius * 9 / 5) + 32) in
+  <div class_="flex items-center gap-4">
+    <button
+      class_="button button--secondary"
+      type_=`button
+      aria_label="Colder"
+      on_click=(fun _ -> S.update set_celsius pred)>
+      "-"
+    </button>
+    <span class_="tabular-nums">
+      (fun () -> Jsx.int (S.get celsius))
+      {js| °C is |js}
+      (fun () -> Jsx.int (S.get fahrenheit))
+      {js| °F|js}
+    </span>
+    <button
+      class_="button button--secondary"
+      type_=`button
+      aria_label="Warmer"
+      on_click=(fun _ -> S.update set_celsius succ)>
+      "+"
+    </button>
+  </div>

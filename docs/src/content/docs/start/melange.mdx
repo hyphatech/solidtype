@@ -1,0 +1,118 @@
+---
+title: Melange and dune
+description: How components are built by dune, compiled by Melange, and why the libraries are shaped as they are.
+---
+
+[Melange](https://melange.re) compiles OCaml to JavaScript, and dune drives
+it. solidtype asks nothing of either beyond what they do for any Melange
+project: components are a library, and an application emits it.
+
+## A library of components
+
+Components live in a Melange library, preprocessed by Melange's ppx and by
+`ppx_solidtype`:
+
+```lisp
+(library
+ (name app)
+ (modes melange)
+ (libraries solidtype solidtype-kobalte melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+```
+
+Its `.mlx` files are read by MLX, which `dune-project` declares as a dialect
+(see [Getting started](../../#a-first-page)). `(merlin_reader mlx)` in that
+dialect lets Merlin and the language server read `.mlx` as they read `.ml`,
+so types, errors and go-to-definition work in JSX too.
+
+## Emitted as `.jsx`
+
+An application, or a test, emits the library:
+
+```lisp
+(melange.emit
+ (target out)
+ (libraries app)
+ (module_systems (es6 jsx)))
+```
+
+- **`es6`**: the modules are ES modules, which Vite and every bundler read
+  and tree-shake.
+- **`jsx`**: the extension. Vite hands a `.jsx` module to its JSX plugins,
+  so `vite-plugin-solidtype` and then `vite-plugin-solid` see it, as they
+  would a `.jsx` file written by hand.
+
+Melange writes each library the application uses into
+`out/node_modules/<library>/`: solidtype's own modules land in
+`out/node_modules/solidtype/`, and a component imports them as
+`solidtype/solid.jsx`. Vite resolves that from the module's own directory,
+as it would any package, so nothing is configured to find them. JavaScript
+packages -- `solid-js`, `@kobalte/core` -- come from the project's own
+`node_modules`, installed by Bun or npm.
+
+Dune builds before Vite reads its output: `dune build` once, or
+`dune build --watch` beside Vite's dev server.
+
+## What the binding is built for
+
+Melange writes OCaml values as JavaScript values. A few of its choices
+decide how solidtype is shaped.
+
+**A reactive read is a plain call.** Solid's accessor is a JavaScript
+function that takes nothing, which OCaml would call through Melange's
+`Curry` helper, an arity check on every call. solidtype types it as
+uncurried, `type 'a accessor = (unit -> 'a [@u])`, and `Solid.get` is
+inlined, so `Solid.get count` compiles to `count()`, the call Solid's JSX
+makes.
+
+**The libraries have no private modules.** Melange keeps what it knows of a
+module across libraries only for public ones. Through a private module, every
+call a user makes into the library would go through `Curry`, and
+`Solid.get` would no longer be inlined. A helper two modules share is
+therefore public.
+
+**A test Solid reads for truth is a `bool`.** Melange writes `None` as
+`undefined` and `Some x` as `x`, so `Some 0`, `Some ""` and the first
+constant constructor of a variant are values JavaScript reads as false.
+`Show`, `Match` and a resource's source take a `bool`, or an `option` the
+binding boxes itself (`Show.Some`), never an OCaml value Solid would test.
+
+**A component is a value.** A JSX tag names a value of type
+`_ Jsx.component`. A binding's component is an `external` of that type, never
+a function type, since Melange wraps an external function used as a value
+in a closure that no JSX tag can name:
+
+```ocaml
+external component : unit Solidtype.Jsx.component = "Root"
+[@@mel.module "@kobalte/core/switch"]
+```
+
+An OCaml component is `Jsx.component make`, which `let%component` writes.
+
+**A string literal is JavaScript's.** Melange reads `"..."` as bytes and
+`{js|...|js}` as a JavaScript string. The ppx turns every string literal in
+JSX into the second, so `"Clicked"` and `"café"` both reach the page as
+written. A literal in plain OCaml, outside JSX, that is not ASCII is still
+written `{js|...|js}`.
+
+## Where it is seen
+
+`Solid.get` compiling to `count()` is visible in any emitted module, and so
+is the absence of `Curry`:
+
+```sh
+rg -n Curry _build/default/out    # nothing, in a call into solidtype
+```
+
+[How it works](../how-it-works/) shows the whole module Melange writes for a
+component.
+
+## Tests
+
+Tests of components are OCaml, run by [vitest](https://vitest.dev) through
+`melange-jest`, which reaches the globals vitest shares with Jest. A test
+library is a Melange library with its own `melange.emit`, and vitest loads
+the emitted `.jsx` through the same two plugins a page uses. A component
+is then tested as the browser runs it: rendered into jsdom, clicked and
+typed into, and read back.

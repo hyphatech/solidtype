@@ -3,11 +3,128 @@ title: Getting Started
 description: Solid, typed, for OCaml front ends on SolidJS and Kobalte.
 ---
 
-solidtype is Solid for OCaml: a component is written in OCaml's JSX and
-reaches the browser as the code Solid's own compiler emits for it. Kobalte is
-bound whole, as `solidtype-kobalte`, and HeroUI's design is being ported on
-top of it, as `solidtype-heroui`.
+import Example from "../../components/Example.astro";
+import * as Counter from "../../../../_build/default/docs/islands/out/docs/islands/solid_counter.jsx";
+import counter from "../../../islands/solid_counter.mlx?raw";
 
-The [coverage](heroui/coverage/) page lists what is ported. Each component's
-page shows the port live, beside the same component in React, with code
-to copy.
+solidtype is [Solid](https://www.solidjs.com) for OCaml. A component is
+written in OCaml's JSX, compiled by [Melange](https://melange.re), and
+reaches the browser as the code Solid's own compiler emits for the same
+JSX: the same templates, the same runtime calls, in the same order. What
+OCaml adds is its types. A reactive read in the wrong place does not
+compile, and neither does a prop left out, an attribute an element does not
+take, or a `match` in a `Switch` that misses a case.
+
+<Example code={counter} title="solid_counter.mlx"><Counter.make client:visible /></Example>
+
+## What it is made of
+
+| Package | What it is |
+|---|---|
+| `solidtype` | Solid 1.9 bound whole: signals, computations, resources, stores, its components and its renderer, server rendering included |
+| `ppx_solidtype` | lowers JSX written in `.mlx` files to calls Melange compiles |
+| `vite-plugin-solidtype` | turns those calls back into JSX, which Solid's compiler compiles as it compiles TSX |
+| `solidtype-kobalte` | [Kobalte](https://kobalte.dev) 0.13 bound whole, generated from its own declarations |
+| `solidtype-heroui` | [HeroUI](https://heroui.com)'s design ported by hand onto Kobalte |
+
+[How it works](start/how-it-works/) follows one component through every
+step. [Melange and dune](start/melange/) and [Vite and Astro](start/vite/)
+say how each tool is set up, and [Conventions](start/conventions/) how a
+name in Solid's documentation is written in OCaml. The
+[Solid](solid/components/) and [Kobalte](kobalte/binding/) tabs are the
+bindings, and [HeroUI](heroui/coverage/) the components built on them.
+
+## Install
+
+The OCaml side, from Hypha's opam repository:
+
+```sh
+opam repo add hypha https://github.com/hyphatech/opam-repository.git
+opam install solidtype ppx_solidtype mlx    # and solidtype-kobalte for Kobalte
+```
+
+The JavaScript side, with Vite and the plugin, which is an asset of each
+GitHub release:
+
+```json
+{
+  "type": "module",
+  "dependencies": {
+    "solid-js": "~1.9.17",
+    "vite": "^8.3.0",
+    "vite-plugin-solid": "^2.11.14",
+    "vite-plugin-solidtype": "https://github.com/hyphatech/solidtype/releases/download/0.1.0/vite-plugin-solidtype-0.1.0.tgz"
+  }
+}
+```
+
+## A first page
+
+`dune-project` reads `.mlx` files, OCaml with JSX:
+
+```lisp
+(lang dune 3.18)
+(using melange 0.1)
+(dialect
+ (name mlx)
+ (implementation
+  (extension mlx)
+  (merlin_reader mlx)
+  (preprocess (run mlx-pp %{input-file}))))
+```
+
+The components are a Melange library, emitted as `.jsx` modules, the files
+the plugin rewrites:
+
+```lisp
+; src/dune
+(library
+ (name app)
+ (modes melange)
+ (libraries solidtype melange.dom)
+ (preprocess (pps melange.ppx ppx_solidtype)))
+
+; dune
+(melange.emit
+ (target out)
+ (libraries app)
+ (module_systems (es6 jsx)))
+```
+
+The counter above is `src/counter.mlx`. An entry module mounts it,
+`src/main.ml`:
+
+```ocaml
+external get_element_by_id : string -> Dom.element = "getElementById"
+[@@mel.scope "document"]
+
+let (_ : unit -> unit) =
+  Solidtype.Web.render Counter.make (get_element_by_id "app")
+```
+
+The plugin runs before Solid's:
+
+```js
+// vite.config.js
+import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
+import solidtype from "vite-plugin-solidtype";
+
+export default defineConfig({ plugins: [solidtype(), solid()] });
+```
+
+The page loads Melange's output:
+
+```html
+<!doctype html>
+<div id="app"></div>
+<script type="module" src="/_build/default/out/src/main.jsx"></script>
+```
+
+Dune builds before Vite reads what it wrote:
+
+```sh
+bun install
+opam exec -- dune build
+bun --bun vite build
+```

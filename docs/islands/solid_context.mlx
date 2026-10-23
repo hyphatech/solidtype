@@ -1,0 +1,25 @@
+module Jsx = Solidtype.Jsx
+
+type locale = English | French
+
+module Locale = Solidtype.Context.Make (struct
+  type t = locale
+
+  let default = English
+end)
+
+module Hello = struct
+  let%component make () =
+    let locale = Locale.use () in
+    <p>
+      (fun () ->
+        Jsx.string
+          (match locale with English -> "Hello" | French -> "Bonjour"))
+    </p>
+end
+
+let make () =
+  <div class_="flex flex-col gap-1">
+    <Hello />
+    <Locale.Provider value=(fun () -> French)><Hello /></Locale.Provider>
+  </div>

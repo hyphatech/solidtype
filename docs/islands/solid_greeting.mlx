@@ -1,0 +1,11 @@
+module Jsx = Solidtype.Jsx
+
+module Greeting = struct
+  let%component make ~(name : string) ?(greeting : string = "Hello") () =
+    <p>(fun () -> Jsx.string (greeting () ^ ", " ^ name () ^ "!"))</p>
+end
+
+let make () =
+  <div class_="flex flex-col gap-1">
+    <Greeting name="Ada" /> <Greeting name="Grace" greeting="Welcome" />
+  </div>

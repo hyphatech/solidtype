@@ -1,5 +1,6 @@
-; The documentation's islands: each demo of a HeroUI port, and the port
-; beside the same component in React, which react/ renders.
+; The documentation's islands: each example of Solid's and Kobalte's
+; bindings, each demo of a HeroUI port, and the port beside the same
+; component in React, which react/ renders.
 
 (library
  (name docs_islands)

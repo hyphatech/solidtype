@@ -1,0 +1,32 @@
+module Jsx = Solidtype.Jsx
+module Store = Solidtype.Store
+
+type player = { mutable volume : int; mutable muted : bool }
+
+let make () =
+  let player, set_player = Store.create_store { volume = 5; muted = false } in
+  let louder () =
+    Store.modify set_player
+      (Store.produce (fun draft -> draft.volume <- min 10 (draft.volume + 1)))
+  in
+  <div class_="flex items-center gap-4">
+    <button
+      class_="button button--secondary"
+      type_=`button
+      on_click=(fun _ ->
+                 Store.set set_player { player with muted = not player.muted })>
+      (fun () -> Jsx.string (if player.muted then "Unmute" else "Mute"))
+    </button>
+    <button
+      class_="button button--secondary"
+      type_=`button
+      on_click=(fun _ -> louder ())>
+      "Louder"
+    </button>
+    <span class_="tabular-nums">
+      (fun () ->
+        Jsx.string
+          (if player.muted then "Muted"
+           else "Volume " ^ string_of_int player.volume))
+    </span>
+  </div>

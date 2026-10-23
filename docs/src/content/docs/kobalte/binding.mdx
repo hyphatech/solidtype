@@ -1,0 +1,128 @@
+---
+title: The binding
+description: How solidtype-kobalte is generated from Kobalte's own declarations, and how Kobalte's types become OCaml's.
+---
+
+[Kobalte](https://kobalte.dev) is Solid's library of accessible,
+unstyled components: the behaviour, keyboard and ARIA of a select, a
+dialog, a slider, with no look of its own. `solidtype-kobalte` binds all of
+Kobalte 0.13 -- every component, part by part, its hooks and utilities, and
+the types they name -- as one OCaml library.
+
+```lisp
+(libraries solidtype solidtype-kobalte melange.dom)
+```
+
+## Generated, never written by hand
+
+Kobalte's parts are hundreds, and their props thousands. A binding written
+by hand would be a second copy of Kobalte's types, drifting from the version
+it binds. `solidtype-kobalte` is written instead by a generator,
+`generate/kobalte.ts`, which reads Kobalte's own `.d.ts` declarations with
+TypeScript's type checker and writes:
+
+- `kobalte/solidtype_kobalte.ml` and its `.mli`: each component as a
+  module, each part a module in it.
+- `kobalte/types.ml` and its `.mli`: the object types the parts name, each
+  a module with a getter per field.
+- `ppx/kobalte_names.ml`: the props whose JavaScript name the ppx cannot
+  spell back by the naming rule.
+
+`make generate` writes them, and `make lint` runs the generator with
+`--check`, which fails when a file differs from what Kobalte's types give.
+Taking a new Kobalte is taking its package and generating again; what
+changed is a diff.
+
+The generator's core, `generate/binding.ts`, is any library of Solid
+components': how TypeScript's types map to OCaml's, how a part and its
+check are written. `generate/kobalte.ts` says only what is Kobalte's -- which
+entries, how its parts are named, its roots split by `multiple`.
+`solidtype`'s own element attributes come from the same approach,
+`generate/html.ts` reading Solid's JSX types.
+
+## A part
+
+Each part is a module of its component, holding the component Kobalte
+exports and the check of its props:
+
+```ocaml
+module Switch : sig
+  module Root : sig
+    module Props : sig
+      external check :
+        ?checked:bool Solidtype.Check.value ->
+        ?default_checked:bool Solidtype.Check.value ->
+        ?on_change:(bool -> unit) ->
+        ?name:string Solidtype.Check.value ->
+        ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+        ?required:bool Solidtype.Check.value ->
+        ?disabled:bool Solidtype.Check.value ->
+        ?read_only:bool Solidtype.Check.value ->
+        (?children:(Types.SwitchRootState.t -> Solidtype.Jsx.element,
+                    [ `nodes | `render ]) Solidtype.Check.children ->
+         unit -> unit) Solidtype.Html.Div.check = "check"
+    end
+
+    external component : unit Solidtype.Jsx.component = "Root"
+    [@@mel.module "@kobalte/core/switch"]
+  end
+  ...
+end
+```
+
+Its check takes the part's own props first, then its children by kind --
+here elements, or a function given the switch's state -- then the
+attributes of the element it renders, `Html.Div.check`, which it passes on.
+So `<Switch.Root class_="..." aria_label="...">` is checked against both
+Kobalte's props and a `<div>`'s attributes. The check is an `external`
+nothing calls: the compiler checks it, and Melange writes nothing for it.
+
+The component is an `external` value imported from Kobalte's own entry,
+`@kobalte/core/switch`, so a page bundles only the components it uses.
+
+## How the types map
+
+The generator maps TypeScript's types as an element's attributes are
+mapped, and further:
+
+| Kobalte, in TypeScript | OCaml |
+|---|---|
+| `string`, `boolean` | `string`, `bool` |
+| a closed set of string literals, `"horizontal" \| "vertical"` | a polymorphic variant, `` [ `horizontal \| `vertical ] `` |
+| `number` | `float`, since a slider's value is fractional |
+| `T \| null` | `T Js.Nullable.t`: Kobalte reads `undefined` as uncontrolled and `null` as controlled and empty |
+| an optional prop, `T \| undefined` | an optional argument, `?name` |
+| a callback's optional argument | an `option` |
+| `A \| B` of different JavaScript kinds | `(a, b) Types.Either.t`, built by `Either.left` and `Either.right` |
+| a named object type | a module of `Types`, a getter per field, a constructor where it has neither methods nor a class |
+| a root whose value turns on `multiple` | two modules, `Root` and `Root_multiple` |
+
+Where a TypeScript type cannot be said in OCaml without a cast it is left
+out: a member typed `any`, or one whose type its caller would choose. So
+are Kobalte's building blocks -- menu, popper, dismissable layer,
+polymorphic -- which its documentation does not offer as components.
+
+`Root` and `Root_multiple` show why a type is split rather than widened. A
+toggle group's value is one `string`, or nothing, `string Js.Nullable.t`;
+with `multiple`, it is a `string array`. TypeScript says which by
+overloading on `multiple`, which OCaml cannot. Two modules give each its own
+exact type. [Using Kobalte](../usage/#toggle-group) shows both.
+
+## Names
+
+Every name is made by the [naming rule](../../start/conventions/):
+`defaultChecked` is `default_checked`, `onChange` is `on_change`,
+`validationState` is `validation_state`. A part keeps its name,
+`Switch.Root`, `Select.ItemLabel`, as Kobalte's documentation writes it,
+and its hooks are its functions in snake case,
+`ToggleGroup.use_toggle_group_context`. Kobalte's documentation is
+therefore the reference for what a part does and takes.
+
+## Tested against Kobalte in TSX
+
+The binding promises Kobalte's behaviour and accessibility, which only a
+running component shows. Each Kobalte component has a test that renders it
+from OCaml and the same component written in TSX, its twin, runs one check
+on both -- roles, names, state attributes, the keys of its ARIA pattern --
+and scans both with [axe](https://github.com/dequelabs/axe-core). A
+difference between them is a failing test.

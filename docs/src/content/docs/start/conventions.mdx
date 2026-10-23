@@ -1,0 +1,94 @@
+---
+title: Conventions
+description: How a name, a namespace, a data attribute, an optional prop and a spread from Solid's documentation are written in OCaml.
+---
+
+Solid's and Kobalte's documentation is the reference for what a component
+does. These rules say how to write what it shows in OCaml, so that it reads
+across without a table per component.
+
+## Names
+
+Every name you write is snake case, made by one rule from the name
+Solid's or Kobalte's documentation gives: a capital is an underscore and
+the lower case, a run of capitals one word, a hyphen an underscore, and
+an OCaml keyword takes a trailing underscore.
+
+| Solid | OCaml |
+|---|---|
+| `onClick` | `on_click` |
+| `readOnly` | `read_only` |
+| `aria-label` | `aria_label` |
+| `defaultValue` | `default_value` |
+| `classList` | `class_list` |
+| `createSignal` | `create_signal` |
+| a keyword: `class`, `type`, `for`, `open`, `when` | `class_`, `type_`, `for_`, `open_`, `when_` |
+
+The ppx gives each name back its JavaScript spelling by the rule's inverse,
+and by a table of the few the inverse cannot give, such as `stroke-width`.
+A module keeps its JavaScript name: Solid's `ErrorBoundary` is
+`Solidtype.ErrorBoundary`, Kobalte's `Switch.Root` is
+`Solidtype_kobalte.Switch.Root`.
+
+A handler takes the event its element and name give it: `on_click` a
+`Dom.mouseEvent`, `on_input` a `Dom.inputEvent`.
+
+## Namespaces
+
+One of Solid's namespaces wraps the value, never the name: `ns:name={v}`
+is `name=(Jsx.ns v)`.
+
+| Solid | OCaml |
+|---|---|
+| `on:click={f}` | `on_click=(Jsx.native f)` |
+| `oncapture:click={f}` | `on_click=(Jsx.capture f)` |
+| `prop:value={v}` | `value=(Jsx.prop v)` |
+| `attr:title={s}` | `title=(Jsx.attr s)` |
+| `bool:hidden={b}` | `hidden=(Jsx.bool b)` |
+| `on:my-event={f}` | `on=(Jsx.listen "my-event" f)` |
+| `data-X={s}` | `attr=(Jsx.named "data-X" s)` |
+
+The last two are for a name whose case or spelling the rule cannot keep. A
+wrapper left out is Solid's default, never another namespace.
+
+## Data attributes
+
+A `data-` attribute is a `Jsx.data`, on an element and on a component,
+which passes it on to its element, as TSX lets a component take a
+hyphenated attribute. It is present, or absent while a flag is down, so a
+state is in the HTML a page is prerendered with.
+
+| TSX | OCaml |
+|---|---|
+| `data-slot="badge"` | `data_slot="badge"` |
+| `data-selected={on() ? "true" : undefined}` | `data_selected=(fun () -> Jsx.flag (on ()))` |
+| `data-id={id()}` | `data_id=(fun () -> Jsx.data (id ()))` |
+
+## Values given to a component
+
+A literal is given as it is, and anything that may change as a thunk,
+`(fun () -> ...)`. A constant held in a name is passed as the thunk it is
+read by, `class_=(fun () -> item)`: a name alone is passed as it is, which a
+component's check takes only for a function.
+
+An optional prop, one a component may leave out, is passed on as it is
+with OCaml's own `?`: present while its option is `Some`, absent while it
+is `None`, as TSX passes `undefined`. A component's optional parameter is
+such an option, so it passes on by its name.
+
+| TSX | OCaml |
+|---|---|
+| `title={note()}` | `?title=(fun () -> note ())` |
+| `name={props.name}` | `?name` |
+
+The compiler refuses `?` on a prop that is not optional.
+
+## Spreads
+
+A spread, TSX's `{...props}`, is the attribute `props`, and so no prop is
+named `props`:
+
+```ocaml
+let make (props : Props.t) = <input class_="field" props />
+<Dynamic component=(fun () -> Greeting.component) props />
+```

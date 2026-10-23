@@ -1,0 +1,64 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Switch = Solidtype.Switch
+module Match = Solidtype.Match
+
+type filter = All | Open | Finished
+type task = { title : string; finished : bool }
+
+let tasks =
+  [|
+    { title = "Bind Solid"; finished = true };
+    { title = "Generate Kobalte's binding"; finished = true };
+    { title = "Port HeroUI"; finished = false };
+  |]
+
+let filters = [| (All, "All"); (Open, "Open"); (Finished, "Finished") |]
+
+let make () =
+  let filter, set_filter = S.create_signal All in
+  let picked = S.create_selector (fun () -> S.get filter) in
+  let shown =
+    S.create_memo (fun () ->
+        match S.get filter with
+        | All -> tasks
+        | Open ->
+            Array.of_list
+              (List.filter (fun t -> not t.finished) (Array.to_list tasks))
+        | Finished ->
+            Array.of_list
+              (List.filter (fun t -> t.finished) (Array.to_list tasks)))
+  in
+  <div class_="flex w-72 flex-col gap-3">
+    <div class_="flex gap-2">
+      <For each=(fun () -> filters)>
+        (fun (f, label) _ ->
+          <button
+            class_=(fun () ->
+                     if picked f then "button button--sm button--primary"
+                     else "button button--sm button--tertiary")
+            type_=`button
+            on_click=(fun _ -> S.set set_filter f)>
+            (fun () -> Jsx.string label)
+          </button>)
+      </For>
+    </div>
+    <Switch>
+      (fun () ->
+        match S.get filter with
+        | All -> <p class_="text-sm text-muted">"Every task"</p>
+        | Open -> <p class_="text-sm text-muted">"What is left"</p>
+        | Finished -> <p class_="text-sm text-muted">"What is done"</p>)
+    </Switch>
+    <Show
+      when_=(fun () -> Array.length (S.get shown) > 0)
+      fallback=(<p>"Nothing here"</p>)>
+      <ul class_="flex flex-col gap-1">
+        <For each=(fun () -> S.get shown)>
+          (fun task _ -> <li>(fun () -> Jsx.string task.title)</li>)
+        </For>
+      </ul>
+    </Show>
+  </div>
