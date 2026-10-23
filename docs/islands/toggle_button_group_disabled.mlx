@@ -1,0 +1,26 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+
+(* A disabled group, and one whose third button keeps itself enabled, as
+   HeroUI documents. *)
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Toggle_button_group is_disabled=true aria_label="Alignment">
+      <Toggle_button id="left"><Icons.Align_left /> "Left"</Toggle_button>
+      <Toggle_button id="center">
+        <Toggle_button_group.Separator /> <Icons.Align_center /> "Center"
+      </Toggle_button>
+      <Toggle_button id="right">
+        <Toggle_button_group.Separator /> <Icons.Align_right /> "Right"
+      </Toggle_button>
+    </Toggle_button_group>
+    <Toggle_button_group is_disabled=true aria_label="Alignment">
+      <Toggle_button id="left"><Icons.Align_left /> "Left"</Toggle_button>
+      <Toggle_button id="center">
+        <Toggle_button_group.Separator /> <Icons.Align_center /> "Center"
+      </Toggle_button>
+      <Toggle_button id="right" is_disabled=false>
+        <Toggle_button_group.Separator /> <Icons.Align_right /> "Right"
+      </Toggle_button>
+    </Toggle_button_group>
+  </div>

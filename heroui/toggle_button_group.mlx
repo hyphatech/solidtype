@@ -1,0 +1,136 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.ToggleGroup
+
+type size = [ `sm | `md | `lg ]
+
+type group = {
+  size : unit -> size option;
+  is_disabled : unit -> bool option;
+  is_selected : string -> bool;
+  join : (unit -> bool) -> unit;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+module Separator = struct
+  let%component make ?(class_ : string option) () =
+    <span
+      aria_hidden=true
+      class_=(fun () ->
+               let separator =
+                 Styles.ToggleButtonGroup.separator
+                   (Styles.ToggleButtonGroup.slots
+                      (Styles.ToggleButtonGroup.options ()))
+               in
+               match class_ () with
+               | Some c -> separator ^ " " ^ c
+               | None -> separator)
+      data_slot="toggle-button-group-separator"
+      props=(Props.others props)
+    />
+end
+
+let%component make ?(selection_mode : [ `single | `multiple ] = `single)
+    ?(selected_keys : string array option)
+    ?(default_selected_keys : string array option)
+    ?(on_selection_change : (string array -> unit) option)
+    ?(disallow_empty_selection : bool = false)
+    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(size : size option) ?(is_detached : bool = false)
+    ?(full_width : bool = false) ?(is_disabled : bool option)
+    ?(aria_label : string option) ?(aria_labelledby : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* The selection is kept here and Kobalte's group controlled by it, so a
+     change that would leave none selected is refused, which Kobalte's group
+     cannot do. *)
+  let keys, set_keys =
+    Field.controlled ~value:selected_keys
+      ~default:(Option.value (default_selected_keys ()) ~default:[||])
+      ~on_change:(fun k -> on_selection_change k)
+  in
+  let change next =
+    if not (disallow_empty_selection () && Array.length next = 0) then
+      set_keys next
+  in
+  (* Each button's read of whether it is disabled. Kobalte's keys look past a
+     disabled button for one that is not, round and round, so Kobalte's group
+     is disabled while every button in it is, and a click finds nothing to
+     focus. *)
+  let buttons, set_buttons = S.create_signal [] in
+  let join disabled =
+    S.update set_buttons (fun bs -> disabled :: bs);
+    S.on_cleanup (fun () ->
+        S.update set_buttons (List.filter (fun b -> b != disabled)))
+  in
+  let all_disabled () =
+    match S.get buttons with
+    | [] -> false
+    | bs -> List.for_all (fun disabled -> disabled ()) bs
+  in
+  let g =
+    {
+      size;
+      is_disabled;
+      is_selected = (fun key -> Array.exists (String.equal key) (keys ()));
+      join;
+    }
+  in
+  let class_ () =
+    let base =
+      Styles.ToggleButtonGroup.base
+        (Styles.ToggleButtonGroup.slots
+           (Styles.ToggleButtonGroup.options ~orientation:(orientation ())
+              ~is_detached:(is_detached ()) ~full_width:(full_width ()) ()))
+    in
+    match class_ () with Some c -> base ^ " " ^ c | None -> base
+  in
+  let disabled () = Option.value (is_disabled ()) ~default:false in
+  (* A button decides whether it is disabled, its own prop over the group's,
+     so Kobalte's group, which would disable every button whatever it says,
+     is disabled only while they all are. *)
+  <Context.Provider value=(fun () -> g)>
+    <Show
+      when_=(fun () ->
+              match selection_mode () with
+              | `multiple -> true
+              | `single -> false)
+      fallback=(<Kobalte.Root
+                  value=(fun () ->
+                          match keys () with
+                          | [||] -> Js.Nullable.null
+                          | ks -> Js.Nullable.return ks.(0))
+                  on_change=(fun v ->
+                              change
+                                (match Js.Nullable.toOption v with
+                                | Some k -> [| k |]
+                                | None -> [||]))
+                  orientation=(fun () -> orientation ())
+                  disabled=(fun () -> all_disabled ())
+                  ?aria_label
+                  ?aria_labelledby
+                  class_=(fun () -> class_ ())
+                  data_slot="toggle-button-group"
+                  data_disabled=(fun () -> Jsx.flag (disabled ()))
+                  props=(Props.others props)>
+                  (fun () -> children ())
+                </Kobalte.Root>)>
+      <Kobalte.Root_multiple
+        multiple=true
+        value=(fun () -> keys ())
+        on_change=change
+        orientation=(fun () -> orientation ())
+        disabled=(fun () -> all_disabled ())
+        ?aria_label
+        ?aria_labelledby
+        class_=(fun () -> class_ ())
+        data_slot="toggle-button-group"
+        data_disabled=(fun () -> Jsx.flag (disabled ()))
+        props=(Props.others props)>
+        (fun () -> children ())
+      </Kobalte.Root_multiple>
+    </Show>
+  </Context.Provider>

@@ -1,0 +1,24 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+
+let make () =
+  <div class_="flex gap-8">
+    <Toggle_button_group aria_label="Alignment">
+      <Toggle_button id="left"><Icons.Align_left /> "Left"</Toggle_button>
+      <Toggle_button id="center">
+        <Toggle_button_group.Separator /> <Icons.Align_center /> "Center"
+      </Toggle_button>
+      <Toggle_button id="right">
+        <Toggle_button_group.Separator /> <Icons.Align_right /> "Right"
+      </Toggle_button>
+    </Toggle_button_group>
+    <Toggle_button_group orientation=`vertical aria_label="Alignment">
+      <Toggle_button id="left"><Icons.Align_left /> "Left"</Toggle_button>
+      <Toggle_button id="center">
+        <Toggle_button_group.Separator /> <Icons.Align_center /> "Center"
+      </Toggle_button>
+      <Toggle_button id="right">
+        <Toggle_button_group.Separator /> <Icons.Align_right /> "Right"
+      </Toggle_button>
+    </Toggle_button_group>
+  </div>

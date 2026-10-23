@@ -375,3 +375,39 @@ external progress_circle_props :
 external progress_circle : Dom.htmlDivElement -> progress_circle_props -> unit
   = "progressCircle"
 [@@mel.module "./react/heroui.tsx"]
+
+type toggle_button_props
+
+external toggle_button_props :
+  variant:string ->
+  size:string ->
+  is_icon_only:(bool[@mel.as "isIconOnly"]) ->
+  is_selected:(bool[@mel.as "isSelected"]) ->
+  on_change:((bool -> unit)[@mel.as "onChange"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  toggle_button_props = ""
+[@@mel.obj]
+
+external toggle_button : Dom.htmlDivElement -> toggle_button_props -> unit
+  = "toggleButton"
+[@@mel.module "./react/heroui.tsx"]
+
+type toggle_button_group_props
+
+external toggle_button_group_props :
+  selection_mode:(string[@mel.as "selectionMode"]) ->
+  selected_keys:(string array[@mel.as "selectedKeys"]) ->
+  on_selection_change:((string array -> unit)[@mel.as "onSelectionChange"]) ->
+  size:string ->
+  orientation:string ->
+  is_detached:(bool[@mel.as "isDetached"]) ->
+  full_width:(bool[@mel.as "fullWidth"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  toggle_button_group_props = ""
+[@@mel.obj]
+
+external toggle_button_group :
+  Dom.htmlDivElement -> toggle_button_group_props -> unit = "toggleButtonGroup"
+[@@mel.module "./react/heroui.tsx"]

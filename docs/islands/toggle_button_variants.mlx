@@ -1,0 +1,7 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Toggle_button><Icons.Heart /> "Default"</Toggle_button>
+    <Toggle_button variant=`ghost><Icons.Heart /> "Ghost"</Toggle_button>
+  </div>

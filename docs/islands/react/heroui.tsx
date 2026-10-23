@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -539,6 +539,49 @@ export function progressCircle(host: HTMLElement, props: ProgressCircleProps): v
           <ProgressCircle.FillCircle />
         </ProgressCircle.Track>
       </ProgressCircle>,
+    ),
+  );
+}
+
+type ToggleButtonProps = {
+  variant: "default" | "ghost";
+  size: "sm" | "md" | "lg";
+  isIconOnly: boolean;
+  isSelected: boolean;
+  onChange: (selected: boolean) => void;
+  isDisabled: boolean;
+};
+
+export function toggleButton(host: HTMLElement, props: ToggleButtonProps): void {
+  flushSync(() => rootOf(host).render(<ToggleButton {...props}>Like</ToggleButton>));
+}
+
+type ToggleButtonGroupProps = {
+  selectionMode: "single" | "multiple";
+  selectedKeys: string[];
+  onSelectionChange: (keys: string[]) => void;
+  size: "sm" | "md" | "lg";
+  orientation: "horizontal" | "vertical";
+  isDetached: boolean;
+  fullWidth: boolean;
+  isDisabled: boolean;
+};
+
+// Three buttons, as the port's demo groups them.
+export function toggleButtonGroup(host: HTMLElement, { onSelectionChange, ...props }: ToggleButtonGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ToggleButtonGroup aria-label="Alignment" {...props} onSelectionChange={(keys) => onSelectionChange([...keys].map(String))}>
+        <ToggleButton id="left">Left</ToggleButton>
+        <ToggleButton id="center">
+          <ToggleButtonGroup.Separator />
+          Center
+        </ToggleButton>
+        <ToggleButton id="right">
+          <ToggleButtonGroup.Separator />
+          Right
+        </ToggleButton>
+      </ToggleButtonGroup>,
     ),
   );
 }

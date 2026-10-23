@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Toggle_button` and `Toggle_button_group`: HeroUI's
+  ToggleButton and ToggleButtonGroup on Kobalte's toggle button and toggle
+  group, selected controlled or kept, one or several in a group, the group's
+  size and disabled state given to its buttons; a button's own
+  `is_disabled=false` holds in a disabled group, as HeroUI documents and its
+  own does not.
 - Every HeroUI port passes on a `data-` attribute it is given, `data_testid`
   and the rest, to its own element, after its own attributes as HeroUI's
   React components spread theirs, so a caller's `data-slot` wins; until now

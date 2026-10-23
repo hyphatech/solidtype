@@ -1,0 +1,42 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <div class_="flex flex-col gap-2">
+      <span class_="text-sm text-muted">"Single selection"</span>
+      <Toggle_button_group
+        default_selected_keys=(fun () -> [| "center" |])
+        selection_mode=`single
+        aria_label="Alignment">
+        <Toggle_button id="left"><Icons.Align_left /> "Left"</Toggle_button>
+        <Toggle_button id="center">
+          <Toggle_button_group.Separator /> <Icons.Align_center /> "Center"
+        </Toggle_button>
+        <Toggle_button id="right">
+          <Toggle_button_group.Separator /> <Icons.Align_right /> "Right"
+        </Toggle_button>
+      </Toggle_button_group>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <span class_="text-sm text-muted">"Multiple selection"</span>
+      <Toggle_button_group
+        default_selected_keys=(fun () -> [| "bold"; "underline" |])
+        selection_mode=`multiple
+        aria_label="Text formatting">
+        <Toggle_button is_icon_only=true aria_label="Bold" id="bold">
+          <Icons.Bold />
+        </Toggle_button>
+        <Toggle_button is_icon_only=true aria_label="Italic" id="italic">
+          <Toggle_button_group.Separator /> <Icons.Italic />
+        </Toggle_button>
+        <Toggle_button is_icon_only=true aria_label="Underline" id="underline">
+          <Toggle_button_group.Separator /> <Icons.Underline />
+        </Toggle_button>
+        <Toggle_button
+          is_icon_only=true aria_label="Strikethrough" id="strikethrough">
+          <Toggle_button_group.Separator /> <Icons.Strikethrough />
+        </Toggle_button>
+      </Toggle_button_group>
+    </div>
+  </div>

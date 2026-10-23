@@ -1,0 +1,138 @@
+---
+title: ToggleButton
+description: A button pressed on or off.
+---
+
+import Example from "../../../components/Example.astro";
+import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_usage.jsx";
+import UsageCode from "../../../../islands/toggle_button_usage.mlx?raw";
+import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_variants.jsx";
+import VariantsCode from "../../../../islands/toggle_button_variants.mlx?raw";
+import * as IconOnly from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_icon_only.jsx";
+import IconOnlyCode from "../../../../islands/toggle_button_icon_only.mlx?raw";
+import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_sizes.jsx";
+import SizesCode from "../../../../islands/toggle_button_sizes.mlx?raw";
+import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_disabled.jsx";
+import DisabledCode from "../../../../islands/toggle_button_disabled.mlx?raw";
+import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_controlled.jsx";
+import ControlledCode from "../../../../islands/toggle_button_controlled.mlx?raw";
+import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_tailwind.jsx";
+import TailwindCode from "../../../../islands/toggle_button_tailwind.mlx?raw";
+import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/toggle_button_demo.jsx";
+
+`Solidtype_heroui.Toggle_button` is Kobalte's toggle button with the classes
+HeroUI's own `toggleButtonVariants` gives, and the state HeroUI's styles read:
+`data-selected` while it is on, and the hover, press and focus React Aria
+shows. Inside a [`Toggle_button_group`](../toggle-button-group/) it is the
+group's button of its `id`.
+
+HeroUI's documentation: [ToggleButton](https://heroui.com/en/docs/react/components/toggle-button).
+
+## Usage
+
+<Example code={UsageCode} title="toggle_button_usage.mlx"><Usage.make client:visible /></Example>
+
+## Examples
+
+### Variants
+
+<Example code={VariantsCode} title="toggle_button_variants.mlx"><Variants.make client:visible /></Example>
+
+### Icon Only
+
+An icon alone is named by `aria_label`.
+
+<Example code={IconOnlyCode} title="toggle_button_icon_only.mlx"><IconOnly.make client:visible /></Example>
+
+### Sizes
+
+<Example code={SizesCode} title="toggle_button_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Disabled
+
+<Example code={DisabledCode} title="toggle_button_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Controlled
+
+`is_selected` gives its state, and `on_change` is called with the new one. A
+function of its state as its children, React's render prop, is not taken: the
+content reads the signal the page keeps, as here.
+
+<Example code={ControlledCode} title="toggle_button_controlled.mlx"><Controlled.make client:visible /></Example>
+
+## Beside React
+
+The same HeroUI ToggleButton twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two buttons:
+a marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads. React Aria writes `tabindex="0"` on the button, which a
+button has anyway; Kobalte marks a button that is on with an empty
+`data-pressed`, which HeroUI's styles, reading `data-pressed="true"` for a
+press, never match.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="toggle_button_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every toggle button, as
+with HeroUI in React:
+
+```css
+@layer components {
+  .toggle-button {
+    @apply bg-purple-500 text-white;
+  }
+
+  .toggle-button--icon-only {
+    @apply rounded-lg;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.toggle-button`, and its sizes `.toggle-button--sm`, `.toggle-button--md`,
+  `.toggle-button--lg`
+- `.toggle-button--default`, `.toggle-button--ghost`
+- `.toggle-button--icon-only`
+
+### Interactive States
+
+- **Selected**: `[data-selected="true"]`
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `:disabled` or `[data-disabled="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### ToggleButton
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `default \| `ghost ] `` | `` `default `` | Its look |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md ``, or its group's | Its size |
+| `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it shows an icon alone |
+| `id` | `id` | `string` | | Its key in a group |
+| `isSelected` | `is_selected` | `bool` | | Whether it is on, while given |
+| `defaultSelected` | `default_selected` | `bool` | `false` | Whether it is on at first |
+| `onChange` | `on_change` | `bool -> unit` | | Called with its new state |
+| `isDisabled` | `is_disabled` | `bool` | `false`, or its group's | Whether it is disabled |
+| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Called as it is clicked |
+| `aria-label` | `aria_label` | `string` | | Its name, where it shows an icon alone |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its content |

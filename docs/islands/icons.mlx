@@ -240,3 +240,57 @@ module Eye_slash = struct
       />
     </svg>
 end
+
+module Heart = struct
+  let%component make () =
+    <Align
+      lines="M8 13.25C8 13.25 2.25 10 2.25 5.9C2.25 4.15 3.6 2.75 5.25 \
+             2.75C6.4 2.75 7.4 3.4 8 4.4C8.6 3.4 9.6 2.75 10.75 2.75C12.4 2.75 \
+             13.75 4.15 13.75 5.9C13.75 10 8 13.25 8 13.25Z"
+    />
+end
+
+module Heart_fill = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" aria_hidden=true class_="size-4">
+      <path
+        d="M8 13.25C8 13.25 2.25 10 2.25 5.9C2.25 4.15 3.6 2.75 5.25 2.75C6.4 \
+           2.75 7.4 3.4 8 4.4C8.6 3.4 9.6 2.75 10.75 2.75C12.4 2.75 13.75 4.15 \
+           13.75 5.9C13.75 10 8 13.25 8 13.25Z"
+        fill="currentColor"
+      />
+    </svg>
+end
+
+module Bookmark = struct
+  let%component make () = <Align lines="M4 2.5H12V13.5L8 10.75L4 13.5V2.5Z" />
+end
+
+module Bold = struct
+  let%component make () =
+    <Align
+      lines="M4.5 2.5H8.75C10.27 2.5 11.5 3.73 11.5 5.25C11.5 6.77 10.27 8 \
+             8.75 8H4.5V2.5ZM4.5 8H9.5C11.02 8 12.25 9.23 12.25 10.75C12.25 \
+             12.27 11.02 13.5 9.5 13.5H4.5V8Z"
+    />
+end
+
+module Italic = struct
+  let%component make () = <Align lines="M7 2.5H12M4 13.5H9M10 2.5L6 13.5" />
+end
+
+module Underline = struct
+  let%component make () =
+    <Align
+      lines="M4.5 2.5V7C4.5 8.93 6.07 10.5 8 10.5C9.93 10.5 11.5 8.93 11.5 \
+             7V2.5M3.5 13.5H12.5"
+    />
+end
+
+module Strikethrough = struct
+  let%component make () =
+    <Align
+      lines="M2.5 8H13.5M11 4.5C11 3.4 9.66 2.5 8 2.5C6.34 2.5 5 3.4 5 4.5C5 \
+             5.6 6 6.5 8 7M5 11C5 12.1 6.34 13 8 13C9.66 13 11 12.1 11 11"
+    />
+end

@@ -45,6 +45,8 @@ module Text_area = H.Text_area
 module Text_field = H.Text_field
 module Time_field = H.Time_field
 module Toast = H.Toast
+module Toggle_button = H.Toggle_button
+module Toggle_button_group = H.Toggle_button_group
 module Typography = H.Typography
 module E = Jest.Expect
 module T = Testing
@@ -135,6 +137,21 @@ let () =
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
                 <Surface data_testid="Surface">"Surface"</Surface>
+                <Toggle_button data_testid="Toggle_button">
+                  "Like"
+                </Toggle_button>
+                <Toggle_button_group
+                  data_testid="Toggle_button_group" aria_label="Alignment">
+                  <Toggle_button data_testid="Toggle_button.Item" id="left">
+                    "Left"
+                  </Toggle_button>
+                  <Toggle_button id="right">
+                    <Toggle_button_group.Separator
+                      data_testid="Toggle_button_group.Separator"
+                    />
+                    "Right"
+                  </Toggle_button>
+                </Toggle_button_group>
                 <Typography data_testid="Typography">"Body"</Typography>
                 <Typography.Heading data_testid="Typography.Heading" level=2>
                   "Heading"
@@ -190,6 +207,11 @@ let () =
                    ("Skeleton", ".skeleton");
                    ("Spinner", "[data-slot=spinner]");
                    ("Surface", "[data-slot=surface]");
+                   ("Toggle_button", "[data-slot=toggle-button]");
+                   ("Toggle_button_group", "[data-slot=toggle-button-group]");
+                   ("Toggle_button.Item", "[data-slot=toggle-button]");
+                   ( "Toggle_button_group.Separator",
+                     "[data-slot=toggle-button-group-separator]" );
                    ("Typography", "[data-slot=typography]");
                    ("Typography.Heading", "h2");
                    ("Typography.Paragraph", "p");

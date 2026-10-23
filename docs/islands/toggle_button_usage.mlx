@@ -1,0 +1,3 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+
+let make () = <Toggle_button><Icons.Heart /> "Like"</Toggle_button>

@@ -1,0 +1,343 @@
+(* HeroUI's ToggleButton and ToggleButtonGroup on Kobalte's, beside the same
+   components in React: each button's and the group's attributes, as HeroUI's
+   styles read them, alone and in a group, through the same clicks and keys. *)
+
+module S = Solidtype.Solid
+module Toggle_button = Solidtype_heroui.Toggle_button
+module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type button
+
+external button :
+  ?variant:[ `default | `ghost ] ->
+  ?size:[ `sm | `md | `lg ] ->
+  ?is_icon_only:(bool[@mel.as "isIconOnly"]) ->
+  ?default_selected:(bool[@mel.as "defaultSelected"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  button = ""
+[@@mel.obj]
+
+type group
+
+external group :
+  selection_mode:([ `single | `multiple ][@mel.as "selectionMode"]) ->
+  default_selected_keys:(string array[@mel.as "defaultSelectedKeys"]) ->
+  disallow_empty_selection:(bool[@mel.as "disallowEmptySelection"]) ->
+  orientation:[ `horizontal | `vertical ] ->
+  ?size:[ `sm | `md | `lg ] ->
+  is_detached:(bool[@mel.as "isDetached"]) ->
+  full_width:(bool[@mel.as "fullWidth"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?enabled:string ->
+  unit ->
+  group = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : button -> Dom.element = "render"
+  [@@mel.module "./twins/ToggleButton.tsx"]
+
+  external render_group : group -> Dom.element = "renderGroup"
+  [@@mel.module "./twins/ToggleButton.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ToggleButton.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ToggleButton.tsx"]
+end
+
+(* Kobalte marks a button that is on with an empty data-pressed, which
+   HeroUI's styles, reading data-pressed="true" for a press, never match; a
+   press's own "true" is kept. *)
+let without_kobalte_on shown =
+  String.split_on_char ' ' shown
+  |> List.filter (fun a -> not (String.equal a "data-pressed="))
+  |> String.concat " "
+
+(* What HeroUI's styles read of a button, and what a reader reaches: every
+   attribute but those each framework writes for itself, and React Aria's
+   tabindex of 0 on a button alone, which a button has anyway. *)
+let button_shown b = without_kobalte_on (T.attributes_but [ "tabindex" ] b)
+
+(* The state after each step of a walk, and whether it is selected. *)
+let selected b = (T.attribute b "data-selected", T.attribute b "aria-pressed")
+
+(* A button alone in solidtype, then in React: shown, walked by the mouse and
+   the keys, which toggle it, and its selection after. *)
+let alone ?variant ?size ?(is_icon_only = false) ?(default_selected = false)
+    ?(disabled = false) () =
+  let run b step =
+    let shown = button_shown b in
+    let* walked = T.walk ~step b in
+    let walked =
+      Array.map (fun (name, state) -> (name, without_kobalte_on state)) walked
+    in
+    Js.Promise.resolve (shown, walked, selected b, button_shown b)
+  in
+  T.render (fun () ->
+      <Toggle_button
+        ?variant=(fun () -> variant)
+        ?size=(fun () -> size)
+        is_icon_only=(fun () -> is_icon_only)
+        default_selected=(fun () -> default_selected)
+        is_disabled=(fun () -> disabled)>
+        "Like"
+      </Toggle_button>);
+  let* solidtype = run (T.by_role "button") Twin.step in
+  T.cleanup ();
+  let b =
+    Twin.render
+      (button ?variant ?size ~is_icon_only ~default_selected
+         ~is_disabled:disabled ())
+  in
+  let* react = run b Twin.step in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+external text_content : Dom.element -> string = "textContent" [@@mel.get]
+
+external buttons_in : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+(* Kobalte's group and React Aria's are each accessible by a pattern of
+   their own, which the port keeps as Kobalte has it: a group of buttons each
+   pressed or not, one Tab stop and the arrow keys between them, where React
+   Aria's is a radio group of radios checked or not, or a toolbar, each a Tab
+   stop; and Kobalte's buttons carry their group's orientation, which no style
+   reads. The selection HeroUI's styles read, data-selected, is compared.
+   React Aria also leaves user-select: none on a disabled button it was
+   pressed on, its press's own style. *)
+let patterns =
+  [
+    "role";
+    "aria-checked";
+    "aria-pressed";
+    "aria-orientation";
+    "aria-disabled";
+    "tabindex";
+    "style";
+  ]
+
+(* The group and each of its buttons, as the page shows them. *)
+let group_shown root =
+  let group =
+    match T.query "[data-slot=toggle-button-group]" with
+    | Some g -> T.attributes_but patterns g
+    | None -> "no group"
+  in
+  let buttons =
+    Js.Array.from (buttons_in root "button")
+    |> Array.map (fun b ->
+        without_kobalte_on (T.attributes_but ("data-orientation" :: patterns) b))
+  in
+  let separators =
+    Js.Array.from (buttons_in root "[data-slot=toggle-button-group-separator]")
+    |> Array.map T.attributes
+  in
+  (group, buttons, separators)
+
+let button_named root name =
+  Js.Array.from (buttons_in root "button")
+  |> Js.Array.find ~f:(fun b -> String.equal (text_content b) name)
+  |> function
+  | Some b -> b
+  | None -> Js.Exn.raiseError ("no button " ^ name)
+
+(* A group in solidtype, then in React: shown, then after each of [steps], a
+   click on the button of a name, shown again. *)
+let grouped ?(selection_mode = `single) ?(default_selected_keys = [||])
+    ?(disallow_empty_selection = false) ?(orientation = `horizontal) ?size
+    ?(is_detached = false) ?(full_width = false) ?(disabled = false) ?enabled
+    steps =
+  let run root step =
+    let user = T.setup () in
+    let first = group_shown root in
+    let rec go seen = function
+      | [] -> Js.Promise.resolve (first, Array.of_list (List.rev seen))
+      | name :: rest ->
+          let* () = step (fun () -> T.click user (button_named root name)) in
+          go ((name, group_shown root) :: seen) rest
+    in
+    go [] steps
+  in
+  T.render (fun () ->
+      <Toggle_button_group
+        selection_mode=(fun () -> selection_mode)
+        default_selected_keys=(fun () -> default_selected_keys)
+        disallow_empty_selection=(fun () -> disallow_empty_selection)
+        orientation=(fun () -> orientation)
+        ?size=(fun () -> size)
+        is_detached=(fun () -> is_detached)
+        full_width=(fun () -> full_width)
+        is_disabled=(fun () -> disabled)
+        aria_label="Alignment">
+        <Toggle_button
+          id="left"
+          ?is_disabled=(fun () ->
+                           if Option.equal String.equal enabled (Some "left")
+                           then Some false
+                           else None)>
+          "left"
+        </Toggle_button>
+        <Toggle_button
+          id="center"
+          ?is_disabled=(fun () ->
+                         if Option.equal String.equal enabled (Some "center")
+                         then Some false
+                         else None)>
+          <Toggle_button_group.Separator /> "center"
+        </Toggle_button>
+        <Toggle_button
+          id="right"
+          ?is_disabled=(fun () ->
+                         if Option.equal String.equal enabled (Some "right")
+                         then Some false
+                         else None)>
+          <Toggle_button_group.Separator /> "right"
+        </Toggle_button>
+      </Toggle_button_group>);
+  let* solidtype = run T.body Twin.step in
+  T.cleanup ();
+  let host =
+    Twin.render_group
+      (group ~selection_mode ~default_selected_keys ~disallow_empty_selection
+         ~orientation ?size ~is_detached ~full_width ~is_disabled:disabled
+         ?enabled ())
+  in
+  let* react = run host Twin.step in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Toggle_button" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is shown, walked and toggled as React's" (fun () ->
+          let* solidtype, react = alone () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is each variant, size and icon alone, as React's"
+        (fun () ->
+          let* solidtype, react =
+            alone ~variant:`ghost ~size:`lg ~is_icon_only:true
+              ~default_selected:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is neither pressed nor toggled while disabled"
+        (fun () ->
+          let* solidtype, react =
+            alone ~disabled:true ~default_selected:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is selected as it is told, and tells a press" (fun () ->
+          let on, set_on = S.create_signal false in
+          let told = ref [] in
+          T.render (fun () ->
+              <Toggle_button
+                is_selected=(fun () -> S.get on)
+                on_change=(fun v -> told := v :: !told)>
+                "Like"
+              </Toggle_button>);
+          let b = T.by_role "button" in
+          let user = T.setup () in
+          let* () = T.click user b in
+          let before = selected b in
+          S.set set_on true;
+          Js.Promise.resolve
+            E.(
+              expect (!told, before, selected b)
+              |> toEqual
+                   ([ true ], (None, Some "false"), (Some "true", Some "true"))));
+      Jest.test "refuses a button with no id inside a group" (fun () ->
+          E.(
+            expect (fun () ->
+                T.render (fun () ->
+                    <Toggle_button_group>
+                      <Toggle_button>"left"</Toggle_button>
+                    </Toggle_button_group>))
+            |> toThrow)));
+  Jest.describe "Toggle_button_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "selects one button at a time, as React's" (fun () ->
+          let* solidtype, react =
+            grouped ~default_selected_keys:[| "center" |]
+              [ "left"; "right"; "right" ]
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "selects several, as React's" (fun () ->
+          let* solidtype, react =
+            grouped ~selection_mode:`multiple ~size:`sm
+              [ "left"; "right"; "left" ]
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "keeps the last selected where it may not be empty"
+        (fun () ->
+          let* solidtype, react =
+            grouped ~disallow_empty_selection:true
+              ~default_selected_keys:[| "left" |]
+              [ "left"; "center"; "center" ]
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is vertical, detached and full width, as React's"
+        (fun () ->
+          let* solidtype, react =
+            grouped ~orientation:`vertical ~is_detached:true ~full_width:true
+              [ "center" ]
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is disabled, every button in it, as React's" (fun () ->
+          let* solidtype, react = grouped ~disabled:true [ "left"; "right" ] in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      (* HeroUI documents that a button's is_disabled of false holds in a
+         disabled group; React Aria's group disables it all the same. *)
+      Jest.testPromise
+        "keeps a button enabled that says so, as HeroUI documents" (fun () ->
+          let* (_, steps), _ =
+            grouped ~disabled:true ~enabled:"right" [ "left"; "right" ]
+          in
+          let buttons = Array.map (fun (_, (_, buttons, _)) -> buttons) steps in
+          let disabled b = Js.String.includes ~search:"data-disabled=true" b in
+          let selected b = Js.String.includes ~search:"data-selected=true" b in
+          let last = buttons.(Array.length buttons - 1) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Array.map disabled last,
+                  Array.map selected buttons.(0),
+                  Array.map selected last )
+              |> toEqual
+                   ( [| true; true; false |],
+                     [| false; false; false |],
+                     [| false; false; true |] )));
+      Jest.testPromise "is given its selection, and tells a change" (fun () ->
+          let keys, set_keys = S.create_signal [| "left" |] in
+          let told = ref [] in
+          T.render (fun () ->
+              <Toggle_button_group
+                selection_mode=`multiple
+                selected_keys=(fun () -> S.get keys)
+                on_selection_change=(fun k -> told := k :: !told)>
+                <Toggle_button id="left">"left"</Toggle_button>
+                <Toggle_button id="right">"right"</Toggle_button>
+              </Toggle_button_group>);
+          let user = T.setup () in
+          let* () = T.click user (button_named T.body "right") in
+          let before = selected (button_named T.body "right") in
+          S.set set_keys [| "right" |];
+          Js.Promise.resolve
+            E.(
+              expect
+                ( !told,
+                  before,
+                  selected (button_named T.body "right"),
+                  selected (button_named T.body "left") )
+              |> toEqual
+                   ( [ [| "left"; "right" |] ],
+                     (None, Some "false"),
+                     (Some "true", Some "true"),
+                     (None, Some "false") ))))

@@ -1,0 +1,21 @@
+module Toggle_button = Solidtype_heroui.Toggle_button
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <div class_="flex items-center gap-3">
+      <Toggle_button size=`sm><Icons.Heart /> "Small"</Toggle_button>
+      <Toggle_button size=`md><Icons.Heart /> "Medium"</Toggle_button>
+      <Toggle_button size=`lg><Icons.Heart /> "Large"</Toggle_button>
+    </div>
+    <div class_="flex items-center gap-3">
+      <Toggle_button is_icon_only=true aria_label="Like" size=`sm>
+        <Icons.Heart />
+      </Toggle_button>
+      <Toggle_button is_icon_only=true aria_label="Like" size=`md>
+        <Icons.Heart />
+      </Toggle_button>
+      <Toggle_button is_icon_only=true aria_label="Like" size=`lg>
+        <Icons.Heart />
+      </Toggle_button>
+    </div>
+  </div>

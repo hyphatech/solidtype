@@ -1,0 +1,24 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Toggle_button = Solidtype_heroui.Toggle_button
+
+(* The button's state is the page's signal, which its content reads too, as
+   React's render prop reads the button's. *)
+let make () =
+  let selected, set_selected = S.create_signal false in
+  <div class_="flex flex-col gap-4">
+    <Toggle_button
+      is_selected=(fun () -> S.get selected) on_change=(S.set set_selected)>
+      (fun () ->
+        if S.get selected then Jsx.element <Icons.Heart_fill />
+        else Jsx.element <Icons.Heart />)
+      (fun () -> Jsx.string (if S.get selected then "Liked" else "Like"))
+    </Toggle_button>
+    <p class_="text-sm text-muted">
+      "Status: "
+      <span class_="font-medium">
+        (fun () ->
+          Jsx.string (if S.get selected then "Selected" else "Not selected"))
+      </span>
+    </p>
+  </div>

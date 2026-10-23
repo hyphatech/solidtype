@@ -31,8 +31,8 @@ Checkbox with CheckboxGroup, Chip, CloseButton, Description, EmptyState,
 FieldError, Fieldset, Form, Input, InputGroup, Kbd, Label, Link, Meter,
 NumberField, ProgressBar, ProgressCircle, RadioGroup with Radio,
 ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface,
-Switch with SwitchGroup, TextArea, TextField, TimeField, Toast and
-Typography are ported so far.
+Switch with SwitchGroup, TextArea, TextField, TimeField, Toast,
+ToggleButton with ToggleButtonGroup and Typography are ported so far.
 `make docs-serve` serves the documentation, where each port is shown beside
 the same component in React.
 
