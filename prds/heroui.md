@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates; groups 1 and 2 have landed but for Form, TimeField and ErrorMessage; group 3 has Alert, Meter, ProgressBar and format options.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar.
 Date: 2026-10-23
 
 ## The problem
