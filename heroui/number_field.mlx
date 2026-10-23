@@ -1,6 +1,8 @@
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.NumberField
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
 
 (* What a field's parts read of it: its classes and its state. *)
 type field = {
@@ -188,7 +190,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_disabled : bool option) ?(is_invalid : bool = false)
     ?(is_read_only : bool = false) ?(is_required : bool = false)
     ?(name : string option) ?(aria_label : string option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option)
+    ?(format_options : Types.NumberFormatOptions.t option)
+    ~(children : Jsx.content) () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -220,6 +224,22 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     let now = current () in
     Float.is_nan now || not (Float.equal (snapped (moved now)) now)
   in
+  (* Kobalte shows the value as its options say but tells a reader the bare
+     number; a formatted field tells it as it shows it. *)
+  let formatter =
+    I18n.create_number_formatter
+      (Types.Either.right (fun[@u] () ->
+           match format_options () with
+           | Some o -> o
+           | None -> Types.NumberFormatOptions.make ()))
+  in
+  let text_value () =
+    let now = current () in
+    match format_options () with
+    | Some _ when not (Float.is_nan now) ->
+        Some (Types.NumberFormat.format (Solidtype.Solid.get formatter) now)
+    | Some _ | None -> None
+  in
   let label_id = Solidtype.Solid.create_unique_id () in
   let f =
     {
@@ -248,6 +268,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       read_only=(fun () -> is_read_only ())
       ?name
       ?aria_label
+      ?format_options
+      ?text_value
       class_=(fun () ->
                after (Styles.NumberField.base (f.slots ())) (class_ ()))
       data_slot="number-field"

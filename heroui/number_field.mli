@@ -16,6 +16,10 @@
       </Number_field>
     ]}
 
+    [format_options], as HeroUI's [formatOptions], is Kobalte's: its input shows
+    and reads its value so, a currency, a percent or a unit, and tells a reader
+    the value as it shows it.
+
     A part is used inside a [Number_field]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
@@ -108,6 +112,8 @@ module Props : sig
     ?name:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?format_options:
+      Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->
     unit ->

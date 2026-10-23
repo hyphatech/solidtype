@@ -99,8 +99,21 @@ function typeVar(name: string, vars: Vars): Type {
   return v;
 }
 
+// A declaration of a name already bound that TypeScript takes for it both
+// ways -- @internationalized/number's NumberFormatOptions, which extends
+// Intl's with a member Intl's has -- is that type, so a value of one is
+// passed where the other is asked.
+function sameAs(symbol: ts.Symbol, type: ts.Type): Named | undefined {
+  for (const n of types.values()) {
+    if (n.symbol?.name === symbol.name && n.params.length === 0
+        && checker.isTypeAssignableTo(type, n.type) && checker.isTypeAssignableTo(n.type, type)) return n;
+  }
+  return undefined;
+}
+
 function namedModule(symbol: ts.Symbol, type: ts.Type): Named {
-  let n = types.get(symbol);
+  let n = types.get(symbol) ?? sameAs(symbol, type);
+  if (n) types.set(symbol, n);
   if (!n) {
     const decl = symbol.declarations?.[0];
     const params =

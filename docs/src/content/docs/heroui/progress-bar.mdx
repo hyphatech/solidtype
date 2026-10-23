@@ -16,6 +16,8 @@ import * as Indeterminate from "../../../../../_build/default/docs/islands/out/d
 import IndeterminateCode from "../../../../islands/progress_bar_indeterminate.mlx?raw";
 import * as CustomScale from "../../../../../_build/default/docs/islands/out/docs/islands/progress_bar_custom_scale.jsx";
 import CustomScaleCode from "../../../../islands/progress_bar_custom_scale.mlx?raw";
+import * as Format from "../../../../../_build/default/docs/islands/out/docs/islands/progress_bar_format.jsx";
+import FormatCode from "../../../../islands/progress_bar_format.mlx?raw";
 import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/progress_bar_demo.jsx";
 
 `Solidtype_heroui.Progress_bar` is Kobalte's `Progress.Root`, a
@@ -66,10 +68,13 @@ reader and its fill moves along the track.
 
 <Example code={CustomScaleCode} title="progress_bar_custom_scale.mlx"><CustomScale.make client:visible /></Example>
 
-### Not yet
+### Format Options
 
-HeroUI's `formatOptions`, a currency or a unit for the output, needs React
-Aria's number formatting, which is not ported yet; the output is a percentage.
+`format_options` formats the output and what a reader is told, by Kobalte's
+number formatter in the reader's locale: a percent, the default, is the
+value's share of its range, and any other style the value itself.
+
+<Example code={FormatCode} title="progress_bar_format.mlx"><Format.make client:visible /></Example>
 
 ## Beside React
 
@@ -108,7 +113,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `valueLabel` | — | | | The output's `children` instead |
-| `formatOptions` | — | | | Not yet |
+| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | a percent | How its value is shown |
 
 ### ProgressBar.Output, ProgressBar.Track, ProgressBar.Fill
 

@@ -22,6 +22,8 @@ external props :
   ?min_value:(float[@mel.as "minValue"]) ->
   ?max_value:(float[@mel.as "maxValue"]) ->
   ?step:float ->
+  ?format_options:
+    (Solidtype_kobalte.Types.NumberFormatOptions.t[@mel.as "formatOptions"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -157,7 +159,7 @@ let walk ~step host told =
   Js.Promise.resolve (Array.of_list (List.rev !seen))
 
 let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
-    ?is_required ?min_value ?max_value ?step () =
+    ?is_required ?min_value ?max_value ?step ?format_options () =
   let told = ref "" in
   T.render (fun () ->
       <Number_field
@@ -170,6 +172,7 @@ let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
         ?min_value=(fun () -> min_value)
         ?max_value=(fun () -> max_value)
         ?step=(fun () -> step)
+        ?format_options=(fun () -> format_options)
         default_value=4.
         name="width"
         on_change=(fun v -> told := Js.Float.toString v)>
@@ -199,7 +202,7 @@ let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
               (function `primary -> "primary" | `secondary -> "secondary")
               variant)
          ?full_width ?is_disabled ?is_invalid ?is_read_only ?is_required
-         ?min_value ?max_value ?step ())
+         ?min_value ?max_value ?step ?format_options ())
       (fun v -> told' := Js.Float.toString v)
   in
   let* react = walk ~step:Twin.step host told' in
@@ -231,4 +234,28 @@ let () =
       Jest.testPromise "is invalid and required, its error shown, as React's"
         (fun () ->
           let* r = both ~is_invalid:true ~is_required:true () in
+          same r);
+      Jest.test "tells a reader its value as it shows it" (fun () ->
+          T.render (fun () ->
+              <Number_field
+                default_value=4.
+                format_options=(fun () ->
+                                 Solidtype_kobalte.Types.NumberFormatOptions
+                                 .make ~style:`currency ~currency:"USD" ())>
+                <Label>"Price"</Label>
+                <Number_field.Group><Number_field.Input /></Number_field.Group>
+              </Number_field>);
+          let told =
+            Option.bind (T.query "[data-slot=number-field-input]") (fun input ->
+                T.attribute input "aria-valuetext")
+          in
+          E.(expect told |> toEqual (Some "$4.00")));
+      Jest.testPromise "steps a currency, as React's does" (fun () ->
+          let* r =
+            both
+              ~format_options:
+                (Solidtype_kobalte.Types.NumberFormatOptions.make
+                   ~style:`currency ~currency:"USD" ())
+              ()
+          in
           same r))

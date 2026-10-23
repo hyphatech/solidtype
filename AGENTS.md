@@ -303,7 +303,9 @@ break.
   `multiple` is two modules, `Root` and `Root_multiple`; a named object
   type is a module of `Types`, with a getter per field, a curried
   wrapper per function it holds and a constructor where it has neither
-  methods nor a class. A member typed `any` is not bound, nor one whose
+  methods nor a class, and two declarations of one name that TypeScript
+  takes for each other, Intl's `NumberFormatOptions` and
+  `@internationalized/number`'s, are one module. A member typed `any` is not bound, nor one whose
   value would be a type its caller chooses, an unchecked cast, and nor are
   Kobalte's building blocks, menu, popper, dismissable-layer and
   polymorphic. Why: Kobalte's parts are hundreds, and a binding by hand

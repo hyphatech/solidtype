@@ -16,6 +16,8 @@ external props :
   ?max_value:(float[@mel.as "maxValue"]) ->
   ?color:string ->
   ?size:string ->
+  ?format_options:
+    (Solidtype_kobalte.Types.NumberFormatOptions.t[@mel.as "formatOptions"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -88,7 +90,8 @@ let shown host =
         :: named)
       ^ if element_count e > 0 then "" else " " ^ text e)
 
-let both ?value ?is_indeterminate ?min_value ?max_value ?color ?size () =
+let both ?value ?is_indeterminate ?min_value ?max_value ?color ?size
+    ?format_options () =
   T.render (fun () ->
       <Progress_bar
         ?value=(fun () -> value)
@@ -97,6 +100,7 @@ let both ?value ?is_indeterminate ?min_value ?max_value ?color ?size () =
         ?max_value=(fun () -> max_value)
         ?color=(fun () -> color)
         ?size=(fun () -> size)
+        ?format_options=(fun () -> format_options)
         class_="w-64">
         <Label>"Loading"</Label>
         <Progress_bar.Output />
@@ -126,7 +130,7 @@ let both ?value ?is_indeterminate ?min_value ?max_value ?color ?size () =
               (Option.map
                  (function `sm -> "sm" | `md -> "md" | `lg -> "lg")
                  size)
-            ()))
+            ?format_options ()))
   in
   Twin.cleanup ();
   (solidtype, react)
@@ -144,6 +148,25 @@ let () =
           E.(expect solidtype |> toEqual react));
       Jest.test "is each color and size, as React's is" (fun () ->
           let solidtype, react = both ~value:90. ~color:`danger ~size:`lg () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "formats its value as a currency, as React's does" (fun () ->
+          let solidtype, react =
+            both ~value:60.
+              ~format_options:
+                (Solidtype_kobalte.Types.NumberFormatOptions.make
+                   ~style:`currency ~currency:"USD" ())
+              ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "formats its share of its range as a percent, as React's does"
+        (fun () ->
+          let solidtype, react =
+            both ~value:31. ~min_value:10. ~max_value:50.
+              ~format_options:
+                (Solidtype_kobalte.Types.NumberFormatOptions.make
+                   ~style:`percent ~maximum_fraction_digits:1. ())
+              ()
+          in
           E.(expect solidtype |> toEqual react));
       Jest.test "is indeterminate, as React's is" (fun () ->
           let solidtype, react = both ~is_indeterminate:true () in

@@ -3518,7 +3518,7 @@ module NumberField : sig
         ?large_step:float Solidtype.Check.value ->
         ?change_on_wheel:bool Solidtype.Check.value ->
         ?format:bool Solidtype.Check.value ->
-        ?format_options:Types.NumberFormatOptions2.t Solidtype.Check.value ->
+        ?format_options:Types.NumberFormatOptions.t Solidtype.Check.value ->
         ?allowed_input:Js.Re.t Solidtype.Check.value ->
         ?id:string Solidtype.Check.value ->
         ?name:string Solidtype.Check.value ->

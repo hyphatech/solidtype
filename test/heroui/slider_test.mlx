@@ -18,6 +18,8 @@ external props :
   ?step:float ->
   ?orientation:string ->
   ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?format_options:
+    (Solidtype_kobalte.Types.NumberFormatOptions.t[@mel.as "formatOptions"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -203,8 +205,8 @@ let walk ?(focusable = true) ~step host told =
 let told_of values =
   String.concat "," (Array.to_list (Array.map Js.Float.toString values))
 
-let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled ()
-    =
+let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled
+    ?format_options () =
   let told = ref "" in
   T.render (fun () ->
       <Slider
@@ -214,6 +216,7 @@ let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled ()
         ?step=(fun () -> step)
         ?orientation=(fun () -> orientation)
         ?is_disabled=(fun () -> is_disabled)
+        ?format_options=(fun () -> format_options)
         on_change=(fun values -> told := told_of values)
         class_="w-64">
         <Label>"Volume"</Label>
@@ -241,7 +244,7 @@ let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled ()
            (Option.map
               (function `horizontal -> "horizontal" | `vertical -> "vertical")
               orientation)
-         ?is_disabled ())
+         ?is_disabled ?format_options ())
       (fun values -> told' := told_of values)
   in
   let* react = walk ~focusable ~step:Twin.step host told' in
@@ -266,6 +269,20 @@ let () =
           same r);
       Jest.testPromise "is a range of two thumbs, as React's is" (fun () ->
           let* r = both ~default_value:[| 20.; 60. |] () in
+          same r);
+      Jest.testPromise "shows its range as a currency, as React's does"
+        (fun () ->
+          let* r =
+            both ~default_value:[| 20.; 60. |]
+              ~format_options:
+                (Solidtype_kobalte.Types.NumberFormatOptions.make
+                   ~style:`currency ~currency:"USD" ())
+              ()
+          in
+          same r);
+      Jest.testPromise "shows its value in the reader's locale, as React's"
+        (fun () ->
+          let* r = both ~default_value:[| 1500. |] ~max_value:2000. () in
           same r);
       Jest.testPromise "is vertical, as React's is" (fun () ->
           let* r = both ~default_value:[| 40. |] ~orientation:`vertical () in

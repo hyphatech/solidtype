@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates; groups 1 and 2 have landed but for Form, TimeField and ErrorMessage; group 3 is begun.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates; groups 1 and 2 have landed but for Form, TimeField and ErrorMessage; group 3 has Alert, Meter, ProgressBar and format options.
 Date: 2026-10-23
 
 ## The problem
@@ -147,9 +147,13 @@ needs is added above it, never inside each field:
 ### Numbers
 
 Kobalte formats what it shows: `NumberField` takes `formatOptions`, and
-`Meter`, `Progress` and `Slider` a `getValueLabel`, which a port builds
-from `I18n.create_number_formatter` and HeroUI's `formatOptions`, in the
-locale Kobalte reads. Both are bound already.
+`Meter` and `Progress` a `getValueLabel`, which a port builds from
+`I18n.create_number_formatter` and HeroUI's `formatOptions`, in the
+locale Kobalte reads. Kobalte's `Slider` tells a thumb's value as a
+decimal alone, so a port gives each thumb its `aria-valuetext`, which
+Kobalte takes after its own, and its output, from the same formatter.
+The generator binds the options `@internationalized/number` declares and
+Intl's as one type, since TypeScript takes either for the other.
 
 ### Where Kobalte and React Aria differ
 
@@ -232,9 +236,10 @@ page, its line in `coverage.mdx`, the README and `CHANGES.md`.
 
 ### Group 3: status
 - [x] Alert, Meter
-- [ ] ProgressBar -- committed in the worktree `progress-bar`, to land
-- [ ] Format options: NumberField's `formatOptions`, and Meter's,
-  ProgressBar's and Slider's through `getValueLabel`
+- [x] ProgressBar
+- [x] Format options: NumberField's `formatOptions`, Kobalte's; Meter's and
+  ProgressBar's through `getValueLabel`; Slider's output and thumbs, by
+  Kobalte's number formatter
 - [ ] ProgressCircle, Toast
 
 ### Group 4: navigation and disclosure

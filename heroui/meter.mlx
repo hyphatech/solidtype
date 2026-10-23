@@ -1,6 +1,8 @@
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Meter
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
 
 (* What a meter's parts read of it: its classes and how far along its range
    its value is, from 0 to 100. *)
@@ -75,7 +77,30 @@ let%component make ~(value : float) ?(min_value : float = 0.)
     ?(max_value : float = 100.)
     ?(color : [ `default | `accent | `success | `warning | `danger ] option)
     ?(size : [ `sm | `md | `lg ] option) ?(aria_label : string option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option)
+    ?(format_options : Types.NumberFormatOptions.t option)
+    ~(children : Jsx.content) () =
+  (* HeroUI's formatOptions as it reads them, a percent by default: a percent
+     is the value's share of its range, any other style the value itself. *)
+  let options () =
+    match format_options () with
+    | Some o -> o
+    | None -> Types.NumberFormatOptions.make ~style:`percent ()
+  in
+  let formatter =
+    I18n.create_number_formatter (Types.Either.right (fun[@u] () -> options ()))
+  in
+  let value_label params =
+    let value = Types.GetValueLabelParams.value params in
+    let min = Types.GetValueLabelParams.min params in
+    let range = Types.GetValueLabelParams.max params -. min in
+    let shown =
+      match Types.NumberFormatOptions.style (options ()) with
+      | Some `percent -> if range <= 0. then 0. else (value -. min) /. range
+      | Some (`decimal | `currency | `unit) | None -> value
+    in
+    Types.NumberFormat.format (Solidtype.Solid.get formatter) shown
+  in
   let m =
     {
       slots =
@@ -97,6 +122,7 @@ let%component make ~(value : float) ?(min_value : float = 0.)
       min_value=(fun () -> min_value ())
       max_value=(fun () -> max_value ())
       ?aria_label
+      get_value_label=value_label
       class_=(fun () -> after (Styles.Meter.base (m.slots ())) (class_ ()))
       data_slot="meter">
       <Label.Slot.Provider value=(fun () -> label)>

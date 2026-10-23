@@ -69,7 +69,6 @@ type t_menubar_context_value
 type t_get_value_label_params
 type t_meter_context_value
 type t_navigation_menu_context_value
-type t_number_format_options2
 type t_number_field_context_value
 type t_pagination_root_item_component
 type t_pagination_context_value
@@ -329,7 +328,7 @@ module Color = struct
     | exception Js.Exn.Error e -> invalid_arg ("with_channel_value: " ^ Option.value (Js.Exn.message e) ~default:"")
   external get_channel_range : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_channel_range = "getChannelRange" [@@mel.send]
   external get_channel_name : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_slider_root_translations -> string = "getChannelName" [@@mel.send]
-  external get_channel_format_options : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_number_format_options2 = "getChannelFormatOptions" [@@mel.send]
+  external get_channel_format_options : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_number_format_options = "getChannelFormatOptions" [@@mel.send]
   external format_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> string = "formatChannelValue" [@@mel.send]
   external get_color_space : t -> unit -> [ `rgb | `hsl | `hsb ] = "getColorSpace" [@@mel.send]
   external get_color_space_axes : t -> t_color_get_color_space_axes -> t_color_axes = "getColorSpaceAxes" [@@mel.send]
@@ -957,32 +956,6 @@ module NavigationMenuContextValue = struct
   external previous_menu : t -> string option Solidtype.Solid.accessor = "previousMenu" [@@mel.get]
   external set_previous_menu : t -> string option Solidtype.Solid.setter = "setPreviousMenu" [@@mel.get]
   external make : dataset:(t_navigation_menu_data_set Solidtype.Solid.accessor [@mel.as "dataset"]) -> delay_duration:(float Solidtype.Solid.accessor [@mel.as "delayDuration"]) -> skip_delay_duration:(float Solidtype.Solid.accessor [@mel.as "skipDelayDuration"]) -> auto_focus_menu:(bool Solidtype.Solid.accessor [@mel.as "autoFocusMenu"]) -> set_auto_focus_menu:(bool Solidtype.Solid.setter [@mel.as "setAutoFocusMenu"]) -> start_leave_timer:((unit -> unit) [@mel.as "startLeaveTimer"]) -> cancel_leave_timer:((unit -> unit) [@mel.as "cancelLeaveTimer"]) -> root_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "rootRef"]) -> set_root_ref:(Dom.htmlElement Solidtype.Solid.setter [@mel.as "setRootRef"]) -> viewport_ref:(Dom.htmlElement option Solidtype.Solid.accessor [@mel.as "viewportRef"]) -> set_viewport_ref:(Dom.htmlElement Solidtype.Solid.setter [@mel.as "setViewportRef"]) -> viewport_present:(bool Solidtype.Solid.accessor [@mel.as "viewportPresent"]) -> current_placement:(string Solidtype.Solid.accessor [@mel.as "currentPlacement"]) -> previous_menu:(string option Solidtype.Solid.accessor [@mel.as "previousMenu"]) -> set_previous_menu:(string option Solidtype.Solid.setter [@mel.as "setPreviousMenu"]) -> unit -> t = "" [@@mel.obj]
-end
-
-module NumberFormatOptions2 = struct
-  type t = t_number_format_options2
-  external locale_matcher : t -> string option = "localeMatcher" [@@mel.get]
-  external style : t -> [ `decimal | `percent | `currency | `unit ] option = "style" [@@mel.get]
-  external currency : t -> string option = "currency" [@@mel.get]
-  external currency_display : t -> [ `symbol | `code | `name | `narrowSymbol ] option = "currencyDisplay" [@@mel.get]
-  external use_grouping : t -> (string, bool) either option = "useGrouping" [@@mel.get]
-  external minimum_integer_digits : t -> float option = "minimumIntegerDigits" [@@mel.get]
-  external minimum_fraction_digits : t -> float option = "minimumFractionDigits" [@@mel.get]
-  external maximum_fraction_digits : t -> float option = "maximumFractionDigits" [@@mel.get]
-  external minimum_significant_digits : t -> float option = "minimumSignificantDigits" [@@mel.get]
-  external maximum_significant_digits : t -> float option = "maximumSignificantDigits" [@@mel.get]
-  external numbering_system : t -> string option = "numberingSystem" [@@mel.get]
-  external compact_display : t -> [ `long | `short ] option = "compactDisplay" [@@mel.get]
-  external notation : t -> [ `standard | `scientific | `engineering | `compact ] option = "notation" [@@mel.get]
-  external sign_display : t -> [ `auto | `always | `never | `exceptZero | `negative ] option = "signDisplay" [@@mel.get]
-  external unit : t -> string option = "unit" [@@mel.get]
-  external unit_display : t -> [ `long | `short | `narrow ] option = "unitDisplay" [@@mel.get]
-  external currency_sign : t -> [ `standard | `accounting ] option = "currencySign" [@@mel.get]
-  external rounding_priority : t -> [ `auto | `morePrecision | `lessPrecision ] option = "roundingPriority" [@@mel.get]
-  external rounding_increment : t -> float option = "roundingIncrement" [@@mel.get]
-  external rounding_mode : t -> [ `ceil | `floor | `expand | `trunc | `halfCeil | `halfFloor | `halfExpand | `halfTrunc | `halfEven ] option = "roundingMode" [@@mel.get]
-  external trailing_zero_display : t -> [ `auto | `stripIfInteger ] option = "trailingZeroDisplay" [@@mel.get]
-  external make : ?locale_matcher:(string [@mel.as "localeMatcher"]) -> ?style:([ `decimal | `percent | `currency | `unit ] [@mel.as "style"]) -> ?currency:(string [@mel.as "currency"]) -> ?currency_display:([ `symbol | `code | `name | `narrowSymbol ] [@mel.as "currencyDisplay"]) -> ?use_grouping:((string, bool) either [@mel.as "useGrouping"]) -> ?minimum_integer_digits:(float [@mel.as "minimumIntegerDigits"]) -> ?minimum_fraction_digits:(float [@mel.as "minimumFractionDigits"]) -> ?maximum_fraction_digits:(float [@mel.as "maximumFractionDigits"]) -> ?minimum_significant_digits:(float [@mel.as "minimumSignificantDigits"]) -> ?maximum_significant_digits:(float [@mel.as "maximumSignificantDigits"]) -> ?numbering_system:(string [@mel.as "numberingSystem"]) -> ?compact_display:([ `long | `short ] [@mel.as "compactDisplay"]) -> ?notation:([ `standard | `scientific | `engineering | `compact ] [@mel.as "notation"]) -> ?sign_display:([ `auto | `always | `never | `exceptZero | `negative ] [@mel.as "signDisplay"]) -> ?unit:(string [@mel.as "unit"]) -> ?unit_display:([ `long | `short | `narrow ] [@mel.as "unitDisplay"]) -> ?currency_sign:([ `standard | `accounting ] [@mel.as "currencySign"]) -> ?rounding_priority:([ `auto | `morePrecision | `lessPrecision ] [@mel.as "roundingPriority"]) -> ?rounding_increment:(float [@mel.as "roundingIncrement"]) -> ?rounding_mode:([ `ceil | `floor | `expand | `trunc | `halfCeil | `halfFloor | `halfExpand | `halfTrunc | `halfEven ] [@mel.as "roundingMode"]) -> ?trailing_zero_display:([ `auto | `stripIfInteger ] [@mel.as "trailingZeroDisplay"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module NumberFieldContextValue = struct

@@ -1,0 +1,14 @@
+module Label = Solidtype_heroui.Label
+module Meter = Solidtype_heroui.Meter
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
+
+let make () =
+  <Meter
+    class_="w-64"
+    max_value=1000.
+    value=750.
+    format_options=(fun () -> Format.make ~style:`currency ~currency:"USD" ())>
+    <Label>"Revenue"</Label>
+    <Meter.Output />
+    <Meter.Track><Meter.Fill /></Meter.Track>
+  </Meter>

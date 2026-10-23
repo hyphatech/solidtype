@@ -5,7 +5,12 @@
 (library
  (name heroui_test)
  (modes melange)
- (libraries solidtype solidtype-heroui melange-jest.jest melange.dom)
+ (libraries
+  solidtype
+  solidtype-heroui
+  solidtype-kobalte
+  melange-jest.jest
+  melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

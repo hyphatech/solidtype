@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `format_options` on `Solidtype_heroui.Number_field`, `Meter`,
+  `Progress_bar` and `Slider`, HeroUI's `formatOptions`: a currency, a
+  percent or a unit, in Kobalte's locale. A slider's output and thumbs show
+  its values in the reader's locale by default, `1,500` where they showed
+  `1500`.
+- Breaking: `Solidtype_kobalte.Types.NumberFormatOptions2` is gone;
+  `NumberField`'s `format_options` takes `Types.NumberFormatOptions.t`, the
+  type `I18n.create_number_formatter` takes, since the generator binds two
+  declarations of a name TypeScript takes for each other as one type.
 - `Solidtype_heroui.Progress_bar`: HeroUI's ProgressBar on Kobalte's
   Progress, determinate or indeterminate, its colors and sizes, its output
   Kobalte's formatting of its value.

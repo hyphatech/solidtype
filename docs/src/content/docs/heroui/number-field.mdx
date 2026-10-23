@@ -22,6 +22,8 @@ import * as Step from "../../../../../_build/default/docs/islands/out/docs/islan
 import StepCode from "../../../../islands/number_field_step.mlx?raw";
 import * as CustomIcons from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_custom_icons.jsx";
 import CustomIconsCode from "../../../../islands/number_field_custom_icons.mlx?raw";
+import * as Format from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_format.jsx";
+import FormatCode from "../../../../islands/number_field_format.mlx?raw";
 import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/number_field_demo.jsx";
 
 `Solidtype_heroui.Number_field` is Kobalte's `NumberField.Root`, with the
@@ -84,11 +86,13 @@ input is Kobalte's spinbutton.
 
 <Example code={CustomIconsCode} title="number_field_custom_icons.mlx"><CustomIcons.make client:visible /></Example>
 
-### Not yet
+### Format Options
 
-HeroUI's Format Options (currency, percent, units) need React Aria's number
-formatting, and its validation examples React Aria's `validate`; neither is
-ported yet.
+`format_options` is Kobalte's own: the input shows and reads its value as a
+currency, a percent or a unit, in the reader's locale, and tells a reader the
+value as it shows it.
+
+<Example code={FormatCode} title="number_field_format.mlx"><Format.make client:visible /></Example>
 
 ## Beside React
 
@@ -141,7 +145,8 @@ Each prop beside the name HeroUI's React component gives it.
 | `name` | `name` | `string` | | Its name in a form |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `formatOptions`, `validate` | — | | | Not yet |
+| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | | How its value is shown and read |
+| `validate` | — | | | A field validates nothing itself: its `is_invalid` and `Field_error` come from the application's state |
 
 ### NumberField.Group, Input, IncrementButton, DecrementButton
 

@@ -1,0 +1,31 @@
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
+
+let make () =
+  <div class_="flex w-64 flex-col gap-4">
+    <Number_field
+      default_value=99.
+      min_value=0.
+      format_options=(fun () -> Format.make ~style:`currency ~currency:"EUR" ())>
+      <Label>"Price"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+    </Number_field>
+    <Number_field
+      default_value=0.25
+      min_value=0.
+      max_value=1.
+      step=0.01
+      format_options=(fun () -> Format.make ~style:`percent ())>
+      <Label>"Discount"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+    </Number_field>
+  </div>

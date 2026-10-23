@@ -13,6 +13,13 @@
       </Progress_bar>
     ]}
 
+    [format_options], as HeroUI's [formatOptions], formats it by Kobalte's
+    [I18n.create_number_formatter], in Kobalte's locale: a percent style, the
+    default, shows the value's share of its range, and any other the value
+    itself, as
+    [Types.NumberFormatOptions.make ~style:`currency ~currency:"USD" ()] shows
+    [$60.00].
+
     A part is used inside a [Progress_bar]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
@@ -79,6 +86,8 @@ module Props : sig
     ?size:[ `sm | `md | `lg ] Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?format_options:
+      Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->
     unit ->

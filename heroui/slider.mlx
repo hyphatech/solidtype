@@ -1,11 +1,15 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.Slider
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
 
-(* What a slider's parts read of it: its values, where each is along the
-   track, its orientation and state, its classes and its thumbs' ids. *)
+(* What a slider's parts read of it: its values, each as a reader reads it,
+   where each is along the track, its orientation and state, its classes and
+   its thumbs' ids. *)
 type slider = {
   values : unit -> float array;
+  format : float -> string;
   percent : float -> float;
   orientation : unit -> [ `horizontal | `vertical ];
   disabled : unit -> bool;
@@ -73,7 +77,7 @@ module Output = struct
         | None ->
             Jsx.string
               (String.concat {js| – |js}
-                 (Array.to_list (Array.map Js.Float.toString (s.values ())))))
+                 (Array.to_list (Array.map s.format (s.values ())))))
     </output>
 end
 
@@ -141,6 +145,11 @@ module Thumb = struct
       id=(fun () -> s.thumb_id (index ()))
       aria_valuemin=(fun () -> Js.Float.toString (bound (-1) s.min_value ()))
       aria_valuemax=(fun () -> Js.Float.toString (bound 1 s.max_value ()))
+      aria_valuetext=(fun () ->
+                       let values = s.values () in
+                       if index () < Array.length values then
+                         s.format values.(index ())
+                       else "")
       class_=(fun () -> after (Styles.Slider.thumb (s.slots ())) (class_ ()))
       style=(fun () ->
               (* Placed as React Aria places it, centred on its value across
@@ -177,7 +186,17 @@ let%component make ?(value : float array option)
     ?(orientation : [ `horizontal | `vertical ] = `horizontal)
     ?(is_disabled : bool option) ?(name : string option)
     ?(aria_label : string option) ?(class_ : string option)
+    ?(format_options : Types.NumberFormatOptions.t option)
     ~(children : Jsx.content) () =
+  (* Each value as HeroUI's formatOptions asks, a decimal by default, in
+     Kobalte's locale: Kobalte formats a thumb's value as a decimal alone. *)
+  let formatter =
+    I18n.create_number_formatter
+      (Types.Either.right (fun[@u] () ->
+           match format_options () with
+           | Some o -> o
+           | None -> Types.NumberFormatOptions.make ~style:`decimal ()))
+  in
   (* A slider is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -202,6 +221,7 @@ let%component make ?(value : float array option)
   let s =
     {
       values;
+      format = (fun v -> Types.NumberFormat.format (S.get formatter) v);
       percent =
         (fun v ->
           let range = max_value () -. min_value () in

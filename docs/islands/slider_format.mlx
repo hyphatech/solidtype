@@ -1,0 +1,16 @@
+module Label = Solidtype_heroui.Label
+module Slider = Solidtype_heroui.Slider
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
+
+let make () =
+  <Slider
+    class_="w-64"
+    default_value=(fun () -> [| 200.; 800. |])
+    max_value=1000.
+    format_options=(fun () -> Format.make ~style:`currency ~currency:"USD" ())>
+    <Label>"Price"</Label>
+    <Slider.Output />
+    <Slider.Track>
+      <Slider.Fill /> <Slider.Thumb index=0 /> <Slider.Thumb index=1 />
+    </Slider.Track>
+  </Slider>

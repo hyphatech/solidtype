@@ -12,6 +12,11 @@
       </Slider>
     ]}
 
+    [format_options], as HeroUI's [formatOptions], formats each value its output
+    shows and each thumb tells a reader, by Kobalte's
+    [I18n.create_number_formatter] in Kobalte's locale, a decimal by default: a
+    thumb's value as Kobalte tells it alone is a decimal.
+
     A part is used inside a [Slider]: elsewhere it raises [Invalid_argument] as
     it is made. *)
 
@@ -97,6 +102,8 @@ module Props : sig
     ?name:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?format_options:
+      Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t ->
     unit ->
