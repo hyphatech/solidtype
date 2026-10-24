@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure, DisclosureGroup and Accordion; no landed port has its misuses in `test/does_not_compile.t` yet.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure, DisclosureGroup, Accordion and Tabs; no landed port has its misuses in `test/does_not_compile.t` yet.
 Date: 2026-10-23
 
 ## The problem
@@ -137,10 +137,15 @@ check written by hand where it passes an element's every attribute on, as
   Aria writes, `--disclosure-panel-height`, where Kobalte takes closed
   content off the page and sizes it by a variable of its own. The port
   keeps the content mounted, hidden until find in page reaches it, and
-  gives it its size step by step, a frame apart, so HeroUI's transition
-  runs; a size and the hidden state are declared, so a prerendered page
-  holds them. Accordion's panel is the same machinery, `Panel`, which both
-  share.
+  gives it its size as React Aria does, its style read between two sizes so
+  HeroUI's transition runs; a size and the hidden state are declared as it
+  is first rendered, so a prerendered page holds them, and written on the
+  element after. Accordion's panel is the same machinery, `Panel`, which
+  both share.
+- **An indicator that slides**: HeroUI's tab indicator is React Aria's
+  shared element, drawn in the selected tab alone; the port's starts where
+  the last one was, then takes its own place a frame on, which HeroUI's
+  styles move it to.
 - **What a group gives**: a context per group -- `Button_group`,
   `Avatar_group`, `Checkbox_group`, `Radio_group`, `Toggle_button_group`,
   `Disclosure_group`, `Fieldset`, `Surface` -- read by the components
@@ -335,7 +340,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] ToggleButton, ToggleButtonGroup
 - [x] Disclosure, DisclosureGroup
 - [x] Accordion, on Kobalte's, its content as a disclosure's
-- [ ] Tabs, Breadcrumbs, Pagination
+- [x] Tabs
+- [ ] Breadcrumbs, Pagination
 
 ### Group 5: overlays and lists
 - [ ] Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox,

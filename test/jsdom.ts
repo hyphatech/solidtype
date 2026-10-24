@@ -64,3 +64,7 @@ if (hidden?.set && hidden.get) {
     },
   });
 }
+// Nor has it Web Animations' getAnimations, by which React Aria's selection
+// indicator, and the port's, cancel what they start: an element with no
+// animation running stands in, as on a page whose styles animate nothing.
+Element.prototype.getAnimations ??= () => [];

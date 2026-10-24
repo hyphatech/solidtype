@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -631,6 +631,40 @@ export function accordion(host: HTMLElement, { expandedKeys, onExpandedChange, .
           </Accordion.Item>
         ))}
       </Accordion>,
+    ),
+  );
+}
+
+type TabsProps = {
+  selectedKey: string;
+  onSelectionChange: (key: string) => void;
+  orientation: "horizontal" | "vertical";
+  variant: "primary" | "secondary";
+  align: "start" | "center" | "end";
+  isDisabled: boolean;
+};
+
+export function tabs(host: HTMLElement, { onSelectionChange, ...props }: TabsProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Tabs {...props} onSelectionChange={(key) => onSelectionChange(String(key))}>
+        <Tabs.ListContainer>
+          <Tabs.List aria-label="Options">
+            {["overview", "analytics", "reports"].map((key, i) => (
+              <Tabs.Tab key={key} id={key}>
+                {i > 0 ? <Tabs.Separator /> : null}
+                {key}
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs.ListContainer>
+        {["overview", "analytics", "reports"].map((key) => (
+          <Tabs.Panel key={key} id={key}>
+            About {key}.
+          </Tabs.Panel>
+        ))}
+      </Tabs>,
     ),
   );
 }

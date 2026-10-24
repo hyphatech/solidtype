@@ -1,0 +1,87 @@
+module S = Solidtype.Solid
+module Tabs = Solidtype_heroui.Tabs
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+let keys = [| "overview"; "analytics"; "reports" |]
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let orientations = [| (`horizontal, "horizontal"); (`vertical, "vertical") |]
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+let aligns = [| (`start, "start"); (`center, "center"); (`end_, "end") |]
+
+let make () =
+  let selected, set_selected = S.create_signal "overview" in
+  let orientation, set_orientation =
+    S.create_signal (`horizontal, "horizontal")
+  in
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let align, set_align = S.create_signal (`center, "center") in
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="orientation"
+        choices=(fun () -> orientations)
+        picked=(fun () -> S.get orientation)
+        on_pick=(Controls.choose orientations set_orientation)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="align"
+        choices=(fun () -> aligns)
+        picked=(fun () -> S.get align)
+        on_pick=(Controls.choose aligns set_align)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=tabs]"
+      solidtype=(<Tabs
+                   selected_key=(fun () -> S.get selected)
+                   on_selection_change=(S.set set_selected)
+                   orientation=(fun () -> fst (S.get orientation))
+                   variant=(fun () -> fst (S.get variant))
+                   align=(fun () -> fst (S.get align))
+                   is_disabled=(fun () -> S.get disabled)>
+                   <Tabs.List_container>
+                     <Tabs.List aria_label="Options">
+                       <Solidtype.For each=(fun () -> keys)>
+                         (fun key _ ->
+                           <Tabs.Tab id=(fun () -> key)>
+                             (fun () ->
+                               if String.equal key keys.(0) then
+                                 Solidtype.Jsx.string ""
+                               else Solidtype.Jsx.element <Tabs.Separator />)
+                             (fun () -> Solidtype.Jsx.string key)
+                             <Tabs.Indicator />
+                           </Tabs.Tab>)
+                       </Solidtype.For>
+                     </Tabs.List>
+                   </Tabs.List_container>
+                   <Solidtype.For each=(fun () -> keys)>
+                     (fun key _ ->
+                       <Tabs.Panel id=(fun () -> key)>
+                         (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
+                       </Tabs.Panel>)
+                   </Solidtype.For>
+                 </Tabs>)
+      react=(fun host ->
+              Heroui_react.tabs host
+                (Heroui_react.tabs_props ~selected_key:(S.get selected)
+                   ~on_selection_change:(S.set set_selected)
+                   ~orientation:(fst (S.get orientation))
+                   ~variant:(fst (S.get variant))
+                   ~align:(fst (S.get align))
+                   ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

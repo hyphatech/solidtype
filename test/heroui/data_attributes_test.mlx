@@ -44,6 +44,7 @@ module Spinner = H.Spinner
 module Surface = H.Surface
 module Switch = H.Switch
 module Switch_group = H.Switch_group
+module Tabs = H.Tabs
 module Text_area = H.Text_area
 module Text_field = H.Text_field
 module Time_field = H.Time_field
@@ -196,6 +197,22 @@ let () =
                     <Accordion.Panel>"More answers."</Accordion.Panel>
                   </Accordion.Item>
                 </Accordion>
+                <Tabs data_testid="Tabs">
+                  <Tabs.List_container data_testid="Tabs.List_container">
+                    <Tabs.List data_testid="Tabs.List" aria_label="Options">
+                      <Tabs.Tab data_testid="Tabs.Tab" id="one">
+                        "One" <Tabs.Indicator data_testid="Tabs.Indicator" />
+                      </Tabs.Tab>
+                      <Tabs.Tab id="two">
+                        <Tabs.Separator data_testid="Tabs.Separator" /> "Two"
+                      </Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs.List_container>
+                  <Tabs.Panel data_testid="Tabs.Panel" id="one">
+                    "First."
+                  </Tabs.Panel>
+                  <Tabs.Panel id="two">"Second."</Tabs.Panel>
+                </Tabs>
                 <Separator data_testid="Separator" />
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
@@ -286,6 +303,13 @@ let () =
                      "span[data-slot=accordion-indicator]" );
                    ("Accordion.Panel", "[data-slot=accordion-panel]");
                    ("Accordion.Body", "[data-slot=accordion-body]");
+                   ("Tabs", "[data-slot=tabs]");
+                   ("Tabs.List_container", "[data-slot=tabs-list-container]");
+                   ("Tabs.List", "[data-slot=tabs-list]");
+                   ("Tabs.Tab", "[data-slot=tabs-tab]");
+                   ("Tabs.Indicator", "[data-slot=tabs-indicator]");
+                   ("Tabs.Separator", "[data-slot=tabs-separator]");
+                   ("Tabs.Panel", "[data-slot=tabs-panel]");
                    ("Button.trigger", "[data-slot=button][aria-expanded]");
                    ("Toggle_button", "[data-slot=toggle-button]");
                    ("Toggle_button_group", "[data-slot=toggle-button-group]");

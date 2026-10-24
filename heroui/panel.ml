@@ -19,6 +19,7 @@ external scroll_height : _ Dom.element_like -> float = "scrollHeight"
 [@@mel.get]
 
 external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+external cancel_frame : int -> unit = "cancelAnimationFrame"
 
 external on_before_match :
   _ Dom.element_like ->
@@ -27,14 +28,23 @@ external on_before_match :
   unit = "addEventListener"
 [@@mel.send]
 
-type size = { width : string; height : string }
+type css_style
 
-let auto = { width = "auto"; height = "auto" }
-let none = { width = "0px"; height = "0px" }
+external style_of : _ Dom.element_like -> css_style = "style" [@@mel.get]
 
-let measured e =
-  let px n = Js.Float.toString n ^ "px" in
-  { width = px (scroll_width e); height = px (scroll_height e) }
+external set_property : css_style -> string -> string -> unit = "setProperty"
+[@@mel.send]
+
+external computed_style : _ Dom.element_like -> css_style = "getComputedStyle"
+external height : css_style -> string = "height" [@@mel.get]
+
+external set_attribute : _ Dom.element_like -> string -> string -> unit
+  = "setAttribute"
+[@@mel.send]
+
+external remove_attribute : _ Dom.element_like -> string -> unit
+  = "removeAttribute"
+[@@mel.send]
 
 (* Runs [f] once the transitions running on [e] end; one interrupted, by a
    toggle before it ends, rejects, and [f] is left to the toggle after. *)
@@ -51,28 +61,18 @@ let settled e f =
 type t = {
   expanded : unit -> bool;
   expand : unit -> unit;
-  size : size Solid.accessor;
-  set_size : size Solid.setter;
-  hidden : bool Solid.accessor;
-  set_hidden : bool Solid.setter;
+  at_first : bool;
   mutable toggled : bool -> unit;
       (* What the content does as it is toggled, once its element is watched;
          nothing before. *)
 }
 
 let create ~expanded ~expand () =
-  let now = Solid.untrack expanded in
-  let size, set_size = Solid.create_signal (if now then auto else none) in
-  (* Written again as a toggle refused leaves it so. *)
-  let hidden, set_hidden = Solid.create_signal ~equals:Never (not now) in
   let p =
     {
       expanded;
       expand;
-      size;
-      set_size;
-      hidden;
-      set_hidden;
+      at_first = Solid.untrack expanded;
       toggled = (fun (_ : bool) -> ());
     }
   in
@@ -81,45 +81,47 @@ let create ~expanded ~expand () =
   p
 
 let watch p e =
+  let inline = style_of e in
+  let size width height =
+    set_property inline "--disclosure-panel-width" width;
+    set_property inline "--disclosure-panel-height" height
+  in
+  let measured () =
+    let px n = Js.Float.toString n ^ "px" in
+    size (px (scroll_width e)) (px (scroll_height e))
+  in
+  let hide () = set_attribute e "hidden" "until-found" in
+  let frame = ref None in
   p.toggled <-
     (fun now ->
+      Option.iter cancel_frame !frame;
       match (Js.Undefined.toOption (animations_method e), now) with
       | None, true ->
-          Solid.set p.set_hidden false;
-          Solid.set p.set_size auto
+          remove_attribute e "hidden";
+          size "auto" "auto"
       | None, false ->
-          Solid.set p.set_size none;
-          Solid.set p.set_hidden true
+          hide ();
+          size "0px" "0px"
       | Some _, true ->
-          Solid.set p.set_hidden false;
-          ignore
-            (request_frame (fun _ ->
-                 if p.expanded () then (
-                   Solid.set p.set_size (measured e);
-                   settled e (fun () ->
-                       if p.expanded () then Solid.set p.set_size auto)))
-              : int)
+          remove_attribute e "hidden";
+          measured ();
+          settled e (fun () -> if p.expanded () then size "auto" "auto")
       | Some _, false ->
-          Solid.set p.set_size (measured e);
-          ignore
-            (request_frame (fun _ ->
-                 if not (p.expanded ()) then (
-                   Solid.set p.set_size none;
-                   settled e (fun () ->
-                       if not (p.expanded ()) then Solid.set p.set_hidden true)))
-              : int));
+          measured ();
+          (* Its size is read, so the transition starts from it. *)
+          ignore (height (computed_style e) : string);
+          size "0px" "0px";
+          settled e (fun () -> if not (p.expanded ()) then hide ()));
   on_before_match e (fun _ ->
-      p.expand ();
       (* The browser takes hidden away once its event is told: content
          controlled collapsed is hidden again. *)
-      ignore
-        (request_frame (fun _ ->
-             if not (p.expanded ()) then Solid.set p.set_hidden true)
-          : int))
+      frame :=
+        Some (request_frame (fun _ -> if not (p.expanded ()) then hide ()));
+      p.expand ())
 
-let hidden p = if Solid.get p.hidden then Some "until-found" else None
+let hidden p = if p.at_first then None else Some "until-found"
 
 let style p =
-  let s = Solid.get p.size in
-  "--disclosure-panel-width: " ^ s.width ^ "; --disclosure-panel-height: "
-  ^ s.height
+  if p.at_first then
+    "--disclosure-panel-width: auto; --disclosure-panel-height: auto"
+  else "--disclosure-panel-width: 0px; --disclosure-panel-height: 0px"

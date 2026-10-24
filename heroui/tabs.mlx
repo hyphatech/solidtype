@@ -1,0 +1,457 @@
+module Jsx = Solidtype.Jsx
+module Solid = Solidtype.Solid
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Tabs
+module Types = Solidtype_kobalte.Types
+
+type css_style
+type rect
+
+external computed_style : _ Dom.element_like -> css_style = "getComputedStyle"
+external style : _ Dom.element_like -> css_style = "style" [@@mel.get]
+
+external property_value : css_style -> string -> string = "getPropertyValue"
+[@@mel.send]
+
+external set_property : css_style -> string -> string -> unit = "setProperty"
+[@@mel.send]
+
+external bounding_rect : _ Dom.element_like -> rect = "getBoundingClientRect"
+[@@mel.send]
+
+external left : rect -> float = "left" [@@mel.get]
+external top : rect -> float = "top" [@@mel.get]
+external is_connected : _ Dom.element_like -> bool = "isConnected" [@@mel.get]
+
+type animation
+type animations_method
+
+(* jsdom, and a browser too old, has no getAnimations. *)
+external animations_method :
+  _ Dom.element_like -> animations_method Js.undefined = "getAnimations"
+[@@mel.get]
+
+external animations_of : _ Dom.element_like -> animation array = "getAnimations"
+[@@mel.send]
+
+external cancel : animation -> unit = "cancel" [@@mel.send]
+external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+external queue_microtask : (unit -> unit) -> unit = "queueMicrotask"
+
+(* Where the selected tab's indicator was, and the values its transition
+   reads, as React Aria's shared element keeps them for the next to start
+   from. *)
+type snapshot = { rect : rect; values : (string * string) list }
+
+(* What a tabs' parts read of it: its classes and orientation, and the
+   indicator's last place. *)
+type tabs = {
+  slots : unit -> Styles.Tabs.slots;
+  orientation : unit -> [ `horizontal | `vertical ];
+  mutable last_indicator : snapshot option;
+  tab_id : string -> string;
+      (* The id of the tab of a key, which its panel is labelled by, and,
+         with "-panel", of the panel it controls: Kobalte reads each from a
+         map the other fills as it is made, which a panel made later than its
+         tab, or before, never finds. *)
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = tabs
+end)
+
+(* What a tab's parts read of it. *)
+type tab = { selected : unit -> bool }
+
+module Tab_context = Solidtype.Context.Make_optional (struct
+  type t = tab
+end)
+
+let within part =
+  match Context.use () with
+  | Some t -> t
+  | None -> invalid_arg (part ^ " is used inside a Tabs")
+
+let within_tab part =
+  match (Context.use (), Tab_context.use ()) with
+  | Some t, Some tab -> (t, tab)
+  | None, _ | _, None -> invalid_arg (part ^ " is used inside a Tabs.Tab")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* A chevron of HeroUI's, by its path. *)
+let chevron d =
+  <svg
+    aria_hidden=true
+    fill="none"
+    height="16"
+    role=`presentation
+    view_box="0 0 16 16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg">
+    <path
+      clip_rule="evenodd"
+      d=(fun () -> d)
+      fill="currentColor"
+      fill_rule="evenodd"
+    />
+  </svg>
+
+let chevron_up =
+  "M13.03 10.53a.75.75 0 0 1-1.06 0L8 6.56l-3.97 3.97a.75.75 0 0 \
+   1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06"
+
+let chevron_down =
+  "M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 0 1 1 1.06 1.06l-4.5 \
+   4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 0-1.06"
+
+let chevron_left =
+  "M10.53 2.97a.75.75 0 0 1 0 1.06L6.56 8l3.97 3.97a.75.75 0 1 1-1.06 \
+   1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 0"
+
+let chevron_right =
+  "M5.47 2.97a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 \
+   0 1 1-1.06-1.06L9.44 8 5.47 4.03a.75.75 0 0 1 0-1.06Z"
+
+external first_element_child : _ Dom.element_like -> Dom.element Js.null
+  = "firstElementChild"
+[@@mel.get]
+
+external client_width : Dom.element -> float = "clientWidth" [@@mel.get]
+external client_height : Dom.element -> float = "clientHeight" [@@mel.get]
+external scroll_width : Dom.element -> float = "scrollWidth" [@@mel.get]
+external scroll_height : Dom.element -> float = "scrollHeight" [@@mel.get]
+external scroll_left : Dom.element -> float = "scrollLeft" [@@mel.get]
+external scroll_top : Dom.element -> float = "scrollTop" [@@mel.get]
+
+type scroll_options
+
+external scroll_options :
+  behavior:string -> ?left:float -> ?top:float -> unit -> scroll_options = ""
+[@@mel.obj]
+
+external scroll_to : Dom.element -> scroll_options -> unit = "scrollTo"
+[@@mel.send]
+
+module List_container = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let t = within "Tabs.List_container" in
+    let container = ref None in
+    let vertical () =
+      match t.orientation () with `vertical -> true | `horizontal -> false
+    in
+    (* Most of a view on, toward the start or the end, and no further than
+       the list goes, as HeroUI's chevrons scroll it; in a right-to-left page
+       the start is on the right, where scrolling runs below zero. *)
+    let scroll_by direction =
+      match
+        Option.bind !container (fun c ->
+            Js.Null.toOption (first_element_child c))
+      with
+      | None -> ()
+      | Some scroller ->
+          let vertical = vertical () in
+          let size =
+            if vertical then client_height scroller else client_width scroller
+          in
+          let full =
+            if vertical then scroll_height scroller else scroll_width scroller
+          in
+          let most = Float.max 0. (full -. size) in
+          let rtl =
+            (not vertical)
+            && String.equal
+                 (property_value (computed_style scroller) "direction")
+                 "rtl"
+          in
+          let current =
+            if vertical then scroll_top scroller else scroll_left scroller
+          in
+          let delta = direction *. size *. 0.8 *. if rtl then -1. else 1. in
+          let low, high = if rtl then (-.most, 0.) else (0., most) in
+          let next = Float.min high (Float.max low (current +. delta)) in
+          if not (Float.equal next current) then
+            scroll_to scroller
+              (if vertical then scroll_options ~behavior:"smooth" ~top:next ()
+               else scroll_options ~behavior:"smooth" ~left:next ())
+    in
+    let slots () = t.slots () in
+    <div
+      class_=(fun () ->
+               after (Styles.Tabs.tab_list_container (slots ())) (class_ ()))
+      ref=(fun e -> container := Some e)
+      data_slot="tabs-list-container"
+      props=(Props.others props)>
+      <Scroll_shadow
+        class_=(fun () -> Styles.Tabs.scroller (slots ()))
+        hide_scroll_bar=true
+        orientation=(fun () -> t.orientation ())
+        size=64>
+        (fun () -> children ())
+      </Scroll_shadow>
+      <button
+        aria_label=(fun () ->
+                     if vertical () then "Scroll tabs up"
+                     else "Scroll tabs left")
+        class_=(fun () -> Styles.Tabs.scroll_prev (slots ()))
+        tab_index="-1"
+        type_=`button
+        on_click=(fun _ -> scroll_by (-1.))>
+        (fun () ->
+          Jsx.element
+            (chevron (if vertical () then chevron_up else chevron_left)))
+      </button>
+      <button
+        aria_label=(fun () ->
+                     if vertical () then "Scroll tabs down"
+                     else "Scroll tabs right")
+        class_=(fun () -> Styles.Tabs.scroll_next (slots ()))
+        tab_index="-1"
+        type_=`button
+        on_click=(fun _ -> scroll_by 1.)>
+        (fun () ->
+          Jsx.element
+            (chevron (if vertical () then chevron_down else chevron_right)))
+      </button>
+    </div>
+end
+
+module Tab = struct
+  let%component make ~(id : string) ?(is_disabled : bool = false)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let t = within "Tabs.Tab" in
+    let k = Kobalte.use_tabs_context () in
+    let selected () =
+      Option.equal String.equal
+        (Solid.get
+           (Types.SingleSelectListState.selected_key
+              (Solid.get (Types.TabsContextValue.list_state k))))
+        (Some (id ()))
+    in
+    let disabled () =
+      is_disabled () || Solid.get (Types.TabsContextValue.is_disabled k)
+    in
+    let n = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    <Kobalte.Trigger
+      id=(fun () -> t.tab_id (id ()))
+      ?aria_controls=(fun () ->
+                       if selected () then Some (t.tab_id (id ()) ^ "-panel")
+                       else None)
+      value=(fun () -> id ())
+      disabled=(fun () -> is_disabled ())
+      class_=(fun () -> after (Styles.Tabs.tab (t.slots ())) (class_ ()))
+      ref=(fun b -> Interaction.watch n b)
+      data_slot="tabs-tab"
+      data_selected=(fun () -> Jsx.flag (selected ()))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed n))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused n))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
+      props=(Props.others props)>
+      <Tab_context.Provider value=(fun () -> { selected })>
+        (fun () -> children ())
+      </Tab_context.Provider>
+    </Kobalte.Trigger>
+end
+
+(* Where an indicator is, and the values of what its transition moves. *)
+let snapshot e =
+  let computed = computed_style e in
+  match property_value computed "transition-property" with
+  | "none" -> None
+  | properties ->
+      Some
+        {
+          rect = bounding_rect e;
+          values =
+            String.split_on_char ',' properties
+            |> Stdlib.List.map String.trim
+            |> Stdlib.List.filter (fun p -> String.length p > 0)
+            |> Stdlib.List.map (fun p -> (p, property_value computed p));
+        }
+
+(* An indicator made where the last one was: it takes that one's place and
+   values, then, a frame on, its own, which HeroUI's styles move it to. *)
+let start_from s e =
+  let before =
+    match Js.Undefined.toOption (animations_method e) with
+    | Some _ -> animations_of e
+    | None -> [||]
+  in
+  let inline = style e in
+  let own =
+    s.values
+    |> Stdlib.List.map (fun (p, last) ->
+        let value = property_value inline p in
+        if String.equal p "translate" then
+          let now = bounding_rect e in
+          set_property inline p
+            (Js.Float.toString (left s.rect -. left now)
+            ^ "px "
+            ^ Js.Float.toString (top s.rect -. top now)
+            ^ "px")
+        else set_property inline p last;
+        (p, value))
+  in
+  (match Js.Undefined.toOption (animations_method e) with
+  | Some _ ->
+      Array.iter
+        (fun a -> if not (Array.exists (fun b -> a == b) before) then cancel a)
+        (animations_of e)
+  | None -> ());
+  ignore
+    (request_frame (fun _ ->
+         Stdlib.List.iter (fun (p, value) -> set_property inline p value) own)
+      : int)
+
+module Indicator = struct
+  let%component make ?(class_ : string option) () =
+    let t, tab = within_tab "Tabs.Indicator" in
+    (* Made each time its tab is selected: it starts where the last was, or,
+       the first, enters for a frame, as React Aria's selection indicator
+       does. *)
+    let indicator () =
+      let entering, set_entering = Solid.create_signal false in
+      let element = ref None in
+      (* Once the last has left and told where it was, which may be after
+         this one is made. *)
+      Solid.on_mount (fun () ->
+          queue_microtask (fun () ->
+              match (!element, t.last_indicator) with
+              | Some e, Some s ->
+                  t.last_indicator <- None;
+                  start_from s e
+              | Some _, None ->
+                  Solid.set set_entering true;
+                  ignore
+                    (request_frame (fun _ -> Solid.set set_entering false)
+                      : int)
+              | None, _ -> ()));
+      Solid.on_cleanup (fun () ->
+          match !element with
+          | Some e when is_connected e -> t.last_indicator <- snapshot e
+          | Some _ | None -> ());
+      <div
+        class_=(fun () ->
+                 after (Styles.Tabs.tab_indicator (t.slots ())) (class_ ()))
+        ref=(fun e -> element := Some e)
+        data_slot="tabs-indicator"
+        data_entering=(fun () -> Jsx.flag (Solid.get entering))
+        props=(Props.others props)
+      />
+    in
+    <Show when_=(fun () -> tab.selected ())>
+      (fun () -> Jsx.element (indicator ()))
+    </Show>
+end
+
+module Separator = struct
+  let%component make ?(class_ : string option) () =
+    let t, (_ : tab) = within_tab "Tabs.Separator" in
+    <span
+      aria_hidden=true
+      class_=(fun () -> after (Styles.Tabs.separator (t.slots ())) (class_ ()))
+      data_slot="tabs-separator"
+      props=(Props.others props)
+    />
+end
+
+module Panel = struct
+  let%component make ~(id : string) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let t = within "Tabs.Panel" in
+    let k = Kobalte.use_tabs_context () in
+    (* On the page while its tab is selected, as React Aria's panel is:
+       Kobalte's, kept mounted, would wait for an animation to end before it
+       left, which HeroUI's styles do not give a panel. *)
+    <Show
+      when_=(fun () ->
+              Option.equal String.equal
+                (Solid.get
+                   (Types.SingleSelectListState.selected_key
+                      (Solid.get (Types.TabsContextValue.list_state k))))
+                (Some (id ())))>
+      <Kobalte.Content
+        value=(fun () -> id ())
+        force_mount=true
+        id=(fun () -> t.tab_id (id ()) ^ "-panel")
+        aria_labelledby=(fun () -> t.tab_id (id ()))
+        class_=(fun () ->
+                 after (Styles.Tabs.tab_panel (t.slots ())) (class_ ()))
+        data_slot="tabs-panel"
+        props=(Props.others props)>
+        (fun () -> children ())
+      </Kobalte.Content>
+    </Show>
+end
+
+(* Last, since it takes the name of the stdlib's lists. *)
+module List = struct
+  let%component make ?(aria_label : string option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let t = within "Tabs.List" in
+    <Kobalte.List
+      ?aria_label=(fun () -> aria_label ())
+      class_=(fun () -> after (Styles.Tabs.tab_list (t.slots ())) (class_ ()))
+      data_slot="tabs-list"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Kobalte.List>
+end
+
+let%component make ?(selected_key : string option)
+    ?(default_selected_key : string option)
+    ?(on_selection_change : (string -> unit) option)
+    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(variant : [ `primary | `secondary ] = `primary)
+    ?(align : [ `start | `center | `end_ ] = `center)
+    ?(keyboard_activation : [ `automatic | `manual ] = `automatic)
+    ?(is_disabled : bool = false) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  let t =
+    {
+      slots =
+        (fun () ->
+          Styles.Tabs.slots
+            (Styles.Tabs.options ~align:(align ()) ~variant:(variant ()) ()));
+      orientation = (fun () -> orientation ());
+      last_indicator = None;
+      tab_id =
+        (let ids = Hashtbl.create 8 in
+         fun key ->
+           match Hashtbl.find_opt ids key with
+           | Some id -> id
+           | None ->
+               let id = Solid.create_unique_id () in
+               Hashtbl.replace ids key id;
+               id);
+    }
+  in
+  (* Kobalte tells a selection twice as the arrows go round from the last tab
+     to the first, in one press; React Aria tells each press once. *)
+  let just_told = ref None in
+  let tell key =
+    match !just_told with
+    | Some k when String.equal k key -> ()
+    | Some _ | None ->
+        just_told := Some key;
+        queue_microtask (fun () -> just_told := None);
+        ignore (on_selection_change key : unit option)
+  in
+  <Kobalte.Root
+    ?value=(fun () -> selected_key ())
+    ?default_value=(fun () -> default_selected_key ())
+    on_change=tell
+    orientation=(fun () -> orientation ())
+    activation_mode=(fun () -> keyboard_activation ())
+    disabled=(fun () -> is_disabled ())
+    class_=(fun () -> after (Styles.Tabs.base (t.slots ())) (class_ ()))
+    data_slot="tabs"
+    data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+    props=(Props.others props)>
+    <Context.Provider value=(fun () -> t)>
+      (fun () -> children ())
+    </Context.Provider>
+  </Kobalte.Root>

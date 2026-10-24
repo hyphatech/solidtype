@@ -1,0 +1,257 @@
+(* HeroUI's Tabs on Kobalte's, beside the same tabs in React: every part, which
+   tab is selected and which panel shown as a tab is clicked and the keys move
+   along the list, and what was told. *)
+
+module Tabs = Solidtype_heroui.Tabs
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?selected_key:(string[@mel.as "selectedKey"]) ->
+  ?default_selected_key:(string[@mel.as "defaultSelectedKey"]) ->
+  ?orientation:([ `horizontal | `vertical ][@mel.as "orientation"]) ->
+  ?variant:([ `primary | `secondary ][@mel.as "variant"]) ->
+  ?align:
+    ([ `start [@mel.as "start"]
+     | `center [@mel.as "center"]
+     | `end_ [@mel.as "end"] ]
+    [@mel.as "align"]) ->
+  ?keyboard_activation:([ `automatic | `manual ][@mel.as "keyboardActivation"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?disabled:string ->
+  ?container:bool ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Tabs.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Tabs.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Tabs.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+(* An attribute that names elements by id, written as the slots of the
+   elements it names, since each side makes its own ids. *)
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+let references = [ "aria-labelledby"; "aria-controls" ]
+
+(* What one framework writes that the other does not, and no style of
+   HeroUI's reads: Kobalte's own state, present and empty, and the
+   orientation it gives each tab; React Aria's collection's name, and its
+   root's focus, which the port leaves out since Kobalte's root, given a
+   data- attribute that changes, loses its panels' labels. A tab is
+   Kobalte's button where React Aria's is a div, each of role tab, so a tab is
+   shown by its role. Kobalte's panel names its orientation, by which HeroUI's
+   styles space it from the list, where React Aria's panel never does, so
+   that spacing reaches the port alone; it is left out here, and the page
+   says it. *)
+let framework_only e name =
+  let slot = T.attribute e "data-slot" in
+  match (name, T.attribute e name) with
+  | ("data-selected" | "data-highlighted" | "data-disabled"), Some "" -> true
+  | "data-collection", _ -> true
+  | ("data-focused" | "data-focus-visible"), _ ->
+      Option.equal String.equal slot (Some "tabs")
+  | ("data-orientation" | "type" | "disabled"), _ ->
+      Option.equal String.equal slot (Some "tabs-tab")
+      || Option.equal String.equal slot (Some "tabs-panel")
+  | _ -> false
+
+(* Each part, its tag, its attributes, each reference by what it names, and
+   its text. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let tag_name e =
+        match T.attribute e "role" with Some "tab" -> "TAB" | _ -> tag_name e
+      in
+      let named =
+        references
+        |> List.filter (fun name -> not (framework_only e name))
+        |> List.filter_map (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+      in
+      String.concat " "
+        (tag_name e
+        :: T.attributes_but
+             (("id" :: references)
+             @ (T.attribute_names e |> Array.to_list
+               |> List.filter (framework_only e)))
+             e
+        :: named)
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let keys = [| "overview"; "analytics"; "reports" |]
+
+let tab host i =
+  match Js.Array.from (query_all host "[role=tab]") with
+  | tabs when i < Array.length tabs -> tabs.(i)
+  | _ -> host
+
+(* The tabs as they are rendered, as the second tab is clicked, then the
+   arrows move on twice, and End and Home: every part, and what was told,
+   after each. *)
+let walk ~step ~vertical host told =
+  let user = T.setup () in
+  let next = if vertical then "{ArrowDown}" else "{ArrowRight}" in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    (* A frame on, each side having written what it writes a frame later:
+       React's scroll shadow its edges, and an indicator its entering. *)
+    let frame () =
+      Js.Promise.make (fun ~resolve ~reject:_ ->
+          ignore (request_frame (fun _ -> (resolve true [@u])) : int))
+      |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+    in
+    let* () = step frame in
+    seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "second clicked" (fun () -> T.click user (tab host 1)) in
+  let* () = after "next" (fun () -> T.keyboard user next) in
+  let* () = after "next again" (fun () -> T.keyboard user next) in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "End" (fun () -> T.keyboard user "{End}") in
+  let* () = after "Home" (fun () -> T.keyboard user "{Home}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+(* The tabs the twin renders, under the same props. *)
+let render ?selected_key ?default_selected_key ?orientation ?variant ?align
+    ?keyboard_activation ?is_disabled ?disabled ~container tell =
+  let list () =
+    <Tabs.List aria_label="Options">
+      <Solidtype.For each=(fun () -> keys)>
+        (fun key _ ->
+          <Tabs.Tab
+            id=(fun () -> key)
+            ?is_disabled=(fun () ->
+                           match disabled with
+                           | Some d when String.equal d key -> Some true
+                           | _ -> None)>
+            (fun () ->
+              if String.equal key keys.(0) then Solidtype.Jsx.string ""
+              else Solidtype.Jsx.element <Tabs.Separator />)
+            (fun () -> Solidtype.Jsx.string key)
+            <Tabs.Indicator />
+          </Tabs.Tab>)
+      </Solidtype.For>
+    </Tabs.List>
+  in
+  T.render (fun () ->
+      <Tabs
+        ?selected_key=(fun () -> selected_key)
+        ?default_selected_key=(fun () -> default_selected_key)
+        ?orientation=(fun () -> orientation)
+        ?variant=(fun () -> variant)
+        ?align=(fun () -> align)
+        ?keyboard_activation=(fun () -> keyboard_activation)
+        ?is_disabled=(fun () -> is_disabled)
+        on_selection_change=tell>
+        (fun () ->
+          if container then
+            Solidtype.Jsx.element
+              <Tabs.List_container>
+                (fun () -> Solidtype.Jsx.element (list ()))
+              </Tabs.List_container>
+          else Solidtype.Jsx.element (list ()))
+        <Solidtype.For each=(fun () -> keys)>
+          (fun key _ ->
+            <Tabs.Panel id=(fun () -> key)>
+              (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
+            </Tabs.Panel>)
+        </Solidtype.For>
+      </Tabs>)
+
+let both ?selected_key ?default_selected_key ?orientation ?variant ?align
+    ?keyboard_activation ?is_disabled ?disabled ?(container = false) () =
+  let vertical =
+    match orientation with
+    | Some `vertical -> true
+    | Some `horizontal | None -> false
+  in
+  let told = ref [] in
+  render ?selected_key ?default_selected_key ?orientation ?variant ?align
+    ?keyboard_activation ?is_disabled ?disabled ~container (fun k ->
+      told := k :: !told);
+  let* solidtype = walk ~step:(fun action -> action ()) ~vertical T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render
+      (props ?selected_key ?default_selected_key ?orientation ?variant ?align
+         ?keyboard_activation ?is_disabled ?disabled ~container ()) (fun k ->
+        told' := k :: !told')
+  in
+  let* react = walk ~step:Twin.step ~vertical host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Tabs" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "selects as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "is selected at first as its key says, as React's"
+        (fun () ->
+          let* r = both ~default_selected_key:"analytics" () in
+          same r);
+      Jest.testPromise "is selected while its key is told, as React's"
+        (fun () ->
+          let* r = both ~selected_key:"reports" () in
+          same r);
+      Jest.testPromise "lies vertical, as React's" (fun () ->
+          let* r = both ~orientation:`vertical () in
+          same r);
+      Jest.testPromise "selects by Enter alone when manual, as React's"
+        (fun () ->
+          let* r = both ~keyboard_activation:`manual () in
+          same r);
+      Jest.testPromise "keeps a tab disabled of its own, as React's" (fun () ->
+          let* r = both ~disabled:"analytics" () in
+          same r);
+      Jest.testPromise "disables every tab while disabled, as React's"
+        (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.testPromise "is secondary and aligned to the start, as React's"
+        (fun () ->
+          let* r = both ~variant:`secondary ~align:`start () in
+          same r);
+      Jest.testPromise "holds its list in a container, as React's" (fun () ->
+          let* r = both ~container:true () in
+          same r))

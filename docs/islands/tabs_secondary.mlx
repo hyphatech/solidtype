@@ -1,0 +1,29 @@
+module Tabs = Solidtype_heroui.Tabs
+
+let make () =
+  <div class_="flex w-full flex-col gap-10">
+    <Tabs class_="w-full max-w-md" variant=`secondary>
+      <Tabs.List_container>
+        <Tabs.List aria_label="Options">
+          <Tabs.Tab id="overview">"Overview" <Tabs.Indicator /></Tabs.Tab>
+          <Tabs.Tab id="analytics">"Analytics" <Tabs.Indicator /></Tabs.Tab>
+          <Tabs.Tab id="reports">"Reports" <Tabs.Indicator /></Tabs.Tab>
+        </Tabs.List>
+      </Tabs.List_container>
+      <Tabs.Panel id="overview">"Your project at a glance."</Tabs.Panel>
+      <Tabs.Panel id="analytics">"Metrics over time."</Tabs.Panel>
+      <Tabs.Panel id="reports">"Reports to download."</Tabs.Panel>
+    </Tabs>
+    <Tabs class_="w-full max-w-md" variant=`secondary orientation=`vertical>
+      <Tabs.List_container>
+        <Tabs.List aria_label="Settings">
+          <Tabs.Tab id="account">"Account" <Tabs.Indicator /></Tabs.Tab>
+          <Tabs.Tab id="security">"Security" <Tabs.Indicator /></Tabs.Tab>
+          <Tabs.Tab id="billing">"Billing" <Tabs.Indicator /></Tabs.Tab>
+        </Tabs.List>
+      </Tabs.List_container>
+      <Tabs.Panel id="account">"Your name, email and avatar."</Tabs.Panel>
+      <Tabs.Panel id="security">"Passwords and two-factor sign-in."</Tabs.Panel>
+      <Tabs.Panel id="billing">"Your plan and invoices."</Tabs.Panel>
+    </Tabs>
+  </div>

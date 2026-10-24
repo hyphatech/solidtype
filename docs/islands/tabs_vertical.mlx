@@ -1,0 +1,15 @@
+module Tabs = Solidtype_heroui.Tabs
+
+let make () =
+  <Tabs class_="w-full max-w-lg" orientation=`vertical>
+    <Tabs.List_container>
+      <Tabs.List aria_label="Settings">
+        <Tabs.Tab id="account">"Account" <Tabs.Indicator /></Tabs.Tab>
+        <Tabs.Tab id="security">"Security" <Tabs.Indicator /></Tabs.Tab>
+        <Tabs.Tab id="billing">"Billing" <Tabs.Indicator /></Tabs.Tab>
+      </Tabs.List>
+    </Tabs.List_container>
+    <Tabs.Panel id="account">"Your name, email and avatar."</Tabs.Panel>
+    <Tabs.Panel id="security">"Passwords and two-factor sign-in."</Tabs.Panel>
+    <Tabs.Panel id="billing">"Your plan and invoices."</Tabs.Panel>
+  </Tabs>

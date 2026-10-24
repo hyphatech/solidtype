@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Tabs`: HeroUI's Tabs on Kobalte's, selection controlled
+  or kept, horizontal or vertical, primary or secondary, aligned, disabled
+  whole or a tab at a time, selected by focus or by Enter; each tab's
+  indicator slides from the tab selected before, as React Aria's selection
+  indicator does, and `Tabs.List_container` scrolls a list too long for it
+  by its chevrons, fading the edges. A tab and its panel each take the `id`
+  that pairs them.
+- `Solidtype_heroui.Disclosure`'s content and `Accordion`'s panel take their
+  sizes as React Aria's disclosure gives them, its style read between the two
+  so the transition starts, where they waited a frame between.
 - A component takes an attribute's namespace, `Jsx.attr`, `Jsx.bool` and
   `Jsx.named`, and passes it on to its element, as a `data_` attribute; an
   element and a component take one optional,

@@ -1,0 +1,17 @@
+module Tabs = Solidtype_heroui.Tabs
+
+let make () =
+  <Tabs class_="w-full max-w-lg" orientation=`vertical align=`start>
+    <Tabs.List_container>
+      <Tabs.List aria_label="Sections">
+        <Tabs.Tab id="profile">"Profile" <Tabs.Indicator /></Tabs.Tab>
+        <Tabs.Tab id="notifications">
+          "Notifications" <Tabs.Indicator />
+        </Tabs.Tab>
+        <Tabs.Tab id="integrations">"Integrations" <Tabs.Indicator /></Tabs.Tab>
+      </Tabs.List>
+    </Tabs.List_container>
+    <Tabs.Panel id="profile">"How others see you."</Tabs.Panel>
+    <Tabs.Panel id="notifications">"What reaches you, and how."</Tabs.Panel>
+    <Tabs.Panel id="integrations">"The services connected."</Tabs.Panel>
+  </Tabs>

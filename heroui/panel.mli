@@ -1,14 +1,15 @@
 (** What a disclosure's content and an accordion's panel share: content kept on
     the page while collapsed, hidden until the browser's find in page reaches a
-    word in it, and sized step by step as HeroUI's styles animate it, by
-    [--disclosure-panel-width] and [--disclosure-panel-height].
+    word in it, and sized as HeroUI's styles animate it, by
+    [--disclosure-panel-width] and [--disclosure-panel-height], as React Aria
+    sizes its disclosure's panel.
 
-    It grows from no size to its own, measured once it is shown, and then takes
-    its own as it changes; it shrinks from its size to none, and is hidden once
-    it has. Each step waits a frame, so the transition starts from the size
-    before it, and a toggle before a transition ends leaves its end to the
-    toggle after. Where the browser cannot tell a transition, as jsdom cannot,
-    it takes its size at once, as React Aria's does. *)
+    It grows from no size to its own, measured once it is shown, and takes its
+    own as it changes once its transition ends; it shrinks from its size to
+    none, its size read first so the transition starts from it, and is hidden
+    once the transition ends. A toggle before a transition ends leaves its end
+    to the toggle after. Where the browser cannot tell a transition, it takes
+    its size at once. *)
 
 type t
 
@@ -18,12 +19,13 @@ val create : expanded:(unit -> bool) -> expand:(unit -> unit) -> unit -> t
     while a component is, which it runs an effect beside. *)
 
 val watch : t -> _ Dom.element_like -> unit
-(** [watch p element] sizes [element] and listens for find in page on it: the
-    content's [ref]. *)
+(** [watch p element] sizes [element], shows and hides it, and listens for find
+    in page on it: the content's [ref]. *)
 
 val hidden : t -> string option
-(** ["until-found"] while it is collapsed and done shrinking, its [hidden]
-    attribute; a read Solid tracks, as {!style} is. *)
+(** Its [hidden] attribute as it is first rendered, ["until-found"] while
+    collapsed, which a prerendered page holds; {!watch} changes it after. *)
 
 val style : t -> string
-(** The sizes HeroUI's styles animate, its [style] attribute. *)
+(** The sizes HeroUI's styles animate, its [style] attribute as it is first
+    rendered; {!watch} changes them after. *)

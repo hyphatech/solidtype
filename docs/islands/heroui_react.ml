@@ -421,6 +421,26 @@ external accordion_props :
 external accordion : Dom.htmlDivElement -> accordion_props -> unit = "accordion"
 [@@mel.module "./react/heroui.tsx"]
 
+type tabs_props
+
+external tabs_props :
+  selected_key:(string[@mel.as "selectedKey"]) ->
+  on_selection_change:((string -> unit)[@mel.as "onSelectionChange"]) ->
+  orientation:([ `horizontal | `vertical ][@mel.as "orientation"]) ->
+  variant:([ `primary | `secondary ][@mel.as "variant"]) ->
+  align:
+    ([ `start [@mel.as "start"]
+     | `center [@mel.as "center"]
+     | `end_ [@mel.as "end"] ]
+    [@mel.as "align"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  tabs_props = ""
+[@@mel.obj]
+
+external tabs : Dom.htmlDivElement -> tabs_props -> unit = "tabs"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :
