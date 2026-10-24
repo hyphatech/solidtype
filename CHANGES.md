@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Accordion`: HeroUI's Accordion on Kobalte's, one item
+  expanded at a time or several, controlled or kept, disabled with an item's
+  own, on a surface or with no separator, an item told its own change after
+  the accordion's; a panel stays on the page while collapsed, found by find
+  in page, and grows and shrinks as a disclosure's content does. The arrows,
+  Home and End move focus between its triggers, which Kobalte's accordion
+  means to and does not, since its root never tells its list it has focus.
+  An indicator takes an icon of its own, in a span with HeroUI's classes.
+  `Solidtype_heroui.Panel` is what an accordion's panel and a disclosure's
+  content share.
 - `Solidtype_heroui.Disclosure_group`: HeroUI's DisclosureGroup on the
   port's Disclosure, one expanded at a time or several, controlled or kept,
   disabled with each disclosure inside; `Disclosure` takes an `id`, its key

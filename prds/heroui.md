@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure and DisclosureGroup; no landed port has its misuses in `test/does_not_compile.t` yet.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure, DisclosureGroup and Accordion; no landed port has its misuses in `test/does_not_compile.t` yet.
 Date: 2026-10-23
 
 ## The problem
@@ -139,7 +139,8 @@ check written by hand where it passes an element's every attribute on, as
   keeps the content mounted, hidden until find in page reaches it, and
   gives it its size step by step, a frame apart, so HeroUI's transition
   runs; a size and the hidden state are declared, so a prerendered page
-  holds them. Accordion's content is the same machinery.
+  holds them. Accordion's panel is the same machinery, `Panel`, which both
+  share.
 - **What a group gives**: a context per group -- `Button_group`,
   `Avatar_group`, `Checkbox_group`, `Radio_group`, `Toggle_button_group`,
   `Disclosure_group`, `Fieldset`, `Surface` -- read by the components
@@ -222,7 +223,11 @@ Kobalte writes them, since a part cannot take them away; the tests leave
 them out by name. A disclosure's content is Kobalte's region its trigger
 controls, where React Aria's is a group its trigger names; since the port
 keeps the content on the page, its trigger names it in `aria-controls`
-always, where Kobalte's does while it is open.
+always, where Kobalte's does while it is open. Kobalte's accordion moves
+focus between its triggers by the arrows, Home and End, which React Aria's
+disclosure group does not; the port keeps it, and since Kobalte's root never
+tells its list of triggers it has focus, so the arrows would move nothing,
+each item tells it as focus comes in.
 
 ### Where HeroUI's own falls short
 
@@ -329,7 +334,7 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 ### Group 4: navigation and disclosure
 - [x] ToggleButton, ToggleButtonGroup
 - [x] Disclosure, DisclosureGroup
-- [ ] Accordion, on Kobalte's, its content as a disclosure's
+- [x] Accordion, on Kobalte's, its content as a disclosure's
 - [ ] Tabs, Breadcrumbs, Pagination
 
 ### Group 5: overlays and lists

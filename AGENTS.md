@@ -59,6 +59,9 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
   field              what a switch, a checkbox and a radio share: the state
                      their content declares, a value controlled or kept, and
                      the content, on a Kobalte component's label and input
+  panel              what a disclosure's content and an accordion's panel
+                     share: kept on the page, found by find in page, and
+                     sized as HeroUI's styles animate it
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte

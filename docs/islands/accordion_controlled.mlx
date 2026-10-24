@@ -1,0 +1,76 @@
+module S = Solidtype.Solid
+module Accordion = Solidtype_heroui.Accordion
+module Button = Solidtype_heroui.Button
+module Disclosure_group = Solidtype_heroui.Disclosure_group
+
+let items =
+  [|
+    ( "getting-started",
+      "Getting Started",
+      "Installation, setup, and your first component." );
+    ( "core-concepts",
+      "Core Concepts",
+      "Compound components, styling, and accessibility." );
+    ( "advanced-usage",
+      "Advanced Usage",
+      "Custom variants and theme customization." );
+  |]
+
+let make () =
+  let expanded, set_expanded = S.create_signal [| "getting-started" |] in
+  let n =
+    Disclosure_group.navigation
+      ~expanded_keys:(fun () -> S.get expanded)
+      ~item_ids:(Array.map (fun (id, _, _) -> id) items)
+      ~on_expanded_change:(S.set set_expanded) ()
+  in
+  <div class_="w-full max-w-md">
+    <div class_="mb-4 flex items-center justify-between">
+      <p class_="text-sm text-muted">
+        "Expanded: "
+        <strong>
+          (fun () ->
+            match S.get expanded with
+            | [||] -> Solidtype.Jsx.string "none"
+            | keys -> Solidtype.Jsx.string (Js.Array.join ~sep:", " keys))
+        </strong>
+      </p>
+      <div class_="flex gap-2">
+        <Button
+          aria_label="Previous item"
+          is_disabled=(fun () -> n.is_prev_disabled ())
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ -> n.on_previous ())>
+          "Previous"
+        </Button>
+        <Button
+          aria_label="Next item"
+          is_disabled=(fun () -> n.is_next_disabled ())
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ -> n.on_next ())>
+          "Next"
+        </Button>
+      </div>
+    </div>
+    <Accordion
+      expanded_keys=(fun () -> S.get expanded)
+      on_expanded_change=(S.set set_expanded)>
+      <Solidtype.For each=(fun () -> items)>
+        (fun (id, title, content) _ ->
+          <Accordion.Item id=(fun () -> id)>
+            <Accordion.Heading>
+              <Accordion.Trigger>
+                (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+              </Accordion.Trigger>
+            </Accordion.Heading>
+            <Accordion.Panel>
+              <Accordion.Body>
+                (fun () -> Solidtype.Jsx.string content)
+              </Accordion.Body>
+            </Accordion.Panel>
+          </Accordion.Item>)
+      </Solidtype.For>
+    </Accordion>
+  </div>

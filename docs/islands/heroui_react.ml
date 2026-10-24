@@ -405,6 +405,22 @@ external disclosure_group : Dom.htmlDivElement -> disclosure_group_props -> unit
   = "disclosureGroup"
 [@@mel.module "./react/heroui.tsx"]
 
+type accordion_props
+
+external accordion_props :
+  expanded_keys:(string array[@mel.as "expandedKeys"]) ->
+  on_expanded_change:((string array -> unit)[@mel.as "onExpandedChange"]) ->
+  allows_multiple_expanded:(bool[@mel.as "allowsMultipleExpanded"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  variant:([ `default | `surface ][@mel.as "variant"]) ->
+  hide_separator:(bool[@mel.as "hideSeparator"]) ->
+  unit ->
+  accordion_props = ""
+[@@mel.obj]
+
+external accordion : Dom.htmlDivElement -> accordion_props -> unit = "accordion"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

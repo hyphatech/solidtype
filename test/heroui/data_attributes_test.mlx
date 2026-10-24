@@ -5,6 +5,7 @@
    has loaded, is checked by the avatar's own test. *)
 
 module H = Solidtype_heroui
+module Accordion = H.Accordion
 module Alert = H.Alert
 module Avatar = H.Avatar
 module Avatar_group = H.Avatar_group
@@ -167,6 +168,34 @@ let () =
                     </Disclosure.Content>
                   </Disclosure>
                 </Disclosure_group>
+                <Accordion data_testid="Accordion">
+                  <Accordion.Item data_testid="Accordion.Item" id="faq">
+                    <Accordion.Heading data_testid="Accordion.Heading">
+                      <Accordion.Trigger data_testid="Accordion.Trigger">
+                        "Questions"
+                        <Accordion.Indicator data_testid="Accordion.Indicator"
+                        />
+                      </Accordion.Trigger>
+                    </Accordion.Heading>
+                    <Accordion.Panel data_testid="Accordion.Panel">
+                      <Accordion.Body data_testid="Accordion.Body">
+                        "Answers."
+                      </Accordion.Body>
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                  <Accordion.Item id="more">
+                    <Accordion.Heading>
+                      <Accordion.Trigger>
+                        "More"
+                        <Accordion.Indicator
+                          data_testid="Accordion.Indicator.icon">
+                          <svg />
+                        </Accordion.Indicator>
+                      </Accordion.Trigger>
+                    </Accordion.Heading>
+                    <Accordion.Panel>"More answers."</Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
                 <Separator data_testid="Separator" />
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
@@ -248,6 +277,15 @@ let () =
                    ("Disclosure.Indicator", "[data-slot=disclosure-indicator]");
                    ("Disclosure.Content", "[data-slot=disclosure-content]");
                    ("Disclosure.Body", "[data-slot=disclosure-body]");
+                   ("Accordion", "[data-slot=accordion]");
+                   ("Accordion.Item", "[data-slot=accordion-item]");
+                   ("Accordion.Heading", "[data-slot=accordion-heading]");
+                   ("Accordion.Trigger", "[data-slot=accordion-trigger]");
+                   ("Accordion.Indicator", "[data-slot=accordion-indicator]");
+                   ( "Accordion.Indicator.icon",
+                     "span[data-slot=accordion-indicator]" );
+                   ("Accordion.Panel", "[data-slot=accordion-panel]");
+                   ("Accordion.Body", "[data-slot=accordion-body]");
                    ("Button.trigger", "[data-slot=button][aria-expanded]");
                    ("Toggle_button", "[data-slot=toggle-button]");
                    ("Toggle_button_group", "[data-slot=toggle-button-group]");

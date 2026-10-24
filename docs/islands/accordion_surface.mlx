@@ -1,0 +1,31 @@
+module Accordion = Solidtype_heroui.Accordion
+
+let items =
+  [|
+    ( "How do I place an order?",
+      "Browse our products, add items to your cart, and proceed to checkout." );
+    ( "Can I modify or cancel my order?",
+      "Yes, you can modify or cancel your order before it's shipped." );
+    ( "Do you ship internationally?",
+      "Yes, we ship to most countries. Please check our shipping rates and \
+       policies for more information." );
+  |]
+
+let make () =
+  <Accordion class_="w-full max-w-md" variant=`surface>
+    <Solidtype.For each=(fun () -> items)>
+      (fun (title, content) _ ->
+        <Accordion.Item>
+          <Accordion.Heading>
+            <Accordion.Trigger>
+              (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+            </Accordion.Trigger>
+          </Accordion.Heading>
+          <Accordion.Panel>
+            <Accordion.Body>
+              (fun () -> Solidtype.Jsx.string content)
+            </Accordion.Body>
+          </Accordion.Panel>
+        </Accordion.Item>)
+    </Solidtype.For>
+  </Accordion>

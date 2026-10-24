@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -596,6 +596,41 @@ export function disclosureGroup(host: HTMLElement, { expandedKeys, onExpandedCha
           </Disclosure>
         ))}
       </DisclosureGroup>,
+    ),
+  );
+}
+
+type AccordionProps = {
+  expandedKeys: string[];
+  onExpandedChange: (keys: string[]) => void;
+  allowsMultipleExpanded: boolean;
+  isDisabled: boolean;
+  variant: "default" | "surface";
+  hideSeparator: boolean;
+};
+
+export function accordion(host: HTMLElement, { expandedKeys, onExpandedChange, ...props }: AccordionProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Accordion
+        {...props}
+        expandedKeys={new Set(expandedKeys)}
+        onExpandedChange={(keys) => onExpandedChange([...keys].map(String))}
+      >
+        {["shipping", "returns"].map((key) => (
+          <Accordion.Item key={key} id={key}>
+            <Accordion.Heading>
+              <Accordion.Trigger>
+                {key}
+                <Accordion.Indicator />
+              </Accordion.Trigger>
+            </Accordion.Heading>
+            <Accordion.Panel>
+              <Accordion.Body>About {key}.</Accordion.Body>
+            </Accordion.Panel>
+          </Accordion.Item>
+        ))}
+      </Accordion>,
     ),
   );
 }

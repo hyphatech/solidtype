@@ -1,0 +1,77 @@
+module S = Solidtype.Solid
+module Accordion = Solidtype_heroui.Accordion
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+let keys = [| "shipping"; "returns" |]
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`default, "default"); (`surface, "surface") |]
+
+let make () =
+  let expanded, set_expanded = S.create_signal [| "shipping" |] in
+  let multiple, set_multiple = S.create_signal false in
+  let disabled, set_disabled = S.create_signal false in
+  let variant, set_variant = S.create_signal (`default, "default") in
+  let hide_separator, set_hide_separator = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="allows multiple expanded"
+        on=(fun () -> S.get multiple)
+        on_toggle=(S.set set_multiple)
+      />
+      <Toggle
+        label="hide separator"
+        on=(fun () -> S.get hide_separator)
+        on_toggle=(S.set set_hide_separator)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=accordion]"
+      solidtype=(<Accordion
+                   expanded_keys=(fun () -> S.get expanded)
+                   on_expanded_change=(S.set set_expanded)
+                   allows_multiple_expanded=(fun () -> S.get multiple)
+                   is_disabled=(fun () -> S.get disabled)
+                   variant=(fun () -> fst (S.get variant))
+                   hide_separator=(fun () -> S.get hide_separator)>
+                   <Solidtype.For each=(fun () -> keys)>
+                     (fun key _ ->
+                       <Accordion.Item id=(fun () -> key)>
+                         <Accordion.Heading>
+                           <Accordion.Trigger>
+                             (fun () -> Solidtype.Jsx.string key)
+                             <Accordion.Indicator />
+                           </Accordion.Trigger>
+                         </Accordion.Heading>
+                         <Accordion.Panel>
+                           <Accordion.Body>
+                             (fun () ->
+                               Solidtype.Jsx.string ("About " ^ key ^ "."))
+                           </Accordion.Body>
+                         </Accordion.Panel>
+                       </Accordion.Item>)
+                   </Solidtype.For>
+                 </Accordion>)
+      react=(fun host ->
+              Heroui_react.accordion host
+                (Heroui_react.accordion_props ~expanded_keys:(S.get expanded)
+                   ~on_expanded_change:(S.set set_expanded)
+                   ~allows_multiple_expanded:(S.get multiple)
+                   ~is_disabled:(S.get disabled)
+                   ~variant:(fst (S.get variant))
+                   ~hide_separator:(S.get hide_separator) ()))
+    />
+  </section>

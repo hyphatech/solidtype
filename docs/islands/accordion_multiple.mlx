@@ -1,0 +1,32 @@
+module Accordion = Solidtype_heroui.Accordion
+
+let items =
+  [|
+    ( "Getting Started",
+      "Learn the basics of HeroUI and how to integrate it into your project." );
+    ( "Core Concepts",
+      "Understand the compound component pattern, styling with Tailwind CSS, \
+       and accessibility." );
+    ( "Advanced Usage",
+      "Explore custom variants, theme customization, and integration with \
+       other libraries." );
+  |]
+
+let make () =
+  <Accordion allows_multiple_expanded=true class_="w-full max-w-md">
+    <Solidtype.For each=(fun () -> items)>
+      (fun (title, content) _ ->
+        <Accordion.Item>
+          <Accordion.Heading>
+            <Accordion.Trigger>
+              (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+            </Accordion.Trigger>
+          </Accordion.Heading>
+          <Accordion.Panel>
+            <Accordion.Body>
+              (fun () -> Solidtype.Jsx.string content)
+            </Accordion.Body>
+          </Accordion.Panel>
+        </Accordion.Item>)
+    </Solidtype.For>
+  </Accordion>

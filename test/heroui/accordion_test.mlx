@@ -1,0 +1,353 @@
+(* HeroUI's Accordion on Kobalte's, beside the same accordion in React: every
+   part of each item, which are expanded as their triggers are clicked and
+   pressed by the keys, and what the accordion and its items told; then the
+   keys Kobalte's accordion moves focus by, and an indicator's own icon. *)
+
+module Accordion = Solidtype_heroui.Accordion
+module Button = Solidtype_heroui.Button
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?expanded_keys:(string array[@mel.as "expandedKeys"]) ->
+  ?default_expanded_keys:(string array[@mel.as "defaultExpandedKeys"]) ->
+  ?allows_multiple_expanded:(bool[@mel.as "allowsMultipleExpanded"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?variant:([ `default | `surface ][@mel.as "variant"]) ->
+  ?hide_separator:(bool[@mel.as "hideSeparator"]) ->
+  ?disabled:string ->
+  ?button:bool ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Accordion.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Accordion.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Accordion.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+type style
+
+external style : Dom.element -> style = "style" [@@mel.get]
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+
+type event
+
+external event : string -> event = "Event" [@@mel.new]
+external dispatch : Dom.element -> event -> bool = "dispatchEvent" [@@mel.send]
+
+(* An attribute that names elements by id, written as the slots of the
+   elements it names, since each side makes its own ids. *)
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+let references = [ "aria-labelledby"; "aria-controls" ]
+
+(* What Kobalte writes that React Aria does not, and no style of HeroUI's
+   reads: its own state, present and empty, and the key its list of triggers
+   finds each by. React Aria's tabindex on a button the pointer presses, and
+   its press's own user-select, and the focus it marks visible within an item,
+   which no style reads either. The sizes HeroUI's styles animate are compared
+   as values, each side writing its style attribute its own way. React Aria's
+   panel is a group its trigger names, Kobalte's a region of the page its
+   trigger controls: each accessible. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ("data-expanded" | "data-closed" | "data-disabled"), Some "" -> true
+  | ("tabindex" | "style" | "data-focus-visible-within" | "data-key"), _ -> true
+  | ("role" | "aria-labelledby"), _ ->
+      Option.equal String.equal
+        (T.attribute e "data-slot")
+        (Some "accordion-panel")
+  | _ -> false
+
+(* Each part, its tag, its attributes, each reference by what it names, the
+   sizes HeroUI's styles animate, and its text. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let named =
+        references
+        |> List.filter (fun name -> not (framework_only e name))
+        |> List.filter_map (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+      in
+      let sizes =
+        [ "--disclosure-panel-width"; "--disclosure-panel-height" ]
+        |> List.filter_map (fun name ->
+            match property (style e) name with
+            | "" -> None
+            | v -> Some (name ^ ":" ^ v))
+      in
+      String.concat " "
+        (tag_name e
+         :: T.attributes_but
+              (("id" :: references)
+              @ (T.attribute_names e |> Array.to_list
+                |> List.filter (framework_only e)))
+              e
+         :: named
+        @ sizes)
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let keys = [| "shipping"; "returns"; "warranty" |]
+
+let trigger host i =
+  match Js.Array.from (query_all host "[aria-expanded]") with
+  | triggers when i < Array.length triggers -> triggers.(i)
+  | _ -> host
+
+(* The accordion as it is rendered, as the first trigger is clicked, then the
+   second, the second again, and Enter and Space on it: every part, and what
+   was told, after each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "first clicked" (fun () -> T.click user (trigger host 0)) in
+  let* () = after "second clicked" (fun () -> T.click user (trigger host 1)) in
+  let* () = after "second again" (fun () -> T.click user (trigger host 1)) in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "Space" (fun () -> T.keyboard user " ") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+(* The accordion the twin renders, under the same props. *)
+let render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
+    ?is_disabled ?variant ?hide_separator ?disabled ?(button = false) tell =
+  T.render (fun () ->
+      <Accordion
+        ?expanded_keys=(fun () -> expanded_keys)
+        ?default_expanded_keys=(fun () -> default_expanded_keys)
+        ?allows_multiple_expanded=(fun () -> allows_multiple_expanded)
+        ?is_disabled=(fun () -> is_disabled)
+        ?variant=(fun () -> variant)
+        ?hide_separator=(fun () -> hide_separator)
+        on_expanded_change=(fun k -> tell (Js.Array.join ~sep:"," k))>
+        (fun () ->
+          Solidtype.Jsx.element
+            <Solidtype.For each=(fun () -> keys)>
+              (fun key _ ->
+                <Accordion.Item
+                  id=(fun () -> key)
+                  ?is_disabled=(fun () ->
+                                 match disabled with
+                                 | Some d when String.equal d key -> Some true
+                                 | _ -> None)
+                  on_expanded_change=(fun v ->
+                                       tell (key ^ ":" ^ string_of_bool v))>
+                  <Accordion.Heading>
+                    (fun () ->
+                      Solidtype.Jsx.element
+                        (if button then
+                           <Button slot=`trigger variant=`secondary>
+                             (fun () -> Solidtype.Jsx.string key)
+                             <Accordion.Indicator />
+                           </Button>
+                         else
+                           <Accordion.Trigger>
+                             (fun () -> Solidtype.Jsx.string key)
+                             <Accordion.Indicator />
+                           </Accordion.Trigger>))
+                  </Accordion.Heading>
+                  <Accordion.Panel>
+                    <Accordion.Body>
+                      (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
+                    </Accordion.Body>
+                  </Accordion.Panel>
+                </Accordion.Item>)
+            </Solidtype.For>)
+      </Accordion>)
+
+let both ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
+    ?is_disabled ?variant ?hide_separator ?disabled ?(button = false) () =
+  let told = ref [] in
+  render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
+    ?is_disabled ?variant ?hide_separator ?disabled ~button (fun t ->
+      told := t :: !told);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render
+      (props ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
+         ?is_disabled ?variant ?hide_separator ?disabled ~button ()) (fun t ->
+        told' := t :: !told')
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+(* The text of the trigger that has focus. *)
+let focused () =
+  match Js.Null.toOption active with Some e -> text e | None -> ""
+
+let () =
+  Jest.describe "Accordion" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "expands one at a time, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "expands several, as React's does" (fun () ->
+          let* r = both ~allows_multiple_expanded:true () in
+          same r);
+      Jest.testPromise "is expanded at first as its keys say, as React's"
+        (fun () ->
+          let* r = both ~default_expanded_keys:[| "returns" |] () in
+          same r);
+      Jest.testPromise "is expanded while its keys are told, as React's"
+        (fun () ->
+          let* r = both ~expanded_keys:[| "shipping" |] () in
+          same r);
+      Jest.testPromise "disables each item while disabled, as React's"
+        (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.testPromise "keeps an item disabled of its own, as React's"
+        (fun () ->
+          let* r = both ~disabled:"returns" () in
+          same r);
+      Jest.testPromise "lies on a surface with no separator, as React's"
+        (fun () ->
+          let* r = both ~variant:`surface ~hide_separator:true () in
+          same r);
+      Jest.testPromise "takes a button as a trigger, as React's does" (fun () ->
+          let* r = both ~button:true () in
+          same r);
+      Jest.testPromise "is expanded as find in page reaches it, as React's"
+        (fun () ->
+          let reveal host told =
+            let* () =
+              Twin.step (fun () ->
+                  (match
+                     Js.Array.from (query_all host "[hidden]")
+                     |> Array.to_list |> List.rev
+                   with
+                  | panel :: _ ->
+                      ignore (dispatch panel (event "beforematch") : bool)
+                  | [] -> ());
+                  Js.Promise.resolve ())
+            in
+            Js.Promise.resolve (shown host, Array.of_list (List.rev !told))
+          in
+          let told = ref [] in
+          render ~default_expanded_keys:[| "shipping" |] (fun t ->
+              told := t :: !told);
+          let* solidtype = reveal T.body told in
+          T.cleanup ();
+          let told' = ref [] in
+          let host =
+            Twin.render (props ~default_expanded_keys:[| "shipping" |] ())
+              (fun t -> told' := t :: !told')
+          in
+          let* react = reveal host told' in
+          Twin.cleanup ();
+          same (solidtype, react));
+      Jest.testPromise
+        "moves focus between its triggers by the arrows, as Kobalte's does"
+        (fun () ->
+          render ~disabled:"returns" (fun (_ : string) -> ());
+          let user = T.setup () in
+          T.focus (trigger T.body 0);
+          let seen = ref [ focused () ] in
+          let press key =
+            let* () = T.keyboard user key in
+            seen := focused () :: !seen;
+            Js.Promise.resolve ()
+          in
+          let* () = press "{ArrowDown}" in
+          let* () = press "{ArrowDown}" in
+          let* () = press "{ArrowUp}" in
+          let* () = press "{Home}" in
+          let* () = press "{End}" in
+          Js.Promise.resolve
+            E.(
+              expect (Array.of_list (List.rev !seen))
+              |> toEqual
+                   [|
+                     "shipping";
+                     "warranty";
+                     "shipping";
+                     "warranty";
+                     "shipping";
+                     "warranty";
+                   |]));
+      Jest.testPromise "turns its own icon over in HeroUI's span" (fun () ->
+          T.render (fun () ->
+              <Accordion>
+                <Accordion.Item id="shipping">
+                  <Accordion.Heading>
+                    <Accordion.Trigger>
+                      "Shipping"
+                      <Accordion.Indicator class_="text-accent">
+                        <svg data_icon="plus" />
+                      </Accordion.Indicator>
+                    </Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>
+                    <Accordion.Body>"Soon."</Accordion.Body>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>);
+          let indicator () =
+            match T.query "[data-slot=accordion-indicator]" with
+            | Some e ->
+                ( tag_name e,
+                  T.class_name e,
+                  T.attribute e "data-expanded",
+                  Option.is_some (Js.Null.toOption (query e "[data-icon]")) )
+            | None -> ("missing", "", None, false)
+          in
+          let before = indicator () in
+          let* () = T.click (T.setup ()) (trigger T.body 0) in
+          E.(
+            expect [| before; indicator () |]
+            |> toEqual
+                 [|
+                   ("SPAN", "accordion__indicator text-accent", None, true);
+                   ( "SPAN",
+                     "accordion__indicator text-accent",
+                     Some "true",
+                     true );
+                 |])
+          |> Js.Promise.resolve))

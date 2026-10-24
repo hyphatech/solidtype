@@ -1,0 +1,60 @@
+module S = Solidtype.Solid
+module Accordion = Solidtype_heroui.Accordion
+
+let plus () =
+  <svg fill="none" height="16" view_box="0 0 16 16" width="16">
+    <path d="M8 3v10M3 8h10" stroke="currentColor" stroke_width="1.5" />
+  </svg>
+
+let minus () =
+  <svg fill="none" height="16" view_box="0 0 16 16" width="16">
+    <path d="M3 8h10" stroke="currentColor" stroke_width="1.5" />
+  </svg>
+
+let arrow () =
+  <svg fill="none" height="16" view_box="0 0 16 16" width="16">
+    <path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" stroke_width="1.5" />
+  </svg>
+
+let make () =
+  let expanded, set_expanded = S.create_signal [||] in
+  <Accordion
+    class_="w-full max-w-md"
+    expanded_keys=(fun () -> S.get expanded)
+    variant=`surface
+    on_expanded_change=(S.set set_expanded)>
+    <Accordion.Item id="1">
+      <Accordion.Heading>
+        <Accordion.Trigger>
+          "Using Plus/Minus Icon"
+          <Accordion.Indicator>
+            (fun () ->
+              Solidtype.Jsx.element
+                (if Array.exists (String.equal "1") (S.get expanded) then
+                   minus ()
+                 else plus ()))
+          </Accordion.Indicator>
+        </Accordion.Trigger>
+      </Accordion.Heading>
+      <Accordion.Panel>
+        <Accordion.Body>
+          "This item's icon is a plus, and a minus while it is expanded."
+        </Accordion.Body>
+      </Accordion.Panel>
+    </Accordion.Item>
+    <Accordion.Item id="2">
+      <Accordion.Heading>
+        <Accordion.Trigger>
+          "Using Arrow Icon"
+          <Accordion.Indicator>
+            (fun () -> Solidtype.Jsx.element (arrow ()))
+          </Accordion.Indicator>
+        </Accordion.Trigger>
+      </Accordion.Heading>
+      <Accordion.Panel>
+        <Accordion.Body>
+          "Any icon given turns over as the item expands."
+        </Accordion.Body>
+      </Accordion.Panel>
+    </Accordion.Item>
+  </Accordion>

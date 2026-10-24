@@ -1,0 +1,301 @@
+module Jsx = Solidtype.Jsx
+module Solid = Solidtype.Solid
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Accordion
+module Types = Solidtype_kobalte.Types
+
+(* What an accordion's parts read of it: its classes, the keys expanded, and
+   each item's own change, told by its key. *)
+type accordion = {
+  slots : unit -> Styles.Accordion.slots;
+  hide_separator : unit -> bool;
+  is_expanded : string -> bool;
+  expand : string -> unit;
+  disabled : unit -> bool;
+  told : (string, bool -> unit) Hashtbl.t;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = accordion
+end)
+
+(* What an item's parts read of it: its state, and the id its trigger
+   controls. *)
+type item = {
+  key : string;
+  expanded : unit -> bool;
+  item_disabled : unit -> bool;
+  content_id : string;
+}
+
+module Item_context = Solidtype.Context.Make_optional (struct
+  type t = item
+end)
+
+let within part =
+  match Context.use () with
+  | Some a -> a
+  | None -> invalid_arg (part ^ " is used inside an Accordion")
+
+let within_item part =
+  match (Context.use (), Item_context.use ()) with
+  | Some a, Some i -> (a, i)
+  | None, _ | _, None -> invalid_arg (part ^ " is used inside an Accordion.Item")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Item = struct
+  let%component make ?(id : string option) ?(is_disabled : bool = false)
+      ?(on_expanded_change : (bool -> unit) option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let a = within "Accordion.Item" in
+    let key =
+      match id () with Some k -> k | None -> Solid.create_unique_id ()
+    in
+    Hashtbl.replace a.told key (fun v ->
+        ignore (on_expanded_change v : unit option));
+    Solid.on_cleanup (fun () -> Hashtbl.remove a.told key);
+    let disabled () = is_disabled () || a.disabled () in
+    (* Kobalte names an item's panel after the item, and takes no id given the
+       panel itself. *)
+    let item_id = Solid.create_unique_id () in
+    (* Kobalte's triggers take focus by the arrows only while its list knows it
+       has focus, which its root never tells it: each item does, as focus comes
+       in, and the root's own focus out takes it back. *)
+    let list =
+      Types.AccordionContextValue.list_state (Kobalte.use_accordion_context ())
+    in
+    let focus_in (_ : Dom.focusEvent) =
+      Types.SelectionManager.set_focused
+        (Solid.get (Types.ListState.selection_manager (Solid.get list)))
+        true
+    in
+    let i =
+      {
+        key;
+        expanded = (fun () -> a.is_expanded key);
+        item_disabled = disabled;
+        content_id = item_id ^ "-content";
+      }
+    in
+    (* Kobalte's panel is kept on the page while collapsed, which HeroUI's
+       styles shrink to nothing and find in page reaches. *)
+    <Kobalte.Item
+      id=(fun () -> item_id)
+      value=(fun () -> key)
+      disabled=(fun () -> disabled ())
+      force_mount=true
+      on_focus_in=focus_in
+      class_=(fun () -> after (Styles.Accordion.item (a.slots ())) (class_ ()))
+      data_expanded=(fun () -> Jsx.flag (i.expanded ()))
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_hide_separator=(fun () -> Jsx.flag (a.hide_separator ()))
+      data_slot="accordion-item"
+      props=(Props.others props)>
+      <Item_context.Provider value=(fun () -> i)>
+        (fun () -> children ())
+      </Item_context.Provider>
+    </Kobalte.Item>
+end
+
+module Heading = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let a, i = within_item "Accordion.Heading" in
+    (* A button with the trigger's slot is Kobalte's trigger, as React Aria's
+       disclosure gives its ButtonContext's trigger slot. *)
+    let trigger =
+      {
+        Button.component = Kobalte.Trigger.component;
+        is_disabled = i.item_disabled;
+        controls = i.content_id;
+      }
+    in
+    <Kobalte.Header
+      class_=(fun () ->
+               after (Styles.Accordion.heading (a.slots ())) (class_ ()))
+      data_slot="accordion-heading"
+      props=(Props.others props)>
+      <Button.Trigger.Provider value=(fun () -> trigger)>
+        (fun () -> children ())
+      </Button.Trigger.Provider>
+    </Kobalte.Header>
+end
+
+module Trigger = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let a, i = within_item "Accordion.Trigger" in
+    let n =
+      Interaction.create ~disabled:(fun[@u] () -> i.item_disabled ()) ()
+    in
+    <Kobalte.Trigger
+      class_=(fun () ->
+               after (Styles.Accordion.trigger (a.slots ())) (class_ ()))
+      aria_controls=(fun () -> i.content_id)
+      slot="trigger"
+      ref=(fun b -> Interaction.watch n b)
+      data_slot="accordion-trigger"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed n))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused n))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Kobalte.Trigger>
+end
+
+module Indicator = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let a, i = within_item "Accordion.Indicator" in
+    let classes () =
+      after (Styles.Accordion.indicator (a.slots ())) (class_ ())
+    in
+    (* HeroUI gives an icon of the user's its classes; a Solid component cannot
+       add them to an element already made, so the span around it takes them,
+       and turns over in its place. *)
+    <Show
+      when_=(fun () -> Option.is_some (children ()))
+      fallback=(<svg
+                  aria_hidden=true
+                  class_=(fun () -> classes ())
+                  fill="none"
+                  height="16"
+                  role=`presentation
+                  view_box="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  data_expanded=(fun () -> Jsx.flag (i.expanded ()))
+                  data_slot="accordion-indicator"
+                  props=(Props.others props)>
+                  <path
+                    clip_rule="evenodd"
+                    d="M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 \
+                       0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 \
+                       0l-4.5-4.5a.75.75 0 0 1 0-1.06"
+                    fill="currentColor"
+                    fill_rule="evenodd"
+                  />
+                </svg>)>
+      <span
+        class_=(fun () -> classes ())
+        data_expanded=(fun () -> Jsx.flag (i.expanded ()))
+        data_slot="accordion-indicator"
+        props=(Props.others props)>
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </span>
+    </Show>
+end
+
+module Panel = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let a, i = within_item "Accordion.Panel" in
+    let panel =
+      Panel.create ~expanded:i.expanded ~expand:(fun () -> a.expand i.key) ()
+    in
+    <Kobalte.Content
+      class_=(fun () -> after (Styles.Accordion.panel (a.slots ())) (class_ ()))
+      aria_hidden=(fun () -> not (i.expanded ()))
+      ?hidden=(fun () -> Panel.hidden panel)
+      style=(fun () -> Panel.style panel)
+      ref=(fun e -> Panel.watch panel e)
+      data_expanded=(fun () -> Jsx.flag (i.expanded ()))
+      data_slot="accordion-panel"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Kobalte.Content>
+end
+
+module Body = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let a, (_ : item) = within_item "Accordion.Body" in
+    <div
+      class_=(fun () -> Styles.Accordion.body (a.slots ()))
+      data_slot="accordion-body"
+      props=(Props.others props)>
+      <div
+        class_=(fun () ->
+                 after (Styles.Accordion.body_inner (a.slots ())) (class_ ()))>
+        (fun () -> children ())
+      </div>
+    </div>
+end
+
+let%component make ?(expanded_keys : string array option)
+    ?(default_expanded_keys : string array = [||])
+    ?(on_expanded_change : (string array -> unit) option)
+    ?(allows_multiple_expanded : bool = false) ?(is_disabled : bool = false)
+    ?(variant : [ `default | `surface ] = `default)
+    ?(hide_separator : bool = false) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  let keys, set_keys =
+    Field.controlled ~value:expanded_keys ~default:(default_expanded_keys ())
+      ~on_change:(fun k -> on_expanded_change k)
+  in
+  let has keys key = Array.exists (String.equal key) keys in
+  let told = Hashtbl.create 8 in
+  (* The item a change expands, else the one it collapses, is told after the
+     accordion, as React Aria tells the disclosure whose trigger was pressed
+     and no other. *)
+  let change now =
+    let before = keys () in
+    set_keys now;
+    let tell key expanded =
+      match Hashtbl.find_opt told key with Some f -> f expanded | None -> ()
+    in
+    match
+      ( Array.find_opt (fun k -> not (has before k)) now,
+        Array.find_opt (fun k -> not (has now k)) before )
+    with
+    | Some k, _ -> tell k true
+    | None, Some k -> tell k false
+    | None, None -> ()
+  in
+  let expand key =
+    let now = keys () in
+    if not (has now key) then
+      change
+        (if allows_multiple_expanded () then Array.append now [| key |]
+         else [| key |])
+  in
+  let a =
+    {
+      slots =
+        (fun () ->
+          Styles.Accordion.slots
+            (Styles.Accordion.options ~variant:(variant ()) ()));
+      hide_separator = (fun () -> hide_separator ());
+      is_expanded = (fun key -> has (keys ()) key);
+      expand;
+      disabled = (fun () -> is_disabled ());
+      told;
+    }
+  in
+  (* Collapsible, since HeroUI's every item collapses as it expands; made
+     where it is shown, so it reads the surface given there. *)
+  let accordion () =
+    <Kobalte.Root
+      value=(fun () -> keys ())
+      on_change=change
+      multiple=(fun () -> allows_multiple_expanded ())
+      collapsible=true
+      class_=(fun () -> after (Styles.Accordion.base (a.slots ())) (class_ ()))
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      data_slot="accordion"
+      props=(Props.others props)>
+      <Context.Provider value=(fun () -> a)>
+        (fun () -> children ())
+      </Context.Provider>
+    </Kobalte.Root>
+  in
+  let surface () = `default in
+  (* A surface accordion is a surface to what is inside it, as HeroUI's is. *)
+  <Show
+    when_=(fun () ->
+            match variant () with `surface -> true | `default -> false)
+    fallback=(fun () -> accordion ())>
+    <Surface.Context.Provider value=(fun () -> surface)>
+      (fun () -> Jsx.element (accordion ()))
+    </Surface.Context.Provider>
+  </Show>

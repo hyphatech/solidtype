@@ -92,124 +92,19 @@ module Indicator = struct
     </svg>
 end
 
-type animation
-
-external animations_of : _ Dom.element_like -> animation array = "getAnimations"
-[@@mel.send]
-
-type animations_method
-
-(* jsdom, and a browser too old, has no getAnimations: there the content
-   takes its size at once, as React Aria's does. *)
-external animations_method :
-  _ Dom.element_like -> animations_method Js.undefined = "getAnimations"
-[@@mel.get]
-
-external finished : animation -> animation Js.Promise.t = "finished" [@@mel.get]
-external scroll_width : _ Dom.element_like -> float = "scrollWidth" [@@mel.get]
-
-external scroll_height : _ Dom.element_like -> float = "scrollHeight"
-[@@mel.get]
-
-external request_frame : (float -> unit) -> int = "requestAnimationFrame"
-
-external on_before_match :
-  _ Dom.element_like ->
-  (_[@mel.as "beforematch"]) ->
-  ((Dom.event -> unit)[@mel.uncurry]) ->
-  unit = "addEventListener"
-[@@mel.send]
-
-(* A size of the content's, as HeroUI's styles read it from
-   --disclosure-panel-width and --disclosure-panel-height. *)
-type size = { width : string; height : string }
-
-let auto = { width = "auto"; height = "auto" }
-let none = { width = "0px"; height = "0px" }
-
-let measured e =
-  let px n = Js.Float.toString n ^ "px" in
-  { width = px (scroll_width e); height = px (scroll_height e) }
-
-(* Runs [f] once the transitions running on [e] end; one interrupted, by a
-   toggle before it ends, rejects, and [f] is left to the toggle after. *)
-let settled e f =
-  let all = Js.Promise.all (Array.map finished (animations_of e)) in
-  ignore
-    (all
-     |> Js.Promise.then_ (fun (_ : animation array) ->
-         f ();
-         Js.Promise.resolve ())
-     |> Js.Promise.catch (fun _ -> Js.Promise.resolve ())
-      : unit Js.Promise.t)
-
 module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let d = within "Disclosure.Content" in
-    let expanded = Solid.untrack d.expanded in
-    let size, set_size =
-      Solid.create_signal (if expanded then auto else none)
-    in
-    (* Hidden until find in page reaches it, and written again as a toggle
-       the disclosure refuses leaves it so. *)
-    let hidden, set_hidden = Solid.create_signal ~equals:Never (not expanded) in
-    let content = ref None in
-    (* The content grows from none to its size, measured once it is shown,
-       then takes its own as it changes; it shrinks from its size to none, and
-       is hidden once it has. Each step waits a frame, so the transition
-       HeroUI's styles run starts from the size before it. *)
-    Solid.create_effect
-      (Solid.on ~defer:true d.expanded (fun now _ ->
-           match !content with
-           | None -> ()
-           | Some e -> (
-               match (Js.Undefined.toOption (animations_method e), now) with
-               | None, true ->
-                   Solid.set set_hidden false;
-                   Solid.set set_size auto
-               | None, false ->
-                   Solid.set set_size none;
-                   Solid.set set_hidden true
-               | Some _, true ->
-                   Solid.set set_hidden false;
-                   ignore
-                     (request_frame (fun _ ->
-                          if d.expanded () then (
-                            Solid.set set_size (measured e);
-                            settled e (fun () ->
-                                if d.expanded () then Solid.set set_size auto)))
-                       : int)
-               | Some _, false ->
-                   Solid.set set_size (measured e);
-                   ignore
-                     (request_frame (fun _ ->
-                          if not (d.expanded ()) then (
-                            Solid.set set_size none;
-                            settled e (fun () ->
-                                if not (d.expanded ()) then
-                                  Solid.set set_hidden true)))
-                       : int))));
-    let reveal (_ : Dom.event) =
-      d.expand true;
-      (* The browser takes hidden away once its event is told: a disclosure
-         controlled collapsed hides it again. *)
-      ignore
-        (request_frame (fun _ ->
-             if not (d.expanded ()) then Solid.set set_hidden true)
-          : int)
+    let panel =
+      Panel.create ~expanded:d.expanded ~expand:(fun () -> d.expand true) ()
     in
     <Collapsible.Content
       id=(fun () -> d.content_id)
       class_=(fun () -> after (Styles.Disclosure.content d.slots) (class_ ()))
       aria_hidden=(fun () -> not (d.expanded ()))
-      ?hidden=(fun () -> if Solid.get hidden then Some "until-found" else None)
-      style=(fun () ->
-              let s = Solid.get size in
-              "--disclosure-panel-width: " ^ s.width
-              ^ "; --disclosure-panel-height: " ^ s.height)
-      ref=(fun e ->
-            content := Some e;
-            on_before_match e reveal)
+      ?hidden=(fun () -> Panel.hidden panel)
+      style=(fun () -> Panel.style panel)
+      ref=(fun e -> Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (d.expanded ()))
       data_slot="disclosure-content"
       props=(Props.others props)>
