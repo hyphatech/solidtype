@@ -1,5 +1,16 @@
 # Changes
 
+## Unreleased
+
+- `Solidtype_heroui.Disclosure`: HeroUI's Disclosure on Kobalte's
+  Collapsible, expanded controlled or kept, its heading, trigger, chevron,
+  content and body; its content stays on the page while collapsed, hidden
+  until find in page reaches it, which expands it, and grows and shrinks by
+  the height HeroUI's styles animate.
+- `Solidtype_heroui.Button` takes `` slot=`trigger ``, as React Aria's
+  slots do: inside a disclosure's heading it is the disclosure's trigger, in
+  a button's look.
+
 ## 0.2.0 (2026-10-23)
 
 - `Solidtype_heroui.Toggle_button` and `Toggle_button_group`: HeroUI's

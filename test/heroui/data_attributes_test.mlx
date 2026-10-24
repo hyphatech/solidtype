@@ -17,6 +17,7 @@ module Checkbox_group = H.Checkbox_group
 module Chip = H.Chip
 module Close_button = H.Close_button
 module Description = H.Description
+module Disclosure = H.Disclosure
 module Empty_state = H.Empty_state
 module Field_error = H.Field_error
 module Fieldset = H.Fieldset
@@ -133,6 +134,28 @@ let () =
                 <Scroll_shadow data_testid="Scroll_shadow">
                   "Text"
                 </Scroll_shadow>
+                <Disclosure data_testid="Disclosure">
+                  <Disclosure.Heading data_testid="Disclosure.Heading">
+                    <Disclosure.Trigger data_testid="Disclosure.Trigger">
+                      "Shipping"
+                      <Disclosure.Indicator data_testid="Disclosure.Indicator"
+                      />
+                    </Disclosure.Trigger>
+                  </Disclosure.Heading>
+                  <Disclosure.Content data_testid="Disclosure.Content">
+                    <Disclosure.Body data_testid="Disclosure.Body">
+                      "Orders ship."
+                    </Disclosure.Body>
+                  </Disclosure.Content>
+                </Disclosure>
+                <Disclosure>
+                  <Disclosure.Heading>
+                    <Button data_testid="Button.trigger" slot=`trigger>
+                      "Returns"
+                    </Button>
+                  </Disclosure.Heading>
+                  <Disclosure.Content>"Within 30 days."</Disclosure.Content>
+                </Disclosure>
                 <Separator data_testid="Separator" />
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
@@ -207,6 +230,13 @@ let () =
                    ("Skeleton", ".skeleton");
                    ("Spinner", "[data-slot=spinner]");
                    ("Surface", "[data-slot=surface]");
+                   ("Disclosure", "[data-slot=disclosure]");
+                   ("Disclosure.Heading", "[data-slot=disclosure-heading]");
+                   ("Disclosure.Trigger", "[data-slot=disclosure-trigger]");
+                   ("Disclosure.Indicator", "[data-slot=disclosure-indicator]");
+                   ("Disclosure.Content", "[data-slot=disclosure-content]");
+                   ("Disclosure.Body", "[data-slot=disclosure-body]");
+                   ("Button.trigger", "[data-slot=button][aria-expanded]");
                    ("Toggle_button", "[data-slot=toggle-button]");
                    ("Toggle_button_group", "[data-slot=toggle-button-group]");
                    ("Toggle_button.Item", "[data-slot=toggle-button]");

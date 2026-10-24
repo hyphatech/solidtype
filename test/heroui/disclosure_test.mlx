@@ -1,0 +1,230 @@
+(* HeroUI's Disclosure on Kobalte's Collapsible, beside the same disclosure in
+   React: every part, which controls and names which, and whether it is
+   expanded as its trigger is clicked and pressed by the keys. *)
+
+module Button = Solidtype_heroui.Button
+module Disclosure = Solidtype_heroui.Disclosure
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?is_expanded:(bool[@mel.as "isExpanded"]) ->
+  ?default_expanded:(bool[@mel.as "defaultExpanded"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?button:bool ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((bool -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Disclosure.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Disclosure.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Disclosure.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+type style
+
+external style : Dom.element -> style = "style" [@@mel.get]
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+
+type event
+
+external event : string -> event = "Event" [@@mel.new]
+external dispatch : Dom.element -> event -> bool = "dispatchEvent" [@@mel.send]
+
+(* An attribute that names elements by id, written as the slots of the
+   elements it names, since each side makes its own ids. *)
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+let references = [ "aria-labelledby"; "aria-controls" ]
+
+(* What Kobalte writes that React Aria does not, and no style of HeroUI's
+   reads: its own state, present and empty. React Aria's tabindex on a button
+   the pointer presses, and its press's own user-select, and the focus it
+   marks visible within the root, which no style reads either. The sizes HeroUI's
+   styles animate are compared as values, each side writing its style
+   attribute its own way. React Aria's content is a group its trigger names,
+   Kobalte's a region of the page its trigger controls: each accessible. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ("data-expanded" | "data-closed" | "data-disabled"), Some "" -> true
+  | ("tabindex" | "style" | "data-focus-visible-within"), _ -> true
+  | ("role" | "aria-labelledby"), _ ->
+      Option.equal String.equal
+        (T.attribute e "data-slot")
+        (Some "disclosure-content")
+  | _ -> false
+
+(* Each part, its tag, its attributes, each reference by what it names, the
+   sizes HeroUI's styles animate, and its text. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let named =
+        references
+        |> List.filter (fun name -> not (framework_only e name))
+        |> List.filter_map (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+      in
+      let sizes =
+        [ "--disclosure-panel-width"; "--disclosure-panel-height" ]
+        |> List.filter_map (fun name ->
+            match property (style e) name with
+            | "" -> None
+            | v -> Some (name ^ ":" ^ v))
+      in
+      String.concat " "
+        (tag_name e
+         :: T.attributes_but
+              (("id" :: references)
+              @ (T.attribute_names e |> Array.to_list
+                |> List.filter (framework_only e)))
+              e
+         :: named
+        @ sizes)
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+(* The disclosure as it is rendered, as its trigger is clicked twice, and as
+   Enter and Space press it: every part, and what it told, after each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let trigger () =
+    match Js.Null.toOption (query host "[aria-expanded]") with
+    | Some e -> e
+    | None -> host
+  in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "clicked" (fun () -> T.click user (trigger ())) in
+  let* () = after "clicked again" (fun () -> T.click user (trigger ())) in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "Space" (fun () -> T.keyboard user " ") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+(* The disclosure the twin renders, under the same props. *)
+let render ?is_expanded ?default_expanded ?is_disabled ~button tell =
+  T.render (fun () ->
+      <Disclosure
+        ?is_expanded=(fun () -> is_expanded)
+        ?default_expanded=(fun () -> default_expanded)
+        ?is_disabled=(fun () -> is_disabled)
+        on_expanded_change=tell>
+        <Disclosure.Heading>
+          (fun () ->
+            Solidtype.Jsx.element
+              (if button then
+                 <Button slot=`trigger variant=`secondary>
+                   "Shipping" <Disclosure.Indicator />
+                 </Button>
+               else
+                 <Disclosure.Trigger>
+                   "Shipping" <Disclosure.Indicator />
+                 </Disclosure.Trigger>))
+        </Disclosure.Heading>
+        <Disclosure.Content>
+          <Disclosure.Body>
+            "Orders ship within 2 business days."
+          </Disclosure.Body>
+        </Disclosure.Content>
+      </Disclosure>)
+
+let both ?is_expanded ?default_expanded ?is_disabled ?(button = false) () =
+  let told = ref [] in
+  render ?is_expanded ?default_expanded ?is_disabled ~button (fun v ->
+      told := v :: !told);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render (props ?is_expanded ?default_expanded ?is_disabled ~button ())
+      (fun v -> told' := v :: !told')
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Disclosure" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "expands and collapses, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "is expanded at first, as React's is" (fun () ->
+          let* r = both ~default_expanded:true () in
+          same r);
+      Jest.testPromise "stays as it is while disabled, as React's" (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.testPromise "is expanded while it is told, as React's" (fun () ->
+          let* r = both ~is_expanded:true () in
+          same r);
+      Jest.testPromise "takes a button as its trigger, as React's does"
+        (fun () ->
+          let* r = both ~button:true () in
+          same r);
+      Jest.testPromise "is expanded as find in page reaches it, as React's"
+        (fun () ->
+          let reveal host =
+            let* () =
+              Twin.step (fun () ->
+                  (match Js.Null.toOption (query host "[hidden]") with
+                  | Some content ->
+                      ignore (dispatch content (event "beforematch") : bool)
+                  | None -> ());
+                  Js.Promise.resolve ())
+            in
+            Js.Promise.resolve (shown host)
+          in
+          render ~button:false (fun (_ : bool) -> ());
+          let* solidtype = reveal T.body in
+          T.cleanup ();
+          let host = Twin.render (props ()) (fun (_ : bool) -> ()) in
+          let* react = reveal host in
+          Twin.cleanup ();
+          same (solidtype, react));
+      Jest.test "is a button given the trigger's slot outside one" (fun () ->
+          T.render (fun () -> <Button slot=`trigger>"Save"</Button>);
+          let expanded =
+            Option.bind (T.query "[data-slot=button]") (fun b ->
+                T.attribute b "aria-expanded")
+          in
+          E.(expect expanded |> toEqual None)))

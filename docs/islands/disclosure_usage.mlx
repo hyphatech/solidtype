@@ -1,0 +1,27 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Disclosure = Solidtype_heroui.Disclosure
+
+let make () =
+  let expanded, set_expanded = S.create_signal true in
+  <div class_="w-full max-w-md text-center">
+    <Disclosure
+      is_expanded=(fun () -> S.get expanded)
+      on_expanded_change=(S.set set_expanded)>
+      <Disclosure.Heading>
+        <Button slot=`trigger variant=`secondary>
+          <Icons.Envelope /> "Get the newsletter" <Disclosure.Indicator />
+        </Button>
+      </Disclosure.Heading>
+      <Disclosure.Content>
+        <Disclosure.Body
+          class_="shadow-panel flex flex-col items-center rounded-3xl \
+                  bg-surface p-4 text-center">
+          <p class_="text-sm text-muted">
+            "One letter a month: what changed, and what is coming."
+          </p>
+          <Button class_="mt-4" variant=`primary>"Subscribe"</Button>
+        </Disclosure.Body>
+      </Disclosure.Content>
+    </Disclosure>
+  </div>

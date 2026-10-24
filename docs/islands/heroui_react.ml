@@ -376,6 +376,20 @@ external progress_circle : Dom.htmlDivElement -> progress_circle_props -> unit
   = "progressCircle"
 [@@mel.module "./react/heroui.tsx"]
 
+type disclosure_props
+
+external disclosure_props :
+  is_expanded:(bool[@mel.as "isExpanded"]) ->
+  on_expanded_change:((bool -> unit)[@mel.as "onExpandedChange"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  disclosure_props = ""
+[@@mel.obj]
+
+external disclosure : Dom.htmlDivElement -> disclosure_props -> unit
+  = "disclosure"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

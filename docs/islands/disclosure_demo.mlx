@@ -1,0 +1,44 @@
+module S = Solidtype.Solid
+module Disclosure = Solidtype_heroui.Disclosure
+module Toggle = Controls.Toggle
+
+let make () =
+  let expanded, set_expanded = S.create_signal false in
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="expanded"
+        on=(fun () -> S.get expanded)
+        on_toggle=(S.set set_expanded)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=disclosure-trigger]"
+      solidtype=(<Disclosure
+                   is_expanded=(fun () -> S.get expanded)
+                   on_expanded_change=(S.set set_expanded)
+                   is_disabled=(fun () -> S.get disabled)>
+                   <Disclosure.Heading>
+                     <Disclosure.Trigger>
+                       "Shipping" <Disclosure.Indicator />
+                     </Disclosure.Trigger>
+                   </Disclosure.Heading>
+                   <Disclosure.Content>
+                     <Disclosure.Body>
+                       "Orders ship within 2 business days."
+                     </Disclosure.Body>
+                   </Disclosure.Content>
+                 </Disclosure>)
+      react=(fun host ->
+              Heroui_react.disclosure host
+                (Heroui_react.disclosure_props ~is_expanded:(S.get expanded)
+                   ~on_expanded_change:(S.set set_expanded)
+                   ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

@@ -1,5 +1,18 @@
 module Kobalte = Solidtype_kobalte.Button
 
+type trigger = {
+  component : unit Solidtype.Jsx.component;
+  is_disabled : unit -> bool;
+  controls : string;
+}
+
+(* A button another part makes its trigger, as React Aria's ButtonContext
+   slots do: a disclosure's heading gives it Kobalte's trigger, which is
+   Kobalte's button with the part's state. *)
+module Trigger = Solidtype.Context.Make_optional (struct
+  type t = trigger
+end)
+
 let%component make
     ?(variant :
        [ `primary
@@ -11,6 +24,7 @@ let%component make
        | `danger_soft ]
        option) ?(size : [ `sm | `md | `lg ] option) ?(full_width : bool option)
     ?(is_icon_only : bool = false) ?(is_disabled : bool option)
+    ?(slot : [ `trigger ] option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
     ~(children : Solidtype.Jsx.content) () =
@@ -30,19 +44,31 @@ let%component make
   let full_width =
     given full_width (fun (g : Button_group.group) -> g.full_width ()) false
   in
+  let trigger =
+    match slot () with Some `trigger -> Trigger.use () | None -> None
+  in
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
-    match is_disabled () with
-    | Some d -> d
-    | None -> (
+    match (is_disabled (), trigger) with
+    | Some d, _ -> d
+    | None, Some t -> t.is_disabled ()
+    | None, None -> (
         match
           Option.bind group (fun (g : Button_group.group) -> g.is_disabled ())
         with
         | Some d -> d
         | None -> in_fieldset ())
   in
+  let module Root = struct
+    module Props = Kobalte.Root.Props
+
+    let component =
+      match trigger with
+      | Some t -> t.component
+      | None -> Kobalte.Root.component
+  end in
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
-  <Kobalte.Root
+  <Root
     class_=(fun () ->
              Styles.Button.classes
                (Styles.Button.options ~variant:(variant ()) ~size:(size ())
@@ -50,7 +76,10 @@ let%component make
                   ?class_:(class_ ()) ()))
     disabled=(fun () -> is_disabled ())
     ?aria_label
+    ?aria_controls=(fun () ->
+                     Option.map (fun (t : trigger) -> t.controls) trigger)
     ref=(fun b -> Interaction.watch i b)
+    ?slot=(fun () -> Option.map (fun `trigger -> "trigger") (slot ()))
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
     data_pressed=(fun () -> Solidtype.Jsx.flag (Interaction.pressed i))
@@ -62,4 +91,4 @@ let%component make
     on_click=(fun e -> ignore (on_click e : unit option))
     props=(Props.others props)>
     (fun () -> children ())
-  </Kobalte.Root>
+  </Root>

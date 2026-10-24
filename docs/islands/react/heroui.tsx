@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -539,6 +539,30 @@ export function progressCircle(host: HTMLElement, props: ProgressCircleProps): v
           <ProgressCircle.FillCircle />
         </ProgressCircle.Track>
       </ProgressCircle>,
+    ),
+  );
+}
+
+type DisclosureProps = {
+  isExpanded: boolean;
+  onExpandedChange: (isExpanded: boolean) => void;
+  isDisabled: boolean;
+};
+
+export function disclosure(host: HTMLElement, props: DisclosureProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Disclosure {...props}>
+        <Disclosure.Heading>
+          <Disclosure.Trigger>
+            Shipping
+            <Disclosure.Indicator />
+          </Disclosure.Trigger>
+        </Disclosure.Heading>
+        <Disclosure.Content>
+          <Disclosure.Body>Orders ship within 2 business days.</Disclosure.Body>
+        </Disclosure.Content>
+      </Disclosure>,
     ),
   );
 }

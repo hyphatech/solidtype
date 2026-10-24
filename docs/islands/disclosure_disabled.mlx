@@ -1,0 +1,14 @@
+module Button = Solidtype_heroui.Button
+module Disclosure = Solidtype_heroui.Disclosure
+
+let make () =
+  <Disclosure is_disabled=true>
+    <Disclosure.Heading>
+      <Button slot=`trigger variant=`secondary>
+        "Archived orders" <Disclosure.Indicator />
+      </Button>
+    </Disclosure.Heading>
+    <Disclosure.Content>
+      <Disclosure.Body>"Nothing archived yet."</Disclosure.Body>
+    </Disclosure.Content>
+  </Disclosure>

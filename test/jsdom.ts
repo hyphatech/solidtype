@@ -47,3 +47,20 @@ window.matchMedia ??= (query: string) =>
     removeEventListener() {},
     dispatchEvent: () => false,
   }) as MediaQueryList;
+// Nor does its hidden property take "until-found", as HTML's has since a
+// hidden element became one find in page reaches: Solid sets the property,
+// and a browser writes the attribute so.
+const hidden = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "hidden");
+if (hidden?.set && hidden.get) {
+  const { get, set } = hidden;
+  Object.defineProperty(HTMLElement.prototype, "hidden", {
+    ...hidden,
+    get(this: HTMLElement) {
+      return this.getAttribute("hidden") === "until-found" ? "until-found" : get.call(this);
+    },
+    set(this: HTMLElement, value: unknown) {
+      if (value === "until-found") this.setAttribute("hidden", "until-found");
+      else set.call(this, value);
+    },
+  });
+}
