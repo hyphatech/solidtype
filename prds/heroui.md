@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton and ToggleButtonGroup.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton and ToggleButtonGroup.
 Date: 2026-10-23
 
 ## The problem
@@ -74,8 +74,32 @@ the primitives Kobalte exports.
   they name.
 - **FR-10** A number a port shows is formatted as HeroUI's
   `formatOptions` asks, for the reader's locale.
+- **FR-11** Each port is judged by four parities with HeroUI's React
+  component, in this order: it looks the same, it behaves the same, its
+  usage carries across, and its types refuse what TypeScript refuses in
+  HeroUI's. A port is HeroUI when it meets the first two; the
+  last two say how well it reads in OCaml.
 
 ## Design
+
+### Parity
+
+A user of HeroUI expects its look and its behaviour first, so those two
+are what a port must meet before it lands, and the other two are judged
+after them.
+
+- **Visual**: HeroUI's classes, from `Styles`, on the parts HeroUI renders,
+  and the state attributes they read, at each step a user takes.
+- **Behavioural**: what HeroUI's component does for a user -- its keys,
+  its value as it changes, what a reader is told -- reached through
+  Kobalte's component, never React Aria's rebuilt; a gap Kobalte leaves is
+  closed in the port's layer on top of it.
+- **API**: HeroUI's props and usage carry across by the spelling rule,
+  except where this document decides otherwise, as it does `validate`.
+- **Type-level**: a prop left out, misspelt, or of the wrong kind is a
+  compile error, as in TSX; what OCaml refuses beyond it is a gain, and an
+  invariant no type can hold, a value on a number field's step grid, is a
+  runtime policy its test holds.
 
 ### Layering
 
@@ -173,7 +197,9 @@ Each port's test renders the port and its twin, `test/heroui/twins/*.tsx`,
 and compares every part's attributes, references between parts written as
 the slot they point to, through the same steps; what one framework writes
 for itself (ids, React's controlled `value` attribute) is left out by name.
-A test is seen failing on a stub before the port is written.
+A test is seen failing on a stub before the port is written. Its type-level
+parity is entries in `test/does_not_compile.t`: the misuses TypeScript
+refuses in HeroUI's component, each with the error a user reads.
 
 ### Alternatives rejected
 
@@ -268,8 +294,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 ## Verification
 
 `make lint`, `make test` and `make docs` pass with every port; each port's
-twin test passes; and the documentation, served, shows each port beside
-HeroUI's React component with no marked row but those its page explains.
+twin test passes, so it looks and behaves as HeroUI's; its misuses fail to
+compile in `test/does_not_compile.t`; and the documentation, served,
+shows each port beside HeroUI's React component with no marked row but
+those its page explains.
 
 ## Where the facts go
 
