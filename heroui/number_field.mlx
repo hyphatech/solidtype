@@ -18,22 +18,56 @@ module Context = Solidtype.Context.Make_optional (struct
   type t = field
 end)
 
-(* A value on its step's grid, counted from the minimum, within the range,
-   as React Aria snaps one: to the nearer step, and below the maximum to the
-   last step that fits. *)
-let snap ~min ~max ~step value =
-  let base = Option.value min ~default:0. in
-  let rest = Float.rem (value -. base) step in
-  let near =
-    if Float.abs rest *. 2. < step then value -. rest
-    else if rest > 0. then value +. (step -. rest)
-    else value -. (step +. rest)
+(* The decimals [x] is written with, a 1e-7 as a 0.0000001: the precision a
+   value on a grid of its step, counted from its minimum, is rounded to. *)
+let decimals x =
+  let s = Js.Float.toString (Float.abs x) in
+  let after_point m =
+    match String.index_opt m '.' with
+    | Some i -> String.length m - i - 1
+    | None -> 0
   in
-  match (min, max) with
-  | Some m, _ when near < m -> m
-  | _, Some m when near > m ->
-      base +. (Float.floor ((m -. base) /. step) *. step)
-  | _ -> near
+  match String.index_opt s 'e' with
+  | Some i -> (
+      let mantissa = String.sub s 0 i in
+      match
+        int_of_string_opt (String.sub s (i + 1) (String.length s - i - 1))
+      with
+      | Some e when e < 0 -> after_point mantissa - e
+      | Some _ | None -> after_point mantissa)
+  | None -> after_point s
+
+(* A value on its step's grid, counted from the minimum, within the range: to
+   the nearer step, a value halfway to the step away from the minimum, and
+   below the maximum to the last step that fits. A count of steps is a float
+   divided, so it is first rounded to nine decimals, which drops a division's
+   noise and keeps any count a field reaches; the value is then written with
+   the decimals of its step and its minimum, so a tenth added to 0.2 is 0.3.
+   A step that is not positive is no grid: the value is kept within the
+   range alone. *)
+let snap ~min ~max ~step value =
+  let within v =
+    match (min, max) with
+    | Some m, _ when v < m -> m
+    | _, Some m when v > m -> m
+    | _ -> v
+  in
+  if not (step > 0.) then within value
+  else
+    let base = Option.value min ~default:0. in
+    let precision = Int.max (decimals step) (decimals base) in
+    let written x =
+      Js.Float.fromString (Js.Float.toFixed ~digits:precision x)
+    in
+    let steps x =
+      Js.Float.fromString (Js.Float.toFixed ~digits:9 ((x -. base) /. step))
+    in
+    let near = written (base +. (Float.round (steps value) *. step)) in
+    match (min, max) with
+    | Some m, _ when near < m -> m
+    | _, Some m when near > m ->
+        written (base +. (Float.floor (steps m) *. step))
+    | _ -> near
 
 let within part =
   match Context.use () with
@@ -206,9 +240,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     if Float.is_nan v then v
     else snap ~min:(min_value ()) ~max:(max_value ()) ~step:(step ()) v
   in
-  (* The value is the field's, on its step's grid within its range, as React
-     Aria keeps it, and Kobalte is given it: Kobalte snaps nothing, nor stops
-     at a bound. Empty is not a number. *)
+  (* The value is the field's, on its step's grid within its range, as
+     HeroUI's field keeps it, and Kobalte is given it: Kobalte snaps nothing,
+     nor stops at a bound. Empty is not a number. *)
   let current, set =
     Field.controlled
       ~value:(fun () -> Option.map snapped (value ()))

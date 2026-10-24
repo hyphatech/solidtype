@@ -29,8 +29,10 @@ import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islan
 `Solidtype_heroui.Number_field` is Kobalte's `NumberField.Root`, with the
 classes HeroUI's own `numberFieldVariants` gives, and the parts inside it as
 Kobalte's. Its value is a number, controlled or its own, kept on its step's
-grid within its range as React Aria keeps it: Kobalte snaps nothing, so the
-field snaps each value, and disables a button its step would not move. Its
+grid within its range as HeroUI's field keeps it: Kobalte snaps nothing, so
+the field snaps each value, a value halfway to the step away from the
+minimum, written with its step's decimals, so a tenth added to 0.2 is 0.3;
+and it disables a button its step would not move. Its
 input is Kobalte's spinbutton.
 
 ## Usage

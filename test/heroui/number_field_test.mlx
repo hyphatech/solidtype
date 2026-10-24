@@ -261,6 +261,55 @@ let () =
           in
           same r))
 
+(* The value a field shows and tells after it is rendered, and after its
+   increment button is clicked, each as Kobalte tells a reader it. *)
+let snapped ?min_value ?max_value ~step default =
+  let told = ref "" in
+  T.render (fun () ->
+      <Number_field
+        ?min_value=(fun () -> min_value)
+        ?max_value=(fun () -> max_value)
+        step=(fun () -> step)
+        default_value=(fun () -> default)
+        on_change=(fun v -> told := Js.Float.toString v)>
+        <Label>"Amount"</Label>
+        <Number_field.Group>
+          <Number_field.Input /> <Number_field.Increment_button />
+        </Number_field.Group>
+      </Number_field>);
+  let now () =
+    Option.bind (T.query "[data-slot=number-field-input]") (fun input ->
+        T.attribute input "aria-valuenow")
+  in
+  let rendered = now () in
+  let* () =
+    match T.query "[data-slot=number-field-increment-button]" with
+    | Some b -> T.click (T.setup ()) b
+    | None -> Js.Promise.resolve ()
+  in
+  Js.Promise.resolve (rendered, !told, now ())
+
+let () =
+  Jest.describe "Number_field, on its step's grid" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "steps by a tenth to a tenth, never near one" (fun () ->
+          let* r = snapped ~min_value:0. ~step:0.1 0.2 in
+          Js.Promise.resolve
+            E.(expect r |> toEqual (Some "0.2", "0.3", Some "0.3")));
+      Jest.testPromise "snaps a value halfway between steps up" (fun () ->
+          let* r = snapped ~min_value:0. ~step:0.1 0.25 in
+          Js.Promise.resolve
+            E.(expect r |> toEqual (Some "0.3", "0.4", Some "0.4")));
+      Jest.testPromise "stops at the last step below its maximum" (fun () ->
+          let* r = snapped ~min_value:0. ~max_value:1. ~step:0.3 1. in
+          Js.Promise.resolve
+            E.(expect r |> toEqual (Some "0.9", "", Some "0.9")));
+      Jest.testPromise "keeps a value off any grid while its step is none"
+        (fun () ->
+          let* r = snapped ~min_value:0. ~max_value:10. ~step:0. 5.5 in
+          Js.Promise.resolve
+            E.(expect r |> toEqual (Some "5.5", "", Some "5.5"))))
+
 let () =
   Jest.describe "Number_field, left" (fun () ->
       Jest.afterEach T.cleanup;

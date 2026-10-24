@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Number_field` keeps a fractional step's values exact: a
+  tenth added to 0.2 is 0.3, where it was 0.30000000000000004, and the last
+  step of 0.3 below 1 is 0.9; a value halfway between steps snaps away from
+  the minimum, and a step that is not positive keeps the value within the
+  range alone, where it was lost.
 - `Solidtype_heroui.Disclosure`: HeroUI's Disclosure on Kobalte's
   Collapsible, expanded controlled or kept, its heading, trigger, chevron,
   content and body; its content stays on the page while collapsed, hidden
