@@ -232,13 +232,33 @@ module Body = struct
     </div>
 end
 
-let%component make ?(is_expanded : bool option)
+let%component make ?(id : string option) ?(is_expanded : bool option)
     ?(default_expanded : bool = false)
     ?(on_expanded_change : (bool -> unit) option) ?(is_disabled : bool = false)
     ?(class_ : string option) ~(children : Jsx.content) () =
+  (* In a group, expanded as the group holds its id, and its own change still
+     told, as React Aria's disclosure is. *)
+  let group = Disclosure_group.Context.use () in
   let expanded, expand =
-    Field.controlled ~value:is_expanded ~default:(default_expanded ())
-      ~on_change:(fun v -> on_expanded_change v)
+    match group with
+    | None ->
+        Field.controlled ~value:is_expanded ~default:(default_expanded ())
+          ~on_change:(fun v -> on_expanded_change v)
+    | Some g ->
+        let key =
+          match id () with Some k -> k | None -> Solid.create_unique_id ()
+        in
+        ( (fun () -> g.is_expanded key),
+          fun v ->
+            g.toggle key;
+            ignore (on_expanded_change v : unit option) )
+  in
+  let is_disabled () =
+    is_disabled ()
+    ||
+    match group with
+    | Some (g : Disclosure_group.group) -> g.is_disabled ()
+    | None -> false
   in
   let d =
     {

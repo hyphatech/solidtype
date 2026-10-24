@@ -1,0 +1,62 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Disclosure = Solidtype_heroui.Disclosure
+module Disclosure_group = Solidtype_heroui.Disclosure_group
+
+let items =
+  [|
+    ("shipping", "Shipping", "Orders ship within 2 business days.");
+    ("returns", "Returns", "Return any order within 30 days.");
+    ("warranty", "Warranty", "Every product is covered for two years.");
+  |]
+
+let make () =
+  let expanded, set_expanded = S.create_signal [| "shipping" |] in
+  let n =
+    Disclosure_group.navigation
+      ~expanded_keys:(fun () -> S.get expanded)
+      ~item_ids:(Array.map (fun (key, _, _) -> key) items)
+      ~on_expanded_change:(S.set set_expanded) ()
+  in
+  <div class_="flex w-full max-w-md flex-col gap-4 p-4">
+    <div class_="flex items-center justify-between">
+      <h3 class_="text-lg font-semibold">"Your order"</h3>
+      <div class_="flex gap-2">
+        <Button
+          aria_label="Previous disclosure"
+          is_disabled=(fun () -> n.is_prev_disabled ())
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ -> n.on_previous ())>
+          "Previous"
+        </Button>
+        <Button
+          aria_label="Next disclosure"
+          is_disabled=(fun () -> n.is_next_disabled ())
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ -> n.on_next ())>
+          "Next"
+        </Button>
+      </div>
+    </div>
+    <Disclosure_group
+      expanded_keys=(fun () -> S.get expanded)
+      on_expanded_change=(S.set set_expanded)>
+      <Solidtype.For each=(fun () -> items)>
+        (fun (key, title, text) _ ->
+          <Disclosure id=(fun () -> key)>
+            <Disclosure.Heading>
+              <Disclosure.Trigger>
+                (fun () -> Solidtype.Jsx.string title) <Disclosure.Indicator />
+              </Disclosure.Trigger>
+            </Disclosure.Heading>
+            <Disclosure.Content>
+              <Disclosure.Body>
+                (fun () -> Solidtype.Jsx.string text)
+              </Disclosure.Body>
+            </Disclosure.Content>
+          </Disclosure>)
+      </Solidtype.For>
+    </Disclosure_group>
+  </div>

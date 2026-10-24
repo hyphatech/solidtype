@@ -1,0 +1,58 @@
+module S = Solidtype.Solid
+module Disclosure = Solidtype_heroui.Disclosure
+module Disclosure_group = Solidtype_heroui.Disclosure_group
+module Toggle = Controls.Toggle
+
+let keys = [| "shipping"; "returns" |]
+
+let make () =
+  let expanded, set_expanded = S.create_signal [| "shipping" |] in
+  let multiple, set_multiple = S.create_signal false in
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="allows multiple expanded"
+        on=(fun () -> S.get multiple)
+        on_toggle=(S.set set_multiple)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=disclosure-group]"
+      solidtype=(<Disclosure_group
+                   expanded_keys=(fun () -> S.get expanded)
+                   on_expanded_change=(S.set set_expanded)
+                   allows_multiple_expanded=(fun () -> S.get multiple)
+                   is_disabled=(fun () -> S.get disabled)>
+                   <Solidtype.For each=(fun () -> keys)>
+                     (fun key _ ->
+                       <Disclosure id=(fun () -> key)>
+                         <Disclosure.Heading>
+                           <Disclosure.Trigger>
+                             (fun () -> Solidtype.Jsx.string key)
+                             <Disclosure.Indicator />
+                           </Disclosure.Trigger>
+                         </Disclosure.Heading>
+                         <Disclosure.Content>
+                           <Disclosure.Body>
+                             (fun () ->
+                               Solidtype.Jsx.string ("About " ^ key ^ "."))
+                           </Disclosure.Body>
+                         </Disclosure.Content>
+                       </Disclosure>)
+                   </Solidtype.For>
+                 </Disclosure_group>)
+      react=(fun host ->
+              Heroui_react.disclosure_group host
+                (Heroui_react.disclosure_group_props
+                   ~expanded_keys:(S.get expanded)
+                   ~on_expanded_change:(S.set set_expanded)
+                   ~allows_multiple_expanded:(S.get multiple)
+                   ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

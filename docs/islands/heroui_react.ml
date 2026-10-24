@@ -390,6 +390,21 @@ external disclosure : Dom.htmlDivElement -> disclosure_props -> unit
   = "disclosure"
 [@@mel.module "./react/heroui.tsx"]
 
+type disclosure_group_props
+
+external disclosure_group_props :
+  expanded_keys:(string array[@mel.as "expandedKeys"]) ->
+  on_expanded_change:((string array -> unit)[@mel.as "onExpandedChange"]) ->
+  allows_multiple_expanded:(bool[@mel.as "allowsMultipleExpanded"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  disclosure_group_props = ""
+[@@mel.obj]
+
+external disclosure_group : Dom.htmlDivElement -> disclosure_group_props -> unit
+  = "disclosureGroup"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

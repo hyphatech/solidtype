@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup and Disclosure.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure and DisclosureGroup.
 Date: 2026-10-23
 
 ## The problem
@@ -273,8 +273,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 
 ### Group 4: navigation and disclosure
 - [x] ToggleButton, ToggleButtonGroup
-- [x] Disclosure
-- [ ] Breadcrumbs, Pagination, Tabs, Accordion, DisclosureGroup
+- [x] Disclosure, DisclosureGroup
+- [ ] Breadcrumbs, Pagination, Tabs, Accordion
 
 ### Group 5: overlays and lists
 - [ ] Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox,

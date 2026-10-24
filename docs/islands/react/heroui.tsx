@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -563,6 +563,39 @@ export function disclosure(host: HTMLElement, props: DisclosureProps): void {
           <Disclosure.Body>Orders ship within 2 business days.</Disclosure.Body>
         </Disclosure.Content>
       </Disclosure>,
+    ),
+  );
+}
+
+type DisclosureGroupProps = {
+  expandedKeys: string[];
+  onExpandedChange: (keys: string[]) => void;
+  allowsMultipleExpanded: boolean;
+  isDisabled: boolean;
+};
+
+export function disclosureGroup(host: HTMLElement, { expandedKeys, onExpandedChange, ...props }: DisclosureGroupProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <DisclosureGroup
+        {...props}
+        expandedKeys={new Set(expandedKeys)}
+        onExpandedChange={(keys) => onExpandedChange([...keys].map(String))}
+      >
+        {["shipping", "returns"].map((key) => (
+          <Disclosure key={key} id={key}>
+            <Disclosure.Heading>
+              <Disclosure.Trigger>
+                {key}
+                <Disclosure.Indicator />
+              </Disclosure.Trigger>
+            </Disclosure.Heading>
+            <Disclosure.Content>
+              <Disclosure.Body>About {key}.</Disclosure.Body>
+            </Disclosure.Content>
+          </Disclosure>
+        ))}
+      </DisclosureGroup>,
     ),
   );
 }

@@ -1,0 +1,271 @@
+(* HeroUI's DisclosureGroup on the port's Disclosure, beside the same group in
+   React: every part of each disclosure, which are expanded as their triggers
+   are clicked and pressed by the keys, and the keys it tells; and the
+   previous and next buttons HeroUI's navigation gives. *)
+
+module Disclosure = Solidtype_heroui.Disclosure
+module Disclosure_group = Solidtype_heroui.Disclosure_group
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?default_expanded_keys:(string array[@mel.as "defaultExpandedKeys"]) ->
+  ?allows_multiple_expanded:(bool[@mel.as "allowsMultipleExpanded"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?disabled:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render :
+    props -> ((string array -> unit)[@mel.uncurry]) -> Dom.element = "render"
+  [@@mel.module "./twins/DisclosureGroup.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/DisclosureGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/DisclosureGroup.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+type style
+
+external style : Dom.element -> style = "style" [@@mel.get]
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+
+type event
+
+external event : string -> event = "Event" [@@mel.new]
+external dispatch : Dom.element -> event -> bool = "dispatchEvent" [@@mel.send]
+
+(* An attribute that names elements by id, written as the slots of the
+   elements it names, since each side makes its own ids. *)
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+let references = [ "aria-labelledby"; "aria-controls" ]
+
+(* What Kobalte writes that React Aria does not, and no style of HeroUI's
+   reads: its own state, present and empty. React Aria's tabindex on a button
+   the pointer presses, and its press's own user-select, and the focus it
+   marks visible within the root, which no style reads either. The sizes HeroUI's
+   styles animate are compared as values, each side writing its style
+   attribute its own way. React Aria's content is a group its trigger names,
+   Kobalte's a region of the page its trigger controls: each accessible. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ("data-expanded" | "data-closed" | "data-disabled"), Some "" -> true
+  | ("tabindex" | "style" | "data-focus-visible-within"), _ -> true
+  | ("role" | "aria-labelledby"), _ ->
+      Option.equal String.equal
+        (T.attribute e "data-slot")
+        (Some "disclosure-content")
+  | _ -> false
+
+(* Each part, its tag, its attributes, each reference by what it names, the
+   sizes HeroUI's styles animate, and its text. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let named =
+        references
+        |> List.filter (fun name -> not (framework_only e name))
+        |> List.filter_map (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+      in
+      let sizes =
+        [ "--disclosure-panel-width"; "--disclosure-panel-height" ]
+        |> List.filter_map (fun name ->
+            match property (style e) name with
+            | "" -> None
+            | v -> Some (name ^ ":" ^ v))
+      in
+      String.concat " "
+        (tag_name e
+         :: T.attributes_but
+              (("id" :: references)
+              @ (T.attribute_names e |> Array.to_list
+                |> List.filter (framework_only e)))
+              e
+         :: named
+        @ sizes)
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let keys = [| "shipping"; "returns"; "warranty" |]
+
+(* The group as it is rendered, as the first trigger is clicked, then the
+   second, the second again, and Enter on it: every part, and the keys it
+   told, after each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let trigger i =
+    match Js.Array.from (query_all host "[aria-expanded]") with
+    | triggers when i < Array.length triggers -> triggers.(i)
+    | _ -> host
+  in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "first clicked" (fun () -> T.click user (trigger 0)) in
+  let* () = after "second clicked" (fun () -> T.click user (trigger 1)) in
+  let* () = after "second again" (fun () -> T.click user (trigger 1)) in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?default_expanded_keys ?allows_multiple_expanded ?is_disabled ?disabled
+    () =
+  let told = ref [] in
+  T.render (fun () ->
+      <Disclosure_group
+        ?default_expanded_keys=(fun () -> default_expanded_keys)
+        ?allows_multiple_expanded=(fun () -> allows_multiple_expanded)
+        ?is_disabled=(fun () -> is_disabled)
+        on_expanded_change=(fun k -> told := Js.Array.join ~sep:"," k :: !told)>
+        (fun () ->
+          Solidtype.Jsx.element
+            <Solidtype.For each=(fun () -> keys)>
+              (fun key _ ->
+                <Disclosure
+                  id=(fun () -> key)
+                  ?is_disabled=(fun () ->
+                                 match disabled with
+                                 | Some d when String.equal d key -> Some true
+                                 | _ -> None)>
+                  <Disclosure.Heading>
+                    <Disclosure.Trigger>
+                      (fun () -> Solidtype.Jsx.string key)
+                      <Disclosure.Indicator />
+                    </Disclosure.Trigger>
+                  </Disclosure.Heading>
+                  <Disclosure.Content>
+                    <Disclosure.Body>
+                      (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
+                    </Disclosure.Body>
+                  </Disclosure.Content>
+                </Disclosure>)
+            </Solidtype.For>)
+      </Disclosure_group>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render
+      (props ?default_expanded_keys ?allows_multiple_expanded ?is_disabled
+         ?disabled ()) (fun k -> told' := Js.Array.join ~sep:"," k :: !told')
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+(* Previous and next over the three disclosures, as the keys are: what
+   navigation says after each press. *)
+let navigated ?allows_multiple_expanded start presses =
+  let expanded, set_expanded = Solidtype.Solid.create_signal start in
+  let n =
+    Disclosure_group.navigation ?allows_multiple_expanded
+      ~expanded_keys:(fun () -> Solidtype.Solid.get expanded)
+      ~item_ids:keys
+      ~on_expanded_change:(Solidtype.Solid.set set_expanded)
+      ()
+  in
+  let state () =
+    ( Js.Array.join ~sep:"," (Solidtype.Solid.get expanded),
+      n.current_index (),
+      n.is_prev_disabled (),
+      n.is_next_disabled () )
+  in
+  state ()
+  :: List.map
+       (fun press ->
+         (match press with
+         | `next -> n.on_next ()
+         | `previous -> n.on_previous ());
+         state ())
+       presses
+  |> Array.of_list
+
+let () =
+  Jest.describe "Disclosure_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "expands one at a time, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "expands several, as React's does" (fun () ->
+          let* r = both ~allows_multiple_expanded:true () in
+          same r);
+      Jest.testPromise "is expanded at first as its keys say, as React's"
+        (fun () ->
+          let* r = both ~default_expanded_keys:[| "returns" |] () in
+          same r);
+      Jest.testPromise "disables each disclosure while disabled, as React's"
+        (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.testPromise "keeps a disclosure disabled of its own, as React's"
+        (fun () ->
+          let* r = both ~disabled:"returns" () in
+          same r))
+
+let () =
+  Jest.describe "Disclosure_group.navigation" (fun () ->
+      Jest.test "steps one disclosure at a time" (fun () ->
+          E.(
+            expect
+              (navigated [| "shipping" |] [ `next; `next; `next; `previous ])
+            |> toEqual
+                 [|
+                   ("shipping", 0, true, false);
+                   ("returns", 1, false, false);
+                   ("warranty", 2, false, true);
+                   ("warranty", 2, false, true);
+                   ("returns", 1, false, false);
+                 |]));
+      Jest.test "starts from the first while none is expanded" (fun () ->
+          E.(
+            expect (navigated [||] [ `next ])
+            |> toEqual [| ("", 0, true, false); ("returns", 1, false, false) |]));
+      Jest.test "reaches another with each press where several expand"
+        (fun () ->
+          E.(
+            expect
+              (navigated ~allows_multiple_expanded:true [| "shipping" |]
+                 [ `next; `next; `previous ])
+            |> toEqual
+                 [|
+                   ("shipping", 0, true, false);
+                   ("shipping,returns", 0, true, false);
+                   ("shipping,returns,warranty", 0, true, true);
+                   ("shipping,returns,warranty", 0, true, true);
+                 |])))

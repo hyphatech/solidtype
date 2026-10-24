@@ -25,6 +25,9 @@
     find in page reaches a word in it, which expands it; it grows and shrinks by
     the height HeroUI's styles animate, [--disclosure-panel-height].
 
+    Inside a {!Disclosure_group} it is expanded as the group holds its [id], and
+    disabled while it or the group is.
+
     A part is used inside a [Disclosure]: elsewhere it raises [Invalid_argument]
     as it is made. *)
 
@@ -117,6 +120,7 @@ module Props : sig
   type t
 
   val check :
+    ?id:string Solidtype.Check.value ->
     ?is_expanded:bool Solidtype.Check.value ->
     ?default_expanded:bool Solidtype.Check.value ->
     ?on_expanded_change:(bool -> unit) ->

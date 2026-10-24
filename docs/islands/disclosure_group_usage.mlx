@@ -1,0 +1,47 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Disclosure = Solidtype_heroui.Disclosure
+module Disclosure_group = Solidtype_heroui.Disclosure_group
+module Separator = Solidtype_heroui.Separator
+
+(* A disclosure whose trigger looks secondary while it is expanded. *)
+let item ~expanded ~key ~title ~text =
+  let open_ () = Array.exists (String.equal key) (S.get expanded) in
+  <Disclosure id=(fun () -> key)>
+    <Disclosure.Heading>
+      <Button
+        slot=`trigger
+        variant=(fun () -> if open_ () then `secondary else `tertiary)
+        class_=(fun () ->
+                 if open_ () then "w-full border-none"
+                 else "w-full border-none bg-transparent")>
+        <div class_="flex w-full items-center justify-start gap-2">
+          (fun () -> Solidtype.Jsx.string title)
+        </div>
+        <Disclosure.Indicator class_="text-muted" />
+      </Button>
+    </Disclosure.Heading>
+    <Disclosure.Content>
+      <Disclosure.Body class_="mx-2 flex flex-col gap-2 p-4 text-center">
+        <p class_="text-sm text-muted">(fun () -> Solidtype.Jsx.string text)</p>
+      </Disclosure.Body>
+    </Disclosure.Content>
+  </Disclosure>
+
+let make () =
+  let expanded, set_expanded = S.create_signal [| "shipping" |] in
+  <div class_="w-full max-w-md p-4">
+    <Disclosure_group
+      expanded_keys=(fun () -> S.get expanded)
+      on_expanded_change=(S.set set_expanded)>
+      (fun () ->
+        Solidtype.Jsx.element
+        @@ item ~expanded ~key:"shipping" ~title:"Shipping"
+             ~text:"Orders ship within 2 business days.")
+      <Separator class_="my-2" />
+      (fun () ->
+        Solidtype.Jsx.element
+        @@ item ~expanded ~key:"returns" ~title:"Returns"
+             ~text:"Return any order within 30 days.")
+    </Disclosure_group>
+  </div>

@@ -18,6 +18,7 @@ module Chip = H.Chip
 module Close_button = H.Close_button
 module Description = H.Description
 module Disclosure = H.Disclosure
+module Disclosure_group = H.Disclosure_group
 module Empty_state = H.Empty_state
 module Field_error = H.Field_error
 module Fieldset = H.Fieldset
@@ -156,6 +157,16 @@ let () =
                   </Disclosure.Heading>
                   <Disclosure.Content>"Within 30 days."</Disclosure.Content>
                 </Disclosure>
+                <Disclosure_group data_testid="Disclosure_group">
+                  <Disclosure id="gift">
+                    <Disclosure.Heading>
+                      <Disclosure.Trigger>"Gift wrap"</Disclosure.Trigger>
+                    </Disclosure.Heading>
+                    <Disclosure.Content>
+                      "Wrapped on request."
+                    </Disclosure.Content>
+                  </Disclosure>
+                </Disclosure_group>
                 <Separator data_testid="Separator" />
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
@@ -232,6 +243,7 @@ let () =
                    ("Surface", "[data-slot=surface]");
                    ("Disclosure", "[data-slot=disclosure]");
                    ("Disclosure.Heading", "[data-slot=disclosure-heading]");
+                   ("Disclosure_group", "[data-slot=disclosure-group]");
                    ("Disclosure.Trigger", "[data-slot=disclosure-trigger]");
                    ("Disclosure.Indicator", "[data-slot=disclosure-indicator]");
                    ("Disclosure.Content", "[data-slot=disclosure-content]");

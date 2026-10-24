@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Disclosure_group`: HeroUI's DisclosureGroup on the
+  port's Disclosure, one expanded at a time or several, controlled or kept,
+  disabled with each disclosure inside; `Disclosure` takes an `id`, its key
+  in a group. `Disclosure_group.navigation` is HeroUI's
+  `useDisclosureGroupNavigation`, whose next and previous, where several
+  expand, reach another with each press, where HeroUI's reaches the same
+  one twice.
 - `Solidtype_heroui.Number_field` keeps a fractional step's values exact: a
   tenth added to 0.2 is 0.3, where it was 0.30000000000000004, and the last
   step of 0.3 below 1 is 0.9; a value halfway between steps snaps away from

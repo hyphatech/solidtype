@@ -1,0 +1,107 @@
+module Jsx = Solidtype.Jsx
+
+type group = {
+  is_expanded : string -> bool;
+  toggle : string -> unit;
+  is_disabled : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+type navigation = {
+  current_index : unit -> int;
+  is_prev_disabled : unit -> bool;
+  is_next_disabled : unit -> bool;
+  on_previous : unit -> unit;
+  on_next : unit -> unit;
+}
+
+let navigation ?(allows_multiple_expanded = false) ~expanded_keys ~item_ids
+    ~on_expanded_change () =
+  let count = Array.length item_ids in
+  let index_of key =
+    Array.find_index (fun id -> String.equal id key) item_ids
+  in
+  let expanded () =
+    let keys = expanded_keys () in
+    item_ids |> Array.to_list
+    |> List.filter (fun id -> Array.exists (String.equal id) keys)
+  in
+  (* The first expanded, as HeroUI's counts it, else the first of all. *)
+  let current_index () =
+    if count = 0 then -1
+    else
+      match expanded () with
+      | first :: _ -> Option.value (index_of first) ~default:0
+      | [] -> 0
+  in
+  (* Where several expand, a step goes past the last expanded, or before the
+     first, so a press always reaches one not yet expanded. *)
+  let last_index () =
+    match List.rev (expanded ()) with
+    | last :: _ when allows_multiple_expanded ->
+        Option.value (index_of last) ~default:0
+    | _ -> current_index ()
+  in
+  let expand i =
+    let key = item_ids.(i) in
+    if allows_multiple_expanded then (
+      let keys = expanded_keys () in
+      if not (Array.exists (String.equal key) keys) then
+        on_expanded_change (Array.append keys [| key |]))
+    else on_expanded_change [| key |]
+  in
+  {
+    current_index;
+    is_prev_disabled = (fun () -> current_index () <= 0);
+    is_next_disabled = (fun () -> last_index () >= count - 1);
+    on_previous =
+      (fun () ->
+        let i = current_index () in
+        if i > 0 then expand (i - 1));
+    on_next =
+      (fun () ->
+        let i = last_index () in
+        if i >= 0 && i < count - 1 then expand (i + 1));
+  }
+
+let%component make ?(expanded_keys : string array option)
+    ?(default_expanded_keys : string array = [||])
+    ?(on_expanded_change : (string array -> unit) option)
+    ?(allows_multiple_expanded : bool = false) ?(is_disabled : bool = false)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let keys, set_keys =
+    Field.controlled ~value:expanded_keys ~default:(default_expanded_keys ())
+      ~on_change:(fun k -> on_expanded_change k)
+  in
+  let is_expanded key = Array.exists (String.equal key) (keys ()) in
+  (* One key in or out where several expand; else the key alone, or none
+     once it collapses, as React Stately toggles a group's keys. *)
+  let toggle key =
+    let now = keys () in
+    match (is_expanded key, allows_multiple_expanded ()) with
+    | true, true ->
+        set_keys (Js.Array.filter ~f:(fun k -> not (String.equal k key)) now)
+    | false, true -> set_keys (Array.append now [| key |])
+    | true, false -> set_keys [||]
+    | false, false -> set_keys [| key |]
+  in
+  let group =
+    { is_expanded; toggle; is_disabled = (fun () -> is_disabled ()) }
+  in
+  let classes () =
+    Styles.DisclosureGroup.base
+      (Styles.DisclosureGroup.slots
+         (Styles.DisclosureGroup.options ?class_:(class_ ()) ()))
+  in
+  <div
+    class_=(fun () -> classes ())
+    data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+    data_slot="disclosure-group"
+    props=(Props.others props)>
+    <Context.Provider value=(fun () -> group)>
+      (fun () -> children ())
+    </Context.Provider>
+  </div>
