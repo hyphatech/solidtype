@@ -1,15 +1,19 @@
 /* HeroUI's Tailwind build, for the examples. The theme's is its own,
    prefixed and in its layer, `hypha`, so the two share no class and no
-   variable, and HeroUI's layers, after the theme's, win over it. HeroUI's
-   pieces as its README gives them, never its entry, which brings Tailwind's
-   preflight and would reset Starlight's page: the prelude its components
-   need, then the components ported, no others, in its own order, shared
+   variable, and HeroUI's layers, after the theme's, win over it. Tailwind's
+   preflight is in the lowest layer, so Starlight's reset and the theme's win
+   wherever they set anything, and HeroUI's components, a button above all,
+   meet the ground they meet on heroui.com rather than the browser's.
+   HeroUI's pieces as its README gives them, never its entry: the prelude its
+   components need, then the components ported, no others, in its own order,
+   shared
    ones first, so a block it has that no port uses, `.header`, never meets
    a page's class of that name. HeroUI's theme follows Starlight's
    data-theme, so dark mode is one switch. */
 @layer base, starlight, hypha, theme, components, utilities;
 
 @import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "tw-animate-css";
 
@@ -59,6 +63,12 @@
 @import "@heroui/styles/components/kbd.css" layer(components);
 @import "@heroui/styles/components/typography.css" layer(components);
 @import "@heroui/styles/components/scroll-shadow.css" layer(components);
+@import "@heroui/styles/components/toggle-button.css" layer(components);
+@import "@heroui/styles/components/toggle-button-group.css" layer(components);
+@import "@heroui/styles/components/disclosure.css" layer(components);
+@import "@heroui/styles/components/disclosure-group.css" layer(components);
+@import "@heroui/styles/components/accordion.css" layer(components);
+@import "@heroui/styles/components/tabs.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
