@@ -1,0 +1,37 @@
+(* A collapsed disclosure's content and accordion's panel as the server writes
+   them: hidden until find in page reaches them, in the HTML a page is
+   prerendered with, so the browser can expand one before the page hydrates. *)
+
+module Server = Solidtype.Server
+module Accordion = Solidtype_heroui.Accordion
+module Disclosure = Solidtype_heroui.Disclosure
+module E = Jest.Expect
+
+let page () =
+  <div>
+    <Disclosure>
+      <Disclosure.Heading>
+        <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
+      </Disclosure.Heading>
+      <Disclosure.Content>
+        "Orders ship within 2 business days."
+      </Disclosure.Content>
+    </Disclosure>
+    <Accordion>
+      <Accordion.Item id="returns">
+        <Accordion.Heading>
+          <Accordion.Trigger>"Returns"</Accordion.Trigger>
+        </Accordion.Heading>
+        <Accordion.Panel>"Within 30 days."</Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
+  </div>
+
+(* How many times [part] is in [s]. *)
+let count part s = Array.length (Js.String.split ~sep:part s) - 1
+
+let () =
+  Jest.describe "Collapsed panels on the server" (fun () ->
+      Jest.test "are hidden until found" (fun () ->
+          let html = Server.render_to_string page in
+          E.(expect (count {js|hidden="until-found"|js} html) |> toEqual 2)))

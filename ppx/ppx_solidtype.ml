@@ -303,6 +303,28 @@ let data ~loc label (value : expression) =
   | _, (Literal | Element | Function) ->
       [%expr Solidtype.Jsx.s [%e name] ([%e value] : Solidtype.Jsx.data)]
 
+(* An attribute's namespace given to a component, which passes it on to its
+   element unchecked, as a data- attribute: [attr:], [bool:], and a name the
+   spelling rule cannot keep. A handler's and a property's are an element's
+   alone, since a component's props name its own. *)
+let passed_on ~loc label (value : expression) =
+  match wrapped value with
+  | Some (Ok (Namespaced (Attr, v))) ->
+      Ok ("attr:" ^ js_name label, [%type: string], v)
+  | Some (Ok (Namespaced (Bool, v))) ->
+      Ok ("bool:" ^ js_name label, [%type: bool], v)
+  | Some (Ok (Named (name, v))) when String.equal label "attr" ->
+      Ok (name, [%type: string], v)
+  | Some (Error e) -> Error e
+  | Some (Ok (Named _)) ->
+      Error (value.pexp_loc, "Jsx.named is given as attr=(Jsx.named \"name\" s)")
+  | Some (Ok (Namespaced ((Native | Capture | Prop), _) | Listen _)) | None ->
+      Error
+        ( loc,
+          "a component passes on Jsx.attr, Jsx.bool and Jsx.named to its \
+           element; Jsx.native, Jsx.capture, Jsx.prop and Jsx.listen wrap an \
+           element's attribute" )
+
 let element map ~loc name args =
   let prop (label, (value : expression)) =
     let loc = value.pexp_loc in
@@ -313,8 +335,8 @@ let element map ~loc name args =
       when starts_with ~prefix:"data_" l && Option.is_none (wrapped value) ->
         Ok (data ~loc l (map value))
     | Optional l -> (
-        let* value = optional ~loc l value in
         let* js, t, value, handler = dom_attribute ~loc ~tag:name l value in
+        let* value = optional ~loc l value in
         match t with
         | _ when handler || Option.is_some (wrapped value) ->
             Error (loc, Printf.sprintf "?%s takes a value, not a handler" l)
@@ -370,12 +392,25 @@ let component map ~loc path args =
           ( Some (bound spread, (None, map value)),
             Some (Labelled spread, x),
             [%expr Solidtype.Jsx.spread [%e x]] )
-    | _ when Option.is_some (wrapped value) ->
-        Error
-          ( loc,
-            "a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop, \
-             Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's \
-             attribute" )
+    | Optional l when Option.is_some (wrapped value) ->
+        let* js, t, v = passed_on ~loc l value in
+        let+ v = optional ~loc l v in
+        let read = [%expr ([%e map v] : unit -> [%t t] option)] in
+        ( None,
+          None,
+          [%expr
+            Solidtype.Jsx.d [%e B.estring ~loc js] [%e absent_or ~loc read]] )
+    | Labelled l when Option.is_some (wrapped value) -> (
+        let+ js, t, v = passed_on ~loc l value in
+        let js = B.estring ~loc js in
+        let v = js_string (map v) in
+        match kind_of ~handler:false v with
+        | Thunk ->
+            ( None,
+              None,
+              [%expr Solidtype.Jsx.d [%e js] ([%e v] : unit -> [%t t])] )
+        | Literal | Element | Function ->
+            (None, None, [%expr Solidtype.Jsx.s [%e js] ([%e v] : [%t t])]))
     | Labelled l when starts_with ~prefix:"data_" l ->
         Ok (None, None, data ~loc l (map value))
     | Optional l ->

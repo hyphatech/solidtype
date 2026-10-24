@@ -70,7 +70,9 @@ external dynamic : (unit -> content) -> child = "dynamic"
     A namespace wraps an attribute's value, never its name: Solid's
     [ns:name={v}] is [name=(Jsx.ns v)]. [ppx_solidtype] reads the wrapper where
     it is written, in an element's attribute, and writes the namespace; a
-    wrapper left out is Solid's default. *)
+    wrapper left out is Solid's default. A component takes {!attr}, {!bool} and
+    {!named} outside its props' check and passes them on to its element; each,
+    optional, is [?name=(Jsx.attr (fun () -> o))]. *)
 
 type 'a namespaced
 

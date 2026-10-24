@@ -330,17 +330,18 @@ A native listener given to an attribute that is no handler.
   Error: Jsx.native wraps a handler, on_<event>=(Jsx.native f)
   [1]
 
-A namespace given to a component, whose props have none.
+A property's namespace given to a component, whose props name its own: a
+component passes on an attribute's alone.
 
   $ cat > case.mlx <<'EOF'
-  > let make () = <Label text=(Solidtype.Jsx.attr "x") />
+  > let make () = <Label text=(Solidtype.Jsx.prop "x") />
   > EOF
   $ build
   File "case.mlx", line 1, characters 26-50:
-  1 | let make () = <Label text=(Solidtype.Jsx.attr "x") />
+  1 | let make () = <Label text=(Solidtype.Jsx.prop "x") />
                                 ^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: a namespace is an element's: Jsx.native, Jsx.capture, Jsx.prop,
-         Jsx.attr, Jsx.bool, Jsx.listen and Jsx.named wrap an element's
+  Error: a component passes on Jsx.attr, Jsx.bool and Jsx.named to its element;
+         Jsx.native, Jsx.capture, Jsx.prop and Jsx.listen wrap an element's
          attribute
   [1]
 

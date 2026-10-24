@@ -197,6 +197,27 @@ let namespaced =
                                                                     ({js|y|js} : 
                                                                     string))|]
     [||]
+let namespaced_optional =
+  Solidtype.Jsx.el "div"
+    [|(Solidtype.Jsx.d "attr:hidden"
+         (fun () ->
+            Js.Undefined.fromOption
+              ((fun () -> found () : unit -> string option) ())))|] [||]
+let namespaced_on_component =
+  if false then Switch.Root.Props.check ();
+  Solidtype.Jsx.c Switch.Root.component
+    [|(Solidtype.Jsx.s "attr:title" ({js|t|js} : string));(Solidtype.Jsx.d
+                                                             "attr:hidden"
+                                                             (fun () ->
+                                                                Js.Undefined.fromOption
+                                                                  ((fun () ->
+                                                                    found () : 
+                                                                    unit ->
+                                                                    string
+                                                                    option)
+                                                                    ())));(
+      Solidtype.Jsx.d "bool:inert" (fun () -> closed () : unit -> bool));(
+      Solidtype.Jsx.s "aria-x" ({js|y|js} : string))|] [||]
 let switch =
   if false
   then (((match answer () with | Waiting -> () | Ready n -> ()))

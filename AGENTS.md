@@ -266,10 +266,16 @@ break.
   JavaScript names share, and `test/ppx` holds what each is given back.
 - **A namespace of Solid's wraps the value, never the name**:
   `on_click=(Jsx.native f)` is `on:click={f}`, read by the ppx where it
-  is written, in an element's attribute; each wrapper types its value.
-  Why: a wrapper left out is Solid's default, never another namespace,
-  and a label that spelt the namespace would let a slip change it
-  unseen. Test: `test/does_not_compile.t`.
+  is written, in an element's attribute; each wrapper types its value. A
+  component takes an attribute's, `Jsx.attr`, `Jsx.bool` and `Jsx.named`,
+  outside its check, and passes it on to its element, as a `data_`
+  attribute: `?hidden=(Jsx.attr (fun () -> o))` is the one way to write
+  `hidden="until-found"` that Solid's server keeps, where a plain `hidden`
+  is a boolean. A handler's and a property's stay an element's, since a
+  component's props name its own. Why: a wrapper left out is Solid's
+  default, never another namespace, and a label that spelt the namespace
+  would let a slip change it unseen. Test: `test/does_not_compile.t`,
+  `test/server/panels_test.mlx`.
 - **A `data-` attribute is declared, never written by hand.** Its value is
   a `Jsx.data`, a string or JavaScript's `undefined`, which Solid leaves
   out: `Jsx.flag b` is `"true"` or nothing, React Aria's convention. The

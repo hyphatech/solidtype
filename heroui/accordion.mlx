@@ -197,7 +197,7 @@ module Panel = struct
     <Kobalte.Content
       class_=(fun () -> after (Styles.Accordion.panel (a.slots ())) (class_ ()))
       aria_hidden=(fun () -> not (i.expanded ()))
-      ?hidden=(fun () -> Panel.hidden panel)
+      ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))
       style=(fun () -> Panel.style panel)
       ref=(fun e -> Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (i.expanded ()))

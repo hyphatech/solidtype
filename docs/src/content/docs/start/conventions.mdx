@@ -51,6 +51,13 @@ is `name=(Jsx.ns v)`.
 The last two are for a name whose case or spelling the rule cannot keep. A
 wrapper left out is Solid's default, never another namespace.
 
+A component takes an attribute's namespace -- `Jsx.attr`, `Jsx.bool`,
+`Jsx.named` -- and passes it on to its element unchecked, as it does a data
+attribute; optional, it is `?hidden=(Jsx.attr (fun () -> o))`. Solid's
+server writes a plain `hidden` as present or absent, so `hidden="until-found"`
+reaches a prerendered page only as `attr:hidden`. A handler's and a
+property's namespaces are an element's alone.
+
 ## Data attributes
 
 A `data-` attribute is a `Jsx.data`, on an element and on a component,

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A component takes an attribute's namespace, `Jsx.attr`, `Jsx.bool` and
+  `Jsx.named`, and passes it on to its element, as a `data_` attribute; an
+  element and a component take one optional,
+  `?hidden=(Jsx.attr (fun () -> o))`. A collapsed
+  `Solidtype_heroui.Disclosure`'s content and `Accordion`'s panel are now
+  prerendered `hidden="until-found"`, so find in page reaches them before
+  the page hydrates, where Solid's server wrote a bare `hidden`.
 - `Solidtype_heroui.Accordion`: HeroUI's Accordion on Kobalte's, one item
   expanded at a time or several, controlled or kept, disabled with an item's
   own, on a surface or with no separator, an item told its own change after

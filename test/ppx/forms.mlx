@@ -56,6 +56,17 @@ let namespaced =
     attr=(Solidtype.Jsx.named "data-x" "y")
   />
 
+let namespaced_optional =
+  <div ?hidden=(Solidtype.Jsx.attr (fun () -> found ())) />
+
+let namespaced_on_component =
+  <Switch.Root
+    title=(Solidtype.Jsx.attr "t")
+    ?hidden=(Solidtype.Jsx.attr (fun () -> found ()))
+    inert=(Solidtype.Jsx.bool (fun () -> closed ()))
+    attr=(Solidtype.Jsx.named "aria-x" "y")
+  />
+
 let switch =
   <Switch>
     (fun () ->
