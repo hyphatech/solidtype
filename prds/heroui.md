@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure and DisclosureGroup.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure and DisclosureGroup; no landed port has its misuses in `test/does_not_compile.t` yet.
 Date: 2026-10-23
 
 ## The problem
@@ -64,8 +64,10 @@ the primitives Kobalte exports.
 - **FR-6** Each port has a documentation page laid out as HeroUI's, its
   examples, its comparison with React's, and what of HeroUI's it does not
   do yet.
-- **FR-7** Where a port differs from HeroUI's React component, it says so in
-  its `.mli` and its page.
+- **FR-7** A port is HeroUI's component, never a list of differences from
+  it: where it keeps Kobalte's accessible pattern, or does right what
+  HeroUI's own does wrong, its `.mli` and its page say what it does and
+  why, and its test holds it to that.
 - **FR-8** Every field can be driven wholly from outside -- its value, its
   change, its blur, its name, whether it is invalid and its error -- so
   the application's state, in Solid's store or its signals, validates it.
@@ -123,14 +125,35 @@ check written by hand where it passes an element's every attribute on, as
   error its element, as React Aria's contexts do; `Field.Slots` gives a
   Kobalte field's three at once; `Field.As_span` renders a Kobalte part as
   the span React Aria's is.
+- **A button another part makes its own**: HeroUI's examples give a
+  `Button` a slot, `slot="trigger"`, which React Aria resolves through a
+  context. `Button` takes `` slot=`trigger ``, and a part that takes a
+  trigger gives it, by `Button.Trigger`, the Kobalte component to render as
+  and the part's state, so the button keeps HeroUI's button look and
+  becomes the part's trigger: a disclosure's heading gives Kobalte's
+  collapsible trigger. A part's own trigger, `Disclosure.Trigger`, stays
+  beside it, as in HeroUI.
+- **Content that grows and shrinks**: HeroUI's styles animate a size React
+  Aria writes, `--disclosure-panel-height`, where Kobalte takes closed
+  content off the page and sizes it by a variable of its own. The port
+  keeps the content mounted, hidden until find in page reaches it, and
+  gives it its size step by step, a frame apart, so HeroUI's transition
+  runs; a size and the hidden state are declared, so a prerendered page
+  holds them. Accordion's content is the same machinery.
 - **What a group gives**: a context per group -- `Button_group`,
-  `Avatar_group`, `Checkbox_group`, `Radio_group`, `Fieldset`,
-  `Surface` -- read by the components inside it after their own props.
+  `Avatar_group`, `Checkbox_group`, `Radio_group`, `Toggle_button_group`,
+  `Disclosure_group`, `Fieldset`, `Surface` -- read by the components
+  inside it after their own props; a member joins a keyed group by its
+  `id`. A group Kobalte lacks, `Disclosure_group`, keeps its keys itself
+  over the port's members, which are Kobalte's.
   Solid cannot single out a group's own children, so every component inside
   a group reads it.
 - **Values a port keeps**: `Field.controlled`, a value controlled or kept,
-  where Kobalte's own does not behave as React Aria's -- a number field
-  snapped to its step, a slider's values -- and Kobalte is given it.
+  where the port needs the value itself -- a number field snapped to its
+  step, a slider's values, a disclosure its content expands -- and Kobalte
+  is given it. A number field's grid is counted from its minimum, a half
+  away from it, and each value written with its step's decimals, so a
+  tenth added to 0.2 is 0.3; a step that is not positive is no grid.
 
 ### Forms
 
@@ -153,6 +176,13 @@ needs is added above it, never inside each field:
   as invalid, until it is changed and then left, as React Aria commits a
   change. The form sets `novalidate`. A field outside a `Form` behaves as
   it does today.
+- **A server's errors, or a check before sending, from a codec**:
+  wiretype's printed Melange module reads a body with every problem at its
+  path, with the server's messages; its problems become
+  `validation_errors` in one `List.map`, path to name. `solidtype-heroui`
+  depends on no codec, since that module is each application's own; the
+  `Form` page shows the mapping, and a field's `name` is the path its
+  problem names.
 - **Values, rules and their timing are the application's**, in Solid's
   store: a field reads its value and its validity from it, and a rule
   across fields reads both. A form library is no part of this work; one
@@ -189,7 +219,22 @@ element where Kobalte's has another meaning: HeroUI's `Alert` and
 `Skeleton` have no role, so they are not Kobalte's. Kobalte's own state
 attributes, present and empty, which no style of HeroUI's reads, are left as
 Kobalte writes them, since a part cannot take them away; the tests leave
-them out by name.
+them out by name. A disclosure's content is Kobalte's region its trigger
+controls, where React Aria's is a group its trigger names; since the port
+keeps the content on the page, its trigger names it in `aria-controls`
+always, where Kobalte's does while it is open.
+
+### Where HeroUI's own falls short
+
+A port does not copy a fault of HeroUI's, or of React Aria's under it,
+and does better where it can; its page says what it does, and its test
+holds it. So far: a toggle button's own `is_disabled=false` holds in a
+disabled group, as HeroUI documents and its own does not; a toast's update
+keeps what it does not name; a disclosure group's navigation reaches
+another disclosure with each press where several expand, where HeroUI's
+reaches the same one twice; and a disclosure toggled before its transition
+ends is left to the toggle after, where React Aria's can hide content just
+expanded again.
 
 ### Tests
 
@@ -197,7 +242,9 @@ Each port's test renders the port and its twin, `test/heroui/twins/*.tsx`,
 and compares every part's attributes, references between parts written as
 the slot they point to, through the same steps; what one framework writes
 for itself (ids, React's controlled `value` attribute) is left out by name.
-A test is seen failing on a stub before the port is written. Its type-level
+A test is seen failing on a stub before the port is written. What jsdom
+lacks that a browser has -- a `hidden` that takes `"until-found"` -- is
+stood in for in `test/jsdom.ts`, never worked around in a port. Its type-level
 parity is entries in `test/does_not_compile.t`: the misuses TypeScript
 refuses in HeroUI's component, each with the error a user reads.
 
@@ -233,8 +280,9 @@ Drafted here; they reach `AGENTS.md` when the work lands.
   its reason. Why: the library promises HeroUI's look and behaviour, which
   only the two side by side show.
 - **A port where Kobalte has no component is built from Kobalte's
-  primitives**, and its `.mli` and page say it is not a Kobalte component.
-  Why: one layering, OCaml on Kobalte, for every port.
+  primitives, or from the ports on Kobalte's**, and its `.mli` and page say
+  it is not a Kobalte component. Why: one layering, OCaml on Kobalte, for
+  every port.
 
 - **A field is driven from outside and validates nothing itself**: its
   value, change, blur, name, validity and error are props, and a `Form`
@@ -245,6 +293,11 @@ Drafted here; they reach `AGENTS.md` when the work lands.
 
 Each port is one worktree from `main` and one commit, with its test, its
 page, its line in `coverage.mdx` and `CHANGES.md`.
+
+### Every group
+- [ ] Each landed port's misuses -- a prop left out, misspelt, of the wrong
+  kind -- in `test/does_not_compile.t`, with the error a user reads, and
+  each port after with its own
 
 ### Group 1: no behaviour to port
 - [x] CloseButton, ButtonGroup, Surface, Card, Kbd, Spinner, Skeleton,
@@ -261,6 +314,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   field focused, `validation_errors` by name
 - [x] TimeField, on Kobalte's
 - [ ] ErrorMessage, with Calendar in group 7
+- [ ] The `Form` page: a server's errors and a check before sending from
+  wiretype's printed codec, as `validation_errors`
 
 ### Group 3: status
 - [x] Alert, Meter
@@ -274,7 +329,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 ### Group 4: navigation and disclosure
 - [x] ToggleButton, ToggleButtonGroup
 - [x] Disclosure, DisclosureGroup
-- [ ] Breadcrumbs, Pagination, Tabs, Accordion
+- [ ] Accordion, on Kobalte's, its content as a disclosure's
+- [ ] Tabs, Breadcrumbs, Pagination
 
 ### Group 5: overlays and lists
 - [ ] Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox,
@@ -305,7 +361,7 @@ those its page explains.
 |---|---|
 | which components are ported, and what of each is not yet | `coverage.mdx` |
 | each port's contract | its `.mli` |
-| each port's use and its differences from React's | its page |
+| each port's use, and what it does other than React's and why | its page |
 | the layering, the twin test, a port built from primitives, a field driven from outside | `AGENTS.md`, its *Rules that must hold* |
 | how a form is validated from Solid's store | the `Form` page |
 | what changed for a user | `CHANGES.md` |
