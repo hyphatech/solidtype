@@ -1,7 +1,7 @@
 module Separator = Solidtype_heroui.Separator
 
 let make () =
-  <div class_="flex w-64 flex-col items-center gap-3 text-sm">
+  <div class_="flex max-w-md flex-col items-center gap-3">
     <div>"Default Variant"</div>
     <Separator variant=`default />
     <div>"Secondary Variant"</div>

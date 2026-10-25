@@ -1,21 +1,34 @@
 module Chip = Solidtype_heroui.Chip
 
 let make () =
-  <div class_="flex flex-wrap items-center gap-3">
-    <Chip variant=`primary>
-      <span class_="size-1.5 rounded-full bg-current" />
-      <Chip.Label>"Default"</Chip.Label>
-    </Chip>
-    <Chip color=`success variant=`primary>
-      <span class_="size-1.5 rounded-full bg-current" />
-      <Chip.Label>"Active"</Chip.Label>
-    </Chip>
-    <Chip color=`warning variant=`primary>
-      <span class_="size-1.5 rounded-full bg-current" />
-      <Chip.Label>"Pending"</Chip.Label>
-    </Chip>
-    <Chip color=`danger variant=`primary>
-      <span class_="size-1.5 rounded-full bg-current" />
-      <Chip.Label>"Inactive"</Chip.Label>
-    </Chip>
+  <div class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-center gap-3">
+      <Chip variant=`primary>
+        <Gravity.Circle_fill width=6 /> <Chip.Label>"Default"</Chip.Label>
+      </Chip>
+      <Chip color=`success variant=`primary>
+        <Gravity.Circle_fill width=6 /> <Chip.Label>"Active"</Chip.Label>
+      </Chip>
+      <Chip color=`warning variant=`primary>
+        <Gravity.Circle_fill width=6 /> <Chip.Label>"Pending"</Chip.Label>
+      </Chip>
+      <Chip color=`danger variant=`primary>
+        <Gravity.Circle_fill width=6 /> <Chip.Label>"Inactive"</Chip.Label>
+      </Chip>
+    </div>
+    <div class_="flex flex-wrap items-center gap-3">
+      <Chip>
+        <Gravity.Circle_info width=12 /> <Chip.Label>"New Feature"</Chip.Label>
+      </Chip>
+      <Chip color=`success>
+        <Gravity.Check width=12 /> <Chip.Label>"Available"</Chip.Label>
+      </Chip>
+      <Chip color=`warning>
+        <Gravity.Triangle_exclamation width=12 />
+        <Chip.Label>"Beta"</Chip.Label>
+      </Chip>
+      <Chip color=`danger>
+        <Gravity.Ban width=12 /> <Chip.Label>"Deprecated"</Chip.Label>
+      </Chip>
+    </div>
   </div>

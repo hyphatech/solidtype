@@ -6,20 +6,22 @@ let make () =
     <div class_="flex flex-col items-start gap-2">
       <p class_="text-sm text-muted">"With icons"</p>
       <Button_group variant=`secondary>
-        <Button><Icons.Globe /> "Search"</Button>
-        <Button><Button_group.Separator /> <Icons.Plus /> "Add"</Button>
-        <Button><Button_group.Separator /> <Icons.Trash /> "Delete"</Button>
+        <Button><Gravity.Globe /> "Search"</Button>
+        <Button><Button_group.Separator /> <Gravity.Plus /> "Add"</Button>
+        <Button>
+          <Button_group.Separator /> <Gravity.Trash_bin /> "Delete"
+        </Button>
       </Button_group>
     </div>
     <div class_="flex flex-col items-start gap-2">
       <p class_="text-sm text-muted">"Icon only buttons"</p>
       <Button_group variant=`tertiary>
-        <Button is_icon_only=true aria_label="Search"><Icons.Globe /></Button>
+        <Button is_icon_only=true aria_label="Search"><Gravity.Globe /></Button>
         <Button is_icon_only=true aria_label="Add">
-          <Button_group.Separator /> <Icons.Plus />
+          <Button_group.Separator /> <Gravity.Plus />
         </Button>
         <Button is_icon_only=true aria_label="Delete">
-          <Button_group.Separator /> <Icons.Trash />
+          <Button_group.Separator /> <Gravity.Trash_bin />
         </Button>
       </Button_group>
     </div>

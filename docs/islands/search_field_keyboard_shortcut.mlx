@@ -1,0 +1,85 @@
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Kbd = Solidtype_heroui.Kbd
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+
+type window
+
+external window : window = "window"
+
+external add_key_down :
+  window -> (_[@mel.as "keydown"]) -> ((Dom.keyboardEvent -> unit)[@u]) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external remove_key_down :
+  window -> (_[@mel.as "keydown"]) -> ((Dom.keyboardEvent -> unit)[@u]) -> unit
+  = "removeEventListener"
+[@@mel.send]
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external shift_key : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external meta_key : Dom.keyboardEvent -> bool = "metaKey" [@@mel.get]
+external ctrl_key : Dom.keyboardEvent -> bool = "ctrlKey" [@@mel.get]
+external alt_key : Dom.keyboardEvent -> bool = "altKey" [@@mel.get]
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+external query : Dom.htmlDivElement -> string -> Dom.htmlElement Js.null
+  = "querySelector"
+[@@mel.send]
+
+external active_element : Dom.htmlElement Js.null = "activeElement"
+[@@mel.scope "document"]
+
+external focus : Dom.htmlElement -> unit = "focus" [@@mel.send]
+external blur : Dom.htmlElement -> unit = "blur" [@@mel.send]
+
+let make () =
+  let value, set_value = S.create_signal "" in
+  (* The element around the field, whose input a key focuses. *)
+  let around = ref None in
+  let handle_key_down =
+   fun[@u] e ->
+    let input =
+      Option.bind !around (fun d -> Js.Null.toOption (query d "input"))
+    in
+    (* Check for Shift+S *)
+    if
+      shift_key e
+      && String.equal (key e) "S"
+      && not (meta_key e || ctrl_key e || alt_key e)
+    then (
+      prevent_default e;
+      Option.iter focus input);
+    (* Check for ESC key to blur the input *)
+    match (key e, input, Js.Null.toOption active_element) with
+    | "Escape", Some i, Some active when i == active -> blur i
+    | _ -> ()
+  in
+  S.on_mount (fun () ->
+      add_key_down window handle_key_down;
+      S.on_cleanup (fun () -> remove_key_down window handle_key_down));
+  <div class_="flex flex-col gap-4">
+    <div ref=(fun d -> around := Some d)>
+      <Search_field
+        name="search" value=(fun () -> S.get value) on_change=(S.set set_value)>
+        <Label>"Search"</Label>
+        <Search_field.Group>
+          <Search_field.Search_icon />
+          <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+          <Search_field.Clear_button />
+        </Search_field.Group>
+        <Description>
+          "Use keyboard shortcut to quickly focus this field"
+        </Description>
+      </Search_field>
+    </div>
+    <div class_="text-default-500 flex items-center gap-2 text-sm">
+      <span>"Press"</span>
+      <Kbd><Kbd.Abbr key_value=`shift /> <Kbd.Content>"S"</Kbd.Content></Kbd>
+      <span>"to focus the search field"</span>
+    </div>
+  </div>

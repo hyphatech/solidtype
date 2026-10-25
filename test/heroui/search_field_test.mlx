@@ -237,3 +237,26 @@ let () =
           in
           Twin.cleanup ();
           E.(expect (solidtype, react) |> toEqual (1, 1))))
+
+let () =
+  Jest.describe "Search_field's clear button" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "draws the icon it is given, as React's does" (fun () ->
+          T.render (fun () ->
+              <Search_field default_value="query">
+                <Label>"Search"</Label>
+                <Search_field.Group>
+                  <Search_field.Input />
+                  <Search_field.Clear_button>
+                    <span class_="given" />
+                  </Search_field.Clear_button>
+                </Search_field.Group>
+              </Search_field>);
+          let drawn =
+            Option.map
+              (fun b ->
+                ( Option.is_some (Js.Null.toOption (query b "span.given")),
+                  Option.is_some (Js.Null.toOption (query b "svg")) ))
+              (T.query "[data-slot=search-field-clear-button]")
+          in
+          E.(expect drawn |> toEqual (Some (true, false)))))

@@ -1,6 +1,6 @@
 (** HeroUI's Badge: a count or a status over the content it marks, with HeroUI's
     classes from {!Styles.Badge}. Text it is given is its label's, as HeroUI's
-    own wraps a string or a number.
+    own wraps a string or a number; with nothing, it is a dot.
 
     {[
       <Badge.Anchor>
@@ -56,7 +56,7 @@ module Props : sig
     ?size:[ `lg | `md | `sm ] Solidtype.Check.value ->
     ?variant:[ `primary | `secondary | `soft ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     unit ->
     unit

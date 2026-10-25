@@ -1,10 +1,11 @@
 module Checkbox = Solidtype_heroui.Checkbox
-module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
 
 let make () =
   <Checkbox is_disabled=true>
     <Checkbox.Content>
       <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-      <Label>"Premium feature"</Label>
+      "Premium Feature"
     </Checkbox.Content>
+    <Description>"This feature is coming soon"</Description>
   </Checkbox>

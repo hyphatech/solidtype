@@ -1,0 +1,19 @@
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+
+let make () =
+  <Number_field
+    class_="w-full max-w-48"
+    default_value=2.
+    min_value=1.
+    name="guests"
+    variant=`secondary>
+    <Label class_="font-medium text-foreground">"Guests"</Label>
+    <Number_field.Group class_="rounded-xl bg-default">
+      <Number_field.Decrement_button class_="text-muted hover:text-foreground"
+      />
+      <Number_field.Input class_="text-center tabular-nums" />
+      <Number_field.Increment_button class_="text-muted hover:text-foreground"
+      />
+    </Number_field.Group>
+  </Number_field>

@@ -1,0 +1,21 @@
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+
+let make () =
+  <Time_field class_="w-full max-w-48 gap-1.5" name="reminder">
+    <Label class_="font-medium text-foreground">"Reminder time"</Label>
+    <Description>"Daily check-in notification."</Description>
+    <Time_field.Group
+      class_="rounded-xl border border-border/80 bg-surface px-2 py-1 \
+              shadow-sm ring-1 ring-accent/5 focus-within:border-accent/25 \
+              focus-within:ring-2 focus-within:ring-accent/15">
+      <Time_field.Input>
+        (fun segment ->
+          <Time_field.Segment
+            class_="text-foreground" segment=(fun () -> S.get segment)
+          />)
+      </Time_field.Input>
+    </Time_field.Group>
+  </Time_field>

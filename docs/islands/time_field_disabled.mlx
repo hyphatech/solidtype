@@ -1,32 +1,38 @@
+module S = Solidtype.Solid
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
 module Time = Solidtype_kobalte.Types.Time
 
+(* The time now, in the reader's time zone. *)
+let now () =
+  let d = Js.Date.make () in
+  Time.make ~hour:(Js.Date.getHours d) ~minute:(Js.Date.getMinutes d)
+    ~second:(Js.Date.getSeconds d) ()
+
 let make () =
+  let time_value = now () in
   <div class_="flex flex-col gap-4">
     <Time_field
-      class_="w-64"
       is_disabled=true
+      class_="w-[256px]"
       name="time"
-      default_value=(fun () -> Time.make ~hour:14. ~minute:30. ())>
+      value=(fun () -> Js.Nullable.return time_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
           (fun segment ->
-            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
-            />)
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>"This time field is disabled"</Description>
     </Time_field>
-    <Time_field class_="w-64" is_disabled=true name="time-empty">
+    <Time_field is_disabled=true class_="w-[256px]" name="time-empty">
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
           (fun segment ->
-            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
-            />)
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>"This time field is disabled"</Description>

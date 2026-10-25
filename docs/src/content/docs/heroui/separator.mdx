@@ -4,15 +4,19 @@ description: A line between content.
 ---
 
 import Example from "@components/Example.astro";
+import * as Usage from "@islands/separator_usage.jsx";
+import UsageCode from "@islands/separator_usage.mlx?raw";
+import * as Variants from "@islands/separator_variants.jsx";
+import VariantsCode from "@islands/separator_variants.mlx?raw";
+import * as Surface from "@islands/separator_surface.jsx";
+import SurfaceCode from "@islands/separator_surface.mlx?raw";
+import * as Vertical from "@islands/separator_vertical.jsx";
+import VerticalCode from "@islands/separator_vertical.mlx?raw";
+import * as WithContent from "@islands/separator_content.jsx";
+import WithContentCode from "@islands/separator_content.mlx?raw";
+import * as Tailwind from "@islands/separator_tailwind.jsx";
+import TailwindCode from "@islands/separator_tailwind.mlx?raw";
 import * as Demo from "@islands/separator_demo.jsx";
-import * as SeparatorUsage from "@islands/separator_usage.jsx";
-import SeparatorUsageCode from "@islands/separator_usage.mlx?raw";
-import * as SeparatorVariants from "@islands/separator_variants.jsx";
-import SeparatorVariantsCode from "@islands/separator_variants.mlx?raw";
-import * as SeparatorVertical from "@islands/separator_vertical.jsx";
-import SeparatorVerticalCode from "@islands/separator_vertical.mlx?raw";
-import * as SeparatorContent from "@islands/separator_content.jsx";
-import SeparatorContentCode from "@islands/separator_content.mlx?raw";
 
 `Solidtype_heroui.Separator` is Kobalte's `Separator.Root`, with the classes
 HeroUI's own `separatorVariants` gives and the explicit role React Aria
@@ -20,28 +24,38 @@ writes.
 
 ## Usage
 
-<Example code={SeparatorUsageCode} title="separator_usage.mlx"><SeparatorUsage.make client:visible /></Example>
+<Example code={UsageCode} title="separator_usage.mlx"><Usage.make client:visible /></Example>
 
 ## Examples
 
 ### Variants
 
-<Example code={SeparatorVariantsCode} title="separator_variants.mlx"><SeparatorVariants.make client:visible /></Example>
+<Example code={VariantsCode} title="separator_variants.mlx"><Variants.make client:visible /></Example>
+
+### With Surface
+
+<Example code={SurfaceCode} title="separator_surface.mlx"><Surface.make client:visible /></Example>
 
 ### Vertical
 
-<Example code={SeparatorVerticalCode} title="separator_vertical.mlx"><SeparatorVertical.make client:visible /></Example>
+<Example code={VerticalCode} title="separator_vertical.mlx"><Vertical.make client:visible /></Example>
 
 ### With Content
 
-<Example code={SeparatorContentCode} title="separator_content.mlx"><SeparatorContent.make client:visible /></Example>
+<Example code={WithContentCode} title="separator_content.mlx"><WithContent.make client:visible /></Example>
 
-### Not yet
+### Render Function
 
-HeroUI's With Surface, until Surface is ported, and its Render Function,
-which needs `render`.
+HeroUI's Render Function example gives the separator `render`, React's way to
+swap the element it renders, which a Solid component has no need of.
 
 ## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="separator_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ### Global CSS
 

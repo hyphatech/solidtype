@@ -19,8 +19,10 @@
     ]}
 
     Its value is Kobalte's {!Solidtype_kobalte.Types.Time}, an hour, a minute
-    and a second. A part is used inside a [Time_field]: elsewhere it raises
-    [Invalid_argument] as it is made. *)
+    and a second. A [value] of [Js.Nullable.null] controls it empty, as React's
+    [null] does, and [on_change] is told [None] once every segment is erased. A
+    part is used inside a [Time_field]: elsewhere it raises [Invalid_argument]
+    as it is made. *)
 
 type segment = [ `hour | `minute | `second | `dayPeriod ]
 (** A segment's part of the time, AM or PM its [`dayPeriod]. *)
@@ -124,9 +126,9 @@ module Props : sig
   type t
 
   val check :
-    ?value:Solidtype_kobalte.Types.Time.t Solidtype.Check.value ->
+    ?value:Solidtype_kobalte.Types.Time.t Js.Nullable.t Solidtype.Check.value ->
     ?default_value:Solidtype_kobalte.Types.Time.t Solidtype.Check.value ->
-    ?on_change:(Solidtype_kobalte.Types.Time.t -> unit) ->
+    ?on_change:(Solidtype_kobalte.Types.Time.t option -> unit) ->
     ?placeholder_value:Solidtype_kobalte.Types.Time.t Solidtype.Check.value ->
     ?min_value:Solidtype_kobalte.Types.Time.t Solidtype.Check.value ->
     ?max_value:Solidtype_kobalte.Types.Time.t Solidtype.Check.value ->

@@ -1,0 +1,42 @@
+module Separator = Solidtype_heroui.Separator
+module Surface = Solidtype_heroui.Surface
+
+let surface ~title ~variant ~separator ?(border = "") () =
+  <Surface
+    class_=(fun () ->
+             "flex min-w-[320px] flex-col gap-3 rounded-3xl " ^ border ^ "p-6")
+    variant=(fun () -> variant)>
+    <h3 class_="text-base font-semibold text-foreground">
+      (fun () -> Solidtype.Jsx.string title)
+    </h3>
+    <Separator variant=(fun () -> separator) />
+    <p class_="text-sm text-muted">"Surface Content"</p>
+  </Surface>
+
+let make () =
+  <div class_="flex flex-col gap-8">
+    <div class_="flex flex-col gap-2">
+      (fun () ->
+        Solidtype.Jsx.element
+          (surface ~title:"Default Surface" ~variant:`default
+             ~separator:`default ()))
+    </div>
+    <div class_="flex flex-col gap-2">
+      (fun () ->
+        Solidtype.Jsx.element
+          (surface ~title:"Secondary Surface" ~variant:`secondary
+             ~separator:`secondary ()))
+    </div>
+    <div class_="flex flex-col gap-2">
+      (fun () ->
+        Solidtype.Jsx.element
+          (surface ~title:"Tertiary Surface" ~variant:`tertiary
+             ~separator:`tertiary ()))
+    </div>
+    <div class_="flex flex-col gap-2">
+      (fun () ->
+        Solidtype.Jsx.element
+          (surface ~title:"Transparent Surface" ~variant:`transparent
+             ~separator:`default ~border:"border " ()))
+    </div>
+  </div>

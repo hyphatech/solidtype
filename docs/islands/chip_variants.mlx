@@ -1,22 +1,72 @@
 module Chip = Solidtype_heroui.Chip
+module Separator = Solidtype_heroui.Separator
 
-(* Each color in a variant. *)
-module Row = struct
-  let%component make ~(variant : [ `primary | `secondary | `soft | `tertiary ])
-      () =
-    <div class_="flex flex-wrap items-center gap-3">
-      <Chip variant=(fun () -> variant ()) color=`accent>"Accent"</Chip>
-      <Chip variant=(fun () -> variant ()) color=`default>"Default"</Chip>
-      <Chip variant=(fun () -> variant ()) color=`success>"Success"</Chip>
-      <Chip variant=(fun () -> variant ()) color=`warning>"Warning"</Chip>
-      <Chip variant=(fun () -> variant ()) color=`danger>"Danger"</Chip>
+let variants =
+  [|
+    (`primary, "primary");
+    (`secondary, "secondary");
+    (`tertiary, "tertiary");
+    (`soft, "soft");
+  |]
+
+let colors =
+  [|
+    (`accent, "accent");
+    (`default, "default");
+    (`success, "success");
+    (`warning, "warning");
+    (`danger, "danger");
+  |]
+
+let cell children =
+  <div class_="flex shrink-0 items-center justify-center" style="width: 130px">
+    (fun () -> Solidtype.Jsx.element (children ()))
+  </div>
+
+let size_block (size, name) =
+  <div class_="flex flex-col gap-4">
+    <h3 class_="text-sm font-semibold text-muted capitalize">
+      (fun () -> Solidtype.Jsx.string name)
+    </h3>
+    <div class_="flex items-center gap-3">
+      <div class_="w-24 shrink-0" />
+      <Solidtype.For each=(fun () -> colors)>
+        (fun (_, color) _ ->
+          cell (fun () ->
+              <span class_="text-xs text-muted capitalize">
+                (fun () -> Solidtype.Jsx.string color)
+              </span>))
+      </Solidtype.For>
     </div>
-end
+    <div class_="flex flex-col gap-3">
+      <Solidtype.For each=(fun () -> variants)>
+        (fun (variant, vname) _ ->
+          <div class_="flex items-center gap-3">
+            <div class_="w-24 shrink-0 text-sm text-muted capitalize">
+              (fun () -> Solidtype.Jsx.string vname)
+            </div>
+            <Solidtype.For each=(fun () -> colors)>
+              (fun (color, _) _ ->
+                cell (fun () ->
+                    <Chip
+                      color=(fun () -> color)
+                      size=(fun () -> size)
+                      variant=(fun () -> variant)>
+                      <Gravity.Circle_dashed />
+                      <Chip.Label>"Label"</Chip.Label>
+                      <Gravity.Circle_dashed />
+                    </Chip>))
+            </Solidtype.For>
+          </div>)
+      </Solidtype.For>
+    </div>
+  </div>
 
 let make () =
-  <div class_="flex flex-col gap-4">
-    <Row variant=`primary />
-    <Row variant=`secondary />
-    <Row variant=`tertiary />
-    <Row variant=`soft />
+  <div class_="flex flex-col gap-8 overflow-x-auto">
+    (fun () -> Solidtype.Jsx.element (size_block (`lg, "lg")))
+    <Separator />
+    (fun () -> Solidtype.Jsx.element (size_block (`md, "md")))
+    <Separator />
+    (fun () -> Solidtype.Jsx.element (size_block (`sm, "sm")))
   </div>

@@ -43,6 +43,7 @@ module Props : sig
     ?is_required:bool Solidtype.Check.value ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?is_invalid:bool Solidtype.Check.value ->
+    ?for_:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->

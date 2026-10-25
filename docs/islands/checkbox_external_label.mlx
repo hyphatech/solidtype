@@ -1,0 +1,14 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module Label = Solidtype_heroui.Label
+
+(* HeroUI's label names the checkbox by its id, which the port's checkbox
+   does not take yet: it is named as the label is. *)
+let make () =
+  <div class_="flex items-center gap-3">
+    <Checkbox aria_label="Send me marketing emails">
+      <Checkbox.Content>
+        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+      </Checkbox.Content>
+    </Checkbox>
+    <Label>"Send me marketing emails"</Label>
+  </div>

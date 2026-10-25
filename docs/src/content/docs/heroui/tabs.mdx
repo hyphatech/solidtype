@@ -16,6 +16,10 @@ import * as WithSeparator from "@islands/tabs_separator.jsx";
 import WithSeparatorCode from "@islands/tabs_separator.mlx?raw";
 import * as Secondary from "@islands/tabs_secondary.jsx";
 import SecondaryCode from "@islands/tabs_secondary.mlx?raw";
+import * as SecondaryVertical from "@islands/tabs_secondary_vertical.jsx";
+import SecondaryVerticalCode from "@islands/tabs_secondary_vertical.mlx?raw";
+import * as Tailwind from "@islands/tabs_tailwind.jsx";
+import TailwindCode from "@islands/tabs_tailwind.mlx?raw";
 import * as Alignment from "@islands/tabs_alignment.jsx";
 import AlignmentCode from "@islands/tabs_alignment.mlx?raw";
 import * as Demo from "@islands/tabs_demo.jsx";
@@ -32,6 +36,8 @@ styles animate it. A tab and its panel are named by their `id`, which each
 takes; HeroUI's take one too, without which a panel has no tab.
 
 ## Usage
+
+HeroUI's examples.
 
 <Example code={UsageCode} title="tabs_usage.mlx"><Usage.make client:visible /></Example>
 
@@ -82,6 +88,10 @@ hidden beside the selected one.
 
 <Example code={SecondaryCode} title="tabs_secondary.mlx"><Secondary.make client:visible /></Example>
 
+### Secondary Variant Vertical
+
+<Example code={SecondaryVerticalCode} title="tabs_secondary_vertical.mlx"><SecondaryVertical.make client:visible /></Example>
+
 ### Alignment
 
 A tab's content is centred, or set to the start or the end by `align`.
@@ -93,6 +103,8 @@ A tab's content is centred, or set to the start or the end by `align`.
 ### Tailwind CSS
 
 `class_` is added after HeroUI's classes, on every part.
+
+<Example code={TailwindCode} title="tabs_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ### Global CSS
 
@@ -190,10 +202,9 @@ row is one they disagree on, and a dimmed row is a framework's own, which no
 style reads.
 
 A tab is Kobalte's button where React Aria's is a div, each of role `tab`.
-Kobalte's panel names its orientation, by which HeroUI's styles space it from
-the list, `mt-4`, or `ms-4` beside a vertical list; React Aria's panel never
-names it, so HeroUI's spacing never reaches it, and a panel here sits that
-much further from its list. React Aria marks its root focused while a tab is,
+A panel names no orientation, as React Aria's names none, so the spacing
+HeroUI's styles would give it by its orientation reaches neither, and a panel
+sits as close to its list as on heroui.com. React Aria marks its root focused while a tab is,
 which no style reads and the port does not.
 
 <div class="not-content">

@@ -296,6 +296,27 @@ let () =
           let react = shown () in
           Twin.cleanup ();
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "adds an action's class after HeroUI's, as React's"
+        (fun () ->
+          T.render (fun () -> <Toast.Provider />);
+          let (_ : Toast.key) =
+            Toast.success ~timeout_ms:0.
+              ~action:
+                (Toast.action ~class_:"bg-success"
+                   ~on_press:(fun () -> ())
+                   "Billing")
+              "Upgraded"
+          in
+          let* () = wait 50 in
+          Js.Promise.resolve
+            E.(
+              expect
+                (Option.map T.class_name
+                   (T.query "[data-slot=toast-action-button]"))
+              |> toEqual
+                   (Some
+                      "button button--sm button--tertiary toast__action \
+                       bg-success")));
       Jest.testPromise "keeps what an update does not name" (fun () ->
           T.render (fun () -> <Toast.Provider />);
           let key = Toast.show ~description:"Today" ~timeout_ms:0. "Saving" in

@@ -7,13 +7,18 @@ let items =
   [|
     ( "getting-started",
       "Getting Started",
-      "Installation, setup, and your first component." );
+      "Learn the basics of HeroUI and how to integrate it into your React \
+       project. This section covers installation, setup, and your first \
+       component." );
     ( "core-concepts",
       "Core Concepts",
-      "Compound components, styling, and accessibility." );
+      "Understand the fundamental concepts behind HeroUI, including the \
+       compound component pattern, styling with Tailwind CSS, and \
+       accessibility features." );
     ( "advanced-usage",
       "Advanced Usage",
-      "Custom variants and theme customization." );
+      "Explore advanced features like custom variants, theme customization, \
+       and integration with other libraries in your React ecosystem." );
   |]
 
 let make () =
@@ -42,7 +47,7 @@ let make () =
           size=`sm
           variant=`secondary
           on_click=(fun _ -> n.on_previous ())>
-          "Previous"
+          <Gravity.Chevron_up class_="size-4" />
         </Button>
         <Button
           aria_label="Next item"
@@ -50,7 +55,7 @@ let make () =
           size=`sm
           variant=`secondary
           on_click=(fun _ -> n.on_next ())>
-          "Next"
+          <Gravity.Chevron_down class_="size-4" />
         </Button>
       </div>
     </div>

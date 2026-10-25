@@ -4,13 +4,30 @@ module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
 
 let make () =
-  <Text_field class_="w-full max-w-[280px]" name="field" is_disabled=true>
-    <Label>"Email address"</Label>
-    <Input_group>
-      <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
-      <Input_group.Input
-        class_="w-full max-w-[280px]" placeholder="name@email.com"
-      />
-    </Input_group>
-    <Description>"This field is disabled"</Description>
-  </Text_field>
+  <div class_="flex flex-col gap-4">
+    <Text_field
+      is_disabled=true
+      class_="w-full max-w-[280px]"
+      default_value="name@email.com"
+      name="email">
+      <Label>"Email address"</Label>
+      <Input_group>
+        <Input_group.Prefix>
+          <Gravity.Envelope class_="size-4 text-muted" />
+        </Input_group.Prefix>
+        <Input_group.Input class_="w-full max-w-[280px]" />
+      </Input_group>
+    </Text_field>
+    <Text_field
+      is_disabled=true
+      class_="w-full max-w-[280px]"
+      default_value="10"
+      name="price">
+      <Label>"Set a price"</Label>
+      <Input_group>
+        <Input_group.Prefix>"$"</Input_group.Prefix>
+        <Input_group.Input class_="w-full max-w-[200px]" type_="number" />
+        <Input_group.Suffix>"USD"</Input_group.Suffix>
+      </Input_group>
+    </Text_field>
+  </div>

@@ -4,14 +4,20 @@ description: A container that groups related content and actions.
 ---
 
 import Example from "@components/Example.astro";
-import * as Usage from "@islands/card_usage.jsx";
-import UsageCode from "@islands/card_usage.mlx?raw";
-import * as Variants from "@islands/card_variants.jsx";
-import VariantsCode from "@islands/card_variants.mlx?raw";
-import * as Horizontal from "@islands/card_horizontal.jsx";
-import HorizontalCode from "@islands/card_horizontal.mlx?raw";
-import * as Tailwind from "@islands/card_tailwind.jsx";
-import TailwindCode from "@islands/card_tailwind.mlx?raw";
+import * as ExUsage from "@islands/card_usage.jsx";
+import ExUsageCode from "@islands/card_usage.mlx?raw";
+import * as ExVariants from "@islands/card_variants.jsx";
+import ExVariantsCode from "@islands/card_variants.mlx?raw";
+import * as ExHorizontal from "@islands/card_horizontal.jsx";
+import ExHorizontalCode from "@islands/card_horizontal.mlx?raw";
+import * as ExAvatar from "@islands/card_avatar.jsx";
+import ExAvatarCode from "@islands/card_avatar.mlx?raw";
+import * as ExImages from "@islands/card_images.jsx";
+import ExImagesCode from "@islands/card_images.mlx?raw";
+import * as ExForm from "@islands/card_form.jsx";
+import ExFormCode from "@islands/card_form.mlx?raw";
+import * as ExTailwind from "@islands/card_tailwind.jsx";
+import ExTailwindCode from "@islands/card_tailwind.mlx?raw";
 import * as Demo from "@islands/card_demo.jsx";
 
 `Solidtype_heroui.Card` is a `<div>` and its parts, with the classes HeroUI's
@@ -21,7 +27,9 @@ card but a transparent one is a surface, which it gives what is inside it by
 
 ## Usage
 
-<Example code={UsageCode} title="card_usage.mlx"><Usage.make client:visible /></Example>
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
+
+<Example code={ExUsageCode} title="card_usage.mlx"><ExUsage.make client:visible /></Example>
 
 ## Anatomy
 
@@ -40,31 +48,31 @@ card but a transparent one is a surface, which it gives what is inside it by
 
 ### Variants
 
-A card's variant says how prominent it is, as a surface's does:
-
-- `` `transparent ``, minimal, with no background, for nested cards
-- `` `default ``, the standard card
-- `` `secondary ``, of medium prominence
-- `` `tertiary ``, of higher prominence
-
-<Example code={VariantsCode} title="card_variants.mlx"><Variants.make client:visible /></Example>
+<Example code={ExVariantsCode} title="card_variants.mlx"><ExVariants.make client:visible /></Example>
 
 ### Horizontal Layout
 
-<Example code={HorizontalCode} title="card_horizontal.mlx"><Horizontal.make client:visible /></Example>
+<Example code={ExHorizontalCode} title="card_horizontal.mlx"><ExHorizontal.make client:visible /></Example>
 
-### Not yet
+### With Avatar
 
-HeroUI's With Avatar, With Images and With Form examples need Avatar, Input
-and TextField, which are not ported yet.
+<Example code={ExAvatarCode} title="card_avatar.mlx"><ExAvatar.make client:visible /></Example>
+
+### With Images
+
+<Example code={ExImagesCode} title="card_images.mlx"><ExImages.make client:visible /></Example>
+
+### With Form
+
+<Example code={ExFormCode} title="card_form.mlx"><ExForm.make client:visible /></Example>
 
 ## Customization
 
 ### Tailwind CSS
 
-`class_` is added after HeroUI's classes, on the card and on each part.
+`class_` is added after HeroUI's classes.
 
-<Example code={TailwindCode} title="card_tailwind.mlx"><Tailwind.make client:visible /></Example>
+<Example code={ExTailwindCode} title="card_tailwind.mlx"><ExTailwind.make client:visible /></Example>
 
 ### Global CSS
 

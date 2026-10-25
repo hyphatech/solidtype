@@ -1,56 +1,86 @@
 module Button = Solidtype_heroui.Button
 module Toast = Solidtype_heroui.Toast
 
+(* A toast whose action closes it, as each of HeroUI's here does. *)
+let closing show =
+  let key = ref None in
+  key := Some (show (fun () -> Option.iter (fun k -> Toast.close k) !key))
+
 let make () =
-  <div class_="flex flex-wrap gap-2">
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~variant:`default
-                        ~description:"A default toast" "Default"
-                       : Toast.key))>
-      "Default"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~variant:`accent ~description:"A accent toast"
-                        "Accent"
-                       : Toast.key))>
-      "Accent"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~variant:`success
-                        ~description:"A success toast" "Success"
-                       : Toast.key))>
-      "Success"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~variant:`warning
-                        ~description:"A warning toast" "Warning"
-                       : Toast.key))>
-      "Warning"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~variant:`danger ~description:"A danger toast"
-                        "Danger"
-                       : Toast.key))>
-      "Danger"
-    </Button>
+  <div class_="flex h-full max-w-xl flex-col items-center justify-center">
+    <div class_="flex w-full flex-wrap items-center justify-center gap-4">
+      <Button
+        size=`sm
+        variant=`tertiary
+        on_click=(fun _ ->
+                     closing (fun close ->
+                         Toast.show
+                           ~action:
+                             (Toast.action ~variant:`tertiary ~on_press:close
+                                "Dismiss")
+                           ~description:
+                             "Bob sent you an invitation to join HeroUI team"
+                           ~indicator:(Toast.Icon <Gravity.Persons />)
+                           ~variant:`default
+                           "You have been invited to join a team"))>
+        "Default toast"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     closing (fun close ->
+                         Toast.info
+                           ~action:(Toast.action ~on_press:close "Upgrade")
+                           ~description:"Get a paid plan for more credits"
+                           "You have 2 credits left"))>
+        "Accent toast"
+      </Button>
+      <Button
+        class_="text-success-soft-foreground"
+        size=`sm
+        variant=`tertiary
+        on_click=(fun _ ->
+                     closing (fun close ->
+                         Toast.success
+                           ~action:
+                             (Toast.action
+                                ~class_:"bg-success text-success-foreground"
+                                ~on_press:close "Billing")
+                           ~description:"You can continue using HeroUI Chat"
+                           "You have upgraded your plan"))>
+        "Success toast"
+      </Button>
+      <Button
+        class_="text-warning-soft-foreground"
+        size=`sm
+        variant=`tertiary
+        on_click=(fun _ ->
+                     closing (fun close ->
+                         Toast.warning
+                           ~action:
+                             (Toast.action
+                                ~class_:"bg-warning text-warning-foreground"
+                                ~on_press:close "Upgrade")
+                           ~description:"Upgrade to a paid plan to continue"
+                           "You have no credits left"))>
+        "Warning toast"
+      </Button>
+      <Button
+        size=`sm
+        variant=`danger_soft
+        on_click=(fun _ ->
+                     closing (fun close ->
+                         Toast.danger
+                           ~action:
+                             (Toast.action ~variant:`danger ~on_press:close
+                                "Remove")
+                           ~description:
+                             "Remove files to release space. Adding more text \
+                              to demonstrate longer content display"
+                           ~indicator:(Toast.Icon <Gravity.Hard_drive />)
+                           "Storage is full"))>
+        "Danger toast"
+      </Button>
+    </div>
   </div>

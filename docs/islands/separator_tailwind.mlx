@@ -1,0 +1,14 @@
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <div class_="max-w-xs space-y-4">
+    <p class_="text-sm font-medium text-foreground">"Account settings"</p>
+    <Separator class_="bg-separator-secondary" />
+    <div class_="flex items-center gap-3 text-sm text-muted">
+      <span>"Profile"</span>
+      <Separator class_="h-4 bg-separator" orientation=`vertical />
+      <span>"Billing"</span>
+      <Separator class_="h-4 bg-separator" orientation=`vertical />
+      <span>"Security"</span>
+    </div>
+  </div>

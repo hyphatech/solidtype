@@ -4,17 +4,17 @@ description: A short label for a status, a category or a choice.
 ---
 
 import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/chip_usage.jsx";
+import ExUsageCode from "@islands/chip_usage.mlx?raw";
+import * as ExVariants from "@islands/chip_variants.jsx";
+import ExVariantsCode from "@islands/chip_variants.mlx?raw";
+import * as ExStatuses from "@islands/chip_statuses.jsx";
+import ExStatusesCode from "@islands/chip_statuses.mlx?raw";
+import * as ExIcons from "@islands/chip_icons.jsx";
+import ExIconsCode from "@islands/chip_icons.mlx?raw";
+import * as ExTailwind from "@islands/chip_tailwind.jsx";
+import ExTailwindCode from "@islands/chip_tailwind.mlx?raw";
 import * as Demo from "@islands/chip_demo.jsx";
-import * as ChipUsage from "@islands/chip_usage.jsx";
-import ChipUsageCode from "@islands/chip_usage.mlx?raw";
-import * as ChipVariants from "@islands/chip_variants.jsx";
-import ChipVariantsCode from "@islands/chip_variants.mlx?raw";
-import * as ChipSizes from "@islands/chip_sizes.jsx";
-import ChipSizesCode from "@islands/chip_sizes.mlx?raw";
-import * as ChipStatuses from "@islands/chip_statuses.jsx";
-import ChipStatusesCode from "@islands/chip_statuses.mlx?raw";
-import * as ChipIcons from "@islands/chip_icons.jsx";
-import ChipIconsCode from "@islands/chip_icons.mlx?raw";
 
 `Solidtype_heroui.Chip` is HeroUI's chip, with the classes HeroUI's own
 `chipVariants` gives. Text a chip is given becomes its `Chip.Label`, as in
@@ -22,31 +22,31 @@ React. A chip has no behaviour, so it is HeroUI's spans as they are.
 
 ## Usage
 
-<Example code={ChipUsageCode} title="chip_usage.mlx"><ChipUsage.make client:visible /></Example>
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
+
+<Example code={ExUsageCode} title="chip_usage.mlx"><ExUsage.make client:visible /></Example>
 
 ## Examples
 
 ### Variants
 
-<Example code={ChipVariantsCode} title="chip_variants.mlx"><ChipVariants.make client:visible /></Example>
-
-### Sizes
-
-<Example code={ChipSizesCode} title="chip_sizes.mlx"><ChipSizes.make client:visible /></Example>
+<Example code={ExVariantsCode} title="chip_variants.mlx"><ExVariants.make client:visible /></Example>
 
 ### Statuses
 
-<Example code={ChipStatusesCode} title="chip_statuses.mlx"><ChipStatuses.make client:visible /></Example>
+<Example code={ExStatusesCode} title="chip_statuses.mlx"><ExStatuses.make client:visible /></Example>
 
 ### With Icons
 
-<Example code={ChipIconsCode} title="chip_icons.mlx"><ChipIcons.make client:visible /></Example>
-
-### Not yet
-
-Nothing of HeroUI's examples: each is here.
+<Example code={ExIconsCode} title="chip_icons.mlx"><ExIcons.make client:visible /></Example>
 
 ## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="chip_tailwind.mlx"><ExTailwind.make client:visible /></Example>
 
 ### Global CSS
 

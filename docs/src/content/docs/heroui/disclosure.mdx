@@ -6,10 +6,6 @@ description: A section that shows and hides its content.
 import Example from "@components/Example.astro";
 import * as Usage from "@islands/disclosure_usage.jsx";
 import UsageCode from "@islands/disclosure_usage.mlx?raw";
-import * as Trigger from "@islands/disclosure_trigger.jsx";
-import TriggerCode from "@islands/disclosure_trigger.mlx?raw";
-import * as Disabled from "@islands/disclosure_disabled.jsx";
-import DisabledCode from "@islands/disclosure_disabled.mlx?raw";
 import * as Tailwind from "@islands/disclosure_tailwind.jsx";
 import TailwindCode from "@islands/disclosure_tailwind.mlx?raw";
 import * as Demo from "@islands/disclosure_demo.jsx";
@@ -26,6 +22,8 @@ in page reaches a word in it, which expands it; it grows and shrinks by
 
 ## Usage
 
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons` and Iconify.
+
 <Example code={UsageCode} title="disclosure_usage.mlx"><Usage.make client:visible /></Example>
 
 ## Anatomy
@@ -41,23 +39,12 @@ in page reaches a word in it, which expands it; it grows and shrinks by
 
 ## Examples
 
-### Its own trigger
+### Render Function
 
-`Disclosure.Trigger` is a trigger in HeroUI's disclosure look, where a
-`Button` is one in a button's.
-
-<Example code={TriggerCode} title="disclosure_trigger.mlx"><Trigger.make client:visible /></Example>
-
-### Disabled
-
-<Example code={DisabledCode} title="disclosure_disabled.mlx"><Disabled.make client:visible /></Example>
-
-### Not yet
-
-HeroUI's Render Function example needs `render`, which the port does not
-take; nor does a part take a function of its state as its children, React's
-render prop: the content reads the signal the page keeps, as the usage
-does.
+HeroUI's Render Function example gives a part `render`, React's way to swap
+the element it renders, which a Solid component has no need of: the port
+does not take it, nor a function of a part's state as its children, since
+the content reads the signal the page keeps, as the usage does.
 
 ## Customization
 

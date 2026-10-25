@@ -1,0 +1,34 @@
+module Button = Solidtype_heroui.Button
+module Disclosure = Solidtype_heroui.Disclosure
+module Disclosure_group = Solidtype_heroui.Disclosure_group
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <Disclosure_group class_="w-full max-w-sm rounded-xl bg-default-soft p-2">
+    <Disclosure id="billing">
+      <Disclosure.Heading>
+        <Button class_="w-full justify-between" slot=`trigger variant=`ghost>
+          "Billing" <Disclosure.Indicator class_="text-muted" />
+        </Button>
+      </Disclosure.Heading>
+      <Disclosure.Content>
+        <Disclosure.Body class_="text-sm text-muted">
+          "Invoices are issued on the first of each month."
+        </Disclosure.Body>
+      </Disclosure.Content>
+    </Disclosure>
+    <Separator class_="my-1" />
+    <Disclosure id="support">
+      <Disclosure.Heading>
+        <Button class_="w-full justify-between" slot=`trigger variant=`ghost>
+          "Support" <Disclosure.Indicator class_="text-muted" />
+        </Button>
+      </Disclosure.Heading>
+      <Disclosure.Content>
+        <Disclosure.Body class_="text-sm text-muted">
+          "Reach us at help@heroui.com. Typical response time is under one \
+           business day."
+        </Disclosure.Body>
+      </Disclosure.Content>
+    </Disclosure>
+  </Disclosure_group>

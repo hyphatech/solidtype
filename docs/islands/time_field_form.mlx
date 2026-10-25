@@ -1,0 +1,81 @@
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module Time = Solidtype_kobalte.Types.Time
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let min_time = Time.make ~hour:9. ~minute:0. ()
+let max_time = Time.make ~hour:17. ~minute:0. ()
+
+(* A time's seconds since midnight, which order two times. *)
+let seconds t =
+  let part p = Option.value (p t) ~default:0. in
+  (part Time.hour *. 3600.) +. (part Time.minute *. 60.) +. part Time.second
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let is_submitting, set_is_submitting = S.create_signal false in
+  let is_invalid () =
+    match S.get value with
+    | Some t -> seconds t < seconds min_time || seconds t > seconds max_time
+    | None -> false
+  in
+  let handle_submit e =
+    prevent_default e;
+    match S.get value with
+    | Some t when not (is_invalid ()) ->
+        S.set set_is_submitting true;
+        (* Simulate API call *)
+        ignore
+          (Js.Global.setTimeout
+             ~f:(fun () ->
+               Js.log2 "Time submitted:" t;
+               S.set set_value None;
+               S.set set_is_submitting false)
+             1500
+            : Js.Global.timeoutId)
+    | Some _ | None -> ()
+  in
+  <Form class_="flex w-[280px] flex-col gap-4" on_submit=handle_submit>
+    <Time_field
+      is_required=true
+      class_="w-full"
+      is_invalid=(fun () -> is_invalid ())
+      name="time"
+      min_value=(fun () -> min_time)
+      max_value=(fun () -> max_time)
+      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Appointment time"</Label>
+      <Time_field.Group>
+        <Time_field.Prefix>
+          <Gravity.Clock class_="size-4 text-muted" />
+        </Time_field.Prefix>
+        <Time_field.Input>
+          (fun segment ->
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
+        </Time_field.Input>
+      </Time_field.Group>
+      <Show
+        when_=(fun () -> is_invalid ())
+        fallback=(<Description>
+                    "Enter a time between 9:00 AM and 5:00 PM"
+                  </Description>)>
+        <Field_error>"Time must be between 9:00 AM and 5:00 PM"</Field_error>
+      </Show>
+    </Time_field>
+    <Button
+      class_="w-full"
+      is_disabled=(fun () -> Option.is_none (S.get value) || is_invalid ())
+      type_=`submit
+      variant=`primary>
+      <Show when_=(fun () -> not (S.get is_submitting))>"Submit"</Show>
+      <Show when_=(fun () -> S.get is_submitting)>"Submitting..."</Show>
+    </Button>
+  </Form>

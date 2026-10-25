@@ -1,4 +1,0 @@
-module Link = Solidtype_heroui.Link
-
-let make () =
-  <Link href="#" is_disabled=true>"Disabled link" <Link.Icon /></Link>

@@ -3,6 +3,12 @@ title: Description
 description: A field's helper text.
 ---
 
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/description_usage.jsx";
+import UsageCode from "@islands/description_usage.mlx?raw";
+import * as Tailwind from "@islands/description_tailwind.jsx";
+import TailwindCode from "@islands/description_tailwind.mlx?raw";
+
 `Solidtype_heroui.Description` is HeroUI's description, with the classes
 HeroUI's own `descriptionVariants` gives. It is a `<span>`, unless a part
 above it gives it its element, as React Aria's do: inside a
@@ -10,9 +16,17 @@ above it gives it its element, as React Aria's do: inside a
 group is described by, and inside a radio the radio's, which its input is
 described by. The Radio Group page shows it in its fields.
 
-```ocaml
-<Description>"Includes 100 messages per month"</Description>
-```
+## Usage
+
+<Example code={UsageCode} title="description_usage.mlx"><Usage.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="description_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ## Styling Reference
 

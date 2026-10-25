@@ -4,8 +4,16 @@ module Search_field = Solidtype_heroui.Search_field
 
 let make () =
   <div class_="flex flex-col gap-4">
-    <Search_field
-      is_disabled=true name="search" default_value="Disabled search">
+    <Search_field is_disabled=true name="search" value="Disabled search">
+      <Label>"Search"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+      <Description>"This search field is disabled"</Description>
+    </Search_field>
+    <Search_field is_disabled=true name="search-empty">
       <Label>"Search"</Label>
       <Search_field.Group>
         <Search_field.Search_icon />

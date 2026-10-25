@@ -10,6 +10,7 @@ type field = {
   disabled : unit -> bool;
   invalid : unit -> bool;
   label_id : string;
+  current : unit -> float;
   can_increment : unit -> bool;
   can_decrement : unit -> bool;
 }
@@ -110,11 +111,17 @@ module Input = struct
       =
     let f = within "Number_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    (* Kobalte's input tells its value now as the text it shows once the value
+       changes, a "51%"; React Aria's tells the number. *)
     <Kobalte.Input
       ?placeholder
       class_=(fun () ->
                after (Styles.NumberField.input (f.slots ())) (class_ ()))
       ref=(fun e -> Interaction.watch i e)
+      ?aria_valuenow=(fun () ->
+                       let v = f.current () in
+                       if Float.is_nan v then None
+                       else Some (Js.Float.toString v))
       data_slot="number-field-input"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -224,11 +231,11 @@ end
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(value : float option)
     ?(default_value : float option) ?(on_change : (float -> unit) option)
-    ?(min_value : float option) ?(max_value : float option) ?(step : float = 1.)
-    ?(is_disabled : bool option) ?(is_invalid : bool = false)
-    ?(is_read_only : bool = false) ?(is_required : bool = false)
-    ?(name : string option) ?(aria_label : string option)
-    ?(class_ : string option)
+    ?(min_value : float option) ?(max_value : float option)
+    ?(step : float option) ?(is_disabled : bool option)
+    ?(is_invalid : bool = false) ?(is_read_only : bool = false)
+    ?(is_required : bool = false) ?(name : string option)
+    ?(aria_label : string option) ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
     ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
   (* A field is disabled as it says, else as its fieldset is. *)
@@ -236,9 +243,24 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let disabled () =
     match is_disabled () with Some d -> d | None -> in_fieldset ()
   in
+  (* A value is on the grid of a step it is given, else within its range
+     alone, as React Aria keeps it; a button steps it by the step, else by 1,
+     or by a percent's hundredth. *)
   let snapped v =
     if Float.is_nan v then v
-    else snap ~min:(min_value ()) ~max:(max_value ()) ~step:(step ()) v
+    else
+      snap ~min:(min_value ()) ~max:(max_value ())
+        ~step:(Option.value (step ()) ~default:0.)
+        v
+  in
+  let by () =
+    match (step (), format_options ()) with
+    | Some s, _ -> s
+    | None, Some o -> (
+        match Types.NumberFormatOptions.style o with
+        | Some `percent -> 0.01
+        | Some (`decimal | `currency | `unit) | None -> 1.)
+    | None, None -> 1.
   in
   (* The value is the field's, on its step's grid within its range, as
      HeroUI's field keeps it, and Kobalte is given it: Kobalte snaps nothing,
@@ -285,6 +307,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let f =
     {
       label_id;
+      current;
       slots =
         (fun () ->
           Styles.NumberField.slots
@@ -292,8 +315,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                ?variant:(variant ()) ()));
       disabled;
       invalid;
-      can_increment = can (fun v -> v +. step ());
-      can_decrement = can (fun v -> v -. step ());
+      can_increment = can (fun v -> v +. by ());
+      can_decrement = can (fun v -> v -. by ());
     }
   in
   <Context.Provider value=(fun () -> f)>
@@ -302,7 +325,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       on_raw_value_change=change
       ?min_value
       ?max_value
-      step=(fun () -> step ())
+      step=(fun () -> by ())
       validation_state=(fun () -> if invalid () then `invalid else `valid)
       required=(fun () -> is_required ())
       disabled=(fun () -> disabled ())

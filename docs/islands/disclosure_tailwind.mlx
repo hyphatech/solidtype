@@ -18,7 +18,8 @@ let make () =
           slot=`trigger
           variant=`ghost>
           <span class_="flex items-center gap-2">
-            <Icons.Globe /> "Shipping details"
+            <Gravity.Shopping_bag class_="size-4 text-muted" />
+            "Shipping details"
           </span>
           <Disclosure.Indicator class_="text-muted" />
         </Button>

@@ -4,23 +4,35 @@ description: A checkbox, HeroUI's on Kobalte's.
 ---
 
 import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/checkbox_usage.jsx";
+import ExUsageCode from "@islands/checkbox_usage.mlx?raw";
+import * as ExVariants from "@islands/checkbox_variants.jsx";
+import ExVariantsCode from "@islands/checkbox_variants.mlx?raw";
+import * as ExRounded from "@islands/checkbox_rounded.jsx";
+import ExRoundedCode from "@islands/checkbox_rounded.mlx?raw";
+import * as ExDisabled from "@islands/checkbox_disabled.jsx";
+import ExDisabledCode from "@islands/checkbox_disabled.mlx?raw";
+import * as ExExternalLabel from "@islands/checkbox_external_label.jsx";
+import ExExternalLabelCode from "@islands/checkbox_external_label.mlx?raw";
+import * as ExDescription from "@islands/checkbox_description.jsx";
+import ExDescriptionCode from "@islands/checkbox_description.mlx?raw";
+import * as ExDefaultSelected from "@islands/checkbox_default_selected.jsx";
+import ExDefaultSelectedCode from "@islands/checkbox_default_selected.mlx?raw";
+import * as ExInvalid from "@islands/checkbox_invalid.jsx";
+import ExInvalidCode from "@islands/checkbox_invalid.mlx?raw";
+import * as ExControlled from "@islands/checkbox_controlled.jsx";
+import ExControlledCode from "@islands/checkbox_controlled.mlx?raw";
+import * as ExIndeterminate from "@islands/checkbox_indeterminate.jsx";
+import ExIndeterminateCode from "@islands/checkbox_indeterminate.mlx?raw";
+import * as ExForm from "@islands/checkbox_form.jsx";
+import ExFormCode from "@islands/checkbox_form.mlx?raw";
+import * as ExRenderProps from "@islands/checkbox_render_props.jsx";
+import ExRenderPropsCode from "@islands/checkbox_render_props.mlx?raw";
+import * as ExCustomIndicator from "@islands/checkbox_custom_indicator.jsx";
+import ExCustomIndicatorCode from "@islands/checkbox_custom_indicator.mlx?raw";
+import * as ExTailwind from "@islands/checkbox_tailwind.jsx";
+import ExTailwindCode from "@islands/checkbox_tailwind.mlx?raw";
 import * as Demo from "@islands/checkbox_demo.jsx";
-import * as CheckboxUsage from "@islands/checkbox_usage.jsx";
-import CheckboxUsageCode from "@islands/checkbox_usage.mlx?raw";
-import * as CheckboxVariants from "@islands/checkbox_variants.jsx";
-import CheckboxVariantsCode from "@islands/checkbox_variants.mlx?raw";
-import * as CheckboxRounded from "@islands/checkbox_rounded.jsx";
-import CheckboxRoundedCode from "@islands/checkbox_rounded.mlx?raw";
-import * as CheckboxDisabled from "@islands/checkbox_disabled.jsx";
-import CheckboxDisabledCode from "@islands/checkbox_disabled.mlx?raw";
-import * as CheckboxInvalid from "@islands/checkbox_invalid.jsx";
-import CheckboxInvalidCode from "@islands/checkbox_invalid.mlx?raw";
-import * as CheckboxControlled from "@islands/checkbox_controlled.jsx";
-import CheckboxControlledCode from "@islands/checkbox_controlled.mlx?raw";
-import * as CheckboxIndeterminate from "@islands/checkbox_indeterminate.jsx";
-import CheckboxIndeterminateCode from "@islands/checkbox_indeterminate.mlx?raw";
-import * as CheckboxCustomIndicator from "@islands/checkbox_custom_indicator.jsx";
-import CheckboxCustomIndicatorCode from "@islands/checkbox_custom_indicator.mlx?raw";
 
 `Solidtype_heroui.Checkbox` is Kobalte's checkbox in HeroUI's anatomy: the
 field, `Checkbox.Content`, the clickable label that holds Kobalte's input,
@@ -29,45 +41,77 @@ HeroUI's `Label`. Its state is declared as React Aria writes it.
 
 ## Usage
 
-<Example code={CheckboxUsageCode} title="checkbox_usage.mlx"><CheckboxUsage.make client:visible /></Example>
+HeroUI's examples.
+
+<Example code={ExUsageCode} title="checkbox_usage.mlx"><ExUsage.make client:visible /></Example>
 
 ## Examples
 
 ### Variants
 
-<Example code={CheckboxVariantsCode} title="checkbox_variants.mlx"><CheckboxVariants.make client:visible /></Example>
+<Example code={ExVariantsCode} title="checkbox_variants.mlx"><ExVariants.make client:visible /></Example>
 
 ### Full Rounded
 
-<Example code={CheckboxRoundedCode} title="checkbox_rounded.mlx"><CheckboxRounded.make client:visible /></Example>
+<Example code={ExRoundedCode} title="checkbox_rounded.mlx"><ExRounded.make client:visible /></Example>
 
 ### Disabled
 
-<Example code={CheckboxDisabledCode} title="checkbox_disabled.mlx"><CheckboxDisabled.make client:visible /></Example>
+<Example code={ExDisabledCode} title="checkbox_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### External Label
+
+HeroUI's label names the checkbox by its `id`, which the port's checkbox does not take yet; here the checkbox is named as the label is.
+
+<Example code={ExExternalLabelCode} title="checkbox_external_label.mlx"><ExExternalLabel.make client:visible /></Example>
+
+### With Description
+
+<Example code={ExDescriptionCode} title="checkbox_description.mlx"><ExDescription.make client:visible /></Example>
+
+### Default Selected
+
+<Example code={ExDefaultSelectedCode} title="checkbox_default_selected.mlx"><ExDefaultSelected.make client:visible /></Example>
 
 ### Invalid
 
-<Example code={CheckboxInvalidCode} title="checkbox_invalid.mlx"><CheckboxInvalid.make client:visible /></Example>
+<Example code={ExInvalidCode} title="checkbox_invalid.mlx"><ExInvalid.make client:visible /></Example>
 
 ### Controlled
 
-<Example code={CheckboxControlledCode} title="checkbox_controlled.mlx"><CheckboxControlled.make client:visible /></Example>
+<Example code={ExControlledCode} title="checkbox_controlled.mlx"><ExControlled.make client:visible /></Example>
 
 ### Indeterminate
 
-<Example code={CheckboxIndeterminateCode} title="checkbox_indeterminate.mlx"><CheckboxIndeterminate.make client:visible /></Example>
+<Example code={ExIndeterminateCode} title="checkbox_indeterminate.mlx"><ExIndeterminate.make client:visible /></Example>
+
+### Form Integration
+
+<Example code={ExFormCode} title="checkbox_form.mlx"><ExForm.make client:visible /></Example>
+
+### Render Props
+
+HeroUI's children read the checkbox's state through a render prop; here the page keeps the state, which the checkbox is controlled by.
+
+<Example code={ExRenderPropsCode} title="checkbox_render_props.mlx"><ExRenderProps.make client:visible /></Example>
+
+### Render Function
+
+HeroUI's Render Function example gives a part `render`, React's way to swap the element it renders, which a Solid component has no need of.
 
 ### Custom Indicator
 
-<Example code={CheckboxCustomIndicatorCode} title="checkbox_custom_indicator.mlx"><CheckboxCustomIndicator.make client:visible /></Example>
+HeroUI draws each icon only while the box is checked, through a render prop; HeroUI's styles show an indicator's content only then, so here it is given as it is.
 
-### Not yet
-
-HeroUI's External Label, which needs an `id` the label names; With
-Description and Form Integration, until their parts are ported; and Render
-Props and Render Function.
+<Example code={ExCustomIndicatorCode} title="checkbox_custom_indicator.mlx"><ExCustomIndicator.make client:visible /></Example>
 
 ## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="checkbox_tailwind.mlx"><ExTailwind.make client:visible /></Example>
 
 ### Global CSS
 

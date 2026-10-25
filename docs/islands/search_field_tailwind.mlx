@@ -1,0 +1,14 @@
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  <Search_field class_="w-full max-w-64" name="docs" variant=`secondary>
+    <Label class_="font-medium text-foreground">"Search docs"</Label>
+    <Search_field.Group class_="rounded-xl bg-default">
+      <Search_field.Search_icon class_="text-muted" />
+      <Search_field.Input
+        class_="placeholder:text-muted" placeholder="Components, guides..."
+      />
+      <Search_field.Clear_button class_="text-muted" />
+    </Search_field.Group>
+  </Search_field>

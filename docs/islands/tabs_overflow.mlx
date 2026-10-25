@@ -1,37 +1,36 @@
 module Tabs = Solidtype_heroui.Tabs
 
-let months =
+let items =
   [|
-    "January";
-    "February";
-    "March";
-    "April";
-    "May";
-    "June";
-    "July";
-    "August";
-    "September";
-    "October";
-    "November";
-    "December";
+    ("overview", "Overview");
+    ("analytics", "Analytics");
+    ("reports", "Reports");
+    ("performance", "Performance");
+    ("engagement", "Engagement");
+    ("audience", "Audience");
+    ("acquisition", "Acquisition");
+    ("retention", "Retention");
+    ("settings", "Settings");
   |]
 
 let make () =
-  <Tabs class_="w-full max-w-sm">
-    <Tabs.List_container>
-      <Tabs.List aria_label="Months">
-        <Solidtype.For each=(fun () -> months)>
-          (fun month _ ->
-            <Tabs.Tab id=(fun () -> month)>
-              (fun () -> Solidtype.Jsx.string month) <Tabs.Indicator />
-            </Tabs.Tab>)
-        </Solidtype.For>
-      </Tabs.List>
-    </Tabs.List_container>
-    <Solidtype.For each=(fun () -> months)>
-      (fun month _ ->
-        <Tabs.Panel id=(fun () -> month)>
-          (fun () -> Solidtype.Jsx.string ("The report for " ^ month ^ "."))
-        </Tabs.Panel>)
-    </Solidtype.For>
-  </Tabs>
+  <div class_="w-[400px]">
+    <Tabs>
+      <Tabs.List_container>
+        <Tabs.List aria_label="Overflow options">
+          <Solidtype.For each=(fun () -> items)>
+            (fun (id, label) _ ->
+              <Tabs.Tab id=(fun () -> id)>
+                (fun () -> Solidtype.Jsx.string label) <Tabs.Indicator />
+              </Tabs.Tab>)
+          </Solidtype.For>
+        </Tabs.List>
+      </Tabs.List_container>
+      <Solidtype.For each=(fun () -> items)>
+        (fun (id, label) _ ->
+          <Tabs.Panel class_="pt-4" id=(fun () -> id)>
+            <p>(fun () -> Solidtype.Jsx.string (label ^ " panel content."))</p>
+          </Tabs.Panel>)
+      </Solidtype.For>
+    </Tabs>
+  </div>

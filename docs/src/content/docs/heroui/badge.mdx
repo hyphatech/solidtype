@@ -5,45 +5,66 @@ description: A count or a status over the content it marks.
 
 import Example from "@components/Example.astro";
 import * as Demo from "@islands/badge_demo.jsx";
-import * as BadgeUsage from "@islands/badge_usage.jsx";
-import BadgeUsageCode from "@islands/badge_usage.mlx?raw";
-import * as BadgeVariants from "@islands/badge_variants.jsx";
-import BadgeVariantsCode from "@islands/badge_variants.mlx?raw";
-import * as BadgeSizes from "@islands/badge_sizes.jsx";
-import BadgeSizesCode from "@islands/badge_sizes.mlx?raw";
-import * as BadgePlacements from "@islands/badge_placements.jsx";
-import BadgePlacementsCode from "@islands/badge_placements.mlx?raw";
+import * as Usage from "@islands/badge_usage.jsx";
+import UsageCode from "@islands/badge_usage.mlx?raw";
+import * as Variants from "@islands/badge_variants.jsx";
+import VariantsCode from "@islands/badge_variants.mlx?raw";
+import * as Sizes from "@islands/badge_sizes.jsx";
+import SizesCode from "@islands/badge_sizes.mlx?raw";
+import * as Colors from "@islands/badge_colors.jsx";
+import ColorsCode from "@islands/badge_colors.mlx?raw";
+import * as Placements from "@islands/badge_placements.jsx";
+import PlacementsCode from "@islands/badge_placements.mlx?raw";
+import * as Dot from "@islands/badge_dot.jsx";
+import DotCode from "@islands/badge_dot.mlx?raw";
+import * as WithContent from "@islands/badge_with_content.jsx";
+import WithContentCode from "@islands/badge_with_content.mlx?raw";
+import * as Tailwind from "@islands/badge_tailwind.jsx";
+import TailwindCode from "@islands/badge_tailwind.mlx?raw";
 
 `Solidtype_heroui.Badge` is HeroUI's badge: `Badge.Anchor` around the content it
 marks and the badge, with the classes HeroUI's own `badgeVariants` gives. Text
 a badge is given becomes its `Badge.Label`, as in React. A badge has no
-behaviour, so it is HeroUI's spans as they are. Where HeroUI's examples mark
-an Avatar, these mark a square, until Avatar is ported.
+behaviour, so it is HeroUI's spans as they are. A badge with no content is a
+dot.
 
 ## Usage
 
-<Example code={BadgeUsageCode} title="badge_usage.mlx"><BadgeUsage.make client:visible /></Example>
+<Example code={UsageCode} title="badge_usage.mlx"><Usage.make client:visible /></Example>
 
 ## Examples
 
 ### Variants
 
-<Example code={BadgeVariantsCode} title="badge_variants.mlx"><BadgeVariants.make client:visible /></Example>
+<Example code={VariantsCode} title="badge_variants.mlx"><Variants.make client:visible /></Example>
 
 ### Sizes
 
-<Example code={BadgeSizesCode} title="badge_sizes.mlx"><BadgeSizes.make client:visible /></Example>
+<Example code={SizesCode} title="badge_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Colors
+
+<Example code={ColorsCode} title="badge_colors.mlx"><Colors.make client:visible /></Example>
 
 ### Placements
 
-<Example code={BadgePlacementsCode} title="badge_placements.mlx"><BadgePlacements.make client:visible /></Example>
+<Example code={PlacementsCode} title="badge_placements.mlx"><Placements.make client:visible /></Example>
 
-### Not yet
+### Dot Badge
 
-HeroUI's Dot Badge, a badge with no content, and the colors it shows: the
-port's badge takes content.
+<Example code={DotCode} title="badge_dot.mlx"><Dot.make client:visible /></Example>
+
+### With Content
+
+<Example code={WithContentCode} title="badge_with_content.mlx"><WithContent.make client:visible /></Example>
 
 ## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="badge_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ### Global CSS
 
@@ -85,7 +106,7 @@ string React takes, a hyphen written as an underscore: `` `top_right `` is
 | `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
 | `placement` | `placement` | `` [ `top_right \| `top_left \| `bottom_right \| `bottom_left ] `` | `` `top_right `` | Corner of the anchor |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its content; text becomes a `Badge.Label` |
+| `children` | `children` | elements | | Its content; text becomes a `Badge.Label`, and none a dot |
 
 ### Badge.Anchor and Badge.Label
 

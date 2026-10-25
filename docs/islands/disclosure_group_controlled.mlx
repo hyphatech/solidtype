@@ -1,62 +1,54 @@
 module S = Solidtype.Solid
 module Button = Solidtype_heroui.Button
-module Disclosure = Solidtype_heroui.Disclosure
 module Disclosure_group = Solidtype_heroui.Disclosure_group
-
-let items =
-  [|
-    ("shipping", "Shipping", "Orders ship within 2 business days.");
-    ("returns", "Returns", "Return any order within 30 days.");
-    ("warranty", "Warranty", "Every product is covered for two years.");
-  |]
+module Separator = Solidtype_heroui.Separator
+module Usage = Disclosure_group_usage
 
 let make () =
-  let expanded, set_expanded = S.create_signal [| "shipping" |] in
+  let expanded, set_expanded = S.create_signal [| "preview" |] in
   let n =
     Disclosure_group.navigation
       ~expanded_keys:(fun () -> S.get expanded)
-      ~item_ids:(Array.map (fun (key, _, _) -> key) items)
+      ~item_ids:[| "preview"; "download" |]
       ~on_expanded_change:(S.set set_expanded) ()
   in
-  <div class_="flex w-full max-w-md flex-col gap-4 p-4">
-    <div class_="flex items-center justify-between">
-      <h3 class_="text-lg font-semibold">"Your order"</h3>
-      <div class_="flex gap-2">
-        <Button
-          aria_label="Previous disclosure"
-          is_disabled=(fun () -> n.is_prev_disabled ())
-          size=`sm
-          variant=`secondary
-          on_click=(fun _ -> n.on_previous ())>
-          "Previous"
-        </Button>
-        <Button
-          aria_label="Next disclosure"
-          is_disabled=(fun () -> n.is_next_disabled ())
-          size=`sm
-          variant=`secondary
-          on_click=(fun _ -> n.on_next ())>
-          "Next"
-        </Button>
+  <div class_="w-full max-w-md">
+    <div class_="flex flex-col gap-4 rounded-3xl p-4">
+      <div class_="mb-2 flex items-center justify-between">
+        <h3 class_="text-lg font-semibold">"HeroUI Native"</h3>
+        <div class_="flex gap-2">
+          <Button
+            aria_label="Previous disclosure"
+            is_disabled=(fun () -> n.is_prev_disabled ())
+            size=`sm
+            variant=`secondary
+            on_click=(fun _ -> n.on_previous ())>
+            <Gravity.Chevron_up class_="size-4" />
+          </Button>
+          <Button
+            aria_label="Next disclosure"
+            is_disabled=(fun () -> n.is_next_disabled ())
+            size=`sm
+            variant=`secondary
+            on_click=(fun _ -> n.on_next ())>
+            <Gravity.Chevron_down class_="size-4" />
+          </Button>
+        </div>
       </div>
+      <Disclosure_group
+        expanded_keys=(fun () -> S.get expanded)
+        on_expanded_change=(S.set set_expanded)>
+        (fun () ->
+          Solidtype.Jsx.element
+          @@ Usage.item ~expanded ~id:"preview"
+               ~icon:(fun () -> <Gravity.Qr_code />)
+               ~title:"Preview HeroUI Native" ~body:Usage.preview)
+        <Separator class_="my-2" />
+        (fun () ->
+          Solidtype.Jsx.element
+          @@ Usage.item ~expanded ~id:"download"
+               ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
+               ~title:"Download App" ~body:Usage.download)
+      </Disclosure_group>
     </div>
-    <Disclosure_group
-      expanded_keys=(fun () -> S.get expanded)
-      on_expanded_change=(S.set set_expanded)>
-      <Solidtype.For each=(fun () -> items)>
-        (fun (key, title, text) _ ->
-          <Disclosure id=(fun () -> key)>
-            <Disclosure.Heading>
-              <Disclosure.Trigger>
-                (fun () -> Solidtype.Jsx.string title) <Disclosure.Indicator />
-              </Disclosure.Trigger>
-            </Disclosure.Heading>
-            <Disclosure.Content>
-              <Disclosure.Body>
-                (fun () -> Solidtype.Jsx.string text)
-              </Disclosure.Body>
-            </Disclosure.Content>
-          </Disclosure>)
-      </Solidtype.For>
-    </Disclosure_group>
   </div>

@@ -1,39 +1,39 @@
+module Avatar = Solidtype_heroui.Avatar
 module Badge = Solidtype_heroui.Badge
+module Separator = Solidtype_heroui.Separator
 
-(* Each color in a variant, over a square where an Avatar will stand. *)
-module Row = struct
-  let%component make ~(variant : [ `primary | `secondary | `soft ]) () =
+let avatar =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+
+let colors = [| `accent; `default; `success; `warning; `danger |]
+
+let row ~name ~variant =
+  <div class_="flex flex-col gap-4">
+    <h3 class_="text-sm font-semibold text-muted capitalize">
+      (fun () -> Solidtype.Jsx.string name)
+    </h3>
     <div class_="flex items-center gap-6">
-      <Badge.Anchor>
-        <span class_="block size-10 rounded-full bg-default" />
-        <Badge variant=(fun () -> variant ()) color=`accent size=`sm>"5"</Badge>
-      </Badge.Anchor>
-      <Badge.Anchor>
-        <span class_="block size-10 rounded-full bg-default" />
-        <Badge variant=(fun () -> variant ()) color=`default size=`sm>
-          "5"
-        </Badge>
-      </Badge.Anchor>
-      <Badge.Anchor>
-        <span class_="block size-10 rounded-full bg-default" />
-        <Badge variant=(fun () -> variant ()) color=`success size=`sm>
-          "5"
-        </Badge>
-      </Badge.Anchor>
-      <Badge.Anchor>
-        <span class_="block size-10 rounded-full bg-default" />
-        <Badge variant=(fun () -> variant ()) color=`warning size=`sm>
-          "5"
-        </Badge>
-      </Badge.Anchor>
-      <Badge.Anchor>
-        <span class_="block size-10 rounded-full bg-default" />
-        <Badge variant=(fun () -> variant ()) color=`danger size=`sm>"5"</Badge>
-      </Badge.Anchor>
+      <Solidtype.For each=(fun () -> colors)>
+        (fun color _ ->
+          <Badge.Anchor>
+            <Avatar>
+              <Avatar.Image src=(fun () -> avatar) />
+              <Avatar.Fallback>"JD"</Avatar.Fallback>
+            </Avatar>
+            <Badge color=(fun () -> color) size=`sm variant=(fun () -> variant)>
+              "5"
+            </Badge>
+          </Badge.Anchor>)
+      </Solidtype.For>
     </div>
-end
+  </div>
 
 let make () =
-  <div class_="flex flex-col gap-6">
-    <Row variant=`primary /> <Row variant=`secondary /> <Row variant=`soft />
+  <div class_="flex flex-col gap-8">
+    (fun () -> Solidtype.Jsx.element (row ~name:"primary" ~variant:`primary))
+    <Separator />
+    (fun () ->
+      Solidtype.Jsx.element (row ~name:"secondary" ~variant:`secondary))
+    <Separator />
+    (fun () -> Solidtype.Jsx.element (row ~name:"soft" ~variant:`soft))
   </div>

@@ -85,9 +85,7 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
   let disabled () = g.disabled () || is_disabled () in
   let r =
     {
-      slots =
-        (fun () ->
-          Styles.Radio.slots (Styles.Radio.options ?class_:(class_ ()) ()));
+      slots = (fun () -> Styles.Radio.slots (Styles.Radio.options ()));
       field =
         {
           selected;
@@ -110,7 +108,7 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
     <Kobalte.Item
       value=(fun () -> value ())
       disabled=(fun () -> is_disabled ())
-      class_=(fun () -> Styles.Radio.base (r.slots ()))
+      class_=(fun () -> after (Styles.Radio.base (r.slots ())) (class_ ()))
       data_slot="radio"
       data_selected=(fun () -> Jsx.flag (selected ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))

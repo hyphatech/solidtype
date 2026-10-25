@@ -1,0 +1,47 @@
+module Avatar = Solidtype_heroui.Avatar
+module Card = Solidtype_heroui.Card
+
+let assets = "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/"
+
+let community ~image ~alt ~title ~members ~avatar ~avatar_alt ~fallback ~by =
+  <Card class_="w-[200px] gap-2">
+    <img
+      alt=(fun () -> alt)
+      class_="pointer-events-none aspect-square w-14 rounded-2xl object-cover \
+              select-none"
+      loading="lazy"
+      src=(fun () -> assets ^ image)
+    />
+    <Card.Header>
+      <Card.Title>(fun () -> Solidtype.Jsx.string title)</Card.Title>
+      <Card.Description>
+        (fun () -> Solidtype.Jsx.string members)
+      </Card.Description>
+    </Card.Header>
+    <Card.Footer class_="flex gap-2">
+      <Avatar class_="size-5">
+        <Avatar.Image alt=(fun () -> avatar_alt) src=(fun () -> assets ^ avatar)
+        />
+        <Avatar.Fallback class_="text-xs">
+          (fun () -> Solidtype.Jsx.string fallback)
+        </Avatar.Fallback>
+      </Avatar>
+      <span class_="text-xs">(fun () -> Solidtype.Jsx.string by)</span>
+    </Card.Footer>
+  </Card>
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    (fun () ->
+      Solidtype.Jsx.element
+        (community ~image:"docs/demo1.jpg" ~alt:"Indie Hackers community"
+           ~title:"Indie Hackers" ~members:"148 members"
+           ~avatar:"avatars/red.jpg" ~avatar_alt:"Martha's avatar"
+           ~fallback:"IH" ~by:"By Martha"))
+    (fun () ->
+      Solidtype.Jsx.element
+        (community ~image:"docs/demo2.jpg" ~alt:"AI Builders community"
+           ~title:"AI Builders" ~members:"362 members"
+           ~avatar:"avatars/blue.jpg" ~avatar_alt:"John's avatar - blue themed"
+           ~fallback:"B" ~by:"By John"))
+  </div>

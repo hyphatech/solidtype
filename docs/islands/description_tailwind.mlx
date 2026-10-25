@@ -1,0 +1,13 @@
+module Description = Solidtype_heroui.Description
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <div class_="flex w-64 flex-col gap-1">
+    <Label for_="workspace-slug">"Workspace URL"</Label>
+    <Input id="workspace-slug" placeholder="acme" type_="text" />
+    <Description
+      class_="leading-relaxed tracking-wide" id="workspace-slug-hint">
+      "Lowercase letters and hyphens only. Used in app.heroui.com/acme"
+    </Description>
+  </div>

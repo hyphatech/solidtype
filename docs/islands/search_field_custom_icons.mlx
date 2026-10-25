@@ -3,12 +3,16 @@ module Label = Solidtype_heroui.Label
 module Search_field = Solidtype_heroui.Search_field
 
 let make () =
-  <Search_field name="search">
-    <Label>"Search"</Label>
-    <Search_field.Group>
-      <Search_field.Search_icon><Icons.Globe /></Search_field.Search_icon>
-      <Search_field.Input class_="w-[280px]" placeholder="Search..." />
-      <Search_field.Clear_button />
-    </Search_field.Group>
-    <Description>"A custom icon"</Description>
-  </Search_field>
+  <div class_="flex flex-col gap-4">
+    <Search_field name="search-custom">
+      <Label>"Search (Custom Icons)"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon><Gravity.Funnel /></Search_field.Search_icon>
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button>
+          <Gravity.Circle_xmark_fill />
+        </Search_field.Clear_button>
+      </Search_field.Group>
+      <Description>"Custom icon children"</Description>
+    </Search_field>
+  </div>

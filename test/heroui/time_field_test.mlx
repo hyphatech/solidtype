@@ -153,10 +153,10 @@ let both ?default_value ?granularity ?hour_cycle ?is_disabled ?is_invalid
         ?is_read_only=(fun () -> is_read_only)
         name="time"
         class_="w-64"
-        on_change=(fun t ->
-                    told :=
-                      told_of
-                        (clock ?hour:(Time.hour t) ?minute:(Time.minute t) ()))>
+        on_change=(Option.iter (fun t ->
+                       told :=
+                         told_of
+                           (clock ?hour:(Time.hour t) ?minute:(Time.minute t) ())))>
         <Label>"Time"</Label>
         <Time_field.Group ?variant=(fun () -> variant)>
           <Time_field.Input>
@@ -244,3 +244,70 @@ let () =
              through its segments and out; a form reads a field left once, as
              every other port tells it. *)
           E.(expect solidtype |> toEqual 1)))
+
+(* A field of hours and minutes, 24 hours to the day, so no segment is AM or
+   PM, told each change. *)
+let field ~default_value ~told () =
+  T.render (fun () ->
+      <Time_field
+        default_value=(fun () -> default_value)
+        hour_cycle=`h24
+        on_change=(fun t ->
+                    told :=
+                      match t with
+                      | Some t ->
+                          told_of
+                            (clock ?hour:(Time.hour t) ?minute:(Time.minute t)
+                               ())
+                      | None -> "none")>
+        <Label>"Time"</Label>
+        <Time_field.Group>
+          <Time_field.Input>
+            (fun segment ->
+              <Time_field.Segment segment=(fun () -> S.get segment) />)
+          </Time_field.Input>
+        </Time_field.Group>
+      </Time_field>)
+
+let placeholder kind = T.attribute (segment T.body kind) "data-placeholder"
+
+let () =
+  Jest.describe "Time_field, emptied" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "is typed into, then emptied by the null it is controlled by" (fun () ->
+          let time, set_time = S.create_signal Js.Nullable.null in
+          T.render (fun () ->
+              <Time_field
+                value=(fun () -> S.get time)
+                hour_cycle=`h24
+                on_change=(fun t -> S.set set_time (Js.Nullable.fromOption t))>
+                <Label>"Time"</Label>
+                <Time_field.Group>
+                  <Time_field.Input>
+                    (fun segment ->
+                      <Time_field.Segment segment=(fun () -> S.get segment) />)
+                  </Time_field.Input>
+                </Time_field.Group>
+              </Time_field>);
+          let user = T.setup () in
+          let* () = T.click user (segment T.body "hour") in
+          let* () = T.keyboard user "0930" in
+          let typed = placeholder "minute" in
+          S.set set_time Js.Nullable.null;
+          Js.Promise.resolve
+            E.(
+              expect (typed, placeholder "hour", placeholder "minute")
+              |> toEqual (None, Some "true", Some "true")));
+      Jest.testPromise "tells its change once every segment is erased"
+        (fun () ->
+          let told = ref "" in
+          field ~default_value:(Time.make ~hour:9. ~minute:45. ()) ~told ();
+          let user = T.setup () in
+          let* () = T.click user (segment T.body "minute") in
+          let* () = T.keyboard user "{Backspace}{Backspace}{Backspace}" in
+          let* () = T.keyboard user "{Backspace}{Backspace}{Backspace}" in
+          Js.Promise.resolve
+            E.(
+              expect (!told, placeholder "hour", placeholder "minute")
+              |> toEqual ("none", Some "true", Some "true"))))

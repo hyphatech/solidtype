@@ -8,6 +8,10 @@ import * as Usage from "@islands/input_group_usage.jsx";
 import UsageCode from "@islands/input_group_usage.mlx?raw";
 import * as Variants from "@islands/input_group_variants.jsx";
 import VariantsCode from "@islands/input_group_variants.mlx?raw";
+import * as Surface from "@islands/input_group_surface.jsx";
+import SurfaceCode from "@islands/input_group_surface.mlx?raw";
+import * as Loading from "@islands/input_group_loading.jsx";
+import LoadingCode from "@islands/input_group_loading.mlx?raw";
 import * as Required from "@islands/input_group_required.jsx";
 import RequiredCode from "@islands/input_group_required.mlx?raw";
 import * as Disabled from "@islands/input_group_disabled.jsx";
@@ -18,12 +22,30 @@ import * as TextPrefix from "@islands/input_group_text_prefix.jsx";
 import TextPrefixCode from "@islands/input_group_text_prefix.mlx?raw";
 import * as TextSuffix from "@islands/input_group_text_suffix.jsx";
 import TextSuffixCode from "@islands/input_group_text_suffix.mlx?raw";
+import * as IconPrefixTextSuffix from "@islands/input_group_icon_prefix_text_suffix.jsx";
+import IconPrefixTextSuffixCode from "@islands/input_group_icon_prefix_text_suffix.mlx?raw";
+import * as CopySuffix from "@islands/input_group_copy_suffix.jsx";
+import CopySuffixCode from "@islands/input_group_copy_suffix.mlx?raw";
+import * as IconPrefixCopySuffix from "@islands/input_group_icon_prefix_copy_suffix.jsx";
+import IconPrefixCopySuffixCode from "@islands/input_group_icon_prefix_copy_suffix.mlx?raw";
 import * as Password from "@islands/input_group_password.jsx";
 import PasswordCode from "@islands/input_group_password.mlx?raw";
 import * as Shortcut from "@islands/input_group_shortcut.jsx";
 import ShortcutCode from "@islands/input_group_shortcut.mlx?raw";
+import * as BadgeSuffix from "@islands/input_group_badge_suffix.jsx";
+import BadgeSuffixCode from "@islands/input_group_badge_suffix.mlx?raw";
+import * as Invalid from "@islands/input_group_invalid.jsx";
+import InvalidCode from "@islands/input_group_invalid.mlx?raw";
+import * as PrefixIcon from "@islands/input_group_prefix_icon.jsx";
+import PrefixIconCode from "@islands/input_group_prefix_icon.mlx?raw";
+import * as SuffixIcon from "@islands/input_group_suffix_icon.jsx";
+import SuffixIconCode from "@islands/input_group_suffix_icon.mlx?raw";
+import * as PrefixSuffix from "@islands/input_group_prefix_suffix.jsx";
+import PrefixSuffixCode from "@islands/input_group_prefix_suffix.mlx?raw";
 import * as TextArea from "@islands/input_group_text_area.jsx";
 import TextAreaCode from "@islands/input_group_text_area.mlx?raw";
+import * as Tailwind from "@islands/input_group_tailwind.jsx";
+import TailwindCode from "@islands/input_group_tailwind.mlx?raw";
 import * as Demo from "@islands/input_group_demo.jsx";
 
 `Solidtype_heroui.Input_group` is an input or a text area with its prefix
@@ -34,6 +56,8 @@ its input is the field's, which the field's label names, and the group takes
 the field's variant where it sets none. Kobalte has no group.
 
 ## Usage
+
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="input_group_usage.mlx"><Usage.make client:visible /></Example>
 
@@ -52,6 +76,14 @@ the field's variant where it sets none. Kobalte has no group.
 ### Variants
 
 <Example code={VariantsCode} title="input_group_variants.mlx"><Variants.make client:visible /></Example>
+
+### In Surface
+
+<Example code={SurfaceCode} title="input_group_surface.mlx"><Surface.make client:visible /></Example>
+
+### Loading State
+
+<Example code={LoadingCode} title="input_group_loading.mlx"><Loading.make client:visible /></Example>
 
 ### Required Field
 
@@ -73,6 +105,18 @@ the field's variant where it sets none. Kobalte has no group.
 
 <Example code={TextSuffixCode} title="input_group_text_suffix.mlx"><TextSuffix.make client:visible /></Example>
 
+### Icon Prefix and Text Suffix
+
+<Example code={IconPrefixTextSuffixCode} title="input_group_icon_prefix_text_suffix.mlx"><IconPrefixTextSuffix.make client:visible /></Example>
+
+### Copy Button Suffix
+
+<Example code={CopySuffixCode} title="input_group_copy_suffix.mlx"><CopySuffix.make client:visible /></Example>
+
+### Icon Prefix and Copy Button
+
+<Example code={IconPrefixCopySuffixCode} title="input_group_icon_prefix_copy_suffix.mlx"><IconPrefixCopySuffix.make client:visible /></Example>
+
 ### Password Toggle
 
 <Example code={PasswordCode} title="input_group_password.mlx"><Password.make client:visible /></Example>
@@ -81,9 +125,39 @@ the field's variant where it sets none. Kobalte has no group.
 
 <Example code={ShortcutCode} title="input_group_shortcut.mlx"><Shortcut.make client:visible /></Example>
 
+### Badge Suffix
+
+<Example code={BadgeSuffixCode} title="input_group_badge_suffix.mlx"><BadgeSuffix.make client:visible /></Example>
+
+### Validation
+
+<Example code={InvalidCode} title="input_group_invalid.mlx"><Invalid.make client:visible /></Example>
+
+### With Prefix Icon
+
+<Example code={PrefixIconCode} title="input_group_prefix_icon.mlx"><PrefixIcon.make client:visible /></Example>
+
+### With Suffix Icon
+
+<Example code={SuffixIconCode} title="input_group_suffix_icon.mlx"><SuffixIcon.make client:visible /></Example>
+
+### With Prefix and Suffix
+
+<Example code={PrefixSuffixCode} title="input_group_prefix_suffix.mlx"><PrefixSuffix.make client:visible /></Example>
+
 ### With TextArea
 
+HeroUI's buttons here show a Tooltip each, which comes with Tooltip's port; the port's TextField takes no `aria_label` yet, so the text area names itself, as the label HeroUI's gives its input.
+
 <Example code={TextAreaCode} title="input_group_text_area.mlx"><TextArea.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="input_group_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ## Styling Reference
 

@@ -14,7 +14,8 @@ module Slot = Solidtype.Context.Make_optional (struct
   type t = slot
 end)
 
-let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+let%component make ?(id : string option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
   let classes () =
     Styles.Description.classes
       (Styles.Description.options ?class_:(class_ ()) ())
@@ -24,6 +25,7 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
       render classes (Props.others props) (fun () -> children ()) [@u]
   | None ->
       <span
+        ?id=(fun () -> id ())
         class_=(fun () -> classes ())
         slot="description"
         data_slot="description"

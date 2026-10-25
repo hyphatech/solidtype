@@ -1,4 +1,3 @@
-module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Search_field = Solidtype_heroui.Search_field
 

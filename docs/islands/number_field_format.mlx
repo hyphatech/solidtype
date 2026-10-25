@@ -1,31 +1,81 @@
+module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Number_field = Solidtype_heroui.Number_field
 module Format = Solidtype_kobalte.Types.NumberFormatOptions
 
 let make () =
-  <div class_="flex w-64 flex-col gap-4">
+  <div class_="flex w-full max-w-64 flex-col gap-4">
     <Number_field
       default_value=99.
       min_value=0.
-      format_options=(fun () -> Format.make ~style:`currency ~currency:"EUR" ())>
-      <Label>"Price"</Label>
+      name="currency-eur"
+      format_options=(fun () ->
+                       Format.make ~currency:"EUR" ~currency_sign:`accounting
+                         ~style:`currency ())>
+      <Label>"Currency (EUR - Accounting)"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />
-        <Number_field.Input />
+        <Number_field.Input class_="w-[120px]" />
         <Number_field.Increment_button />
       </Number_field.Group>
+      <Description>"Accounting format with EUR currency"</Description>
     </Number_field>
     <Number_field
-      default_value=0.25
+      default_value=99.99
       min_value=0.
-      max_value=1.
-      step=0.01
-      format_options=(fun () -> Format.make ~style:`percent ())>
-      <Label>"Discount"</Label>
+      name="currency-usd"
+      format_options=(fun () -> Format.make ~currency:"USD" ~style:`currency ())>
+      <Label>"Currency (USD)"</Label>
       <Number_field.Group>
         <Number_field.Decrement_button />
-        <Number_field.Input />
+        <Number_field.Input class_="w-[120px]" />
         <Number_field.Increment_button />
       </Number_field.Group>
+      <Description>"Standard USD currency format"</Description>
+    </Number_field>
+    <Number_field
+      default_value=0.5
+      format_options=(fun () -> Format.make ~style:`percent ())
+      max_value=1.
+      min_value=0.
+      name="percentage"
+      step=0.01>
+      <Label>"Percentage"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Description>"Percentage format (0-1, where 0.5 = 50%)"</Description>
+    </Number_field>
+    <Number_field
+      default_value=1234.56
+      min_value=0.
+      name="decimal"
+      format_options=(fun () ->
+                       Format.make ~maximum_fraction_digits:2.
+                         ~minimum_fraction_digits:2. ~style:`decimal ())>
+      <Label>"Decimal (2 decimal places)"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Description>"Decimal format with 2 decimal places"</Description>
+    </Number_field>
+    <Number_field
+      default_value=1000.
+      min_value=0.
+      name="unit"
+      format_options=(fun () ->
+                       Format.make ~style:`unit ~unit:"kilogram"
+                         ~unit_display:`short ())>
+      <Label>"Unit (Kilograms)"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Description>"Unit format with kilograms"</Description>
     </Number_field>
   </div>

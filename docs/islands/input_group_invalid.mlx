@@ -1,0 +1,40 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+module Field_error = Solidtype_heroui.Field_error
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Text_field
+      is_invalid=true
+      is_required=true
+      class_="w-full max-w-[280px]"
+      name="email">
+      <Label>"Email address"</Label>
+      <Input_group>
+        <Input_group.Prefix>
+          <Gravity.Envelope class_="size-4 text-muted" />
+        </Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[280px]" placeholder="name@email.com"
+        />
+      </Input_group>
+      <Field_error>"Please enter a valid email address"</Field_error>
+    </Text_field>
+    <Text_field
+      is_invalid=true
+      is_required=true
+      class_="w-full max-w-[280px]"
+      name="price">
+      <Label>"Set a price"</Label>
+      <Input_group>
+        <Input_group.Prefix>"$"</Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[200px]" placeholder="0" type_="number"
+        />
+        <Input_group.Suffix>"USD"</Input_group.Suffix>
+      </Input_group>
+      <Field_error>"Price must be greater than 0"</Field_error>
+    </Text_field>
+  </div>

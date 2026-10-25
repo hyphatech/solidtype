@@ -16,6 +16,11 @@
       </Number_field>
     ]}
 
+    A value is kept on the grid of a [step] it is given, counted from its
+    minimum, and else within its range alone, as React Aria keeps it; its
+    buttons and arrow keys step it by [step], else by 1, or by a hundredth for a
+    percent.
+
     [format_options], as HeroUI's [formatOptions], is Kobalte's: its input shows
     and reads its value so, a currency, a percent or a unit, and tells a reader
     the value as it shows it.

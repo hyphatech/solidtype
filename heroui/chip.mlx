@@ -28,10 +28,12 @@ let%component make
     ?(class_ : string option) ~(children : Jsx.content) () =
   <span
     class_=(fun () ->
-             Styles.Chip.base
-               (Styles.Chip.slots
-                  (Styles.Chip.options ~color:(color ()) ?size:(size ())
-                     ~variant:(variant ()) ?class_:(class_ ()) ())))
+             after
+               (Styles.Chip.base
+                  (Styles.Chip.slots
+                     (Styles.Chip.options ~color:(color ()) ?size:(size ())
+                        ~variant:(variant ()) ())))
+               (class_ ()))
     data_slot="chip"
     props=(Props.others props)>
     (fun () ->

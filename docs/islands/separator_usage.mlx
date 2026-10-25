@@ -1,6 +1,19 @@
 module Separator = Solidtype_heroui.Separator
 
 let make () =
-  <div class_="flex w-64 flex-col gap-3 text-sm">
-    <p>"Above"</p> <Separator /> <p>"Below"</p>
+  <div class_="max-w-md">
+    <div class_="space-y-1">
+      <h4 class_="text-medium font-medium">"HeroUI v3 Components"</h4>
+      <p class_="text-small text-default-400">
+        "Beautiful, fast and modern React UI library."
+      </p>
+    </div>
+    <Separator class_="my-4" />
+    <div class_="text-small flex h-5 items-center space-x-4">
+      <div>"Blog"</div>
+      <Separator orientation=`vertical />
+      <div>"Docs"</div>
+      <Separator orientation=`vertical />
+      <div>"Source"</div>
+    </div>
   </div>

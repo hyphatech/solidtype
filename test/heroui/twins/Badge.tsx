@@ -14,16 +14,18 @@ type Props = {
   placement?: "bottom-left" | "bottom-right" | "top-left" | "top-right";
   size?: "lg" | "md" | "sm";
   variant?: "primary" | "secondary" | "soft";
+  // Whether the badge has no content, HeroUI's dot.
+  dot?: boolean;
 };
 
-export function render(props: Props): void {
+export function render({ dot, ...props }: Props): void {
   const host = document.body.appendChild(document.createElement("div"));
   const root = createRoot(host);
   act(() =>
     root.render(
       <Badge.Anchor>
         <span>Inbox</span>
-        <Badge {...props}>5</Badge>
+        {dot ? <Badge {...props} /> : <Badge {...props}>5</Badge>}
       </Badge.Anchor>,
     ),
   );

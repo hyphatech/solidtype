@@ -2,12 +2,69 @@ module Description = Solidtype_heroui.Description
 module Input_group = Solidtype_heroui.Input_group
 module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Spinner = Solidtype_heroui.Spinner
 
 let make () =
-  <Text_field class_="w-full max-w-[280px]" name="field">
-    <Label>"Message"</Label>
-    <Input_group>
-      <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
-      <Input_group.Text_area placeholder="Write a message" />
+  let value, set_value = S.create_signal "" in
+  let submitting, set_submitting = S.create_signal false in
+  let empty () = String.equal (String.trim (S.get value)) "" in
+  let submit _ =
+    if not (empty ()) then begin
+      S.set set_submitting true;
+      ignore
+        (Js.Global.setTimeout
+           ~f:(fun () ->
+             S.set set_submitting false;
+             S.set set_value "")
+           1000
+          : Js.Global.timeoutId)
+    end
+  in
+  <Text_field
+    full_width=true
+    class_="flex w-sm flex-col sm:w-lg"
+    name="prompt"
+    value=(fun () -> S.get value)
+    on_change=(S.set set_value)>
+    <Input_group full_width=true class_="flex flex-col gap-2 rounded-3xl py-2">
+      <Input_group.Prefix class_="px-3 py-0">
+        <Button aria_label="Add context" size=`sm variant=`outline>
+          <Gravity.At /> "Add Context"
+        </Button>
+      </Input_group.Prefix>
+      <Input_group.Text_area
+        aria_label="Prompt input"
+        class_="w-full resize-none px-3.5 py-0"
+        placeholder="Assign tasks or ask anything..."
+        rows="5"
+      />
+      <Input_group.Suffix class_="flex w-full items-center gap-1.5 px-3 py-0">
+        <Button
+          is_icon_only=true aria_label="Attach file" size=`sm variant=`tertiary>
+          <Gravity.Plus />
+        </Button>
+        <Button
+          is_icon_only=true aria_label="Connect Apps" size=`sm variant=`tertiary>
+          <Gravity.Plug_connection />
+        </Button>
+        <div class_="ms-auto flex items-center gap-1.5">
+          <Button
+            is_icon_only=true aria_label="Voice input" size=`sm variant=`ghost>
+            <Gravity.Microphone />
+          </Button>
+          <Button
+            is_icon_only=true
+            aria_label="Send prompt"
+            is_disabled=(fun () -> empty ())
+            on_click=submit>
+            (fun () ->
+              if S.get submitting then
+                Solidtype.Jsx.element <Spinner color=`current size=`sm />
+              else Solidtype.Jsx.element <Gravity.Arrow_up />)
+          </Button>
+        </div>
+      </Input_group.Suffix>
     </Input_group>
   </Text_field>

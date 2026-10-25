@@ -1,0 +1,53 @@
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  let q = Toast.Queue.create () in
+  <div class_="flex flex-col items-center gap-4">
+    <Toast.Provider placement=`bottom queue=(fun () -> q)>
+      (fun toast ->
+        let variant () = Toast.toast_variant toast in
+        <Toast
+          class_="rounded-xl border border-border/80 bg-surface shadow-lg \
+                  ring-1 ring-black/5 dark:ring-white/10"
+          toast=(fun () -> toast)
+          variant=(fun () -> variant ())>
+          <Toast.Content>
+            <div class_="flex items-center gap-2.5">
+              <Toast.Indicator
+                class_="text-neutral-600 dark:text-neutral-400"
+                variant=(fun () -> variant ())
+              />
+              <div class_="flex flex-col gap-0.5">
+                <Toast.Title
+                  class_="text-sm font-medium text-neutral-900 \
+                          dark:text-neutral-50">
+                  (fun () -> Jsx.string (Toast.title toast))
+                </Toast.Title>
+                (fun () ->
+                  match Toast.description toast with
+                  | Some d ->
+                      Jsx.element
+                        <Toast.Description
+                          class_="text-sm text-neutral-600 \
+                                  dark:text-neutral-400">
+                          (fun () -> Jsx.string d)
+                        </Toast.Description>
+                  | None -> Jsx.string "")
+              </div>
+            </div>
+          </Toast.Content>
+        </Toast>)
+    </Toast.Provider>
+    <Button
+      size=`sm
+      variant=`secondary
+      on_click=(fun _ ->
+                   ignore
+                     (Toast.show ~queue:q ~variant:`default
+                        ~description:"Draft synced" "Saved"
+                       : Toast.key))>
+      "Show toast"
+    </Button>
+  </div>

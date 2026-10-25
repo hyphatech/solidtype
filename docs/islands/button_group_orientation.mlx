@@ -1,40 +1,31 @@
 module Button = Solidtype_heroui.Button
 module Button_group = Solidtype_heroui.Button_group
 
+let group ~label ~orientation =
+  <div class_="flex flex-col gap-2">
+    <span class_="text-sm text-muted">
+      (fun () -> Solidtype.Jsx.string label)
+    </span>
+    <Button_group orientation=(fun () -> orientation) variant=`tertiary>
+      <Button is_icon_only=true aria_label="Align left">
+        <Gravity.Text_align_left />
+      </Button>
+      <Button is_icon_only=true aria_label="Align center">
+        <Button_group.Separator /> <Gravity.Text_align_center />
+      </Button>
+      <Button is_icon_only=true aria_label="Align right">
+        <Button_group.Separator /> <Gravity.Text_align_right />
+      </Button>
+      <Button is_icon_only=true aria_label="Justify">
+        <Button_group.Separator /> <Gravity.Text_align_justify />
+      </Button>
+    </Button_group>
+  </div>
+
 let make () =
   <div class_="flex items-start gap-8">
-    <div class_="flex flex-col items-start gap-2">
-      <p class_="text-sm text-muted">"Horizontal"</p>
-      <Button_group orientation=`horizontal variant=`tertiary>
-        <Button is_icon_only=true aria_label="Align left">
-          <Icons.Align_left />
-        </Button>
-        <Button is_icon_only=true aria_label="Align center">
-          <Button_group.Separator /> <Icons.Align_center />
-        </Button>
-        <Button is_icon_only=true aria_label="Align right">
-          <Button_group.Separator /> <Icons.Align_right />
-        </Button>
-        <Button is_icon_only=true aria_label="Justify">
-          <Button_group.Separator /> <Icons.Align_justify />
-        </Button>
-      </Button_group>
-    </div>
-    <div class_="flex flex-col items-start gap-2">
-      <p class_="text-sm text-muted">"Vertical"</p>
-      <Button_group orientation=`vertical variant=`tertiary>
-        <Button is_icon_only=true aria_label="Align left">
-          <Icons.Align_left />
-        </Button>
-        <Button is_icon_only=true aria_label="Align center">
-          <Button_group.Separator /> <Icons.Align_center />
-        </Button>
-        <Button is_icon_only=true aria_label="Align right">
-          <Button_group.Separator /> <Icons.Align_right />
-        </Button>
-        <Button is_icon_only=true aria_label="Justify">
-          <Button_group.Separator /> <Icons.Align_justify />
-        </Button>
-      </Button_group>
-    </div>
+    (fun () ->
+      Solidtype.Jsx.element (group ~label:"Horizontal" ~orientation:`horizontal))
+    (fun () ->
+      Solidtype.Jsx.element (group ~label:"Vertical" ~orientation:`vertical))
   </div>

@@ -1,23 +1,8 @@
 module S = Solidtype.Solid
 module Accordion = Solidtype_heroui.Accordion
 
-let plus () =
-  <svg fill="none" height="16" view_box="0 0 16 16" width="16">
-    <path d="M8 3v10M3 8h10" stroke="currentColor" stroke_width="1.5" />
-  </svg>
-
-let minus () =
-  <svg fill="none" height="16" view_box="0 0 16 16" width="16">
-    <path d="M3 8h10" stroke="currentColor" stroke_width="1.5" />
-  </svg>
-
-let arrow () =
-  <svg fill="none" height="16" view_box="0 0 16 16" width="16">
-    <path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" stroke_width="1.5" />
-  </svg>
-
 let make () =
-  let expanded, set_expanded = S.create_signal [||] in
+  let expanded, set_expanded = S.create_signal [| "" |] in
   <Accordion
     class_="w-full max-w-md"
     expanded_keys=(fun () -> S.get expanded)
@@ -29,31 +14,46 @@ let make () =
           "Using Plus/Minus Icon"
           <Accordion.Indicator>
             (fun () ->
-              Solidtype.Jsx.element
-                (if Array.exists (String.equal "1") (S.get expanded) then
-                   minus ()
-                 else plus ()))
+              if Array.exists (String.equal "1") (S.get expanded) then
+                Solidtype.Jsx.element <Gravity.Minus />
+              else Solidtype.Jsx.element <Gravity.Plus />)
           </Accordion.Indicator>
         </Accordion.Trigger>
       </Accordion.Heading>
       <Accordion.Panel>
         <Accordion.Body>
-          "This item's icon is a plus, and a minus while it is expanded."
+          "This accordion uses a plus icon that transforms when expanded. The \
+           icon automatically rotates 45 degrees to form an X."
         </Accordion.Body>
       </Accordion.Panel>
     </Accordion.Item>
     <Accordion.Item id="2">
       <Accordion.Heading>
         <Accordion.Trigger>
-          "Using Arrow Icon"
+          "Using Caret Icon"
           <Accordion.Indicator>
-            (fun () -> Solidtype.Jsx.element (arrow ()))
+            <Gravity.Circle_chevron_down />
           </Accordion.Indicator>
         </Accordion.Trigger>
       </Accordion.Heading>
       <Accordion.Panel>
         <Accordion.Body>
-          "Any icon given turns over as the item expands."
+          "This item uses a caret icon for the indicator. The rotation \
+           animation is applied automatically."
+        </Accordion.Body>
+      </Accordion.Panel>
+    </Accordion.Item>
+    <Accordion.Item id="3">
+      <Accordion.Heading>
+        <Accordion.Trigger>
+          "Using Arrow Icon"
+          <Accordion.Indicator><Gravity.Chevrons_down /></Accordion.Indicator>
+        </Accordion.Trigger>
+      </Accordion.Heading>
+      <Accordion.Panel>
+        <Accordion.Body>
+          "This item uses an arrow icon. Any icon you pass will receive the \
+           rotation animation when the item expands."
         </Accordion.Body>
       </Accordion.Panel>
     </Accordion.Item>

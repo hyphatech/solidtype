@@ -1,0 +1,19 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+module Button = Solidtype_heroui.Button
+
+let make () =
+  <Text_field
+    class_="w-full max-w-[280px]" default_value="heroui.com" name="website">
+    <Label>"Website"</Label>
+    <Input_group>
+      <Input_group.Input class_="w-full max-w-[280px]" />
+      <Input_group.Suffix class_="pe-0">
+        <Button is_icon_only=true aria_label="Copy" size=`sm variant=`ghost>
+          <Gravity.Copy class_="size-4" />
+        </Button>
+      </Input_group.Suffix>
+    </Input_group>
+  </Text_field>

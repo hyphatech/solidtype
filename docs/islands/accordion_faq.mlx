@@ -1,0 +1,68 @@
+module Accordion = Solidtype_heroui.Accordion
+
+let categories =
+  [|
+    ( "General",
+      [|
+        ( "How do I place an order?",
+          "Browse our products, add items to your cart, and proceed to \
+           checkout. You'll need to provide shipping and payment information \
+           to complete your purchase." );
+        ( "Can I modify or cancel my order?",
+          "Yes, you can modify or cancel your order before it's shipped. Once \
+           your order is processed, you can't make changes." );
+      |] );
+    ( "Licensing",
+      [|
+        ( "How do I purchase a license?",
+          "You can purchase a license directly from our website. Select the \
+           license type that fits your needs and proceed to checkout." );
+        ( "What is the difference between a standard and a pro license?",
+          "A standard license is for personal use or small projects, while a \
+           pro license includes commercial use rights and priority support." );
+      |] );
+    ( "Support",
+      [|
+        ( "How do I get support?",
+          "You can reach our support team through the contact form on our \
+           website, or email us directly at support@example.com." );
+      |] );
+  |]
+
+let make () =
+  <div class_="flex w-full flex-col gap-6">
+    <div class_="flex flex-col gap-1">
+      <h2 class_="text-2xl font-bold">"Frequently Asked Questions"</h2>
+      <p class_="mb-4 text-lg font-medium text-muted">
+        "Everything you need to know about licensing and usage."
+      </p>
+    </div>
+    <Solidtype.For each=(fun () -> categories)>
+      (fun (category, items) _ ->
+        <div>
+          <p class_="text-md mb-2 font-medium text-muted">
+            (fun () -> Solidtype.Jsx.string category)
+          </p>
+          <Accordion class_="w-full" variant=`surface>
+            <Solidtype.For each=(fun () -> items)>
+              (fun (title, content) _ ->
+                <Accordion.Item>
+                  <Accordion.Heading>
+                    <Accordion.Trigger>
+                      (fun () -> Solidtype.Jsx.string title)
+                      <Accordion.Indicator>
+                        <Gravity.Chevron_down />
+                      </Accordion.Indicator>
+                    </Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>
+                    <Accordion.Body>
+                      (fun () -> Solidtype.Jsx.string content)
+                    </Accordion.Body>
+                  </Accordion.Panel>
+                </Accordion.Item>)
+            </Solidtype.For>
+          </Accordion>
+        </div>)
+    </Solidtype.For>
+  </div>

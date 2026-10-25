@@ -1,27 +1,26 @@
+module S = Solidtype.Solid
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
 
 let make () =
   <div class_="flex flex-col gap-4">
-    <Time_field class_="w-64" name="time">
+    <Time_field class_="w-[256px]" name="time">
       <Label>"Start time"</Label>
       <Time_field.Group>
         <Time_field.Input>
           (fun segment ->
-            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
-            />)
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>"Enter the start time"</Description>
     </Time_field>
-    <Time_field class_="w-64" name="end-time">
+    <Time_field class_="w-[256px]" name="end-time">
       <Label>"End time"</Label>
       <Time_field.Group>
         <Time_field.Input>
           (fun segment ->
-            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
-            />)
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>"Enter the end time"</Description>

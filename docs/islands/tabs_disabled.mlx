@@ -3,15 +3,21 @@ module Tabs = Solidtype_heroui.Tabs
 let make () =
   <Tabs class_="w-full max-w-md">
     <Tabs.List_container>
-      <Tabs.List aria_label="Options">
+      <Tabs.List aria_label="Tabs with disabled">
         <Tabs.Tab id="active">"Active" <Tabs.Indicator /></Tabs.Tab>
-        <Tabs.Tab id="disabled" is_disabled=true>
+        <Tabs.Tab is_disabled=true id="disabled">
           "Disabled" <Tabs.Indicator />
         </Tabs.Tab>
         <Tabs.Tab id="available">"Available" <Tabs.Indicator /></Tabs.Tab>
       </Tabs.List>
     </Tabs.List_container>
-    <Tabs.Panel id="active">"This tab is active."</Tabs.Panel>
-    <Tabs.Panel id="disabled">"This content cannot be reached."</Tabs.Panel>
-    <Tabs.Panel id="available">"This tab is available too."</Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="active">
+      <p>"This tab is active and can be selected."</p>
+    </Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="disabled">
+      <p>"This content cannot be accessed."</p>
+    </Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="available">
+      <p>"This tab is also available for selection."</p>
+    </Tabs.Panel>
   </Tabs>

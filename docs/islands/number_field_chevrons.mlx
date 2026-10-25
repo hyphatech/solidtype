@@ -1,0 +1,30 @@
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
+
+let make () =
+  <Number_field
+    class_="w-full max-w-64"
+    default_value=99.
+    min_value=0.
+    name="amount"
+    format_options=(fun () ->
+                     Format.make ~currency:"EUR" ~currency_sign:`accounting
+                       ~style:`currency ())>
+    <Label>"Number field with chevrons"</Label>
+    <Number_field.Group class_="flex">
+      <Number_field.Input class_="flex-1" />
+      <div class_="flex h-full flex-col border-s border-field-placeholder/15">
+        <Number_field.Increment_button
+          class_="flex h-1/2 w-6 items-center justify-center rounded-none \
+                  border-0 pt-0.5 text-sm">
+          <Gravity.Chevron_up width=11 height=11 />
+        </Number_field.Increment_button>
+        <Number_field.Decrement_button
+          class_="flex h-1/2 w-6 items-center justify-center rounded-none \
+                  border-0 pb-0.5 text-sm">
+          <Gravity.Chevron_down width=11 height=11 />
+        </Number_field.Decrement_button>
+      </div>
+    </Number_field.Group>
+  </Number_field>

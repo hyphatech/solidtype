@@ -1,0 +1,19 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+module Chip = Solidtype_heroui.Chip
+
+let make () =
+  <Text_field class_="w-full max-w-[280px]" name="email">
+    <Input_group>
+      <Input_group.Input
+        aria_label="Email address"
+        class_="w-full max-w-[280px]"
+        placeholder="Email address"
+      />
+      <Input_group.Suffix class_="pe-2">
+        <Chip color=`accent size=`md variant=`soft>"Pro"</Chip>
+      </Input_group.Suffix>
+    </Input_group>
+  </Text_field>

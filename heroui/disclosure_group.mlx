@@ -92,9 +92,11 @@ let%component make ?(expanded_keys : string array option)
     { is_expanded; toggle; is_disabled = (fun () -> is_disabled ()) }
   in
   let classes () =
-    Styles.DisclosureGroup.base
-      (Styles.DisclosureGroup.slots
-         (Styles.DisclosureGroup.options ?class_:(class_ ()) ()))
+    let base =
+      Styles.DisclosureGroup.base
+        (Styles.DisclosureGroup.slots (Styles.DisclosureGroup.options ()))
+    in
+    match class_ () with Some c -> base ^ " " ^ c | None -> base
   in
   <div
     class_=(fun () -> classes ())

@@ -1,14 +1,13 @@
-module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Search_field = Solidtype_heroui.Search_field
 
 let make () =
-  <div class_="w-[400px]">
+  <div class_="w-[400px] space-y-4">
     <Search_field full_width=true name="search">
       <Label>"Search"</Label>
       <Search_field.Group>
         <Search_field.Search_icon />
-        <Search_field.Input class_="" placeholder="Search..." />
+        <Search_field.Input placeholder="Search..." />
         <Search_field.Clear_button />
       </Search_field.Group>
     </Search_field>

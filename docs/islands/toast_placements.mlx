@@ -18,7 +18,7 @@ let make () =
       (fun (p, name) -> (p, name, Toast.Queue.create ~max_visible_toasts:3 ()))
       placements
   in
-  <div class_="flex flex-wrap justify-center gap-2">
+  <div class_="flex h-full flex-col items-center justify-center gap-6">
     (fun () ->
       Solidtype.Jsx.element
       @@ Solidtype.Jsx.fragment
@@ -26,21 +26,23 @@ let make () =
               (fun (p, _, q) ->
                 <Toast.Provider placement=(fun () -> p) queue=(fun () -> q) />)
               queues))
-    (fun () ->
-      Solidtype.Jsx.element
-      @@ Solidtype.Jsx.fragment
-           (Array.map
-              (fun (_, name, q) ->
-                <Button
-                  size=`sm
-                  variant=`secondary
-                  on_click=(fun _ ->
-                             ignore
-                               (Toast.show ~queue:q
-                                  ~description:"Event has been created"
-                                  "Event created"
-                                 : Toast.key))>
-                  (fun () -> Solidtype.Jsx.string name)
-                </Button>)
-              queues))
+    <div class_="flex max-w-xs flex-wrap justify-center gap-2">
+      (fun () ->
+        Solidtype.Jsx.element
+        @@ Solidtype.Jsx.fragment
+             (Array.map
+                (fun (_, name, q) ->
+                  <Button
+                    size=`sm
+                    variant=`secondary
+                    on_click=(fun _ ->
+                               ignore
+                                 (Toast.show ~queue:q
+                                    ~description:"Event has been created"
+                                    "Event created"
+                                   : Toast.key))>
+                    (fun () -> Solidtype.Jsx.string name)
+                  </Button>)
+                queues))
+    </div>
   </div>

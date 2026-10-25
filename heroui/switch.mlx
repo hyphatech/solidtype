@@ -76,8 +76,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
     {
       slots =
         (fun () ->
-          Styles.Switch.slots
-            (Styles.Switch.options ~size:(size ()) ?class_:(class_ ()) ()));
+          Styles.Switch.slots (Styles.Switch.options ~size:(size ()) ()));
       field =
         {
           selected = on;
@@ -107,7 +106,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       validation_state=(fun () -> if invalid () then `invalid else `valid)
       ?name
       ?value
-      class_=(fun () -> Styles.Switch.base (s.slots ()))
+      class_=(fun () -> after (Styles.Switch.base (s.slots ())) (class_ ()))
       ref=(fun e -> in_form.root e)
       on_focus_out=(Field.on_leave (fun e ->
                         in_form.left ();

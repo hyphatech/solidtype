@@ -1,0 +1,28 @@
+module S = Solidtype.Solid
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Time_field is_invalid=true is_required=true class_="w-[256px]" name="time">
+      <Label>"Time"</Label>
+      <Time_field.Group>
+        <Time_field.Input>
+          (fun segment ->
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
+        </Time_field.Input>
+      </Time_field.Group>
+      <Field_error>"Please enter a valid time"</Field_error>
+    </Time_field>
+    <Time_field is_invalid=true class_="w-[256px]" name="invalid-time">
+      <Label>"Time"</Label>
+      <Time_field.Group>
+        <Time_field.Input>
+          (fun segment ->
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
+        </Time_field.Input>
+      </Time_field.Group>
+      <Field_error>"Time must be within business hours"</Field_error>
+    </Time_field>
+  </div>

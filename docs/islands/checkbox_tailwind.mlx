@@ -1,0 +1,13 @@
+module Checkbox = Solidtype_heroui.Checkbox
+
+let make () =
+  <Checkbox>
+    <Checkbox.Content>
+      <Checkbox.Control class_="bg-success-soft before:bg-success">
+        <Checkbox.Indicator
+          class_="**:data-[slot=checkbox-default-indicator--checkmark]:text-success-foreground"
+        />
+      </Checkbox.Control>
+      "Custom styled checkbox"
+    </Checkbox.Content>
+  </Checkbox>

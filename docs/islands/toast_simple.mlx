@@ -2,39 +2,42 @@ module Button = Solidtype_heroui.Button
 module Toast = Solidtype_heroui.Toast
 
 let make () =
-  <div class_="flex flex-wrap gap-2">
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ -> ignore (Toast.show "Simple message" : Toast.key))>
-      "Default"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore (Toast.success "Operation completed" : Toast.key))>
-      "Success"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ -> ignore (Toast.info "New update available" : Toast.key))>
-      "Info"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.warning "Please check your settings" : Toast.key))>
-      "Warning"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore (Toast.danger "Something went wrong" : Toast.key))>
-      "Danger"
-    </Button>
+  <div class_="flex h-full max-w-xl flex-col items-center justify-center">
+    <div class_="flex w-full flex-wrap items-center justify-center gap-4">
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ -> ignore (Toast.show "Simple message" : Toast.key))>
+        "Default"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     ignore (Toast.success "Operation completed" : Toast.key))>
+        "Success"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     ignore (Toast.info "New update available" : Toast.key))>
+        "Info"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     ignore
+                       (Toast.warning "Please check your settings" : Toast.key))>
+        "Warning"
+      </Button>
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     ignore (Toast.danger "Something went wrong" : Toast.key))>
+        "Error"
+      </Button>
+    </div>
   </div>

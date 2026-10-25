@@ -1,6 +1,7 @@
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Number_field = Solidtype_heroui.Number_field
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
 
 let make () =
   <div class_="flex w-full max-w-64 flex-col gap-4">
@@ -12,6 +13,22 @@ let make () =
         <Number_field.Input class_="w-[120px]" />
         <Number_field.Increment_button />
       </Number_field.Group>
-      <Description>"This field is disabled"</Description>
+      <Description>"Enter the width in pixels"</Description>
+    </Number_field>
+    <Number_field
+      is_disabled=true
+      default_value=0.5
+      format_options=(fun () -> Format.make ~style:`percent ())
+      max_value=1.
+      min_value=0.
+      name="percentage"
+      step=0.1>
+      <Label>"Percentage"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Description>"Value must be between 0 and 100"</Description>
     </Number_field>
   </div>

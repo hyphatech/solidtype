@@ -1,0 +1,51 @@
+module Button = Solidtype_heroui.Button
+module Checkbox = Solidtype_heroui.Checkbox
+
+type form_data
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external target : Dom.event -> Dom.element = "target" [@@mel.get]
+external form_data : Dom.element -> form_data = "FormData" [@@mel.new]
+
+external entries : form_data -> (string * string) array = "from"
+[@@mel.scope "Array"]
+
+external alert : string -> unit = "alert"
+
+let submit e =
+  prevent_default e;
+  let lines =
+    form_data (target e)
+    |> entries
+    |> Array.map (fun (key, value) -> key ^ ": " ^ value)
+    |> Array.to_list |> String.concat "\n"
+  in
+  alert ("Form submitted with:\n" ^ lines)
+
+let item ?(selected = false) ~name ~text () =
+  <Checkbox
+    default_selected=(fun () -> selected) name=(fun () -> name) value="on">
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+      (fun () -> Solidtype.Jsx.string text)
+    </Checkbox.Content>
+  </Checkbox>
+
+let make () =
+  <form class_="flex flex-col gap-4" on_submit=submit>
+    <div class_="flex flex-col gap-3">
+      (fun () ->
+        Solidtype.Jsx.element
+          (item ~name:"notifications" ~text:"Enable notifications" ()))
+      (fun () ->
+        Solidtype.Jsx.element
+          (item ~selected:true ~name:"newsletter"
+             ~text:"Subscribe to newsletter" ()))
+      (fun () ->
+        Solidtype.Jsx.element
+          (item ~name:"marketing" ~text:"Receive marketing updates" ()))
+    </div>
+    <Button class_="mt-4" size=`sm type_=`submit variant=`primary>
+      "Submit"
+    </Button>
+  </form>

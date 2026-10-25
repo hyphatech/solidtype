@@ -1,0 +1,57 @@
+(* An icon of @gravity-ui/icons, from its SVG file, drawn as the package's
+   React icon draws it: the file's paths inside the svg element it renders,
+   which a class sizes as it sizes theirs. *)
+
+(* What is between the file's svg element's tags. *)
+let paths svg =
+  match (String.index_opt svg '>', String.rindex_opt svg '<') with
+  | Some start, Some stop when stop > start ->
+      String.sub svg (start + 1) (stop - start - 1)
+  | Some _, Some _ | None, _ | _, None -> ""
+
+(* An icon of an Iconify set, from its @iconify-icons module, drawn as
+   @iconify/react's Icon draws it: the body in an svg of its size, an em
+   wide. *)
+type iconify
+
+external body : iconify -> string = "body" [@@mel.get]
+external width : iconify -> int = "width" [@@mel.get]
+external height : iconify -> int = "height" [@@mel.get]
+
+module Iconify (I : sig
+  val data : iconify
+end) =
+struct
+  let%component make ?(class_ : string option) () =
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      view_box=(fun () ->
+                 "0 0 "
+                 ^ string_of_int (width I.data)
+                 ^ " "
+                 ^ string_of_int (height I.data))
+      ?class_=(fun () -> class_ ())
+      inner_html=(fun () -> body I.data)
+    />
+end
+
+module Make (I : sig
+  val svg : string
+end) =
+struct
+  let%component make ?(width : int = 16) ?(height : int = 16)
+      ?(aria_label : string option) ?(class_ : string option) () =
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      ?aria_label=(fun () -> aria_label ())
+      ?role=(fun () -> Option.map (fun _ -> `img) (aria_label ()))
+      width=(fun () -> string_of_int (width ()))
+      height=(fun () -> string_of_int (height ()))
+      fill="none"
+      view_box="0 0 16 16"
+      ?class_=(fun () -> class_ ())
+      inner_html=(fun () -> paths I.svg)
+    />
+end

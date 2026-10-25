@@ -1,0 +1,78 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+module Spinner = Solidtype_heroui.Spinner
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let stock_available = 3.
+let stock = Js.Float.toString stock_available
+
+let make () =
+  (* Empty is not a number. *)
+  let value, set_value = S.create_signal Float.nan in
+  let is_submitting, set_is_submitting = S.create_signal false in
+  let is_out_of_stock () =
+    (not (Float.is_nan (S.get value))) && S.get value > stock_available
+  in
+  let unavailable () =
+    let v = S.get value in
+    Float.is_nan v || v < 1. || v > stock_available
+  in
+  let handle_submit e =
+    prevent_default e;
+    if not (unavailable ()) then (
+      S.set set_is_submitting true;
+      (* Simulate API call *)
+      ignore
+        (Js.Global.setTimeout
+           ~f:(fun () ->
+             Js.log2 "Order submitted, quantity:" (S.get value);
+             S.set set_value Float.nan;
+             S.set set_is_submitting false)
+           1500
+          : Js.Global.timeoutId))
+  in
+  <Form class_="flex w-[280px] flex-col gap-4" on_submit=handle_submit>
+    <Number_field
+      is_required=true
+      is_invalid=(fun () -> is_out_of_stock ())
+      max_value=5.
+      min_value=1.
+      name="quantity"
+      value=(fun () -> S.get value)
+      on_change=(S.set set_value)>
+      <Label>"Order quantity"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Show
+        when_=(fun () -> is_out_of_stock ())
+        fallback=(<Description>
+                    (fun () ->
+                      Jsx.string ("Only " ^ stock ^ " items available"))
+                  </Description>)>
+        <Field_error>
+          (fun () -> Jsx.string ("Only " ^ stock ^ " items left in stock"))
+        </Field_error>
+      </Show>
+    </Number_field>
+    <Button
+      class_="w-full"
+      is_disabled=(fun () -> unavailable ())
+      type_=`submit
+      variant=`primary>
+      <Show when_=(fun () -> not (S.get is_submitting))>"Place Order"</Show>
+      <Show when_=(fun () -> S.get is_submitting)>
+        <Spinner color=`current size=`sm /> "Processing..."
+      </Show>
+    </Button>
+  </Form>

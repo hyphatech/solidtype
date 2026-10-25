@@ -1,13 +1,14 @@
+module S = Solidtype.Solid
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
 
 let make () =
-  <Time_field class_="w-64" name="time">
+  <Time_field class_="w-[256px]" name="time">
     <Label>"Time"</Label>
     <Time_field.Group>
       <Time_field.Input>
         (fun segment ->
-          <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment) />)
+          <Time_field.Segment segment=(fun () -> S.get segment) />)
       </Time_field.Input>
     </Time_field.Group>
   </Time_field>

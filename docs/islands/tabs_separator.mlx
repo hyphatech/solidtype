@@ -13,7 +13,13 @@ let make () =
         </Tabs.Tab>
       </Tabs.List>
     </Tabs.List_container>
-    <Tabs.Panel id="overview">"Your project at a glance."</Tabs.Panel>
-    <Tabs.Panel id="analytics">"Metrics over time."</Tabs.Panel>
-    <Tabs.Panel id="reports">"Reports to download."</Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="overview">
+      <p>"View your project overview and recent activity."</p>
+    </Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="analytics">
+      <p>"Track your metrics and analyze performance data."</p>
+    </Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="reports">
+      <p>"Generate and download detailed reports."</p>
+    </Tabs.Panel>
   </Tabs>

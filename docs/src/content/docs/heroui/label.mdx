@@ -6,8 +6,8 @@ description: A field's name.
 import Example from "@components/Example.astro";
 import * as LabelUsage from "@islands/label_usage.jsx";
 import LabelUsageCode from "@islands/label_usage.mlx?raw";
-import * as LabelStates from "@islands/label_states.jsx";
-import LabelStatesCode from "@islands/label_states.mlx?raw";
+import * as Tailwind from "@islands/label_tailwind.jsx";
+import TailwindCode from "@islands/label_tailwind.mlx?raw";
 
 `Solidtype_heroui.Label` is HeroUI's label, with the classes HeroUI's own
 `labelVariants` gives. Inside a switch's, a checkbox's or a radio's content it
@@ -22,11 +22,14 @@ in its fields.
 
 <Example code={LabelUsageCode} title="label_usage.mlx"><LabelUsage.make client:visible /></Example>
 
-### Required, Disabled and Invalid
-
-<Example code={LabelStatesCode} title="label_states.mlx"><LabelStates.make client:visible /></Example>
-
 ## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={TailwindCode} title="label_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
 
 ### Global CSS
 

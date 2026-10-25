@@ -17,6 +17,7 @@ external props :
     [@mel.as "placement"]) ->
   size:[ `lg | `md | `sm ] ->
   variant:[ `primary | `secondary | `soft ] ->
+  dot:bool ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -37,21 +38,32 @@ let shown () =
       | Some e -> (slot, Some (T.class_name e, text e)))
 
 let both ?(color = `default) ?(placement = `top_right) ?(size = `md)
-    ?(variant = `primary) () =
+    ?(variant = `primary) ?(dot = false) () =
   T.render (fun () ->
       <Badge.Anchor>
         <span>"Inbox"</span>
-        <Badge
-          color=(fun () -> color)
-          placement=(fun () -> placement)
-          size=(fun () -> size)
-          variant=(fun () -> variant)>
-          "5"
-        </Badge>
+        (fun () ->
+          if dot then
+            Solidtype.Jsx.element
+              <Badge
+                color=(fun () -> color)
+                placement=(fun () -> placement)
+                size=(fun () -> size)
+                variant=(fun () -> variant)
+              />
+          else
+            Solidtype.Jsx.element
+              <Badge
+                color=(fun () -> color)
+                placement=(fun () -> placement)
+                size=(fun () -> size)
+                variant=(fun () -> variant)>
+                "5"
+              </Badge>)
       </Badge.Anchor>);
   let solidtype = shown () in
   T.cleanup ();
-  Twin.render (props ~color ~placement ~size ~variant ());
+  Twin.render (props ~color ~placement ~size ~variant ~dot ());
   let react = shown () in
   Twin.cleanup ();
   (solidtype, react)
@@ -67,4 +79,7 @@ let () =
             both ~color:`danger ~placement:`bottom_left ~size:`lg ~variant:`soft
               ()
           in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "is a dot with no content, as React's is" (fun () ->
+          let solidtype, react = both ~color:`success ~size:`sm ~dot:true () in
           E.(expect solidtype |> toEqual react)))

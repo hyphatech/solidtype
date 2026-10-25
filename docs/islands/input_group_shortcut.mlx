@@ -5,11 +5,12 @@ module Text_field = Solidtype_heroui.Text_field
 module Kbd = Solidtype_heroui.Kbd
 
 let make () =
-  <Text_field class_="w-full max-w-[280px]" name="field">
-    <Label>"Search"</Label>
+  <Text_field class_="w-full max-w-[280px]" name="command">
     <Input_group>
-      <Input_group.Input placeholder="Search..." />
-      <Input_group.Suffix>
+      <Input_group.Input
+        aria_label="Command" class_="w-full max-w-[280px]" placeholder="Command"
+      />
+      <Input_group.Suffix class_="pe-2">
         <Kbd>
           <Kbd.Abbr key_value=`command /> <Kbd.Content>"K"</Kbd.Content>
         </Kbd>

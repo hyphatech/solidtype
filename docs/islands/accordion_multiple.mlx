@@ -3,13 +3,19 @@ module Accordion = Solidtype_heroui.Accordion
 let items =
   [|
     ( "Getting Started",
-      "Learn the basics of HeroUI and how to integrate it into your project." );
+      "Learn the basics of HeroUI and how to integrate it into your React \
+       project. This section covers installation, setup, and your first \
+       component." );
     ( "Core Concepts",
-      "Understand the compound component pattern, styling with Tailwind CSS, \
-       and accessibility." );
+      "Understand the fundamental concepts behind HeroUI, including the \
+       compound component pattern, styling with Tailwind CSS, and \
+       accessibility features." );
     ( "Advanced Usage",
-      "Explore custom variants, theme customization, and integration with \
-       other libraries." );
+      "Explore advanced features like custom variants, theme customization, \
+       and integration with other libraries in your React ecosystem." );
+    ( "Best Practices",
+      "Follow our recommended best practices for building performant, \
+       accessible, and maintainable applications with HeroUI components." );
   |]
 
 let make () =

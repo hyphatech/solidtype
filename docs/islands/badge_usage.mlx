@@ -1,7 +1,29 @@
+module Avatar = Solidtype_heroui.Avatar
 module Badge = Solidtype_heroui.Badge
 
+let avatars = "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/"
+
 let make () =
-  <Badge.Anchor>
-    <span class_="block size-10 rounded-full bg-default" />
-    <Badge color=`danger size=`sm>"5"</Badge>
-  </Badge.Anchor>
+  <div class_="flex items-center gap-6">
+    <Badge.Anchor>
+      <Avatar>
+        <Avatar.Image src=(fun () -> avatars ^ "green.jpg") />
+        <Avatar.Fallback>"JD"</Avatar.Fallback>
+      </Avatar>
+      <Badge color=`danger size=`sm>"5"</Badge>
+    </Badge.Anchor>
+    <Badge.Anchor>
+      <Avatar>
+        <Avatar.Image src=(fun () -> avatars ^ "orange.jpg") />
+        <Avatar.Fallback>"AB"</Avatar.Fallback>
+      </Avatar>
+      <Badge color=`accent size=`sm>"New"</Badge>
+    </Badge.Anchor>
+    <Badge.Anchor>
+      <Avatar>
+        <Avatar.Image src=(fun () -> avatars ^ "blue.jpg") />
+        <Avatar.Fallback>"CD"</Avatar.Fallback>
+      </Avatar>
+      <Badge color=`success placement=`bottom_right size=`sm />
+    </Badge.Anchor>
+  </div>

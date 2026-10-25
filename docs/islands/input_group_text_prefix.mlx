@@ -4,10 +4,11 @@ module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
 
 let make () =
-  <Text_field class_="w-full max-w-[280px]" name="field">
+  <Text_field
+    class_="w-full max-w-[280px]" default_value="heroui.com" name="website">
     <Label>"Website"</Label>
     <Input_group>
       <Input_group.Prefix>"https://"</Input_group.Prefix>
-      <Input_group.Input placeholder="heroui.com" />
+      <Input_group.Input class_="w-full max-w-[280px]" />
     </Input_group>
   </Text_field>

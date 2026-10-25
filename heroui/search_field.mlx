@@ -133,7 +133,8 @@ module Input = struct
 end
 
 module Clear_button = struct
-  let%component make ?(class_ : string option) () =
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
     let f = within "Search_field.Clear_button" in
     let disabled () = f.disabled () || f.read_only () in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
@@ -161,7 +162,10 @@ module Clear_button = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
       props=(Props.others props)>
-      <Close_button.Icon />
+      (fun () ->
+        match children () with
+        | Some c -> c
+        | None -> Jsx.element <Close_button.Icon />)
     </Kobalte_button.Root>
 end
 

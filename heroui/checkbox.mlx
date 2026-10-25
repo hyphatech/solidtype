@@ -119,6 +119,24 @@ let description : Description.slot =
     (fun () -> children ())
   </Kobalte_description>
 
+module Kobalte_error = Field.As_span (struct
+  let component = Kobalte.ErrorMessage.component
+end)
+
+(* An error in a checkbox is the checkbox's: Kobalte's, shown while it is
+   invalid and describing its input. *)
+let error : Field_error.slot =
+ fun[@u] classes others children ->
+  <Kobalte_error
+    as_="span"
+    class_=(fun () -> classes ())
+    slot="errorMessage"
+    data_slot="field-error"
+    data_visible="true"
+    props=others>
+    (fun () -> children ())
+  </Kobalte_error>
+
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_selected : bool option) ?(default_selected : bool = false)
     ?(is_indeterminate : bool = false) ?(on_change : (bool -> unit) option)
@@ -185,8 +203,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       slots =
         (fun () ->
           Styles.Checkbox.slots
-            (Styles.Checkbox.options ~variant:(variant ()) ?class_:(class_ ())
-               ()));
+            (Styles.Checkbox.options ~variant:(variant ()) ()));
       field =
         {
           selected = on;
@@ -220,7 +237,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?name
       ?value
       validation_state=(fun () -> if invalid () then `invalid else `valid)
-      class_=(fun () -> Styles.Checkbox.base (c.slots ()))
+      class_=(fun () -> after (Styles.Checkbox.base (c.slots ())) (class_ ()))
       ref=(fun e -> in_form.root e)
       on_focus_out=(Field.on_leave (fun e ->
                         in_form.left ();
@@ -234,7 +251,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
-        (fun () -> children ())
+        <Field_error.Slot.Provider value=(fun () -> error)>
+          (fun () -> children ())
+        </Field_error.Slot.Provider>
       </Description.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

@@ -365,7 +365,9 @@ module Panel = struct
     let k = Kobalte.use_tabs_context () in
     (* On the page while its tab is selected, as React Aria's panel is:
        Kobalte's, kept mounted, would wait for an animation to end before it
-       left, which HeroUI's styles do not give a panel. *)
+       left, which HeroUI's styles do not give a panel. React Aria's panel
+       names no orientation, so HeroUI's spacing by it never reaches the page;
+       Kobalte's names one, which an empty one overrides. *)
     <Show
       when_=(fun () ->
               Option.equal String.equal
@@ -381,6 +383,7 @@ module Panel = struct
         class_=(fun () ->
                  after (Styles.Tabs.tab_panel (t.slots ())) (class_ ()))
         data_slot="tabs-panel"
+        data_orientation=(fun () -> Jsx.data "")
         props=(Props.others props)>
         (fun () -> children ())
       </Kobalte.Content>

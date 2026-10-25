@@ -1,0 +1,45 @@
+module Button = Solidtype_heroui.Button
+module Card = Solidtype_heroui.Card
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Link = Solidtype_heroui.Link
+module Text_field = Solidtype_heroui.Text_field
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external alert : string -> unit = "alert"
+
+let make () =
+  <Card class_="w-full max-w-md">
+    <Card.Header>
+      <Card.Title>"Login"</Card.Title>
+      <Card.Description>
+        "Enter your credentials to access your account"
+      </Card.Description>
+    </Card.Header>
+    <Form
+      on_submit=(fun e ->
+                  prevent_default e;
+                  alert "Form submitted successfully!")>
+      <Card.Content>
+        <div class_="flex flex-col gap-4">
+          <Text_field name="email">
+            <Label>"Email"</Label>
+            <Input
+              placeholder="email@example.com" type_="email" variant=`secondary
+            />
+          </Text_field>
+          <Text_field name="password">
+            <Label>"Password"</Label>
+            <Input
+              placeholder={js|••••••••|js} type_="password" variant=`secondary
+            />
+          </Text_field>
+        </div>
+      </Card.Content>
+      <Card.Footer class_="mt-4 flex flex-col gap-2">
+        <Button class_="w-full" type_=`submit>"Sign In"</Button>
+        <Link class_="text-center text-sm" href="#">"Forgot password?"</Link>
+      </Card.Footer>
+    </Form>
+  </Card>

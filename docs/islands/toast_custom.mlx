@@ -4,27 +4,51 @@ module Toast = Solidtype_heroui.Toast
 
 let make () =
   let q = Toast.Queue.create () in
-  <div>
-    <Toast.Provider placement=`top_end queue=(fun () -> q)>
+  <div class_="flex h-full max-w-xl flex-col items-center justify-center">
+    <Toast.Provider placement=`bottom queue=(fun () -> q)>
       (fun toast ->
-        <Toast toast=(fun () -> toast) variant=`accent>
-          <Toast.Indicator variant=`accent />
+        let variant () = Toast.toast_variant toast in
+        <Toast
+          class_="rounded-xl border border-border"
+          toast=(fun () -> toast)
+          variant=(fun () -> variant ())>
           <Toast.Content>
-            <Toast.Title>
-              (fun () -> Jsx.string (Toast.title toast))
-            </Toast.Title>
-            <Toast.Description>
-              "Rendered by the page's own function"
-            </Toast.Description>
+            <div class_="flex items-center gap-2">
+              <Toast.Indicator
+                class_="text-accent-soft-foreground"
+                variant=(fun () -> variant ())
+              />
+              <div class_="flex flex-col pe-6">
+                <Toast.Title class_="text-accent-soft-foreground">
+                  (fun () -> Jsx.string (Toast.title toast))
+                </Toast.Title>
+                (fun () ->
+                  match Toast.description toast with
+                  | Some d ->
+                      Jsx.element
+                        <Toast.Description>
+                          (fun () -> Jsx.string d)
+                        </Toast.Description>
+                  | None -> Jsx.string "")
+              </div>
+            </div>
           </Toast.Content>
-          <Toast.Close_button key=(fun () -> Toast.key toast) />
+          <Toast.Close_button
+            class_="absolute end-2 top-1/2 -translate-y-1/2 border-none \
+                    bg-transparent opacity-100 [&>svg]:size-4"
+            key=(fun () -> Toast.key toast)
+          />
         </Toast>)
     </Toast.Provider>
     <Button
       size=`sm
       variant=`secondary
       on_click=(fun _ ->
-                   ignore (Toast.show ~queue:q "A toast of its own" : Toast.key))>
-      "Show custom toast"
+                   ignore
+                     (Toast.show ~queue:q ~variant:`default
+                        ~description:"This uses a custom render function"
+                        "Custom layout toast"
+                       : Toast.key))>
+      "Custom toast"
     </Button>
   </div>

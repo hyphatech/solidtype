@@ -1,0 +1,150 @@
+module Avatar = Solidtype_heroui.Avatar
+module Button = Solidtype_heroui.Button
+module Card = Solidtype_heroui.Card
+module Close_button = Solidtype_heroui.Close_button
+module Link = Solidtype_heroui.Link
+
+let assets = "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/"
+
+let community ~image ~alt ~fallback ~title ~members ~avatar ~by =
+  <Card class_="col-span-12 gap-2 sm:col-span-6">
+    <Card.Header>
+      <Avatar class_="size-[56px] rounded-xl">
+        <Avatar.Image alt=(fun () -> alt) src=(fun () -> assets ^ image) />
+        <Avatar.Fallback>
+          (fun () -> Solidtype.Jsx.string fallback)
+        </Avatar.Fallback>
+      </Avatar>
+    </Card.Header>
+    <Card.Content class_="mt-1">
+      <p class_="text-sm leading-4 font-medium">
+        (fun () -> Solidtype.Jsx.string title)
+      </p>
+      <p class_="text-xs text-muted">
+        (fun () -> Solidtype.Jsx.string members)
+      </p>
+    </Card.Content>
+    <Card.Footer class_="flex items-center gap-2">
+      <Avatar class_="size-4">
+        <Avatar.Image alt="John" src=(fun () -> assets ^ avatar) />
+        <Avatar.Fallback>
+          (fun () -> Solidtype.Jsx.string fallback)
+        </Avatar.Fallback>
+      </Avatar>
+      <p class_="text-xs text-muted">(fun () -> Solidtype.Jsx.string by)</p>
+    </Card.Footer>
+  </Card>
+
+let make () =
+  <div class_="flex w-full items-center justify-center">
+    <div class_="grid w-full max-w-2xl grid-cols-12 gap-4 p-4">
+      <Card class_="col-span-12 flex h-auto min-h-[152px] flex-col sm:flex-row">
+        <div
+          class_="relative h-[140px] w-full shrink-0 overflow-hidden \
+                  rounded-2xl sm:h-[120px] sm:w-[120px]">
+          <img
+            alt="Cherries"
+            class_="pointer-events-none absolute inset-0 h-full w-full \
+                    scale-125 object-cover select-none"
+            loading="lazy"
+            src=(fun () -> assets ^ "docs/cherries.jpeg")
+          />
+        </div>
+        <div class_="flex flex-1 flex-col gap-3">
+          <Card.Header class_="gap-1">
+            <Card.Title class_="pe-8">"Become an ACME Creator!"</Card.Title>
+            <Card.Description>
+              "Lorem ipsum dolor sit amet consectetur. Sed arcu donec id \
+               aliquam dolor sed amet faucibus etiam."
+            </Card.Description>
+            <Close_button
+              aria_label="Close banner" class_="absolute end-3 top-3"
+            />
+          </Card.Header>
+          <Card.Footer
+            class_="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row \
+                    sm:items-center sm:justify-between">
+            <div class_="flex flex-col">
+              <span class_="text-sm font-medium text-foreground">
+                "Only 10 spots"
+              </span>
+              <span class_="text-xs text-muted">"Submission ends Oct 10."</span>
+            </div>
+            <Button class_="w-full sm:w-auto">"Apply Now"</Button>
+          </Card.Footer>
+        </div>
+      </Card>
+      <div class_="col-span-12 grid grid-cols-12 gap-4">
+        <div class_="col-span-12 grid grid-cols-12 gap-4 lg:col-span-6">
+          <Card class_="col-span-12">
+            <div class_="absolute end-3 top-3 z-10">
+              <Close_button aria_label="Close notification" />
+            </div>
+            <Card.Header class_="gap-3">
+              <Gravity.Circle_dollar
+                aria_label="Dollar sign icon"
+                class_="text-primary size-8 shrink-0"
+              />
+              <div class_="flex flex-col gap-1">
+                <span class_="text-xs font-medium text-muted uppercase">
+                  "PAYMENT"
+                </span>
+                <Card.Title class_="pe-8 text-sm sm:text-base">
+                  "You can now withdraw on crypto"
+                </Card.Title>
+                <Card.Description class_="text-xs sm:text-sm">
+                  "Add your wallet in settings to withdraw"
+                </Card.Description>
+              </div>
+            </Card.Header>
+            <Card.Footer>
+              <Link href="#">"Go to settings" <Link.Icon /></Link>
+            </Card.Footer>
+          </Card>
+          <div class_="col-span-12 grid grid-cols-12 gap-4">
+            (fun () ->
+              Solidtype.Jsx.element
+                (community ~image:"docs/demo1.jpg" ~alt:"Demo 1" ~fallback:"JK"
+                   ~title:"Indie Hackers" ~members:"148 members"
+                   ~avatar:"avatars/red.jpg" ~by:"By John"))
+            (fun () ->
+              Solidtype.Jsx.element
+                (community ~image:"docs/demo2.jpg" ~alt:"Demo 2" ~fallback:"AB"
+                   ~title:"AI Builders" ~members:"362 members"
+                   ~avatar:"avatars/blue.jpg" ~by:"By Martha"))
+          </div>
+        </div>
+        <Card
+          class_="col-span-12 min-h-[200px] overflow-hidden rounded-3xl \
+                  lg:col-span-6">
+          <img
+            alt="NEO Home Robot"
+            aria_hidden=true
+            class_="absolute inset-0 h-full w-full object-cover"
+            src=(fun () -> assets ^ "docs/neo2.jpeg")
+          />
+          <Card.Header class_="z-10 text-white">
+            <Card.Title
+              class_="text-xs font-semibold tracking-wide text-black/70">
+              "NEO"
+            </Card.Title>
+            <Card.Description
+              class_="text-sm leading-5 font-medium text-black/50">
+              "Home Robot"
+            </Card.Description>
+          </Card.Header>
+          <Card.Footer class_="z-10 mt-auto flex items-center justify-between">
+            <div>
+              <div class_="text-sm font-medium text-black">
+                "Available soon"
+              </div>
+              <div class_="text-xs text-black/60">"Get notified"</div>
+            </div>
+            <Button class_="bg-white text-black" size=`sm variant=`tertiary>
+              "Notify me"
+            </Button>
+          </Card.Footer>
+        </Card>
+      </div>
+    </div>
+  </div>

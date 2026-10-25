@@ -1,30 +1,54 @@
 module Button = Solidtype_heroui.Button
 module Toast = Solidtype_heroui.Toast
 
+external now : unit -> float = "now" [@@mel.scope "Date"]
+
 let make () =
   let notifications = Toast.Queue.create ~max_visible_toasts:2 () in
   let errors = Toast.Queue.create ~max_visible_toasts:3 () in
-  <div class_="flex flex-wrap gap-2">
-    <Toast.Provider placement=`bottom_start queue=(fun () -> notifications) />
-    <Toast.Provider placement=`bottom_end queue=(fun () -> errors) />
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~queue:notifications
-                        ~description:"You have a new message" "New notification"
-                       : Toast.key))>
-      "Add notification (max 2)"
-    </Button>
-    <Button
-      size=`sm
-      variant=`danger_soft
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.danger ~queue:errors
-                        ~description:"Failed to save changes" "Error occurred"
-                       : Toast.key))>
-      "Add error (max 3)"
-    </Button>
+  let successes = Toast.Queue.create ~max_visible_toasts:1 () in
+  <div class_="flex h-full max-w-4xl items-center justify-center gap-4">
+    <Toast.Provider placement=`bottom queue=(fun () -> notifications) />
+    <div class_="flex justify-center gap-2">
+      <Button
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     ignore
+                       (Toast.show ~queue:notifications ~variant:`default
+                          ~description:"You have a new message"
+                          "New notification"
+                         : Toast.key))>
+        "Add notification (max 2)"
+      </Button>
+    </div>
+    <Toast.Provider placement=`bottom_start queue=(fun () -> errors) />
+    <div class_="flex justify-center gap-2">
+      <Button
+        size=`sm
+        variant=`danger_soft
+        on_click=(fun _ ->
+                     ignore
+                       (Toast.danger ~queue:errors
+                          ~description:"Failed to save changes" "Error occurred"
+                         : Toast.key))>
+        "Add error (max 3)"
+      </Button>
+    </div>
+    <Toast.Provider placement=`bottom_end queue=(fun () -> successes) />
+    <div class_="flex justify-center gap-2">
+      <Button
+        class_="text-success-soft-foreground"
+        size=`sm
+        variant=`secondary
+        on_click=(fun _ ->
+                     ignore
+                       (Toast.success ~queue:successes
+                          ~description:
+                            ("Operation " ^ Js.Float.toString (now ()))
+                          "Success!"
+                         : Toast.key))>
+        "Add success (max 1)"
+      </Button>
+    </div>
   </div>

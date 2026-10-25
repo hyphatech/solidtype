@@ -21,10 +21,11 @@ type action = {
   label : string;
   on_press : unit -> unit;
   button : button_variant;
+  button_class : string option;
 }
 
-let action ?(variant = `tertiary) ~on_press label =
-  { label; on_press; button = variant }
+let action ?(variant = `tertiary) ?class_ ~on_press label =
+  { label; on_press; button = variant; button_class = class_ }
 
 type content = {
   title : string;
@@ -696,7 +697,9 @@ let default_toast e =
   let action () = match (c ()).act with Some a -> Some a | None -> None in
   let button a =
     <Action_button
-      variant=(fun () -> a.button) on_press=(fun () -> a.on_press ())>
+      variant=(fun () -> a.button)
+      ?class_=(fun () -> a.button_class)
+      on_press=(fun () -> a.on_press ())>
       (fun () -> Jsx.string a.label)
     </Action_button>
   in

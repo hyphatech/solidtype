@@ -4,13 +4,27 @@ module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
 
 let make () =
-  <Text_field class_="w-full max-w-[280px]" name="field" is_required=true>
-    <Label>"Email address"</Label>
-    <Input_group>
-      <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
-      <Input_group.Input
-        class_="w-full max-w-[280px]" placeholder="name@email.com"
-      />
-    </Input_group>
-    <Description>"We will email you a receipt"</Description>
-  </Text_field>
+  <div class_="flex flex-col gap-4">
+    <Text_field is_required=true class_="w-full max-w-[280px]" name="email">
+      <Label>"Email address"</Label>
+      <Input_group>
+        <Input_group.Prefix>
+          <Gravity.Envelope class_="size-4 text-muted" />
+        </Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[280px]" placeholder="name@email.com"
+        />
+      </Input_group>
+    </Text_field>
+    <Text_field is_required=true class_="w-full max-w-[280px]" name="price">
+      <Label>"Set a price"</Label>
+      <Input_group>
+        <Input_group.Prefix>"$"</Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[200px]" placeholder="0" type_="number"
+        />
+        <Input_group.Suffix>"USD"</Input_group.Suffix>
+      </Input_group>
+      <Description>"What customers would pay"</Description>
+    </Text_field>
+  </div>

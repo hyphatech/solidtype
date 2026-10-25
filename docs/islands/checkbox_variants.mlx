@@ -1,18 +1,26 @@
 module Checkbox = Solidtype_heroui.Checkbox
-module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
 
 let make () =
   <div class_="flex flex-col gap-4">
-    <Checkbox variant=`primary default_selected=true>
-      <Checkbox.Content>
-        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-        <Label>"Primary checkbox"</Label>
-      </Checkbox.Content>
-    </Checkbox>
-    <Checkbox variant=`secondary default_selected=true>
-      <Checkbox.Content>
-        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-        <Label>"Secondary checkbox"</Label>
-      </Checkbox.Content>
-    </Checkbox>
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Primary variant"</p>
+      <Checkbox name="primary" variant=`primary>
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          "Primary checkbox"
+        </Checkbox.Content>
+        <Description>"Standard styling with default background"</Description>
+      </Checkbox>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Secondary variant"</p>
+      <Checkbox name="secondary" variant=`secondary>
+        <Checkbox.Content>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          "Secondary checkbox"
+        </Checkbox.Content>
+        <Description>"Lower emphasis variant for use in surfaces"</Description>
+      </Checkbox>
+    </div>
   </div>

@@ -1,17 +1,41 @@
 module Separator = Solidtype_heroui.Separator
 
+let assets =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/"
+
+let items =
+  [|
+    ( assets ^ "bell-small.png",
+      "Receive account activity updates",
+      "Set Up Notifications" );
+    ( assets ^ "compass-small.png",
+      "Connect your browser to your account",
+      "Set up Browser Extension" );
+    ( assets ^ "mint-collective-small.png",
+      "Create your first collectible",
+      "Mint Collectible" );
+  |]
+
 let make () =
-  <div class_="flex w-72 flex-col gap-3">
-    <div>
-      <h4 class_="text-base font-medium">"solidtype"</h4>
-      <p class_="text-sm text-muted">"Solid, typed, for OCaml front ends."</p>
-    </div>
-    <Separator />
-    <div class_="flex h-5 items-center gap-4 text-sm">
-      <div>"Blog"</div>
-      <Separator orientation=`vertical />
-      <div>"Docs"</div>
-      <Separator orientation=`vertical />
-      <div>"Source"</div>
-    </div>
+  <div class_="max-w-md space-y-4">
+    <Solidtype.For each=(fun () -> items)>
+      (fun (icon, subtitle, title) index ->
+        <div>
+          <div class_="flex items-center gap-3">
+            <img alt=(fun () -> title) class_="size-12" src=(fun () -> icon) />
+            <div class_="flex-1 space-y-0">
+              <h4 class_="text-small font-medium">
+                (fun () -> Solidtype.Jsx.string title)
+              </h4>
+              <p class_="text-sm text-muted">
+                (fun () -> Solidtype.Jsx.string subtitle)
+              </p>
+            </div>
+          </div>
+          (fun () ->
+            if (index () [@u]) < Array.length items - 1 then
+              Solidtype.Jsx.element <Separator class_="my-4" />
+            else Solidtype.Jsx.string "")
+        </div>)
+    </Solidtype.For>
   </div>

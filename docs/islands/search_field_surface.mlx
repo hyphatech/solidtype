@@ -1,0 +1,26 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="flex w-full max-w-sm flex-col gap-4 rounded-3xl p-6">
+    <Search_field name="search" variant=`secondary>
+      <Label>"Search"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-full" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+      <Description>"Enter keywords to search"</Description>
+    </Search_field>
+    <Search_field name="search-2" variant=`secondary>
+      <Label>"Advanced search"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-full" placeholder="Advanced search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+      <Description>"Use filters to refine your search"</Description>
+    </Search_field>
+  </Surface>

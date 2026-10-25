@@ -2,23 +2,48 @@ module Accordion = Solidtype_heroui.Accordion
 
 let items =
   [|
-    ( "How do I place an order?",
-      "Browse our products, add items to your cart, and proceed to checkout." );
-    ( "Can I modify or cancel my order?",
-      "Yes, you can modify or cancel your order before it's shipped." );
-    ( "Do you ship internationally?",
+    ( (fun () -> <Gravity.Shopping_bag />),
+      "How do I place an order?",
+      "Browse our products, add items to your cart, and proceed to checkout. \
+       You'll need to provide shipping and payment information to complete \
+       your purchase." );
+    ( (fun () -> <Gravity.Receipt />),
+      "Can I modify or cancel my order?",
+      "Yes, you can modify or cancel your order before it's shipped. Once your \
+       order is processed, you can't make changes." );
+    ( (fun () -> <Gravity.Credit_card />),
+      "What payment methods do you accept?",
+      "We accept all major credit cards, including Visa, Mastercard, and \
+       American Express." );
+    ( (fun () -> <Gravity.Box />),
+      "How much does shipping cost?",
+      "Shipping costs vary based on your location and the size of your order. \
+       We offer free shipping for orders over $50." );
+    ( (fun () -> <Gravity.Planet_earth />),
+      "Do you ship internationally?",
       "Yes, we ship to most countries. Please check our shipping rates and \
        policies for more information." );
+    ( (fun () -> <Gravity.Arrows_rotate_left />),
+      "How do I request a refund?",
+      "If you're not satisfied with your purchase, you can request a refund \
+       within 30 days of purchase. Please contact our customer support team \
+       for assistance." );
   |]
 
 let make () =
   <Accordion class_="w-full max-w-md" variant=`surface>
     <Solidtype.For each=(fun () -> items)>
-      (fun (title, content) _ ->
+      (fun (icon, title, content) _ ->
         <Accordion.Item>
           <Accordion.Heading>
             <Accordion.Trigger>
-              (fun () -> Solidtype.Jsx.string title) <Accordion.Indicator />
+              <span class_="me-3 size-4 shrink-0 text-muted">
+                (fun () -> Solidtype.Jsx.element (icon ()))
+              </span>
+              (fun () -> Solidtype.Jsx.string title)
+              <Accordion.Indicator>
+                <Gravity.Chevron_down />
+              </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Panel>

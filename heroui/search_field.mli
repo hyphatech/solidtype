@@ -72,14 +72,15 @@ module Input : sig
 end
 
 (** The button that clears the field and gives its input the focus back:
-    HeroUI's close button, named "Close" and drawing {!Close_button.Icon}, out
-    of the tab order, as React Aria's is. *)
+    HeroUI's close button, named "Close" and drawing {!Close_button.Icon}, or
+    the children it is given, out of the tab order, as React Aria's is. *)
 module Clear_button : sig
   module Props : sig
     type t
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       unit ->
       unit

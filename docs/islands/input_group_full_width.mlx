@@ -4,12 +4,23 @@ module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
 
 let make () =
-  <div class_="w-[400px]">
+  <div class_="w-[400px] space-y-4">
     <Text_field full_width=true name="email">
       <Label>"Email address"</Label>
       <Input_group full_width=true>
-        <Input_group.Prefix><Icons.Envelope /></Input_group.Prefix>
+        <Input_group.Prefix>
+          <Gravity.Envelope class_="size-4 text-muted" />
+        </Input_group.Prefix>
         <Input_group.Input placeholder="name@email.com" />
+      </Input_group>
+    </Text_field>
+    <Text_field full_width=true name="password">
+      <Label>"Password"</Label>
+      <Input_group full_width=true>
+        <Input_group.Input placeholder="Enter password" type_="password" />
+        <Input_group.Suffix>
+          <Gravity.Eye class_="size-4 text-muted" />
+        </Input_group.Suffix>
       </Input_group>
     </Text_field>
   </div>

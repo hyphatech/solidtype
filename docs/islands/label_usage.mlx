@@ -1,3 +1,8 @@
+module Input = Solidtype_heroui.Input
 module Label = Solidtype_heroui.Label
 
-let make () = <Label>"Email"</Label>
+let make () =
+  <div class_="flex flex-col gap-1">
+    <Label for_="name">"Name"</Label>
+    <Input class_="w-64" id="name" placeholder="Enter your name" type_="text" />
+  </div>

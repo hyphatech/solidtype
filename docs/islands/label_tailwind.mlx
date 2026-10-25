@@ -1,0 +1,12 @@
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <div class_="flex flex-col gap-1.5">
+    <Label
+      class_="text-xs font-semibold tracking-wide text-accent uppercase"
+      for_="repo">
+      "Repository"
+    </Label>
+    <Input class_="w-64 bg-field" id="repo" placeholder="heroui/react" />
+  </div>

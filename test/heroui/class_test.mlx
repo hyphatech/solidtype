@@ -1,0 +1,111 @@
+(* A class given to a port reaches its root after HeroUI's own, as React's
+   className does, on the ports whose classes are a variant function's slots,
+   where tailwind-variants takes a class only as a slot is called. *)
+
+module H = Solidtype_heroui
+module Badge = H.Badge
+module Checkbox = H.Checkbox
+module Chip = H.Chip
+module Disclosure = H.Disclosure
+module Switch = H.Switch
+module Disclosure_group = H.Disclosure_group
+module Link = H.Link
+module Radio = H.Radio
+module Radio_group = H.Radio_group
+module E = Jest.Expect
+module T = Testing
+
+let class_of selector =
+  match T.query selector with Some e -> T.class_name e | None -> "missing"
+
+let ends_with_given c =
+  let given = " given" in
+  let n = String.length c and m = String.length given in
+  n >= m && String.equal (String.sub c (n - m) m) given
+
+let () =
+  Jest.describe "A label and a description standing alone" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "name what they label and are named, as React's do" (fun () ->
+          T.render (fun () ->
+              <div>
+                <H.Label for_="email">"Email"</H.Label>
+                <H.Description id="email-description">
+                  "Never shared."
+                </H.Description>
+              </div>);
+          E.(
+            expect
+              ( Option.bind (T.query "[data-slot=label]") (fun e ->
+                    T.attribute e "for"),
+                Option.bind (T.query "[data-slot=description]") (fun e ->
+                    T.attribute e "id") )
+            |> toEqual (Some "email", Some "email-description"))))
+
+let () =
+  Jest.describe "A checkbox's error" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "shows while it is invalid, as React's does" (fun () ->
+          T.render (fun () ->
+              <Checkbox is_invalid=true is_required=true name="agreement">
+                <Checkbox.Content>
+                  <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                  "I agree to the terms"
+                </Checkbox.Content>
+                <H.Field_error>
+                  "You must accept the terms to continue"
+                </H.Field_error>
+              </Checkbox>);
+          E.(
+            expect
+              (Option.map
+                 (fun e -> (T.class_name e, T.attribute e "data-visible"))
+                 (T.query "[data-slot=field-error]"))
+            |> toEqual (Some ("field-error", Some "true")))))
+
+let () =
+  Jest.describe "A port's class" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "follows HeroUI's on each root" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Disclosure_group class_="given">
+                  <Disclosure id="a">
+                    <Disclosure.Heading>
+                      <Disclosure.Trigger>"A"</Disclosure.Trigger>
+                    </Disclosure.Heading>
+                    <Disclosure.Content>"About a."</Disclosure.Content>
+                  </Disclosure>
+                </Disclosure_group>
+                <Link href="#" class_="given">"Link"</Link>
+                <Radio_group>
+                  <Radio value="a" class_="given">"A"</Radio>
+                </Radio_group>
+                <Badge class_="given">"5"</Badge>
+                <Chip class_="given">"Chip"</Chip>
+                <Checkbox class_="given">"Check"</Checkbox>
+                <Switch class_="given">"Switch"</Switch>
+              </div>);
+          E.(
+            expect
+              (List.map
+                 (fun s -> (s, ends_with_given (class_of s)))
+                 [
+                   "[data-slot=disclosure-group]";
+                   "[data-slot=link]";
+                   "[data-slot=radio]";
+                   "[data-slot=badge]";
+                   "[data-slot=chip]";
+                   "[data-slot=checkbox]";
+                   "[data-slot=switch]";
+                 ])
+            |> toEqual
+                 [
+                   ("[data-slot=disclosure-group]", true);
+                   ("[data-slot=link]", true);
+                   ("[data-slot=radio]", true);
+                   ("[data-slot=badge]", true);
+                   ("[data-slot=chip]", true);
+                   ("[data-slot=checkbox]", true);
+                   ("[data-slot=switch]", true);
+                 ])))

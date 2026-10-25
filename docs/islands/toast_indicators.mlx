@@ -2,32 +2,16 @@ module Button = Solidtype_heroui.Button
 module Toast = Solidtype_heroui.Toast
 
 let make () =
-  <div class_="flex flex-wrap gap-2">
+  <div class_="flex h-full max-w-xl flex-col items-center justify-center">
     <Button
       size=`sm
       variant=`secondary
       on_click=(fun _ ->
                    ignore
                      (Toast.show
-                        ~indicator:
-                          (Toast.Icon
-                             <svg
-                               class_="size-4"
-                               view_box="0 0 16 16"
-                               fill="currentColor">
-                               <circle cx="8" cy="8" r="4" />
-                             </svg>)
-                        "A dot of its own"
+                        ~indicator:(Toast.Icon <Gravity.Star />)
+                        "Custom icon indicator"
                        : Toast.key))>
-      "Custom icon"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.show ~indicator:Toast.No_icon "No icon at all"
-                       : Toast.key))>
-      "No icon"
+      "Custom indicator"
     </Button>
   </div>

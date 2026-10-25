@@ -1,0 +1,66 @@
+module Accordion = Solidtype_heroui.Accordion
+
+let assets =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/"
+
+let items =
+  [|
+    ( "Set Up Notifications",
+      "Receive account activity updates",
+      assets ^ "bell-small.png",
+      "Stay informed about your account activity with real-time notifications."
+    );
+    ( "Set up Browser Extension",
+      "Connect your browser to your account",
+      assets ^ "compass-small.png",
+      "Enhance your browsing experience by installing our official browser \
+       extension" );
+    ( "Mint Collectible",
+      "Create your first collectible",
+      assets ^ "mint-collective-small.png",
+      "Begin your journey into the world of digital collectibles by creating \
+       your first NFT. " );
+  |]
+
+let make () =
+  <Accordion
+    class_="bg-surface-1/10 w-full max-w-md rounded-2xl" variant=`surface>
+    <Solidtype.For each=(fun () -> items)>
+      (fun (title, subtitle, icon, content) _ ->
+        <Accordion.Item
+          class_="group/item \
+                  first:**:data-[slot=accordion-trigger]:rounded-t-2xl \
+                  last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl">
+          <Accordion.Heading>
+            <Accordion.Trigger
+              class_="group flex items-center gap-2 transition-none \
+                      hover:bg-surface">
+              <img
+                alt=(fun () -> title)
+                class_="h-11 w-11 transition-[scale,rotate] duration-300 \
+                        ease-out group-hover/item:scale-120 \
+                        group-hover/item:-rotate-10 \
+                        group-hover/item:drop-shadow-lg"
+                src=(fun () -> icon)
+              />
+              <div class_="flex flex-col gap-0">
+                <span class_="leading-5 font-medium">
+                  (fun () -> Solidtype.Jsx.string title)
+                </span>
+                <span class_="leading-6 font-normal text-muted/80">
+                  (fun () -> Solidtype.Jsx.string subtitle)
+                </span>
+              </div>
+              <Accordion.Indicator class_="text-muted/50 [&>svg]:size-4">
+                <Gravity.Chevron_down />
+              </Accordion.Indicator>
+            </Accordion.Trigger>
+          </Accordion.Heading>
+          <Accordion.Panel>
+            <Accordion.Body class_="text-muted/80">
+              (fun () -> Solidtype.Jsx.string content)
+            </Accordion.Body>
+          </Accordion.Panel>
+        </Accordion.Item>)
+    </Solidtype.For>
+  </Accordion>

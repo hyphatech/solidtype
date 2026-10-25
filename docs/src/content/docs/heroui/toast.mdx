@@ -25,8 +25,8 @@ import * as Callbacks from "@islands/toast_callbacks.jsx";
 import CallbacksCode from "@islands/toast_callbacks.mlx?raw";
 import * as Queues from "@islands/toast_queues.jsx";
 import QueuesCode from "@islands/toast_queues.mlx?raw";
-import { Code } from "@astrojs/starlight/components";
-import SetupCode from "@islands/toast_setup.mlx?raw";
+import * as Tailwind from "@islands/toast_tailwind.jsx";
+import TailwindCode from "@islands/toast_tailwind.mlx?raw";
 
 {/* The page's toasts, on HeroUI's ground and out of the prose's flow, as an example's preview is. */}
 <div class="not-content heroui-ground"><Provider.make client:load /></div>
@@ -44,6 +44,8 @@ the page while it is hidden. Alt and T moves the focus to it, and Escape folds
 it; a closing toast stays for its exit before it is gone.
 
 ## Usage
+
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="toast_usage.mlx"><Usage.make client:visible /></Example>
 
@@ -113,7 +115,24 @@ apart. `Toast.update` keeps what it does not name, as HeroUI documents it.
 
 Render the provider once, at the root of the page:
 
-<Code code={SetupCode} lang="ocaml" />
+```ocaml
+let make () =
+  <main>
+    <Toast.Provider />
+    <Button on_click=(fun _ -> ignore (Toast.show "Simple message" : Toast.key))>
+      "Show toast"
+    </Button>
+  </main>
+```
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on a toast and each of its parts,
+and on an action's button by `Toast.action`'s.
+
+<Example code={TailwindCode} title="toast_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ## Styling Reference
 

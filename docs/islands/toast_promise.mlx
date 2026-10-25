@@ -1,45 +1,145 @@
 module Button = Solidtype_heroui.Button
 module Toast = Solidtype_heroui.Toast
 
-let after ms value =
+(* What HeroUI's example rejects with: an Error, its message read. *)
+external message : Js.Promise.error -> string = "message" [@@mel.get]
+external error : string -> Js.Exn.t = "Error" [@@mel.new]
+external reject : Js.Exn.t -> 'a Js.Promise.t = "reject" [@@mel.scope "Promise"]
+external random : unit -> float = "random" [@@mel.scope "Math"]
+
+let after ms f =
   Js.Promise.make (fun ~resolve ~reject:_ ->
       let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve value [@u])) ms
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
       in
       ())
+  |> Js.Promise.then_ (fun (_ : bool) -> f ())
+
+let upload_file () =
+  after 2000 (fun () -> Js.Promise.resolve ("document.pdf", 1024))
+
+let create_event () =
+  after 2000 (fun () -> reject (error "Network error. Please try again."))
+
+let save_data () =
+  after 2000 (fun () ->
+      if random () > 0.5 then Js.Promise.resolve 42
+      else reject (error "Failed to save data"))
+
+let fetch_user () = after 2000 (fun () -> Js.Promise.resolve "John Doe")
+let later ms f = ignore (Js.Global.setTimeout ~f ms : Js.Global.timeoutId)
+
+(* A toast loading until it is told how it ended, as HeroUI's manual
+   examples are. *)
+let loading ?description ~ms title ended =
+  let key = Toast.show ?description ~is_loading:true ~timeout_ms:0. title in
+  later ms (fun () -> ignore (ended key : Toast.key))
 
 let make () =
-  <div class_="flex flex-wrap gap-2">
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   ignore
-                     (Toast.promise (after 2000 "report.pdf")
-                        ~loading:"Uploading file..."
-                        ~success:(fun name -> "File " ^ name ^ " uploaded")
-                        ~error:(fun _ -> "Failed to upload file")
-                       : Toast.key))>
-      "Upload"
-    </Button>
-    <Button
-      size=`sm
-      variant=`secondary
-      on_click=(fun _ ->
-                   let key =
-                     Toast.show ~is_loading:true ~timeout_ms:0.
-                       "Creating event..."
-                   in
-                   ignore
-                     (after 2000 ()
-                      |> Js.Promise.then_ (fun () ->
-                          ignore
-                            (Toast.update key ~variant:`success
-                               ~is_loading:false ~timeout_ms:4000.
-                               "Event created"
-                              : Toast.key);
-                          Js.Promise.resolve ())
-                       : unit Js.Promise.t))>
-      "Create event"
-    </Button>
+  <div
+    class_="flex h-full max-w-2xl flex-col items-center justify-center gap-8">
+    <div class_="w-full space-y-3">
+      <div class_="text-center">
+        <h3 class_="text-sm font-medium">"Using toast.promise()"</h3>
+        <p class_="text-xs text-muted">
+          "Automatically handles loading, success, and error states"
+        </p>
+      </div>
+      <div class_="flex w-full flex-wrap items-center justify-center gap-4">
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       ignore
+                         (Toast.promise (upload_file ())
+                            ~error:(fun _ -> "Failed to upload file")
+                            ~loading:"Uploading file..."
+                            ~success:(fun (name, size) ->
+                              "File " ^ name ^ " uploaded ("
+                              ^ string_of_int size ^ "KB)")
+                           : Toast.key))>
+          "Upload file"
+        </Button>
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       ignore
+                         (Toast.promise (create_event ()) ~error:message
+                            ~loading:"Creating event..." ~success:(fun () ->
+                              "Event created")
+                           : Toast.key))>
+          "Create event (error)"
+        </Button>
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       ignore
+                         (Toast.promise (save_data ()) ~error:message
+                            ~loading:"Saving changes..." ~success:(fun count ->
+                              "Saved " ^ string_of_int count ^ " items")
+                           : Toast.key))>
+          "Save data (random)"
+        </Button>
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       ignore
+                         (Toast.promise (fetch_user ())
+                            ~error:(fun _ -> "Failed to fetch user")
+                            ~loading:"Loading user..."
+                            ~success:(fun name -> "Welcome back, " ^ name ^ "!")
+                           : Toast.key))>
+          "Fetch user"
+        </Button>
+      </div>
+    </div>
+    <div class_="w-full space-y-3">
+      <div class_="text-center">
+        <h3 class_="text-sm font-medium">"Manual Loading State"</h3>
+        <p class_="text-xs text-muted">
+          "Manually control loading state with isLoading prop"
+        </p>
+      </div>
+      <div class_="flex w-full flex-wrap items-center justify-center gap-4">
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       loading
+                         ~description:"Please wait while we upload your file"
+                         ~ms:3000 "Uploading file..." (fun key ->
+                           Toast.update key
+                             ~description:
+                               "Your file has been uploaded successfully"
+                             ~variant:`success ~is_loading:false
+                             ~timeout_ms:4000. "File uploaded"))>
+          "Upload with loading"
+        </Button>
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       loading ~ms:2500 "Processing payment..." (fun key ->
+                           Toast.update key
+                             ~description:
+                               "Your payment has been processed successfully"
+                             ~variant:`success ~is_loading:false
+                             ~timeout_ms:4000. "Payment processed"))>
+          "Payment processing"
+        </Button>
+        <Button
+          size=`sm
+          variant=`secondary
+          on_click=(fun _ ->
+                       loading ~ms:2000 "Saving changes..." (fun key ->
+                           Toast.update key ~description:"Please try again"
+                             ~variant:`danger ~is_loading:false
+                             ~timeout_ms:4000. "Failed to save"))>
+          "Loading to error"
+        </Button>
+      </div>
+    </div>
   </div>

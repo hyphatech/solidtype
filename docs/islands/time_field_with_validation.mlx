@@ -1,0 +1,49 @@
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module Time = Solidtype_kobalte.Types.Time
+
+let min_time = Time.make ~hour:9. ~minute:0. ()
+let max_time = Time.make ~hour:17. ~minute:0. ()
+
+(* A time's seconds since midnight, which order two times. *)
+let seconds t =
+  let part p = Option.value (p t) ~default:0. in
+  (part Time.hour *. 3600.) +. (part Time.minute *. 60.) +. part Time.second
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let is_invalid () =
+    match S.get value with
+    | Some t -> seconds t < seconds min_time || seconds t > seconds max_time
+    | None -> false
+  in
+  <div class_="flex flex-col gap-4">
+    <Time_field
+      is_required=true
+      class_="w-[256px]"
+      is_invalid=(fun () -> is_invalid ())
+      name="time"
+      min_value=(fun () -> min_time)
+      max_value=(fun () -> max_time)
+      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Time"</Label>
+      <Time_field.Group>
+        <Time_field.Input>
+          (fun segment ->
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
+        </Time_field.Input>
+      </Time_field.Group>
+      <Show
+        when_=(fun () -> is_invalid ())
+        fallback=(<Description>
+                    "Enter a time between 9:00 AM and 5:00 PM"
+                  </Description>)>
+        <Field_error>"Time must be between 9:00 AM and 5:00 PM"</Field_error>
+      </Show>
+    </Time_field>
+  </div>

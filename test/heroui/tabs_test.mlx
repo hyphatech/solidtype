@@ -70,20 +70,21 @@ let references = [ "aria-labelledby"; "aria-controls" ]
    root's focus, which the port leaves out since Kobalte's root, given a
    data- attribute that changes, loses its panels' labels. A tab is
    Kobalte's button where React Aria's is a div, each of role tab, so a tab is
-   shown by its role. Kobalte's panel names its orientation, by which HeroUI's
-   styles space it from the list, where React Aria's panel never does, so
-   that spacing reaches the port alone; it is left out here, and the page
-   says it. *)
+   shown by its role. A panel names no orientation, as React Aria's names
+   none, so HeroUI's spacing by it reaches neither: the port's is empty, over
+   Kobalte's. *)
 let framework_only e name =
   let slot = T.attribute e "data-slot" in
   match (name, T.attribute e name) with
-  | ("data-selected" | "data-highlighted" | "data-disabled"), Some "" -> true
+  | ( ( "data-selected" | "data-highlighted" | "data-disabled"
+      | "data-orientation" ),
+      Some "" ) ->
+      true
   | "data-collection", _ -> true
   | ("data-focused" | "data-focus-visible"), _ ->
       Option.equal String.equal slot (Some "tabs")
   | ("data-orientation" | "type" | "disabled"), _ ->
       Option.equal String.equal slot (Some "tabs-tab")
-      || Option.equal String.equal slot (Some "tabs-panel")
   | _ -> false
 
 (* Each part, its tag, its attributes, each reference by what it names, and

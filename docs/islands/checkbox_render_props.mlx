@@ -1,0 +1,23 @@
+module Checkbox = Solidtype_heroui.Checkbox
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+
+(* HeroUI's children read the checkbox's state through a render prop; here
+   the page keeps the state, which the checkbox controls. *)
+let make () =
+  let selected, set_selected = S.create_signal false in
+  <Checkbox
+    is_selected=(fun () -> S.get selected) on_change=(S.set set_selected)>
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+      (fun () ->
+        Solidtype.Jsx.string
+          (if S.get selected then "Terms accepted" else "Accept terms"))
+    </Checkbox.Content>
+    <Description>
+      (fun () ->
+        Solidtype.Jsx.string
+          (if S.get selected then "Thank you for accepting"
+           else "Please read and accept the terms"))
+    </Description>
+  </Checkbox>

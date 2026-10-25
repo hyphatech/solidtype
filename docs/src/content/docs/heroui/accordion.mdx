@@ -18,6 +18,10 @@ import * as Controlled from "@islands/accordion_controlled.jsx";
 import ControlledCode from "@islands/accordion_controlled.mlx?raw";
 import * as CustomIndicator from "@islands/accordion_custom_indicator.jsx";
 import CustomIndicatorCode from "@islands/accordion_custom_indicator.mlx?raw";
+import * as Faq from "@islands/accordion_faq.jsx";
+import FaqCode from "@islands/accordion_faq.mlx?raw";
+import * as Tailwind from "@islands/accordion_tailwind.jsx";
+import TailwindCode from "@islands/accordion_tailwind.mlx?raw";
 import * as Demo from "@islands/accordion_demo.jsx";
 
 `Solidtype_heroui.Accordion` is Kobalte's accordion with the classes HeroUI's
@@ -39,6 +43,8 @@ page reaches a word in it, which expands its item; it grows and shrinks by
 does.
 
 ## Usage
+
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="accordion_usage.mlx"><Usage.make client:visible /></Example>
 
@@ -99,11 +105,17 @@ already made; the span looks and turns the same.
 
 <Example code={CustomIndicatorCode} title="accordion_custom_indicator.mlx"><CustomIndicator.make client:visible /></Example>
 
+### FAQ Layout
+
+<Example code={FaqCode} title="accordion_faq.mlx"><Faq.make client:visible /></Example>
+
 ## Customization
 
 ### Tailwind CSS
 
 `class_` is added after HeroUI's classes, on every part.
+
+<Example code={TailwindCode} title="accordion_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ### Global CSS
 

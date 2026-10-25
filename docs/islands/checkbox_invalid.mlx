@@ -1,10 +1,11 @@
 module Checkbox = Solidtype_heroui.Checkbox
-module Label = Solidtype_heroui.Label
+module Field_error = Solidtype_heroui.Field_error
 
 let make () =
-  <Checkbox is_invalid=true>
+  <Checkbox is_invalid=true is_required=true name="agreement">
     <Checkbox.Content>
       <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-      <Label>"I agree to the terms"</Label>
+      "I agree to the terms"
     </Checkbox.Content>
+    <Field_error>"You must accept the terms to continue"</Field_error>
   </Checkbox>

@@ -37,17 +37,21 @@ let%component make
     ?(placement : [ `bottom_left | `bottom_right | `top_left | `top_right ] =
       `top_right) ?(size : [ `lg | `md | `sm ] = `md)
     ?(variant : [ `primary | `secondary | `soft ] = `primary)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ?(children : Jsx.content option) () =
   <span
     class_=(fun () ->
-             Styles.Badge.base
-               (Styles.Badge.slots
-                  (Styles.Badge.options ~color:(color ())
-                     ~placement:(placement ()) ~size:(size ())
-                     ~variant:(variant ()) ?class_:(class_ ()) ())))
+             after
+               (Styles.Badge.base
+                  (Styles.Badge.slots
+                     (Styles.Badge.options ~color:(color ())
+                        ~placement:(placement ()) ~size:(size ())
+                        ~variant:(variant ()) ())))
+               (class_ ()))
     data_slot="badge"
     props=(Props.others props)>
     (fun () ->
-      let c = children () in
-      if text c then Jsx.element <Label>(fun () -> c)</Label> else c)
+      match children () with
+      | Some c when text c -> Jsx.element <Label>(fun () -> c)</Label>
+      | Some c -> c
+      | None -> Jsx.string "")
   </span>

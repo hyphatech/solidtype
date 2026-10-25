@@ -4,24 +4,34 @@ description: A search input, cleared by Escape or its button and submitted by En
 ---
 
 import Example from "@components/Example.astro";
-import * as Usage from "@islands/search_field_usage.jsx";
-import UsageCode from "@islands/search_field_usage.mlx?raw";
-import * as Variants from "@islands/search_field_variants.jsx";
-import VariantsCode from "@islands/search_field_variants.mlx?raw";
-import * as WithDescription from "@islands/search_field_description.jsx";
-import WithDescriptionCode from "@islands/search_field_description.mlx?raw";
-import * as Required from "@islands/search_field_required.jsx";
-import RequiredCode from "@islands/search_field_required.mlx?raw";
-import * as Disabled from "@islands/search_field_disabled.jsx";
-import DisabledCode from "@islands/search_field_disabled.mlx?raw";
-import * as FullWidth from "@islands/search_field_full_width.jsx";
-import FullWidthCode from "@islands/search_field_full_width.mlx?raw";
-import * as Controlled from "@islands/search_field_controlled.jsx";
-import ControlledCode from "@islands/search_field_controlled.mlx?raw";
-import * as Submit from "@islands/search_field_submit.jsx";
-import SubmitCode from "@islands/search_field_submit.mlx?raw";
-import * as CustomIcons from "@islands/search_field_custom_icons.jsx";
-import CustomIconsCode from "@islands/search_field_custom_icons.mlx?raw";
+import * as ExUsage from "@islands/search_field_usage.jsx";
+import ExUsageCode from "@islands/search_field_usage.mlx?raw";
+import * as ExVariants from "@islands/search_field_variants.jsx";
+import ExVariantsCode from "@islands/search_field_variants.mlx?raw";
+import * as ExSurface from "@islands/search_field_surface.jsx";
+import ExSurfaceCode from "@islands/search_field_surface.mlx?raw";
+import * as ExDescription from "@islands/search_field_description.jsx";
+import ExDescriptionCode from "@islands/search_field_description.mlx?raw";
+import * as ExRequired from "@islands/search_field_required.jsx";
+import ExRequiredCode from "@islands/search_field_required.mlx?raw";
+import * as ExDisabled from "@islands/search_field_disabled.jsx";
+import ExDisabledCode from "@islands/search_field_disabled.mlx?raw";
+import * as ExFullWidth from "@islands/search_field_full_width.jsx";
+import ExFullWidthCode from "@islands/search_field_full_width.mlx?raw";
+import * as ExValidation from "@islands/search_field_validation.jsx";
+import ExValidationCode from "@islands/search_field_validation.mlx?raw";
+import * as ExControlled from "@islands/search_field_controlled.jsx";
+import ExControlledCode from "@islands/search_field_controlled.mlx?raw";
+import * as ExForm from "@islands/search_field_form.jsx";
+import ExFormCode from "@islands/search_field_form.mlx?raw";
+import * as ExWithValidation from "@islands/search_field_with_validation.jsx";
+import ExWithValidationCode from "@islands/search_field_with_validation.mlx?raw";
+import * as ExCustomIcons from "@islands/search_field_custom_icons.jsx";
+import ExCustomIconsCode from "@islands/search_field_custom_icons.mlx?raw";
+import * as ExKeyboardShortcut from "@islands/search_field_keyboard_shortcut.jsx";
+import ExKeyboardShortcutCode from "@islands/search_field_keyboard_shortcut.mlx?raw";
+import * as ExTailwind from "@islands/search_field_tailwind.jsx";
+import ExTailwindCode from "@islands/search_field_tailwind.mlx?raw";
 import * as Demo from "@islands/search_field_demo.jsx";
 
 `Solidtype_heroui.Search_field` is Kobalte's `TextField.Root`, with the
@@ -32,7 +42,9 @@ combobox; HeroUI's search field is a text field, which this is.
 
 ## Usage
 
-<Example code={UsageCode} title="search_field_usage.mlx"><Usage.make client:visible /></Example>
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
+
+<Example code={ExUsageCode} title="search_field_usage.mlx"><ExUsage.make client:visible /></Example>
 
 ## Anatomy
 
@@ -52,45 +64,65 @@ combobox; HeroUI's search field is a text field, which this is.
 
 ### Variants
 
-<Example code={VariantsCode} title="search_field_variants.mlx"><Variants.make client:visible /></Example>
+<Example code={ExVariantsCode} title="search_field_variants.mlx"><ExVariants.make client:visible /></Example>
+
+### In Surface
+
+<Example code={ExSurfaceCode} title="search_field_surface.mlx"><ExSurface.make client:visible /></Example>
 
 ### With Description
 
-<Example code={WithDescriptionCode} title="search_field_description.mlx"><WithDescription.make client:visible /></Example>
+<Example code={ExDescriptionCode} title="search_field_description.mlx"><ExDescription.make client:visible /></Example>
 
 ### Required Field
 
-<Example code={RequiredCode} title="search_field_required.mlx"><Required.make client:visible /></Example>
+<Example code={ExRequiredCode} title="search_field_required.mlx"><ExRequired.make client:visible /></Example>
 
 ### Disabled State
 
-<Example code={DisabledCode} title="search_field_disabled.mlx"><Disabled.make client:visible /></Example>
+<Example code={ExDisabledCode} title="search_field_disabled.mlx"><ExDisabled.make client:visible /></Example>
 
 ### Full Width
 
-<Example code={FullWidthCode} title="search_field_full_width.mlx"><FullWidth.make client:visible /></Example>
+<Example code={ExFullWidthCode} title="search_field_full_width.mlx"><ExFullWidth.make client:visible /></Example>
+
+### Validation
+
+<Example code={ExValidationCode} title="search_field_validation.mlx"><ExValidation.make client:visible /></Example>
 
 ### Controlled
 
-<Example code={ControlledCode} title="search_field_controlled.mlx"><Controlled.make client:visible /></Example>
+<Example code={ExControlledCode} title="search_field_controlled.mlx"><ExControlled.make client:visible /></Example>
 
-### Submitted
+### Form Example
 
-`on_submit` is told the query as Enter submits it.
+HeroUI's button takes `isPending` while the search is sent; the port's button has no pending state yet, so this one shows the spinner alone.
 
-<Example code={SubmitCode} title="search_field_submit.mlx"><Submit.make client:visible /></Example>
+<Example code={ExFormCode} title="search_field_form.mlx"><ExForm.make client:visible /></Example>
+
+### With Validation
+
+<Example code={ExWithValidationCode} title="search_field_with_validation.mlx"><ExWithValidation.make client:visible /></Example>
 
 ### Custom Icons
 
-`Search_field.Search_icon`'s children are drawn in place of HeroUI's
-magnifier, inside a span with its class.
+<Example code={ExCustomIconsCode} title="search_field_custom_icons.mlx"><ExCustomIcons.make client:visible /></Example>
 
-<Example code={CustomIconsCode} title="search_field_custom_icons.mlx"><CustomIcons.make client:visible /></Example>
+### With Keyboard Shortcut
 
-### Not yet
+<Example code={ExKeyboardShortcutCode} title="search_field_keyboard_shortcut.mlx"><ExKeyboardShortcut.make client:visible /></Example>
 
-HeroUI's validation examples need React Aria's `validate`, which is not
-ported yet.
+### Render Function
+
+HeroUI's Render Function example gives the field `render`, React's way to swap the element it renders, which a Solid component has no need of.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="search_field_tailwind.mlx"><ExTailwind.make client:visible /></Example>
 
 ## Styling Reference
 

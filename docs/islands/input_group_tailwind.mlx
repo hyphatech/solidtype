@@ -1,0 +1,16 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Text_field class_="w-full max-w-xs" name="email">
+    <Label>"Work email"</Label>
+    <Input_group
+      class_="rounded-xl border border-border/80 bg-default shadow-sm">
+      <Input_group.Prefix>
+        <Gravity.Envelope class_="size-4 text-muted" />
+      </Input_group.Prefix>
+      <Input_group.Input placeholder="you@company.com" />
+    </Input_group>
+  </Text_field>

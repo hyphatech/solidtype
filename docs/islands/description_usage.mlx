@@ -1,0 +1,18 @@
+module Description = Solidtype_heroui.Description
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <div class_="flex flex-col gap-1">
+    <Label for_="email">"Email"</Label>
+    <Input
+      aria_describedby="email-description"
+      class_="w-64"
+      id="email"
+      placeholder="you@example.com"
+      type_="email"
+    />
+    <Description id="email-description">
+      "We'll never share your email with anyone else."
+    </Description>
+  </div>

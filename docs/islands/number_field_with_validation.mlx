@@ -1,0 +1,39 @@
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
+
+let make () =
+  (* Empty is not a number. *)
+  let value, set_value = S.create_signal Float.nan in
+  let is_invalid () =
+    let v = S.get value in
+    (not (Float.is_nan v)) && (v < 0. || v > 100.)
+  in
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Number_field
+      is_required=true
+      format_options=(fun () -> Format.make ~style:`percent ())
+      is_invalid=(fun () -> is_invalid ())
+      max_value=1.
+      min_value=0.
+      name="percentage"
+      step=0.1
+      value=(fun () -> S.get value)
+      on_change=(S.set set_value)>
+      <Label>"Percentage"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Show
+        when_=(fun () -> is_invalid ())
+        fallback=(<Description>"Enter a value between 0 and 100"</Description>)>
+        <Field_error>"Percentage must be between 0 and 100"</Field_error>
+      </Show>
+    </Number_field>
+  </div>

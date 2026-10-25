@@ -194,9 +194,11 @@ let twelve_hours formatter =
           ~date:(Types.Either.right (thirteen ()))
           ()))
 
-let%component make ?(value : Time.t option) ?(default_value : Time.t option)
-    ?(on_change : (Time.t -> unit) option) ?(placeholder_value : Time.t option)
-    ?(min_value : Time.t option) ?(max_value : Time.t option)
+let%component make ?(value : Time.t Js.Nullable.t option)
+    ?(default_value : Time.t option)
+    ?(on_change : (Time.t option -> unit) option)
+    ?(placeholder_value : Time.t option) ?(min_value : Time.t option)
+    ?(max_value : Time.t option)
     ?(granularity : [ `hour | `minute | `second ] option)
     ?(hour_cycle : [ `h12 | `h24 ] option)
     ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
@@ -209,16 +211,17 @@ let%component make ?(value : Time.t option) ?(default_value : Time.t option)
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let current, set =
     Field.controlled
-      ~value:(fun () -> Option.map Option.some (value ()))
+      ~value:(fun () -> Option.map Js.Nullable.toOption (value ()))
       ~default:(default_value ())
-      ~on_change:
-        (Option.iter (fun v ->
-             in_form.changed ();
-             ignore (on_change v : unit option)))
+      ~on_change:(fun v ->
+        in_form.changed ();
+        ignore (on_change v : unit option))
   in
   (* A time partly typed is the field's alone, as React Aria keeps it: the
      field's value changes, and its on_change is told, once every segment has
-     its part. Kobalte is given the time shown, either. *)
+     its part. Kobalte is given the time shown, either, and an empty one for
+     none: it keeps a time of its own only while it is given none, which a
+     field emptied by its owner would go on showing. *)
   let typed, set_typed = S.create_signal None in
   let shown () =
     match S.get typed with Some t -> Some t | None -> current ()
@@ -232,10 +235,20 @@ let%component make ?(value : Time.t option) ?(default_value : Time.t option)
     | `minute -> has Time.minute
     | `second -> has Time.minute && has Time.second
   in
+  (* A time with every part erased is none, as React Aria tells it. *)
+  let erased t =
+    not
+      (List.exists
+         (fun part -> Option.is_some (part t))
+         Time.[ hour; minute; second ])
+  in
   let change t =
     if whole t then (
       S.set set_typed None;
       set (Some t))
+    else if erased t then (
+      S.set set_typed None;
+      if Option.is_some (current ()) then set None)
     else S.set set_typed (Some t)
   in
   let formatter =
@@ -334,7 +347,7 @@ let%component make ?(value : Time.t option) ?(default_value : Time.t option)
   in
   <Context.Provider value=(fun () -> f)>
     <Kobalte.Root
-      ?value=(fun () -> shown ())
+      value=(fun () -> Option.value (shown ()) ~default:(Time.make ()))
       on_change=change
       ?placeholder=(fun () -> placeholder_value ())
       ?min=(fun () -> min_value ())

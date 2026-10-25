@@ -39,6 +39,7 @@ module Props : sig
   type t
 
   val check :
+    ?id:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->

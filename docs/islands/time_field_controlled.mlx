@@ -1,40 +1,54 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
-module S = Solidtype.Solid
-module Jsx = Solidtype.Jsx
 module Time = Solidtype_kobalte.Types.Time
 
-let two n = (if n < 10. then "0" else "") ^ Js.Float.toString n
+(* The time now, in the reader's time zone. *)
+let now () =
+  let d = Js.Date.make () in
+  Time.make ~hour:(Js.Date.getHours d) ~minute:(Js.Date.getMinutes d)
+    ~second:(Js.Date.getSeconds d) ()
+
+(* A time as @internationalized/date's [Time] writes it, 09:45:00. *)
+let to_string t =
+  let two part =
+    let n = Option.value (part t) ~default:0. in
+    (if n < 10. then "0" else "") ^ Js.Float.toString n
+  in
+  String.concat ":" [ two Time.hour; two Time.minute; two Time.second ]
 
 let make () =
-  let time, set_time =
-    S.create_signal (Some (Time.make ~hour:9. ~minute:45. ()))
-  in
-  <div class_="flex flex-col gap-2">
+  let value, set_value = S.create_signal None in
+  <div class_="flex flex-col gap-4">
     <Time_field
-      class_="w-64"
+      class_="w-[256px]"
       name="time"
-      ?value=(fun () -> S.get time)
-      on_change=(fun t -> S.set set_time (Some t))>
+      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
           (fun segment ->
-            <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment)
-            />)
+            <Time_field.Segment segment=(fun () -> S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
+      <Description>
+        (fun () ->
+          Jsx.string
+            ("Current value: "
+            ^ match S.get value with Some t -> to_string t | None -> "(empty)"))
+      </Description>
     </Time_field>
-    <p class_="text-sm text-muted">
-      (fun () ->
-        Jsx.string
-          (match S.get time with
-          | Some t ->
-              "Selected: "
-              ^ two (Option.value (Time.hour t) ~default:0.)
-              ^ ":"
-              ^ two (Option.value (Time.minute t) ~default:0.)
-          | None -> "No time selected"))
-    </p>
+    <div class_="flex gap-2">
+      <Button
+        variant=`tertiary on_click=(fun _ -> S.set set_value (Some (now ())))>
+        "Set now"
+      </Button>
+      <Button variant=`tertiary on_click=(fun _ -> S.set set_value None)>
+        "Clear"
+      </Button>
+    </div>
   </div>

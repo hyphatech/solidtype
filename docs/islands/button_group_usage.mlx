@@ -1,9 +1,99 @@
 module Button = Solidtype_heroui.Button
 module Button_group = Solidtype_heroui.Button_group
+module Chip = Solidtype_heroui.Chip
 
+(* HeroUI's split button opens a Dropdown, which comes with its port; here
+   its chevron is the button alone. *)
 let make () =
-  <Button_group>
-    <Button>"First"</Button>
-    <Button><Button_group.Separator /> "Second"</Button>
-    <Button><Button_group.Separator /> "Third"</Button>
-  </Button_group>
+  <div class_="flex flex-col items-start gap-6">
+    <div class_="flex flex-col gap-2">
+      <Button_group>
+        <Button>"Merge pull request"</Button>
+        <Button is_icon_only=true aria_label="More options">
+          <Button_group.Separator /> <Gravity.Chevron_down />
+        </Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <div class_="flex flex-wrap gap-x-2 gap-y-4">
+        <Button_group variant=`tertiary>
+          <Button>
+            <Gravity.Code_fork class_="size-3.5" />
+            "Fork"
+            <Chip color=`accent size=`sm variant=`soft>"24"</Chip>
+          </Button>
+          <Button is_icon_only=true aria_label="More fork options">
+            <Button_group.Separator /> <Gravity.Chevron_down />
+          </Button>
+        </Button_group>
+        <Button_group variant=`tertiary>
+          <Button is_icon_only=true aria_label="Show QR code">
+            <Gravity.Qr_code />
+          </Button>
+          <Button><Button_group.Separator /> "Scan to pay"</Button>
+        </Button_group>
+        <Button_group variant=`tertiary>
+          <Button>
+            <Gravity.Thumbs_up />
+            <span class_="text-xs font-semibold">"2.4K"</span>
+          </Button>
+          <Button is_icon_only=true aria_label="Dislike">
+            <Button_group.Separator /> <Gravity.Thumbs_down />
+          </Button>
+        </Button_group>
+        <Button_group variant=`tertiary>
+          <Button><Gravity.Star class_="size-3.5" /> "Star"</Button>
+          <Button class_="px-2">
+            <Button_group.Separator />
+            <Chip color=`accent size=`sm variant=`soft>"104"</Chip>
+          </Button>
+        </Button_group>
+        <Button_group variant=`tertiary>
+          <Button><Gravity.Pin /> "Pinned"</Button>
+          <Button is_icon_only=true aria_label="More pin options">
+            <Button_group.Separator /> <Gravity.Chevron_down />
+          </Button>
+        </Button_group>
+      </div>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <Button_group variant=`tertiary>
+        <Button><Gravity.Chevron_left /> "Previous"</Button>
+        <Button>
+          <Button_group.Separator /> "Next" <Gravity.Chevron_right />
+        </Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <Button_group variant=`tertiary>
+        <Button><Gravity.Picture /> "Photos"</Button>
+        <Button><Button_group.Separator /> <Gravity.Video /> "Videos"</Button>
+        <Button is_icon_only=true aria_label="More options">
+          <Button_group.Separator /> <Gravity.Ellipsis />
+        </Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <Button_group variant=`tertiary>
+        <Button>"Left"</Button>
+        <Button><Button_group.Separator /> "Center"</Button>
+        <Button><Button_group.Separator /> "Right"</Button>
+      </Button_group>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <Button_group variant=`tertiary>
+        <Button is_icon_only=true aria_label="Align left">
+          <Gravity.Text_align_left />
+        </Button>
+        <Button is_icon_only=true aria_label="Align center">
+          <Button_group.Separator /> <Gravity.Text_align_center />
+        </Button>
+        <Button is_icon_only=true aria_label="Align right">
+          <Button_group.Separator /> <Gravity.Text_align_right />
+        </Button>
+        <Button is_icon_only=true aria_label="Justify">
+          <Button_group.Separator /> <Gravity.Text_align_justify />
+        </Button>
+      </Button_group>
+    </div>
+  </div>

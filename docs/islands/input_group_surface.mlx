@@ -1,0 +1,21 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="rounded-2xl p-6">
+    <Text_field class_="w-full max-w-[280px]" name="email">
+      <Label>"Email address"</Label>
+      <Input_group variant=`secondary>
+        <Input_group.Prefix>
+          <Gravity.Envelope class_="size-4 text-muted" />
+        </Input_group.Prefix>
+        <Input_group.Input
+          class_="w-full max-w-[280px]" placeholder="name@email.com"
+        />
+      </Input_group>
+      <Description>"We'll never share this with anyone else"</Description>
+    </Text_field>
+  </Surface>

@@ -1,0 +1,34 @@
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Number_field = Solidtype_heroui.Number_field
+module Format = Solidtype_kobalte.Types.NumberFormatOptions
+
+let make () =
+  <div class_="flex w-full max-w-64 flex-col gap-4">
+    <Number_field
+      is_invalid=true is_required=true min_value=0. name="quantity" value=(-5.)>
+      <Label>"Quantity"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Field_error>"Quantity must be greater than or equal to 0"</Field_error>
+    </Number_field>
+    <Number_field
+      is_invalid=true
+      format_options=(fun () -> Format.make ~style:`percent ())
+      max_value=1.
+      min_value=0.
+      name="percentage"
+      step=0.1
+      value=1.5>
+      <Label>"Percentage"</Label>
+      <Number_field.Group>
+        <Number_field.Decrement_button />
+        <Number_field.Input class_="w-[120px]" />
+        <Number_field.Increment_button />
+      </Number_field.Group>
+      <Field_error>"Percentage must be between 0 and 100"</Field_error>
+    </Number_field>
+  </div>

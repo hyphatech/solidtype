@@ -1,4 +1,14 @@
 module Link = Solidtype_heroui.Link
 
 let make () =
-  <Link href="#">"Add to library" <Link.Icon><Icons.Plus /></Link.Icon></Link>
+  <div class_="flex flex-col gap-3">
+    <Link href="#">
+      "External link"
+      <Link.Icon class_="ms-1.5 size-3">
+        <Gravity.Arrow_up_right_from_square />
+      </Link.Icon>
+    </Link>
+    <Link class_="gap-1" href="#">
+      "Go to page" <Link.Icon class_="size-3"><Gravity.Link /></Link.Icon>
+    </Link>
+  </div>

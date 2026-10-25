@@ -1,10 +1,9 @@
 module Checkbox = Solidtype_heroui.Checkbox
-module Label = Solidtype_heroui.Label
 
 let make () =
-  <Checkbox>
+  <Checkbox name="basic-terms">
     <Checkbox.Content>
       <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-      <Label>"Accept terms and conditions"</Label>
+      "Accept terms and conditions"
     </Checkbox.Content>
   </Checkbox>

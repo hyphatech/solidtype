@@ -22,11 +22,17 @@ let make () =
         (fun () ->
           Solidtype.Jsx.element
           @@ item ~title:"Disabled Item 1"
-               ~content:"This content cannot be accessed." ())
+               ~content:
+                 "This content cannot be accessed when the accordion is \
+                  disabled."
+               ())
         (fun () ->
           Solidtype.Jsx.element
           @@ item ~title:"Disabled Item 2"
-               ~content:"This content cannot be accessed." ())
+               ~content:
+                 "This content cannot be accessed when the accordion is \
+                  disabled."
+               ())
       </Accordion>
     </div>
     <div class_="w-full max-w-md space-y-2">
@@ -37,15 +43,17 @@ let make () =
         (fun () ->
           Solidtype.Jsx.element
           @@ item ~title:"Active Item"
-               ~content:"This item can be toggled normally." ())
+               ~content:"This item is active and can be toggled normally." ())
         (fun () ->
           Solidtype.Jsx.element
           @@ item ~is_disabled:true ~title:"Disabled Item"
-               ~content:"This content cannot be accessed." ())
+               ~content:
+                 "This content cannot be accessed when the item is disabled."
+               ())
         (fun () ->
           Solidtype.Jsx.element
           @@ item ~title:"Another Active Item"
-               ~content:"This item can be toggled too." ())
+               ~content:"This item is also active and can be toggled." ())
       </Accordion>
     </div>
   </div>

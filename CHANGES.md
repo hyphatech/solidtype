@@ -8,6 +8,28 @@
   the errors they were cleared from, so errors given again are shown whole;
   the effect that cleared them read the errors in a way Melange dropped, and
   never ran again.
+- `Solidtype_heroui.Badge`, `Checkbox`, `Chip`, `Disclosure_group`, `Link`,
+  `Radio` and `Switch` keep the `class_` they are given, after HeroUI's
+  classes, where they dropped it.
+- `Solidtype_heroui.Badge` takes no children, HeroUI's dot.
+- `Solidtype_heroui.Checkbox` shows a `Field_error` inside it while it is
+  invalid, Kobalte's error message, as HeroUI's does; it raised there.
+- Breaking: `Solidtype_heroui.Number_field` keeps a value on its step's grid
+  only while it is given a `step`, else within its range alone, as React
+  Aria does, where it rounded 99.99 to 100; its buttons then step by 1, or
+  by a hundredth for a percent. Its input tells a reader the value now as a
+  number, where Kobalte's told the text it shows once the value changed.
+- Breaking: `Solidtype_heroui.Time_field`'s `value` is a
+  `Time.t Js.Nullable.t`, null to control it empty, as React's `null` does,
+  and its `on_change` is told a `Time.t option`, `None` once every segment
+  is erased; a field emptied by its owner went on showing its time.
+- `Solidtype_heroui.Search_field.Clear_button` draws the children it is
+  given in place of HeroUI's icon, as React's does.
+- `Solidtype_heroui.Label` takes a `for_` and `Description` an `id`, as
+  HeroUI's examples give them where a label names its input.
+- `Solidtype_heroui.Toast.action` takes a `class_`, added after HeroUI's
+  classes on the action's button, as React's `actionProps` take a
+  `className`.
 - `Solidtype_heroui.Tabs`: HeroUI's Tabs on Kobalte's, selection controlled
   or kept, horizontal or vertical, primary or secondary, aligned, disabled
   whole or a tab at a time, selected by focus or by Enter; each tab's

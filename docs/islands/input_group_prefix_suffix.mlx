@@ -1,0 +1,15 @@
+module Description = Solidtype_heroui.Description
+module Input_group = Solidtype_heroui.Input_group
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Text_field class_="w-full max-w-[280px]" default_value="10" name="price">
+    <Label>"Set a price"</Label>
+    <Input_group>
+      <Input_group.Prefix>"$"</Input_group.Prefix>
+      <Input_group.Input class_="w-full max-w-[200px]" type_="number" />
+      <Input_group.Suffix>"USD"</Input_group.Suffix>
+    </Input_group>
+    <Description>"What customers would pay"</Description>
+  </Text_field>

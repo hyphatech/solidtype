@@ -55,8 +55,9 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     href=(fun () -> href ())
     disabled=(fun () -> is_disabled ())
     class_=(fun () ->
-             Styles.Link.base
-               (Styles.Link.slots (Styles.Link.options ?class_:(class_ ()) ())))
+             after
+               (Styles.Link.base (Styles.Link.slots (Styles.Link.options ())))
+               (class_ ()))
     ref=(fun a -> Interaction.watch i a)
     data_slot="link"
     data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))

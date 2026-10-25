@@ -1,0 +1,9 @@
+module Checkbox = Solidtype_heroui.Checkbox
+
+let make () =
+  <Checkbox default_selected=true>
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+      "Enable email notifications"
+    </Checkbox.Content>
+  </Checkbox>

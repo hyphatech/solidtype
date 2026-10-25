@@ -1,12 +1,63 @@
 module Checkbox = Solidtype_heroui.Checkbox
-module Label = Solidtype_heroui.Label
 
+(* HeroUI draws each icon only while the box is checked, by a render prop;
+   HeroUI's styles show an indicator's content only then, so it is given as it
+   is. *)
 let make () =
-  <Checkbox default_selected=true>
-    <Checkbox.Content>
-      <Checkbox.Control>
-        <Checkbox.Indicator><Icons.Plus /></Checkbox.Indicator>
-      </Checkbox.Control>
-      <Label>"Plus"</Label>
-    </Checkbox.Content>
-  </Checkbox>
+  <div class_="flex gap-4">
+    <Checkbox default_selected=true name="heart">
+      <Checkbox.Content>
+        <Checkbox.Control>
+          <Checkbox.Indicator>
+            <svg fill="currentColor" view_box="0 0 24 24">
+              <path
+                d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 \
+                   2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 \
+                   0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 \
+                   11.13-9.38 12.12Z"
+                fill="currentColor"
+              />
+            </svg>
+          </Checkbox.Indicator>
+        </Checkbox.Control>
+        "Heart"
+      </Checkbox.Content>
+    </Checkbox>
+    <Checkbox default_selected=true name="plus">
+      <Checkbox.Content>
+        <Checkbox.Control>
+          <Checkbox.Indicator>
+            <svg fill="none" view_box="0 0 24 24">
+              <path
+                d="M6 12H18"
+                stroke="currentColor"
+                stroke_linecap="round"
+                stroke_linejoin="round"
+                stroke_width="3"
+              />
+              <path
+                d="M12 18V6"
+                stroke="currentColor"
+                stroke_linecap="round"
+                stroke_linejoin="round"
+                stroke_width="3"
+              />
+            </svg>
+          </Checkbox.Indicator>
+        </Checkbox.Control>
+        "Plus"
+      </Checkbox.Content>
+    </Checkbox>
+    <Checkbox is_indeterminate=true name="indeterminate">
+      <Checkbox.Content>
+        <Checkbox.Control>
+          <Checkbox.Indicator>
+            <svg stroke="currentColor" stroke_width="3" view_box="0 0 24 24">
+              <line x1="21" x2="3" y1="12" y2="12" />
+            </svg>
+          </Checkbox.Indicator>
+        </Checkbox.Control>
+        "Indeterminate"
+      </Checkbox.Content>
+    </Checkbox>
+  </div>

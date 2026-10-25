@@ -10,7 +10,7 @@ let make () =
       on_expanded_change=(S.set set_expanded)>
       <Disclosure.Heading>
         <Button slot=`trigger variant=`secondary>
-          <Icons.Envelope /> "Get the newsletter" <Disclosure.Indicator />
+          <Gravity.Qr_code /> "Preview HeroUI Native" <Disclosure.Indicator />
         </Button>
       </Disclosure.Heading>
       <Disclosure.Content>
@@ -18,9 +18,20 @@ let make () =
           class_="shadow-panel flex flex-col items-center rounded-3xl \
                   bg-surface p-4 text-center">
           <p class_="text-sm text-muted">
-            "One letter a month: what changed, and what is coming."
+            "Scan this QR code with your camera app to preview the HeroUI \
+             native components."
           </p>
-          <Button class_="mt-4" variant=`primary>"Subscribe"</Button>
+          <img
+            alt="Expo Go QR Code"
+            class_="aspect-square w-full max-w-54 object-cover"
+            src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/qr-code-native.png"
+          />
+          <p class_="text-sm text-muted">
+            "Expo must be installed on your device."
+          </p>
+          <Button class_="mt-4" variant=`primary>
+            <Iconify.Tabler_brand_apple_filled /> "Download on App Store"
+          </Button>
         </Disclosure.Body>
       </Disclosure.Content>
     </Disclosure>

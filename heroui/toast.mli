@@ -39,11 +39,13 @@ val action :
     | `ghost
     | `danger
     | `danger_soft ] ->
+  ?class_:string ->
   on_press:(unit -> unit) ->
   string ->
   action
 (** [action ~on_press label] is a button labelled [label] that calls [on_press],
-    [`tertiary] unless [variant] says otherwise. *)
+    [`tertiary] unless [variant] says otherwise, [class_] added after HeroUI's
+    classes, as React's [actionProps]' className is. *)
 
 (** Toasts, held in order, the newest first, each until it is closed. *)
 module Queue : sig

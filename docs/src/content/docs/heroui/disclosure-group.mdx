@@ -8,8 +8,8 @@ import * as Usage from "@islands/disclosure_group_usage.jsx";
 import UsageCode from "@islands/disclosure_group_usage.mlx?raw";
 import * as Controlled from "@islands/disclosure_group_controlled.jsx";
 import ControlledCode from "@islands/disclosure_group_controlled.mlx?raw";
-import * as Multiple from "@islands/disclosure_group_multiple.jsx";
-import MultipleCode from "@islands/disclosure_group_multiple.mlx?raw";
+import * as Tailwind from "@islands/disclosure_group_tailwind.jsx";
+import TailwindCode from "@islands/disclosure_group_tailwind.mlx?raw";
 import * as Demo from "@islands/disclosure_group_demo.jsx";
 
 `Solidtype_heroui.Disclosure_group` holds the [`Disclosure`](/solidtype/heroui/disclosure/)s
@@ -19,6 +19,8 @@ expanding another collapsing it, or several, with the class HeroUI's own
 built on the port's Disclosure, which is Kobalte's collapsible.
 
 ## Usage
+
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons` and Iconify.
 
 <Example code={UsageCode} title="disclosure_group_usage.mlx"><Usage.make client:visible /></Example>
 
@@ -45,15 +47,13 @@ reaches the same one twice.
 
 <Example code={ControlledCode} title="disclosure_group_controlled.mlx"><Controlled.make client:visible /></Example>
 
-### Several expanded
-
-<Example code={MultipleCode} title="disclosure_group_multiple.mlx"><Multiple.make client:visible /></Example>
-
 ## Customization
 
 ### Tailwind CSS
 
 `class_` is added after HeroUI's class.
+
+<Example code={TailwindCode} title="disclosure_group_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 ### Global CSS
 

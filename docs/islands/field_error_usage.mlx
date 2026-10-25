@@ -1,20 +1,21 @@
 module S = Solidtype.Solid
-module Jsx = Solidtype.Jsx
-module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
 module Input = Solidtype_heroui.Input
 module Label = Solidtype_heroui.Label
-module Text_area = Solidtype_heroui.Text_area
 module Text_field = Solidtype_heroui.Text_field
 
 let make () =
-  let value, set_value = S.create_signal "jd" in
+  let value, set_value = S.create_signal "jr" in
+  let invalid () =
+    let n = String.length (S.get value) in
+    n > 0 && n < 3
+  in
   <Text_field
     class_="w-64"
-    is_invalid=(fun () -> String.length (S.get value) < 3)
+    is_invalid=(fun () -> invalid ())
     value=(fun () -> S.get value)
     on_change=(S.set set_value)>
     <Label>"Username"</Label>
-    <Input />
+    <Input placeholder="Enter username" />
     <Field_error>"Username must be at least 3 characters"</Field_error>
   </Text_field>

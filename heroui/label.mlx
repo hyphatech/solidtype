@@ -15,8 +15,8 @@ module Slot = Solidtype.Context.Make_optional (struct
 end)
 
 let%component make ?(is_required : bool option) ?(is_disabled : bool option)
-    ?(is_invalid : bool option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ?(is_invalid : bool option) ?(for_ : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
   let classes () =
     Styles.Label.classes
       (Styles.Label.options ?is_required:(is_required ())
@@ -28,6 +28,7 @@ let%component make ?(is_required : bool option) ?(is_disabled : bool option)
       render classes (Props.others props) (fun () -> children ()) [@u]
   | None ->
       <label
+        ?for_=(fun () -> for_ ())
         class_=(fun () -> classes ())
         data_slot="label"
         props=(Props.others props)>

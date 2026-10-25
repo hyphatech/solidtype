@@ -1,21 +1,32 @@
+module Avatar = Solidtype_heroui.Avatar
 module Badge = Solidtype_heroui.Badge
 
+let avatar =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+
+let placements =
+  [|
+    (`top_right, "top-right");
+    (`top_left, "top-left");
+    (`bottom_right, "bottom-right");
+    (`bottom_left, "bottom-left");
+  |]
+
 let make () =
-  <div class_="flex items-center gap-6">
-    <Badge.Anchor>
-      <span class_="block size-10 rounded-lg bg-default" />
-      <Badge color=`accent placement=`top_right size=`sm>"1"</Badge>
-    </Badge.Anchor>
-    <Badge.Anchor>
-      <span class_="block size-10 rounded-lg bg-default" />
-      <Badge color=`accent placement=`top_left size=`sm>"2"</Badge>
-    </Badge.Anchor>
-    <Badge.Anchor>
-      <span class_="block size-10 rounded-lg bg-default" />
-      <Badge color=`accent placement=`bottom_right size=`sm>"3"</Badge>
-    </Badge.Anchor>
-    <Badge.Anchor>
-      <span class_="block size-10 rounded-lg bg-default" />
-      <Badge color=`accent placement=`bottom_left size=`sm>"4"</Badge>
-    </Badge.Anchor>
+  <div class_="flex items-center gap-8">
+    <Solidtype.For each=(fun () -> placements)>
+      (fun (placement, name) _ ->
+        <div class_="flex flex-col items-center gap-2">
+          <Badge.Anchor>
+            <Avatar>
+              <Avatar.Image src=(fun () -> avatar) />
+              <Avatar.Fallback>"JD"</Avatar.Fallback>
+            </Avatar>
+            <Badge color=`accent placement=(fun () -> placement) size=`sm />
+          </Badge.Anchor>
+          <span class_="text-xs text-muted">
+            (fun () -> Solidtype.Jsx.string name)
+          </span>
+        </div>)
+    </Solidtype.For>
   </div>

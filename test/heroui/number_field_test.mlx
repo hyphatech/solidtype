@@ -263,13 +263,14 @@ let () =
 
 (* The value a field shows and tells after it is rendered, and after its
    increment button is clicked, each as Kobalte tells a reader it. *)
-let snapped ?min_value ?max_value ~step default =
+let snapped ?min_value ?max_value ?step ?format_options default =
   let told = ref "" in
   T.render (fun () ->
       <Number_field
         ?min_value=(fun () -> min_value)
         ?max_value=(fun () -> max_value)
-        step=(fun () -> step)
+        ?step=(fun () -> step)
+        ?format_options=(fun () -> format_options)
         default_value=(fun () -> default)
         on_change=(fun v -> told := Js.Float.toString v)>
         <Label>"Amount"</Label>
@@ -308,7 +309,23 @@ let () =
         (fun () ->
           let* r = snapped ~min_value:0. ~max_value:10. ~step:0. 5.5 in
           Js.Promise.resolve
-            E.(expect r |> toEqual (Some "5.5", "", Some "5.5"))))
+            E.(expect r |> toEqual (Some "5.5", "", Some "5.5")));
+      Jest.testPromise "keeps a value off the grid of a step it is not given"
+        (fun () ->
+          let* r = snapped ~min_value:0. 99.99 in
+          Js.Promise.resolve
+            E.(expect r |> toEqual (Some "99.99", "100", Some "100")));
+      Jest.testPromise "steps a percent by a hundredth while given no step"
+        (fun () ->
+          let* r =
+            snapped ~min_value:0. ~max_value:1.
+              ~format_options:
+                (Solidtype_kobalte.Types.NumberFormatOptions.make
+                   ~style:`percent ())
+              0.5
+          in
+          Js.Promise.resolve
+            E.(expect r |> toEqual (Some "0.5", "0.51", Some "0.51"))))
 
 let () =
   Jest.describe "Number_field, left" (fun () ->

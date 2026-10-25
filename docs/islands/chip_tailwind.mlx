@@ -1,0 +1,17 @@
+module Chip = Solidtype_heroui.Chip
+
+let make () =
+  <div class_="flex flex-wrap items-center gap-2">
+    <Chip
+      class_="rounded-full bg-default-soft px-3 text-default-soft-foreground">
+      "Draft"
+    </Chip>
+    <Chip
+      class_="rounded-full bg-warning-soft px-3 text-warning-soft-foreground">
+      "In review"
+    </Chip>
+    <Chip
+      class_="rounded-full bg-success-soft px-3 text-success-soft-foreground">
+      "Published"
+    </Chip>
+  </div>

@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  let value, set_value = S.create_signal "" in
+  let is_invalid () =
+    let n = String.length (S.get value) in
+    n > 0 && n < 3
+  in
+  <div class_="flex flex-col gap-4">
+    <Search_field
+      is_required=true
+      is_invalid=(fun () -> is_invalid ())
+      name="search"
+      value=(fun () -> S.get value)
+      on_change=(S.set set_value)>
+      <Label>"Search"</Label>
+      <Search_field.Group>
+        <Search_field.Search_icon />
+        <Search_field.Input class_="w-[280px]" placeholder="Search..." />
+        <Search_field.Clear_button />
+      </Search_field.Group>
+      <Show
+        when_=(fun () -> is_invalid ())
+        fallback=(<Description>
+                    "Enter at least 3 characters to search"
+                  </Description>)>
+        <Field_error>"Search query must be at least 3 characters"</Field_error>
+      </Show>
+    </Search_field>
+  </div>

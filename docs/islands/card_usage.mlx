@@ -3,7 +3,9 @@ module Link = Solidtype_heroui.Link
 
 let make () =
   <Card class_="w-[400px]">
-    <Icons.Circle_dollar />
+    <Gravity.Circle_dollar
+      aria_label="Dollar sign icon" class_="text-primary size-6"
+    />
     <Card.Header>
       <Card.Title>"Become an Acme Creator!"</Card.Title>
       <Card.Description>

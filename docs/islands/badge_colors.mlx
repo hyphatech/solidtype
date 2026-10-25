@@ -1,0 +1,20 @@
+module Avatar = Solidtype_heroui.Avatar
+module Badge = Solidtype_heroui.Badge
+
+let avatar =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+
+let make () =
+  <div class_="flex items-center gap-6">
+    <Solidtype.For
+      each=(fun () -> [| `default; `accent; `success; `warning; `danger |])>
+      (fun color _ ->
+        <Badge.Anchor>
+          <Avatar>
+            <Avatar.Image src=(fun () -> avatar) />
+            <Avatar.Fallback>"JD"</Avatar.Fallback>
+          </Avatar>
+          <Badge color=(fun () -> color) size=`sm />
+        </Badge.Anchor>)
+    </Solidtype.For>
+  </div>

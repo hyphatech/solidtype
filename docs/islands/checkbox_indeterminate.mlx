@@ -1,18 +1,18 @@
-module S = Solidtype.Solid
 module Checkbox = Solidtype_heroui.Checkbox
-module Label = Solidtype_heroui.Label
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
 
 let make () =
   let indeterminate, set_indeterminate = S.create_signal true in
-  let on, set_on = S.create_signal false in
+  let selected, set_selected = S.create_signal false in
   <Checkbox
     is_indeterminate=(fun () -> S.get indeterminate)
-    is_selected=(fun () -> S.get on)
+    is_selected=(fun () -> S.get selected)
     on_change=(fun v ->
-                S.set set_on v;
+                S.set set_selected v;
                 S.set set_indeterminate false)>
     <Checkbox.Content>
-      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-      <Label>"Select all"</Label>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Select all"
     </Checkbox.Content>
+    <Description>"Shows indeterminate state (dash icon)"</Description>
   </Checkbox>

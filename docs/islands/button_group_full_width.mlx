@@ -10,13 +10,13 @@ let make () =
     </Button_group>
     <Button_group full_width=true>
       <Button is_icon_only=true aria_label="Align left">
-        <Icons.Align_left />
+        <Gravity.Text_align_left />
       </Button>
       <Button is_icon_only=true aria_label="Align center">
-        <Button_group.Separator /> <Icons.Align_center />
+        <Button_group.Separator /> <Gravity.Text_align_center />
       </Button>
       <Button is_icon_only=true aria_label="Align right">
-        <Button_group.Separator /> <Icons.Align_right />
+        <Button_group.Separator /> <Gravity.Text_align_right />
       </Button>
     </Button_group>
   </div>

@@ -4,17 +4,17 @@ description: A link, HeroUI's on Kobalte's.
 ---
 
 import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/link_usage.jsx";
+import ExUsageCode from "@islands/link_usage.mlx?raw";
+import * as ExPlacement from "@islands/link_placement.jsx";
+import ExPlacementCode from "@islands/link_placement.mlx?raw";
+import * as ExDecoration from "@islands/link_decoration.jsx";
+import ExDecorationCode from "@islands/link_decoration.mlx?raw";
+import * as ExCustomIcon from "@islands/link_custom_icon.jsx";
+import ExCustomIconCode from "@islands/link_custom_icon.mlx?raw";
+import * as ExTailwind from "@islands/link_tailwind.jsx";
+import ExTailwindCode from "@islands/link_tailwind.mlx?raw";
 import * as Demo from "@islands/link_demo.jsx";
-import * as LinkUsage from "@islands/link_usage.jsx";
-import LinkUsageCode from "@islands/link_usage.mlx?raw";
-import * as LinkPlacement from "@islands/link_placement.jsx";
-import LinkPlacementCode from "@islands/link_placement.mlx?raw";
-import * as LinkDecoration from "@islands/link_decoration.jsx";
-import LinkDecorationCode from "@islands/link_decoration.mlx?raw";
-import * as LinkCustomIcon from "@islands/link_custom_icon.jsx";
-import LinkCustomIconCode from "@islands/link_custom_icon.mlx?raw";
-import * as LinkDisabled from "@islands/link_disabled.jsx";
-import LinkDisabledCode from "@islands/link_disabled.mlx?raw";
 
 `Solidtype_heroui.Link` is Kobalte's `Link.Root`, an anchor, with the classes
 HeroUI's own `linkVariants` gives, and `Link.Icon`, HeroUI's arrow. Its state
@@ -23,31 +23,35 @@ not.
 
 ## Usage
 
-<Example code={LinkUsageCode} title="link_usage.mlx"><LinkUsage.make client:visible /></Example>
+HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
+
+<Example code={ExUsageCode} title="link_usage.mlx"><ExUsage.make client:visible /></Example>
 
 ## Examples
 
 ### Icon Placement
 
-<Example code={LinkPlacementCode} title="link_placement.mlx"><LinkPlacement.make client:visible /></Example>
+<Example code={ExPlacementCode} title="link_placement.mlx"><ExPlacement.make client:visible /></Example>
 
 ### Text Decoration with Tailwind CSS
 
-<Example code={LinkDecorationCode} title="link_decoration.mlx"><LinkDecoration.make client:visible /></Example>
+<Example code={ExDecorationCode} title="link_decoration.mlx"><ExDecoration.make client:visible /></Example>
 
 ### Custom Icon
 
-<Example code={LinkCustomIconCode} title="link_custom_icon.mlx"><LinkCustomIcon.make client:visible /></Example>
+<Example code={ExCustomIconCode} title="link_custom_icon.mlx"><ExCustomIcon.make client:visible /></Example>
 
-### Disabled
+### Render Function
 
-<Example code={LinkDisabledCode} title="link_disabled.mlx"><LinkDisabled.make client:visible /></Example>
-
-### Not yet
-
-HeroUI's Render Function, which needs `render`.
+HeroUI's Render Function example gives the link `render`, React's way to swap the element it renders, which a Solid component has no need of.
 
 ## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="link_tailwind.mlx"><ExTailwind.make client:visible /></Example>
 
 ### Global CSS
 
