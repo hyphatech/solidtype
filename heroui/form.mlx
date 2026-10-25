@@ -94,14 +94,19 @@ let%component make ?(action : string option)
     ?(on_submit : (Dom.event -> unit) option)
     ?(on_reset : (Dom.event -> unit) option) ~(children : Jsx.content) () =
   let entries = ref [] in
-  (* The names whose server error a change has cleared, until the errors are
-     given again. *)
-  let cleared, set_cleared = S.create_signal [] in
-  S.create_effect (fun () ->
-      let (_ : (string * string) list option) = validation_errors () in
-      S.set set_cleared []);
+  (* The names whose server error a change has cleared, with the errors they
+     were cleared from: errors given again are another list, shown whole.
+     Identity is the point, so a name cleared before the errors came, by a
+     field left for the submit button, clears nothing of them. *)
+  let cleared, set_cleared = S.create_signal (None, []) in
+  let cleared_now () =
+    let from, names = S.get cleared in
+    match (from, validation_errors ()) with
+    | Some from, Some errors when from == errors -> names
+    | (Some _ | None), (Some _ | None) -> []
+  in
   let error name =
-    if List.exists (String.equal name) (S.get cleared) then None
+    if List.exists (String.equal name) (cleared_now ()) then None
     else
       Option.bind (validation_errors ()) (fun errors ->
           List.assoc_opt name errors)
@@ -111,7 +116,9 @@ let%component make ?(action : string option)
       add = (fun e -> entries := e :: !entries);
       remove = (fun e -> entries := List.filter (fun x -> x != e) !entries);
       error;
-      clear = (fun name -> S.set set_cleared (name :: S.get cleared));
+      clear =
+        (fun name ->
+          S.set set_cleared (validation_errors (), name :: cleared_now ()));
     }
   in
   let invalid (e : entry) =

@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-25T09:40:14.705Z",
+        "reason": "Claude decided: HeroUI's own face, as heroui.com and docs/src/styles/heroui.css give it; the example matches HeroUI's look by the repository's parity rule"
+      }
+    ]
+  }
+}

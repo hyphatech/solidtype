@@ -2,3 +2,4 @@ _build/
 .astro/
 .DS_Store
 node_modules/
+example/board.db*

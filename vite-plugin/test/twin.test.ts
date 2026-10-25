@@ -55,7 +55,7 @@ export async function compiled(ml: string, tsx: string, mode: Mode = "dom") {
   };
 }
 
-const islands = [["app", "App"], ["card", "Card"], ["add_task", "AddTask"], ["notice", "Notice"]] as const;
+const islands = [["app", "App"], ["card", "Card"], ["add_task", "AddTask"]] as const;
 
 for (const [ml, tsx] of islands) {
   for (const mode of Object.keys(modes) as Mode[]) {

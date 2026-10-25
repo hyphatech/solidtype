@@ -9,23 +9,35 @@
  (name server)
  (wrapped false)
  (modules store routes)
- (libraries spindle wiretype)
+ (libraries spindle spindle-sqlite rowtype wiretype)
  (preprocess
   (pps ppx_wiretype)))
 
 (executable
  (name serve)
  (modules serve)
- (libraries spindle server eio_main))
+ (libraries spindle spindle-sqlite server eio_main))
 
 (executable
  (name board)
  (modules board)
  (libraries spindle spindle-cli server))
 
-; The routes, called in-process as the board calls them.
+; The routes, called in-process as the board calls them, on a database the
+; board's migrations make.
 
 (test
  (name test_tasks)
  (modules test_tasks)
- (libraries spindle spindle.http server alcotest))
+ (deps
+  (glob_files ../migrations/*.sql))
+ (libraries
+  spindle
+  spindle-http
+  spindle-sqlite
+  rowtype-sqlite
+  rowtype-migrate
+  rowtype-migrate.sqlite
+  server
+  eio_main
+  alcotest))

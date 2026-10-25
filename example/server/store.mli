@@ -1,5 +1,6 @@
-(** The tasks on a board, kept in memory, newest first, and the rules a change
-    to one keeps. *)
+(** The tasks on a board, kept in SQLite, newest first, in the table the
+    migrations in [example/migrations] make, which [rowtype-migrate] applies
+    before the server starts. *)
 
 (** Where a task is on the board. *)
 type status = To_do | Doing | Done
@@ -15,26 +16,33 @@ type task = {
 
 val task_json : task Wiretype.t
 
-type t
-(** A board, safe to share between the server's domains. *)
+type error = Spindle_sqlite.error
+(** A statement's failure, or the pool's, which {!Spindle_sqlite.refusal}
+    answers. *)
 
-val create : unit -> t
-(** An empty board. *)
+val dep : Spindle_sqlite.Pool.t Spindle.Dep.t
+(** The board's database, as a route reads it. *)
 
-val dep : t Spindle.Dep.t
-(** The board, as a route reads it. *)
+val resource : Spindle_sqlite.Pool.t -> Spindle.Dep.resource
+(** [pool] as the one {!dep} reads, for [Spindle.serve ~resources]. *)
 
-val resource : t -> Spindle.Dep.resource
-(** [board] as the one {!dep} reads, for [Spindle.serve ~resources]. *)
-
-val tasks : ?status:status -> t -> task list
+val tasks : ?status:status -> Spindle_sqlite.Pool.t -> (task list, error) result
 (** Every task, or those with [status]. *)
 
-val add : t -> title:string -> ?note:string -> unit -> task
+val add :
+  Spindle_sqlite.Pool.t ->
+  title:string ->
+  ?note:string ->
+  unit ->
+  (task, error) result
 (** A task put on the board, to do. *)
 
-val move : t -> int -> status -> task option
+val move : Spindle_sqlite.Pool.t -> int -> status -> (task option, error) result
 (** The task [id] at [status], [None] when there is none. *)
 
-val remove : t -> int -> bool
+val remove : Spindle_sqlite.Pool.t -> int -> (bool, error) result
 (** Whether the task [id] was there to take off the board. *)
+
+val statements : Rowtype.any list
+(** Every statement the store runs, for [Rowtype_sqlite.verify] to hold to the
+    table the migrations make. *)

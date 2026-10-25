@@ -41,4 +41,21 @@ let () =
                 T.expect_equal ~what:"the task's column" "Doing"
                   (Option.value (T.column (T.by_text "Ship it")) ~default:""))
           in
+          Js.Promise.resolve Jest.pass);
+      Jest.testPromise "a title the server refuses is shown on its field"
+        (fun () ->
+          T.render Example.App.make;
+          T.click (T.by_role_named "button" "Add a task");
+          let* title = T.find_by_label "Title" in
+          T.set_value title (String.make 121 't');
+          T.input title;
+          T.click (T.by_role_named "button" "Add");
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the title's state" "true"
+                  (Option.value
+                     (Js.Null.toOption
+                        (T.attribute (T.by_label "Title") "aria-invalid"))
+                     ~default:""))
+          in
           Js.Promise.resolve Jest.pass))

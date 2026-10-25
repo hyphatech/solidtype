@@ -1,5 +1,45 @@
-/* Tailwind reads its classes from the .mlx sources, where they are
-   written whole; the build's .jsx under _build is ignored with the rest
-   of what git ignores. */
-@import "tailwindcss";
+/* HeroUI's Tailwind build, as its README gives it: the prelude its
+   components need, then the components the board uses, no others, in
+   HeroUI's own order. Its theme turns dark under `.dark`, which the page
+   sets from the system's scheme. Tailwind reads the board's classes from
+   the .mlx sources, where they are written whole; the build's .jsx under
+   _build is ignored with the rest of what git ignores. */
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tw-animate-css";
+
+@import "@heroui/styles/base/base.css" layer(base);
+@import "@heroui/styles/utilities";
+@import "@heroui/styles/variants";
+@import "@heroui/styles/themes/default" layer(theme);
+
+@import "@heroui/styles/components/close-button.css" layer(components);
+@import "@heroui/styles/components/description.css" layer(components);
+@import "@heroui/styles/components/field-error.css" layer(components);
+@import "@heroui/styles/components/label.css" layer(components);
+@import "@heroui/styles/components/button.css" layer(components);
+@import "@heroui/styles/components/chip.css" layer(components);
+@import "@heroui/styles/components/empty-state.css" layer(components);
+@import "@heroui/styles/components/spinner.css" layer(components);
+@import "@heroui/styles/components/toast.css" layer(components);
+@import "@heroui/styles/components/input.css" layer(components);
+@import "@heroui/styles/components/textfield.css" layer(components);
+@import "@heroui/styles/components/textarea.css" layer(components);
+@import "@heroui/styles/components/card.css" layer(components);
+@import "@heroui/styles/components/surface.css" layer(components);
+@import "@heroui/styles/components/modal.css" layer(components);
+
+/* HeroUI's ground, as heroui.com gives it: Inter, on its background, in its
+   foreground, which its components take from the page. */
+@import "@fontsource-variable/inter";
+
+body {
+  font-family: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+}
+
 @source "./";

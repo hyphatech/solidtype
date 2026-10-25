@@ -10,6 +10,7 @@ module Number_field = Solidtype_heroui.Number_field
 module Radio = Solidtype_heroui.Radio
 module Radio_group = Solidtype_heroui.Radio_group
 module Text_field = Solidtype_heroui.Text_field
+module S = Solidtype.Solid
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -186,4 +187,36 @@ let () =
                        (None, None) ),
                      ( (Some "true", Some "Taken"),
                        (Some "true", Some "Taken"),
-                       (None, None) ) ))))
+                       (None, None) ) )));
+      Jest.testPromise
+        "shows a server's error that comes after its field was changed and left"
+        (fun () ->
+          let errors, set_errors = S.create_signal [] in
+          T.render (fun () ->
+              <Form
+                validation_errors=(fun () -> S.get errors)
+                on_submit=prevent_default>
+                <Text_field name="email">
+                  <Label>"Email"</Label> <Input /> <Field_error />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          (* As a submit clicked: the field changed, then left for the button,
+             and the server's answer after. *)
+          let* (_ : (string option * string option) * _ * _) =
+            walk ~step:(fun action -> action ()) ()
+          in
+          S.set set_errors [ ("email", "Taken") ];
+          let answered = shown () in
+          let* (_ : (string option * string option) * _ * _) =
+            walk ~step:(fun action -> action ()) ()
+          in
+          let cleared = shown () in
+          S.set set_errors [ ("email", "Taken") ];
+          Js.Promise.resolve
+            E.(
+              expect (answered, cleared, shown ())
+              |> toEqual
+                   ( (Some "true", Some "Taken"),
+                     (None, None),
+                     (Some "true", Some "Taken") ))))

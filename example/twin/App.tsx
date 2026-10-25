@@ -1,11 +1,12 @@
-import * as Toast from "@kobalte/core/toast";
 import { createResource, createSignal, For } from "solid-js";
 import { isServer } from "solid-js/web";
+import * as Chip from "solidtype-heroui/chip.jsx";
+import * as EmptyState from "solidtype-heroui/empty_state.jsx";
+import * as Toast from "solidtype-heroui/toast.jsx";
 import { z } from "zod/mini";
 import { make as AddTask } from "./AddTask";
 import { call } from "./api";
 import { make as Card } from "./Card";
-import { show } from "./Notice";
 import { TaskSchema, type Task } from "./board.gen";
 
 type Status = Task["status"];
@@ -19,18 +20,18 @@ export function make() {
     async () => {
       const listed = await call("GET", "/api/tasks", z.array(TaskSchema));
       if (listed.ok) return listed.value;
-      show("Could not load the board", listed.error);
+      Toast.danger(undefined, listed.error, undefined, undefined, undefined, undefined, "Could not load the board");
       return [];
     },
   );
   const changed = (what: string) => {
     refetch();
-    show("Done", what);
+    Toast.success(undefined, what, undefined, undefined, undefined, undefined, "Done");
   };
   const settle = async (what: string, answer: Promise<{ ok: boolean; error?: string }>) => {
     const a = await answer;
     if (a.ok) changed(what);
-    else show("Not done", a.error ?? "");
+    else Toast.danger(undefined, a.error ?? "", undefined, undefined, undefined, undefined, "Not done");
   };
   const move = (t: Task, status: Status) => {
     if (t.status !== status)
@@ -41,7 +42,7 @@ export function make() {
   const [over, setOver] = createSignal<Status>();
   return (
     <main class="mx-auto max-w-6xl px-4 py-10">
-      <header class="mb-8 flex items-center justify-between">
+      <header class="mb-8 flex items-center justify-between gap-4">
         <h1 class="text-3xl font-semibold tracking-tight">Kanban Board</h1>
         <AddTask onAdded={(title) => changed(title + " is on the board")} />
       </header>
@@ -52,8 +53,8 @@ export function make() {
               aria-label={labels[status]}
               class={
                 over() === status
-                  ? "rounded-xl bg-amber-100/70 p-3 ring-2 ring-amber-400 transition dark:bg-amber-950/40"
-                  : "rounded-xl bg-stone-100 p-3 transition dark:bg-stone-900/60"
+                  ? "rounded-3xl bg-accent-soft p-3 ring-2 ring-accent transition"
+                  : "rounded-3xl bg-surface-secondary p-3 transition"
               }
               onDragOver={(e) => {
                 e.preventDefault();
@@ -67,18 +68,18 @@ export function make() {
                 if (t) move(t, status);
               }}
             >
-              <h2 class="mb-3 flex items-center justify-between px-1 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+              <h2 class="mb-3 flex items-center justify-between px-2 text-sm font-medium text-muted">
                 {labels[status]}
-                <span class="rounded-full bg-stone-200 px-2 py-0.5 text-xs text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                <Chip.component color="accent" size="sm" variant="soft">
                   {inColumn(status).length}
-                </span>
+                </Chip.component>
               </h2>
               <ul class="flex min-h-24 flex-col gap-2">
                 <For
                   each={inColumn(status)}
                   fallback={
-                    <li class="rounded-lg border border-dashed border-stone-300 p-4 text-center text-sm text-stone-400 dark:border-stone-700">
-                      Drop a task here
+                    <li class="rounded-2xl border border-dashed border-border">
+                      <EmptyState.component class="p-4 text-center">Drop a task here</EmptyState.component>
                     </li>
                   }
                 >
@@ -95,9 +96,7 @@ export function make() {
           )}
         </For>
       </div>
-      <Toast.Region>
-        <Toast.List class="fixed bottom-4 right-4 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2" />
-      </Toast.Region>
+      <Toast.Provider.component placement="bottom_end" />
     </main>
   );
 }

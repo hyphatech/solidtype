@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kanban Board</title>
     <link rel="stylesheet" href="/src/board.css" />
+    <!-- HeroUI's theme is dark under .dark: the system's scheme, as the page opens. -->
+    <script>
+      if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.classList.add("dark");
+    </script>
   </head>
-  <body class="min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+  <body class="min-h-screen antialiased">
     <div id="app"></div>
     <script type="module" src="../_build/default/example/out/example/src/main.jsx"></script>
   </body>

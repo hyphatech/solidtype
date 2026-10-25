@@ -1,58 +1,56 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
-module Button = Solidtype_kobalte.Button
+module Button = Solidtype_heroui.Button
+module Card = Solidtype_heroui.Card
+module Close_button = Solidtype_heroui.Close_button
 
-(* A task on the board: dragged to another column, or moved a column at a
-   time by its arrows. *)
+(* A task on the board, HeroUI's card: dragged to another column, or moved a
+   column at a time by its arrows. *)
 let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
     ~(on_remove : unit -> unit) () =
   let arrow ~label target =
     match target with
-    | None -> <span class_="w-7" />
+    | None -> <span class_="size-8" />
     | Some status ->
-        <Button.Root
-          class_="grid h-7 w-7 place-items-center rounded-md text-stone-400 \
-                  hover:bg-stone-100 hover:text-stone-700 \
-                  dark:hover:bg-stone-800 dark:hover:text-stone-200"
+        <Button
+          variant=`ghost
+          size=`sm
+          is_icon_only=true
           aria_label=(fun () ->
                        "Move " ^ (task ()).title ^ " to " ^ Status.label status)
           on_click=(fun _ -> on_move status)>
           (fun () -> Jsx.string label)
-        </Button.Root>
+        </Button>
   in
   <li
-    class_="group cursor-grab rounded-lg border border-stone-200 bg-white p-3 \
-            shadow-sm transition hover:shadow-md active:cursor-grabbing \
-            dark:border-stone-700 dark:bg-stone-900"
+    class_="cursor-grab active:cursor-grabbing"
     draggable=true
     on_drag_start=(fun e -> Drag.start e (task ()).id)>
-    <div class_="flex items-start gap-2">
-      <div class_="min-w-0 flex-1">
-        <p class_="truncate font-medium text-stone-900 dark:text-stone-100">
-          (fun () -> Jsx.string (task ()).title)
-        </p>
-        <Show.Some some=(fun () -> (task ()).note)>
-          (fun note ->
-            <p class_="truncate text-sm text-stone-500 dark:text-stone-400">
-              (fun () -> Jsx.string (S.get note))
-            </p>)
-        </Show.Some>
-      </div>
-      <Button.Root
-        class_="grid h-6 w-6 place-items-center rounded-md text-stone-400 \
-                opacity-0 transition group-hover:opacity-100 hover:bg-red-50 \
-                hover:text-red-600 focus-visible:opacity-100 \
-                dark:hover:bg-red-950"
-        aria_label=(fun () -> "Remove " ^ (task ()).title)
-        on_click=(fun _ -> on_remove ())>
-        "×"
-      </Button.Root>
-    </div>
-    <div class_="mt-2 flex items-center justify-between">
-      (fun () ->
-        Jsx.element (arrow ~label:{js|←|js} (Status.previous (task ()).status)))
-      (fun () ->
-        Jsx.element (arrow ~label:{js|→|js} (Status.next (task ()).status)))
-    </div>
+    <Card class_="gap-1 p-3">
+      <Card.Header class_="flex-row items-start gap-2">
+        <div class_="min-w-0 flex-1">
+          <Card.Title class_="truncate">
+            (fun () -> Jsx.string (task ()).title)
+          </Card.Title>
+          <Show.Some some=(fun () -> (task ()).note)>
+            (fun note ->
+              <Card.Description class_="truncate">
+                (fun () -> Jsx.string (S.get note))
+              </Card.Description>)
+          </Show.Some>
+        </div>
+        <Close_button
+          aria_label=(fun () -> "Remove " ^ (task ()).title)
+          on_click=(fun _ -> on_remove ())
+        />
+      </Card.Header>
+      <Card.Footer class_="justify-between">
+        (fun () ->
+          Jsx.element
+            (arrow ~label:{js|←|js} (Status.previous (task ()).status)))
+        (fun () ->
+          Jsx.element (arrow ~label:{js|→|js} (Status.next (task ()).status)))
+      </Card.Footer>
+    </Card>
   </li>

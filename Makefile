@@ -29,7 +29,7 @@ node_modules: package.json bun.lock
 # comes first.
 test: build node_modules ## run the tests
 	$(OPAM) dune test --force
-	bun run test
+	$(OPAM) bun run test
 
 # Release is the profile opam installs with.
 lint: node_modules ## check formatting, types, the release build and bindings
@@ -48,8 +48,14 @@ example: build node_modules ## build the example, as a Vite page and an Astro on
 	bun --bun vite build --config example/vite.config.ts
 	bun --bun astro build
 
+# The board's tasks, kept in this file from one serve to the next, migrated
+# before the server starts, never by it.
+BOARD_DB ?= example/board.db
+
 example-serve: example ## serve the example and its API on http://localhost:4420
-	_build/default/example/server/serve.exe
+	@test -f $(BOARD_DB) || $(OPAM) rowtype-migrate create --url sqlite:$(BOARD_DB)
+	$(OPAM) rowtype-migrate up --dir example/migrations --url sqlite:$(BOARD_DB)
+	BOARD_DB=$(BOARD_DB) _build/default/example/server/serve.exe
 
 docs: build node_modules ## build the documentation into _build/docs
 	bun --bun astro build --root docs

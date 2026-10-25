@@ -1,112 +1,128 @@
 module S = Solidtype.Solid
-module Dialog = Solidtype_kobalte.Dialog
-module TextField = Solidtype_kobalte.TextField
-module Button = Solidtype_kobalte.Button
 module Jsx = Solidtype.Jsx
+module Dialog = Solidtype_kobalte.Dialog
+module Button = Solidtype_heroui.Button
+module Close_button = Solidtype_heroui.Close_button
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_area = Solidtype_heroui.Text_area
+module Text_field = Solidtype_heroui.Text_field
+module Modal = Solidtype_heroui.Styles.Modal
 
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
-(* The dialog that puts a task on the board; [on_added] is told its title. *)
+(* The dialog that puts a task on the board; [on_added] is told its title.
+   What the server finds wrong with a field is shown on that field. *)
 let%component make ~(on_added : string -> unit) () =
+  (* HeroUI has no modal ported yet, so Kobalte's dialog wears HeroUI's
+     modal classes: a backdrop blurred behind it, and one that only places
+     it. *)
+  let modal = Modal.slots (Modal.options ()) in
+  let backdrop =
+    Modal.backdrop (Modal.slots (Modal.options ~variant:`blur ()))
+  in
+  let placing =
+    Modal.backdrop (Modal.slots (Modal.options ~variant:`transparent ()))
+  in
   let open_, set_open = S.create_signal false in
   let title, set_title = S.create_signal "" in
   let note, set_note = S.create_signal "" in
+  let tried, set_tried = S.create_signal false in
+  let refused, set_refused = S.create_signal [] in
   let problem, set_problem = S.create_signal "" in
+  let untitled () =
+    S.get tried && String.equal (String.trim (S.get title)) ""
+  in
+  let opened o =
+    S.batch (fun () ->
+        if not o then (
+          S.set set_title "";
+          S.set set_note "";
+          S.set set_tried false;
+          S.set set_refused [];
+          S.set set_problem "");
+        S.set set_open o)
+  in
+  let answered = function
+    | Ok (t : Api.task) ->
+        opened false;
+        on_added t.title
+    | Error (`Invalid (problems : Api.Problem.t list)) ->
+        S.set set_refused
+          (List.map (fun (p : Api.Problem.t) -> (p.at, p.message)) problems)
+    | Error e -> S.set set_problem (Said.error e)
+  in
   let submit e =
     prevent_default e;
-    ignore
-      (Js.Promise.then_
-         (fun answered ->
-           (match answered with
-           | Ok (t : Api.task) ->
-               S.batch (fun () ->
-                   S.set set_title "";
-                   S.set set_note "";
-                   S.set set_problem "";
-                   S.set set_open false);
-               on_added t.title
-           | Error e -> S.set set_problem (Said.error e));
-           Js.Promise.resolve ())
-         (Api.post_api_tasks
-            ~body:
-              {
-                title = S.get title;
-                note = (match S.get note with "" -> None | n -> Some n);
-              }
-            ())
-        : unit Js.Promise.t)
+    S.set set_tried true;
+    if not (untitled ()) then
+      ignore
+        (Js.Promise.then_
+           (fun a -> Js.Promise.resolve (answered a))
+           (Api.post_api_tasks
+              ~body:
+                {
+                  title = S.get title;
+                  note = (match S.get note with "" -> None | n -> Some n);
+                }
+              ())
+          : unit Js.Promise.t)
   in
-  <Dialog.Root open_=(fun () -> S.get open_) on_open_change=(S.set set_open)>
-    <Dialog.Trigger
-      class_="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold \
-              text-white shadow-sm hover:bg-amber-800 dark:bg-amber-500 \
-              dark:text-stone-950 dark:hover:bg-amber-400">
-      "Add a task"
-    </Dialog.Trigger>
+  <Dialog.Root open_=(fun () -> S.get open_) on_open_change=opened>
+    <Button on_click=(fun _ -> opened true)>"Add a task"</Button>
     <Dialog.Portal>
-      <Dialog.Overlay class_="fixed inset-0 bg-stone-950/40 backdrop-blur-sm" />
-      <div class_="fixed inset-0 grid place-items-center p-4">
-        <Dialog.Content
-          class_="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl \
-                  dark:bg-stone-900">
-          <Dialog.Title class_="mb-4 text-xl font-semibold">
-            "Add a task"
-          </Dialog.Title>
-          <form on_submit=submit>
-            <TextField.Root
-              class_="mb-4 flex flex-col gap-1"
-              value=(fun () -> S.get title)
-              on_change=(S.set set_title)
-              required=true>
-              <TextField.Label
-                class_="text-sm text-stone-500 dark:text-stone-400">
-                "Title"
-              </TextField.Label>
-              <TextField.Input
-                class_="rounded-lg border border-stone-300 bg-stone-50 px-3 \
-                        py-2 outline-none focus:border-amber-500 focus:ring-2 \
-                        focus:ring-amber-500/30 dark:border-stone-700 \
-                        dark:bg-stone-950"
-              />
-            </TextField.Root>
-            <TextField.Root
-              class_="mb-4 flex flex-col gap-1"
-              value=(fun () -> S.get note)
-              on_change=(S.set set_note)>
-              <TextField.Label
-                class_="text-sm text-stone-500 dark:text-stone-400">
-                "Note"
-              </TextField.Label>
-              <TextField.Input
-                class_="rounded-lg border border-stone-300 bg-stone-50 px-3 \
-                        py-2 outline-none focus:border-amber-500 focus:ring-2 \
-                        focus:ring-amber-500/30 dark:border-stone-700 \
-                        dark:bg-stone-950"
-              />
-            </TextField.Root>
-            <p
-              class_="mb-2 min-h-6 text-sm text-red-600 dark:text-red-400"
-              role=`alert>
-              (fun () -> Jsx.string (S.get problem))
-            </p>
-            <div class_="flex justify-end gap-2">
-              <Dialog.CloseButton
-                class_="rounded-lg px-4 py-2 text-sm text-stone-600 \
-                        hover:bg-stone-100 dark:text-stone-300 \
-                        dark:hover:bg-stone-800">
-                "Cancel"
-              </Dialog.CloseButton>
-              <Button.Root
-                class_="rounded-lg bg-amber-700 px-4 py-2 text-sm \
-                        font-semibold text-white shadow-sm hover:bg-amber-800 \
-                        dark:bg-amber-500 dark:text-stone-950 \
-                        dark:hover:bg-amber-400"
-                type_=`submit>
-                "Add"
-              </Button.Root>
-            </div>
-          </form>
-        </Dialog.Content>
+      <Dialog.Overlay class_=(fun () -> backdrop) />
+      <div class_=(fun () -> placing)>
+        <div class_=(fun () -> Modal.container modal)>
+          <Dialog.Content class_=(fun () -> Modal.dialog modal ^ " gap-5")>
+            <Close_button
+              class_=(fun () -> Modal.close_trigger modal)
+              aria_label="Close"
+              on_click=(fun _ -> opened false)
+            />
+            <header class_=(fun () -> Modal.header modal)>
+              <Dialog.Title class_=(fun () -> Modal.heading modal)>
+                "Add a task"
+              </Dialog.Title>
+            </header>
+            <Form
+              on_submit=submit
+              validation_errors=(fun () -> S.get refused)
+              class_="flex flex-col gap-6">
+              <div class_=(fun () -> Modal.body modal ^ " flex flex-col gap-4")>
+                <Text_field
+                  name="title"
+                  value=(fun () -> S.get title)
+                  on_change=(S.set set_title)
+                  is_required=true
+                  is_invalid=(fun () -> untitled ())>
+                  <Label>"Title"</Label>
+                  <Input placeholder="What is to be done" />
+                  <Field_error>"Give the task a title."</Field_error>
+                </Text_field>
+                <Text_field
+                  name="note"
+                  value=(fun () -> S.get note)
+                  on_change=(S.set set_note)>
+                  <Label>"Note"</Label>
+                  <Text_area placeholder="A line more about it" rows="2" />
+                  <Field_error>"The note is too long."</Field_error>
+                </Text_field>
+                <p class_="text-sm text-danger empty:hidden" role=`alert>
+                  (fun () -> Jsx.string (S.get problem))
+                </p>
+              </div>
+              <footer class_=(fun () -> Modal.footer modal)>
+                <Button variant=`tertiary on_click=(fun _ -> opened false)>
+                  "Cancel"
+                </Button>
+                <Button type_=`submit>"Add"</Button>
+              </footer>
+            </Form>
+          </Dialog.Content>
+        </div>
       </div>
     </Dialog.Portal>
   </Dialog.Root>

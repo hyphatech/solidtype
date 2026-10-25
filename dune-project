@@ -47,8 +47,35 @@
     :with-test
     (>= 0.2.0)))
   ; The example's server, which its board is printed from and called
-  ; against, and the server's tests of its routes.
+  ; against, its tasks kept in SQLite, and the server's tests of its
+  ; routes, on a database migrated as rowtype-migrate migrates the
+  ; board's.
   (spindle
+   (and
+    :with-test
+    (>= 0.11.0)
+    (< 0.12.0)))
+  (spindle-http
+   (and
+    :with-test
+    (>= 0.11.0)
+    (< 0.12.0)))
+  (spindle-sqlite
+   (and
+    :with-test
+    (>= 0.11.0)
+    (< 0.12.0)))
+  (rowtype
+   (and
+    :with-test
+    (>= 0.9.0)
+    (< 0.10.0)))
+  (rowtype-sqlite
+   (and
+    :with-test
+    (>= 0.9.0)
+    (< 0.10.0)))
+  (rowtype-migrate
    (and
     :with-test
     (>= 0.9.0)
@@ -66,8 +93,8 @@
   (spindle-cli
    (and
     :with-test
-    (>= 0.9.0)
-    (< 0.10.0)))
+    (>= 0.11.0)
+    (< 0.12.0)))
   (alcotest
    (and
     :with-test

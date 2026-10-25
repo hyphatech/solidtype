@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Fixed: `Solidtype_heroui.Form` showed no server error that came after its
+  field was changed and left -- the answer to a submit clicked, which takes
+  the focus from the field first. The names a change cleared are kept with
+  the errors they were cleared from, so errors given again are shown whole;
+  the effect that cleared them read the errors in a way Melange dropped, and
+  never ran again.
 - `Solidtype_heroui.Tabs`: HeroUI's Tabs on Kobalte's, selection controlled
   or kept, horizontal or vertical, primary or secondary, aligned, disabled
   whole or a tab at a time, selected by focus or by Enter; each tab's

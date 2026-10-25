@@ -12,8 +12,12 @@ import "../src/board.css";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kanban Board</title>
+    <!-- HeroUI's theme is dark under .dark: the system's scheme, as the page opens. -->
+    <script is:inline>
+      if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.classList.add("dark");
+    </script>
   </head>
-  <body class="min-h-screen bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+  <body class="min-h-screen antialiased">
     <App.make client:load />
   </body>
 </html>

@@ -27,23 +27,29 @@ let routes =
       Spindle.Path.(s "api" / s "tasks")
       (Spindle.Returns.json (Wiretype.list Store.task_json))
       (let+ board = Store.dep and+ status = filter in
-       Ok (Store.tasks ?status board));
+       Store.tasks ?status board |> Result.map_error Spindle_sqlite.refusal);
     Spindle.post ~summary:"Put a task on the board"
       Spindle.Path.(s "api" / s "tasks")
       (Spindle.Returns.json ~status:`Created Store.task_json)
       (let+ board = Store.dep and+ (d : draft) = Spindle.json draft_json in
-       Ok (Store.add board ~title:d.title ?note:d.note ()));
+       Store.add board ~title:d.title ?note:d.note ()
+       |> Result.map_error Spindle_sqlite.refusal);
     Spindle.put ~summary:"Move a task to another column" ~refuses:[ not_found ]
       Spindle.Path.(s "api" / s "tasks" / id / s "status")
       (Spindle.Returns.json Store.task_json)
       (let+ board = Store.dep
        and+ id = Spindle.param id
        and+ (m : move) = Spindle.json move_json in
-       Option.to_result ~none:Spindle.Refusal.not_found
-         (Store.move board id m.status));
+       match Store.move board id m.status with
+       | Ok (Some t) -> Ok t
+       | Ok None -> Error Spindle.Refusal.not_found
+       | Error e -> Error (Spindle_sqlite.refusal e));
     Spindle.delete ~summary:"Take a task off the board" ~refuses:[ not_found ]
       Spindle.Path.(s "api" / s "tasks" / id)
       (Spindle.Returns.empty ())
       (let+ board = Store.dep and+ id = Spindle.param id in
-       if Store.remove board id then Ok () else Error Spindle.Refusal.not_found);
+       match Store.remove board id with
+       | Ok true -> Ok ()
+       | Ok false -> Error Spindle.Refusal.not_found
+       | Error e -> Error (Spindle_sqlite.refusal e));
   ]

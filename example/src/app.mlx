@@ -1,7 +1,9 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module For = Solidtype.For
-module Toast = Solidtype_kobalte.Toast
+module Chip = Solidtype_heroui.Chip
+module Empty_state = Solidtype_heroui.Empty_state
+module Toast = Solidtype_heroui.Toast
 
 (* What a call came to: the board fetched again and [what] said, or why
    not. *)
@@ -11,7 +13,9 @@ let settle ~changed what call =
        (fun answered ->
          (match answered with
          | Ok _ -> changed what
-         | Error e -> Notice.show ~title:"Not done" (Said.error e));
+         | Error e ->
+             ignore
+               (Toast.danger ~description:(Said.error e) "Not done" : Toast.key));
          Js.Promise.resolve ())
        call
       : unit Js.Promise.t)
@@ -28,13 +32,16 @@ let make () =
               (match answered with
               | Ok tasks -> tasks
               | Error e ->
-                  Notice.show ~title:"Could not load the board" (Said.error e);
+                  ignore
+                    (Toast.danger ~description:(Said.error e)
+                       "Could not load the board"
+                      : Toast.key);
                   [||]))
           (Api.get_api_tasks ()))
   in
   let changed what =
     S.refetch actions;
-    Notice.show ~title:"Done" what
+    ignore (Toast.success ~description:what "Done" : Toast.key)
   in
   let settle what call = settle ~changed what call in
   let move (t : Api.task) status =
@@ -61,7 +68,7 @@ let make () =
   in
   let over, set_over = S.create_signal None in
   <main class_="mx-auto max-w-6xl px-4 py-10">
-    <header class_="mb-8 flex items-center justify-between">
+    <header class_="mb-8 flex items-center justify-between gap-4">
       <h1 class_="text-3xl font-semibold tracking-tight">"Kanban Board"</h1>
       <Add_task on_added=(fun title -> changed (title ^ " is on the board")) />
     </header>
@@ -73,11 +80,10 @@ let make () =
             class_=(fun () ->
                      match S.get over with
                      | Some s when Status.equal s status ->
-                         "rounded-xl bg-amber-100/70 p-3 ring-2 ring-amber-400 \
-                          transition dark:bg-amber-950/40"
+                         "rounded-3xl bg-accent-soft p-3 ring-2 ring-accent \
+                          transition"
                      | Some _ | None ->
-                         "rounded-xl bg-stone-100 p-3 transition \
-                          dark:bg-stone-900/60")
+                         "rounded-3xl bg-surface-secondary p-3 transition")
             on_drag_over=(fun e ->
                            Drag.prevent_default e;
                            S.set set_over (Some status))
@@ -89,24 +95,22 @@ let make () =
                         (fun t -> move t status)
                         (Option.bind (Drag.dropped e) find))>
             <h2
-              class_="mb-3 flex items-center justify-between px-1 text-sm \
-                      font-semibold uppercase tracking-wide text-stone-500 \
-                      dark:text-stone-400">
+              class_="mb-3 flex items-center justify-between px-2 text-sm \
+                      font-medium text-muted">
               (fun () -> Jsx.string (Status.label status))
-              <span
-                class_="rounded-full bg-stone-200 px-2 py-0.5 text-xs \
-                        text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+              <Chip color=`accent size=`sm variant=`soft>
                 (fun () -> Jsx.int (Array.length (in_column status)))
-              </span>
+              </Chip>
             </h2>
             <ul class_="flex min-h-24 flex-col gap-2">
               <For
                 each=(fun () -> in_column status)
                 fallback=(<li
-                            class_="rounded-lg border border-dashed \
-                                    border-stone-300 p-4 text-center text-sm \
-                                    text-stone-400 dark:border-stone-700">
-                            "Drop a task here"
+                            class_="rounded-2xl border border-dashed \
+                                    border-border">
+                            <Empty_state class_="p-4 text-center">
+                              "Drop a task here"
+                            </Empty_state>
                           </li>)>
                 (fun (t : Api.task) _ ->
                   <Card
@@ -119,10 +123,5 @@ let make () =
           </section>)
       </For>
     </div>
-    <Toast.Region>
-      <Toast.List
-        class_="fixed bottom-4 right-4 z-50 flex w-80 max-w-[calc(100vw-2rem)] \
-                flex-col gap-2"
-      />
-    </Toast.Region>
+    <Toast.Provider placement=`bottom_end />
   </main>

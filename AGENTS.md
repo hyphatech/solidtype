@@ -22,7 +22,8 @@ make lint           # formatting, the plugin's and the generators' types, the
 make fmt            # format in place
 make example        # the board, built by Vite into _build/example-dist, and
                     # its Astro page, into _build/example-astro
-make example-serve  # the board and its API, served on http://localhost:4420
+make example-serve  # the board and its API, served on http://localhost:4420,
+                    # its tasks in BOARD_DB, example/board.db, migrated first
 make docs           # the documentation, built by Astro into _build/docs,
                     # as .github/workflows/docs.yml publishes it from main
 make docs-serve     # the documentation built, served on DOCS_PORT with search
@@ -118,13 +119,17 @@ vitest.config.ts     the OCaml tests, as three projects: the browser's in
                      jsdom, the example's server started for them; the
                      server's in Node; and hydration, compiled hydratable
 example/             a kanban board: a whole application on the
-                     stack, its README the map and the rough edges found
-                     building it
+                     stack -- Solid, Kobalte and HeroUI's ports over a
+                     Spindle server on SQLite -- its README the map and the
+                     rough edges found building it
   index.html         the page, built by Vite with vite.config.ts
   pages/             the same board as an Astro page: wiring alone
   src/               the board's islands in .mlx, and api.ml, its client
                      printed from server/ as the build runs
-  server/            a Spindle app: the tasks' store, the routes over it,
+  migrations/        the tasks' table, which rowtype-migrate applies before
+                     the server starts
+  server/            a Spindle app: the tasks' store in SQLite, the routes
+                     over it,
                      which the board is called against and `make example-serve`
                      serves, their tests, and their command line,
                      Spindle's, which prints the board's client and the
@@ -132,7 +137,8 @@ example/             a kanban board: a whole application on the
   twin/              each island's TSX twin, read by the twin test alone;
                      board.gen.ts, the server's Zod schemas, compared
   test/              the board's behaviour, in OCaml, run by vitest
-                     against the server server.ts starts
+                     against the server server.ts starts, on a database of
+                     the run's own
 test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
 test/server/         Solid's rendering on the server, in OCaml, run by vitest
