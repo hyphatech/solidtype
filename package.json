@@ -3,17 +3,15 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "vite-plugin"
+    "vite-plugin",
+    "docs"
   ],
   "scripts": {
     "test": "bun test vite-plugin/test && bun --bun vite build --config example/vite.config.ts && bun --bun vitest run",
     "dev": "bun --bun vite --config example/vite.config.ts"
   },
   "devDependencies": {
-    "@astrojs/react": "^7.1.0",
     "@astrojs/solid-js": "^7.0.2",
-    "@astrojs/starlight": "~0.42.6",
-    "@astrojs/starlight-tailwind": "^5.0.0",
     "@babel/preset-typescript": "^7.29.7",
     "@fontsource-variable/inter": "^5.3.0",
     "@heroui/react": "~3.2.6",
@@ -38,7 +36,6 @@
     "react-aria-components": "^1.21.1",
     "react-dom": "^19.2.0",
     "solid-js": "~1.9.17",
-    "starlight-theme-hypha": "github:hyphatech/starlight-theme-hypha#v0.3.0",
     "tailwindcss": "^4.3.3",
     "tw-animate-css": "1.4.0",
     "typescript": "^5.9.3",

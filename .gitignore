@@ -3,3 +3,5 @@ _build/
 .DS_Store
 node_modules/
 example/board.db*
+# odoc's reference, copied in by `make docs` for the site to serve.
+docs/public/reference/

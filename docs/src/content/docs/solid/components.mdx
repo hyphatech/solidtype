@@ -3,11 +3,11 @@ title: Components
 description: A component in OCaml's JSX, its props, its children, and how the compiler checks them.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Greeting from "../../../../../_build/default/docs/islands/out/docs/islands/solid_greeting.jsx";
-import greeting from "../../../../islands/solid_greeting.mlx?raw";
-import * as Children from "../../../../../_build/default/docs/islands/out/docs/islands/solid_children.jsx";
-import children from "../../../../islands/solid_children.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Greeting from "@islands/solid_greeting.jsx";
+import greeting from "@islands/solid_greeting.mlx?raw";
+import * as Children from "@islands/solid_children.jsx";
+import children from "@islands/solid_children.mlx?raw";
 
 A component is a function from its props to an element, as in Solid. It
 runs once; what changes afterwards is the thunks inside it, which Solid

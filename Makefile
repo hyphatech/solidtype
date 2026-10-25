@@ -1,6 +1,8 @@
 SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
+# The reference is odoc's, for solidtype's own packages and nothing under them.
+REFERENCE = solidtype solidtype-kobalte solidtype-heroui ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example example-serve docs docs-serve generate
@@ -19,9 +21,10 @@ setup: ## create the switch and install dependencies
 build: ## build everything
 	$(OPAM) dune build @all
 
-# Bun's dependencies, installed again whenever the lockfile or the manifest
-# changes, so no target runs against what an older checkout installed.
-node_modules: package.json bun.lock
+# Bun's dependencies, the documentation's among them, installed again whenever
+# the lockfile or a manifest changes, so no target runs against what an older
+# checkout installed.
+node_modules: package.json docs/package.json bun.lock
 	bun install --frozen-lockfile
 	@touch node_modules
 
@@ -46,7 +49,7 @@ fmt: ## format the code
 
 example: build node_modules ## build the example, as a Vite page and an Astro one
 	bun --bun vite build --config example/vite.config.ts
-	bun --bun astro build
+	bun --bun astro build --root example
 
 # The board's tasks, kept in this file from one serve to the next, migrated
 # before the server starts, never by it.
@@ -57,13 +60,20 @@ example-serve: example ## serve the example and its API on http://localhost:4420
 	$(OPAM) rowtype-migrate up --dir example/migrations --url sqlite:$(BOARD_DB)
 	BOARD_DB=$(BOARD_DB) _build/default/example/server/serve.exe
 
-docs: build node_modules ## build the documentation into _build/docs
+# odoc's reference from the .mli files is copied in first, for the site to
+# serve as it is.
+docs: build node_modules ## build the documentation site
+	$(OPAM) dune build @doc
+	rm -rf docs/public/reference
+	mkdir -p docs/public/reference
+	cd _build/default/_doc/_html && cp -R $(REFERENCE) $(CURDIR)/docs/public/reference/
+	chmod -R u+w docs/public/reference
 	bun --bun astro build --root docs
 
 # The built documentation, as a host serves it: Pagefind's index exists only
 # in a build, and a page served as it changes loads its styles after its
 # text. Run from docs/, where Astro finds its config again.
-docs-serve: docs ## serve the built documentation on DOCS_PORT, search included
+docs-serve: docs ## serve the built documentation site
 	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
 
 generate: node_modules ## write the bindings from Solid's, Kobalte's and HeroUI's types

@@ -1,5 +1,6 @@
 # The documentation site on GitHub Pages, rebuilt on every push to main:
-# the islands compiled by Melange, then Starlight's pages around them.
+# odoc's reference from the .mli files and the islands compiled by Melange,
+# then Starlight's pages around them.
 name: docs
 
 on:
@@ -30,8 +31,9 @@ jobs:
           opam-repositories: |
             hypha: https://github.com/hyphatech/opam-repository.git
             default: https://opam.ocaml.org
-      # `make docs` builds everything first, the tests' libraries too.
-      - run: opam install . --deps-only --with-test -y
+      # `make docs` builds everything first, the tests' libraries too, and
+      # odoc, a development tool, writes the reference.
+      - run: opam install . --deps-only --with-test --with-dev-setup -y
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       # Use setup-ocaml's switch instead of the Makefile's.

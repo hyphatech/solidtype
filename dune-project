@@ -103,6 +103,11 @@
    (and
     :with-test
     (>= 1.6)))
+  ; The documentation's reference, built by `make docs`.
+  (odoc
+   (and
+    :with-dev-setup
+    (>= 3.2.1)))
   (merlin
    (and
     :with-dev-setup

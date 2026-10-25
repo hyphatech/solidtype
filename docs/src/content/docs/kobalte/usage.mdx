@@ -3,13 +3,13 @@ title: Using Kobalte
 description: Kobalte's components in OCaml's JSX, styled by their own data attributes.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Switch from "../../../../../_build/default/docs/islands/out/docs/islands/kobalte_switch.jsx";
-import switchCode from "../../../../islands/kobalte_switch.mlx?raw";
-import * as ToggleGroup from "../../../../../_build/default/docs/islands/out/docs/islands/kobalte_toggle_group.jsx";
-import toggleGroup from "../../../../islands/kobalte_toggle_group.mlx?raw";
-import * as Select from "../../../../../_build/default/docs/islands/out/docs/islands/kobalte_select.jsx";
-import select from "../../../../islands/kobalte_select.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Switch from "@islands/kobalte_switch.jsx";
+import switchCode from "@islands/kobalte_switch.mlx?raw";
+import * as ToggleGroup from "@islands/kobalte_toggle_group.jsx";
+import toggleGroup from "@islands/kobalte_toggle_group.mlx?raw";
+import * as Select from "@islands/kobalte_select.jsx";
+import select from "@islands/kobalte_select.mlx?raw";
 
 A Kobalte component is used as Kobalte's documentation shows it, part by
 part, in OCaml's JSX. Kobalte has no look of its own: it writes its state
@@ -69,6 +69,6 @@ Accordion to Tooltip, by the same rules. Each module's `.mli` is the
 reference for its parts and their props, in OCaml; Kobalte's documentation
 is the reference for what they do.
 
-[HeroUI](../../heroui/coverage/) is built on these components: each port is
+[HeroUI](/solidtype/heroui/coverage/) is built on these components: each port is
 a Kobalte component with HeroUI's classes, and its page shows it beside
 HeroUI's own.

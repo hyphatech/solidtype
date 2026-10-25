@@ -1,0 +1,11 @@
+module Button = Solidtype_heroui.Button
+module Toast = Solidtype_heroui.Toast
+
+let make () =
+  <main>
+    <Toast.Provider />
+    <Button
+      on_click=(fun _ -> ignore (Toast.show "Simple message" : Toast.key))>
+      "Show toast"
+    </Button>
+  </main>

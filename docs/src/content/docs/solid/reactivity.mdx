@@ -3,9 +3,9 @@ title: Reactivity
 description: Signals, derived values and effects, and why a reactive read is a thunk.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Derived from "../../../../../_build/default/docs/islands/out/docs/islands/solid_derived.jsx";
-import derived from "../../../../islands/solid_derived.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Derived from "@islands/solid_derived.jsx";
+import derived from "@islands/solid_derived.mlx?raw";
 
 `Solidtype.Solid` binds `solid-js`, Solid's reactive core, at 1.9. Its
 names are Solid's in snake case, so Solid's own guide to
@@ -113,4 +113,4 @@ OCaml as it was raised, and a value JavaScript threw as `Js.Exn.Error`.
 | `mapArray`, `indexArray` | `Solid.map_array`, `Solid.index_array` |
 | `observable`, `from` | `Solid.observable`, `Solid.from`, `Solid.from_observable` |
 
-Resources, a value fetched asynchronously, are on [Async](../async/).
+Resources, a value fetched asynchronously, are on [Async](/solidtype/solid/async/).

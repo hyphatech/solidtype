@@ -3,17 +3,15 @@ title: Rendering
 description: Mounting in the browser, rendering on the server, and hydrating what the server rendered.
 ---
 
+import { Code } from "@astrojs/starlight/components";
+import main from "@example/src/main.ml?raw";
+
 ## In the browser
 
 `Solidtype.Web` binds `solid-js/web`. `Web.render` mounts a root in an
 element, and gives what unmounts it:
 
-```ocaml
-external get_element_by_id : string -> Dom.element = "getElementById"
-[@@mel.scope "document"]
-
-let (_ : unit -> unit) = Web.render App.make (get_element_by_id "app")
-```
+<Code code={main} lang="ocaml" />
 
 `Web.is_server` and `Web.is_dev` say which of Solid's builds is running.
 
@@ -55,7 +53,7 @@ Astro does all of this for an island: it renders it on the server, writes
 the hydration script, and hydrates it in the browser. `client:load`
 prerenders the island and hydrates it as the page loads, `client:visible`
 when it scrolls into view, and `client:only="solid-js"` skips the server and
-renders it in the browser alone. See [Vite and Astro](../../start/vite/#astro).
+renders it in the browser alone. See [Vite and Astro](/solidtype/start/vite/#astro).
 
 A `data-` attribute that marks a state, `data-selected`, is written by Solid
 as an attribute, never set from a `ref`, so the state is in the HTML a page

@@ -3,28 +3,30 @@ title: Toast
 description: Brief messages, shown in a stack, closing themselves.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Provider from "../../../../../_build/default/docs/islands/out/docs/islands/toast_provider.jsx";
-import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/toast_usage.jsx";
-import UsageCode from "../../../../islands/toast_usage.mlx?raw";
-import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/toast_variants.jsx";
-import VariantsCode from "../../../../islands/toast_variants.mlx?raw";
-import * as Placements from "../../../../../_build/default/docs/islands/out/docs/islands/toast_placements.jsx";
-import PlacementsCode from "../../../../islands/toast_placements.mlx?raw";
-import * as Expanded from "../../../../../_build/default/docs/islands/out/docs/islands/toast_expanded.jsx";
-import ExpandedCode from "../../../../islands/toast_expanded.mlx?raw";
-import * as Simple from "../../../../../_build/default/docs/islands/out/docs/islands/toast_simple.jsx";
-import SimpleCode from "../../../../islands/toast_simple.mlx?raw";
-import * as Indicators from "../../../../../_build/default/docs/islands/out/docs/islands/toast_indicators.jsx";
-import IndicatorsCode from "../../../../islands/toast_indicators.mlx?raw";
-import * as Custom from "../../../../../_build/default/docs/islands/out/docs/islands/toast_custom.jsx";
-import CustomCode from "../../../../islands/toast_custom.mlx?raw";
-import * as Promise from "../../../../../_build/default/docs/islands/out/docs/islands/toast_promise.jsx";
-import PromiseCode from "../../../../islands/toast_promise.mlx?raw";
-import * as Callbacks from "../../../../../_build/default/docs/islands/out/docs/islands/toast_callbacks.jsx";
-import CallbacksCode from "../../../../islands/toast_callbacks.mlx?raw";
-import * as Queues from "../../../../../_build/default/docs/islands/out/docs/islands/toast_queues.jsx";
-import QueuesCode from "../../../../islands/toast_queues.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Provider from "@islands/toast_provider.jsx";
+import * as Usage from "@islands/toast_usage.jsx";
+import UsageCode from "@islands/toast_usage.mlx?raw";
+import * as Variants from "@islands/toast_variants.jsx";
+import VariantsCode from "@islands/toast_variants.mlx?raw";
+import * as Placements from "@islands/toast_placements.jsx";
+import PlacementsCode from "@islands/toast_placements.mlx?raw";
+import * as Expanded from "@islands/toast_expanded.jsx";
+import ExpandedCode from "@islands/toast_expanded.mlx?raw";
+import * as Simple from "@islands/toast_simple.jsx";
+import SimpleCode from "@islands/toast_simple.mlx?raw";
+import * as Indicators from "@islands/toast_indicators.jsx";
+import IndicatorsCode from "@islands/toast_indicators.mlx?raw";
+import * as Custom from "@islands/toast_custom.jsx";
+import CustomCode from "@islands/toast_custom.mlx?raw";
+import * as Promise from "@islands/toast_promise.jsx";
+import PromiseCode from "@islands/toast_promise.mlx?raw";
+import * as Callbacks from "@islands/toast_callbacks.jsx";
+import CallbacksCode from "@islands/toast_callbacks.mlx?raw";
+import * as Queues from "@islands/toast_queues.jsx";
+import QueuesCode from "@islands/toast_queues.mlx?raw";
+import { Code } from "@astrojs/starlight/components";
+import SetupCode from "@islands/toast_setup.mlx?raw";
 
 {/* The page's toasts, on HeroUI's ground and out of the prose's flow, as an example's preview is. */}
 <div class="not-content heroui-ground"><Provider.make client:load /></div>
@@ -111,15 +113,7 @@ apart. `Toast.update` keeps what it does not name, as HeroUI documents it.
 
 Render the provider once, at the root of the page:
 
-```ocaml
-let make () =
-  <main>
-    <Toast.Provider />
-    <Button on_click=(fun _ -> ignore (Toast.show "Simple message" : Toast.key))>
-      "Show toast"
-    </Button>
-  </main>
-```
+<Code code={SetupCode} lang="ocaml" />
 
 ## Styling Reference
 

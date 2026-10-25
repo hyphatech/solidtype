@@ -3,6 +3,9 @@ title: Conventions
 description: How a name, a namespace, a data attribute, an optional prop and a spread from Solid's documentation are written in OCaml.
 ---
 
+import { Code } from "@astrojs/starlight/components";
+import dataAttributes from "@islands/conventions_data_attributes.mlx?raw";
+
 Solid's and Kobalte's documentation is the reference for what a component
 does. These rules say how to write what it shows in OCaml, so that it reads
 across without a table per component.
@@ -67,10 +70,7 @@ state is in the HTML a page is prerendered with.
 A component passes it on by spreading `Props.others props`, the props it
 does not name, on its element, after its own attributes:
 
-```ocaml
-let%component make ~(label : string) () =
-  <button class_="chip" props=(Props.others props)>(fun () -> Jsx.string (label ()))</button>
-```
+<Code code={dataAttributes} lang="ocaml" />
 
 | TSX | OCaml |
 |---|---|

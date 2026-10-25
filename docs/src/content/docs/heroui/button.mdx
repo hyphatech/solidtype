@@ -3,24 +3,24 @@ title: Button
 description: A clickable button, HeroUI's on Kobalte's.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/button_usage.jsx";
-import usage from "../../../../islands/button_usage.mlx?raw";
-import * as Variants from "../../../../../_build/default/docs/islands/out/docs/islands/button_variants.jsx";
-import variants from "../../../../islands/button_variants.mlx?raw";
-import * as Sizes from "../../../../../_build/default/docs/islands/out/docs/islands/button_sizes.jsx";
-import sizes from "../../../../islands/button_sizes.mlx?raw";
-import * as Icons from "../../../../../_build/default/docs/islands/out/docs/islands/button_icons.jsx";
-import icons from "../../../../islands/button_icons.mlx?raw";
-import * as IconOnly from "../../../../../_build/default/docs/islands/out/docs/islands/button_icon_only.jsx";
-import iconOnly from "../../../../islands/button_icon_only.mlx?raw";
-import * as FullWidth from "../../../../../_build/default/docs/islands/out/docs/islands/button_full_width.jsx";
-import fullWidth from "../../../../islands/button_full_width.mlx?raw";
-import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/button_disabled.jsx";
-import disabled from "../../../../islands/button_disabled.mlx?raw";
-import * as Tailwind from "../../../../../_build/default/docs/islands/out/docs/islands/button_tailwind.jsx";
-import tailwind from "../../../../islands/button_tailwind.mlx?raw";
-import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/button_demo.jsx";
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/button_usage.jsx";
+import usage from "@islands/button_usage.mlx?raw";
+import * as Variants from "@islands/button_variants.jsx";
+import variants from "@islands/button_variants.mlx?raw";
+import * as Sizes from "@islands/button_sizes.jsx";
+import sizes from "@islands/button_sizes.mlx?raw";
+import * as Icons from "@islands/button_icons.jsx";
+import icons from "@islands/button_icons.mlx?raw";
+import * as IconOnly from "@islands/button_icon_only.jsx";
+import iconOnly from "@islands/button_icon_only.mlx?raw";
+import * as FullWidth from "@islands/button_full_width.jsx";
+import fullWidth from "@islands/button_full_width.mlx?raw";
+import * as Disabled from "@islands/button_disabled.jsx";
+import disabled from "@islands/button_disabled.mlx?raw";
+import * as Tailwind from "@islands/button_tailwind.jsx";
+import tailwind from "@islands/button_tailwind.mlx?raw";
+import * as Demo from "@islands/button_demo.jsx";
 
 `Solidtype_heroui.Button` is Kobalte's `Button.Root`, a native `<button>`, with
 the classes HeroUI's own `buttonVariants` gives and the state its styles read,
@@ -133,7 +133,7 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 | `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
 | `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `slot` | `slot` | `` [ `trigger ] `` | | Makes it the trigger of the part above it, a [`Disclosure.Heading`](../disclosure/)'s |
+| `slot` | `slot` | `` [ `trigger ] `` | | Makes it the trigger of the part above it, a [`Disclosure.Heading`](/solidtype/heroui/disclosure/)'s |
 | `type` | `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
 | `aria-label` | `aria_label` | `string` | | Its name where it shows an icon alone |
 | `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |

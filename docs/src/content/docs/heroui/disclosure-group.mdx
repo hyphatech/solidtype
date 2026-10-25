@@ -3,16 +3,16 @@ title: DisclosureGroup
 description: Disclosures expanded together, one at a time or several.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/disclosure_group_usage.jsx";
-import UsageCode from "../../../../islands/disclosure_group_usage.mlx?raw";
-import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/disclosure_group_controlled.jsx";
-import ControlledCode from "../../../../islands/disclosure_group_controlled.mlx?raw";
-import * as Multiple from "../../../../../_build/default/docs/islands/out/docs/islands/disclosure_group_multiple.jsx";
-import MultipleCode from "../../../../islands/disclosure_group_multiple.mlx?raw";
-import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/disclosure_group_demo.jsx";
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/disclosure_group_usage.jsx";
+import UsageCode from "@islands/disclosure_group_usage.mlx?raw";
+import * as Controlled from "@islands/disclosure_group_controlled.jsx";
+import ControlledCode from "@islands/disclosure_group_controlled.mlx?raw";
+import * as Multiple from "@islands/disclosure_group_multiple.jsx";
+import MultipleCode from "@islands/disclosure_group_multiple.mlx?raw";
+import * as Demo from "@islands/disclosure_group_demo.jsx";
 
-`Solidtype_heroui.Disclosure_group` holds the [`Disclosure`](../disclosure/)s
+`Solidtype_heroui.Disclosure_group` holds the [`Disclosure`](/solidtype/heroui/disclosure/)s
 inside it, each by its `id`, and keeps which are expanded: one at a time,
 expanding another collapsing it, or several, with the class HeroUI's own
 `disclosureGroupVariants` gives. Kobalte has no disclosure group; this one is

@@ -3,6 +3,9 @@ title: How it works
 description: One component, from OCaml's JSX to the code Solid's compiler emits.
 ---
 
+import { Code } from "@astrojs/starlight/components";
+import counterSource from "@islands/solid_counter.mlx?raw";
+
 Solid has no runtime that reads JSX. Its compiler turns each JSX element
 into a template, cloned once per render, and each dynamic part into a call
 that updates one node when what it reads changes. Solid's speed is that
@@ -20,21 +23,12 @@ Five tools take part, each doing the one thing it does anyway:
 | 4 | `vite-plugin-solidtype` | the markers | JSX |
 | 5 | `vite-plugin-solid` | JSX | templates and Solid's runtime calls |
 
-Below, the counter on [Getting started](../../) goes through each step.
+Below, the counter on [Getting started](/solidtype/) goes through each step.
 Every listing is what the tool wrote, unedited.
 
 ## 1. MLX parses the JSX
 
-```ocaml title="solid_counter.mlx"
-let make () =
-  let count, set_count = S.create_signal 0 in
-  <button
-    class_="button button--primary"
-    type_=`button
-    on_click=(fun _ -> S.update set_count succ)>
-    "Clicked " (fun () -> Jsx.int (S.get count)) " times"
-  </button>
-```
+<Code code={counterSource} lang="ocaml" title="solid_counter.mlx" />
 
 An attribute is an OCaml label, in snake case; a child is a string, an
 element or a thunk, `(fun () -> ...)`. MLX's parser reads the file into
@@ -81,7 +75,7 @@ This is where the types come in:
 
 - **A name gets its JavaScript spelling back**: `class_` is `class`,
   `on_click` is `onClick`, by the inverse of the
-  [naming rule](../conventions/).
+  [naming rule](/solidtype/start/conventions/).
 - **A string literal becomes `{js|...|js}`**, which Melange writes as a
   JavaScript string, so a page shows `é` as one character.
 
@@ -96,7 +90,7 @@ Solidtype.Jsx.c Greeting.component [| Solidtype.Jsx.s "name" {js|Ada|js} |] [||]
 
 A required prop left out is a partial application, and a prop the component
 does not take is a label the function does not have. Both are compile
-errors, as in TSX. [Components](../../solid/components/) says how a
+errors, as in TSX. [Components](/solidtype/solid/components/) says how a
 component's `Props` are written.
 
 ## 3. Melange compiles the calls as calls
@@ -137,7 +131,7 @@ makes. The type annotations are gone, and so is the props check.
 
 The module's extension is `.jsx`, by `(module_systems (es6 jsx))`, so that
 Vite hands it to the JSX plugins.
-[Melange and dune](../melange/) says why the library is built the way it is.
+[Melange and dune](/solidtype/start/melange/) says why the library is built the way it is.
 
 ## 4. The plugin rewrites the markers into JSX
 

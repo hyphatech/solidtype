@@ -24,9 +24,11 @@ make example        # the board, built by Vite into _build/example-dist, and
                     # its Astro page, into _build/example-astro
 make example-serve  # the board and its API, served on http://localhost:4420,
                     # its tasks in BOARD_DB, example/board.db, migrated first
-make docs           # the documentation, built by Astro into _build/docs,
+make docs           # the documentation site, odoc's reference copied into
+                    # docs/public/reference, built by Astro into _build/docs,
                     # as .github/workflows/docs.yml publishes it from main
-make docs-serve     # the documentation built, served on DOCS_PORT with search
+make docs-serve     # the documentation site built, served on DOCS_PORT with
+                    # search
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -67,13 +69,28 @@ docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte
                      bindings, and each port's page, which shows it beside
-                     the same component in React, with its source
+                     the same component in React, with its source, and
+                     each module's odoc reference; built into _build/docs,
+                     which `dune clean` removes and nothing ignores, and a
+                     link to a page or heading that is not there fails it
+  package.json       the site's dependencies, a member of the root's Bun
+                     workspace, whose one bun.lock is at the root
   islands/           the pages' OCaml: each example, compiled, and the
                      comparison of a port's element with React's,
-                     attribute by attribute
+                     attribute by attribute; every whole program a page
+                     shows is a file the repository builds -- here or
+                     example/ -- imported raw into Starlight's <Code>, a
+                     missing one failing the build; a page imports an
+                     island's source as @islands/<name>.mlx?raw and its
+                     compiled demo as @islands/<name>.jsx, aliases
+                     astro.config.mjs defines, never by a path up the tree
   islands/react/     HeroUI's components in React, rendered into a host
                      an island owns: the one place the documentation runs
                      React
+  src/content/docs/reference.md
+                     the packages, and a link to each module's odoc page,
+                     which `make docs` copies into public/reference/,
+                     ignored, since Starlight serves public/ as it is
 prds/               the PRDs of work being decided and built, and which
                      document owns each kind of fact once it lands
 generate/            what writes the generated bindings from Solid's and
@@ -112,9 +129,6 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
                      prerendered, to hydrate
   test/docs          the documentation built, React's compiler beside
                      Solid's: a port's page holds it prerendered, to hydrate
-astro.config.mjs     the example's Astro page: Astro, its Solid
-                     integration and the plugin, rooted here so a page
-                     reaches _build
 vitest.config.ts     the OCaml tests, as three projects: the browser's in
                      jsdom, the example's server started for them; the
                      server's in Node; and hydration, compiled hydratable
@@ -123,7 +137,8 @@ example/             a kanban board: a whole application on the
                      Spindle server on SQLite -- its README the map and the
                      rough edges found building it
   index.html         the page, built by Vite with vite.config.ts
-  pages/             the same board as an Astro page: wiring alone
+  pages/             the same board as an Astro page: wiring alone, built
+                     with astro.config.mjs, which lets Vite reach _build
   src/               the board's islands in .mlx, and api.ml, its client
                      printed from server/ as the build runs
   migrations/        the tasks' table, which rowtype-migrate applies before
@@ -153,6 +168,8 @@ test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      React, its twin in twins/; and the variant functions,
                      each against HeroUI's own call
 test/ppx/            what the ppx writes for each JSX form
+test/test_docs.ml    every island of docs/islands on some page, or a part of
+                     other islands
 test/does_not_compile.t
                      each mistake the types refuse, built against the
                      installed library, with the error a user reads

@@ -3,9 +3,9 @@ title: Control flow
 description: Show, For, Index, Switch and Match, ErrorBoundary and Portal, with OCaml's options and matches.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Flow from "../../../../../_build/default/docs/islands/out/docs/islands/solid_flow.jsx";
-import flow from "../../../../islands/solid_flow.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Flow from "@islands/solid_flow.jsx";
+import flow from "@islands/solid_flow.mlx?raw";
 
 Solid's control flow is components, so that each branch and each item is
 created once and kept, never rendered again from scratch. solidtype binds
@@ -90,4 +90,4 @@ renders the children again.
 `Portal` mounts its children elsewhere, in `document.body` unless `mount`
 is given, while they stay this component's in the reactive graph.
 `Dynamic` renders a component chosen while the page runs; see
-[Components](../components/#a-component-chosen-at-run-time).
+[Components](/solidtype/solid/components/#a-component-chosen-at-run-time).

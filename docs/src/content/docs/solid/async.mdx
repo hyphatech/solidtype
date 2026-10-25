@@ -3,9 +3,9 @@ title: Async
 description: Resources, Suspense and transitions, with OCaml's options and results.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Resource from "../../../../../_build/default/docs/islands/out/docs/islands/solid_resource.jsx";
-import resource from "../../../../islands/solid_resource.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Resource from "@islands/solid_resource.jsx";
+import resource from "@islands/solid_resource.mlx?raw";
 
 ## Resources
 
@@ -39,7 +39,7 @@ A resource read inside `Suspense` shows its fallback while the resource
 loads, as above. `SuspenseList` orders several. On the server, a page
 rendered with `Server.render_to_string_async` waits for every resource read,
 and `render_to_stream` sends each part as it resolves; see
-[Rendering](../rendering/).
+[Rendering](/solidtype/solid/rendering/).
 
 ## Transitions
 

@@ -8,6 +8,17 @@
   (package solidtype-kobalte)
   (package ppx_solidtype)))
 
+; Every island of the documentation is on one of its pages.
+
+(test
+ (name test_docs)
+ (package solidtype)
+ (modules test_docs)
+ (libraries alcotest)
+ (deps
+  (glob_files ../docs/islands/*.{ml,mlx})
+  (glob_files_rec ../docs/src/content/*.{md,mdx})))
+
 ; Its errors are compared as text, so colour stays off even where the
 ; environment forces it, as CI's does.
 

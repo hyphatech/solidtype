@@ -3,28 +3,28 @@ title: Accordion
 description: A stack of sections, each a heading that shows and hides its panel.
 ---
 
-import Example from "../../../components/Example.astro";
-import * as Usage from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_usage.jsx";
-import UsageCode from "../../../../islands/accordion_usage.mlx?raw";
-import * as Surface from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_surface.jsx";
-import SurfaceCode from "../../../../islands/accordion_surface.mlx?raw";
-import * as WithoutSeparator from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_without_separator.jsx";
-import WithoutSeparatorCode from "../../../../islands/accordion_without_separator.mlx?raw";
-import * as Multiple from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_multiple.jsx";
-import MultipleCode from "../../../../islands/accordion_multiple.mlx?raw";
-import * as Disabled from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_disabled.jsx";
-import DisabledCode from "../../../../islands/accordion_disabled.mlx?raw";
-import * as Controlled from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_controlled.jsx";
-import ControlledCode from "../../../../islands/accordion_controlled.mlx?raw";
-import * as CustomIndicator from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_custom_indicator.jsx";
-import CustomIndicatorCode from "../../../../islands/accordion_custom_indicator.mlx?raw";
-import * as Demo from "../../../../../_build/default/docs/islands/out/docs/islands/accordion_demo.jsx";
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/accordion_usage.jsx";
+import UsageCode from "@islands/accordion_usage.mlx?raw";
+import * as Surface from "@islands/accordion_surface.jsx";
+import SurfaceCode from "@islands/accordion_surface.mlx?raw";
+import * as WithoutSeparator from "@islands/accordion_without_separator.jsx";
+import WithoutSeparatorCode from "@islands/accordion_without_separator.mlx?raw";
+import * as Multiple from "@islands/accordion_multiple.jsx";
+import MultipleCode from "@islands/accordion_multiple.mlx?raw";
+import * as Disabled from "@islands/accordion_disabled.jsx";
+import DisabledCode from "@islands/accordion_disabled.mlx?raw";
+import * as Controlled from "@islands/accordion_controlled.jsx";
+import ControlledCode from "@islands/accordion_controlled.mlx?raw";
+import * as CustomIndicator from "@islands/accordion_custom_indicator.jsx";
+import CustomIndicatorCode from "@islands/accordion_custom_indicator.mlx?raw";
+import * as Demo from "@islands/accordion_demo.jsx";
 
 `Solidtype_heroui.Accordion` is Kobalte's accordion with the classes HeroUI's
 own `accordionVariants` gives: items, each a heading holding the button that
 expands and collapses it, and the panel that follows. One item is expanded at
 a time, or several, and any expanded item collapses again as HeroUI's does. A
-[`Button`](../button/) given `` slot=`trigger `` inside a heading is its
+[`Button`](/solidtype/heroui/button/) given `` slot=`trigger `` inside a heading is its
 item's trigger, in HeroUI's look.
 
 The up and down arrows move focus from one trigger to the next, round from the
@@ -35,7 +35,7 @@ so the arrows would move nothing; each item tells it as focus comes in.
 
 A panel stays on the page while collapsed, hidden until the browser's find in
 page reaches a word in it, which expands its item; it grows and shrinks by
-`--disclosure-panel-height`, as a [`Disclosure`](../disclosure/)'s content
+`--disclosure-panel-height`, as a [`Disclosure`](/solidtype/heroui/disclosure/)'s content
 does.
 
 ## Usage
@@ -62,7 +62,7 @@ does.
 ### Surface
 
 `` variant=`surface `` lays the accordion on a surface, which the components
-inside it read as a [`Surface`](../surface/)'s.
+inside it read as a [`Surface`](/solidtype/heroui/surface/)'s.
 
 <Example code={SurfaceCode} title="accordion_surface.mlx"><Surface.make client:visible /></Example>
 
@@ -84,7 +84,7 @@ An item is disabled while it or the accordion is.
 
 `expanded_keys` gives the expanded items' ids, and `on_expanded_change` is
 called with them all, then the item whose trigger was pressed with its own
-state. [`Disclosure_group.navigation`](../disclosure-group/#navigation),
+state. [`Disclosure_group.navigation`](/solidtype/heroui/disclosure-group/#navigation),
 HeroUI's `useDisclosureGroupNavigation`, gives previous and next buttons over
 the items.
 

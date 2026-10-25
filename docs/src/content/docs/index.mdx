@@ -3,9 +3,11 @@ title: Getting Started
 description: Solid, typed, for OCaml front ends on SolidJS and Kobalte.
 ---
 
-import Example from "../../components/Example.astro";
-import * as Counter from "../../../../_build/default/docs/islands/out/docs/islands/solid_counter.jsx";
-import counter from "../../../islands/solid_counter.mlx?raw";
+import Example from "@components/Example.astro";
+import * as Counter from "@islands/solid_counter.jsx";
+import counter from "@islands/solid_counter.mlx?raw";
+import { Code } from "@astrojs/starlight/components";
+import main from "@example/src/main.ml?raw";
 
 solidtype is [Solid](https://www.solidjs.com) for OCaml. A component is
 written in OCaml's JSX, compiled by [Melange](https://melange.re), and
@@ -27,12 +29,12 @@ take, or a `match` in a `Switch` that misses a case.
 | `solidtype-kobalte` | [Kobalte](https://kobalte.dev) 0.13 bound whole, generated from its own declarations |
 | `solidtype-heroui` | [HeroUI](https://heroui.com)'s design ported by hand onto Kobalte |
 
-[How it works](start/how-it-works/) follows one component through every
-step. [Melange and dune](start/melange/) and [Vite and Astro](start/vite/)
-say how each tool is set up, and [Conventions](start/conventions/) how a
+[How it works](/solidtype/start/how-it-works/) follows one component through every
+step. [Melange and dune](/solidtype/start/melange/) and [Vite and Astro](/solidtype/start/vite/)
+say how each tool is set up, and [Conventions](/solidtype/start/conventions/) how a
 name in Solid's documentation is written in OCaml. The
-[Solid](solid/components/) and [Kobalte](kobalte/binding/) tabs are the
-bindings, and [HeroUI](heroui/coverage/) the components built on them.
+[Solid](/solidtype/solid/components/) and [Kobalte](/solidtype/kobalte/binding/) tabs are the
+bindings, and [HeroUI](/solidtype/heroui/coverage/) the components built on them.
 
 ## Install
 
@@ -95,16 +97,10 @@ the plugin rewrites:
  (module_systems (es6 jsx)))
 ```
 
-The counter above is `src/counter.mlx`. An entry module mounts it,
+The counter above is `src/app.mlx`. An entry module mounts it,
 `src/main.ml`:
 
-```ocaml
-external get_element_by_id : string -> Dom.element = "getElementById"
-[@@mel.scope "document"]
-
-let (_ : unit -> unit) =
-  Solidtype.Web.render Counter.make (get_element_by_id "app")
-```
+<Code code={main} lang="ocaml" />
 
 The plugin runs before Solid's:
 
