@@ -20,6 +20,7 @@ test("the page prerenders the board, empty, to hydrate as client:load", () => {
   const board = islands[0]?.html ?? "";
   expect(board).toMatch(/^<main data-hk="\w+" class="mx-auto max-w-6xl px-4 py-10">/);
   expect([...board.matchAll(/<section data-hk="\w+" aria-label="([^"]+)"/g)].map((m) => m[1])).toEqual(["To do", "Doing", "Done"]);
-  expect(board.match(/Drop a task here/g)?.length).toBe(3);
+  for (const waiting of ["No tasks yet. Add one to start.", "Nothing in progress", "Nothing done yet"])
+    expect(board).toContain(waiting);
   expect(board).not.toContain("Could not load the board");
 }, 60_000);

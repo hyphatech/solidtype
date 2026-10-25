@@ -105,9 +105,11 @@ What surprised or slowed down writing this, as a user of the libraries.
 9. **HeroUI has no modal yet.** Kobalte's `Dialog` takes HeroUI's look from
    `Styles.Modal`, slot by slot: an overlay blurred, and a second backdrop,
    transparent, that only places the dialog, since Kobalte's overlay is not
-   the dialog's parent as React Aria's is. HeroUI's theme is dark under
-   `.dark` rather than the system's scheme, so each page sets it, a line
-   of script.
+   the dialog's parent as React Aria's is. A field on it takes the
+   `secondary` variant, as HeroUI's own modal form does: a primary field is
+   the overlay's colour in the dark theme, and vanishes. HeroUI's theme is
+   dark under `.dark` rather than the system's scheme, so each page sets
+   it, a line of script.
 10. **A body's problems have two paths.** The client checks a body before it
    sends it and names a field `title`; the server names the same problem
    `body.title`. The form shows the client's on its field; a refusal from

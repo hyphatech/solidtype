@@ -66,6 +66,17 @@ let make () =
       (fun (t : Api.task) -> Float.equal t.id id)
       (Option.value (S.latest tasks) ~default:[||])
   in
+  (* A drop needs a task to drag: while the board holds none, a column says
+     what it is waiting for. *)
+  let empty status =
+    if Array.length (Option.value (S.latest tasks) ~default:[||]) > 0 then
+      "Drop a task here"
+    else
+      match (status : Status.t) with
+      | To_do -> "No tasks yet. Add one to start."
+      | Doing -> "Nothing in progress"
+      | Done -> "Nothing done yet"
+  in
   let over, set_over = S.create_signal None in
   <main class_="mx-auto max-w-6xl px-4 py-10">
     <header class_="mb-8 flex items-center justify-between gap-4">
@@ -109,7 +120,7 @@ let make () =
                             class_="rounded-2xl border border-dashed \
                                     border-border">
                             <Empty_state class_="p-4 text-center">
-                              "Drop a task here"
+                              (fun () -> Jsx.string (empty status))
                             </Empty_state>
                           </li>)>
                 (fun (t : Api.task) _ ->

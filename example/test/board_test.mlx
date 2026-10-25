@@ -17,6 +17,18 @@ let add ~title ~note =
 let () =
   Jest.describe "the board, against the example's server" (fun () ->
       Jest.afterEach T.cleanup;
+      (* First, while the run's database holds no task. *)
+      Jest.testPromise "an empty board asks for a task, not for a drop"
+        (fun () ->
+          T.render Example.App.make;
+          let* empty = T.find_by_text "No tasks yet. Add one to start." in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect
+                ( T.column empty,
+                  T.column (T.by_text "Nothing in progress"),
+                  T.column (T.by_text "Nothing done yet") )
+              |> toEqual (Some "To do", Some "Doing", Some "Done")));
       Jest.testPromise "a task added is on the board, to do, and said so"
         (fun () ->
           T.render Example.App.make;

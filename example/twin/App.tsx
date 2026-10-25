@@ -39,6 +39,12 @@ export function make() {
   };
   const inColumn = (status: Status) => (tasks.latest ?? []).filter((t) => t.status === status);
   const find = (id: number) => (tasks.latest ?? []).find((t) => t.id === id);
+  const waiting: Record<Status, string> = {
+    to_do: "No tasks yet. Add one to start.",
+    doing: "Nothing in progress",
+    done: "Nothing done yet",
+  };
+  const empty = (status: Status) => ((tasks.latest ?? []).length > 0 ? "Drop a task here" : waiting[status]);
   const [over, setOver] = createSignal<Status>();
   return (
     <main class="mx-auto max-w-6xl px-4 py-10">
@@ -79,7 +85,7 @@ export function make() {
                   each={inColumn(status)}
                   fallback={
                     <li class="rounded-2xl border border-dashed border-border">
-                      <EmptyState.component class="p-4 text-center">Drop a task here</EmptyState.component>
+                      <EmptyState.component class="p-4 text-center">{empty(status)}</EmptyState.component>
                     </li>
                   }
                 >

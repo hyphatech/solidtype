@@ -61,12 +61,12 @@ export function make(props: { onAdded: (title: string) => void }) {
                 class="flex flex-col gap-6"
               >
                 <div class={modal.body() + " flex flex-col gap-4"}>
-                  <TextField.component name="title" value={title()} onChange={(v: string) => setTitle(v)} isRequired={true} isInvalid={untitled()}>
+                  <TextField.component variant="secondary" name="title" value={title()} onChange={(v: string) => setTitle(v)} isRequired={true} isInvalid={untitled()}>
                     <Label.component>Title</Label.component>
                     <Input.component placeholder="What is to be done" />
                     <FieldError.component>Give the task a title.</FieldError.component>
                   </TextField.component>
-                  <TextField.component name="note" value={note()} onChange={(v: string) => setNote(v)}>
+                  <TextField.component variant="secondary" name="note" value={note()} onChange={(v: string) => setNote(v)}>
                     <Label.component>Note</Label.component>
                     <TextArea.component placeholder="A line more about it" rows="2" />
                     <FieldError.component>The note is too long.</FieldError.component>

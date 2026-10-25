@@ -93,6 +93,7 @@ let%component make ~(on_added : string -> unit) () =
               class_="flex flex-col gap-6">
               <div class_=(fun () -> Modal.body modal ^ " flex flex-col gap-4")>
                 <Text_field
+                  variant=`secondary
                   name="title"
                   value=(fun () -> S.get title)
                   on_change=(S.set set_title)
@@ -103,6 +104,7 @@ let%component make ~(on_added : string -> unit) () =
                   <Field_error>"Give the task a title."</Field_error>
                 </Text_field>
                 <Text_field
+                  variant=`secondary
                   name="note"
                   value=(fun () -> S.get note)
                   on_change=(S.set set_note)>

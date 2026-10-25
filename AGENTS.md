@@ -144,9 +144,8 @@ example/             a kanban board: a whole application on the
   migrations/        the tasks' table, which rowtype-migrate applies before
                      the server starts
   server/            a Spindle app: the tasks' store in SQLite, the routes
-                     over it,
-                     which the board is called against and `make example-serve`
-                     serves, their tests, and their command line,
+                     over it, which the board is called against and `make
+                     example-serve` serves, their tests, and their command line,
                      Spindle's, which prints the board's client and the
                      twins' schemas
   twin/              each island's TSX twin, read by the twin test alone;
