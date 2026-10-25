@@ -18,8 +18,11 @@ let islands = "../docs/islands"
 let every_island_is_on_a_page () =
   let sources =
     Sys.readdir islands |> Array.to_list
+    (* An island is <name>.ml or <name>.mlx; older dunes leave <name>.mlx.ml
+       and <name>.mlx.pp.ml beside it, which are none. *)
     |> List.filter (fun f ->
-        Filename.check_suffix f ".ml" || Filename.check_suffix f ".mlx")
+        (Filename.check_suffix f ".ml" || Filename.check_suffix f ".mlx")
+        && not (String.contains (Filename.remove_extension f) '.'))
     |> List.map (fun f ->
         (Filename.remove_extension f, read (Filename.concat islands f)))
   in
