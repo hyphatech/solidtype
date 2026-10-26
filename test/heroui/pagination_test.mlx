@@ -1,0 +1,154 @@
+(* HeroUI's Pagination on Kobalte's buttons, beside the same pagination in
+   React: every part, as a page is hovered and pressed, Next pressed, and the
+   buttons reached by Tab, and which pages were told. *)
+
+module Pagination = Solidtype_heroui.Pagination
+module For = Solidtype.For
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props : ?size:([ `sm | `md | `lg ][@mel.as "size"]) -> unit -> props
+  = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((int -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Pagination.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Pagination.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Pagination.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+(* What one framework writes for itself: React Aria gives a button a tabindex,
+   which a [<button>] needs none of. *)
+let framework_only (_ : Dom.element) name = String.equal name "tabindex"
+
+(* Each element, its tag, its attributes and its text. *)
+let shown host =
+  Js.Array.from (query_all host "nav, nav *")
+  |> Array.map (fun e ->
+      String.concat " "
+        [
+          tag_name e;
+          T.attributes_but
+            (T.attribute_names e |> Array.to_list
+            |> List.filter (framework_only e))
+            e;
+        ]
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let part host selector =
+  match Js.Array.from (query_all host selector) with
+  | [||] -> host
+  | found -> found.(0)
+
+(* The pagination as rendered, as page 2 is hovered and pressed, Next
+   pressed, and Tab moves on: every element, and the pages told, after
+   each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let link n () =
+    Js.Array.from (query_all host "[data-slot=pagination-link]")
+    |> Array.to_list
+    |> List.filteri (fun i _ -> i = n)
+    |> function
+    | [ l ] -> l
+    | _ -> host
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "hovered" (fun () -> T.hover user (link 1 ())) in
+  let* () = after "pressed" (fun () -> T.click user (link 1 ())) in
+  let* () =
+    after "Next" (fun () ->
+        T.click user (part host "[data-slot=pagination-next]"))
+  in
+  let* () = after "Tab" (fun () -> T.tab user) in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?size () =
+  let told = ref [] in
+  let page, set_page = S.create_signal 1 in
+  let go p =
+    S.set set_page p;
+    told := p :: !told
+  in
+  T.render (fun () ->
+      <Pagination ?size=(fun () -> size)>
+        <Pagination.Summary>
+          "Page " (fun () -> Jsx.int (S.get page)) " of 3"
+        </Pagination.Summary>
+        <Pagination.Content>
+          <Pagination.Item>
+            <Pagination.Previous
+              is_disabled=(fun () -> S.get page = 1)
+              on_press=(fun () -> go (S.get page - 1))>
+              <Pagination.Previous_icon /> <span>"Previous"</span>
+            </Pagination.Previous>
+          </Pagination.Item>
+          <For each=(fun () -> [| 1; 2; 3 |])>
+            (fun p _ ->
+              <Pagination.Item>
+                <Pagination.Link
+                  is_active=(fun () -> p = S.get page) on_press=(fun () -> go p)>
+                  (fun () -> Jsx.int p)
+                </Pagination.Link>
+              </Pagination.Item>)
+          </For>
+          <Pagination.Item><Pagination.Ellipsis /></Pagination.Item>
+          <Pagination.Item>
+            <Pagination.Next
+              is_disabled=(fun () -> S.get page = 3)
+              on_press=(fun () -> go (S.get page + 1))>
+              <span>"Next"</span> <Pagination.Next_icon />
+            </Pagination.Next>
+          </Pagination.Item>
+        </Pagination.Content>
+      </Pagination>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host = Twin.render (props ?size ()) (fun p -> told' := p :: !told') in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Pagination" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "moves between pages, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "is small, as React's" (fun () ->
+          let* r = both ~size:`sm () in
+          same r);
+      Jest.testPromise "is large, as React's" (fun () ->
+          let* r = both ~size:`lg () in
+          same r))

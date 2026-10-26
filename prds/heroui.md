@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure, DisclosureGroup, Accordion, Tabs and Breadcrumbs; no landed port has its misuses in `test/does_not_compile.t` yet.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; no landed port has its misuses in `test/does_not_compile.t` yet.
 Date: 2026-10-23
 
 ## The problem
@@ -274,6 +274,9 @@ refuses in HeroUI's component, each with the error a user reads.
   Kobalte's primitives.
 - **Extending or forking Kobalte**, or contributing upstream first: a
   second copy to maintain, or releases that wait on another project.
+- **Kobalte's `Pagination`** for Pagination: it keeps the page and draws
+  its own items from a count, where HeroUI's parts are laid out by the
+  application; the port is HeroUI's parts, its buttons Kobalte's.
 - **Kobalte's `Search`** for SearchField: it is a combobox; HeroUI's is a
   text field, built on Kobalte's.
 - **A `validate` on each field**, as HeroUI's API names it: a second
@@ -348,7 +351,7 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Accordion, on Kobalte's, its content as a disclosure's
 - [x] Tabs
 - [x] Breadcrumbs, its items drawn by the trail
-- [ ] Pagination
+- [x] Pagination, HeroUI's parts on Kobalte's buttons
 
 ### Group 5: overlays and lists
 - [ ] Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox,

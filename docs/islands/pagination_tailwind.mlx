@@ -1,0 +1,42 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Pagination = Solidtype_heroui.Pagination
+
+let link_class = "text-muted hover:bg-surface hover:text-foreground"
+let active_class = "bg-accent text-accent-foreground hover:bg-accent-hover"
+
+let make () =
+  let page, set_page = S.create_signal 2 in
+  <Pagination class_="justify-center">
+    <Pagination.Content class_="gap-1 rounded-xl bg-default p-1">
+      <Pagination.Item>
+        <Pagination.Previous
+          class_=(fun () -> link_class)
+          is_disabled=(fun () -> S.get page = 1)
+          on_press=(fun () -> S.update set_page pred)>
+          <Pagination.Previous_icon />
+        </Pagination.Previous>
+      </Pagination.Item>
+      <For each=(fun () -> [| 1; 2; 3 |])>
+        (fun p _ ->
+          <Pagination.Item>
+            <Pagination.Link
+              class_=(fun () ->
+                       if p = S.get page then active_class else link_class)
+              is_active=(fun () -> p = S.get page)
+              on_press=(fun () -> S.set set_page p)>
+              (fun () -> Jsx.int p)
+            </Pagination.Link>
+          </Pagination.Item>)
+      </For>
+      <Pagination.Item>
+        <Pagination.Next
+          class_=(fun () -> link_class)
+          is_disabled=(fun () -> S.get page = 3)
+          on_press=(fun () -> S.update set_page succ)>
+          <Pagination.Next_icon />
+        </Pagination.Next>
+      </Pagination.Item>
+    </Pagination.Content>
+  </Pagination>

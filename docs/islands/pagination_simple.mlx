@@ -1,0 +1,38 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Pagination = Solidtype_heroui.Pagination
+
+let total_pages = 10
+let items_per_page = 5
+let total_items = 50
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  let start_item () = ((S.get page - 1) * items_per_page) + 1 in
+  let end_item () = Int.min (S.get page * items_per_page) total_items in
+  <Pagination class_="w-full">
+    <Pagination.Summary>
+      (fun () -> Jsx.int (start_item ()))
+      " to "
+      (fun () -> Jsx.int (end_item ()))
+      " of "
+      (fun () -> Jsx.int total_items)
+      " invoices"
+    </Pagination.Summary>
+    <Pagination.Content>
+      <Pagination.Item>
+        <Pagination.Previous
+          is_disabled=(fun () -> S.get page = 1)
+          on_press=(fun () -> S.update set_page pred)>
+          <Pagination.Previous_icon /> <span>"Prev"</span>
+        </Pagination.Previous>
+      </Pagination.Item>
+      <Pagination.Item>
+        <Pagination.Next
+          is_disabled=(fun () -> S.get page = total_pages)
+          on_press=(fun () -> S.update set_page succ)>
+          <span>"Next"</span> <Pagination.Next_icon />
+        </Pagination.Next>
+      </Pagination.Item>
+    </Pagination.Content>
+  </Pagination>

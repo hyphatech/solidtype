@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Pagination = Solidtype_heroui.Pagination
+
+let total_pages = 3
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  <Pagination class_="justify-center">
+    <Pagination.Content>
+      <Pagination.Item>
+        <Pagination.Previous
+          is_disabled=true on_press=(fun () -> S.update set_page pred)>
+          <Pagination.Previous_icon /> <span>"Previous"</span>
+        </Pagination.Previous>
+      </Pagination.Item>
+      <For each=(fun () -> Array.init total_pages succ)>
+        (fun p _ ->
+          <Pagination.Item>
+            <Pagination.Link
+              is_active=(fun () -> p = S.get page)
+              on_press=(fun () -> S.set set_page p)>
+              (fun () -> Jsx.int p)
+            </Pagination.Link>
+          </Pagination.Item>)
+      </For>
+      <Pagination.Item>
+        <Pagination.Next
+          is_disabled=true on_press=(fun () -> S.update set_page succ)>
+          <span>"Next"</span> <Pagination.Next_icon />
+        </Pagination.Next>
+      </Pagination.Item>
+    </Pagination.Content>
+  </Pagination>

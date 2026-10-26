@@ -1,0 +1,193 @@
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.Button
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = unit -> Styles.Pagination.slots
+end)
+
+let within part =
+  match Context.use () with
+  | Some slots -> slots
+  | None -> invalid_arg (part ^ " is used inside a Pagination")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* A page, Previous or Next: Kobalte's button with the state HeroUI's styles
+   read, kept as React Aria keeps it. *)
+let button ~slot ~classes ~is_active ~is_disabled ~on_press ~others children =
+  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  <Kobalte.Root
+    class_=(fun () -> classes ())
+    disabled=(fun () -> is_disabled ())
+    ?aria_current=(fun () -> if is_active () then Some "page" else None)
+    on_click=(fun _ -> ignore (on_press () : unit option))
+    ref=(fun b -> Interaction.watch i b)
+    data_slot=(fun () -> Jsx.data slot)
+    data_active=(fun () -> Jsx.flag (is_active ()))
+    data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+    data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+    data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+    data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+    props=others>
+    (fun () -> children ())
+  </Kobalte.Root>
+
+(* The chevrons HeroUI draws for Previous and Next. *)
+let chevron d =
+  <svg
+    aria_hidden=true
+    fill="none"
+    height="16"
+    role=`presentation
+    view_box="0 0 16 16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg">
+    <path clip_rule="evenodd" d fill="currentColor" fill_rule="evenodd" />
+  </svg>
+
+let left =
+  "M10.53 2.97a.75.75 0 0 1 0 1.06L6.56 8l3.97 3.97a.75.75 0 1 1-1.06 \
+   1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 0"
+
+let right =
+  "M5.47 2.97a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 \
+   0 1 1-1.06-1.06L9.44 8 5.47 4.03a.75.75 0 0 1 0-1.06Z"
+
+module Summary = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = within "Pagination.Summary" in
+    (* Its direction from its own text, so "1 to 5 of 10" keeps its order
+       under a right-to-left page, as HeroUI's does. *)
+    <div
+      class_=(fun () ->
+               after (Styles.Pagination.summary (slots ())) (class_ ()))
+      data_slot="pagination-summary"
+      dir=`auto
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = within "Pagination.Content" in
+    <ul
+      class_=(fun () ->
+               after (Styles.Pagination.content (slots ())) (class_ ()))
+      data_slot="pagination-content"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </ul>
+end
+
+module Item = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = within "Pagination.Item" in
+    <li
+      class_=(fun () -> after (Styles.Pagination.item (slots ())) (class_ ()))
+      data_slot="pagination-item"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </li>
+end
+
+module Link = struct
+  let%component make ?(is_active : bool = false) ?(is_disabled : bool = false)
+      ?(on_press : (unit -> unit) option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let slots = within "Pagination.Link" in
+    button ~slot:"pagination-link"
+      ~classes:(fun () -> after (Styles.Pagination.link (slots ())) (class_ ()))
+      ~is_active ~is_disabled ~on_press ~others:(Props.others props) children
+end
+
+module Previous = struct
+  let%component make ?(is_disabled : bool = false)
+      ?(on_press : (unit -> unit) option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let slots = within "Pagination.Previous" in
+    button ~slot:"pagination-previous"
+      ~classes:(fun () ->
+        after
+          (Styles.Pagination.link (slots ()) ^ " pagination__link--nav")
+          (class_ ()))
+      ~is_active:(fun () -> false)
+      ~is_disabled ~on_press ~others:(Props.others props) children
+end
+
+module Next = struct
+  let%component make ?(is_disabled : bool = false)
+      ?(on_press : (unit -> unit) option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let slots = within "Pagination.Next" in
+    button ~slot:"pagination-next"
+      ~classes:(fun () ->
+        after
+          (Styles.Pagination.link (slots ()) ^ " pagination__link--nav")
+          (class_ ()))
+      ~is_active:(fun () -> false)
+      ~is_disabled ~on_press ~others:(Props.others props) children
+end
+
+module Previous_icon = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    <span
+      aria_hidden=true
+      ?class_=(fun () -> class_ ())
+      data_slot="pagination-previous-icon"
+      props=(Props.others props)>
+      (fun () ->
+        match children () with
+        | Some c -> c
+        | None -> Jsx.element (chevron left))
+    </span>
+end
+
+module Next_icon = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    <span
+      aria_hidden=true
+      ?class_=(fun () -> class_ ())
+      data_slot="pagination-next-icon"
+      props=(Props.others props)>
+      (fun () ->
+        match children () with
+        | Some c -> c
+        | None -> Jsx.element (chevron right))
+    </span>
+end
+
+module Ellipsis = struct
+  let%component make ?(class_ : string option) () =
+    let slots = within "Pagination.Ellipsis" in
+    <span
+      aria_hidden=true
+      class_=(fun () ->
+               after (Styles.Pagination.ellipsis (slots ())) (class_ ()))
+      data_slot="pagination-ellipsis"
+      props=(Props.others props)>
+      {js|…|js}
+    </span>
+end
+
+let%component make ?(size : [ `sm | `md | `lg ] = `md) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  let slots () =
+    Styles.Pagination.slots (Styles.Pagination.options ~size:(size ()) ())
+  in
+  (* HeroUI names the landmark and gives its role, which a [<nav>] has
+     already. *)
+  <nav
+    aria_label="pagination"
+    class_=(fun () -> after (Styles.Pagination.base (slots ())) (class_ ()))
+    role=`navigation
+    data_slot="pagination"
+    props=(Props.others props)>
+    <Context.Provider value=(fun () -> slots)>
+      (fun () -> children ())
+    </Context.Provider>
+  </nav>

@@ -1,0 +1,59 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Pagination = Solidtype_heroui.Pagination
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  let size, set_size = S.create_signal (`md, "md") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=pagination-next]"
+      solidtype=(<Pagination size=(fun () -> fst (S.get size))>
+                   <Pagination.Content>
+                     <Pagination.Item>
+                       <Pagination.Previous
+                         is_disabled=(fun () -> S.get page = 1)
+                         on_press=(fun () -> S.update set_page pred)>
+                         <Pagination.Previous_icon /> <span>"Previous"</span>
+                       </Pagination.Previous>
+                     </Pagination.Item>
+                     <For each=(fun () -> [| 1; 2; 3 |])>
+                       (fun p _ ->
+                         <Pagination.Item>
+                           <Pagination.Link
+                             is_active=(fun () -> p = S.get page)
+                             on_press=(fun () -> S.set set_page p)>
+                             (fun () -> Jsx.int p)
+                           </Pagination.Link>
+                         </Pagination.Item>)
+                     </For>
+                     <Pagination.Item>
+                       <Pagination.Next
+                         is_disabled=(fun () -> S.get page = 3)
+                         on_press=(fun () -> S.update set_page succ)>
+                         <span>"Next"</span> <Pagination.Next_icon />
+                       </Pagination.Next>
+                     </Pagination.Item>
+                   </Pagination.Content>
+                 </Pagination>)
+      react=(fun host ->
+              Heroui_react.pagination host
+                (Heroui_react.pagination_props ~page:(S.get page)
+                   ~on_page:(S.set set_page)
+                   ~size:(fst (S.get size))
+                   ()))
+    />
+  </section>

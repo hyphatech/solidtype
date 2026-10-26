@@ -454,6 +454,20 @@ external breadcrumbs : Dom.htmlDivElement -> breadcrumbs_props -> unit
   = "breadcrumbs"
 [@@mel.module "./react/heroui.tsx"]
 
+type pagination_props
+
+external pagination_props :
+  page:int ->
+  on_page:((int -> unit)[@mel.as "onPage"]) ->
+  size:([ `sm | `md | `lg ][@mel.as "size"]) ->
+  unit ->
+  pagination_props = ""
+[@@mel.obj]
+
+external pagination : Dom.htmlDivElement -> pagination_props -> unit
+  = "pagination"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

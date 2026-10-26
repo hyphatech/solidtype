@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Pagination`: HeroUI's Pagination, its parts HeroUI's and
+  its buttons Kobalte's -- a summary, pages, previous and next, an ellipsis,
+  in three sizes -- its page kept by the application, as in HeroUI.
+- `Solidtype_heroui`'s ports show no hover, press or focus on a button
+  disabled while it had one, and a hover or press held as it was disabled is
+  over, as React Aria's: Next pressed onto the last page no longer shows
+  focused, nor hovered once enabled again under a resting pointer.
 - `Solidtype_heroui.Breadcrumbs`: HeroUI's Breadcrumbs on Kobalte's, a
   `<nav>` named for a reader around HeroUI's list, the last item the page
   itself -- marked so in a prerendered page too -- disabled whole or an item

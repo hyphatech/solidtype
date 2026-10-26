@@ -2,6 +2,16 @@
    component from the SVG file the package ships, named as the package's React
    icon is: ChevronDown is Chevron_down. *)
 
+module Arrow_left = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/arrow-left.svg?raw"]
+end)
+
+module Arrow_right = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/arrow-right.svg?raw"]
+end)
+
 module Arrow_up = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/arrow-up.svg?raw"]

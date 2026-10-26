@@ -60,6 +60,8 @@ val pressed : t -> bool
 (** Whether it is pressed, and not disabled. *)
 
 val focused : t -> bool
+(** Whether it has the focus, and is not disabled. *)
+
 val focus_visible : t -> bool
 
 val pointer_inert : t -> bool

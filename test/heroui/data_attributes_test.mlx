@@ -11,6 +11,7 @@ module Avatar = H.Avatar
 module Avatar_group = H.Avatar_group
 module Badge = H.Badge
 module Breadcrumbs = H.Breadcrumbs
+module Pagination = H.Pagination
 module Button = H.Button
 module Button_group = H.Button_group
 module Card = H.Card
@@ -106,6 +107,34 @@ let () =
                     "Home"
                   </Breadcrumbs.Item>
                 </Breadcrumbs>
+                <Pagination data_testid="Pagination">
+                  <Pagination.Summary data_testid="Pagination.Summary">
+                    "Page 1"
+                  </Pagination.Summary>
+                  <Pagination.Content data_testid="Pagination.Content">
+                    <Pagination.Item data_testid="Pagination.Item">
+                      <Pagination.Previous data_testid="Pagination.Previous">
+                        <Pagination.Previous_icon
+                          data_testid="Pagination.Previous_icon"
+                        />
+                      </Pagination.Previous>
+                    </Pagination.Item>
+                    <Pagination.Item>
+                      <Pagination.Link data_testid="Pagination.Link">
+                        "1"
+                      </Pagination.Link>
+                    </Pagination.Item>
+                    <Pagination.Item>
+                      <Pagination.Ellipsis data_testid="Pagination.Ellipsis" />
+                    </Pagination.Item>
+                    <Pagination.Item>
+                      <Pagination.Next data_testid="Pagination.Next">
+                        <Pagination.Next_icon data_testid="Pagination.Next_icon"
+                        />
+                      </Pagination.Next>
+                    </Pagination.Item>
+                  </Pagination.Content>
+                </Pagination>
                 <Button_group data_testid="Button_group">
                   <Button data_testid="Button">"First"</Button>
                   <Button>
@@ -270,6 +299,17 @@ let () =
                    ("Badge.Label", "[data-slot=badge-label]");
                    ("Breadcrumbs", "[data-slot=breadcrumbs]");
                    ("Breadcrumbs.Item", "[data-slot=breadcrumbs-item]");
+                   ("Pagination", "[data-slot=pagination]");
+                   ("Pagination.Summary", "[data-slot=pagination-summary]");
+                   ("Pagination.Content", "[data-slot=pagination-content]");
+                   ("Pagination.Item", "[data-slot=pagination-item]");
+                   ("Pagination.Previous", "[data-slot=pagination-previous]");
+                   ( "Pagination.Previous_icon",
+                     "[data-slot=pagination-previous-icon]" );
+                   ("Pagination.Link", "[data-slot=pagination-link]");
+                   ("Pagination.Ellipsis", "[data-slot=pagination-ellipsis]");
+                   ("Pagination.Next", "[data-slot=pagination-next]");
+                   ("Pagination.Next_icon", "[data-slot=pagination-next-icon]");
                    ("Button_group", "[data-slot=button-group]");
                    ("Button", "[data-slot=button]");
                    ( "Button_group.Separator",

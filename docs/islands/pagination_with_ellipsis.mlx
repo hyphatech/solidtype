@@ -1,0 +1,55 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Index = Solidtype.Index
+module Pagination = Solidtype_heroui.Pagination
+
+type shown = Page of int | Ellipsis
+
+let total_pages = 12
+
+let page_numbers page =
+  let start = Int.max 2 (page - 1) in
+  let stop = Int.min (total_pages - 1) (page + 1) in
+  [ Page 1 ]
+  @ (if page > 3 then [ Ellipsis ] else [])
+  @ List.init (stop - start + 1) (fun i -> Page (start + i))
+  @ (if page < total_pages - 2 then [ Ellipsis ] else [])
+  @ [ Page total_pages ]
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  <div class_="w-full max-w-2xs overflow-x-auto sm:max-w-full">
+    <Pagination class_="justify-center">
+      <Pagination.Content>
+        <Pagination.Item>
+          <Pagination.Previous
+            is_disabled=(fun () -> S.get page = 1)
+            on_press=(fun () -> S.update set_page pred)>
+            <Pagination.Previous_icon /> <span>"Previous"</span>
+          </Pagination.Previous>
+        </Pagination.Item>
+        <Index each=(fun () -> Array.of_list (page_numbers (S.get page)))>
+          (fun shown _ ->
+            <Pagination.Item>
+              (fun () ->
+                match S.get shown with
+                | Ellipsis -> Jsx.element <Pagination.Ellipsis />
+                | Page p ->
+                    Jsx.element
+                      <Pagination.Link
+                        is_active=(fun () -> p = S.get page)
+                        on_press=(fun () -> S.set set_page p)>
+                        (fun () -> Jsx.int p)
+                      </Pagination.Link>)
+            </Pagination.Item>)
+        </Index>
+        <Pagination.Item>
+          <Pagination.Next
+            is_disabled=(fun () -> S.get page = total_pages)
+            on_press=(fun () -> S.update set_page succ)>
+            <span>"Next"</span> <Pagination.Next_icon />
+          </Pagination.Next>
+        </Pagination.Item>
+      </Pagination.Content>
+    </Pagination>
+  </div>

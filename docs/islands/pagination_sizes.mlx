@@ -1,0 +1,49 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Pagination = Solidtype_heroui.Pagination
+
+let total_pages = 3
+
+let size_pagination (size, name) =
+  let page, set_page = S.create_signal 1 in
+  <div class_="flex flex-col gap-2">
+    <span class_="text-xs font-medium text-muted capitalize">
+      (fun () -> Jsx.string name)
+    </span>
+    <Pagination class_="justify-center" size=(fun () -> size)>
+      <Pagination.Content>
+        <Pagination.Item>
+          <Pagination.Previous
+            is_disabled=(fun () -> S.get page = 1)
+            on_press=(fun () -> S.update set_page pred)>
+            <Pagination.Previous_icon /> <span>"Previous"</span>
+          </Pagination.Previous>
+        </Pagination.Item>
+        <For each=(fun () -> Array.init total_pages succ)>
+          (fun p _ ->
+            <Pagination.Item>
+              <Pagination.Link
+                is_active=(fun () -> p = S.get page)
+                on_press=(fun () -> S.set set_page p)>
+                (fun () -> Jsx.int p)
+              </Pagination.Link>
+            </Pagination.Item>)
+        </For>
+        <Pagination.Item>
+          <Pagination.Next
+            is_disabled=(fun () -> S.get page = total_pages)
+            on_press=(fun () -> S.update set_page succ)>
+            <span>"Next"</span> <Pagination.Next_icon />
+          </Pagination.Next>
+        </Pagination.Item>
+      </Pagination.Content>
+    </Pagination>
+  </div>
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <For each=(fun () -> [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |])>
+      (fun size _ -> size_pagination size)
+    </For>
+  </div>

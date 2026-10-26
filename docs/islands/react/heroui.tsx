@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Pagination, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -683,6 +683,38 @@ export function breadcrumbs(host: HTMLElement, { isDisabled, onAction }: Breadcr
         </Breadcrumbs.Item>
         <Breadcrumbs.Item id="laptop">Laptop</Breadcrumbs.Item>
       </Breadcrumbs>,
+    ),
+  );
+}
+
+type PaginationProps = { page: number; onPage: (page: number) => void; size: "sm" | "md" | "lg" };
+
+export function pagination(host: HTMLElement, { page, onPage, size }: PaginationProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Pagination size={size}>
+        <Pagination.Content>
+          <Pagination.Item>
+            <Pagination.Previous isDisabled={page === 1} onPress={() => onPage(page - 1)}>
+              <Pagination.PreviousIcon />
+              <span>Previous</span>
+            </Pagination.Previous>
+          </Pagination.Item>
+          {[1, 2, 3].map((p) => (
+            <Pagination.Item key={p}>
+              <Pagination.Link isActive={p === page} onPress={() => onPage(p)}>
+                {p}
+              </Pagination.Link>
+            </Pagination.Item>
+          ))}
+          <Pagination.Item>
+            <Pagination.Next isDisabled={page === 3} onPress={() => onPage(page + 1)}>
+              <span>Next</span>
+              <Pagination.NextIcon />
+            </Pagination.Next>
+          </Pagination.Item>
+        </Pagination.Content>
+      </Pagination>,
     ),
   );
 }

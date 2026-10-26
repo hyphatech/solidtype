@@ -129,6 +129,17 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
   let hover, set_hover = S.create_signal false in
   let press, set_press = S.create_signal false in
   let focus, set_focus = S.create_signal false in
+  (* A hover or a press ends as the element is disabled, as React Aria ends
+     them, so one enabled again under a resting pointer shows neither until
+     the pointer moves in again. *)
+  Option.iter
+    (fun off ->
+      S.create_computed (fun () ->
+          if S.get off then begin
+            S.set set_hover false;
+            S.set set_press false
+          end))
+    disabled;
   {
     off = disabled;
     no_hover;
@@ -146,11 +157,12 @@ let disabled i = match i.off with Some d -> S.get d | None -> false
 let holds = function Some a -> S.get a | None -> false
 let pointer_inert i = holds i.no_pointer_press
 
-(* A disabled element is neither hovered nor pressed, whatever the pointer
-   did while it was. *)
+(* A disabled element is neither hovered, pressed nor focused, whatever was
+   done to it before: a button disabled as it is pressed, the last page's
+   Next, keeps the focus with no blur told. *)
 let hovered i = S.get i.hover && not (disabled i || holds i.no_hover)
 let pressed i = S.get i.press && not (disabled i)
-let focused i = S.get i.focus
+let focused i = S.get i.focus && not (disabled i)
 let focus_visible i = focused i && by_keyboard ()
 
 let watch i element =

@@ -72,6 +72,7 @@
 @import "@heroui/styles/components/disclosure-group.css" layer(components);
 @import "@heroui/styles/components/accordion.css" layer(components);
 @import "@heroui/styles/components/tabs.css" layer(components);
+@import "@heroui/styles/components/pagination.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
