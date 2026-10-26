@@ -33,6 +33,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "solidtype",
+      description: "SolidJS for modern OCaml.",
       logo: { src: "starlight-theme-hypha/assets/hypha.webp" },
       // Hypha's look, from its theme; heroui.css keeps the demos in HeroUI's,
       // and api.css sets this site's API tables.

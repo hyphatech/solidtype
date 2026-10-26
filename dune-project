@@ -30,7 +30,7 @@
 
 (package
  (name solidtype)
- (synopsis "Solid, typed: OCaml front ends on SolidJS, through Melange")
+ (synopsis "SolidJS for modern OCaml")
  (description
   "Bindings to Solid for Melange, written in OCaml's JSX, where a reactive read in the wrong place does not compile. The JSX reaches the browser as the code Solid's own compiler emits for it.")
  (depends
