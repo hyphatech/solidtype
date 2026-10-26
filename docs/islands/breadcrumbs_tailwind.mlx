@@ -1,0 +1,14 @@
+module Breadcrumbs = Solidtype_heroui.Breadcrumbs
+
+let make () =
+  <Breadcrumbs class_="rounded-lg bg-default-soft px-3 py-2">
+    <Breadcrumbs.Item class_="text-muted hover:text-accent" href="#">
+      "Home"
+    </Breadcrumbs.Item>
+    <Breadcrumbs.Item class_="text-muted hover:text-accent" href="#">
+      "Products"
+    </Breadcrumbs.Item>
+    <Breadcrumbs.Item class_="font-medium text-foreground">
+      "Laptop"
+    </Breadcrumbs.Item>
+  </Breadcrumbs>

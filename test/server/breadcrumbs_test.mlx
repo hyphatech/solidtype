@@ -1,0 +1,29 @@
+(* Breadcrumbs as the server writes them: the last item is the page itself in
+   the HTML a page is prerendered with, as React Aria's is, though Solid makes
+   an item before it knows of those after it. *)
+
+module Server = Solidtype.Server
+module Breadcrumbs = Solidtype_heroui.Breadcrumbs
+module E = Jest.Expect
+
+let page () =
+  <Breadcrumbs>
+    <Breadcrumbs.Item href="/">"Home"</Breadcrumbs.Item>
+    <Breadcrumbs.Item href="/docs">"Docs"</Breadcrumbs.Item>
+    <Breadcrumbs.Item>"Breadcrumbs"</Breadcrumbs.Item>
+  </Breadcrumbs>
+
+(* How many times [part] is in [s]. *)
+let count part s = Array.length (Js.String.split ~sep:part s) - 1
+
+let () =
+  Jest.describe "Breadcrumbs on the server" (fun () ->
+      Jest.test "mark the last item the page, with no separator after it"
+        (fun () ->
+          let html = Server.render_to_string page in
+          E.(
+            expect
+              ( count {js|aria-current="page"|js} html,
+                count {js|data-current="true"|js} html,
+                count {js|data-slot="breadcrumbs-separator"|js} html )
+            |> toEqual (1, 2, 2))))

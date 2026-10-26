@@ -1,0 +1,36 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Breadcrumbs = Solidtype_heroui.Breadcrumbs
+module Toggle = Controls.Toggle
+
+let make () =
+  let disabled, set_disabled = S.create_signal false in
+  let told, set_told = S.create_signal "nothing yet" in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+      <p class_="text-sm">"on_action: " (fun () -> Jsx.string (S.get told))</p>
+    </div>
+    <Side_by_side
+      compared="[data-slot=link]"
+      solidtype=(<Breadcrumbs
+                   is_disabled=(fun () -> S.get disabled)
+                   on_action=(S.set set_told)>
+                   <Breadcrumbs.Item id="home" href="#beside-react">
+                     "Home"
+                   </Breadcrumbs.Item>
+                   <Breadcrumbs.Item id="products" href="#beside-react">
+                     "Products"
+                   </Breadcrumbs.Item>
+                   <Breadcrumbs.Item id="laptop">"Laptop"</Breadcrumbs.Item>
+                 </Breadcrumbs>)
+      react=(fun host ->
+              Heroui_react.breadcrumbs host
+                (Heroui_react.breadcrumbs_props ~is_disabled:(S.get disabled)
+                   ~on_action:(S.set set_told) ()))
+    />
+  </section>

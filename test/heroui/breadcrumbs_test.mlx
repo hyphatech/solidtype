@@ -1,0 +1,199 @@
+(* HeroUI's Breadcrumbs on Kobalte's, beside the same breadcrumbs in React:
+   every part, which item is the page, as a link is hovered, clicked and
+   reached by Tab, and what was told. *)
+
+module Breadcrumbs = Solidtype_heroui.Breadcrumbs
+module For = Solidtype.For
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?is_disabled:(bool[@mel.as "isDisabled"]) -> ?disabled:string -> unit -> props
+  = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/Breadcrumbs.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Breadcrumbs.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Breadcrumbs.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+let slot e = T.attribute e "data-slot"
+
+(* What one framework writes for itself: React Aria names the list, where the
+   port names Kobalte's [<nav>] around it, as the pattern for breadcrumbs does;
+   React Aria gives a link a tabindex, which an anchor needs none of; and
+   Kobalte takes a disabled link's href off, where React Aria keeps it and
+   refuses the click. *)
+let framework_only e name =
+  match (slot e, name) with
+  | Some "breadcrumbs", "aria-label" | Some "link", "tabindex" -> true
+  | Some "link", "href" ->
+      Option.equal String.equal (T.attribute e "aria-disabled") (Some "true")
+  | _ -> false
+
+(* A link by its role: the page itself is Kobalte's anchor, its href taken off,
+   where React Aria's is a span; a link to a reader either way. *)
+let tag e = match slot e with Some "link" -> "link" | _ -> tag_name e
+
+(* Each element, its tag, its attributes and its text. *)
+let shown host =
+  Js.Array.from (query_all host "ol, ol *")
+  |> Array.map (fun e ->
+      String.concat " "
+        [
+          tag e;
+          T.attributes_but
+            (T.attribute_names e |> Array.to_list
+            |> List.filter (framework_only e))
+            e;
+        ]
+      ^ if element_count e > 0 then "" else " " ^ text e)
+
+let link host i =
+  match
+    Js.Array.from
+      (query_all host "[data-slot=breadcrumbs-item] > *:first-child")
+  with
+  | links when i < Array.length links -> links.(i)
+  | _ -> host
+
+(* The breadcrumbs as rendered, as the first link is hovered and clicked, and
+   Tab moves on: every element, and what was told, after each. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "hovered" (fun () -> T.hover user (link host 0)) in
+  let* () = after "clicked" (fun () -> T.click user (link host 0)) in
+  let* () = after "Tab" (fun () -> T.tab user) in
+  let* () = after "Tab again" (fun () -> T.tab user) in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?is_disabled ?disabled () =
+  let told = ref [] in
+  let disabled_one key =
+    match disabled with
+    | Some d when String.equal d key -> Some true
+    | _ -> None
+  in
+  T.render (fun () ->
+      <Breadcrumbs
+        ?is_disabled=(fun () -> is_disabled)
+        on_action=(fun k -> told := k :: !told)>
+        <Breadcrumbs.Item
+          id="home" href="#home" ?is_disabled=(fun () -> disabled_one "home")>
+          "Home"
+        </Breadcrumbs.Item>
+        <Breadcrumbs.Item
+          id="docs" href="#docs" ?is_disabled=(fun () -> disabled_one "docs")>
+          "Docs"
+        </Breadcrumbs.Item>
+        <Breadcrumbs.Item id="tabs">"Tabs"</Breadcrumbs.Item>
+      </Breadcrumbs>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render (props ?is_disabled ?disabled ()) (fun k ->
+        told' := k :: !told')
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Breadcrumbs" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "marks the last item the page, as React's does"
+        (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "keeps an item disabled of its own, as React's"
+        (fun () ->
+          let* r = both ~disabled:"home" () in
+          same r);
+      Jest.testPromise "disables every item while disabled, as React's"
+        (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r);
+      Jest.test "is a navigation named for a reader, around its list" (fun () ->
+          T.render (fun () ->
+              <Breadcrumbs>
+                <Breadcrumbs.Item href="#home">"Home"</Breadcrumbs.Item>
+                <Breadcrumbs.Item>"Tabs"</Breadcrumbs.Item>
+              </Breadcrumbs>);
+          let nav = T.by_role "navigation" in
+          E.(
+            expect
+              ( T.attribute nav "aria-label",
+                Js.Array.length (Js.Array.from (query_all nav "ol > li")) )
+            |> toEqual (Some "Breadcrumbs", 2)));
+      Jest.test "makes an item added after the page the page" (fun () ->
+          let pages, set_pages = S.create_signal [| "Home"; "Docs" |] in
+          T.render (fun () ->
+              <Breadcrumbs>
+                <For each=(fun () -> S.get pages)>
+                  (fun page _ ->
+                    <Breadcrumbs.Item href=(fun () -> "#" ^ page)>
+                      (fun () -> Jsx.string page)
+                    </Breadcrumbs.Item>)
+                </For>
+              </Breadcrumbs>);
+          let current () =
+            Js.Array.from (query_all T.body "[aria-current=page]")
+            |> Array.map text
+          in
+          let before = current () in
+          S.set set_pages [| "Home"; "Docs"; "Tabs" |];
+          E.(
+            expect
+              ( before,
+                current (),
+                Js.Array.length
+                  (Js.Array.from
+                     (query_all T.body "[data-slot=breadcrumbs-separator]")) )
+            |> toEqual ([| "Docs" |], [| "Tabs" |], 2)));
+      Jest.test "draws a separator given in HeroUI's place for one" (fun () ->
+          T.render (fun () ->
+              <Breadcrumbs separator=(<b>"/"</b>)>
+                <Breadcrumbs.Item href="#home">"Home"</Breadcrumbs.Item>
+                <Breadcrumbs.Item>"Tabs"</Breadcrumbs.Item>
+              </Breadcrumbs>);
+          let separators =
+            Js.Array.from (query_all T.body "[data-slot=breadcrumbs-separator]")
+            |> Array.map (fun e ->
+                (tag_name e, T.attribute e "aria-hidden", T.class_name e, text e))
+          in
+          E.(
+            expect separators
+            |> toEqual
+                 [| ("SPAN", Some "true", "breadcrumbs__separator", "/") |])))

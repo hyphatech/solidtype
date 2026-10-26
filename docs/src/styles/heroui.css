@@ -26,6 +26,9 @@
 @import "@heroui/styles/components/description.css" layer(components);
 @import "@heroui/styles/components/field-error.css" layer(components);
 @import "@heroui/styles/components/label.css" layer(components);
+/* Before link.css, as HeroUI's bundle has it: a disabled link in a trail is
+   dimmed by link.css over the opacity breadcrumbs.css gives every one. */
+@import "@heroui/styles/components/breadcrumbs.css" layer(components);
 @import "@heroui/styles/components/link.css" layer(components);
 @import "@heroui/styles/components/button.css" layer(components);
 @import "@heroui/styles/components/button-group.css" layer(components);

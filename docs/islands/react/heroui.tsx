@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -665,6 +665,24 @@ export function tabs(host: HTMLElement, { onSelectionChange, ...props }: TabsPro
           </Tabs.Panel>
         ))}
       </Tabs>,
+    ),
+  );
+}
+
+type BreadcrumbsProps = { isDisabled: boolean; onAction: (key: string) => void };
+
+export function breadcrumbs(host: HTMLElement, { isDisabled, onAction }: BreadcrumbsProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Breadcrumbs isDisabled={isDisabled} onAction={(key) => onAction(String(key))}>
+        <Breadcrumbs.Item id="home" href="#beside-react">
+          Home
+        </Breadcrumbs.Item>
+        <Breadcrumbs.Item id="products" href="#beside-react">
+          Products
+        </Breadcrumbs.Item>
+        <Breadcrumbs.Item id="laptop">Laptop</Breadcrumbs.Item>
+      </Breadcrumbs>,
     ),
   );
 }

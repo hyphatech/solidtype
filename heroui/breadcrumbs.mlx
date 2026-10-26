@@ -1,0 +1,154 @@
+module Jsx = Solidtype.Jsx
+module Solid = Solidtype.Solid
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Breadcrumbs
+module Link = Solidtype_kobalte.Link
+
+(* An item as it joined its trail: how it is drawn, told whether it is the
+   page itself. *)
+type item = { key : int; draw : current:(unit -> bool) -> Jsx.element }
+
+(* What an item reads of its trail, and how it joins it. Each read of
+   [separator] makes a new element, as each read of a Solid prop does, so each
+   item has one of its own. *)
+type trail = {
+  disabled : unit -> bool;
+  separator : unit -> Jsx.element option;
+  act : string -> unit;
+  join : (current:(unit -> bool) -> Jsx.element) -> unit;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = trail
+end)
+
+(* HeroUI's classes for the parts, the same whatever their options, read as a
+   part is made: a module does nothing as it loads. *)
+let slots () = Styles.Breadcrumbs.slots (Styles.Breadcrumbs.options ())
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Item = struct
+  let%component make ?(id : string option) ?(href : string option)
+      ?(is_disabled : bool = false) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let t =
+      match Context.use () with
+      | Some t -> t
+      | None -> invalid_arg "Breadcrumbs.Item is used inside a Breadcrumbs"
+    in
+    let others = Props.others props in
+    t.join (fun ~current ->
+        let disabled () = is_disabled () || t.disabled () || current () in
+        let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+        <li
+          class_=(fun () ->
+                   after (Styles.Breadcrumbs.item (slots ())) (class_ ()))
+          data_slot="breadcrumbs-item"
+          data_current=(fun () -> Jsx.flag (current ()))
+          data_disabled=(fun () -> Jsx.flag (t.disabled () || current ()))
+          props=others>
+          (* Kobalte's breadcrumb link takes no disabled of its own, so the
+             port marks the page on Kobalte's link, as that one does. *)
+          <Link.Root
+            ?href=(fun () -> href ())
+            disabled=(fun () -> disabled ())
+            ?aria_current=(fun () -> if current () then Some "page" else None)
+            class_=(fun () ->
+                     Styles.Link.base
+                       (Styles.Link.slots (Styles.Link.options ()))
+                     ^ " "
+                     ^ Styles.Breadcrumbs.link (slots ()))
+            on_click=(fun _ ->
+                       if not (disabled ()) then Option.iter t.act (id ()))
+            ref=(fun a -> Interaction.watch i a)
+            data_slot="link"
+            data_current=(fun () -> Jsx.flag (current ()))
+            data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+            data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+            data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+            data_focus_visible=(fun () ->
+                                 Jsx.flag (Interaction.focus_visible i))
+            data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+            (fun () -> children ())
+          </Link.Root>
+          <Show when_=(fun () -> not (current ()))>
+            (fun () ->
+              match t.separator () with
+              (* HeroUI gives a separator of the user's its classes; a Solid
+                 component cannot add them to an element already made, so the
+                 span around it takes them. *)
+              | Some s ->
+                  Jsx.element
+                    <span
+                      aria_hidden=true
+                      class_=(fun () -> Styles.Breadcrumbs.separator (slots ()))
+                      data_slot="breadcrumbs-separator">
+                      (fun () -> Jsx.element s)
+                    </span>
+              | None ->
+                  Jsx.element
+                    <svg
+                      aria_hidden=true
+                      class_=(fun () -> Styles.Breadcrumbs.separator (slots ()))
+                      fill="none"
+                      height="16"
+                      role=`presentation
+                      view_box="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      data_slot="breadcrumbs-separator">
+                      <path
+                        clip_rule="evenodd"
+                        d="M5.47 2.97a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 \
+                           0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06L9.44 8 5.47 \
+                           4.03a.75.75 0 0 1 0-1.06Z"
+                        fill="currentColor"
+                        fill_rule="evenodd"
+                      />
+                    </svg>)
+          </Show>
+        </li>);
+    Jsx.nothing
+end
+
+let%component make ?(separator : Jsx.element option)
+    ?(on_action : (string -> unit) option) ?(is_disabled : bool = false)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* React Aria knows the last item as it renders, from its collection; Solid
+     makes an item before those after it, so each joins the trail as it is
+     made, and the trail draws them once all have, on the server too. *)
+  let items, set_items = Solid.create_signal [] in
+  let next = ref 0 in
+  let join draw =
+    let key = !next in
+    incr next;
+    Solid.update set_items (fun l -> l @ [ { key; draw } ]);
+    Solid.on_cleanup (fun () ->
+        Solid.update set_items (List.filter (fun (i : item) -> i.key <> key)))
+  in
+  let t =
+    {
+      disabled = is_disabled;
+      separator;
+      act = (fun key -> ignore (on_action key : unit option));
+      join;
+    }
+  in
+  <Kobalte.Root>
+    <ol
+      class_=(fun () -> after (Styles.Breadcrumbs.base (slots ())) (class_ ()))
+      data_slot="breadcrumbs"
+      props=(Props.others props)>
+      <Context.Provider value=(fun () -> t)>
+        (fun () -> children ())
+      </Context.Provider>
+      <For each=(fun () -> Array.of_list (Solid.get items))>
+        (fun (i : item) at ->
+          i.draw ~current:(fun () ->
+              Solid.get at = List.length (Solid.get items) - 1))
+      </For>
+    </ol>
+  </Kobalte.Root>

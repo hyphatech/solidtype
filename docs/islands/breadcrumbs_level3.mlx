@@ -1,0 +1,8 @@
+module Breadcrumbs = Solidtype_heroui.Breadcrumbs
+
+let make () =
+  <Breadcrumbs>
+    <Breadcrumbs.Item href="#">"Home"</Breadcrumbs.Item>
+    <Breadcrumbs.Item href="#">"Category"</Breadcrumbs.Item>
+    <Breadcrumbs.Item>"Current Page"</Breadcrumbs.Item>
+  </Breadcrumbs>

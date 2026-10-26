@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Breadcrumbs`: HeroUI's Breadcrumbs on Kobalte's, a
+  `<nav>` named for a reader around HeroUI's list, the last item the page
+  itself -- marked so in a prerendered page too -- disabled whole or an item
+  at a time, with HeroUI's chevron or a separator of its own between items,
+  and `on_action` told the `id` of an item whose link is pressed.
 - Fixed: `Solidtype_heroui.Form` showed no server error that came after its
   field was changed and left -- the answer to a submit clicked, which takes
   the focus from the field first. The names a change cleared are kept with

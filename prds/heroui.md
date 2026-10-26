@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure, DisclosureGroup, Accordion and Tabs; no landed port has its misuses in `test/does_not_compile.t` yet.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has ToggleButton, ToggleButtonGroup, Disclosure, DisclosureGroup, Accordion, Tabs and Breadcrumbs; no landed port has its misuses in `test/does_not_compile.t` yet.
 Date: 2026-10-23
 
 ## The problem
@@ -146,6 +146,12 @@ check written by hand where it passes an element's every attribute on, as
   shared element, drawn in the selected tab alone; the port's starts where
   the last one was, then takes its own place a frame on, which HeroUI's
   styles move it to.
+- **Members a part draws**: where HeroUI's part reads its members from React
+  Aria's collection as it renders -- a breadcrumb knows it is the last -- the
+  port's members join the part as they are made, and the part draws them
+  once all have, by `For`, so what turns on the whole list is right on the
+  server too. Solid's server makes every child before it writes any, and
+  nothing lighter defers a member's element until its siblings exist.
 - **What a group gives**: a context per group -- `Button_group`,
   `Avatar_group`, `Checkbox_group`, `Radio_group`, `Toggle_button_group`,
   `Disclosure_group`, `Fieldset`, `Surface` -- read by the components
@@ -341,7 +347,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Disclosure, DisclosureGroup
 - [x] Accordion, on Kobalte's, its content as a disclosure's
 - [x] Tabs
-- [ ] Breadcrumbs, Pagination
+- [x] Breadcrumbs, its items drawn by the trail
+- [ ] Pagination
 
 ### Group 5: overlays and lists
 - [ ] Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox,

@@ -10,6 +10,7 @@ module Alert = H.Alert
 module Avatar = H.Avatar
 module Avatar_group = H.Avatar_group
 module Badge = H.Badge
+module Breadcrumbs = H.Breadcrumbs
 module Button = H.Button
 module Button_group = H.Button_group
 module Card = H.Card
@@ -100,6 +101,11 @@ let () =
                     <Badge.Label data_testid="Badge.Label">"5"</Badge.Label>
                   </Badge>
                 </Badge.Anchor>
+                <Breadcrumbs data_testid="Breadcrumbs">
+                  <Breadcrumbs.Item data_testid="Breadcrumbs.Item">
+                    "Home"
+                  </Breadcrumbs.Item>
+                </Breadcrumbs>
                 <Button_group data_testid="Button_group">
                   <Button data_testid="Button">"First"</Button>
                   <Button>
@@ -262,6 +268,8 @@ let () =
                    ("Badge.Anchor", "[data-slot=badge-anchor]");
                    ("Badge", "[data-slot=badge]");
                    ("Badge.Label", "[data-slot=badge-label]");
+                   ("Breadcrumbs", "[data-slot=breadcrumbs]");
+                   ("Breadcrumbs.Item", "[data-slot=breadcrumbs-item]");
                    ("Button_group", "[data-slot=button-group]");
                    ("Button", "[data-slot=button]");
                    ( "Button_group.Separator",

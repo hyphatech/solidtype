@@ -441,6 +441,19 @@ external tabs_props :
 external tabs : Dom.htmlDivElement -> tabs_props -> unit = "tabs"
 [@@mel.module "./react/heroui.tsx"]
 
+type breadcrumbs_props
+
+external breadcrumbs_props :
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  on_action:((string -> unit)[@mel.as "onAction"]) ->
+  unit ->
+  breadcrumbs_props = ""
+[@@mel.obj]
+
+external breadcrumbs : Dom.htmlDivElement -> breadcrumbs_props -> unit
+  = "breadcrumbs"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

@@ -1,0 +1,163 @@
+---
+title: Breadcrumbs
+description: The trail of pages to the one shown, HeroUI's on Kobalte's.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/breadcrumbs_usage.jsx";
+import ExUsageCode from "@islands/breadcrumbs_usage.mlx?raw";
+import * as ExLevel2 from "@islands/breadcrumbs_level2.jsx";
+import ExLevel2Code from "@islands/breadcrumbs_level2.mlx?raw";
+import * as ExLevel3 from "@islands/breadcrumbs_level3.jsx";
+import ExLevel3Code from "@islands/breadcrumbs_level3.mlx?raw";
+import * as ExDisabled from "@islands/breadcrumbs_disabled.jsx";
+import ExDisabledCode from "@islands/breadcrumbs_disabled.mlx?raw";
+import * as ExSeparator from "@islands/breadcrumbs_custom_separator.jsx";
+import ExSeparatorCode from "@islands/breadcrumbs_custom_separator.mlx?raw";
+import * as ExTailwind from "@islands/breadcrumbs_tailwind.jsx";
+import ExTailwindCode from "@islands/breadcrumbs_tailwind.mlx?raw";
+import * as Demo from "@islands/breadcrumbs_demo.jsx";
+
+`Solidtype_heroui.Breadcrumbs` is Kobalte's `Breadcrumbs.Root`, a `<nav>`
+named "Breadcrumbs" for a reader, around HeroUI's list, each item an `<li>`
+holding Kobalte's link and HeroUI's chevron, with the classes HeroUI's own
+`breadcrumbsVariants` gives. The last item is the page itself: its link is
+`aria-current="page"` and disabled, and no separator follows it.
+
+## Usage
+
+<Example code={ExUsageCode} title="breadcrumbs_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Breadcrumbs>
+  <Breadcrumbs.Item href="#">"Home"</Breadcrumbs.Item>
+  <Breadcrumbs.Item href="#">"Category"</Breadcrumbs.Item>
+  <Breadcrumbs.Item>"Current Page"</Breadcrumbs.Item>
+</Breadcrumbs>
+```
+
+## Examples
+
+### Navigation Levels
+
+<Example code={ExLevel2Code} title="breadcrumbs_level2.mlx"><ExLevel2.make client:visible /></Example>
+
+<Example code={ExLevel3Code} title="breadcrumbs_level3.mlx"><ExLevel3.make client:visible /></Example>
+
+### Disabled State
+
+<Example code={ExDisabledCode} title="breadcrumbs_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Custom Separator
+
+HeroUI gives the separator element its own class; a Solid component cannot
+add a class to an element already made, so the port draws the separator
+inside a `<span>` that takes HeroUI's class, a 12-pixel square hidden from a
+reader. An icon fills it with `size-full`.
+
+<Example code={ExSeparatorCode} title="breadcrumbs_custom_separator.mlx"><ExSeparator.make client:visible /></Example>
+
+### Render Function
+
+HeroUI's Render Function example gives the trail and its items `render`,
+React's way to swap the element it renders, which a Solid component has no
+need of.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes: the trail's on its list, an item's
+on its `<li>`.
+
+<Example code={ExTailwindCode} title="breadcrumbs_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .breadcrumbs {
+    @apply gap-4 text-lg;
+  }
+
+  .breadcrumbs__link {
+    @apply font-semibold;
+  }
+
+  .breadcrumbs__separator {
+    @apply text-blue-500;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.breadcrumbs`, `.breadcrumbs__item`, `.breadcrumbs__link`,
+  `.breadcrumbs__separator`
+
+### Interactive States
+
+- **Current**: `[data-current="true"]` on the link and its item
+- **Hover**: `:hover` or `[data-hovered="true"]` on a link
+- **Focus**: `[data-focus-visible="true"]` on a link
+- **Disabled**: `[aria-disabled="true"]` on a link
+
+## How it is made
+
+React Aria knows the last item as it renders, from its collection. Solid makes
+an item before those after it, so each item joins its trail as it is made, and
+the trail draws them once all have, in the order they joined: the page is the
+last on the server too, so a prerendered page marks it. An item added later,
+by a `For`, is drawn after those already there, and becomes the page if it is
+last. Since the trail draws each item, a context given between the trail and
+an item does not reach the item's children.
+
+A disabled link, and the page itself, is Kobalte's `<a>` with its `href` taken
+off, where React Aria's keeps the `href` and refuses the click, and the page is
+a `<span role="link">`; both are `aria-disabled="true"`. The trail is named on
+Kobalte's `<nav>`, as the pattern for breadcrumbs asks, where React Aria names
+its `<ol>`. An item without an `id` tells `on_action` nothing.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Breadcrumbs
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `separator` | `separator` | element | HeroUI's chevron | Drawn between items |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether every link is disabled |
+| `onAction` | `on_action` | `string -> unit` | | Told the `id` of an item whose link is pressed |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | The items |
+
+### Breadcrumbs.Item
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `id` | `id` | `string` | | What `on_action` is told |
+| `href` | `href` | `string` | | Where it leads; left out for the page itself |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether its link is disabled |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its text |
+
+## Beside React
+
+Original HeroUI documentation: [Breadcrumbs](https://heroui.com/en/docs/react/components/breadcrumbs).
+
+The same HeroUI Breadcrumbs twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the first link of
+each: a marked row is one they disagree on, and a dimmed row is a framework's
+own, which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
