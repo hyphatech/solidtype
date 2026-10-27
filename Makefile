@@ -1,8 +1,16 @@
 SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
-# The reference is odoc's, for solidtype's own packages and nothing under them.
-REFERENCE = solidtype solidtype-kobalte solidtype-heroui ppx_solidtype odoc.support
+# The reference is odoc's, for solidtype's own packages and the standard library
+# they name -- an [@raise Invalid_argument] links to it -- as dune's @doc-new
+# builds and links them: one page of a package builds all of its pages, and
+# nothing of the packages installed beside it. Its layout is kept, since a
+# package's pages reach the standard library's by it.
+REFERENCE_HTML = _build/default/_doc_new/html/docs
+REFERENCE_PACKAGES = solidtype/Solidtype solidtype-kobalte/Solidtype_kobalte \
+  solidtype-heroui/Solidtype_heroui ppx_solidtype/Ppx_solidtype
+REFERENCE = $(REFERENCE_PACKAGES:%=local/%/index.html) stdlib/Stdlib/index.html \
+  odoc.support/odoc.css
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example example-serve docs docs-serve generate
@@ -63,10 +71,12 @@ example-serve: example ## serve the example and its API on http://localhost:4420
 # odoc's reference from the .mli files is copied in first, for the site to
 # serve as it is.
 docs: build node_modules ## build the documentation site
-	$(OPAM) dune build @doc
+	$(OPAM) dune build $(REFERENCE:%=$(REFERENCE_HTML)/%)
 	rm -rf docs/public/reference
-	mkdir -p docs/public/reference
-	cd _build/default/_doc/_html && cp -R $(REFERENCE) $(CURDIR)/docs/public/reference/
+	mkdir -p docs/public/reference/local
+	cd $(REFERENCE_HTML) && cp -R $(patsubst %/,%,$(dir $(REFERENCE_PACKAGES:%=local/%))) \
+	  $(CURDIR)/docs/public/reference/local/
+	cd $(REFERENCE_HTML) && cp -R stdlib odoc.support $(CURDIR)/docs/public/reference/
 	chmod -R u+w docs/public/reference
 	bun --bun astro build --root docs
 

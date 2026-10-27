@@ -12,8 +12,8 @@ type content
 (** What a dynamic child gives: a string, a number or an element. *)
 
 type 'props component
-(** A component taking ['props]: an OCaml one, by {!component}, or a binding's.
-*)
+(** A component taking ['props]: an OCaml one, by {!val-component}, or a
+    binding's. *)
 
 external component : ('props -> element) -> 'props component = "%identity"
 external string : string -> content = "%identity"

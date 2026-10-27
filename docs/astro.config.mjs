@@ -34,6 +34,8 @@ export default defineConfig({
     starlight({
       title: "solidtype",
       description: "SolidJS for modern OCaml.",
+      // The 404 page is src/pages/404.astro, drawn by Starlight.
+      disable404Route: true,
       logo: { src: "starlight-theme-hypha/assets/hypha.webp" },
       // Hypha's look, from its theme; heroui.css keeps the demos in HeroUI's,
       // and api.css sets this site's API tables.
@@ -45,7 +47,7 @@ export default defineConfig({
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
         }),
         // The reference is odoc's, in public/, which the validator cannot see.
-        links({ exclude: ["**/reference/solidtype*/**", "**/reference/ppx_solidtype/**"] }),
+        links({ exclude: ["**/reference/**"] }),
       ],
       customCss: ["./src/styles/heroui.css", "./src/styles/api.css"],
       favicon: "/favicon-32.png",
