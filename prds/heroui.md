@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; no landed port has its misuses in `test/does_not_compile.t` yet.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed.
 Date: 2026-10-23
 
 ## The problem
@@ -261,8 +261,11 @@ for itself (ids, React's controlled `value` attribute) is left out by name.
 A test is seen failing on a stub before the port is written. What jsdom
 lacks that a browser has -- a `hidden` that takes `"until-found"` -- is
 stood in for in `test/jsdom.ts`, never worked around in a port. Its type-level
-parity is entries in `test/does_not_compile.t`: the misuses TypeScript
-refuses in HeroUI's component, each with the error a user reads.
+parity is its `Props.check`, which the compiler applies to every use; a
+port's misuses are not added to `test/does_not_compile.t`, which holds the
+mistakes the binding's own machinery refuses, since a port's would repeat
+the same few errors for every component, and its owner ranks this parity
+last.
 
 ### Alternatives rejected
 
@@ -312,11 +315,6 @@ Drafted here; they reach `AGENTS.md` when the work lands.
 
 Each port is one worktree from `main` and one commit, with its test, its
 page, its line in `coverage.mdx` and `CHANGES.md`.
-
-### Every group
-- [ ] Each landed port's misuses -- a prop left out, misspelt, of the wrong
-  kind -- in `test/does_not_compile.t`, with the error a user reads, and
-  each port after with its own
 
 ### Group 1: no behaviour to port
 - [x] CloseButton, ButtonGroup, Surface, Card, Kbd, Spinner, Skeleton,
@@ -371,8 +369,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 ## Verification
 
 `make lint`, `make test` and `make docs` pass with every port; each port's
-twin test passes, so it looks and behaves as HeroUI's; its misuses fail to
-compile in `test/does_not_compile.t`; and the documentation, served,
+twin test passes, so it looks and behaves as HeroUI's; and the
+documentation, served,
 shows each port beside HeroUI's React component with no marked row but
 those its page explains.
 
