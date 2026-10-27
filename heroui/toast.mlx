@@ -413,8 +413,13 @@ external observe : observer -> _ Dom.element_like -> observed -> unit
   = "observe"
 [@@mel.send]
 
-external resize_observer : (unit -> unit) -> observer = "ResizeObserver"
+type resize_entry
+
+external resize_observer :
+  ((resize_entry array -> unit)[@mel.uncurry]) -> observer = "ResizeObserver"
 [@@mel.new]
+
+external content_rect : resize_entry -> rect = "contentRect" [@@mel.get]
 
 external observe_size : observer -> _ Dom.element_like -> unit = "observe"
 [@@mel.send]
@@ -629,14 +634,18 @@ module Item = struct
            ~character_data:true ~child_list:true ~subtree:true ());
       (* A width that changes reflows its content, which no mutation shows;
          its height is what animates, and would be measured each frame of
-         it, so only the width is watched, as HeroUI watches it. *)
+         it, so only the width is watched, as HeroUI watches it: from the
+         entry the observer is told, after a first reading. *)
       let width = ref (rect_width (bounding el)) in
       let sizes =
-        resize_observer (fun () ->
-            let now = rect_width (bounding el) in
-            if Float.abs (now -. !width) >= 0.5 then (
-              width := now;
-              schedule ()))
+        resize_observer (fun entries ->
+            match entries with
+            | [||] -> ()
+            | entries ->
+                let now = rect_width (content_rect entries.(0)) in
+                if Float.abs (now -. !width) >= 0.5 then (
+                  width := now;
+                  schedule ()))
       in
       observe_size sizes el;
       S.on_cleanup (fun () ->
