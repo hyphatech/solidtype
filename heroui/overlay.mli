@@ -37,3 +37,18 @@ val entering : t -> bool
 
 val exiting : t -> bool
 (** Whether its exit animation runs. *)
+
+val arrow_position : unit -> (unit -> string) * (_ Dom.element_like -> unit)
+(** Where Kobalte places an overlay's arrow, as the [left], [top], [right] and
+    [bottom] of a style, and the [ref] that gives it Kobalte's arrow. Kobalte's
+    arrow draws a shape of its own and takes no other, so it is kept, hidden,
+    and HeroUI's arrow is drawn where it is. *)
+
+val placed_side :
+  placement:(unit -> string) ->
+  unit ->
+  (unit -> string) * (_ Dom.element_like -> unit)
+(** The side Kobalte placed an overlay's content on, ["top"] or another, as
+    React Aria's [data-placement] names it, read from Kobalte's positioner as it
+    moves, else [placement] until it is placed; and the [ref] that gives it the
+    content. For a Kobalte overlay that does not tell its placement. *)

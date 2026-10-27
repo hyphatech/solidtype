@@ -482,6 +482,18 @@ external tooltip_props :
 external tooltip : Dom.htmlDivElement -> tooltip_props -> unit = "tooltip"
 [@@mel.module "./react/heroui.tsx"]
 
+type popover_props
+
+external popover_props :
+  placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
+  arrow:bool ->
+  unit ->
+  popover_props = ""
+[@@mel.obj]
+
+external popover : Dom.htmlDivElement -> popover_props -> unit = "popover"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

@@ -78,3 +78,88 @@ let watch o e =
 let present o = S.get o.present
 let entering o = S.get o.entering
 let exiting o = S.get o.exiting
+
+type observer
+type watched
+
+external observer : ((unit -> unit)[@mel.uncurry]) -> observer
+  = "MutationObserver"
+[@@mel.new]
+
+external watched :
+  attributes:bool ->
+  attribute_filter:(string array[@mel.as "attributeFilter"]) ->
+  unit ->
+  watched = ""
+[@@mel.obj]
+
+external observe : observer -> _ Dom.element_like -> watched -> unit = "observe"
+[@@mel.send]
+
+external disconnect : observer -> unit = "disconnect" [@@mel.send]
+
+type css_style
+
+external style_of : _ Dom.element_like -> css_style = "style" [@@mel.get]
+
+external side_value : css_style -> string -> string = "getPropertyValue"
+[@@mel.send]
+
+let arrow_position () =
+  let position, set_position = S.create_signal "" in
+  let follow k =
+    let copy () =
+      let style = style_of k in
+      S.set set_position
+        ([ "left"; "top"; "right"; "bottom" ]
+        |> List.filter_map (fun side ->
+            match side_value style side with
+            | "" -> None
+            | v -> Some (side ^ ": " ^ v ^ ";"))
+        |> String.concat " ")
+    in
+    let watching = observer copy in
+    observe watching k
+      (watched ~attributes:true ~attribute_filter:[| "style" |] ());
+    copy ();
+    S.on_cleanup (fun () -> disconnect watching)
+  in
+  ((fun () -> S.get position), follow)
+
+external parent : _ Dom.element_like -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+let placed_side ~placement () =
+  let side, set_side = S.create_signal None in
+  let watch content =
+    match Js.Null.toOption (parent content) with
+    | None -> ()
+    | Some positioner ->
+        let read () =
+          let origin =
+            String.trim
+              (side_value (style_of positioner)
+                 "--kb-popper-content-transform-origin")
+          in
+          (* Kobalte's origin is the side of the content toward its trigger,
+             the opposite of the side it is placed on. *)
+          let toward =
+            match String.index_opt origin ' ' with
+            | Some at -> String.sub origin 0 at
+            | None -> origin
+          in
+          S.set set_side
+            (match toward with
+            | "bottom" -> Some "top"
+            | "top" -> Some "bottom"
+            | "left" -> Some "right"
+            | "right" -> Some "left"
+            | _ -> None)
+        in
+        let watching = observer read in
+        observe watching positioner
+          (watched ~attributes:true ~attribute_filter:[| "style" |] ());
+        read ();
+        S.on_cleanup (fun () -> disconnect watching)
+  in
+  ((fun () -> match S.get side with Some s -> s | None -> placement ()), watch)

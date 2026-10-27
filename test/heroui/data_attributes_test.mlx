@@ -12,6 +12,7 @@ module Avatar_group = H.Avatar_group
 module Badge = H.Badge
 module Breadcrumbs = H.Breadcrumbs
 module Pagination = H.Pagination
+module Popover = H.Popover
 module Tooltip = H.Tooltip
 module Button = H.Button
 module Button_group = H.Button_group
@@ -144,6 +145,19 @@ let () =
                     <Tooltip.Arrow data_testid="Tooltip.Arrow" /> "More"
                   </Tooltip.Content>
                 </Tooltip>
+                <Popover default_open=true>
+                  <Popover.Trigger data_testid="Popover.Trigger">
+                    "Profile"
+                  </Popover.Trigger>
+                  <Popover.Content data_testid="Popover.Content">
+                    <Popover.Dialog data_testid="Popover.Dialog">
+                      <Popover.Arrow data_testid="Popover.Arrow" />
+                      <Popover.Heading data_testid="Popover.Heading">
+                        "Title"
+                      </Popover.Heading>
+                    </Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
                 <Button_group data_testid="Button_group">
                   <Button data_testid="Button">"First"</Button>
                   <Button>
@@ -322,6 +336,11 @@ let () =
                    ("Tooltip.Trigger", "[data-slot=tooltip-trigger]");
                    ("Tooltip.Content", "[role=tooltip]");
                    ("Tooltip.Arrow", "[data-slot=tooltip-arrow]");
+                   ("Popover.Trigger", "[data-slot=popover-trigger]");
+                   ("Popover.Content", ".popover");
+                   ("Popover.Dialog", "[data-slot=popover-dialog]");
+                   ("Popover.Arrow", "[data-slot=popover-overlay-arrow-group]");
+                   ("Popover.Heading", ".popover__heading");
                    ("Button_group", "[data-slot=button-group]");
                    ("Button", "[data-slot=button]");
                    ( "Button_group.Separator",

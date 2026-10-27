@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Pagination, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -737,6 +737,27 @@ export function tooltip(host: HTMLElement, { isOpen, onOpenChange, placement, sh
             <p>This is a tooltip</p>
           </Tooltip.Content>
         </Tooltip>
+      </div>,
+    ),
+  );
+}
+
+type PopoverProps = { placement: "top" | "bottom" | "left" | "right"; arrow: boolean };
+
+export function popover(host: HTMLElement, { placement, arrow }: PopoverProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <div className="flex justify-center py-16">
+        <Popover>
+          <Button>Click me</Button>
+          <Popover.Content className="max-w-64" placement={placement}>
+            <Popover.Dialog>
+              {arrow ? <Popover.Arrow /> : null}
+              <Popover.Heading>Popover Title</Popover.Heading>
+              <p className="mt-2 text-sm text-muted">This is the popover content.</p>
+            </Popover.Dialog>
+          </Popover.Content>
+        </Popover>
       </div>,
     ),
   );

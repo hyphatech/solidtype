@@ -4,6 +4,7 @@ type trigger = {
   component : unit Solidtype.Jsx.component;
   is_disabled : (unit -> bool) option;
   controls : string option;
+  pressed : (unit -> bool) option;
   needs_slot : bool;
 }
 
@@ -14,6 +15,15 @@ type trigger = {
 module Trigger = Solidtype.Context.Make_optional (struct
   type t = trigger
 end)
+
+let no_trigger =
+  {
+    component = Kobalte.Root.component;
+    is_disabled = None;
+    controls = None;
+    pressed = None;
+    needs_slot = true;
+  }
 
 let%component make
     ?(variant :
@@ -89,7 +99,15 @@ let%component make
     ?slot=(fun () -> Option.map (fun `trigger -> "trigger") (slot ()))
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
-    data_pressed=(fun () -> Solidtype.Jsx.flag (Interaction.pressed i))
+    data_pressed=(fun () ->
+                   Solidtype.Jsx.flag
+                     (Interaction.pressed i
+                     ||
+                     match
+                       Option.bind trigger (fun (t : trigger) -> t.pressed)
+                     with
+                     | Some shown -> shown ()
+                     | None -> false))
     data_focused=(fun () -> Solidtype.Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () ->
                          Solidtype.Jsx.flag (Interaction.focus_visible i))

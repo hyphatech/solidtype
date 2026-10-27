@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Popover`: HeroUI's Popover on Kobalte's, opened by a
+  `Button` inside it or a `Popover.Trigger`, its dialog given the focus and
+  named by its heading, with HeroUI's arrow, placements, offset and flip,
+  the focus kept inside and given back to the trigger, and HeroUI's enter
+  and exit animations.
+- `Solidtype_heroui.Button.trigger` takes `pressed`, and `Button.no_trigger`
+  makes the buttons inside an overlay's content buttons again: a button
+  inside a tooltip's content is no longer its trigger.
 - `Solidtype_heroui.Tooltip`: HeroUI's Tooltip on Kobalte's, opened by a
   `Button` inside it or a `Tooltip.Trigger` around anything else, with
   HeroUI's arrow, placements, offset and flip, delays of its own or the

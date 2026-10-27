@@ -109,6 +109,7 @@ module Heading = struct
         Button.component = Kobalte.Trigger.component;
         is_disabled = Some i.item_disabled;
         controls = Some i.content_id;
+        pressed = None;
         needs_slot = true;
       }
     in

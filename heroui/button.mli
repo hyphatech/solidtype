@@ -29,11 +29,18 @@ type trigger = {
           say; a part that says nothing leaves it to the button's group. *)
   controls : string option;
       (** The id of what it shows and hides, its [aria-controls]. *)
+  pressed : (unit -> bool) option;
+      (** Whether the button shows pressed, as a popover's does while it is
+          open, besides while it is pressed. *)
   needs_slot : bool;
       (** Whether only a button with [slot=`trigger] takes it, as a disclosure's
           heading gives it, or any button, as a tooltip does. *)
 }
 (** The trigger a part gives a button below it. *)
+
+val no_trigger : trigger
+(** What a part gives the buttons inside it to make them buttons again: an
+    overlay's content, inside an overlay that makes every button its trigger. *)
 
 (** The {!trigger} a part gives the buttons below it. *)
 module Trigger : sig

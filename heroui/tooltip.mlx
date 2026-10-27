@@ -108,37 +108,13 @@ module Content = struct
           data_entering=(fun () -> Jsx.flag (Overlay.entering o))
           data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
-          (fun () -> children ())
+          <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
+            (fun () -> children ())
+          </Button.Trigger.Provider>
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>
 end
-
-type observer
-type watched
-
-external observer : ((unit -> unit)[@mel.uncurry]) -> observer
-  = "MutationObserver"
-[@@mel.new]
-
-external watched :
-  attributes:bool ->
-  attribute_filter:(string array[@mel.as "attributeFilter"]) ->
-  unit ->
-  watched = ""
-[@@mel.obj]
-
-external observe : observer -> _ Dom.element_like -> watched -> unit = "observe"
-[@@mel.send]
-
-external disconnect : observer -> unit = "disconnect" [@@mel.send]
-
-type css_style
-
-external style_of : _ Dom.element_like -> css_style = "style" [@@mel.get]
-
-external side_value : css_style -> string -> string = "getPropertyValue"
-[@@mel.send]
 
 module Arrow = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
@@ -146,26 +122,7 @@ module Arrow = struct
     let t = within "Tooltip.Arrow" in
     t.set_arrow true;
     S.on_cleanup (fun () -> t.set_arrow false);
-    (* Kobalte's arrow, hidden, is where Kobalte places an arrow, and draws
-       its own shape, which takes no other: HeroUI's arrow follows it. *)
-    let position, set_position = S.create_signal "" in
-    let follow k =
-      let copy () =
-        let style = style_of k in
-        S.set set_position
-          ([ "left"; "top"; "right"; "bottom" ]
-          |> List.filter_map (fun side ->
-              match side_value style side with
-              | "" -> None
-              | v -> Some (side ^ ": " ^ v ^ ";"))
-          |> String.concat " ")
-      in
-      let watching = observer copy in
-      observe watching k
-        (watched ~attributes:true ~attribute_filter:[| "style" |] ());
-      copy ();
-      S.on_cleanup (fun () -> disconnect watching)
-    in
+    let position, follow = Overlay.arrow_position () in
     Jsx.fragment
       [|
         <Kobalte.Arrow
@@ -173,7 +130,7 @@ module Arrow = struct
         />;
         <div
           ?class_=(fun () -> class_ ())
-          style=(fun () -> "position: absolute; " ^ S.get position)
+          style=(fun () -> "position: absolute; " ^ position ())
           data_placement=(fun () -> Jsx.data (t.side ()))
           data_slot="tooltip-arrow"
           props=(Props.others props)>
@@ -230,6 +187,7 @@ let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)
       Button.component = Kobalte.Trigger.component;
       is_disabled = None;
       controls = None;
+      pressed = None;
       needs_slot = false;
     }
   in

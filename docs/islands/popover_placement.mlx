@@ -1,0 +1,45 @@
+module Button = Solidtype_heroui.Button
+module Popover = Solidtype_heroui.Popover
+
+let make () =
+  <div class_="grid grid-cols-3 gap-4">
+    <div />
+    <Popover>
+      <Button class_="w-full" variant=`tertiary>"Top"</Button>
+      <Popover.Content placement=`top>
+        <Popover.Dialog>
+          <Popover.Arrow /> <p class_="text-sm">"Top placement"</p>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+    <div />
+    <Popover>
+      <Button class_="w-full" variant=`tertiary>"Left"</Button>
+      <Popover.Content placement=`left>
+        <Popover.Dialog>
+          <Popover.Arrow /> <p class_="text-sm">"Left placement"</p>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+    <div class_="flex items-center justify-center">
+      <span class_="text-sm text-muted">"Click buttons"</span>
+    </div>
+    <Popover>
+      <Button class_="w-full" variant=`tertiary>"Right"</Button>
+      <Popover.Content placement=`right>
+        <Popover.Dialog>
+          <Popover.Arrow /> <p class_="text-sm">"Right placement"</p>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+    <div />
+    <Popover>
+      <Button class_="w-full" variant=`tertiary>"Bottom"</Button>
+      <Popover.Content placement=`bottom>
+        <Popover.Dialog>
+          <Popover.Arrow /> <p class_="text-sm">"Bottom placement"</p>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+    <div />
+  </div>

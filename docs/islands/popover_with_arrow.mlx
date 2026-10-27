@@ -1,0 +1,32 @@
+module Button = Solidtype_heroui.Button
+module Popover = Solidtype_heroui.Popover
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Popover>
+      <Button variant=`secondary>"With Arrow"</Button>
+      <Popover.Content class_="max-w-64">
+        <Popover.Dialog>
+          <Popover.Arrow />
+          <Popover.Heading>"Popover with Arrow"</Popover.Heading>
+          <p class_="mt-2 text-sm text-muted">
+            "The arrow shows which element triggered the popover."
+          </p>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+    <Popover>
+      <Button is_icon_only=true aria_label="More options" variant=`tertiary>
+        <Gravity.Ellipsis />
+      </Button>
+      <Popover.Content class_="max-w-64" offset=10.>
+        <Popover.Dialog>
+          <Popover.Arrow />
+          <Popover.Heading>"Popover with Arrow"</Popover.Heading>
+          <p class_="mt-2 text-sm text-muted">
+            "The arrow shows which element triggered the popover."
+          </p>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+  </div>

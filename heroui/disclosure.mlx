@@ -34,6 +34,7 @@ module Heading = struct
         Button.component = Collapsible.Trigger.component;
         is_disabled = Some d.disabled;
         controls = Some d.content_id;
+        pressed = None;
         needs_slot = true;
       }
     in

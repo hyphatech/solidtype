@@ -1,0 +1,52 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Popover = Solidtype_heroui.Popover
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let placements =
+  [| (`top, "top"); (`bottom, "bottom"); (`left, "left"); (`right, "right") |]
+
+let make () =
+  let placement, set_placement = S.create_signal (`bottom, "bottom") in
+  let arrow, set_arrow = S.create_signal true in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+      <Toggle
+        label="arrow" on=(fun () -> S.get arrow) on_toggle=(S.set set_arrow)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<div class_="flex justify-center py-16">
+                   <Popover>
+                     <Button>"Click me"</Button>
+                     <Popover.Content
+                       class_="max-w-64"
+                       placement=(fun () -> fst (S.get placement))>
+                       <Popover.Dialog>
+                         <Solidtype.Show when_=(fun () -> S.get arrow)>
+                           <Popover.Arrow />
+                         </Solidtype.Show>
+                         <Popover.Heading>"Popover Title"</Popover.Heading>
+                         <p class_="mt-2 text-sm text-muted">
+                           "This is the popover content."
+                         </p>
+                       </Popover.Dialog>
+                     </Popover.Content>
+                   </Popover>
+                 </div>)
+      react=(fun host ->
+              Heroui_react.popover host
+                (Heroui_react.popover_props
+                   ~placement:(fst (S.get placement))
+                   ~arrow:(S.get arrow) ()))
+    />
+  </section>

@@ -74,6 +74,7 @@
 @import "@heroui/styles/components/tabs.css" layer(components);
 @import "@heroui/styles/components/pagination.css" layer(components);
 @import "@heroui/styles/components/tooltip.css" layer(components);
+@import "@heroui/styles/components/popover.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
@@ -92,7 +93,7 @@
 /* An overlay is drawn in a portal at the end of the page, outside any
    preview: Kobalte's positioner around one of HeroUI's gives it the same
    ground, but its size, which the overlay's own classes set. */
-[data-popper-positioner]:has(> .tooltip) {
+[data-popper-positioner]:has(> .tooltip, > .popover) {
   font-family: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
   letter-spacing: normal;
   color: var(--foreground);
