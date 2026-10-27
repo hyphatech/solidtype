@@ -1,0 +1,114 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+type animation = {
+  backdrop : string;
+  container : string;
+  description : string;
+  icon : [ `sparkles | `arrow_up_from_line ];
+  name : string;
+}
+
+let animations =
+  [|
+    {
+      backdrop =
+        String.concat " "
+          [
+            "data-[entering]:duration-400";
+            "data-[entering]:ease-[cubic-bezier(0.16,1,0.3,1)]";
+            "data-[exiting]:duration-200";
+            "data-[exiting]:ease-[cubic-bezier(0.7,0,0.84,0)]";
+          ];
+      container =
+        String.concat " "
+          [
+            "data-[entering]:animate-in";
+            "data-[entering]:fade-in-0";
+            "data-[entering]:zoom-in-95";
+            "data-[entering]:duration-400";
+            "data-[entering]:ease-[cubic-bezier(0.16,1,0.3,1)]";
+            "data-[exiting]:animate-out";
+            "data-[exiting]:fade-out-0";
+            "data-[exiting]:zoom-out-95";
+            "data-[exiting]:duration-200";
+            "data-[exiting]:ease-[cubic-bezier(0.7,0,0.84,0)]";
+          ];
+      description =
+        "Physics-based elastic scaling. Simulates a high-damping spring system \
+         with fast transient response and prolonged settling time. Ideal for \
+         Modals and Popovers.";
+      icon = `sparkles;
+      name = "Kinematic Scale";
+    };
+    {
+      backdrop =
+        String.concat " "
+          [
+            "data-[entering]:duration-500";
+            "data-[entering]:ease-[cubic-bezier(0.25,1,0.5,1)]";
+            "data-[exiting]:duration-200";
+            "data-[exiting]:ease-[cubic-bezier(0.5,0,0.75,0)]";
+          ];
+      container =
+        String.concat " "
+          [
+            "data-[entering]:animate-in";
+            "data-[entering]:fade-in-0";
+            "data-[entering]:slide-in-from-bottom-4";
+            "data-[entering]:duration-500";
+            "data-[entering]:ease-[cubic-bezier(0.25,1,0.5,1)]";
+            "data-[exiting]:animate-out";
+            "data-[exiting]:fade-out-0";
+            "data-[exiting]:slide-out-to-bottom-2";
+            "data-[exiting]:duration-200";
+            "data-[exiting]:ease-[cubic-bezier(0.5,0,0.75,0)]";
+          ];
+      description =
+        "Simulates movement through a medium with fluid resistance. Eliminates \
+         mechanical linearity for a natural, grounded feel. Perfect for Bottom \
+         Sheets or Toasts.";
+      icon = `arrow_up_from_line;
+      name = "Fluid Slide";
+    };
+  |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> animations)>
+      (fun (a : animation) _ ->
+        <Modal>
+          <Button variant=`secondary>(fun () -> Jsx.string a.name)</Button>
+          <Modal.Backdrop class_=(fun () -> a.backdrop)>
+            <Modal.Container class_=(fun () -> a.container)>
+              <Modal.Dialog class_="sm:max-w-[360px]">
+                <Modal.Close_trigger />
+                <Modal.Header>
+                  <Modal.Icon class_="bg-default text-foreground">
+                    (fun () ->
+                      match a.icon with
+                      | `sparkles ->
+                          Jsx.element <Gravity.Sparkles class_="size-5" />
+                      | `arrow_up_from_line ->
+                          Jsx.element
+                            <Gravity.Arrow_up_from_line class_="size-5" />)
+                  </Modal.Icon>
+                  <Modal.Heading>
+                    (fun () -> Jsx.string a.name) " Animation"
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  <p class_="mt-1">(fun () -> Jsx.string a.description)</p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button slot=`close variant=`tertiary>"Close"</Button>
+                  <Button slot=`close>"Try Again"</Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>)
+    </For>
+  </div>

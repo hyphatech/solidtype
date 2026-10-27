@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip and Popover.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover and Modal.
 Date: 2026-10-23
 
 ## The problem
@@ -363,7 +363,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Tooltip, on Kobalte's, and `Overlay`, an overlay's presence through
   HeroUI's enter and exit animations
 - [x] Popover, on Kobalte's
-- [ ] Modal, AlertDialog, Drawer, Dropdown, ListBox, Select, ComboBox,
+- [x] Modal, on Kobalte's dialog
+- [ ] AlertDialog, Drawer, Dropdown, ListBox, Select, ComboBox,
   Autocomplete
 
 ### Group 6: color

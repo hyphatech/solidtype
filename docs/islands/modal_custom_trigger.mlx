@@ -1,0 +1,45 @@
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+let make () =
+  <Modal>
+    <Modal.Trigger
+      class_="group flex items-center gap-3 rounded-2xl bg-surface p-4 \
+              shadow-xs select-none hover:bg-surface-secondary">
+      <div
+        class_="flex size-12 shrink-0 items-center justify-center rounded-xl \
+                bg-accent-soft text-accent-soft-foreground">
+        <Gravity.Gear class_="size-6" />
+      </div>
+      <div class_="flex flex-1 flex-col gap-0.5">
+        <p class_="text-sm font-semibold">"Settings"</p>
+        <p class_="text-xs text-muted">"Manage your preferences"</p>
+      </div>
+    </Modal.Trigger>
+    <Modal.Backdrop>
+      <Modal.Container>
+        <Modal.Dialog class_="sm:max-w-[360px]">
+          <Modal.Close_trigger />
+          <Modal.Header>
+            <Modal.Icon class_="bg-accent-soft text-accent-soft-foreground">
+              <Gravity.Gear class_="size-5" />
+            </Modal.Icon>
+            <Modal.Heading>"Settings"</Modal.Heading>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              "Use "
+              <code>"Modal.Trigger"</code>
+              " to create custom trigger elements beyond standard buttons. \
+               This example shows a card-style trigger with icons and \
+               descriptive text."
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button slot=`close variant=`secondary>"Cancel"</Button>
+            <Button slot=`close>"Save"</Button>
+          </Modal.Footer>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
+  </Modal>

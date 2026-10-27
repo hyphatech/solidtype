@@ -1,0 +1,71 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+let sizes =
+  [|
+    (`xs, "xs");
+    (`sm, "sm");
+    (`md, "md");
+    (`lg, "lg");
+    (`cover, "cover");
+    (`full, "full");
+  |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> sizes)>
+      (fun (size, name) _ ->
+        <Modal>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Modal.Backdrop>
+            <Modal.Container size=(fun () -> size)>
+              <Modal.Dialog>
+                <Modal.Close_trigger />
+                <Modal.Header>
+                  <Modal.Icon class_="bg-default text-foreground">
+                    <Gravity.Rocket class_="size-5" />
+                  </Modal.Icon>
+                  <Modal.Heading>
+                    "Size: "
+                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  <p>
+                    "This modal uses the "
+                    <code>(fun () -> Jsx.string name)</code>
+                    (fun () ->
+                      Jsx.string
+                        (match size with
+                        | `cover ->
+                            " size variant. It spans the full screen with \
+                             margins: 16px on mobile and 40px on desktop. \
+                             Maintains rounded corners and standard padding. \
+                             Perfect for cover-style content that needs \
+                             maximum width while preserving modal aesthetics."
+                        | `full ->
+                            " size variant. It occupies the entire viewport \
+                             without any margins, rounded corners, or shadows, \
+                             creating a true fullscreen experience. Ideal for \
+                             immersive content or full-page interactions."
+                        | `xs | `sm | `md | `lg ->
+                            " size variant. On mobile devices, all sizes adapt \
+                             to near full-width for optimal viewing. On \
+                             desktop, each size provides a different maximum \
+                             width to suit various content needs."))
+                  </p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button slot=`close variant=`secondary>"Cancel"</Button>
+                  <Button slot=`close>"Confirm"</Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>)
+    </For>
+  </div>

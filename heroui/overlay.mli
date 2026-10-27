@@ -25,8 +25,8 @@ val create : is_open:(unit -> bool) -> unit -> t
     tracking. *)
 
 val watch : t -> _ Dom.element_like -> unit
-(** The element whose animations it waits for: from its [ref], each time it is
-    made. *)
+(** An element whose animations it waits for, with any other it watches: from
+    its [ref], each time it is made. *)
 
 val present : t -> bool
 (** Whether it is on the page: open, or closing until its exit animation ends.
@@ -52,3 +52,14 @@ val placed_side :
     React Aria's [data-placement] names it, read from Kobalte's positioner as it
     moves, else [placement] until it is placed; and the [ref] that gives it the
     content. For a Kobalte overlay that does not tell its placement. *)
+
+val focus : _ Dom.element_like -> unit
+(** [focus e] gives [e] the focus without scrolling the page: an overlay is
+    given it before it is placed, at the page's top, as React Aria's is too. *)
+
+val return_focus :
+  is_open:(unit -> bool) -> inside:(Dom.element -> bool) -> unit -> unit
+(** Gives the focus back, as an overlay closes, to what had it as the overlay
+    opened, while the focus is [inside] the overlay or nowhere, as React Aria
+    does: Kobalte's does as its content unmounts, which waits here for HeroUI's
+    exit animation, when the focus has already left. *)

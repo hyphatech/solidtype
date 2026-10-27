@@ -34,18 +34,7 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
-type focus_options
-
-external focus_options :
-  prevent_scroll:(bool[@mel.as "preventScroll"]) -> unit -> focus_options = ""
-[@@mel.obj]
-
-external focus_with : Dom.element -> focus_options -> unit = "focus"
-[@@mel.send]
-
-(* The focus moved without scrolling the page: a popover is given it before
-   it is placed, at the page's top, as React Aria's focuses too. *)
-let focus e = focus_with e (focus_options ~prevent_scroll:true ())
+let focus = Overlay.focus
 
 external as_element : _ Dom.element_like -> Dom.element = "%identity"
 external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]

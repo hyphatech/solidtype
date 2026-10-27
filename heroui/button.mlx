@@ -16,6 +16,12 @@ module Trigger = Solidtype.Context.Make_optional (struct
   type t = trigger
 end)
 
+(* What closes the dialog a button with slot=`close is in, as React Aria's
+   close slot gives it. *)
+module Close = Solidtype.Context.Make_optional (struct
+  type t = unit -> unit
+end)
+
 let no_trigger =
   {
     component = Kobalte.Root.component;
@@ -36,7 +42,7 @@ let%component make
        | `danger_soft ]
        option) ?(size : [ `sm | `md | `lg ] option) ?(full_width : bool option)
     ?(is_icon_only : bool = false) ?(is_disabled : bool option)
-    ?(slot : [ `trigger ] option)
+    ?(slot : [ `trigger | `close ] option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
     ~(children : Solidtype.Jsx.content) () =
@@ -59,8 +65,13 @@ let%component make
   let trigger =
     match (slot (), Trigger.use ()) with
     | Some `trigger, t -> t
-    | None, Some t when not t.needs_slot -> Some t
-    | None, (Some _ | None) -> None
+    | (None | Some `close), Some t when not t.needs_slot -> Some t
+    | (None | Some `close), (Some _ | None) -> None
+  in
+  let closes =
+    match slot () with
+    | Some `close -> Close.use ()
+    | Some `trigger | None -> None
   in
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -96,7 +107,10 @@ let%component make
     ?aria_controls=(fun () ->
                      Option.bind trigger (fun (t : trigger) -> t.controls))
     ref=(fun b -> Interaction.watch i b)
-    ?slot=(fun () -> Option.map (fun `trigger -> "trigger") (slot ()))
+    ?slot=(fun () ->
+            Option.map
+              (function `trigger -> "trigger" | `close -> "close")
+              (slot ()))
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
     data_pressed=(fun () ->
@@ -113,7 +127,9 @@ let%component make
                          Solidtype.Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Solidtype.Jsx.flag (Interaction.disabled i))
     type_=(fun () -> type_ ())
-    on_click=(fun e -> ignore (on_click e : unit option))
+    on_click=(fun e ->
+               ignore (on_click e : unit option);
+               Option.iter (fun close -> close ()) closes)
     props=(Props.others props)>
     (fun () -> children ())
   </Root>

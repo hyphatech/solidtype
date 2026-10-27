@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -759,6 +759,39 @@ export function popover(host: HTMLElement, { placement, arrow }: PopoverProps): 
           </Popover.Content>
         </Popover>
       </div>,
+    ),
+  );
+}
+
+type ModalProps = {
+  variant: "opaque" | "blur" | "transparent";
+  placement: "auto" | "center" | "top" | "bottom";
+  size: "xs" | "sm" | "md" | "lg" | "cover" | "full";
+  isDismissable: boolean;
+};
+
+export function modal(host: HTMLElement, { variant, placement, size, isDismissable }: ModalProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Modal>
+        <Button variant="secondary">Open Modal</Button>
+        <Modal.Backdrop variant={variant} isDismissable={isDismissable}>
+          <Modal.Container placement={placement} size={size}>
+            <Modal.Dialog>
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>Welcome to HeroUI</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <p>A beautiful, fast, and modern React UI library.</p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button slot="close">Continue</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>,
     ),
   );
 }

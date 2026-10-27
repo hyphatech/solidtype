@@ -1,0 +1,90 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants =
+  [| (`opaque, "opaque"); (`blur, "blur"); (`transparent, "transparent") |]
+
+let placements =
+  [| (`auto, "auto"); (`center, "center"); (`top, "top"); (`bottom, "bottom") |]
+
+let sizes =
+  [|
+    (`xs, "xs");
+    (`sm, "sm");
+    (`md, "md");
+    (`lg, "lg");
+    (`cover, "cover");
+    (`full, "full");
+  |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`opaque, "opaque") in
+  let placement, set_placement = S.create_signal (`auto, "auto") in
+  let size, set_size = S.create_signal (`md, "md") in
+  let dismissable, set_dismissable = S.create_signal true in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Toggle
+        label="dismissable"
+        on=(fun () -> S.get dismissable)
+        on_toggle=(S.set set_dismissable)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<Modal>
+                   <Button variant=`secondary>"Open Modal"</Button>
+                   <Modal.Backdrop
+                     variant=(fun () -> fst (S.get variant))
+                     is_dismissable=(fun () -> S.get dismissable)>
+                     <Modal.Container
+                       placement=(fun () -> fst (S.get placement))
+                       size=(fun () -> fst (S.get size))>
+                       <Modal.Dialog>
+                         <Modal.Close_trigger />
+                         <Modal.Header>
+                           <Modal.Heading>"Welcome to HeroUI"</Modal.Heading>
+                         </Modal.Header>
+                         <Modal.Body>
+                           <p>
+                             "A beautiful, fast, and modern React UI library."
+                           </p>
+                         </Modal.Body>
+                         <Modal.Footer>
+                           <Button slot=`close>"Continue"</Button>
+                         </Modal.Footer>
+                       </Modal.Dialog>
+                     </Modal.Container>
+                   </Modal.Backdrop>
+                 </Modal>)
+      react=(fun host ->
+              Heroui_react.modal host
+                (Heroui_react.modal_props
+                   ~variant:(fst (S.get variant))
+                   ~placement:(fst (S.get placement))
+                   ~size:(fst (S.get size))
+                   ~is_dismissable:(S.get dismissable) ()))
+    />
+  </section>

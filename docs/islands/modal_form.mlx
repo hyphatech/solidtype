@@ -1,0 +1,58 @@
+module Button = Solidtype_heroui.Button
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Modal = Solidtype_heroui.Modal
+module Surface = Solidtype_heroui.Surface
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Modal>
+    <Button variant=`secondary>"Open Contact Form"</Button>
+    <Modal.Backdrop>
+      <Modal.Container placement=`auto>
+        <Modal.Dialog class_="sm:max-w-md">
+          <Modal.Close_trigger />
+          <Modal.Header>
+            <Modal.Icon class_="bg-accent-soft text-accent-soft-foreground">
+              <Gravity.Envelope class_="size-5" />
+            </Modal.Icon>
+            <Modal.Heading>"Contact Us"</Modal.Heading>
+            <p class_="mt-1.5 text-sm leading-5 text-muted">
+              "Fill out the form below and we'll get back to you. The modal \
+               adapts automatically when the keyboard appears on mobile."
+            </p>
+          </Modal.Header>
+          <Modal.Body class_="p-6">
+            <Surface variant=`default>
+              <form class_="flex flex-col gap-4">
+                <Text_field class_="w-full" name="name" variant=`secondary>
+                  <Label>"Name"</Label>
+                  <Input type_="text" placeholder="Enter your name" />
+                </Text_field>
+                <Text_field class_="w-full" name="email" variant=`secondary>
+                  <Label>"Email"</Label>
+                  <Input type_="email" placeholder="Enter your email" />
+                </Text_field>
+                <Text_field class_="w-full" name="phone" variant=`secondary>
+                  <Label>"Phone"</Label>
+                  <Input type_="tel" placeholder="Enter your phone number" />
+                </Text_field>
+                <Text_field class_="w-full" name="company" variant=`secondary>
+                  <Label>"Company"</Label>
+                  <Input placeholder="Enter your company name" />
+                </Text_field>
+                <Text_field class_="w-full" name="message" variant=`secondary>
+                  <Label>"Message"</Label>
+                  <Input placeholder="Enter your message" />
+                </Text_field>
+              </form>
+            </Surface>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button slot=`close variant=`secondary>"Cancel"</Button>
+            <Button slot=`close>"Send Message"</Button>
+          </Modal.Footer>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
+  </Modal>

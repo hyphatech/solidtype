@@ -1,0 +1,38 @@
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+let make () =
+  <Modal>
+    <Button variant=`secondary>"Custom Backdrop"</Button>
+    <Modal.Backdrop
+      class_="bg-linear-to-t from-black/80 via-black/40 to-transparent \
+              dark:from-zinc-800/80 dark:via-zinc-800/40"
+      variant=`blur>
+      <Modal.Container>
+        <Modal.Dialog class_="sm:max-w-[360px]">
+          <Modal.Header class_="items-center text-center">
+            <Modal.Icon class_="bg-accent-soft text-accent-soft-foreground">
+              <Gravity.Sparkles class_="size-5" />
+            </Modal.Icon>
+            <Modal.Heading>"Premium Backdrop"</Modal.Heading>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              "This backdrop features a sophisticated gradient that \
+               transitions from a dark color at the bottom to complete \
+               transparency at the top, combined with a smooth blur effect. \
+               The gradient automatically adapts its intensity for optimal \
+               contrast in both light and dark modes."
+            </p>
+          </Modal.Body>
+          <Modal.Footer class_="flex-col-reverse">
+            <Button class_="w-full" slot=`close>"Amazing!"</Button>
+            <Button class_="w-full" slot=`close variant=`secondary>
+              "Close"
+            </Button>
+          </Modal.Footer>
+          <Modal.Close_trigger />
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
+  </Modal>

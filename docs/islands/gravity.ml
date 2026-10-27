@@ -17,6 +17,11 @@ module Arrow_up = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/arrow-up.svg?raw"]
 end)
 
+module Arrow_up_from_line = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/arrow-up-from-line.svg?raw"]
+end)
+
 module Arrow_up_right_from_square = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/arrow-up-right-from-square.svg?raw"]
@@ -75,6 +80,11 @@ end)
 module Chevrons_down = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/chevrons-down.svg?raw"]
+end)
+
+module Circle_check = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/circle-check.svg?raw"]
 end)
 
 module Circle_check_fill = Icon.Make (struct
@@ -162,6 +172,11 @@ module Funnel = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/funnel.svg?raw"]
 end)
 
+module Gear = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/gear.svg?raw"]
+end)
+
 module Globe = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/globe.svg?raw"]
@@ -237,9 +252,19 @@ module Receipt = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/receipt.svg?raw"]
 end)
 
+module Rocket = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/rocket.svg?raw"]
+end)
+
 module Shopping_bag = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/shopping-bag.svg?raw"]
+end)
+
+module Sparkles = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/sparkles.svg?raw"]
 end)
 
 module Star = Icon.Make (struct

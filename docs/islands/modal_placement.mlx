@@ -1,0 +1,46 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+let placements =
+  [| (`auto, "auto"); (`top, "top"); (`center, "center"); (`bottom, "bottom") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> placements)>
+      (fun (placement, name) _ ->
+        <Modal>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Modal.Backdrop>
+            <Modal.Container placement=(fun () -> placement)>
+              <Modal.Dialog class_="sm:max-w-[360px]">
+                <Modal.Close_trigger />
+                <Modal.Header>
+                  <Modal.Icon class_="bg-default text-foreground">
+                    <Gravity.Rocket class_="size-5" />
+                  </Modal.Icon>
+                  <Modal.Heading>
+                    "Placement: "
+                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  <p>
+                    "This modal uses the "
+                    <code>(fun () -> Jsx.string name)</code>
+                    " placement option. Try different placements to see how \
+                     the modal positions itself on the screen."
+                  </p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button class_="w-full" slot=`close>"Continue"</Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>)
+    </For>
+  </div>

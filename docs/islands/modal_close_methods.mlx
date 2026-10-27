@@ -1,0 +1,92 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+(* HeroUI's second dialog closes itself through its render prop's close; here
+   the page keeps the modal's state, which the buttons set. *)
+let make () =
+  let is_open, set_open = S.create_signal false in
+  <div class_="flex max-w-2xl flex-col gap-8">
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"Using slot=`close"</h3>
+      <p class_="text-sm text-muted">
+        "The simplest way to close a modal. Add "
+        <code>"slot=`close"</code>
+        " to any Button component within the modal. When clicked, it will \
+         automatically close the modal."
+      </p>
+      <Modal>
+        <Button variant=`secondary>"Open Modal"</Button>
+        <Modal.Backdrop>
+          <Modal.Container>
+            <Modal.Dialog class_="sm:max-w-[360px]">
+              <Modal.Header>
+                <Modal.Icon class_="bg-accent-soft text-accent-soft-foreground">
+                  <Gravity.Circle_info class_="size-5" />
+                </Modal.Icon>
+                <Modal.Heading>"Using slot=`close"</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <p>
+                  "Click either button below - both have "
+                  <code>"slot=`close"</code>
+                  " and will close the modal automatically."
+                </p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button slot=`close variant=`secondary>"Cancel"</Button>
+                <Button slot=`close>"Confirm"</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"Using the modal's state"</h3>
+      <p class_="text-sm text-muted">
+        "Keep the modal's state in a "
+        <code>"signal"</code>
+        " and set it to "
+        <code>"false"</code>
+        ". This gives you full control over when and how to close the modal, \
+         allowing you to add custom logic before closing."
+      </p>
+      <Modal is_open=(fun () -> S.get is_open) on_open_change=(S.set set_open)>
+        <Button variant=`secondary>"Open Modal"</Button>
+        <Modal.Backdrop>
+          <Modal.Container>
+            <Modal.Dialog class_="sm:max-w-[360px]">
+              <Modal.Header>
+                <Modal.Icon
+                  class_="bg-success-soft text-success-soft-foreground">
+                  <Gravity.Circle_check class_="size-5" />
+                </Modal.Icon>
+                <Modal.Heading>"Using the modal's state"</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <p>
+                  "The buttons below set the "
+                  <code>"signal"</code>
+                  " to "
+                  <code>"false"</code>
+                  ". You can add validation or other logic before calling "
+                  <code>"S.set set_open false"</code>
+                  "."
+                </p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant=`secondary on_click=(fun _ -> S.set set_open false)>
+                  "Cancel"
+                </Button>
+                <Button on_click=(fun _ -> S.set set_open false)>
+                  "Confirm"
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </div>
+  </div>

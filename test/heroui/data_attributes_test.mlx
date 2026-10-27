@@ -11,6 +11,7 @@ module Avatar = H.Avatar
 module Avatar_group = H.Avatar_group
 module Badge = H.Badge
 module Breadcrumbs = H.Breadcrumbs
+module Modal = H.Modal
 module Pagination = H.Pagination
 module Popover = H.Popover
 module Tooltip = H.Tooltip
@@ -158,6 +159,29 @@ let () =
                     </Popover.Dialog>
                   </Popover.Content>
                 </Popover>
+                <Modal default_open=true>
+                  <Modal.Trigger data_testid="Modal.Trigger">
+                    "Open"
+                  </Modal.Trigger>
+                  <Modal.Backdrop data_testid="Modal.Backdrop">
+                    <Modal.Container data_testid="Modal.Container">
+                      <Modal.Dialog data_testid="Modal.Dialog">
+                        <Modal.Close_trigger data_testid="Modal.Close_trigger"
+                        />
+                        <Modal.Header data_testid="Modal.Header">
+                          <Modal.Icon data_testid="Modal.Icon">"i"</Modal.Icon>
+                          <Modal.Heading data_testid="Modal.Heading">
+                            "Title"
+                          </Modal.Heading>
+                        </Modal.Header>
+                        <Modal.Body data_testid="Modal.Body">"Body"</Modal.Body>
+                        <Modal.Footer data_testid="Modal.Footer">
+                          "Footer"
+                        </Modal.Footer>
+                      </Modal.Dialog>
+                    </Modal.Container>
+                  </Modal.Backdrop>
+                </Modal>
                 <Button_group data_testid="Button_group">
                   <Button data_testid="Button">"First"</Button>
                   <Button>
@@ -341,6 +365,16 @@ let () =
                    ("Popover.Dialog", "[data-slot=popover-dialog]");
                    ("Popover.Arrow", "[data-slot=popover-overlay-arrow-group]");
                    ("Popover.Heading", ".popover__heading");
+                   ("Modal.Trigger", "[data-slot=modal-trigger]");
+                   ("Modal.Backdrop", "[data-slot=modal-backdrop]");
+                   ("Modal.Container", "[data-slot=modal-container]");
+                   ("Modal.Dialog", "[data-slot=modal-dialog]");
+                   ("Modal.Close_trigger", "[data-slot=modal-close-trigger]");
+                   ("Modal.Header", "[data-slot=modal-header]");
+                   ("Modal.Icon", "[data-slot=modal-icon]");
+                   ("Modal.Heading", "[data-slot=modal-heading]");
+                   ("Modal.Body", "[data-slot=modal-body]");
+                   ("Modal.Footer", "[data-slot=modal-footer]");
                    ("Button_group", "[data-slot=button-group]");
                    ("Button", "[data-slot=button]");
                    ( "Button_group.Separator",

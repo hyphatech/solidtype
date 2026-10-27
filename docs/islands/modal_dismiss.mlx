@@ -1,0 +1,85 @@
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+let make () =
+  <div class_="flex max-w-sm flex-col gap-6">
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"is_dismissable"</h3>
+      <p class_="text-sm text-muted">
+        "Controls whether the modal can be dismissed by clicking the overlay \
+         backdrop. Defaults to "
+        <code>"true"</code>
+        ". Set to "
+        <code>"false"</code>
+        " to require explicit close action."
+      </p>
+      <Modal>
+        <Button variant=`secondary>"Open Modal"</Button>
+        <Modal.Backdrop is_dismissable=false>
+          <Modal.Container>
+            <Modal.Dialog class_="sm:max-w-[360px]">
+              <Modal.Close_trigger />
+              <Modal.Header>
+                <Modal.Icon class_="bg-default text-foreground">
+                  <Gravity.Circle_info class_="size-5" />
+                </Modal.Icon>
+                <Modal.Heading>"is_dismissable = false"</Modal.Heading>
+                <p class_="text-sm leading-5 text-muted">
+                  "Clicking the backdrop won't close this modal"
+                </p>
+              </Modal.Header>
+              <Modal.Body>
+                <p>
+                  "Try clicking outside this modal on the overlay - it won't \
+                   close. You must use the close button or press ESC to \
+                   dismiss it."
+                </p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button class_="w-full" slot=`close>"Close"</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"is_keyboard_dismiss_disabled"</h3>
+      <p class_="text-sm text-muted">
+        "Controls whether the ESC key can dismiss the modal. When set to "
+        <code>"true"</code>
+        ", the ESC key will be disabled and users must use explicit close \
+         actions."
+      </p>
+      <Modal>
+        <Button variant=`secondary>"Open Modal"</Button>
+        <Modal.Backdrop is_keyboard_dismiss_disabled=true>
+          <Modal.Container>
+            <Modal.Dialog class_="sm:max-w-[360px]">
+              <Modal.Close_trigger />
+              <Modal.Header>
+                <Modal.Icon class_="bg-default text-foreground">
+                  <Gravity.Circle_info class_="size-5" />
+                </Modal.Icon>
+                <Modal.Heading>
+                  "is_keyboard_dismiss_disabled = true"
+                </Modal.Heading>
+                <p class_="text-sm leading-5 text-muted">
+                  "ESC key is disabled"
+                </p>
+              </Modal.Header>
+              <Modal.Body>
+                <p>
+                  "Press ESC - nothing happens. You must use the close button \
+                   or click the overlay backdrop to dismiss this modal."
+                </p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button class_="w-full" slot=`close>"Close"</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </div>
+  </div>

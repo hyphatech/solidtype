@@ -18,7 +18,11 @@
     button that expands and collapses the disclosure, in HeroUI's look and
     disabled with it. Inside a {!Tooltip}, any button is its trigger, as React
     Aria's focusable context makes it. Where no part above takes one, it is a
-    button. *)
+    button.
+
+    Given [slot=`close], a button closes the dialog it is in, as React Aria's
+    close slot does, besides calling its [on_click]: inside a {!Modal}'s dialog.
+*)
 
 type trigger = {
   component : unit Solidtype.Jsx.component;
@@ -41,6 +45,24 @@ type trigger = {
 val no_trigger : trigger
 (** What a part gives the buttons inside it to make them buttons again: an
     overlay's content, inside an overlay that makes every button its trigger. *)
+
+(** What closes the dialog a part is, which it gives a button inside it with
+    [slot=`close]. *)
+module Close : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:(unit -> unit) Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Solidtype.Jsx.component
+  end
+
+  val use : unit -> (unit -> unit) option
+end
 
 (** The {!trigger} a part gives the buttons below it. *)
 module Trigger : sig
@@ -76,7 +98,7 @@ module Props : sig
     ?full_width:bool Solidtype.Check.value ->
     ?is_icon_only:bool Solidtype.Check.value ->
     ?is_disabled:bool Solidtype.Check.value ->
-    ?slot:[ `trigger ] Solidtype.Check.value ->
+    ?slot:[ `trigger | `close ] Solidtype.Check.value ->
     ?type_:Solidtype.Html.Button.type_ Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->

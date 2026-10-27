@@ -1,0 +1,72 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+module Radio = Solidtype_heroui.Radio
+module Radio_group = Solidtype_heroui.Radio_group
+
+let paragraphs = Array.init 30 (fun i -> i + 1)
+
+let make () =
+  let scroll, set_scroll = S.create_signal "inside" in
+  let label () = String.capitalize_ascii (S.get scroll) in
+  <div class_="flex flex-col gap-4">
+    <Radio_group
+      orientation=`horizontal
+      value=(fun () -> S.get scroll)
+      on_change=(S.set set_scroll)>
+      <Radio value="inside">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Inside"
+        </Radio.Content>
+      </Radio>
+      <Radio value="outside">
+        <Radio.Content>
+          <Radio.Control><Radio.Indicator /></Radio.Control> "Outside"
+        </Radio.Content>
+      </Radio>
+    </Radio_group>
+    <Modal>
+      <Button variant=`secondary>
+        "Open Modal (" (fun () -> Jsx.string (label ())) ")"
+      </Button>
+      <Modal.Backdrop>
+        <Modal.Container
+          scroll=(fun () ->
+                   match S.get scroll with
+                   | "outside" -> `outside
+                   | _ -> `inside)>
+          <Modal.Dialog class_="sm:max-w-[360px]">
+            <Modal.Header>
+              <Modal.Heading>
+                "Scroll: " (fun () -> Jsx.string (label ()))
+              </Modal.Heading>
+              <p class_="text-sm leading-5 text-muted">
+                "Compare scroll behaviors - inside keeps content scrollable \
+                 within the modal, outside allows page scrolling"
+              </p>
+            </Modal.Header>
+            <Modal.Body>
+              <For each=(fun () -> paragraphs)>
+                (fun n _ ->
+                  <p class_="mb-3">
+                    "Paragraph "
+                    (fun () -> Jsx.int n)
+                    ": Lorem ipsum dolor sit amet, consectetur adipiscing \
+                     elit. Nullam pulvinar risus non risus hendrerit \
+                     venenatis. Pellentesque sit amet hendrerit risus, sed \
+                     porttitor quam."
+                  </p>)
+              </For>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot=`close variant=`secondary>"Cancel"</Button>
+              <Button slot=`close>"Confirm"</Button>
+            </Modal.Footer>
+            <Modal.Close_trigger />
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
+  </div>

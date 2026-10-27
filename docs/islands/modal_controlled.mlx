@@ -1,0 +1,147 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+(* HeroUI shows React's useState and its own useOverlayState; a signal is
+   Solid's state, so both halves keep the modal's in one. *)
+let make () =
+  let is_open, set_open = S.create_signal false in
+  let state_open, set_state_open = S.create_signal false in
+  <div class_="flex max-w-md flex-col gap-8">
+    <div class_="flex flex-col gap-3">
+      <h3 class_="text-lg font-semibold text-foreground">"With a signal"</h3>
+      <p class_="text-sm leading-relaxed text-pretty text-muted">
+        "Control the modal using Solid's "
+        <code class_="text-foreground">"signal"</code>
+        " for simple state management. Perfect for basic use cases."
+      </p>
+      <div
+        class_="flex flex-col items-start gap-3 rounded-2xl bg-surface p-4 \
+                shadow-sm">
+        <div class_="flex w-full items-center justify-between">
+          <p class_="text-xs text-muted">
+            "Status: "
+            <span class_="font-mono font-medium text-foreground">
+              (fun () ->
+                Jsx.string (if S.get is_open then "open" else "closed"))
+            </span>
+          </p>
+        </div>
+        <div class_="flex gap-2">
+          <Button
+            size=`sm variant=`secondary on_click=(fun _ -> S.set set_open true)>
+            "Open Modal"
+          </Button>
+          <Button
+            size=`sm variant=`tertiary on_click=(fun _ -> S.update set_open not)>
+            "Toggle"
+          </Button>
+        </div>
+      </div>
+      <Modal.Backdrop
+        is_open=(fun () -> S.get is_open) on_open_change=(S.set set_open)>
+        <Modal.Container>
+          <Modal.Dialog class_="sm:max-w-[360px]">
+            <Modal.Close_trigger />
+            <Modal.Header>
+              <Modal.Icon class_="bg-accent-soft text-accent-soft-foreground">
+                <Gravity.Circle_check class_="size-5" />
+              </Modal.Icon>
+              <Modal.Heading>"Controlled with a signal"</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                "This modal is controlled by Solid's "
+                <code>"signal"</code>
+                ". Pass "
+                <code>"is_open"</code>
+                " and "
+                <code>"on_open_change"</code>
+                " props to manage the modal state externally."
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot=`close variant=`secondary>"Cancel"</Button>
+              <Button slot=`close>"Confirm"</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </div>
+    <div class_="flex flex-col gap-3">
+      <h3 class_="text-lg font-semibold text-foreground">
+        "With a signal's setter"
+      </h3>
+      <p class_="text-sm leading-relaxed text-pretty text-muted">
+        "Use the "
+        <code class_="text-foreground">"signal"</code>
+        "'s setter for a cleaner API with convenient calls like "
+        <code>"S.set set_open true"</code>
+        ", "
+        <code>"S.set set_open false"</code>
+        ", and "
+        <code>"S.update set_open not"</code>
+        "."
+      </p>
+      <div
+        class_="flex flex-col items-start gap-3 rounded-2xl bg-surface p-4 \
+                shadow-sm">
+        <div class_="flex w-full items-center justify-between">
+          <p class_="text-xs text-muted">
+            "Status: "
+            <span class_="font-mono font-medium text-foreground">
+              (fun () ->
+                Jsx.string (if S.get state_open then "open" else "closed"))
+            </span>
+          </p>
+        </div>
+        <div class_="flex gap-2">
+          <Button
+            size=`sm
+            variant=`secondary
+            on_click=(fun _ -> S.set set_state_open true)>
+            "Open Modal"
+          </Button>
+          <Button
+            size=`sm
+            variant=`tertiary
+            on_click=(fun _ -> S.update set_state_open not)>
+            "Toggle"
+          </Button>
+        </div>
+      </div>
+      <Modal.Backdrop
+        is_open=(fun () -> S.get state_open)
+        on_open_change=(S.set set_state_open)>
+        <Modal.Container>
+          <Modal.Dialog class_="sm:max-w-[360px]">
+            <Modal.Close_trigger />
+            <Modal.Header>
+              <Modal.Icon class_="bg-success-soft text-success-soft-foreground">
+                <Gravity.Circle_check class_="size-5" />
+              </Modal.Icon>
+              <Modal.Heading>"Controlled with a signal's setter"</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <p>
+                "The "
+                <code>"signal"</code>
+                {js|'s setter covers the common operations. No need to manually create callbacks—just use |js}
+                <code>"S.set set_open true"</code>
+                ", "
+                <code>"S.set set_open false"</code>
+                ", or "
+                <code>"S.update set_open not"</code>
+                "."
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot=`close variant=`secondary>"Cancel"</Button>
+              <Button slot=`close>"Confirm"</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </div>
+  </div>

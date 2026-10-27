@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Modal`: HeroUI's Modal on Kobalte's dialog, opened by a
+  `Button` inside it or a `Modal.Trigger`, or a `Modal.Backdrop` alone and
+  controlled; HeroUI's backdrop variants, placements, sizes and scroll, its
+  header, icon, heading, body, footer and close trigger, dismissed by a
+  press on the backdrop or Escape unless told not to, the focus kept inside
+  and given back, and HeroUI's enter and exit animations.
+- `Solidtype_heroui.Button` takes `slot=`close`, which closes the dialog
+  it is in, as React Aria's close slot does.
 - `Solidtype_heroui.Popover`: HeroUI's Popover on Kobalte's, opened by a
   `Button` inside it or a `Popover.Trigger`, its dialog given the focus and
   named by its heading, with HeroUI's arrow, placements, offset and flip,

@@ -494,6 +494,20 @@ external popover_props :
 external popover : Dom.htmlDivElement -> popover_props -> unit = "popover"
 [@@mel.module "./react/heroui.tsx"]
 
+type modal_props
+
+external modal_props :
+  variant:([ `opaque | `blur | `transparent ][@mel.as "variant"]) ->
+  placement:([ `auto | `center | `top | `bottom ][@mel.as "placement"]) ->
+  size:([ `xs | `sm | `md | `lg | `cover | `full ][@mel.as "size"]) ->
+  is_dismissable:(bool[@mel.as "isDismissable"]) ->
+  unit ->
+  modal_props = ""
+[@@mel.obj]
+
+external modal : Dom.htmlDivElement -> modal_props -> unit = "modal"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :
