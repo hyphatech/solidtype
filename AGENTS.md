@@ -65,6 +65,8 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
   panel              what a disclosure's content and an accordion's panel
                      share: kept on the page, found by find in page, and
                      sized as HeroUI's styles animate it
+  overlay            what every overlay shares: on the page while it opens,
+                     is open, and closes, as HeroUI's styles animate it
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte

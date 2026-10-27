@@ -1,0 +1,37 @@
+module Button = Solidtype_heroui.Button
+module Tooltip = Solidtype_heroui.Tooltip
+
+let make () =
+  <div class_="grid grid-cols-3 gap-4">
+    <div />
+    <Tooltip delay_ms=0.>
+      <Button class_="w-full" variant=`tertiary>"Top"</Button>
+      <Tooltip.Content show_arrow=true placement=`top>
+        <Tooltip.Arrow /> <p>"Top placement"</p>
+      </Tooltip.Content>
+    </Tooltip>
+    <div />
+    <Tooltip delay_ms=0.>
+      <Button class_="w-full" variant=`tertiary>"Left"</Button>
+      <Tooltip.Content show_arrow=true placement=`left>
+        <Tooltip.Arrow /> <p>"Left placement"</p>
+      </Tooltip.Content>
+    </Tooltip>
+    <div class_="flex items-center justify-center">
+      <span class_="text-sm text-muted">"Hover buttons"</span>
+    </div>
+    <Tooltip delay_ms=0.>
+      <Button class_="w-full" variant=`tertiary>"Right"</Button>
+      <Tooltip.Content show_arrow=true placement=`right>
+        <Tooltip.Arrow /> <p>"Right placement"</p>
+      </Tooltip.Content>
+    </Tooltip>
+    <div />
+    <Tooltip delay_ms=0.>
+      <Button class_="w-full" variant=`tertiary>"Bottom"</Button>
+      <Tooltip.Content show_arrow=true placement=`bottom>
+        <Tooltip.Arrow /> <p>"Bottom placement"</p>
+      </Tooltip.Content>
+    </Tooltip>
+    <div />
+  </div>

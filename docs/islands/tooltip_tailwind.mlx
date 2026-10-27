@@ -1,0 +1,12 @@
+module Button = Solidtype_heroui.Button
+module Tooltip = Solidtype_heroui.Tooltip
+
+let make () =
+  <Tooltip delay_ms=0.>
+    <Button variant=`secondary>"Share link"</Button>
+    <Tooltip.Content
+      class_="rounded-lg border border-border/80 bg-surface px-2.5 py-1 \
+              text-xs text-foreground shadow-sm">
+      <p>"Copied to clipboard"</p>
+    </Tooltip.Content>
+  </Tooltip>

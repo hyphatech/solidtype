@@ -1,0 +1,53 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Tooltip = Solidtype_heroui.Tooltip
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let placements =
+  [| (`top, "top"); (`bottom, "bottom"); (`left, "left"); (`right, "right") |]
+
+let make () =
+  let open_, set_open = S.create_signal true in
+  let placement, set_placement = S.create_signal (`top, "top") in
+  let arrow, set_arrow = S.create_signal true in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle label="open" on=(fun () -> S.get open_) on_toggle=(S.set set_open)
+      />
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+      <Toggle
+        label="arrow" on=(fun () -> S.get arrow) on_toggle=(S.set set_arrow)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<div class_="flex justify-center py-16">
+                   <Tooltip
+                     is_open=(fun () -> S.get open_)
+                     on_open_change=(S.set set_open)>
+                     <Button variant=`secondary>"Hover me"</Button>
+                     <Tooltip.Content
+                       placement=(fun () -> fst (S.get placement))
+                       show_arrow=(fun () -> S.get arrow)>
+                       <Solidtype.Show when_=(fun () -> S.get arrow)>
+                         <Tooltip.Arrow />
+                       </Solidtype.Show>
+                       <p>"This is a tooltip"</p>
+                     </Tooltip.Content>
+                   </Tooltip>
+                 </div>)
+      react=(fun host ->
+              Heroui_react.tooltip host
+                (Heroui_react.tooltip_props ~is_open:(S.get open_)
+                   ~on_open_change:(S.set set_open)
+                   ~placement:(fst (S.get placement))
+                   ~show_arrow:(S.get arrow) ()))
+    />
+  </section>

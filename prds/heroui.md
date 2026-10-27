@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip.
 Date: 2026-10-23
 
 ## The problem
@@ -152,6 +152,14 @@ check written by hand where it passes an element's every attribute on, as
   once all have, by `For`, so what turns on the whole list is right on the
   server too. Solid's server makes every child before it writes any, and
   nothing lighter defers a member's element until its siblings exist.
+- **An overlay's presence**: HeroUI's styles animate an overlay in by
+  `data-entering` and out by `data-exiting`, which React Aria writes while
+  each animation runs, and keeps the overlay on the page until its exit
+  ends. `Overlay` does the same over Kobalte's open state, with Kobalte's
+  content kept mounted by `forceMount`; every overlay of group 5 shares it.
+- **A shape Kobalte draws for itself**: Kobalte's popper arrow draws its own
+  shape and takes no other, so a port keeps it, hidden, where Kobalte places
+  it, and draws HeroUI's arrow on the same spot.
 - **What a group gives**: a context per group -- `Button_group`,
   `Avatar_group`, `Checkbox_group`, `Radio_group`, `Toggle_button_group`,
   `Disclosure_group`, `Fieldset`, `Surface` -- read by the components
@@ -352,8 +360,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Pagination, HeroUI's parts on Kobalte's buttons
 
 ### Group 5: overlays and lists
-- [ ] Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox,
-  Select, ComboBox, Autocomplete
+- [x] Tooltip, on Kobalte's, and `Overlay`, an overlay's presence through
+  HeroUI's enter and exit animations
+- [ ] Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox, Select,
+  ComboBox, Autocomplete
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,

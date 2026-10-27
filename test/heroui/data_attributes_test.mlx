@@ -12,6 +12,7 @@ module Avatar_group = H.Avatar_group
 module Badge = H.Badge
 module Breadcrumbs = H.Breadcrumbs
 module Pagination = H.Pagination
+module Tooltip = H.Tooltip
 module Button = H.Button
 module Button_group = H.Button_group
 module Card = H.Card
@@ -135,6 +136,14 @@ let () =
                     </Pagination.Item>
                   </Pagination.Content>
                 </Pagination>
+                <Tooltip default_open=true>
+                  <Tooltip.Trigger data_testid="Tooltip.Trigger">
+                    "Info"
+                  </Tooltip.Trigger>
+                  <Tooltip.Content data_testid="Tooltip.Content">
+                    <Tooltip.Arrow data_testid="Tooltip.Arrow" /> "More"
+                  </Tooltip.Content>
+                </Tooltip>
                 <Button_group data_testid="Button_group">
                   <Button data_testid="Button">"First"</Button>
                   <Button>
@@ -310,6 +319,9 @@ let () =
                    ("Pagination.Ellipsis", "[data-slot=pagination-ellipsis]");
                    ("Pagination.Next", "[data-slot=pagination-next]");
                    ("Pagination.Next_icon", "[data-slot=pagination-next-icon]");
+                   ("Tooltip.Trigger", "[data-slot=tooltip-trigger]");
+                   ("Tooltip.Content", "[role=tooltip]");
+                   ("Tooltip.Arrow", "[data-slot=tooltip-arrow]");
                    ("Button_group", "[data-slot=button-group]");
                    ("Button", "[data-slot=button]");
                    ( "Button_group.Separator",

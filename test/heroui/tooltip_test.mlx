@@ -1,0 +1,207 @@
+(* HeroUI's Tooltip on Kobalte's, beside the same tooltip in React: its
+   trigger and the tooltip, as the trigger is hovered and left, reached by
+   Tab, and Escape pressed. *)
+
+module Tooltip = Solidtype_heroui.Tooltip
+module Button = Solidtype_heroui.Button
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
+  ?show_arrow:(bool[@mel.as "showArrow"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?custom:bool ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Tooltip.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Tooltip.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Tooltip.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+type moved
+type coords
+
+external coords :
+  client_x:(float[@mel.as "clientX"]) ->
+  client_y:(float[@mel.as "clientY"]) ->
+  unit ->
+  coords = ""
+[@@mel.obj]
+
+external moved : target:Dom.element -> coords:coords -> unit -> moved = ""
+[@@mel.obj]
+
+external move : T.user -> moved -> T.pointers Js.Promise.t = "pointer"
+[@@mel.send]
+
+(* A while for a framework's timers, its delays at nought, to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself: Kobalte's own state, present and
+   empty, which no style of HeroUI's reads; React Aria's tabindex on what is
+   focusable already, and its arrow's default class; Kobalte's button type on
+   the [<div>] its trigger is, which only a button reads; and where each
+   places the tooltip, inline. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ("data-expanded" | "data-closed"), Some "" -> true
+  | "tabindex", _ -> Option.is_none (T.attribute e "role")
+  | "class", Some "react-aria-OverlayArrow" -> true
+  | "type", _ -> not (String.equal (tag_name e) "BUTTON")
+  | "style", _ -> true
+  | _ -> false
+
+(* An element: its tag, its attributes and its text; what describes the
+   trigger by the tooltip's id, which each framework makes its own way. *)
+let one e =
+  let described =
+    match T.attribute e "aria-describedby" with
+    | Some _ -> [ "described by the tooltip" ]
+    | None -> []
+  in
+  String.concat " "
+    (tag_name e
+     :: T.attributes_but
+          ("aria-describedby"
+          :: (T.attribute_names e |> Array.to_list
+             |> List.filter (framework_only e)))
+          e
+     :: described
+    @ [])
+  ^ if element_count e > 0 then "" else " " ^ text e
+
+(* The trigger, then the tooltip and all inside it, wherever it is, but for
+   Kobalte's own arrow, which the port hides, and draws HeroUI's. *)
+let shown () =
+  let all selector = Js.Array.from (query_all T.body selector) in
+  Array.concat
+    [
+      all "[data-slot=tooltip-trigger], [data-slot=button]";
+      all
+        "[role=tooltip], [role=tooltip] \
+         *:not([aria-hidden=true]):not([aria-hidden=true] *)";
+    ]
+  |> Array.map one
+
+let trigger () =
+  match
+    Js.Array.from
+      (query_all T.body "[data-slot=tooltip-trigger], [data-slot=button]")
+  with
+  | [||] -> T.body
+  | found -> found.(0)
+
+(* The tooltip as the trigger is hovered, left, reached by Tab, and Escape
+   pressed: what is shown after each. The page is clicked first, as a pointer
+   has always moved before it hovers: React Aria opens on a hover only once
+   it has seen one. *)
+let walk ~step =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    seen := (name, shown ()) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "page clicked" (fun () -> T.click user T.body) in
+  let* () = after "hovered" (fun () -> T.hover user (trigger ())) in
+  let* () =
+    after "left" (fun () ->
+        (* Far from both, past the area Kobalte lets a pointer cross to the
+           tooltip in, which jsdom, with no layout, puts at the page's
+           corner. *)
+        let* () = T.unhover user (trigger ()) in
+        let* (_ : T.pointers) =
+          move user
+            (moved ~target:T.body
+               ~coords:(coords ~client_x:500. ~client_y:500. ())
+               ())
+        in
+        Js.Promise.resolve ())
+  in
+  let* () = after "Tab" (fun () -> T.tab user) in
+  let* () = after "Escape" (fun () -> T.keyboard user "{Escape}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?placement ?(show_arrow = false) ?(is_disabled = false)
+    ?(custom = false) () =
+  T.render (fun () ->
+      <Tooltip
+        delay_ms=0. close_delay_ms=0. is_disabled=(fun () -> is_disabled)>
+        (fun () ->
+          if custom then
+            Solidtype.Jsx.element
+              <Tooltip.Trigger aria_label="Status">
+                <span>"Active"</span>
+              </Tooltip.Trigger>
+          else
+            Solidtype.Jsx.element <Button variant=`secondary>"Hover me"</Button>)
+        <Tooltip.Content
+          ?placement=(fun () -> placement)
+          show_arrow=(fun () -> show_arrow)
+          should_flip=false>
+          (fun () ->
+            if show_arrow then Solidtype.Jsx.element <Tooltip.Arrow />
+            else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+          <p>"This is a tooltip"</p>
+        </Tooltip.Content>
+      </Tooltip>);
+  let* solidtype = walk ~step:(fun action -> action ()) in
+  T.cleanup ();
+  let (_ : Dom.element) =
+    Twin.render (props ?placement ~show_arrow ~is_disabled ~custom ())
+  in
+  let* react = walk ~step:Twin.step in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Tooltip" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "opens on a button, as React's does" (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "draws its arrow below, as React's" (fun () ->
+          let* r = both ~placement:`bottom ~show_arrow:true () in
+          same r);
+      Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
+          let* r = both ~custom:true () in
+          same r);
+      Jest.testPromise "stays shut while disabled, as React's" (fun () ->
+          let* r = both ~is_disabled:true () in
+          same r))

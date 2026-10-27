@@ -1,0 +1,175 @@
+---
+title: Tooltip
+description: Text shown as an element is hovered or focused, HeroUI's on Kobalte's.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/tooltip_usage.jsx";
+import ExUsageCode from "@islands/tooltip_usage.mlx?raw";
+import * as ExPlacement from "@islands/tooltip_placement.jsx";
+import ExPlacementCode from "@islands/tooltip_placement.mlx?raw";
+import * as ExArrow from "@islands/tooltip_with_arrow.jsx";
+import ExArrowCode from "@islands/tooltip_with_arrow.mlx?raw";
+import * as ExCustom from "@islands/tooltip_custom_triggers.jsx";
+import ExCustomCode from "@islands/tooltip_custom_triggers.mlx?raw";
+import * as ExTailwind from "@islands/tooltip_tailwind.jsx";
+import ExTailwindCode from "@islands/tooltip_tailwind.mlx?raw";
+import * as Demo from "@islands/tooltip_demo.jsx";
+
+`Solidtype_heroui.Tooltip` is Kobalte's `Tooltip`, with the classes HeroUI's
+own `tooltipVariants` gives and HeroUI's arrow. A `Button` inside it is its
+trigger, as in HeroUI; anything else is wrapped in `Tooltip.Trigger`.
+
+## Usage
+
+<Example code={ExUsageCode} title="tooltip_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Tooltip>
+  <Tooltip.Trigger><Button>"Hover for tooltip"</Button></Tooltip.Trigger>
+  <Tooltip.Content>
+    <Tooltip.Arrow />
+    "Helpful information about this element"
+  </Tooltip.Content>
+</Tooltip>
+```
+
+## Examples
+
+### Placement
+
+<Example code={ExPlacementCode} title="tooltip_placement.mlx"><ExPlacement.make client:visible /></Example>
+
+### With Arrow
+
+<Example code={ExArrowCode} title="tooltip_with_arrow.mlx"><ExArrow.make client:visible /></Example>
+
+### Custom Triggers
+
+<Example code={ExCustomCode} title="tooltip_custom_triggers.mlx"><ExCustom.make client:visible /></Example>
+
+### Render Function
+
+HeroUI's Render Function example gives the content `render`, React's way to
+swap the element it renders, which a Solid component has no need of.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="tooltip_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .tooltip {
+    @apply rounded-xl shadow-lg;
+  }
+
+  .tooltip__trigger {
+    @apply cursor-help;
+  }
+}
+```
+
+## Styling Reference
+
+### Global Delay Configuration
+
+A tooltip given no `delay_ms` or `close_delay_ms` reads the page's, as
+HeroUI's does, else waits 1500 ms to open and 500 ms to close:
+
+```css
+:root {
+  --tooltip-delay: 1500ms;
+  --tooltip-close-delay: 500ms;
+}
+```
+
+### CSS Classes
+
+- `.tooltip`, `.tooltip__trigger`
+
+### Interactive States
+
+- **Entering**: `[data-entering="true"]`, while it appears
+- **Exiting**: `[data-exiting="true"]`, while it disappears
+- **Placement**: `[data-placement="top"]`, and the other sides
+
+## How it is made
+
+Kobalte's tooltip opens, closes, places itself and names its trigger's
+description. As its pointer leaves the trigger, Kobalte keeps the tooltip
+open while the pointer crosses toward it, where React Aria waits out its
+close delay. The port keeps the tooltip on the page while HeroUI's exit
+animation plays, and declares `data-entering` and `data-exiting` as React
+Aria does, so HeroUI's keyframes run both ways.
+
+Kobalte's arrow draws a shape of its own, so the port keeps it, hidden, where
+Kobalte places it, and draws HeroUI's arrow there. `Tooltip.Trigger` is
+Kobalte's trigger as the `<div role="button">` HeroUI's is, so a button
+inside it is not a button inside a button.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Tooltip
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `delay` | `delay_ms` | `float` | `--tooltip-delay`, else 1500 | Before it opens |
+| `closeDelay` | `close_delay_ms` | `float` | `--tooltip-close-delay`, else 500 | Before it closes |
+| `trigger` | `trigger` | `` `hover `` \| `` `focus `` | `` `hover `` | What opens it |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it never opens |
+| `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
+| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
+| `children` | `children` | elements | | Its trigger and its content |
+
+### Tooltip.Content
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | `` `top `` | Its side of the trigger |
+| `offset` | `offset` | `float` | 3, 7 with the arrow | Its distance from the trigger |
+| `showArrow` | `show_arrow` | `bool` | `false` | Whether it draws an arrow, for its offset |
+| `shouldFlip` | `should_flip` | `bool` | `true` | Whether it moves to the other side where there is no room |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | What it shows |
+
+### Tooltip.Trigger
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `aria-label` | `aria_label` | `string` | Its name, where its children give none |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | What it wraps |
+
+### Tooltip.Arrow
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Its class |
+| `children` | `children` | elements | An arrow of its own, in place of HeroUI's |
+
+## Beside React
+
+Original HeroUI documentation: [Tooltip](https://heroui.com/en/docs/react/components/tooltip).
+
+The same HeroUI Tooltip twice, sharing whether it is open: in solidtype on
+the left, in React on the right. Below them, every attribute of each trigger:
+a marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

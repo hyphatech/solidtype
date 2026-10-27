@@ -107,8 +107,9 @@ module Heading = struct
     let trigger =
       {
         Button.component = Kobalte.Trigger.component;
-        is_disabled = i.item_disabled;
-        controls = i.content_id;
+        is_disabled = Some i.item_disabled;
+        controls = Some i.content_id;
+        needs_slot = true;
       }
     in
     <Kobalte.Header

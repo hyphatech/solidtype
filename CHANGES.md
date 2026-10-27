@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Tooltip`: HeroUI's Tooltip on Kobalte's, opened by a
+  `Button` inside it or a `Tooltip.Trigger` around anything else, with
+  HeroUI's arrow, placements, offset and flip, delays of its own or the
+  page's `--tooltip-delay`, and HeroUI's enter and exit animations.
+- `Solidtype_heroui.Button.trigger` takes `is_disabled` and `controls` as
+  options and `needs_slot`, so a part may give any button below it its
+  trigger, as a tooltip does. Breaking for a part outside the library that
+  builds one.
 - `Solidtype_heroui.Pagination`: HeroUI's Pagination, its parts HeroUI's and
   its buttons Kobalte's -- a summary, pages, previous and next, an ellipsis,
   in three sizes -- its page kept by the application, as in HeroUI.

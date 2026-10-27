@@ -468,6 +468,20 @@ external pagination : Dom.htmlDivElement -> pagination_props -> unit
   = "pagination"
 [@@mel.module "./react/heroui.tsx"]
 
+type tooltip_props
+
+external tooltip_props :
+  is_open:(bool[@mel.as "isOpen"]) ->
+  on_open_change:((bool -> unit)[@mel.as "onOpenChange"]) ->
+  placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
+  show_arrow:(bool[@mel.as "showArrow"]) ->
+  unit ->
+  tooltip_props = ""
+[@@mel.obj]
+
+external tooltip : Dom.htmlDivElement -> tooltip_props -> unit = "tooltip"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

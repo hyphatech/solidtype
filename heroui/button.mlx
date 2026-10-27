@@ -2,13 +2,15 @@ module Kobalte = Solidtype_kobalte.Button
 
 type trigger = {
   component : unit Solidtype.Jsx.component;
-  is_disabled : unit -> bool;
-  controls : string;
+  is_disabled : (unit -> bool) option;
+  controls : string option;
+  needs_slot : bool;
 }
 
 (* A button another part makes its trigger, as React Aria's ButtonContext
    slots do: a disclosure's heading gives it Kobalte's trigger, which is
-   Kobalte's button with the part's state. *)
+   Kobalte's button with the part's state; and as its FocusableContext does,
+   a tooltip gives any button below it Kobalte's tooltip trigger. *)
 module Trigger = Solidtype.Context.Make_optional (struct
   type t = trigger
 end)
@@ -45,13 +47,18 @@ let%component make
     given full_width (fun (g : Button_group.group) -> g.full_width ()) false
   in
   let trigger =
-    match slot () with Some `trigger -> Trigger.use () | None -> None
+    match (slot (), Trigger.use ()) with
+    | Some `trigger, t -> t
+    | None, Some t when not t.needs_slot -> Some t
+    | None, (Some _ | None) -> None
   in
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
-    match (is_disabled (), trigger) with
+    match
+      (is_disabled (), Option.bind trigger (fun (t : trigger) -> t.is_disabled))
+    with
     | Some d, _ -> d
-    | None, Some t -> t.is_disabled ()
+    | None, Some part -> part ()
     | None, None -> (
         match
           Option.bind group (fun (g : Button_group.group) -> g.is_disabled ())
@@ -77,7 +84,7 @@ let%component make
     disabled=(fun () -> is_disabled ())
     ?aria_label
     ?aria_controls=(fun () ->
-                     Option.map (fun (t : trigger) -> t.controls) trigger)
+                     Option.bind trigger (fun (t : trigger) -> t.controls))
     ref=(fun b -> Interaction.watch i b)
     ?slot=(fun () -> Option.map (fun `trigger -> "trigger") (slot ()))
     data_slot="button"

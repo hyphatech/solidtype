@@ -32,8 +32,9 @@ module Heading = struct
     let trigger =
       {
         Button.component = Collapsible.Trigger.component;
-        is_disabled = d.disabled;
-        controls = d.content_id;
+        is_disabled = Some d.disabled;
+        controls = Some d.content_id;
+        needs_slot = true;
       }
     in
     <h3

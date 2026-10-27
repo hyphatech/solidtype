@@ -16,19 +16,24 @@
     Given [slot=`trigger], a button is the trigger of the part above it that
     takes one, as React Aria's slots are: inside a {!Disclosure.Heading}, the
     button that expands and collapses the disclosure, in HeroUI's look and
-    disabled with it. Where no part above takes one, it is a button. *)
+    disabled with it. Inside a {!Tooltip}, any button is its trigger, as React
+    Aria's focusable context makes it. Where no part above takes one, it is a
+    button. *)
 
 type trigger = {
   component : unit Solidtype.Jsx.component;
       (** What the button renders as, in place of Kobalte's [Button.Root]: a
           component that takes the same props and is a [<button>]. *)
-  is_disabled : unit -> bool;
+  is_disabled : (unit -> bool) option;
       (** Whether the part is disabled, which the button is where it does not
-          say. *)
-  controls : string;
+          say; a part that says nothing leaves it to the button's group. *)
+  controls : string option;
       (** The id of what it shows and hides, its [aria-controls]. *)
+  needs_slot : bool;
+      (** Whether only a button with [slot=`trigger] takes it, as a disclosure's
+          heading gives it, or any button, as a tooltip does. *)
 }
-(** The trigger a part gives a button below it with [slot=`trigger]. *)
+(** The trigger a part gives a button below it. *)
 
 (** The {!trigger} a part gives the buttons below it. *)
 module Trigger : sig

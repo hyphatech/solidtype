@@ -107,6 +107,11 @@ module Circle_info = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/circle-info.svg?raw"]
 end)
 
+module Circle_question = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/circle-question.svg?raw"]
+end)
+
 module Circle_xmark_fill = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/circle-xmark-fill.svg?raw"]

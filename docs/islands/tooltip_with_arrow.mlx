@@ -1,0 +1,18 @@
+module Button = Solidtype_heroui.Button
+module Tooltip = Solidtype_heroui.Tooltip
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Tooltip delay_ms=0.>
+      <Button variant=`secondary>"With Arrow"</Button>
+      <Tooltip.Content show_arrow=true>
+        <Tooltip.Arrow /> <p>"Tooltip with arrow indicator"</p>
+      </Tooltip.Content>
+    </Tooltip>
+    <Tooltip delay_ms=0.>
+      <Button variant=`primary>"Custom Offset"</Button>
+      <Tooltip.Content show_arrow=true offset=12.>
+        <Tooltip.Arrow /> <p>"Custom offset from trigger"</p>
+      </Tooltip.Content>
+    </Tooltip>
+  </div>

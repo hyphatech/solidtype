@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Pagination, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Typography } from "@heroui/react";
+import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, NumberField, Pagination, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -715,6 +715,29 @@ export function pagination(host: HTMLElement, { page, onPage, size }: Pagination
           </Pagination.Item>
         </Pagination.Content>
       </Pagination>,
+    ),
+  );
+}
+
+type TooltipProps = {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  placement: "top" | "bottom" | "left" | "right";
+  showArrow: boolean;
+};
+
+export function tooltip(host: HTMLElement, { isOpen, onOpenChange, placement, showArrow }: TooltipProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <div className="flex justify-center py-16">
+        <Tooltip isOpen={isOpen} onOpenChange={onOpenChange}>
+          <Button variant="secondary">Hover me</Button>
+          <Tooltip.Content placement={placement} showArrow={showArrow}>
+            {showArrow ? <Tooltip.Arrow /> : null}
+            <p>This is a tooltip</p>
+          </Tooltip.Content>
+        </Tooltip>
+      </div>,
     ),
   );
 }

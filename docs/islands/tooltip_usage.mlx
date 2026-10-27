@@ -1,0 +1,16 @@
+module Button = Solidtype_heroui.Button
+module Tooltip = Solidtype_heroui.Tooltip
+
+let make () =
+  <div class_="flex items-center gap-4">
+    <Tooltip delay_ms=0.>
+      <Button variant=`secondary>"Hover me"</Button>
+      <Tooltip.Content><p>"This is a tooltip"</p></Tooltip.Content>
+    </Tooltip>
+    <Tooltip delay_ms=0.>
+      <Button is_icon_only=true aria_label="More information" variant=`tertiary>
+        <Gravity.Circle_info />
+      </Button>
+      <Tooltip.Content><p>"More information"</p></Tooltip.Content>
+    </Tooltip>
+  </div>
