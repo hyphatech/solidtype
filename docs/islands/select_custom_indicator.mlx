@@ -1,0 +1,36 @@
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  <Select class_="w-[256px]" placeholder="Select one">
+    <Label>"State"</Label>
+    <Select.Trigger>
+      <Select.Value />
+      <Select.Indicator class_="size-3">
+        <Gravity.Chevrons_expand_vertical />
+      </Select.Indicator>
+    </Select.Trigger>
+    <Select.Popover>
+      <List_box>
+        <List_box.Item id="florida" text_value="Florida">
+          "Florida" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="delaware" text_value="Delaware">
+          "Delaware" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="california" text_value="California">
+          "California" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="texas" text_value="Texas">
+          "Texas" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="new-york" text_value="New York">
+          "New York" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="washington" text_value="Washington">
+          "Washington" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Select.Popover>
+  </Select>

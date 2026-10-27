@@ -478,6 +478,19 @@ external list_box_props :
 external list_box : Dom.htmlDivElement -> list_box_props -> unit = "listBox"
 [@@mel.module "./react/heroui.tsx"]
 
+type select_props
+
+external select_props :
+  selection_mode:([ `single | `multiple ][@mel.as "selectionMode"]) ->
+  variant:([ `primary | `secondary ][@mel.as "variant"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  select_props = ""
+[@@mel.obj]
+
+external select : Dom.htmlDivElement -> select_props -> unit = "select"
+[@@mel.module "./react/heroui.tsx"]
+
 type dropdown_props
 
 external dropdown_props :

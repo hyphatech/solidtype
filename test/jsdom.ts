@@ -13,6 +13,17 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 };
+// Nor an IntersectionObserver, by which a list box's load-more sentinel
+// sees it is in view: one that never reports stands in, as for a list
+// scrolled nowhere.
+globalThis.IntersectionObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+} as unknown as typeof IntersectionObserver;
 // Nor has it CSS.escape, by which user-event finds a radio's group as an
 // arrow key moves the choice: CSSOM's serialisation of an identifier
 // stands in.

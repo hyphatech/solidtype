@@ -1,0 +1,52 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+type state = { id : string; name : string }
+
+let states =
+  [|
+    { id = "california"; name = "California" };
+    { id = "texas"; name = "Texas" };
+    { id = "florida"; name = "Florida" };
+    { id = "new-york"; name = "New York" };
+    { id = "illinois"; name = "Illinois" };
+    { id = "pennsylvania"; name = "Pennsylvania" };
+  |]
+
+let make () =
+  let state, set_state = S.create_signal [| "california" |] in
+  let selected_state () =
+    Array.find_opt
+      (fun s -> Array.exists (String.equal s.id) (S.get state))
+      states
+  in
+  <div class_="space-y-2">
+    <Select
+      class_="w-[256px]"
+      placeholder="Select a state"
+      value=(fun () -> S.get state)
+      on_change=(fun value -> S.set set_state value)>
+      <Label>"State (controlled)"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <Solidtype.For each=(fun () -> states)>
+            (fun (state : state) _ ->
+              <List_box.Item
+                id=(fun () -> state.id) text_value=(fun () -> state.name)>
+                (fun () -> Jsx.string state.name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Select.Popover>
+    </Select>
+    <p class_="text-sm text-muted">
+      "Selected: "
+      (fun () ->
+        Jsx.string
+          (match selected_state () with Some s -> s.name | None -> "None"))
+    </p>
+  </div>

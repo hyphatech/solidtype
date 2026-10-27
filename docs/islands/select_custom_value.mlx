@@ -1,0 +1,116 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+type user = {
+  avatar_url : string;
+  email : string;
+  fallback : string;
+  id : string;
+  name : string;
+}
+
+let users =
+  [|
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg";
+      email = "bob@heroui.com";
+      fallback = "B";
+      id = "1";
+      name = "Bob";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg";
+      email = "fred@heroui.com";
+      fallback = "F";
+      id = "2";
+      name = "Fred";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg";
+      email = "martha@heroui.com";
+      fallback = "M";
+      id = "3";
+      name = "Martha";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg";
+      email = "john@heroui.com";
+      fallback = "J";
+      id = "4";
+      name = "John";
+    };
+    {
+      avatar_url =
+        "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg";
+      email = "jane@heroui.com";
+      fallback = "J";
+      id = "5";
+      name = "Jane";
+    };
+  |]
+
+let make () =
+  <Select class_="w-[256px]" placeholder="Select a user">
+    <Label>"User"</Label>
+    <Select.Trigger>
+      <Select.Value>
+        (fun keys ->
+          <span class_="contents">
+            (fun () ->
+              match S.get keys with
+              | [| key |] -> (
+                  match
+                    Array.find_opt
+                      (fun (user : user) -> String.equal user.id key)
+                      users
+                  with
+                  | Some user ->
+                      Jsx.element
+                        <div class_="flex items-center gap-2">
+                          <Avatar class_="size-4" size=`sm>
+                            <Avatar.Image src=(fun () -> user.avatar_url) />
+                            <Avatar.Fallback>
+                              (fun () -> Jsx.string user.fallback)
+                            </Avatar.Fallback>
+                          </Avatar>
+                          <span>(fun () -> Jsx.string user.name)</span>
+                        </div>
+                  | None -> Jsx.element Jsx.nothing)
+              | keys ->
+                  Jsx.string
+                    (string_of_int (Array.length keys) ^ " users selected"))
+          </span>)
+      </Select.Value>
+      <Select.Indicator />
+    </Select.Trigger>
+    <Select.Popover>
+      <List_box>
+        <Solidtype.For each=(fun () -> users)>
+          (fun (user : user) _ ->
+            <List_box.Item
+              id=(fun () -> user.id) text_value=(fun () -> user.name)>
+              <Avatar size=`sm>
+                <Avatar.Image src=(fun () -> user.avatar_url) />
+                <Avatar.Fallback>
+                  (fun () -> Jsx.string user.fallback)
+                </Avatar.Fallback>
+              </Avatar>
+              <div class_="flex flex-col">
+                <Label>(fun () -> Jsx.string user.name)</Label>
+                <Description>(fun () -> Jsx.string user.email)</Description>
+              </div>
+              <List_box.Item_indicator />
+            </List_box.Item>)
+        </Solidtype.For>
+      </List_box>
+    </Select.Popover>
+  </Select>

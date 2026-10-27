@@ -86,6 +86,7 @@
 @import "@heroui/styles/components/list-box.css" layer(components);
 @import "@heroui/styles/components/list-box-item.css" layer(components);
 @import "@heroui/styles/components/list-box-section.css" layer(components);
+@import "@heroui/styles/components/select.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
@@ -104,7 +105,12 @@
 /* An overlay is drawn in a portal at the end of the page, outside any
    preview: Kobalte's positioner around one of HeroUI's gives it the same
    ground, but its size, which the overlay's own classes set. */
-[data-popper-positioner]:has(> .tooltip, > .popover, > .dropdown__popover),
+[data-popper-positioner]:has(
+    > .tooltip,
+    > .popover,
+    > .dropdown__popover,
+    > .select__popover
+  ),
 .modal__backdrop,
 .alert-dialog__backdrop,
 .drawer__backdrop {

@@ -1,0 +1,68 @@
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Select
+      is_disabled=true
+      class_="w-[256px]"
+      default_value=(fun () -> [| "california" |])
+      placeholder="Select one">
+      <Label>"State"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="florida" text_value="Florida">
+            "Florida" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="delaware" text_value="Delaware">
+            "Delaware" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="california" text_value="California">
+            "California" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="texas" text_value="Texas">
+            "Texas" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="new-york" text_value="New York">
+            "New York" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="washington" text_value="Washington">
+            "Washington" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+    </Select>
+    <Select
+      is_disabled=true
+      class_="w-[256px]"
+      default_value=(fun () -> [| "argentina"; "japan"; "france" |])
+      placeholder="Select countries"
+      selection_mode=`multiple>
+      <Label>"Countries to Visit"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="argentina" text_value="Argentina">
+            "Argentina" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="venezuela" text_value="Venezuela">
+            "Venezuela" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="japan" text_value="Japan">
+            "Japan" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="france" text_value="France">
+            "France" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="italy" text_value="Italy">
+            "Italy" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="spain" text_value="Spain">
+            "Spain" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+    </Select>
+  </div>

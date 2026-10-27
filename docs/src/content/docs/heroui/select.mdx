@@ -1,0 +1,291 @@
+---
+title: Select
+description: A button that chooses one or many options from a list, HeroUI's on Kobalte's.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/select_usage.jsx";
+import ExUsageCode from "@islands/select_usage.mlx?raw";
+import * as ExVariants from "@islands/select_variants.jsx";
+import ExVariantsCode from "@islands/select_variants.mlx?raw";
+import * as ExFullWidth from "@islands/select_full_width.jsx";
+import ExFullWidthCode from "@islands/select_full_width.mlx?raw";
+import * as ExWithDescription from "@islands/select_with_description.jsx";
+import ExWithDescriptionCode from "@islands/select_with_description.mlx?raw";
+import * as ExRequired from "@islands/select_required.jsx";
+import ExRequiredCode from "@islands/select_required.mlx?raw";
+import * as ExDisabled from "@islands/select_disabled.jsx";
+import ExDisabledCode from "@islands/select_disabled.mlx?raw";
+import * as ExWithDisabledOptions from "@islands/select_with_disabled_options.jsx";
+import ExWithDisabledOptionsCode from "@islands/select_with_disabled_options.mlx?raw";
+import * as ExMultipleSelect from "@islands/select_multiple_select.jsx";
+import ExMultipleSelectCode from "@islands/select_multiple_select.mlx?raw";
+import * as ExWithSections from "@islands/select_with_sections.jsx";
+import ExWithSectionsCode from "@islands/select_with_sections.mlx?raw";
+import * as ExControlled from "@islands/select_controlled.jsx";
+import ExControlledCode from "@islands/select_controlled.mlx?raw";
+import * as ExControlledMultiple from "@islands/select_controlled_multiple.jsx";
+import ExControlledMultipleCode from "@islands/select_controlled_multiple.mlx?raw";
+import * as ExControlledOpenState from "@islands/select_controlled_open_state.jsx";
+import ExControlledOpenStateCode from "@islands/select_controlled_open_state.mlx?raw";
+import * as ExAsynchronousLoading from "@islands/select_asynchronous_loading.jsx";
+import ExAsynchronousLoadingCode from "@islands/select_asynchronous_loading.mlx?raw";
+import * as ExCustomIndicator from "@islands/select_custom_indicator.jsx";
+import ExCustomIndicatorCode from "@islands/select_custom_indicator.mlx?raw";
+import * as ExWithClearButton from "@islands/select_with_clear_button.jsx";
+import ExWithClearButtonCode from "@islands/select_with_clear_button.mlx?raw";
+import * as ExCustomValue from "@islands/select_custom_value.jsx";
+import ExCustomValueCode from "@islands/select_custom_value.mlx?raw";
+import * as ExInSurface from "@islands/select_in_surface.jsx";
+import ExInSurfaceCode from "@islands/select_in_surface.mlx?raw";
+import * as ExTailwind from "@islands/select_tailwind.jsx";
+import ExTailwindCode from "@islands/select_tailwind.mlx?raw";
+import * as Demo from "@islands/select_demo.jsx";
+
+`Solidtype_heroui.Select` is Kobalte's `Select`, with the classes HeroUI's
+own `selectVariants` gives. Its list is a `List_box` inside its popover, as
+in HeroUI; `Label`, `Description` and `Field_error` inside it name, describe
+and qualify it.
+
+## Usage
+
+<Example code={ExUsageCode} title="select_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Select>
+  <Label>...</Label>
+  <Select.Trigger>
+    <Select.Value />
+    <Select.Clear_button />
+    <Select.Indicator />
+  </Select.Trigger>
+  <Description>...</Description>
+  <Select.Popover>
+    <List_box>
+      <List_box.Item id="...">...</List_box.Item>
+    </List_box>
+  </Select.Popover>
+</Select>
+```
+
+## Examples
+
+### Variants
+
+<Example code={ExVariantsCode} title="select_variants.mlx"><ExVariants.make client:visible /></Example>
+
+### Full Width
+
+<Example code={ExFullWidthCode} title="select_full_width.mlx"><ExFullWidth.make client:visible /></Example>
+
+### With Description
+
+<Example code={ExWithDescriptionCode} title="select_with_description.mlx"><ExWithDescription.make client:visible /></Example>
+
+### Required
+
+HeroUI's required select is checked by the browser as its form is
+submitted. A `Form` here checks nothing itself, as with a text field: the
+example says the select is invalid once a submit finds it empty.
+
+
+<Example code={ExRequiredCode} title="select_required.mlx"><ExRequired.make client:visible /></Example>
+
+### Disabled
+
+<Example code={ExDisabledCode} title="select_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### With Disabled Options
+
+<Example code={ExWithDisabledOptionsCode} title="select_with_disabled_options.mlx"><ExWithDisabledOptions.make client:visible /></Example>
+
+### Multiple Select
+
+<Example code={ExMultipleSelectCode} title="select_multiple_select.mlx"><ExMultipleSelect.make client:visible /></Example>
+
+### With Sections
+
+<Example code={ExWithSectionsCode} title="select_with_sections.mlx"><ExWithSections.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ExControlledCode} title="select_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Controlled Multiple
+
+<Example code={ExControlledMultipleCode} title="select_controlled_multiple.mlx"><ExControlledMultiple.make client:visible /></Example>
+
+### Controlled Open State
+
+<Example code={ExControlledOpenStateCode} title="select_controlled_open_state.mlx"><ExControlledOpenState.make client:visible /></Example>
+
+### Asynchronous Loading
+
+HeroUI's example fetches its list from a server; here the same names are
+loaded a part at a time. The list's `List_box.Load_more_item` is React
+Aria's `ListBoxLoadMoreItem`: it asks for more as the list scrolls to its
+end, and shows its children while more load.
+
+
+<Example code={ExAsynchronousLoadingCode} title="select_asynchronous_loading.mlx"><ExAsynchronousLoading.make client:visible /></Example>
+
+### Custom Indicator
+
+<Example code={ExCustomIndicatorCode} title="select_custom_indicator.mlx"><ExCustomIndicator.make client:visible /></Example>
+
+### With Clear Button
+
+<Example code={ExWithClearButtonCode} title="select_with_clear_button.mlx"><ExWithClearButton.make client:visible /></Example>
+
+### Custom Value
+
+`Select.Value`'s children are a function of the ids chosen, drawn while
+one is; the select draws its placeholder while none is.
+
+
+<Example code={ExCustomValueCode} title="select_custom_value.mlx"><ExCustomValue.make client:visible /></Example>
+
+### In Surface
+
+<Example code={ExInSurfaceCode} title="select_in_surface.mlx"><ExInSurface.make client:visible /></Example>
+
+### Render Function
+
+HeroUI's Render Function example gives the select `render`, React's way to
+swap the element it renders, which a Solid component has no need of.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="select_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .select__trigger {
+    @apply rounded-lg border border-border bg-surface;
+  }
+
+  .select__popover {
+    @apply rounded-xl;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.select`, `.select--primary`, `.select--secondary`, `.select--full-width`
+- `.select__trigger`, `.select__value`, `.select__indicator`,
+  `.select__clear-button`, `.select__popover`
+
+### Interactive States
+
+- **Open**: `[data-open="true"]` on the select and its indicator
+- **Focus**: `[data-focused="true"]` and `[data-focus-visible="true"]` on the
+  select and its trigger
+- **Hover** and **Pressed**: `[data-hovered="true"]`, `[data-pressed="true"]`
+  on the trigger
+- **Placeholder**: `[data-placeholder="true"]` on the value
+- **Empty**: `[data-empty="true"]` on the clear button
+- **Invalid**, **Disabled**, **Required**: `[data-invalid="true"]`,
+  `[data-disabled="true"]`, `[data-required="true"]` on the select
+- **Entering** and **Exiting**: `[data-entering="true"]`,
+  `[data-exiting="true"]` on the popover
+
+## How it is made
+
+Kobalte's select opens its list from its trigger, moves the focus through it
+by the arrows and by what is typed, chooses one option or many, and closes
+on Escape or a press outside, giving the focus back to its trigger, as React
+Aria's does. Its list is the `List_box` inside its popover, which a select
+takes as its own: the list's options join the select while it is closed
+too, so its value can draw the option chosen as the list draws it, and are
+Kobalte's select's options. While it is open the page outside is hidden from
+a reader, as React Aria's modal popover hides it.
+
+A clear button is a `<span>` inside the trigger, since a button in a button
+is not HTML, so Backspace or Delete on the trigger clears too, as HeroUI's
+does.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Select
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `placeholder` | `placeholder` | `string` | `"Select an item"` | Shown while nothing is chosen |
+| `selectionMode` | `selection_mode` | `` `single `` \| `` `multiple `` | `` `single `` | One or many, read as it is made |
+| `value` | `value` | `string array` | | The ids chosen, controlled |
+| `defaultValue` | `default_value` | `string array` | | The ids chosen at first |
+| `onChange` | `on_change` | `string array -> unit` | | Told the ids chosen as they change |
+| `onClear` | `on_clear` | `unit -> unit` | | Told as it is cleared |
+| `disabledKeys` | `disabled_keys` | `string array` | | The disabled options' ids |
+| `isOpen` | `is_open` | `bool` | | Whether its list is open, controlled |
+| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `isRequired` | `is_required` | `bool` | `false` | Whether a choice is required |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `name` | `name` | `string` | | Its name in a form |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it fills its container |
+| `variant` | `variant` | `` `primary `` \| `` `secondary `` | `` `primary `` | Its look |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its label, trigger, description and popover |
+
+### Select.Trigger, Select.Popover
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | The popover's side, `bottom` by default |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | What it holds |
+
+### Select.Value
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | `string array accessor -> element` | What it draws while something is chosen, given the ids chosen |
+
+### Select.Indicator, Select.Clear_button
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | An icon of its own |
+| `onClick` | `on_click` | `Dom.mouseEvent -> unit` | The clear button's, told after it clears |
+
+### List_box.Load_more_item
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isLoading` | `is_loading` | `bool` | `false` | Whether more are loading, while its children show |
+| `onLoadMore` | `on_load_more` | `unit -> unit` | | Asked for more as the list scrolls to it |
+| `scrollOffset` | `scroll_offset` | `float` | 1 | How many of the list's heights before its end it asks |
+| `children` | `children` | elements | | What shows while more load |
+
+## Beside React
+
+Original HeroUI documentation: [Select](https://heroui.com/en/docs/react/components/select).
+
+The same HeroUI Select twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each trigger: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -780,6 +780,49 @@ export function listBox(host: HTMLElement, { selectionMode, variant }: ListBoxPr
           <ListBox.ItemIndicator />
         </ListBox.Item>
       </ListBox>,
+    ),
+  );
+}
+
+type SelectProps = {
+  selectionMode: "single" | "multiple";
+  variant: "primary" | "secondary";
+  isDisabled: boolean;
+};
+
+export function select(host: HTMLElement, { selectionMode, variant, isDisabled }: SelectProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Select
+        key={selectionMode}
+        className="w-[256px]"
+        placeholder="Select one"
+        selectionMode={selectionMode}
+        variant={variant}
+        isDisabled={isDisabled}
+      >
+        <Label>State</Label>
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover>
+          <ListBox>
+            <ListBox.Item id="florida" textValue="Florida">
+              Florida
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="texas" textValue="Texas">
+              Texas
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="utah" textValue="Utah">
+              Utah
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          </ListBox>
+        </Select.Popover>
+      </Select>,
     ),
   );
 }

@@ -1,0 +1,289 @@
+(* HeroUI's Select on Kobalte's, beside the same select in React: its label,
+   trigger, value, description and list, what it tells and what has the
+   focus, as its trigger is pressed, the keys move through its list and
+   choose, and its clear button or the keys clear it. *)
+
+module Select = Solidtype_heroui.Select
+module List_box = Solidtype_heroui.List_box
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props : multiple:bool -> told:(string -> unit) -> unit -> props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Select.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Select.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Select.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+type options
+
+external options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) -> unit -> options
+  = ""
+[@@mel.obj]
+
+external setup : options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* A while for a framework's timers and focus moves to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself, which no style of HeroUI's reads:
+   Kobalte's own state, present and empty, its pointer's type, an
+   [aria-disabled] it writes false, each option's place in the list, which a
+   reader counts in React Aria's, its group around the select and the edges
+   of its focus trap; React Aria's collection, layout and orientation, its
+   [tabindex] on a button, focusable already, and its list's own focus; and each framework's ids and keys, made its own way.
+   And the popover's role, name and focus: React Aria's is a dialog around
+   its list, Kobalte's the list's frame. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ( ( "data-expanded" | "data-closed" | "data-valid" | "data-highlighted"
+      | "data-placeholder-shown" | "data-selected" | "data-disabled" ),
+      Some "" ) ->
+      true
+  | "aria-disabled", Some "false" -> true
+  | ("aria-posinset" | "aria-setsize" | "data-pointer-type"), _ -> true
+  | ("data-collection" | "data-layout" | "data-orientation" | "data-trigger"), _
+    ->
+      true
+  | ("id" | "style" | "dir" | "data-key"), _ -> true
+  | "data-focused", _
+    when String.equal
+           (Option.value (T.attribute e "data-slot") ~default:"")
+           "list-box" ->
+      true
+  | ("role" | "tabindex" | "aria-labelledby"), _ -> (
+      match T.attribute e "data-slot" with
+      | Some ("select" | "select-popover" | "select-trigger") -> true
+      | Some _ | None -> false)
+  | _ -> false
+
+(* What React Aria's popover holds besides its list, for a reader and its
+   focus scope: a button either side that closes it, which Kobalte's leaves
+   to Escape; and each framework's hidden select, for a form. *)
+let framework_element e =
+  match (tag_name e, T.attribute e "aria-label") with
+  | "BUTTON", Some "Dismiss" -> true
+  | "SPAN", _ ->
+      Option.is_some (T.attribute e "data-focus-scope-start")
+      || Option.is_some (T.attribute e "data-focus-scope-end")
+  | "DIV", _ -> (
+      Option.is_some (T.attribute e "data-a11y-ignore")
+      || (match T.attribute e "aria-hidden" with
+        | Some "true" -> element_count e = 0 || true
+        | Some _ | None -> false)
+      ||
+      match Js.Array.from (query_all e "button[aria-label=Dismiss]") with
+      | [| _ |] -> element_count e = 1
+      | _ -> false)
+  | _ -> false
+
+(* An id one part names another by, which each framework makes its own way. *)
+let names_another = function
+  | "aria-controls" | "aria-describedby" | "aria-labelledby" | "for" -> true
+  | _ -> false
+
+(* An element: its tag, its attributes and its text. *)
+let one e =
+  let names =
+    T.attribute_names e |> Array.to_list
+    |> List.filter (fun name ->
+        not (framework_only e name || T.framework_only name))
+    |> List.sort String.compare
+  in
+  String.concat " "
+    (tag_name e
+    :: List.map
+         (fun name ->
+           if names_another name then name ^ "=(id)"
+           else name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+         names)
+  ^ if element_count e > 0 then "" else " " ^ text e
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+(* The select and its list, wherever it is, and all inside them, what it told,
+   and what has the focus. *)
+let shown told =
+  all
+    ".select, .select *:not([aria-hidden=true] *), .select__popover, \
+     .select__popover *:not([data-focus-trap]):not([aria-hidden=true] *)"
+  |> Array.to_list
+  |> List.filter (fun e -> not (framework_element e))
+  |> List.map one |> Array.of_list
+  |> Fun.flip Array.append (Array.of_list (List.rev !told))
+  |> Fun.flip Array.append
+       [|
+         ("focus: "
+         ^
+         match Js.Null.toOption active with
+         | Some e when e == T.body -> "the page"
+         | Some e ->
+             Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+             ^ " " ^ text e
+         | None -> "none");
+       |]
+
+let first selector =
+  match all selector with [||] -> T.body | found -> found.(0)
+
+let walk ~step ~told =
+  let user = setup (options ~pointer_events_check:0 ()) in
+  let seen = ref [] in
+  let after name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    seen := (name, shown told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () =
+    after "pressed" (fun () ->
+        T.click user (first "[data-slot=select-trigger]"))
+  in
+  let* () = after "ArrowDown" (fun () -> T.keyboard user "{ArrowDown}") in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "ArrowDown again" (fun () -> T.keyboard user "{ArrowDown}") in
+  let* () = after "Escape" (fun () -> T.keyboard user "{Escape}") in
+  let* () = after "Backspace" (fun () -> T.keyboard user "{Backspace}") in
+  let* () =
+    after "pressed again" (fun () ->
+        T.click user (first "[data-slot=select-trigger]"))
+  in
+  let* () =
+    after "chose" (fun () ->
+        match
+          List.find_opt
+            (fun e -> String.equal (text e) "Utah")
+            (Array.to_list (all "[data-slot=list-box-item]"))
+        with
+        | Some e -> T.click user e
+        | None -> Js.Promise.resolve ())
+  in
+  let* () = after "closed" (fun () -> T.keyboard user "{Escape}") in
+  let* () =
+    after "cleared" (fun () ->
+        T.click user (first "[data-slot=select-clear-button]"))
+  in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ~multiple =
+  let told = ref [] in
+  let tell said = told := said :: !told in
+  T.render (fun () ->
+      <div>
+        <button type_=`button>"Before"</button>
+        <Select
+          placeholder="Select one"
+          selection_mode=(fun () -> if multiple then `multiple else `single)
+          disabled_keys=(fun () -> [| "texas" |])
+          on_change=(fun keys ->
+                      let keys = Array.copy keys in
+                      Array.sort String.compare keys;
+                      tell
+                        ("changed "
+                        ^
+                        if multiple then String.concat " " (Array.to_list keys)
+                        else match keys with [| k |] -> k | _ -> "null"))>
+          <Label>"State"</Label>
+          <Select.Trigger>
+            <Select.Value /> <Select.Clear_button /> <Select.Indicator />
+          </Select.Trigger>
+          <Description>"Where you live"</Description>
+          <Select.Popover>
+            <List_box>
+              <List_box.Item id="florida" text_value="Florida">
+                "Florida" <List_box.Item_indicator />
+              </List_box.Item>
+              <List_box.Item id="texas" text_value="Texas">
+                "Texas" <List_box.Item_indicator />
+              </List_box.Item>
+              <List_box.Item id="utah" text_value="Utah">
+                "Utah" <List_box.Item_indicator />
+              </List_box.Item>
+            </List_box>
+          </Select.Popover>
+        </Select>
+      </div>);
+  let* solidtype = walk ~step:(fun action -> action ()) ~told in
+  T.cleanup ();
+  told := [];
+  let (_ : Dom.element) = Twin.render (props ~multiple ~told:tell ()) in
+  let* react = walk ~step:Twin.step ~told in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Select" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "chooses one, as React's does" (fun () ->
+          let* r = both ~multiple:false in
+          same r);
+      Jest.testPromise "chooses many, as React's does" (fun () ->
+          let* r = both ~multiple:true in
+          same r);
+      Jest.testPromise "draws its value by a function of the ids chosen"
+        (fun () ->
+          T.render (fun () ->
+              <Select
+                selection_mode=`multiple
+                default_value=(fun () -> [| "florida"; "utah" |])>
+                <Select.Trigger>
+                  <Select.Value>
+                    (fun keys ->
+                      <span>
+                        (fun () ->
+                          Solidtype.Jsx.string
+                            (string_of_int
+                               (Array.length (Solidtype.Solid.get keys))
+                            ^ " states"))
+                      </span>)
+                  </Select.Value>
+                </Select.Trigger>
+                <Select.Popover>
+                  <List_box>
+                    <List_box.Item id="florida">"Florida"</List_box.Item>
+                    <List_box.Item id="utah">"Utah"</List_box.Item>
+                  </List_box>
+                </Select.Popover>
+              </Select>);
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (text (first "[data-slot=select-value]"))
+              |> toEqual "2 states")))

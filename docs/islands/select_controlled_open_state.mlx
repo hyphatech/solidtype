@@ -1,0 +1,49 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  let is_open, set_is_open = S.create_signal false in
+  <div class_="space-y-4">
+    <Select
+      class_="w-[256px]"
+      is_open=(fun () -> S.get is_open)
+      placeholder="Select one"
+      on_open_change=(S.set set_is_open)>
+      <Label>"State"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="florida" text_value="Florida">
+            "Florida" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="delaware" text_value="Delaware">
+            "Delaware" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="california" text_value="California">
+            "California" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="texas" text_value="Texas">
+            "Texas" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="new-york" text_value="New York">
+            "New York" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="washington" text_value="Washington">
+            "Washington" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+    </Select>
+    <Button on_click=(fun _ -> S.set set_is_open (not (S.get is_open)))>
+      (fun () -> Jsx.string (if S.get is_open then "Close" else "Open"))
+      " Select"
+    </Button>
+    <p class_="text-sm text-muted">
+      "Select is "
+      (fun () -> Jsx.string (if S.get is_open then "open" else "closed"))
+    </p>
+  </div>

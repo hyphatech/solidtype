@@ -92,6 +92,11 @@ module Chevrons_down = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/chevrons-down.svg?raw"]
 end)
 
+module Chevrons_expand_vertical = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/chevrons-expand-vertical.svg?raw"]
+end)
+
 module Circle_check = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/circle-check.svg?raw"]

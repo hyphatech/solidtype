@@ -1,0 +1,27 @@
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let item_class =
+  "rounded-lg data-[focused=true]:bg-accent/10 \
+   data-[selected=true]:text-foreground"
+
+let make () =
+  <Select class_="w-56" placeholder="Pick a plan" variant=`secondary>
+    <Label class_="font-medium text-foreground">"Plan"</Label>
+    <Select.Trigger class_="rounded-xl bg-default">
+      <Select.Value /> <Select.Indicator />
+    </Select.Trigger>
+    <Select.Popover
+      class_="rounded-xl border border-border bg-surface p-1 shadow-lg">
+      <List_box>
+        <List_box.Item
+          class_=(fun () -> item_class) id="free" text_value="Free">
+          "Free" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item class_=(fun () -> item_class) id="pro" text_value="Pro">
+          "Pro" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Select.Popover>
+  </Select>

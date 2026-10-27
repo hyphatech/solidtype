@@ -1,0 +1,49 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  let selected, set_selected = S.create_signal [| "california"; "texas" |] in
+  <div class_="space-y-4">
+    <Select
+      class_="w-[256px]"
+      placeholder="Select states"
+      selection_mode=`multiple
+      value=(fun () -> S.get selected)
+      on_change=(fun keys -> S.set set_selected keys)>
+      <Label>"States (controlled multiple)"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box selection_mode=`multiple>
+          <List_box.Item id="california" text_value="California">
+            "California" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="texas" text_value="Texas">
+            "Texas" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="florida" text_value="Florida">
+            "Florida" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="new-york" text_value="New York">
+            "New York" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="illinois" text_value="Illinois">
+            "Illinois" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="pennsylvania" text_value="Pennsylvania">
+            "Pennsylvania" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+    </Select>
+    <p class_="text-sm text-muted">
+      "Selected: "
+      (fun () ->
+        Jsx.string
+          (match S.get selected with
+          | [||] -> "None"
+          | keys -> String.concat ", " (Array.to_list keys)))
+    </p>
+  </div>

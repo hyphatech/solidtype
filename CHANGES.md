@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Select`: HeroUI's Select on Kobalte's, its list a
+  `List_box`, one or many chosen, its value drawn as the option chosen or by a
+  function, with HeroUI's clear button, variants and animations, its label,
+  description and error, in a `Form` too.
+- `Solidtype_heroui.List_box.Host`: where a part takes the list box inside it
+  to draw as its own, as a select does.
 - `Solidtype_heroui.List_box`: HeroUI's ListBox on Kobalte's, its options
   selected one or many at a time, or acted on, with HeroUI's indicators,
   sections and their `Header`, descriptions and separators.

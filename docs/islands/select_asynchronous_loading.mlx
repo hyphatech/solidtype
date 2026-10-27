@@ -1,0 +1,75 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+module Spinner = Solidtype_heroui.Spinner
+
+(* The first page of https://pokeapi.co/api/v2/pokemon, which HeroUI's example
+   fetches, here loaded a part at a time. *)
+let pokemon =
+  [|
+    "bulbasaur";
+    "ivysaur";
+    "venusaur";
+    "charmander";
+    "charmeleon";
+    "charizard";
+    "squirtle";
+    "wartortle";
+    "blastoise";
+    "caterpie";
+    "metapod";
+    "butterfree";
+    "weedle";
+    "kakuna";
+    "beedrill";
+    "pidgey";
+    "pidgeotto";
+    "pidgeot";
+    "rattata";
+    "raticate";
+  |]
+
+(* How long the fetch it stands in for takes, and how many each brings. *)
+let load_ms = 800
+let page = 10
+
+let make () =
+  let loaded, set_loaded = S.create_signal 0 in
+  let loading, set_loading = S.create_signal false in
+  let load_more () =
+    let now = S.get loaded in
+    if (not (S.get loading)) && now < Array.length pokemon then (
+      S.set set_loading true;
+      let timer =
+        Js.Global.setTimeout
+          ~f:(fun () ->
+            S.set set_loaded (min (Array.length pokemon) (now + page));
+            S.set set_loading false)
+          load_ms
+      in
+      S.on_cleanup (fun () -> Js.Global.clearTimeout timer))
+  in
+  S.on_mount load_more;
+  <Select class_="w-[256px]" placeholder="Select a Pokemon">
+    <Label>"Pick a Pokemon"</Label>
+    <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+    <Select.Popover>
+      <List_box>
+        <Solidtype.For each=(fun () -> Array.sub pokemon 0 (S.get loaded))>
+          (fun name _ ->
+            <List_box.Item id=(fun () -> name) text_value=(fun () -> name)>
+              (fun () -> Jsx.string name) <List_box.Item_indicator />
+            </List_box.Item>)
+        </Solidtype.For>
+        <List_box.Load_more_item
+          is_loading=(fun () -> S.get loading) on_load_more=load_more>
+          <div class_="flex items-center justify-center gap-2 py-2">
+            <Spinner size=`sm />
+            <span class_="text-sm text-muted">"Loading more..."</span>
+          </div>
+        </List_box.Load_more_item>
+      </List_box>
+    </Select.Popover>
+  </Select>

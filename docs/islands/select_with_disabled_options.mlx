@@ -1,0 +1,34 @@
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  <Select
+    class_="w-[256px]"
+    disabled_keys=(fun () -> [| "cat"; "kangaroo" |])
+    placeholder="Select an animal">
+    <Label>"Animal"</Label>
+    <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+    <Select.Popover>
+      <List_box>
+        <List_box.Item id="dog" text_value="Dog">
+          "Dog" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="cat" text_value="Cat">
+          "Cat" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="bird" text_value="Bird">
+          "Bird" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="kangaroo" text_value="Kangaroo">
+          "Kangaroo" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="elephant" text_value="Elephant">
+          "Elephant" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="tiger" text_value="Tiger">
+          "Tiger" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Select.Popover>
+  </Select>

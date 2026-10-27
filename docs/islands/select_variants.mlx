@@ -1,0 +1,35 @@
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Select class_="w-[256px]" placeholder="Select one" variant=`primary>
+      <Label>"Primary variant"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="option1" text_value="Option 1">
+            "Option 1" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="option2" text_value="Option 2">
+            "Option 2" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+    </Select>
+    <Select class_="w-[256px]" placeholder="Select one" variant=`secondary>
+      <Label>"Secondary variant"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="option1" text_value="Option 1">
+            "Option 1" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="option2" text_value="Option 2">
+            "Option 2" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+    </Select>
+  </div>

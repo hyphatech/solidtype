@@ -30,6 +30,80 @@
 type selection_mode = [ `none | `single | `multiple ]
 (** How a list selects its options: not at all, one at most, or many. *)
 
+type option_
+(** An option as it joined its list. *)
+
+val key : option_ -> string
+(** Its [id]. *)
+
+val text : option_ -> string
+(** Its [text_value], else its [id]. *)
+
+val content : option_ -> Solidtype.Jsx.element
+(** Its children, drawn again outside the list, as a select's value shows the
+    option chosen; an indicator inside them is drawn as not selected, as React
+    Aria draws it. *)
+
+type node =
+  (option_, unit) Solidtype_kobalte.Types.Either.t
+  Solidtype_kobalte.Types.CollectionNode.t
+(** Kobalte's node of an option, in a list of options alone. *)
+
+type listing = {
+  mode : unit -> selection_mode;
+  is_selected : string -> bool;
+  is_disabled : string -> bool;
+  act : string -> unit;
+}
+(** What a list's options read of what holds them: how it selects, which keys
+    are selected and disabled, and what an option pressed does. *)
+
+(** The {!listing} a part gives the options it draws. *)
+module Listing : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:listing Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Solidtype.Jsx.component
+  end
+end
+
+type hosted = {
+  options : unit -> option_ list;
+      (** Its options, in order, whatever holds them. *)
+  draw :
+    node Solidtype_kobalte.Types.Collection.t Solidtype.Solid.accessor ->
+    Solidtype.Jsx.element;
+      (** Its options, sections and separators, given Kobalte's collection, as
+          the children of Kobalte's list: inside a {!Listing}. *)
+  classes : unit -> string;  (** Its classes. *)
+  aria_label : unit -> string option;  (** Its name. *)
+  others : unit Solidtype.Solid.rest;  (** The rest of its props. *)
+}
+(** What a part that holds a list box takes of it, to draw it as its own, in
+    Kobalte's list of its own. *)
+
+(** Where a list box inside a part is taken: a {!Select} takes its list box,
+    which then draws nothing where it is, and draws it in its popover. *)
+module Host : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:((hosted -> Solidtype.Jsx.element)[@u]) Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Solidtype.Jsx.component
+  end
+end
+
 (** An option, known by its [id], typed to by its [text_value]: Kobalte's item,
     a [<div>] with the role [option], selected while its id is. *)
 module Item : sig
@@ -65,6 +139,29 @@ module Item_indicator : sig
         ( bool Solidtype.Solid.accessor -> Solidtype.Jsx.element,
           [ `render ] )
         Solidtype.Check.children ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
+(** What loads more options, as React Aria's [ListBoxLoadMoreItem] does: a
+    sentinel in its place that calls [on_load_more] as it comes within
+    [scroll_offset] heights of the list's view, 1 by default, and again as
+    loading ends with it still in view; and its children, an option no key
+    reaches, while [is_loading]. *)
+module Load_more_item : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?is_loading:bool Solidtype.Check.value ->
+      ?on_load_more:(unit -> unit) ->
+      ?scroll_offset:float Solidtype.Check.value ->
+      children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       unit ->
       unit

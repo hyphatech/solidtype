@@ -1,0 +1,90 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+let make () =
+  let state, set_state = S.create_signal [||] in
+  let country, set_country = S.create_signal [||] in
+  (* A required select shows its error once a submit has been tried, as the
+     browser's validation React Aria reads does. *)
+  let tried, set_tried = S.create_signal false in
+  let missing chosen = S.get tried && Array.length (S.get chosen) = 0 in
+  <Form
+    class_="flex w-[256px] flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_tried true)>
+    <Select
+      is_required=true
+      is_invalid=(fun () -> missing state)
+      class_="w-full"
+      name="state"
+      placeholder="Select one"
+      on_change=(S.set set_state)>
+      <Label>"State"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="florida" text_value="Florida">
+            "Florida" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="delaware" text_value="Delaware">
+            "Delaware" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="california" text_value="California">
+            "California" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="texas" text_value="Texas">
+            "Texas" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="new-york" text_value="New York">
+            "New York" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="washington" text_value="Washington">
+            "Washington" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+      <Field_error>"Please select an item in the list."</Field_error>
+    </Select>
+    <Select
+      is_required=true
+      is_invalid=(fun () -> missing country)
+      class_="w-full"
+      name="country"
+      placeholder="Select a country"
+      on_change=(S.set set_country)>
+      <Label>"Country"</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <List_box.Item id="usa" text_value="United States">
+            "United States" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="canada" text_value="Canada">
+            "Canada" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="mexico" text_value="Mexico">
+            "Mexico" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="uk" text_value="United Kingdom">
+            "United Kingdom" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="france" text_value="France">
+            "France" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="germany" text_value="Germany">
+            "Germany" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Select.Popover>
+      <Field_error>"Please select an item in the list."</Field_error>
+    </Select>
+    <Button type_=`submit>"Submit"</Button>
+  </Form>

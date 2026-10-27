@@ -1,0 +1,41 @@
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+
+let make () =
+  <Select
+    class_="w-[256px]" placeholder="Select countries" selection_mode=`multiple>
+    <Label>"Countries to Visit"</Label>
+    <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+    <Select.Popover>
+      <List_box selection_mode=`multiple>
+        <List_box.Item id="argentina" text_value="Argentina">
+          "Argentina" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="venezuela" text_value="Venezuela">
+          "Venezuela" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="japan" text_value="Japan">
+          "Japan" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="france" text_value="France">
+          "France" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="italy" text_value="Italy">
+          "Italy" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="spain" text_value="Spain">
+          "Spain" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="thailand" text_value="Thailand">
+          "Thailand" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="new-zealand" text_value="New Zealand">
+          "New Zealand" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="iceland" text_value="Iceland">
+          "Iceland" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Select.Popover>
+  </Select>

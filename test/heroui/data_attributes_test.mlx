@@ -38,6 +38,7 @@ module Input_group = H.Input_group
 module Kbd = H.Kbd
 module Label = H.Label
 module Link = H.Link
+module Select = H.Select
 module List_box = H.List_box
 module Meter = H.Meter
 module Number_field = H.Number_field
@@ -235,6 +236,18 @@ let () =
                     </List_box.Item>
                   </List_box.Section>
                 </List_box>
+                <Select default_open=true data_testid="Select">
+                  <Select.Trigger data_testid="Select.Trigger">
+                    <Select.Value data_testid="Select.Value" />
+                    <Select.Clear_button data_testid="Select.Clear_button" />
+                    <Select.Indicator data_testid="Select.Indicator" />
+                  </Select.Trigger>
+                  <Select.Popover data_testid="Select.Popover">
+                    <List_box>
+                      <List_box.Item id="utah">"Utah"</List_box.Item>
+                    </List_box>
+                  </Select.Popover>
+                </Select>
                 <Drawer default_open=true>
                   <Drawer.Trigger data_testid="Drawer.Trigger">
                     "Open"
@@ -492,6 +505,12 @@ let () =
                    ("List_box.Item", "[data-slot=list-box-item]");
                    ( "List_box.Item_indicator",
                      "[data-slot=list-box-item-indicator]" );
+                   ("Select", "[data-slot=select]");
+                   ("Select.Trigger", "[data-slot=select-trigger]");
+                   ("Select.Value", "[data-slot=select-value]");
+                   ("Select.Clear_button", "[data-slot=select-clear-button]");
+                   ("Select.Indicator", "[data-slot=select-default-indicator]");
+                   ("Select.Popover", "[data-slot=select-popover]");
                    ("Drawer.Trigger", "[data-slot=drawer-trigger]");
                    ("Drawer.Backdrop", "[data-slot=drawer-backdrop]");
                    ("Drawer.Content", "[data-slot=drawer-content]");

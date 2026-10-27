@@ -229,4 +229,27 @@ let () =
           same r);
       Jest.testPromise "acts on items in sections, as React's does" (fun () ->
           let* r = both `sections in
-          same r))
+          same r);
+      Jest.test "draws what loads more as an option while it loads" (fun () ->
+          let loading, set_loading = Solidtype.Solid.create_signal true in
+          T.render (fun () ->
+              <List_box aria_label="Pokemon">
+                <List_box.Item id="bulbasaur">"bulbasaur"</List_box.Item>
+                <List_box.Load_more_item
+                  is_loading=(fun () -> Solidtype.Solid.get loading)>
+                  <span>"Loading more..."</span>
+                </List_box.Load_more_item>
+              </List_box>);
+          let shown () =
+            all "[role=listbox] > *"
+            |> Array.map (fun e ->
+                Option.value (T.attribute e "role") ~default:(tag_name e)
+                ^ " " ^ text e)
+          in
+          let while_loading = shown () in
+          Solidtype.Solid.set set_loading false;
+          E.(
+            expect (while_loading, shown ())
+            |> toEqual
+                 ( [| "option bulbasaur"; "DIV "; "option Loading more..." |],
+                   [| "option bulbasaur"; "DIV " |] ))))
