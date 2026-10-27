@@ -18,7 +18,6 @@ let make () =
   let detached, set_detached = S.create_signal false in
   let full_width, set_full_width = S.create_signal false in
   let disabled, set_disabled = S.create_signal false in
-  let keys, set_keys = S.create_signal [| "center" |] in
   <section class_="flex flex-col gap-4">
     <div class_="flex flex-wrap items-end gap-4">
       <Select
@@ -59,8 +58,7 @@ let make () =
       compared="[data-slot=toggle-button-group]"
       solidtype=(<Toggle_button_group
                    selection_mode=(fun () -> fst (S.get mode))
-                   selected_keys=(fun () -> S.get keys)
-                   on_selection_change=(S.set set_keys)
+                   default_selected_keys=(fun () -> [| "center" |])
                    size=(fun () -> fst (S.get size))
                    orientation=(fun () -> fst (S.get orientation))
                    is_detached=(fun () -> S.get detached)
@@ -79,8 +77,6 @@ let make () =
               Heroui_react.toggle_button_group host
                 (Heroui_react.toggle_button_group_props
                    ~selection_mode:(snd (S.get mode))
-                   ~selected_keys:(S.get keys)
-                   ~on_selection_change:(S.set set_keys)
                    ~size:(snd (S.get size))
                    ~orientation:(snd (S.get orientation))
                    ~is_detached:(S.get detached) ~full_width:(S.get full_width)

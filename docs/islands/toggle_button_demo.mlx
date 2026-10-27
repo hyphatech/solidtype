@@ -11,7 +11,6 @@ let make () =
   let variant, set_variant = S.create_signal (`default, "default") in
   let size, set_size = S.create_signal (`md, "md") in
   let icon_only, set_icon_only = S.create_signal false in
-  let selected, set_selected = S.create_signal false in
   let disabled, set_disabled = S.create_signal false in
   <section class_="flex flex-col gap-4">
     <div class_="flex flex-wrap items-end gap-4">
@@ -33,11 +32,6 @@ let make () =
         on_toggle=(S.set set_icon_only)
       />
       <Toggle
-        label="selected"
-        on=(fun () -> S.get selected)
-        on_toggle=(S.set set_selected)
-      />
-      <Toggle
         label="disabled"
         on=(fun () -> S.get disabled)
         on_toggle=(S.set set_disabled)
@@ -49,8 +43,6 @@ let make () =
                    variant=(fun () -> fst (S.get variant))
                    size=(fun () -> fst (S.get size))
                    is_icon_only=(fun () -> S.get icon_only)
-                   is_selected=(fun () -> S.get selected)
-                   on_change=(S.set set_selected)
                    is_disabled=(fun () -> S.get disabled)>
                    "Like"
                  </Toggle_button>)
@@ -59,8 +51,7 @@ let make () =
                 (Heroui_react.toggle_button_props
                    ~variant:(snd (S.get variant))
                    ~size:(snd (S.get size))
-                   ~is_icon_only:(S.get icon_only) ~is_selected:(S.get selected)
-                   ~on_change:(S.set set_selected) ~is_disabled:(S.get disabled)
+                   ~is_icon_only:(S.get icon_only) ~is_disabled:(S.get disabled)
                    ()))
     />
   </section>

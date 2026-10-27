@@ -9,7 +9,6 @@ let keys = [| "shipping"; "returns" |]
 let variants = [| (`default, "default"); (`surface, "surface") |]
 
 let make () =
-  let expanded, set_expanded = S.create_signal [| "shipping" |] in
   let multiple, set_multiple = S.create_signal false in
   let disabled, set_disabled = S.create_signal false in
   let variant, set_variant = S.create_signal (`default, "default") in
@@ -41,8 +40,7 @@ let make () =
     <Side_by_side
       compared="[data-slot=accordion]"
       solidtype=(<Accordion
-                   expanded_keys=(fun () -> S.get expanded)
-                   on_expanded_change=(S.set set_expanded)
+                   default_expanded_keys=(fun () -> [| "shipping" |])
                    allows_multiple_expanded=(fun () -> S.get multiple)
                    is_disabled=(fun () -> S.get disabled)
                    variant=(fun () -> fst (S.get variant))
@@ -67,8 +65,7 @@ let make () =
                  </Accordion>)
       react=(fun host ->
               Heroui_react.accordion host
-                (Heroui_react.accordion_props ~expanded_keys:(S.get expanded)
-                   ~on_expanded_change:(S.set set_expanded)
+                (Heroui_react.accordion_props
                    ~allows_multiple_expanded:(S.get multiple)
                    ~is_disabled:(S.get disabled)
                    ~variant:(fst (S.get variant))

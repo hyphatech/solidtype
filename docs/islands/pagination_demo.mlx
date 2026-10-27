@@ -51,9 +51,6 @@ let make () =
                  </Pagination>)
       react=(fun host ->
               Heroui_react.pagination host
-                (Heroui_react.pagination_props ~page:(S.get page)
-                   ~on_page:(S.set set_page)
-                   ~size:(fst (S.get size))
-                   ()))
+                (Heroui_react.pagination_props ~size:(fst (S.get size)) ()))
     />
   </section>

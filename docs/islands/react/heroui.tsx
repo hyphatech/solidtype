@@ -3,6 +3,7 @@
 // is flushed at once, so the page reads the result in the same effect.
 
 import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -544,8 +545,6 @@ export function progressCircle(host: HTMLElement, props: ProgressCircleProps): v
 }
 
 type DisclosureProps = {
-  isExpanded: boolean;
-  onExpandedChange: (isExpanded: boolean) => void;
   isDisabled: boolean;
 };
 
@@ -568,20 +567,14 @@ export function disclosure(host: HTMLElement, props: DisclosureProps): void {
 }
 
 type DisclosureGroupProps = {
-  expandedKeys: string[];
-  onExpandedChange: (keys: string[]) => void;
   allowsMultipleExpanded: boolean;
   isDisabled: boolean;
 };
 
-export function disclosureGroup(host: HTMLElement, { expandedKeys, onExpandedChange, ...props }: DisclosureGroupProps): void {
+export function disclosureGroup(host: HTMLElement, props: DisclosureGroupProps): void {
   flushSync(() =>
     rootOf(host).render(
-      <DisclosureGroup
-        {...props}
-        expandedKeys={new Set(expandedKeys)}
-        onExpandedChange={(keys) => onExpandedChange([...keys].map(String))}
-      >
+      <DisclosureGroup {...props} defaultExpandedKeys={["shipping"]}>
         {["shipping", "returns"].map((key) => (
           <Disclosure key={key} id={key}>
             <Disclosure.Heading>
@@ -601,22 +594,16 @@ export function disclosureGroup(host: HTMLElement, { expandedKeys, onExpandedCha
 }
 
 type AccordionProps = {
-  expandedKeys: string[];
-  onExpandedChange: (keys: string[]) => void;
   allowsMultipleExpanded: boolean;
   isDisabled: boolean;
   variant: "default" | "surface";
   hideSeparator: boolean;
 };
 
-export function accordion(host: HTMLElement, { expandedKeys, onExpandedChange, ...props }: AccordionProps): void {
+export function accordion(host: HTMLElement, props: AccordionProps): void {
   flushSync(() =>
     rootOf(host).render(
-      <Accordion
-        {...props}
-        expandedKeys={new Set(expandedKeys)}
-        onExpandedChange={(keys) => onExpandedChange([...keys].map(String))}
-      >
+      <Accordion {...props} defaultExpandedKeys={["shipping"]}>
         {["shipping", "returns"].map((key) => (
           <Accordion.Item key={key} id={key}>
             <Accordion.Heading>
@@ -636,18 +623,16 @@ export function accordion(host: HTMLElement, { expandedKeys, onExpandedChange, .
 }
 
 type TabsProps = {
-  selectedKey: string;
-  onSelectionChange: (key: string) => void;
   orientation: "horizontal" | "vertical";
   variant: "primary" | "secondary";
   align: "start" | "center" | "end";
   isDisabled: boolean;
 };
 
-export function tabs(host: HTMLElement, { onSelectionChange, ...props }: TabsProps): void {
+export function tabs(host: HTMLElement, props: TabsProps): void {
   flushSync(() =>
     rootOf(host).render(
-      <Tabs {...props} onSelectionChange={(key) => onSelectionChange(String(key))}>
+      <Tabs {...props} defaultSelectedKey="overview">
         <Tabs.ListContainer>
           <Tabs.List aria-label="Options">
             {["overview", "analytics", "reports"].map((key, i) => (
@@ -687,11 +672,12 @@ export function breadcrumbs(host: HTMLElement, { isDisabled, onAction }: Breadcr
   );
 }
 
-type PaginationProps = { page: number; onPage: (page: number) => void; size: "sm" | "md" | "lg" };
+type PaginationProps = { size: "sm" | "md" | "lg" };
 
-export function pagination(host: HTMLElement, { page, onPage, size }: PaginationProps): void {
-  flushSync(() =>
-    rootOf(host).render(
+// Its page kept by React, as HeroUI's examples keep it, apart from the port's.
+function Pages({ size }: PaginationProps) {
+  const [page, onPage] = useState(1);
+  return (
       <Pagination size={size}>
         <Pagination.Content>
           <Pagination.Item>
@@ -714,23 +700,24 @@ export function pagination(host: HTMLElement, { page, onPage, size }: Pagination
             </Pagination.Next>
           </Pagination.Item>
         </Pagination.Content>
-      </Pagination>,
-    ),
+      </Pagination>
   );
 }
 
+export function pagination(host: HTMLElement, props: PaginationProps): void {
+  flushSync(() => rootOf(host).render(<Pages {...props} />));
+}
+
 type TooltipProps = {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
   placement: "top" | "bottom" | "left" | "right";
   showArrow: boolean;
 };
 
-export function tooltip(host: HTMLElement, { isOpen, onOpenChange, placement, showArrow }: TooltipProps): void {
+export function tooltip(host: HTMLElement, { placement, showArrow }: TooltipProps): void {
   flushSync(() =>
     rootOf(host).render(
       <div className="flex justify-center py-16">
-        <Tooltip isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Tooltip defaultOpen>
           <Button variant="secondary">Hover me</Button>
           <Tooltip.Content placement={placement} showArrow={showArrow}>
             {showArrow ? <Tooltip.Arrow /> : null}
@@ -838,8 +825,6 @@ type ToggleButtonProps = {
   variant: "default" | "ghost";
   size: "sm" | "md" | "lg";
   isIconOnly: boolean;
-  isSelected: boolean;
-  onChange: (selected: boolean) => void;
   isDisabled: boolean;
 };
 
@@ -849,8 +834,6 @@ export function toggleButton(host: HTMLElement, props: ToggleButtonProps): void 
 
 type ToggleButtonGroupProps = {
   selectionMode: "single" | "multiple";
-  selectedKeys: string[];
-  onSelectionChange: (keys: string[]) => void;
   size: "sm" | "md" | "lg";
   orientation: "horizontal" | "vertical";
   isDetached: boolean;
@@ -859,10 +842,10 @@ type ToggleButtonGroupProps = {
 };
 
 // Three buttons, as the port's demo groups them.
-export function toggleButtonGroup(host: HTMLElement, { onSelectionChange, ...props }: ToggleButtonGroupProps): void {
+export function toggleButtonGroup(host: HTMLElement, props: ToggleButtonGroupProps): void {
   flushSync(() =>
     rootOf(host).render(
-      <ToggleButtonGroup aria-label="Alignment" {...props} onSelectionChange={(keys) => onSelectionChange([...keys].map(String))}>
+      <ToggleButtonGroup aria-label="Alignment" {...props} defaultSelectedKeys={["center"]}>
         <ToggleButton id="left">Left</ToggleButton>
         <ToggleButton id="center">
           <ToggleButtonGroup.Separator />

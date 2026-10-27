@@ -11,7 +11,6 @@ let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
 let aligns = [| (`start, "start"); (`center, "center"); (`end_, "end") |]
 
 let make () =
-  let selected, set_selected = S.create_signal "overview" in
   let orientation, set_orientation =
     S.create_signal (`horizontal, "horizontal")
   in
@@ -47,8 +46,7 @@ let make () =
     <Side_by_side
       compared="[data-slot=tabs]"
       solidtype=(<Tabs
-                   selected_key=(fun () -> S.get selected)
-                   on_selection_change=(S.set set_selected)
+                   default_selected_key="overview"
                    orientation=(fun () -> fst (S.get orientation))
                    variant=(fun () -> fst (S.get variant))
                    align=(fun () -> fst (S.get align))
@@ -77,8 +75,7 @@ let make () =
                  </Tabs>)
       react=(fun host ->
               Heroui_react.tabs host
-                (Heroui_react.tabs_props ~selected_key:(S.get selected)
-                   ~on_selection_change:(S.set set_selected)
+                (Heroui_react.tabs_props
                    ~orientation:(fst (S.get orientation))
                    ~variant:(fst (S.get variant))
                    ~align:(fst (S.get align))

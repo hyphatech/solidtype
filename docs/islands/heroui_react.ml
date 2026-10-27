@@ -379,11 +379,7 @@ external progress_circle : Dom.htmlDivElement -> progress_circle_props -> unit
 type disclosure_props
 
 external disclosure_props :
-  is_expanded:(bool[@mel.as "isExpanded"]) ->
-  on_expanded_change:((bool -> unit)[@mel.as "onExpandedChange"]) ->
-  is_disabled:(bool[@mel.as "isDisabled"]) ->
-  unit ->
-  disclosure_props = ""
+  is_disabled:(bool[@mel.as "isDisabled"]) -> unit -> disclosure_props = ""
 [@@mel.obj]
 
 external disclosure : Dom.htmlDivElement -> disclosure_props -> unit
@@ -393,8 +389,6 @@ external disclosure : Dom.htmlDivElement -> disclosure_props -> unit
 type disclosure_group_props
 
 external disclosure_group_props :
-  expanded_keys:(string array[@mel.as "expandedKeys"]) ->
-  on_expanded_change:((string array -> unit)[@mel.as "onExpandedChange"]) ->
   allows_multiple_expanded:(bool[@mel.as "allowsMultipleExpanded"]) ->
   is_disabled:(bool[@mel.as "isDisabled"]) ->
   unit ->
@@ -408,8 +402,6 @@ external disclosure_group : Dom.htmlDivElement -> disclosure_group_props -> unit
 type accordion_props
 
 external accordion_props :
-  expanded_keys:(string array[@mel.as "expandedKeys"]) ->
-  on_expanded_change:((string array -> unit)[@mel.as "onExpandedChange"]) ->
   allows_multiple_expanded:(bool[@mel.as "allowsMultipleExpanded"]) ->
   is_disabled:(bool[@mel.as "isDisabled"]) ->
   variant:([ `default | `surface ][@mel.as "variant"]) ->
@@ -424,8 +416,6 @@ external accordion : Dom.htmlDivElement -> accordion_props -> unit = "accordion"
 type tabs_props
 
 external tabs_props :
-  selected_key:(string[@mel.as "selectedKey"]) ->
-  on_selection_change:((string -> unit)[@mel.as "onSelectionChange"]) ->
   orientation:([ `horizontal | `vertical ][@mel.as "orientation"]) ->
   variant:([ `primary | `secondary ][@mel.as "variant"]) ->
   align:
@@ -457,11 +447,7 @@ external breadcrumbs : Dom.htmlDivElement -> breadcrumbs_props -> unit
 type pagination_props
 
 external pagination_props :
-  page:int ->
-  on_page:((int -> unit)[@mel.as "onPage"]) ->
-  size:([ `sm | `md | `lg ][@mel.as "size"]) ->
-  unit ->
-  pagination_props = ""
+  size:([ `sm | `md | `lg ][@mel.as "size"]) -> unit -> pagination_props = ""
 [@@mel.obj]
 
 external pagination : Dom.htmlDivElement -> pagination_props -> unit
@@ -471,8 +457,6 @@ external pagination : Dom.htmlDivElement -> pagination_props -> unit
 type tooltip_props
 
 external tooltip_props :
-  is_open:(bool[@mel.as "isOpen"]) ->
-  on_open_change:((bool -> unit)[@mel.as "onOpenChange"]) ->
   placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
   show_arrow:(bool[@mel.as "showArrow"]) ->
   unit ->
@@ -529,8 +513,6 @@ external toggle_button_props :
   variant:string ->
   size:string ->
   is_icon_only:(bool[@mel.as "isIconOnly"]) ->
-  is_selected:(bool[@mel.as "isSelected"]) ->
-  on_change:((bool -> unit)[@mel.as "onChange"]) ->
   is_disabled:(bool[@mel.as "isDisabled"]) ->
   unit ->
   toggle_button_props = ""
@@ -544,8 +526,6 @@ type toggle_button_group_props
 
 external toggle_button_group_props :
   selection_mode:(string[@mel.as "selectionMode"]) ->
-  selected_keys:(string array[@mel.as "selectedKeys"]) ->
-  on_selection_change:((string array -> unit)[@mel.as "onSelectionChange"]) ->
   size:string ->
   orientation:string ->
   is_detached:(bool[@mel.as "isDetached"]) ->
