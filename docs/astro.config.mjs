@@ -82,5 +82,25 @@ export default defineConfig({
       ],
     },
     server: { fs: { allow: [repository] } },
+    // The comparisons' React -- React itself, React Aria under HeroUI's
+    // components, and HeroUI's React components -- shared by every port's
+    // page, each a chunk of its own, the three together past what one chunk
+    // should hold.
+    build: {
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              { name: "react", test: /\/node_modules\/(react|react-dom|scheduler)\// },
+              {
+                name: "react-aria",
+                test: /\/node_modules\/(@react-aria|@react-stately|@react-types|react-aria|react-aria-components|react-stately|@internationalized)\//,
+              },
+              { name: "heroui-react", test: /\/node_modules\/@heroui\/react\// },
+            ],
+          },
+        },
+      },
+    },
   },
 });
