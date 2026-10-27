@@ -8,6 +8,8 @@ import * as Usage from "@islands/form_usage.jsx";
 import UsageCode from "@islands/form_usage.mlx?raw";
 import * as ServerErrors from "@islands/form_server_errors.jsx";
 import ServerErrorsCode from "@islands/form_server_errors.mlx?raw";
+import { Code } from "@astrojs/starlight/components";
+import addTask from "@example/src/add_task.mlx?raw";
 
 `Solidtype_heroui.Form` is a `<form>`, to which HeroUI gives no classes of its
 own. Kobalte has no form: it is built here, above Kobalte's fields. Every field
@@ -46,6 +48,34 @@ invalid, shown by its `Field_error`, until the field is changed and then left,
 as React's does, or until the errors are given again.
 
 <Example code={ServerErrorsCode} title="form_server_errors.mlx"><ServerErrors.make client:visible /></Example>
+
+### From a codec
+
+A client wiretype prints for an application's routes checks a body against
+the routes' own rules before it sends it, and reads a server's refusal: each
+problem it finds is at a path in the body, with a sentence for that place.
+A field's `name` is that path, so the problems are `validation_errors` in one
+`List.map`, and `solidtype-heroui` needs no codec of its own. The example
+board's form to add a task, whose title the routes say is 1 to 120
+characters and its note at most 200:
+
+<Code code={addTask} lang="ocaml" title="example/src/add_task.mlx" />
+
+A body the client finds wrong is never sent: `Api.post_api_tasks` answers
+`` `Invalid `` with its problems, at the body's own paths, `title` or `note`.
+A server's refusal, `` `Refused ``, names each problem by where it is in the
+request, `body.title`, so a form that shows those on its fields takes the
+prefix off first:
+
+```ocaml
+| Error (`Refused ({ problems = Some problems; _ } : Api.refusal)) ->
+    S.set set_refused
+      (Array.to_list problems
+      |> List.filter_map (fun (p : Api.problem) ->
+          match String.split_on_char '.' p.at with
+          | "body" :: path -> Some (String.concat "." path, p.message)
+          | _ -> None))
+```
 
 ### Not yet
 

@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has landed.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed.
 Date: 2026-10-23
 
 ## The problem
@@ -347,8 +347,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Form: a field's registration, a submit refused and the first invalid
   field focused, `validation_errors` by name
 - [x] TimeField, on Kobalte's
-- [ ] ErrorMessage, with Calendar in group 7
-- [ ] The `Form` page: a server's errors and a check before sending from
+- [ ] ErrorMessage, with TagGroup and Calendar in group 7, the hosts HeroUI's
+  examples of it are
+- [x] The `Form` page: a server's errors and a check before sending from
   wiretype's printed codec, as `validation_errors`
 
 ### Group 3: status
