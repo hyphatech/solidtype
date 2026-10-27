@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Autocomplete`: HeroUI's Autocomplete on Kobalte's combo
+  box, a select whose popover filters its `List_box` by a `Search_field`, one
+  or many chosen, a filter given, its search's text controlled, with HeroUI's
+  clear button, variants and animations, its label, description and error,
+  in a `Form` too.
+- `Solidtype_heroui.Search_field` inside an `Autocomplete.Filter` is its
+  search.
+- `Solidtype_heroui.List_box`: `render_empty_state`, what it shows while it
+  holds no option, and its children are optional.
 - `Solidtype_heroui.Combo_box`: HeroUI's ComboBox on Kobalte's, an input that
   filters a `List_box` as it is typed into, one or many chosen, its text
   controlled or kept, a filter given, opened by focus, typing or its trigger,

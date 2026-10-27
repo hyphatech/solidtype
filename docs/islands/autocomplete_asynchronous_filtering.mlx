@@ -1,0 +1,98 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+(* The first two pages of https://swapi.py4e.com/api/people/, which HeroUI's
+   example searches, here searched after the same wait. *)
+let characters =
+  [|
+    "Luke Skywalker";
+    "C-3PO";
+    "R2-D2";
+    "Darth Vader";
+    "Leia Organa";
+    "Owen Lars";
+    "Beru Whitesun lars";
+    "R5-D4";
+    "Biggs Darklighter";
+    "Obi-Wan Kenobi";
+    "Anakin Skywalker";
+    "Wilhuff Tarkin";
+    "Chewbacca";
+    "Han Solo";
+    "Greedo";
+    "Jabba Desilijic Tiure";
+    "Wedge Antilles";
+    "Jek Tono Porkins";
+    "Yoda";
+    "Palpatine";
+  |]
+
+(* How long the fetch it stands in for takes. *)
+let load_ms = 400
+
+(* Whether [part] is in [name], whatever their case, as the search finds it. *)
+let holds ~part name =
+  let name = String.lowercase_ascii name
+  and part = String.lowercase_ascii part in
+  let n = String.length part in
+  let rec from i =
+    i + n <= String.length name
+    && (String.equal (String.sub name i n) part || from (i + 1))
+  in
+  from 0
+
+let make () =
+  let filter_text, set_filter_text = S.create_signal "" in
+  let found, set_found = S.create_signal characters in
+  let search text =
+    S.set set_filter_text text;
+    let timer =
+      Js.Global.setTimeout
+        ~f:(fun () ->
+          S.set set_found
+            (Array.of_list
+               (List.filter
+                  (fun name -> holds ~part:text name)
+                  (Array.to_list characters))))
+        load_ms
+    in
+    S.on_cleanup (fun () -> Js.Global.clearTimeout timer)
+  in
+  <Autocomplete
+    allows_empty_collection=true class_="w-[256px]" placeholder="Search...">
+    <Label>"Search a Star Wars characters"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value />
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter
+        input_value=(fun () -> S.get filter_text) on_input_change=search>
+        <Search_field
+          aria_label="Search characters" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search characters..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          class_="max-h-[420px] overflow-y-auto"
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)>
+          <Solidtype.For each=(fun () -> S.get found)>
+            (fun name _ ->
+              <List_box.Item id=(fun () -> name) text_value=(fun () -> name)>
+                (fun () -> Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

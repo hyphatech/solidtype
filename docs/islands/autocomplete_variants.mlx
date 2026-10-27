@@ -1,0 +1,86 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+let items =
+  [|
+    ("option1", "Option 1");
+    ("option2", "Option 2");
+    ("option3", "Option 3");
+    ("option4", "Option 4");
+  |]
+
+let variant ~label ~variant ~mode =
+  let selected, set_selected = S.create_signal [||] in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder=(fun () ->
+                  match mode with
+                  | `single -> "Select one"
+                  | `multiple -> "Select options")
+    selection_mode=(fun () -> mode)
+    value=(fun () -> S.get selected)
+    variant=(fun () -> variant)
+    on_change=(S.set set_selected)>
+    <Label>(fun () -> Jsx.string label)</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value />
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search options" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)
+          selection_mode=(fun () -> (mode :> List_box.selection_mode))>
+          <Solidtype.For each=(fun () -> items)>
+            (fun (id, name) _ ->
+              <List_box.Item id=(fun () -> id) text_value=(fun () -> name)>
+                (fun () -> Jsx.string name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>
+
+let make () =
+  <div class_="flex flex-col gap-8">
+    <div class_="flex flex-col gap-4">
+      <h3 class_="text-lg font-semibold">"Single Select Variants"</h3>
+      <div class_="flex flex-col gap-4">
+        (fun () ->
+          Jsx.element
+            (variant ~label:"Primary variant" ~variant:`primary ~mode:`single))
+        (fun () ->
+          Jsx.element
+            (variant ~label:"Secondary variant" ~variant:`secondary
+               ~mode:`single))
+      </div>
+    </div>
+    <div class_="flex flex-col gap-4">
+      <h3 class_="text-lg font-semibold">"Multiple Select Variants"</h3>
+      <div class_="flex flex-col gap-4">
+        (fun () ->
+          Jsx.element
+            (variant ~label:"Primary variant" ~variant:`primary ~mode:`multiple))
+        (fun () ->
+          Jsx.element
+            (variant ~label:"Secondary variant" ~variant:`secondary
+               ~mode:`multiple))
+      </div>
+    </div>
+  </div>

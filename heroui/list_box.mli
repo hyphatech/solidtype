@@ -89,7 +89,9 @@ type hosted = {
     node Solidtype_kobalte.Types.Collection.t Solidtype.Solid.accessor ->
     Solidtype.Jsx.element;
       (** Its options, sections and separators, given Kobalte's collection, as
-          the children of Kobalte's list: inside a {!Listing}. *)
+          the children of Kobalte's list: inside a {!Listing}; or, while it
+          draws no option, its empty state. *)
+  empty : unit -> bool;  (** Whether it draws no option. *)
   classes : unit -> string;  (** Its classes. *)
   aria_label : unit -> string option;  (** Its name. *)
   others : unit Solidtype.Solid.rest;  (** The rest of its props. *)
@@ -202,7 +204,8 @@ end
     by default. Its [selected_keys] are the selected options' ids while it is
     given, else those it keeps, [default_selected_keys] at first; a change calls
     [on_selection_change] with them. An option whose id [disabled_keys] holds is
-    disabled. *)
+    disabled. While it draws no option, what [render_empty_state] draws shows in
+    it. *)
 module Props : sig
   type t
 
@@ -214,9 +217,10 @@ module Props : sig
     ?on_selection_change:(string array -> unit) ->
     ?disabled_keys:string array Solidtype.Check.value ->
     ?on_action:(string -> unit) ->
+    ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
     ?variant:[ `default | `danger ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     unit ->
     unit

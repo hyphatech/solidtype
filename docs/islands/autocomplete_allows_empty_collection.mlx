@@ -1,0 +1,32 @@
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  <Autocomplete
+    allows_empty_collection=true class_="w-[256px]" placeholder="Select one">
+    <Label>"State"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value />
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search states" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search states..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                                 <Empty_state>"No results found"</Empty_state>)
+        />
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

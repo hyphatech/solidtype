@@ -1,0 +1,93 @@
+module S = Solidtype.Solid
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Search_field = Solidtype_heroui.Search_field
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Choice = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let modes = [| (`single, "single"); (`multiple, "multiple") |]
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let mode, set_mode = S.create_signal (`single, "single") in
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let disabled, set_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Choice
+        label="selectionMode"
+        choices=(fun () -> modes)
+        picked=(fun () -> S.get mode)
+        on_pick=(Controls.choose modes set_mode)
+      />
+      <Choice
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="isDisabled"
+        on=(fun () -> S.get disabled)
+        on_toggle=(S.set set_disabled)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=autocomplete-trigger] button[aria-haspopup]"
+      solidtype=(<div>
+                   (fun () ->
+                     (* An autocomplete's mode is read as it is made, so
+                        another makes another, as React's key does. *)
+                     let mode = fst (S.get mode) in
+                     Solidtype.Jsx.element
+                       <Autocomplete
+                         class_="w-[256px]"
+                         placeholder="Select one"
+                         selection_mode=(fun () -> mode)
+                         variant=(fun () -> fst (S.get variant))
+                         is_disabled=(fun () -> S.get disabled)>
+                         <Label>"State"</Label>
+                         <Autocomplete.Trigger>
+                           <Autocomplete.Value />
+                           <Autocomplete.Clear_button />
+                           <Autocomplete.Indicator />
+                         </Autocomplete.Trigger>
+                         <Autocomplete.Popover>
+                           <Autocomplete.Filter>
+                             <Search_field
+                               aria_label="Search options"
+                               name="search"
+                               variant=`secondary>
+                               <Search_field.Group>
+                                 <Search_field.Search_icon />
+                                 <Search_field.Input placeholder="Search..." />
+                               </Search_field.Group>
+                             </Search_field>
+                             <List_box
+                               selection_mode=(fun () ->
+                                                (mode
+                                                  :> List_box.selection_mode))>
+                               <List_box.Item id="florida" text_value="Florida">
+                                 "Florida" <List_box.Item_indicator />
+                               </List_box.Item>
+                               <List_box.Item id="texas" text_value="Texas">
+                                 "Texas" <List_box.Item_indicator />
+                               </List_box.Item>
+                               <List_box.Item id="utah" text_value="Utah">
+                                 "Utah" <List_box.Item_indicator />
+                               </List_box.Item>
+                             </List_box>
+                           </Autocomplete.Filter>
+                         </Autocomplete.Popover>
+                       </Autocomplete>)
+                 </div>)
+      react=(fun host ->
+              Heroui_react.autocomplete host
+                (Heroui_react.autocomplete_props
+                   ~selection_mode:(fst (S.get mode))
+                   ~variant:(fst (S.get variant))
+                   ~is_disabled:(S.get disabled) ()))
+    />
+  </section>

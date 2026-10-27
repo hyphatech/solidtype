@@ -1,0 +1,96 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+type city = { name : string; country : string }
+
+let cities =
+  [|
+    { country = "USA"; name = "New York" };
+    { country = "USA"; name = "Los Angeles" };
+    { country = "USA"; name = "Chicago" };
+    { country = "UK"; name = "London" };
+    { country = "France"; name = "Paris" };
+    { country = "Japan"; name = "Tokyo" };
+    { country = "Australia"; name = "Sydney" };
+    { country = "Canada"; name = "Toronto" };
+    { country = "Germany"; name = "Berlin" };
+    { country = "Spain"; name = "Madrid" };
+  |]
+
+(* How long the search it stands in for takes. *)
+let search_ms = 300
+
+(* Whether [part] is in [text], whatever their case. *)
+let holds ~part text =
+  let text = String.lowercase_ascii text
+  and part = String.lowercase_ascii part in
+  let n = String.length part in
+  let rec from i =
+    i + n <= String.length text
+    && (String.equal (String.sub text i n) part || from (i + 1))
+  in
+  from 0
+
+let make () =
+  let selected, set_selected = S.create_signal [||] in
+  let loading, set_loading = S.create_signal false in
+  (* HeroUI's example stands in for a search that takes a while. *)
+  let filter text typed =
+    String.equal typed ""
+    ||
+    (S.set set_loading true;
+     let (_ : Js.Global.timeoutId) =
+       Js.Global.setTimeout ~f:(fun () -> S.set set_loading false) search_ms
+     in
+     holds ~part:typed text)
+  in
+  <Autocomplete
+    class_="w-[256px]"
+    placeholder="Search for a city"
+    value=(fun () -> S.get selected)
+    on_change=(S.set set_selected)>
+    <Label>"City"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value />
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter filter>
+        <Search_field
+          aria_label="Search cities" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search cities..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>
+                                 (fun () ->
+                                   Jsx.string
+                                     (if S.get loading then "Searching..."
+                                      else "No cities found"))
+                               </Empty_state>)>
+          <Solidtype.For each=(fun () -> cities)>
+            (fun city _ ->
+              <List_box.Item
+                id=(fun () -> city.name) text_value=(fun () -> city.name)>
+                <div class_="flex flex-col">
+                  <Label>(fun () -> Jsx.string city.name)</Label>
+                  <Description>(fun () -> Jsx.string city.country)</Description>
+                </div>
+                <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

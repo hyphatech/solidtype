@@ -1,0 +1,454 @@
+(* HeroUI's Autocomplete on Kobalte's combo box, beside the same autocomplete
+   in React: its label, trigger, value, description, search and list, what it
+   tells and what has the focus, as its trigger is pressed, its search is
+   typed into, the keys move through its list and choose, Escape closes it
+   and its clear button clears it. *)
+
+module Autocomplete = Solidtype_heroui.Autocomplete
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props : multiple:bool -> told:(string -> unit) -> unit -> props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Autocomplete.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Autocomplete.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Autocomplete.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external input_value : Dom.element -> string = "value" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+type options
+
+external options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) -> unit -> options
+  = ""
+[@@mel.obj]
+
+external setup : options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* A while for a framework's timers and focus moves to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself, which no style of HeroUI's reads:
+   Kobalte's own state, present and empty, its pointer's type, an
+   [aria-disabled] it writes false, each option's place in the list, which a
+   reader counts in React Aria's, and the group its root and its search's root
+   are; React Aria's collection, layout and orientation, its button's own
+   class, the [tabindex] and [title] it writes on an input, focusable already,
+   and its input's controlled [value] attribute, whose value each element's
+   line holds; and each framework's ids and keys, made its own way.
+   And the search's input is Kobalte's combo box, which a reader is told
+   expands and the option it holds, where React Aria's is a search box that
+   controls the list; and while the list is open each hides the page outside
+   it from a reader in its own place, React Aria on the element of the page
+   that holds the autocomplete, Kobalte on each element beside its trigger. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ( ( "data-expanded" | "data-closed" | "data-valid" | "data-highlighted"
+      | "data-placeholder-shown" | "data-selected" | "data-disabled" ),
+      Some "" ) ->
+      true
+  | "aria-disabled", Some "false" -> true
+  | ("aria-posinset" | "aria-setsize" | "data-pointer-type"), _ -> true
+  | ("data-collection" | "data-layout" | "data-orientation" | "data-trigger"), _
+    ->
+      true
+  | ("id" | "style" | "dir" | "data-key"), _ -> true
+  | "class", Some "react-aria-Button" -> true
+  | "role", Some "group" -> (
+      match T.attribute e "data-slot" with
+      | Some ("autocomplete" | "search-field") -> true
+      | Some _ | None -> false)
+  | "aria-hidden", _ -> (
+      match T.attribute e "data-slot" with
+      | Some ("label" | "description") -> true
+      | Some _ | None -> false)
+  | ( ( "tabindex" | "title" | "value" | "role" | "aria-expanded"
+      | "aria-haspopup" | "aria-activedescendant" ),
+      _ ) ->
+      String.equal (tag_name e) "INPUT"
+  | _ -> false
+
+(* What each framework draws for a form, and React Aria's popover holds
+   besides its list for a reader: a button either side that closes it, which
+   Kobalte's leaves to Escape; and the edges of each one's focus scope. *)
+let framework_element e =
+  match (tag_name e, T.attribute e "aria-label") with
+  | "BUTTON", Some "Dismiss" -> true
+  | "SELECT", _ | "OPTION", _ -> true
+  | "LABEL", _ -> Option.is_none (T.attribute e "data-slot")
+  | "INPUT", _ -> (
+      match T.attribute e "type" with Some "hidden" -> true | _ -> false)
+  | "SPAN", _ ->
+      Option.is_some (T.attribute e "data-focus-trap")
+      || Option.is_some (T.attribute e "data-focus-scope-start")
+      || Option.is_some (T.attribute e "data-focus-scope-end")
+  | "DIV", _ -> (
+      Option.is_some (T.attribute e "data-a11y-ignore")
+      ||
+      match Js.Array.from (query_all e "button[aria-label=Dismiss]") with
+      | [| _ |] -> element_count e = 1
+      | _ -> false)
+  | _ -> false
+
+(* An id one part names another by, which each framework makes its own way. *)
+let names_another = function
+  | "aria-controls" | "aria-describedby" | "aria-labelledby" | "for"
+  | "aria-activedescendant" ->
+      true
+  | _ -> false
+
+(* An element: its tag, its attributes, its text, and an input's value. *)
+let one e =
+  let names =
+    T.attribute_names e |> Array.to_list
+    |> List.filter (fun name ->
+        not (framework_only e name || T.framework_only name))
+    |> List.sort String.compare
+  in
+  String.concat " "
+    (tag_name e
+    :: List.map
+         (fun name ->
+           if names_another name then name ^ "=(id)"
+           else name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+         names)
+  ^ (if element_count e > 0 then "" else " " ^ text e)
+  ^ match tag_name e with "INPUT" -> " value=" ^ input_value e | _ -> ""
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+(* The autocomplete and its popover, wherever it is, and all inside them,
+   what it told, and what has the focus. *)
+let shown told =
+  all
+    ".autocomplete, .autocomplete *:not([data-slot=list-box-item-indicator] \
+     *), .autocomplete__popover, .autocomplete__popover \
+     *:not([data-slot=list-box-item-indicator] *)"
+  |> Array.to_list
+  |> List.filter (fun e -> not (framework_element e))
+  |> List.map one |> Array.of_list
+  |> Fun.flip Array.append (Array.of_list (List.rev !told))
+  |> Fun.flip Array.append
+       [|
+         ("focus: "
+         ^
+         match Js.Null.toOption active with
+         | Some e when e == T.body -> "the page"
+         | Some e ->
+             Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+             ^ " " ^ text e
+         | None -> "none");
+       |]
+
+let first selector =
+  match all selector with [||] -> T.body | found -> found.(0)
+
+(* The walk, where a step [unseen] is not compared, but the next one is: as
+   a choice closes the list, React Aria's focus is lost to the page, where the
+   port's goes back to its button, as its own test holds; and a press outside
+   an open list reaches what is pressed in jsdom, which no pointer reaches
+   beside a modal popover in a browser. So the focus is then put on the page's
+   first button. *)
+let walk ~step ~told =
+  let user = setup (options ~pointer_events_check:0 ()) in
+  let seen = ref [] in
+  let after ?(unseen = false) name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    if not unseen then begin
+      seen := (name, shown told) :: !seen;
+      told := []
+    end;
+    Js.Promise.resolve ()
+  in
+  let elsewhere () =
+    let* () = T.click user (first "button") in
+    T.focus (first "button");
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () =
+    after "pressed" (fun () ->
+        T.click user (first "[data-slot=autocomplete-trigger]"))
+  in
+  let* () = after "typed u" (fun () -> T.keyboard user "u") in
+  let* () = after "ArrowDown" (fun () -> T.keyboard user "{ArrowDown}") in
+  let* () = after ~unseen:true "Enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "Enter, then elsewhere" elsewhere in
+  let* () =
+    after "pressed again" (fun () ->
+        T.click user (first "[data-slot=autocomplete-trigger]"))
+  in
+  let* () = after "typed x" (fun () -> T.keyboard user "x") in
+  let* () = after "Backspace" (fun () -> T.keyboard user "{Backspace}") in
+  let* () =
+    after ~unseen:true "chose" (fun () ->
+        match
+          List.find_opt
+            (fun e -> String.equal (text e) "Florida")
+            (Array.to_list (all "[data-slot=list-box-item]"))
+        with
+        | Some e -> T.click user e
+        | None -> Js.Promise.resolve ())
+  in
+  let* () = after "chose, then elsewhere" elsewhere in
+  let* () =
+    after "cleared" (fun () ->
+        T.click user (first "[data-slot=autocomplete-clear-button]"))
+  in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ~multiple =
+  let told = ref [] in
+  let tell said = told := said :: !told in
+  T.render (fun () ->
+      <div>
+        <button type_=`button>"Before"</button>
+        <Autocomplete
+          placeholder="Select one"
+          selection_mode=(fun () -> if multiple then `multiple else `single)
+          disabled_keys=(fun () -> [| "texas" |])
+          name="state"
+          on_change=(fun keys ->
+                      let keys = Array.copy keys in
+                      Array.sort String.compare keys;
+                      tell
+                        ("changed "
+                        ^
+                        if multiple then String.concat " " (Array.to_list keys)
+                        else match keys with [| k |] -> k | _ -> "null"))>
+          <Label>"State"</Label>
+          <Autocomplete.Trigger>
+            <Autocomplete.Value />
+            <Autocomplete.Clear_button />
+            <Autocomplete.Indicator />
+          </Autocomplete.Trigger>
+          <Description>"Where you live"</Description>
+          <Autocomplete.Popover>
+            <Autocomplete.Filter>
+              <Search_field
+                aria_label="Search options" name="search" variant=`secondary>
+                <Search_field.Group>
+                  <Search_field.Search_icon />
+                  <Search_field.Input placeholder="Search..." />
+                </Search_field.Group>
+              </Search_field>
+              <List_box
+                selection_mode=(fun () ->
+                                 if multiple then `multiple else `single)>
+                <List_box.Item id="florida" text_value="Florida">
+                  "Florida" <List_box.Item_indicator />
+                </List_box.Item>
+                <List_box.Item id="texas" text_value="Texas">
+                  "Texas" <List_box.Item_indicator />
+                </List_box.Item>
+                <List_box.Item id="utah" text_value="Utah">
+                  "Utah" <List_box.Item_indicator />
+                </List_box.Item>
+              </List_box>
+            </Autocomplete.Filter>
+          </Autocomplete.Popover>
+        </Autocomplete>
+        <button type_=`button>"After"</button>
+      </div>);
+  let* solidtype = walk ~step:(fun action -> action ()) ~told in
+  T.cleanup ();
+  told := [];
+  let (_ : Dom.element) = Twin.render (props ~multiple ~told:tell ()) in
+  let* react = walk ~step:Twin.step ~told in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Autocomplete" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "chooses one, as React's does" (fun () ->
+          let* r = both ~multiple:false in
+          same r);
+      Jest.testPromise "chooses many, as React's does" (fun () ->
+          let* r = both ~multiple:true in
+          same r))
+
+module S = Solidtype.Solid
+
+type form_data
+
+external form_data : Dom.element -> form_data = "FormData" [@@mel.new]
+external get_all : form_data -> string -> string array = "getAll" [@@mel.send]
+
+let search_and_list () =
+  Solidtype.Jsx.fragment
+    [|
+      <Search_field aria_label="Search">
+        <Search_field.Group><Search_field.Input /></Search_field.Group>
+      </Search_field>;
+      <List_box render_empty_state=(fun _ -> <span>"No results found"</span>)>
+        <List_box.Item id="florida" text_value="Florida">
+          "Florida"
+        </List_box.Item>
+        <List_box.Item id="texas" text_value="Texas">"Texas"</List_box.Item>
+        <List_box.Item id="utah" text_value="Utah">"Utah"</List_box.Item>
+      </List_box>;
+    |]
+
+let states filter =
+  <Autocomplete name="state">
+    <Label>"State"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value /> <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover data_testid="Autocomplete.Popover">
+      (fun () -> Solidtype.Jsx.element (filter ()))
+    </Autocomplete.Popover>
+  </Autocomplete>
+
+let options () =
+  Array.map text (all "[data-slot=list-box-item]") |> Array.to_list
+
+let focused () =
+  match Js.Null.toOption active with
+  | Some e -> Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+  | None -> "none"
+
+let () =
+  Jest.describe "Autocomplete, beyond React's" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "opens by its button's keys, its search focused, and gives the button \
+         the focus back as it closes" (fun () ->
+          T.render (fun () ->
+              <form>
+                (fun () ->
+                  Solidtype.Jsx.element
+                    (states (fun () ->
+                         <Autocomplete.Filter>
+                           (fun () ->
+                             Solidtype.Jsx.element (search_and_list ()))
+                         </Autocomplete.Filter>)))
+              </form>);
+          let user = T.setup () in
+          T.focus (first "[data-slot=autocomplete-trigger] button");
+          let* () = T.keyboard user "{ArrowDown}" in
+          let* () = settle () in
+          let opened = focused () in
+          let* () = T.keyboard user "t{ArrowDown}{Enter}" in
+          let* () = settle () in
+          let chose = focused () in
+          let* () = T.keyboard user "{ArrowDown}" in
+          let* () = settle () in
+          let* () = T.keyboard user "{Escape}" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( opened,
+                  chose,
+                  focused (),
+                  get_all (form_data (first "form")) "state",
+                  T.attribute
+                    (first "[data-slot=autocomplete-popover]")
+                    "data-testid" )
+              |> toEqual
+                   ("search-field-input", "BUTTON", "BUTTON", [| "utah" |], None)));
+      Jest.testPromise
+        "shows the options the filter given keeps, and none while it keeps none"
+        (fun () ->
+          T.render (fun () ->
+              states (fun () ->
+                  <Autocomplete.Filter
+                    filter=(fun text typed ->
+                             String.length typed > 0
+                             && String.length text > 0
+                             && Char.equal
+                                  (Char.lowercase_ascii text.[0])
+                                  (Char.lowercase_ascii typed.[0]))>
+                    (fun () -> Solidtype.Jsx.element (search_and_list ()))
+                  </Autocomplete.Filter>));
+          let user = T.setup () in
+          let* () = T.click user (first "[data-slot=autocomplete-trigger]") in
+          let* () = T.keyboard user "u" in
+          let* () = settle () in
+          let kept = options () in
+          let* () = T.keyboard user "{Backspace}z" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( kept,
+                  options (),
+                  ( text (first "[data-slot=list-box]"),
+                    T.attribute (first "[data-slot=list-box]") "data-empty" ),
+                  Option.is_some (T.query "[data-slot=search-field-input]"),
+                  T.attribute
+                    (first "[data-slot=autocomplete-popover]")
+                    "data-testid" )
+              |> toEqual
+                   ( [ "Utah" ],
+                     [],
+                     ("No results found", Some "true"),
+                     true,
+                     Some "Autocomplete.Popover" )));
+      Jest.testPromise "keeps the search's text it is given" (fun () ->
+          let given, set_given = S.create_signal "Tex" in
+          let told = ref [] in
+          T.render (fun () ->
+              states (fun () ->
+                  <Autocomplete.Filter
+                    input_value=(fun () -> S.get given)
+                    on_input_change=(fun t -> told := t :: !told)>
+                    (fun () -> Solidtype.Jsx.element (search_and_list ()))
+                  </Autocomplete.Filter>));
+          let user = T.setup () in
+          let* () = T.click user (first "[data-slot=autocomplete-trigger]") in
+          let* () = settle () in
+          let shown = options () in
+          let* () = T.keyboard user "x" in
+          let* () = settle () in
+          let kept = input_value (first "[data-slot=search-field-input]") in
+          S.set set_given "";
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (shown, kept, options (), !told)
+              |> toEqual
+                   ( [ "Texas" ],
+                     "Tex",
+                     [ "Florida"; "Texas"; "Utah" ],
+                     [ "Texx" ] ))))

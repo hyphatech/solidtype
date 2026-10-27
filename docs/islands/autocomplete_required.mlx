@@ -1,0 +1,77 @@
+module S = Solidtype.Solid
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Button = Solidtype_heroui.Button
+module Empty_state = Solidtype_heroui.Empty_state
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external alert : string -> unit = "alert" [@@mel.scope "window"]
+
+let make () =
+  let state, set_state = S.create_signal [||] in
+  (* A required autocomplete shows its error once a submit has been tried, as
+     the browser's validation React Aria reads does. *)
+  let tried, set_tried = S.create_signal false in
+  let missing () = S.get tried && Array.length (S.get state) = 0 in
+  <Form
+    class_="flex w-[256px] flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_tried true;
+                if Array.length (S.get state) > 0 then
+                  alert "Form submitted successfully!")>
+    <Autocomplete
+      is_required=true
+      is_invalid=(fun () -> missing ())
+      class_="w-full"
+      name="state"
+      placeholder="Select one"
+      on_change=(S.set set_state)>
+      <Label>"State"</Label>
+      <Autocomplete.Trigger>
+        <Autocomplete.Value />
+        <Autocomplete.Clear_button />
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover>
+        <Autocomplete.Filter>
+          <Search_field
+            aria_label="Search states" name="search" variant=`secondary>
+            <Search_field.Group>
+              <Search_field.Search_icon />
+              <Search_field.Input placeholder="Search states..." />
+              <Search_field.Clear_button />
+            </Search_field.Group>
+          </Search_field>
+          <List_box
+            render_empty_state=(fun _ ->
+                                 <Empty_state>"No results found"</Empty_state>)>
+            <List_box.Item id="florida" text_value="Florida">
+              "Florida" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="delaware" text_value="Delaware">
+              "Delaware" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="california" text_value="California">
+              "California" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="texas" text_value="Texas">
+              "Texas" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="new-york" text_value="New York">
+              "New York" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="washington" text_value="Washington">
+              "Washington" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+      <Field_error>"Please select an item in the list."</Field_error>
+    </Autocomplete>
+    <Button type_=`submit>"Submit"</Button>
+  </Form>

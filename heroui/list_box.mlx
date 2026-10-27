@@ -63,6 +63,7 @@ let content (o : option_) = o.content ()
 type hosted = {
   options : unit -> option_ list;
   draw : node Types.Collection.t S.accessor -> Jsx.element;
+  empty : unit -> bool;
   classes : unit -> string;
   aria_label : unit -> string option;
   others : unit S.rest;
@@ -507,9 +508,11 @@ let%component make ?(aria_label : string option)
     ?(on_selection_change : (string array -> unit) option)
     ?(disabled_keys : string array option)
     ?(on_action : (string -> unit) option)
+    ?(render_empty_state : (unit -> Jsx.element) option)
     ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ?(children : Jsx.content option) () =
   let entries, holder = holding () in
+  let empty, set_empty = S.create_signal false in
   let kept, set_kept = S.create_signal [||] in
   S.create_computed (fun () ->
       S.set set_kept
@@ -547,20 +550,37 @@ let%component make ?(aria_label : string option)
     let option_ (o : option_) =
       <Show.Some some=(node o)>(fun node -> o.draw node)</Show.Some>
     in
-    <For each=(fun () -> Array.of_list (entries ()))>
-      (fun entry _ ->
-        match entry with
-        | Option o -> option_ o
-        | Separator (_, drawn) | Loader (_, drawn) -> drawn ()
-        | Section s ->
-            <Show
-              when_=(fun () ->
-                      List.exists
-                        (fun o -> Option.is_some (node o ()))
-                        (s.options ()))>
-              (fun () -> Jsx.element (s.draw option_))
-            </Show>)
-    </For>
+    S.create_computed (fun () ->
+        S.set set_empty
+          (not (List.exists (fun o -> Option.is_some (node o ())) (options ()))));
+    Jsx.fragment
+      [|
+        <For each=(fun () -> Array.of_list (entries ()))>
+          (fun entry _ ->
+            match entry with
+            | Option o -> option_ o
+            | Separator (_, drawn) | Loader (_, drawn) -> drawn ()
+            | Section s ->
+                <Show
+                  when_=(fun () ->
+                          List.exists
+                            (fun o -> Option.is_some (node o ()))
+                            (s.options ()))>
+                  (fun () -> Jsx.element (s.draw option_))
+                </Show>)
+        </For>;
+        (* What it shows while it holds no option, as React Aria's draws it. *)
+        <Show when_=(fun () -> S.get empty)>
+          (fun () ->
+            match render_empty_state () with
+            | Some drawn ->
+                Jsx.element
+                  <div role=`option style="display: contents;">
+                    (fun () -> Jsx.element drawn)
+                  </div>
+            | None -> Jsx.element Jsx.nothing)
+        </Show>;
+      |]
   in
   let classes () =
     Styles.Listbox.classes
@@ -570,7 +590,8 @@ let%component make ?(aria_label : string option)
     <Holder.Provider value=(fun () -> holder)>
       <Separator.Slot.Provider value=(fun () -> separator holder)>
         <Separator.Element.Provider value=(fun () -> `div)>
-          (fun () -> children ())
+          (fun () ->
+            Option.value (children ()) ~default:(Jsx.element Jsx.nothing))
         </Separator.Element.Provider>
       </Separator.Slot.Provider>
     </Holder.Provider>
@@ -584,6 +605,7 @@ let%component make ?(aria_label : string option)
              {
                options;
                draw;
+               empty = (fun () -> S.get empty);
                classes;
                aria_label = (fun () -> aria_label ());
                others = Props.others props;
@@ -611,6 +633,7 @@ let%component make ?(aria_label : string option)
             aria_orientation=`vertical
             class_=(fun () -> classes ())
             data_slot="list-box"
+            data_empty=(fun () -> Jsx.flag (S.get empty))
             props=(Props.others props)>
             (fun collection ->
               <Listing.Provider value=(fun () -> l)>

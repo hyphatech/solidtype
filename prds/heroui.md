@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox, Select and ComboBox.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has landed.
 Date: 2026-10-23
 
 ## The problem
@@ -251,7 +251,11 @@ and moves a virtual one through its list, which an option shows as React
 Aria's does; while the list is open, React Aria hides the page outside the
 input and the list from a reader, where Kobalte's combo box, not modal,
 leaves it, and the port keeps Kobalte's, since Kobalte's modal one would
-also hold the page's pointer and scroll.
+also hold the page's pointer and scroll. An autocomplete is a select on Kobalte's combo
+box, modal as React Aria's select is, whose search, a search field in its
+popover, is Kobalte's combo box input, where React Aria's is a search box;
+its focus goes back to its button as it closes, where React Aria's is lost
+to the page.
 
 ### Where HeroUI's own falls short
 
@@ -376,7 +380,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Select, on Kobalte's, its list a ListBox it hosts
 - [x] ComboBox, on Kobalte's, its input HeroUI's `Input` and its list a
   ListBox it hosts, filtered as Kobalte's collection holds it
-- [ ] Autocomplete
+- [x] Autocomplete, on Kobalte's combo box, its search a SearchField in its
+  popover
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,

@@ -1,0 +1,67 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Button = Solidtype_heroui.Button
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+let states =
+  [|
+    ("florida", "Florida");
+    ("delaware", "Delaware");
+    ("california", "California");
+    ("texas", "Texas");
+    ("new-york", "New York");
+    ("washington", "Washington");
+  |]
+
+let make () =
+  let is_open, set_open = S.create_signal false in
+  <div class_="space-y-4">
+    <Autocomplete
+      class_="w-[256px]"
+      is_open=(fun () -> S.get is_open)
+      placeholder="Select one"
+      on_open_change=(S.set set_open)>
+      <Label>"State"</Label>
+      <Autocomplete.Trigger>
+        <Autocomplete.Value />
+        <Autocomplete.Clear_button />
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover>
+        <Autocomplete.Filter>
+          <Search_field
+            aria_label="Search states" name="search" variant=`secondary>
+            <Search_field.Group>
+              <Search_field.Search_icon />
+              <Search_field.Input placeholder="Search states..." />
+              <Search_field.Clear_button />
+            </Search_field.Group>
+          </Search_field>
+          <List_box
+            render_empty_state=(fun _ ->
+                                 <Empty_state>"No results found"</Empty_state>)>
+            <Solidtype.For each=(fun () -> states)>
+              (fun (id, name) _ ->
+                <List_box.Item id=(fun () -> id) text_value=(fun () -> name)>
+                  (fun () -> Jsx.string name) <List_box.Item_indicator />
+                </List_box.Item>)
+            </Solidtype.For>
+          </List_box>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+    </Autocomplete>
+    <Button on_click=(fun _ -> S.set set_open (not (S.get is_open)))>
+      (fun () ->
+        Jsx.string
+          ((if S.get is_open then "Close" else "Open") ^ " Autocomplete"))
+    </Button>
+    <p class_="text-sm text-muted">
+      (fun () ->
+        Jsx.string
+          ("Autocomplete is " ^ if S.get is_open then "open" else "closed"))
+    </p>
+  </div>

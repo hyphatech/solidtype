@@ -88,6 +88,7 @@
 @import "@heroui/styles/components/list-box-section.css" layer(components);
 @import "@heroui/styles/components/combo-box.css" layer(components);
 @import "@heroui/styles/components/select.css" layer(components);
+@import "@heroui/styles/components/autocomplete.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
@@ -111,7 +112,8 @@
     > .popover,
     > .dropdown__popover,
     > .select__popover,
-    > .combo-box__popover
+    > .combo-box__popover,
+    > .autocomplete__popover
   ),
 .modal__backdrop,
 .alert-dialog__backdrop,

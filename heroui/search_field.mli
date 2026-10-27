@@ -16,8 +16,10 @@
     ]}
 
     Kobalte's [Search] is a combobox; HeroUI's search field is a text field,
-    which this is. A part is used inside a [Search_field]: elsewhere it raises
-    [Invalid_argument] as it is made. *)
+    which this is. Inside an {!Autocomplete.Filter} it is the autocomplete's
+    search: its text is the autocomplete's, and its input Kobalte's combo box
+    input, whose keys move through the list and choose. A part is used inside a
+    [Search_field]: elsewhere it raises [Invalid_argument] as it is made. *)
 
 (** The icon, the input and the clear button, laid out together: a
     [<div role="group">]. *)

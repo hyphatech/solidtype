@@ -1,0 +1,80 @@
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+module Header = Solidtype_heroui.Header
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <Autocomplete class_="w-[256px]" placeholder="Select a country">
+    <Label>"Country"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value />
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search countries" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search countries..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)>
+          <List_box.Section>
+            <Header>"North America"</Header>
+            <List_box.Item id="usa" text_value="United States">
+              "United States" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="canada" text_value="Canada">
+              "Canada" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="mexico" text_value="Mexico">
+              "Mexico" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box.Section>
+          <Separator />
+          <List_box.Section>
+            <Header>"Europe"</Header>
+            <List_box.Item id="uk" text_value="United Kingdom">
+              "United Kingdom" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="france" text_value="France">
+              "France" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="germany" text_value="Germany">
+              "Germany" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="spain" text_value="Spain">
+              "Spain" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="italy" text_value="Italy">
+              "Italy" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box.Section>
+          <Separator />
+          <List_box.Section>
+            <Header>"Asia"</Header>
+            <List_box.Item id="japan" text_value="Japan">
+              "Japan" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="china" text_value="China">
+              "China" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="india" text_value="India">
+              "India" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="south-korea" text_value="South Korea">
+              "South Korea" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box.Section>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

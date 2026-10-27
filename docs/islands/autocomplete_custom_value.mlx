@@ -1,0 +1,81 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+type currency = { code : string; id : string; name : string; symbol : string }
+
+let currencies =
+  [|
+    { code = "USD"; id = "usd"; name = "US Dollar"; symbol = "$" };
+    { code = "EUR"; id = "eur"; name = "Euro"; symbol = {js|€|js} };
+    { code = "GBP"; id = "gbp"; name = "British Pound"; symbol = {js|£|js} };
+    { code = "JPY"; id = "jpy"; name = "Japanese Yen"; symbol = {js|¥|js} };
+    { code = "CHF"; id = "chf"; name = "Swiss Franc"; symbol = {js|₣|js} };
+  |]
+
+let make () =
+  <Autocomplete
+    class_="w-[256px]"
+    default_value=(fun () -> [| "usd" |])
+    placeholder="Select a currency">
+    <Label>"Currency"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value>
+        (fun keys ->
+          <span class_="contents">
+            (fun () ->
+              match S.get keys with
+              | [| key |] -> (
+                  match
+                    Array.find_opt (fun c -> String.equal c.id key) currencies
+                  with
+                  | Some c ->
+                      Jsx.element
+                        <span class_="flex min-w-0 items-center gap-1.5">
+                          <span class_="font-medium">
+                            (fun () -> Jsx.string c.symbol)
+                          </span>
+                          <span>(fun () -> Jsx.string c.code)</span>
+                          <span class_="truncate text-muted">
+                            (fun () -> Jsx.string c.name)
+                          </span>
+                        </span>
+                  | None -> Jsx.element Jsx.nothing)
+              | _ -> Jsx.element Jsx.nothing)
+          </span>)
+      </Autocomplete.Value>
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search currencies" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search currencies..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)>
+          <Solidtype.For each=(fun () -> currencies)>
+            (fun c _ ->
+              <List_box.Item
+                id=(fun () -> c.id) text_value=(fun () -> c.code ^ " " ^ c.name)>
+                <div class_="flex flex-col">
+                  <Label>(fun () -> Jsx.string c.code)</Label>
+                  <Description>(fun () -> Jsx.string c.name)</Description>
+                </div>
+                <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -825,6 +825,60 @@ export function select(host: HTMLElement, { selectionMode, variant, isDisabled }
       </Select>,
     ),
   );
+}
+
+type AutocompleteProps = {
+  selectionMode: "single" | "multiple";
+  variant: "primary" | "secondary";
+  isDisabled: boolean;
+};
+
+function States({ selectionMode, variant, isDisabled }: AutocompleteProps) {
+  const { contains } = useFilter({ sensitivity: "base" });
+  return (
+    <Autocomplete
+      className="w-[256px]"
+      placeholder="Select one"
+      selectionMode={selectionMode}
+      variant={variant}
+      isDisabled={isDisabled}
+    >
+      <Label>State</Label>
+      <Autocomplete.Trigger>
+        <Autocomplete.Value />
+        <Autocomplete.ClearButton />
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover>
+        <Autocomplete.Filter filter={contains}>
+          <SearchField aria-label="Search options" name="search" variant="secondary">
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="Search..." />
+            </SearchField.Group>
+          </SearchField>
+          <ListBox selectionMode={selectionMode}>
+            <ListBox.Item id="florida" textValue="Florida">
+              Florida
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="texas" textValue="Texas">
+              Texas
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="utah" textValue="Utah">
+              Utah
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          </ListBox>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+    </Autocomplete>
+  );
+}
+
+export function autocomplete(host: HTMLElement, props: AutocompleteProps): void {
+  flushSync(() => rootOf(host).render(<States key={props.selectionMode} {...props} />));
 }
 
 type ComboBoxProps = {

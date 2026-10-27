@@ -1,0 +1,52 @@
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+let make () =
+  <Autocomplete
+    class_="w-[256px]"
+    disabled_keys=(fun () -> [| "cat"; "kangaroo" |])
+    placeholder="Select an animal">
+    <Label>"Animal"</Label>
+    <Autocomplete.Trigger>
+      <Autocomplete.Value />
+      <Autocomplete.Clear_button />
+      <Autocomplete.Indicator />
+    </Autocomplete.Trigger>
+    <Autocomplete.Popover>
+      <Autocomplete.Filter>
+        <Search_field
+          aria_label="Search animals" name="search" variant=`secondary>
+          <Search_field.Group>
+            <Search_field.Search_icon />
+            <Search_field.Input placeholder="Search animals..." />
+            <Search_field.Clear_button />
+          </Search_field.Group>
+        </Search_field>
+        <List_box
+          render_empty_state=(fun _ ->
+                               <Empty_state>"No results found"</Empty_state>)>
+          <List_box.Item id="dog" text_value="Dog">
+            "Dog" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="cat" text_value="Cat">
+            "Cat" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="bird" text_value="Bird">
+            "Bird" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="kangaroo" text_value="Kangaroo">
+            "Kangaroo" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="elephant" text_value="Elephant">
+            "Elephant" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="tiger" text_value="Tiger">
+            "Tiger" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Autocomplete.Filter>
+    </Autocomplete.Popover>
+  </Autocomplete>

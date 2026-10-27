@@ -1,0 +1,67 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Autocomplete = Solidtype_heroui.Autocomplete
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Search_field = Solidtype_heroui.Search_field
+
+let states =
+  [|
+    ("california", "California");
+    ("texas", "Texas");
+    ("florida", "Florida");
+    ("new-york", "New York");
+    ("illinois", "Illinois");
+    ("pennsylvania", "Pennsylvania");
+  |]
+
+let make () =
+  let state, set_state = S.create_signal [| "california" |] in
+  let name () =
+    match S.get state with
+    | [| key |] -> (
+        match Array.find_opt (fun (id, _) -> String.equal id key) states with
+        | Some (_, name) -> name
+        | None -> "None")
+    | _ -> "None"
+  in
+  <div class_="space-y-4">
+    <Autocomplete
+      class_="w-[256px]"
+      placeholder="Select a state"
+      value=(fun () -> S.get state)
+      on_change=(S.set set_state)>
+      <Label>"State (controlled)"</Label>
+      <Autocomplete.Trigger>
+        <Autocomplete.Value />
+        <Autocomplete.Clear_button />
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover>
+        <Autocomplete.Filter>
+          <Search_field
+            aria_label="Search states" name="search" variant=`secondary>
+            <Search_field.Group>
+              <Search_field.Search_icon />
+              <Search_field.Input placeholder="Search states..." />
+              <Search_field.Clear_button />
+            </Search_field.Group>
+          </Search_field>
+          <List_box
+            render_empty_state=(fun _ ->
+                                 <Empty_state>"No results found"</Empty_state>)>
+            <Solidtype.For each=(fun () -> states)>
+              (fun (id, name) _ ->
+                <List_box.Item id=(fun () -> id) text_value=(fun () -> name)>
+                  (fun () -> Jsx.string name) <List_box.Item_indicator />
+                </List_box.Item>)
+            </Solidtype.For>
+          </List_box>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+    </Autocomplete>
+    <p class_="text-sm text-muted">
+      (fun () -> Jsx.string ("Selected: " ^ name ()))
+    </p>
+  </div>

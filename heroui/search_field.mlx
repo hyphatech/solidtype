@@ -2,6 +2,7 @@ module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.TextField
 module Kobalte_button = Solidtype_kobalte.Button
+module Kobalte_combo_box = Solidtype_kobalte.Combobox
 
 external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
 [@@mel.send]
@@ -23,6 +24,9 @@ type field = {
   invalid : unit -> bool;
   read_only : unit -> bool;
   input : Dom.htmlInputElement option ref;
+  search : Autocomplete.Search.t option;
+  name : unit -> string option;
+  aria_label : unit -> string option;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -36,6 +40,18 @@ let within part =
 
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
+
+(* Whether an option of an autocomplete holds the focus, which stays in its
+   search: React Aria's search shows it is not focused meanwhile. *)
+let elsewhere f =
+  match f.search with
+  | Some (s : Autocomplete.Search.t) -> s.elsewhere ()
+  | None -> false
+
+let returned f =
+  match f.search with
+  | Some (s : Autocomplete.Search.t) -> s.returned ()
+  | None -> false
 
 module Parts = Field.Slots (struct
   let label = Kobalte.Label.component
@@ -56,8 +72,13 @@ module Group = struct
                after (Styles.SearchField.group (f.slots ())) (class_ ()))
       data_slot="search-field-group"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_focus_within=(fun () ->
+                          Jsx.flag (Interaction.focused i && not (elsewhere f)))
+      data_focus_visible=(fun () ->
+                           Jsx.flag
+                             ((Interaction.focus_visible i
+                              || (Interaction.focused i && returned f))
+                             && not (elsewhere f)))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
       props=(Props.others props)>
@@ -104,32 +125,65 @@ module Input = struct
       =
     let f = within "Search_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
-    (* Escape clears a search, and Enter submits it, as React Aria's does. *)
-    let keyed e =
-      match key e with
-      | "Escape" when not (String.equal (f.value ()) "" || f.read_only ()) ->
-          prevent_default e;
-          f.clear ()
-      | "Enter" -> f.submit ()
-      | _ -> ()
+    let classes () =
+      after (Styles.SearchField.input (f.slots ())) (class_ ())
     in
-    <Kobalte.Input
-      ?placeholder
-      type_="search"
-      class_=(fun () ->
-               after (Styles.SearchField.input (f.slots ())) (class_ ()))
-      ref=(fun e ->
-            f.input := Some e;
-            Interaction.watch i e)
-      on_key_down=keyed
-      data_slot="search-field-input"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
-      props=(Props.others props)
-    />
+    let watched e =
+      f.input := Some e;
+      Interaction.watch i e
+    in
+    match f.search with
+    | Some s ->
+        (* An autocomplete's search: Kobalte's combo box input, whose keys
+           move through the list and choose, and Escape closes it. *)
+        <Kobalte_combo_box.Input
+          ?placeholder
+          ?name=(fun () -> f.name ())
+          ?aria_label=(fun () -> f.aria_label ())
+          enterkeyhint="go"
+          title=""
+          type_="search"
+          class_=(fun () -> classes ())
+          ref=watched
+          data_slot="search-field-input"
+          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+          data_focused=(fun () ->
+                         Jsx.flag (Interaction.focused i && not (s.elsewhere ())))
+          data_focus_visible=(fun () ->
+                               Jsx.flag
+                                 ((Interaction.focus_visible i
+                                  || (Interaction.focused i && s.returned ()))
+                                 && not (s.elsewhere ())))
+          data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+          data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+          props=(Props.others props)
+        />
+    | None ->
+        (* Escape clears a search, and Enter submits it, as React Aria's
+           does. *)
+        let keyed e =
+          match key e with
+          | "Escape" when not (String.equal (f.value ()) "" || f.read_only ())
+            ->
+              prevent_default e;
+              f.clear ()
+          | "Enter" -> f.submit ()
+          | _ -> ()
+        in
+        <Kobalte.Input
+          ?placeholder
+          type_="search"
+          class_=(fun () -> classes ())
+          ref=watched
+          on_key_down=keyed
+          data_slot="search-field-input"
+          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+          data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+          data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+          data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+          props=(Props.others props)
+        />
 end
 
 module Clear_button = struct
@@ -185,10 +239,15 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   in
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let search = Autocomplete.Search.use () in
+  (* An autocomplete's search is its text, which its combo box keeps. *)
   let current, set =
-    Field.controlled ~value ~default:(default_value ()) ~on_change:(fun v ->
-        in_form.changed ();
-        on_change v)
+    match search with
+    | Some s -> (s.text, s.set)
+    | None ->
+        Field.controlled ~value ~default:(default_value ()) ~on_change:(fun v ->
+            in_form.changed ();
+            on_change v)
   in
   let f =
     {
@@ -207,6 +266,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       invalid;
       read_only = (fun () -> is_read_only ());
       input = ref None;
+      search;
+      name = (fun () -> name ());
+      aria_label = (fun () -> aria_label ());
     }
   in
   <Context.Provider value=(fun () -> f)>
@@ -217,8 +279,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       required=(fun () -> is_required ())
       disabled=(fun () -> disabled ())
       read_only=(fun () -> is_read_only ())
-      ?name
-      ?aria_label
+      ?name=(fun () -> if Option.is_some search then None else name ())
+      ?aria_label=(fun () ->
+                    if Option.is_some search then None else aria_label ())
       class_=(fun () ->
                after (Styles.SearchField.base (f.slots ())) (class_ ()))
       ref=(fun e -> in_form.root e)
