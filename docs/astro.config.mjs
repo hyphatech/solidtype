@@ -47,7 +47,7 @@ export default defineConfig({
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
         }),
         // The reference is odoc's, in public/, which the validator cannot see.
-        links({ exclude: ["**/reference/**"] }),
+        links({ exclude: ["**/reference/solidtype*/**", "**/reference/ppx_solidtype/**"] }),
       ],
       customCss: ["./src/styles/heroui.css", "./src/styles/api.css"],
       favicon: "/favicon-32.png",

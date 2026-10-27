@@ -7,7 +7,7 @@
       <Field_error>"Enter a valid email."</Field_error>
     ]}
 
-    @raise Invalid_argument as it is made, outside a field. *)
+    Raises [Invalid_argument] as it is made, outside a field. *)
 
 type slot =
   ((unit -> string) ->

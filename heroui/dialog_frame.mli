@@ -19,9 +19,9 @@ type t
 (** A backdrop, as its parts read it. *)
 
 val within : string -> backdrop:string -> t
-(** [within part ~backdrop] is the backdrop [part] is inside.
-    @raise Invalid_argument
-      where it is inside none, naming [part] and its [backdrop]. *)
+(** [within part ~backdrop] is the backdrop [part] is inside. Raises
+    [Invalid_argument] where it is inside none, naming [part] and its
+    [backdrop]. *)
 
 val close : t -> unit
 (** Closes the dialog. *)

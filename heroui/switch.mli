@@ -38,7 +38,7 @@ end
 (** The clickable label that holds the control and its {!Label}: Kobalte's
     [Switch.Label], the switch's input inside it.
 
-    @raise Invalid_argument outside a [Switch]. *)
+    Raises [Invalid_argument] outside a [Switch]. *)
 module Content : sig
   module Props : sig
     type t
@@ -57,7 +57,7 @@ end
 
 (** The track the thumb moves along.
 
-    @raise Invalid_argument outside a [Switch]. *)
+    Raises [Invalid_argument] outside a [Switch]. *)
 module Control : sig
   module Props : sig
     type t
@@ -76,7 +76,7 @@ end
 
 (** The thumb.
 
-    @raise Invalid_argument outside a [Switch]. *)
+    Raises [Invalid_argument] outside a [Switch]. *)
 module Thumb : sig
   module Props : sig
     type t

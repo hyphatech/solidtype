@@ -1,14 +1,8 @@
 SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
-# odoc's reference: dune's @doc-new builds a package's pages by its index, links
-# them to the standard library's, built beside them, and styles them all.
-REFERENCE = _build/default/_doc_new/html/docs
-REFERENCE_FILES = local/solidtype/Solidtype/index.html \
-  local/solidtype-kobalte/Solidtype_kobalte/index.html \
-  local/solidtype-heroui/Solidtype_heroui/index.html \
-  local/ppx_solidtype/Ppx_solidtype/index.html \
-  stdlib/Stdlib/index.html odoc.support/odoc.css
+# The reference is odoc's, for solidtype's own packages and nothing under them.
+REFERENCE = solidtype solidtype-kobalte solidtype-heroui ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example example-serve docs docs-serve generate
@@ -69,9 +63,10 @@ example-serve: example ## serve the example and its API on http://localhost:4420
 # odoc's reference from the .mli files is copied in first, for the site to
 # serve as it is.
 docs: build node_modules ## build the documentation site
-	$(OPAM) dune build $(REFERENCE_FILES:%=$(REFERENCE)/%)
+	$(OPAM) dune build @doc
 	rm -rf docs/public/reference
-	cp -R $(REFERENCE) docs/public/reference
+	mkdir -p docs/public/reference
+	cd _build/default/_doc/_html && cp -R $(REFERENCE) $(CURDIR)/docs/public/reference/
 	chmod -R u+w docs/public/reference
 	bun --bun astro build --root docs
 

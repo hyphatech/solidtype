@@ -40,7 +40,7 @@ end
 (** The clickable label that holds the control and its text: Kobalte's
     [RadioGroup.ItemLabel], the radio's input inside it.
 
-    @raise Invalid_argument outside a [Radio]. *)
+    Raises [Invalid_argument] outside a [Radio]. *)
 module Content : sig
   module Props : sig
     type t
@@ -59,7 +59,7 @@ end
 
 (** The circle the indicator is drawn in.
 
-    @raise Invalid_argument outside a [Radio]. *)
+    Raises [Invalid_argument] outside a [Radio]. *)
 module Control : sig
   module Props : sig
     type t
@@ -79,7 +79,7 @@ end
 (** The dot, which HeroUI's styles draw as the radio is selected, or the
     children it is given.
 
-    @raise Invalid_argument outside a [Radio]. *)
+    Raises [Invalid_argument] outside a [Radio]. *)
 module Indicator : sig
   module Props : sig
     type t

@@ -18,7 +18,7 @@ type weight = [ `normal | `medium | `semibold | `bold ]
 
 (** A heading of a [level] from 1 to 6, as [type_] [`h1] to [`h6] is.
 
-    @raise Invalid_argument as it is made, for a level outside 1 to 6. *)
+    Raises [Invalid_argument] as it is made, for a level outside 1 to 6. *)
 module Heading : sig
   module Props : sig
     type t

@@ -41,7 +41,7 @@ end
 (** The clickable label that holds the control and its {!Label}: Kobalte's
     [Checkbox.Label], the checkbox's input inside it.
 
-    @raise Invalid_argument outside a [Checkbox]. *)
+    Raises [Invalid_argument] outside a [Checkbox]. *)
 module Content : sig
   module Props : sig
     type t
@@ -60,7 +60,7 @@ end
 
 (** The box the indicator is drawn in.
 
-    @raise Invalid_argument outside a [Checkbox]. *)
+    Raises [Invalid_argument] outside a [Checkbox]. *)
 module Control : sig
   module Props : sig
     type t
@@ -80,7 +80,7 @@ end
 (** The mark: HeroUI's check, drawn in as it is selected, or its dash while
     indeterminate, unless given children of its own.
 
-    @raise Invalid_argument outside a [Checkbox]. *)
+    Raises [Invalid_argument] outside a [Checkbox]. *)
 module Indicator : sig
   module Props : sig
     type t

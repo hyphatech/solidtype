@@ -22,33 +22,33 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 
 ## solidtype
 
-- [`Solidtype`](/solidtype/reference/local/solidtype/Solidtype/index.html) --
+- [`Solidtype`](/solidtype/reference/solidtype/Solidtype/index.html) --
   Solid's reactive core, its renderer in the browser and on the server, its
   stores and its components, one module each, and the JSX the ppx writes.
   The most read:
-  [`Solid`](/solidtype/reference/local/solidtype/Solidtype/Solid/index.html),
-  [`Web`](/solidtype/reference/local/solidtype/Solidtype/Web/index.html),
-  [`Server`](/solidtype/reference/local/solidtype/Solidtype/Server/index.html),
-  [`Store`](/solidtype/reference/local/solidtype/Solidtype/Store/index.html),
-  [`Jsx`](/solidtype/reference/local/solidtype/Solidtype/Jsx/index.html),
-  [`Check`](/solidtype/reference/local/solidtype/Solidtype/Check/index.html) and
-  [`Html`](/solidtype/reference/local/solidtype/Solidtype/Html/index.html).
+  [`Solid`](/solidtype/reference/solidtype/Solidtype/Solid/index.html),
+  [`Web`](/solidtype/reference/solidtype/Solidtype/Web/index.html),
+  [`Server`](/solidtype/reference/solidtype/Solidtype/Server/index.html),
+  [`Store`](/solidtype/reference/solidtype/Solidtype/Store/index.html),
+  [`Jsx`](/solidtype/reference/solidtype/Solidtype/Jsx/index.html),
+  [`Check`](/solidtype/reference/solidtype/Solidtype/Check/index.html) and
+  [`Html`](/solidtype/reference/solidtype/Solidtype/Html/index.html).
 
 ## solidtype-kobalte
 
-- [`Solidtype_kobalte`](/solidtype/reference/local/solidtype-kobalte/Solidtype_kobalte/index.html)
+- [`Solidtype_kobalte`](/solidtype/reference/solidtype-kobalte/Solidtype_kobalte/index.html)
   -- each of Kobalte's components, part by part, its hooks and values, and
-  [`Types`](/solidtype/reference/local/solidtype-kobalte/Solidtype_kobalte/Types/index.html),
+  [`Types`](/solidtype/reference/solidtype-kobalte/Solidtype_kobalte/Types/index.html),
   the types they name.
 
 ## solidtype-heroui
 
-- [`Solidtype_heroui`](/solidtype/reference/local/solidtype-heroui/Solidtype_heroui/index.html)
+- [`Solidtype_heroui`](/solidtype/reference/solidtype-heroui/Solidtype_heroui/index.html)
   -- each port, one module each, and
-  [`Styles`](/solidtype/reference/local/solidtype-heroui/Solidtype_heroui/Styles/index.html),
+  [`Styles`](/solidtype/reference/solidtype-heroui/Solidtype_heroui/Styles/index.html),
   HeroUI's variant functions, the classes of each look.
 
 ## ppx_solidtype
 
-- [`Ppx_solidtype`](/solidtype/reference/local/ppx_solidtype/Ppx_solidtype/index.html)
+- [`Ppx_solidtype`](/solidtype/reference/ppx_solidtype/Ppx_solidtype/index.html)
   -- what each JSX form is lowered to.

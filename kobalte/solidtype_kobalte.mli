@@ -1128,7 +1128,7 @@ module Colors : sig
 
   (** Parses a color from a string value. Throws an error if the string could not be parsed.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val parse_color : string -> Types.Color.t
   val parse_color_opt : string -> Types.Color.t option
 end

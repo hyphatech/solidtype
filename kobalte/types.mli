@@ -292,7 +292,7 @@ module Color : sig
   type t = t_color
   (** Converts the color to the given color format, and returns a new Color object.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val to_format : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba ] -> t_color
   external to_string : t -> ?format:[ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba | `css ] -> unit -> string = "toString" [@@mel.send]
   external clone : t -> unit -> t_color = "clone" [@@mel.send]
@@ -300,12 +300,12 @@ module Color : sig
   (** Returns the numeric value for a given channel.
       Throws an error if the channel is unsupported in the current color format.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val get_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float
   (** Sets the numeric value for a given channel, and returns a new Color object.
       Throws an error if the channel is unsupported in the current color format.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val with_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float -> t_color
   external get_channel_range : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_channel_range = "getChannelRange" [@@mel.send]
   external get_channel_name : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_slider_root_translations -> string = "getChannelName" [@@mel.send]

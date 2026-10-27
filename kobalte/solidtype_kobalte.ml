@@ -1130,7 +1130,7 @@ module Colors = struct
   [@@mel.module "@kobalte/core/colors"]
   (** Parses a color from a string value. Throws an error if the string could not be parsed.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   let parse_color x0 =
     match parse_color_js x0 with
     | v -> v

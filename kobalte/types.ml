@@ -295,7 +295,7 @@ module Color = struct
   external to_format_js : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba ] -> t_color = "toFormat" [@@mel.send]
   (** Converts the color to the given color format, and returns a new Color object.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   let to_format o x0 =
     match to_format_js o x0 with
     | v -> v
@@ -307,7 +307,7 @@ module Color = struct
   (** Returns the numeric value for a given channel.
       Throws an error if the channel is unsupported in the current color format.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   let get_channel_value o x0 =
     match get_channel_value_js o x0 with
     | v -> v
@@ -316,7 +316,7 @@ module Color = struct
   (** Sets the numeric value for a given channel, and returns a new Color object.
       Throws an error if the channel is unsupported in the current color format.
       
-      @raise Invalid_argument with Kobalte's message, where it throws. *)
+      Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   let with_channel_value o x0 x1 =
     match with_channel_value_js o x0 x1 with
     | v -> v

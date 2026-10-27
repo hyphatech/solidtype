@@ -34,7 +34,7 @@ module Props : sig
 end
 
 val make : Props.t -> Solidtype.Jsx.element
-(** @raise Invalid_argument
-      as it is made inside a {!Toggle_button_group} with no [id]. *)
+(** Raises [Invalid_argument] as it is made inside a {!Toggle_button_group} with
+    no [id]. *)
 
 val component : Props.t Solidtype.Jsx.component

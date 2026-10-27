@@ -501,7 +501,7 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
 export function doc(symbol: ts.Symbol, indent: string, raises = false): string[] {
   const text = ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim();
   const escaped = text.replace(/\*\)/g, "* )").replace(/[{}\[\]@]/g, (c) => `\\${c}`);
-  const raise = raises ? `@raise Invalid_argument with ${library.name}'s message, where it throws.` : "";
+  const raise = raises ? `Raises [Invalid_argument] with ${library.name}'s message, where it throws.` : "";
   const all = [escaped, raise].filter((t) => t !== "").join("\n\n");
   if (!all) return [];
   return [`${indent}(** ${all.split("\n").join(`\n${indent}    `)} *)`];
