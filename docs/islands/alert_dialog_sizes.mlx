@@ -1,0 +1,60 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let sizes =
+  [| (`xs, "xs"); (`sm, "sm"); (`md, "md"); (`lg, "lg"); (`cover, "cover") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> sizes)>
+      (fun (size, name) _ ->
+        <Alert_dialog>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Alert_dialog.Backdrop>
+            <Alert_dialog.Container size=(fun () -> size)>
+              <Alert_dialog.Dialog>
+                <Alert_dialog.Close_trigger />
+                <Alert_dialog.Header>
+                  <Alert_dialog.Icon class_="bg-default text-foreground">
+                    <Gravity.Rocket class_="size-5" />
+                  </Alert_dialog.Icon>
+                  <Alert_dialog.Heading>
+                    "Size: "
+                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                  </Alert_dialog.Heading>
+                </Alert_dialog.Header>
+                <Alert_dialog.Body>
+                  <p>
+                    "This alert dialog uses the "
+                    <code>(fun () -> Jsx.string name)</code>
+                    (fun () ->
+                      Jsx.string
+                        (match size with
+                        | `cover ->
+                            " size variant. It spans the full screen with \
+                             margins: 16px on mobile and 40px on desktop. \
+                             Maintains rounded corners and standard padding. \
+                             Perfect for critical confirmations that need \
+                             maximum width while preserving alert dialog \
+                             aesthetics."
+                        | `xs | `sm | `md | `lg ->
+                            " size variant. On mobile devices, all sizes adapt \
+                             to near full-width for optimal viewing. On \
+                             desktop, each size provides a different maximum \
+                             width to suit various content needs."))
+                  </p>
+                </Alert_dialog.Body>
+                <Alert_dialog.Footer>
+                  <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                  <Button slot=`close>"Confirm"</Button>
+                </Alert_dialog.Footer>
+              </Alert_dialog.Dialog>
+            </Alert_dialog.Container>
+          </Alert_dialog.Backdrop>
+        </Alert_dialog>)
+    </For>
+  </div>

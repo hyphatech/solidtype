@@ -192,6 +192,11 @@ module Link = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/link.svg?raw"]
 end)
 
+module Lock_open = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/lock-open.svg?raw"]
+end)
+
 module Magnifier_minus = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/magnifier-minus.svg?raw"]

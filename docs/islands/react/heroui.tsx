@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
@@ -792,6 +792,44 @@ export function modal(host: HTMLElement, { variant, placement, size, isDismissab
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>,
+    ),
+  );
+}
+
+type AlertDialogProps = {
+  status: "default" | "accent" | "success" | "warning" | "danger";
+  variant: "opaque" | "blur" | "transparent";
+  isDismissable: boolean;
+};
+
+export function alertDialog(host: HTMLElement, { status, variant, isDismissable }: AlertDialogProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <AlertDialog>
+        <Button variant="danger">Delete Project</Button>
+        <AlertDialog.Backdrop variant={variant} isDismissable={isDismissable}>
+          <AlertDialog.Container>
+            <AlertDialog.Dialog>
+              <AlertDialog.CloseTrigger />
+              <AlertDialog.Header>
+                <AlertDialog.Icon status={status} />
+                <AlertDialog.Heading>Delete project permanently?</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                <p>This will permanently delete the project.</p>
+              </AlertDialog.Body>
+              <AlertDialog.Footer>
+                <Button slot="close" variant="tertiary">
+                  Cancel
+                </Button>
+                <Button slot="close" variant="danger">
+                  Delete
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>,
     ),
   );
 }

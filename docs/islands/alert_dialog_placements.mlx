@@ -1,0 +1,56 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let placements =
+  [| (`auto, "auto"); (`top, "top"); (`center, "center"); (`bottom, "bottom") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> placements)>
+      (fun (placement, name) _ ->
+        <Alert_dialog>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Alert_dialog.Backdrop>
+            <Alert_dialog.Container placement=(fun () -> placement)>
+              <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+                <Alert_dialog.Close_trigger />
+                <Alert_dialog.Header>
+                  <Alert_dialog.Icon status=`accent />
+                  <Alert_dialog.Heading>
+                    (fun () ->
+                      Jsx.string
+                        (match placement with
+                        | `auto -> "Auto Placement"
+                        | `top | `center | `bottom ->
+                            String.capitalize_ascii name ^ " Position"))
+                  </Alert_dialog.Heading>
+                </Alert_dialog.Header>
+                <Alert_dialog.Body>
+                  <p>
+                    (fun () ->
+                      Jsx.string
+                        (match placement with
+                        | `auto ->
+                            "Automatically positions at the bottom on mobile \
+                             and center on desktop for optimal user \
+                             experience."
+                        | `top | `center | `bottom ->
+                            "This dialog is positioned at the " ^ name
+                            ^ " of the viewport. Critical confirmations are \
+                               typically centered for maximum attention."))
+                  </p>
+                </Alert_dialog.Body>
+                <Alert_dialog.Footer>
+                  <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                  <Button slot=`close>"Confirm"</Button>
+                </Alert_dialog.Footer>
+              </Alert_dialog.Dialog>
+            </Alert_dialog.Container>
+          </Alert_dialog.Backdrop>
+        </Alert_dialog>)
+    </For>
+  </div>

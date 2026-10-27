@@ -11,6 +11,7 @@ module Avatar = H.Avatar
 module Avatar_group = H.Avatar_group
 module Badge = H.Badge
 module Breadcrumbs = H.Breadcrumbs
+module Alert_dialog = H.Alert_dialog
 module Modal = H.Modal
 module Pagination = H.Pagination
 module Popover = H.Popover
@@ -159,6 +160,34 @@ let () =
                     </Popover.Dialog>
                   </Popover.Content>
                 </Popover>
+                <Alert_dialog default_open=true>
+                  <Alert_dialog.Trigger data_testid="Alert_dialog.Trigger">
+                    "Delete"
+                  </Alert_dialog.Trigger>
+                  <Alert_dialog.Backdrop data_testid="Alert_dialog.Backdrop">
+                    <Alert_dialog.Container
+                      data_testid="Alert_dialog.Container">
+                      <Alert_dialog.Dialog data_testid="Alert_dialog.Dialog">
+                        <Alert_dialog.Close_trigger
+                          data_testid="Alert_dialog.Close_trigger"
+                        />
+                        <Alert_dialog.Header data_testid="Alert_dialog.Header">
+                          <Alert_dialog.Icon data_testid="Alert_dialog.Icon" />
+                          <Alert_dialog.Heading
+                            data_testid="Alert_dialog.Heading">
+                            "Sure?"
+                          </Alert_dialog.Heading>
+                        </Alert_dialog.Header>
+                        <Alert_dialog.Body data_testid="Alert_dialog.Body">
+                          "Body"
+                        </Alert_dialog.Body>
+                        <Alert_dialog.Footer data_testid="Alert_dialog.Footer">
+                          "Footer"
+                        </Alert_dialog.Footer>
+                      </Alert_dialog.Dialog>
+                    </Alert_dialog.Container>
+                  </Alert_dialog.Backdrop>
+                </Alert_dialog>
                 <Modal default_open=true>
                   <Modal.Trigger data_testid="Modal.Trigger">
                     "Open"
@@ -365,6 +394,18 @@ let () =
                    ("Popover.Dialog", "[data-slot=popover-dialog]");
                    ("Popover.Arrow", "[data-slot=popover-overlay-arrow-group]");
                    ("Popover.Heading", ".popover__heading");
+                   ("Alert_dialog.Trigger", "[data-slot=alert-dialog-trigger]");
+                   ("Alert_dialog.Backdrop", "[data-slot=alert-dialog-backdrop]");
+                   ( "Alert_dialog.Container",
+                     "[data-slot=alert-dialog-container]" );
+                   ("Alert_dialog.Dialog", "[data-slot=alert-dialog-dialog]");
+                   ( "Alert_dialog.Close_trigger",
+                     "[data-slot=alert-dialog-close-trigger]" );
+                   ("Alert_dialog.Header", "[data-slot=alert-dialog-header]");
+                   ("Alert_dialog.Icon", "[data-slot=alert-dialog-icon]");
+                   ("Alert_dialog.Heading", "[data-slot=alert-dialog-heading]");
+                   ("Alert_dialog.Body", "[data-slot=alert-dialog-body]");
+                   ("Alert_dialog.Footer", "[data-slot=alert-dialog-footer]");
                    ("Modal.Trigger", "[data-slot=modal-trigger]");
                    ("Modal.Backdrop", "[data-slot=modal-backdrop]");
                    ("Modal.Container", "[data-slot=modal-container]");

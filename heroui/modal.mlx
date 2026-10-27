@@ -1,41 +1,32 @@
 module Jsx = Solidtype.Jsx
-module S = Solidtype.Solid
-module Show = Solidtype.Show
-module Kobalte = Solidtype_kobalte.Dialog
-module Types = Solidtype_kobalte.Types
 
 type variant = [ `opaque | `blur | `transparent ]
 type placement = [ `auto | `center | `top | `bottom ]
 type scroll = [ `inside | `outside ]
 type size = [ `xs | `sm | `md | `lg | `cover | `full ]
 
-(* That a modal's root is above a backdrop, which then takes its open state
-   from it: a [bool], since Melange writes [()] as JavaScript's [undefined],
-   which a context reads as none given. *)
-module Root = Solidtype.Context.Make_optional (struct
-  type t = bool
-end)
-
-(* What the parts inside a backdrop read of it: its presence, how it may be
-   dismissed, what closes it, and the container's placement and sizes. *)
-type backdrop = {
-  overlay : Overlay.t;
-  dismissable : unit -> bool;
-  keyboard_dismissable : unit -> bool;
-  close : unit -> unit;
-  mutable placement : unit -> placement;
-  mutable scroll : unit -> scroll;
-  mutable size : unit -> size;
+(* What the dialog and its body read of their container. *)
+type container = {
+  placement : unit -> placement;
+  scroll : unit -> scroll;
+  size : unit -> size;
 }
 
-module Backdrop_context = Solidtype.Context.Make_optional (struct
-  type t = backdrop
+module Container_context = Solidtype.Context.Make_optional (struct
+  type t = container
 end)
 
-let within part =
-  match Backdrop_context.use () with
-  | Some b -> b
-  | None -> invalid_arg (part ^ " is used inside a Modal.Backdrop")
+let within part = Dialog_frame.within part ~backdrop:"Modal.Backdrop"
+
+let container () =
+  match Container_context.use () with
+  | Some c -> c
+  | None ->
+      {
+        placement = (fun () -> `auto);
+        scroll = (fun () -> `inside);
+        size = (fun () -> `md);
+      }
 
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
@@ -49,107 +40,12 @@ let placement_name = function
   | `top -> "top"
   | `bottom -> "bottom"
 
-external prevent_default : _ Dom.event_like -> unit = "preventDefault"
-[@@mel.send]
-
-external as_element : _ Dom.element_like -> Dom.element = "%identity"
-
-external related_target : Dom.focusEvent -> Dom.element Js.null
-  = "relatedTarget"
-[@@mel.get]
-
-external target : Dom.focusEvent -> Dom.element = "target" [@@mel.get]
-external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
-
-type visual_viewport
-
-external visual_viewport : visual_viewport Js.undefined = "visualViewport"
-[@@mel.scope "window"]
-
-external viewport_height : visual_viewport -> float = "height" [@@mel.get]
-external inner_height : float = "innerHeight" [@@mel.scope "window"]
-
-external on_resize :
-  visual_viewport ->
-  (_[@mel.as "resize"]) ->
-  ((Dom.event -> unit)[@mel.uncurry]) ->
-  unit = "addEventListener"
-[@@mel.send]
-
-external off_resize :
-  visual_viewport ->
-  (_[@mel.as "resize"]) ->
-  ((Dom.event -> unit)[@mel.uncurry]) ->
-  unit = "removeEventListener"
-[@@mel.send]
-
-(* The height of what a phone shows of the page, which its keyboard
-   shortens, as React Aria gives HeroUI's backdrop and container in
-   [--visual-viewport-height]; read once the backdrop is on the page. *)
-let viewport_height () =
-  let height, set_height = S.create_signal None in
-  S.on_mount (fun () ->
-      let read () =
-        S.set set_height
-          (Some
-             (match Js.Undefined.toOption visual_viewport with
-             | Some v -> viewport_height v
-             | None -> inner_height))
-      in
-      read ();
-      match Js.Undefined.toOption visual_viewport with
-      | Some v ->
-          let resized (_ : Dom.event) = read () in
-          on_resize v resized;
-          S.on_cleanup (fun () -> off_resize v resized)
-      | None -> ());
-  fun () -> S.get height
-
-(* Kobalte's trigger as the [<div role="button">] HeroUI's is, so a button
-   inside it is not a button inside a button. *)
-module As_div = struct
-  module Props = struct
-    external check :
-      ?as_:string Solidtype.Check.value ->
-      ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
-      Solidtype.Html.Div.check = "check"
-    [@@mel.module "vite-plugin-solidtype/markers"]
-  end
-
-  let component = Kobalte.Trigger.component
-end
-
-(* Kobalte's dialog as the [<section>] React Aria's is. *)
-module As_section = struct
-  module Props = struct
-    external check :
-      ?as_:string Solidtype.Check.value ->
-      ?on_open_auto_focus:(Dom.event -> unit) ->
-      ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
-      ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
-      ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
-      Solidtype.Html.Section.check = "check"
-    [@@mel.module "vite-plugin-solidtype/markers"]
-  end
-
-  let component = Kobalte.Content.component
-end
-
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
       ~(children : Jsx.content) () =
-    <As_div
-      as_="div"
-      ?aria_label
-      class_=(fun () -> after (Styles.Modal.trigger (slots ())) (class_ ()))
-      role=`button
-      tabindex="0"
-      data_slot="modal-trigger"
-      props=(Props.others props)>
-      (fun () -> children ())
-    </As_div>
+    Dialog_frame.trigger ~slot:"modal-trigger"
+      ~class_:(fun () -> after (Styles.Modal.trigger (slots ())) (class_ ()))
+      ~aria_label ~others:(Props.others props) children
 end
 
 module Backdrop = struct
@@ -158,159 +54,51 @@ module Backdrop = struct
       ?(is_keyboard_dismiss_disabled : bool = false) ?(is_open : bool option)
       ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
       ?(class_ : string option) ~(children : Jsx.content) () =
-    (* The backdrop inside Kobalte's root, its own or the modal's. *)
-    let shown () =
-      let k = Kobalte.use_dialog_context () in
-      let open_ = Types.DialogContextValue.is_open k in
-      let o = Overlay.create ~is_open:(fun () -> S.get open_) () in
-      let b =
-        {
-          overlay = o;
-          dismissable = is_dismissable;
-          keyboard_dismissable =
-            (fun () -> not (is_keyboard_dismiss_disabled ()));
-          close = (fun () -> Types.DialogContextValue.close k ());
-          placement = (fun () -> `auto);
-          scroll = (fun () -> `inside);
-          size = (fun () -> `md);
-        }
-      in
-      let height = viewport_height () in
-      <Show when_=(fun () -> Overlay.present o)>
-        <Kobalte.Portal>
-          <div
-            class_=(fun () ->
-                     after
-                       (Styles.Modal.backdrop (slots ~variant:(variant ()) ()))
-                       (class_ ()))
-            style=(fun () ->
-                    match height () with
-                    | Some h ->
-                        "--visual-viewport-height: " ^ Js.Float.toString h
-                        ^ "px;"
-                    | None -> "")
-            ref=(fun e -> Overlay.watch o e)
-            data_slot="modal-backdrop"
-            data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-            data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
-            props=(Props.others props)>
-            <Backdrop_context.Provider value=(fun () -> b)>
-              (fun () -> children ())
-            </Backdrop_context.Provider>
-          </div>
-        </Kobalte.Portal>
-      </Show>
-    in
-    match Root.use () with
-    | Some (true | false) -> shown ()
-    (* A backdrop alone is a modal of its own, open as it says. *)
-    | None ->
-        <Kobalte.Root
-          ?open_=(fun () -> is_open ())
-          ?default_open=(fun () -> default_open ())
-          on_open_change=(fun o -> ignore (on_open_change o : unit option))
-          modal=true
-          force_mount=true>
-          (fun () -> Jsx.element (shown ()))
-        </Kobalte.Root>
+    Dialog_frame.backdrop ~slot:"modal-backdrop"
+      ~class_:(fun () ->
+        after
+          (Styles.Modal.backdrop (slots ~variant:(variant ()) ()))
+          (class_ ()))
+      ~dismissable:is_dismissable
+      ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
+      ~is_open ~default_open
+      ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+      ~others:(Props.others props) children
 end
 
 module Container = struct
   let%component make ?(placement : placement = `auto)
       ?(scroll : scroll = `inside) ?(size : size = `md)
       ?(class_ : string option) ~(children : Jsx.content) () =
-    let b = within "Modal.Container" in
-    b.placement <- placement;
-    b.scroll <- scroll;
-    b.size <- size;
-    let o = b.overlay in
-    <div
-      class_=(fun () ->
-               after
-                 (Styles.Modal.container
-                    (slots ~scroll:(scroll ()) ~size:(size ()) ()))
-                 (class_ ()))
-      ref=(fun e -> Overlay.watch o e)
-      data_placement=(fun () -> Jsx.data (placement_name (placement ())))
-      data_slot="modal-container"
-      data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-      data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
-      props=(Props.others props)>
-      (fun () -> children ())
-    </div>
+    let f = within "Modal.Container" in
+    let c = { placement; scroll; size } in
+    Dialog_frame.container f ~slot:"modal-container"
+      ~class_:(fun () ->
+        after
+          (Styles.Modal.container
+             (slots ~scroll:(scroll ()) ~size:(size ()) ()))
+          (class_ ()))
+      ~placement:(fun () -> placement_name (placement ()))
+      ~others:(Props.others props)
+      (fun () ->
+        Jsx.element
+          <Container_context.Provider value=(fun () -> c)>
+            (fun () -> children ())
+          </Container_context.Provider>)
 end
-
-(* A button only a reader finds, which closes the modal, as React Aria puts
-   one for a reader with no Escape key: inside the dialog, since Kobalte hides
-   from a reader all else while a modal is open, where React Aria's is just
-   before it. *)
-let dismiss close =
-  <div
-    style="border: 0px; clip: rect(0px); clip-path: inset(50%); height: 1px; \
-           margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
-           width: 1px; white-space: nowrap;">
-    <button
-      aria_label="Dismiss"
-      style="width: 1px; height: 1px;"
-      tabindex="-1"
-      type_=`button
-      on_click=(fun _ -> close ())
-    />
-  </div>
 
 module Dialog = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
-    let b = within "Modal.Dialog" in
-    let content = ref None in
-    Overlay.return_focus
-      ~is_open:(fun () -> not (Overlay.exiting b.overlay))
-      ~inside:(fun focused ->
-        Option.fold ~none:false ~some:(fun c -> contains c focused) !content)
-      ();
-    (* React Aria's modal gives its dialog the focus as it opens, where
-       Kobalte's gives it to the first button inside. *)
-    let focus_dialog e =
-      match !content with
-      | Some c ->
-          prevent_default e;
-          Overlay.focus c
-      | None -> ()
-    in
-    <As_section
-      as_="section"
-      class_=(fun () ->
-               after
-                 (Styles.Modal.dialog
-                    (slots ~scroll:(b.scroll ()) ~size:(b.size ()) ()))
-                 (class_ ()))
-      ref=(fun e -> content := Some (as_element e))
-      on_open_auto_focus=focus_dialog
-      on_escape_key_down=(fun e ->
-                           if not (b.keyboard_dismissable ()) then
-                             prevent_default e)
-      on_pointer_down_outside=(fun e ->
-                                if not (b.dismissable ()) then prevent_default e)
-      on_focus_out=(fun e ->
-                     (* A press on the backdrop of a modal that stays leaves
-                        the focus nowhere, which Kobalte's trap does not
-                        catch: the dialog takes it back, as React Aria's
-                        does. *)
-                     if
-                       Option.is_none (Js.Null.toOption (related_target e))
-                       && not (Overlay.exiting b.overlay)
-                     then Overlay.focus (target e))
-      data_placement=(fun () -> Jsx.data (placement_name (b.placement ())))
-      data_slot="modal-dialog"
-      props=(Props.others props)>
-      (fun () ->
-        if b.dismissable () then Jsx.element (dismiss b.close)
-        else Jsx.element Jsx.nothing)
-      <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-        <Button.Close.Provider value=(fun () -> b.close)>
-          (fun () -> children ())
-        </Button.Close.Provider>
-      </Button.Trigger.Provider>
-    </As_section>
+    let f = within "Modal.Dialog" in
+    let c = container () in
+    Dialog_frame.dialog f ~slot:"modal-dialog" ~role:`dialog
+      ~class_:(fun () ->
+        after
+          (Styles.Modal.dialog
+             (slots ~scroll:(c.scroll ()) ~size:(c.size ()) ()))
+          (class_ ()))
+      ~placement:(fun () -> placement_name (c.placement ()))
+      ~others:(Props.others props) children
 end
 
 module Header = struct
@@ -325,11 +113,11 @@ end
 
 module Body = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
-    let b = within "Modal.Body" in
+    let c = container () in
     <div
       class_=(fun () ->
                after
-                 (Styles.Modal.body (slots ~scroll:(b.scroll ()) ()))
+                 (Styles.Modal.body (slots ~scroll:(c.scroll ()) ()))
                  (class_ ()))
       data_slot="modal-body"
       props=(Props.others props)>
@@ -359,52 +147,22 @@ end
 
 module Heading = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
-    <Kobalte.Title
-      class_=(fun () -> after (Styles.Modal.heading (slots ())) (class_ ()))
-      data_slot="modal-heading"
-      props=(Props.others props)>
-      (fun () -> children ())
-    </Kobalte.Title>
+    Dialog_frame.heading ~slot:"modal-heading"
+      ~class_:(fun () -> after (Styles.Modal.heading (slots ())) (class_ ()))
+      ~others:(Props.others props) children
 end
 
 module Close_trigger = struct
   let%component make ?(class_ : string option) () =
-    let b = within "Modal.Close_trigger" in
-    <Close_button
-      class_=(fun () ->
-               after (Styles.Modal.close_trigger (slots ())) (class_ ()))
-      on_click=(fun _ -> b.close ())
-      data_slot="modal-close-trigger"
-      props=(Props.others props)
-    />
+    let f = within "Modal.Close_trigger" in
+    Dialog_frame.close_trigger f ~slot:"modal-close-trigger"
+      ~class_:(fun () ->
+        after (Styles.Modal.close_trigger (slots ())) (class_ ()))
+      ~others:(Props.others props)
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
     ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
-  let kept, set_kept = S.create_signal false in
-  S.create_computed (fun () ->
-      S.set set_kept (Option.value (S.untrack default_open) ~default:false));
-  let opened () = match is_open () with Some o -> o | None -> S.get kept in
-  let trigger_for_buttons =
-    {
-      Button.component = Kobalte.Trigger.component;
-      is_disabled = None;
-      controls = None;
-      pressed = Some opened;
-      needs_slot = false;
-    }
-  in
-  <Kobalte.Root
-    ?open_=(fun () -> is_open ())
-    ?default_open=(fun () -> default_open ())
-    on_open_change=(fun o ->
-                     S.set set_kept o;
-                     ignore (on_open_change o : unit option))
-    modal=true
-    force_mount=true>
-    <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
-      <Root.Provider value=(fun () -> true)>
-        (fun () -> children ())
-      </Root.Provider>
-    </Button.Trigger.Provider>
-  </Kobalte.Root>
+  Dialog_frame.root ~is_open ~default_open
+    ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+    children

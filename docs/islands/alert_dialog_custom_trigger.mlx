@@ -1,0 +1,45 @@
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let make () =
+  <Alert_dialog>
+    <Alert_dialog.Trigger
+      class_="group flex items-center gap-3 rounded-2xl bg-surface p-4 \
+              shadow-xs select-none hover:bg-surface-secondary">
+      <div
+        class_="flex size-12 shrink-0 items-center justify-center rounded-xl \
+                bg-danger-soft text-danger-soft-foreground">
+        <Gravity.Trash_bin class_="size-6" />
+      </div>
+      <div class_="flex flex-1 flex-col gap-0.5">
+        <p class_="text-sm font-semibold">"Delete Item"</p>
+        <p class_="text-xs text-muted">"Permanently remove this item"</p>
+      </div>
+    </Alert_dialog.Trigger>
+    <Alert_dialog.Backdrop>
+      <Alert_dialog.Container>
+        <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+          <Alert_dialog.Close_trigger />
+          <Alert_dialog.Header>
+            <Alert_dialog.Icon status=`danger>
+              <Gravity.Trash_bin class_="size-5" />
+            </Alert_dialog.Icon>
+            <Alert_dialog.Heading>"Delete this item?"</Alert_dialog.Heading>
+          </Alert_dialog.Header>
+          <Alert_dialog.Body>
+            <p>
+              "Use "
+              <code>"Alert_dialog.Trigger"</code>
+              " to create custom trigger elements beyond standard buttons. \
+               This example shows a card-style trigger with icons and \
+               descriptive text."
+            </p>
+          </Alert_dialog.Body>
+          <Alert_dialog.Footer>
+            <Button slot=`close variant=`tertiary>"Cancel"</Button>
+            <Button slot=`close variant=`danger>"Delete Item"</Button>
+          </Alert_dialog.Footer>
+        </Alert_dialog.Dialog>
+      </Alert_dialog.Container>
+    </Alert_dialog.Backdrop>
+  </Alert_dialog>

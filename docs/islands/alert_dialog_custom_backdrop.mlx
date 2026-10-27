@@ -1,0 +1,39 @@
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let make () =
+  <Alert_dialog>
+    <Button variant=`danger>"Delete Account"</Button>
+    <Alert_dialog.Backdrop
+      class_="bg-linear-to-t from-red-950/90 via-red-950/50 to-transparent \
+              dark:from-red-950/95 dark:via-red-950/60"
+      variant=`blur>
+      <Alert_dialog.Container>
+        <Alert_dialog.Dialog class_="sm:max-w-[420px]">
+          <Alert_dialog.Close_trigger />
+          <Alert_dialog.Header class_="items-center text-center">
+            <Alert_dialog.Icon status=`danger>
+              <Gravity.Triangle_exclamation class_="size-5" />
+            </Alert_dialog.Icon>
+            <Alert_dialog.Heading>
+              "Permanently delete your account?"
+            </Alert_dialog.Heading>
+          </Alert_dialog.Header>
+          <Alert_dialog.Body>
+            <p>
+              "This action cannot be undone. All your data, settings, and \
+               content will be permanently removed from our servers. The \
+               dramatic red backdrop emphasizes the severity and \
+               irreversibility of this decision."
+            </p>
+          </Alert_dialog.Body>
+          <Alert_dialog.Footer class_="flex-col-reverse">
+            <Button class_="w-full" slot=`close>"Keep Account"</Button>
+            <Button class_="w-full" slot=`close variant=`danger>
+              "Delete Forever"
+            </Button>
+          </Alert_dialog.Footer>
+        </Alert_dialog.Dialog>
+      </Alert_dialog.Container>
+    </Alert_dialog.Backdrop>
+  </Alert_dialog>

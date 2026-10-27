@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover and Modal.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover, Modal and AlertDialog.
 Date: 2026-10-23
 
 ## The problem
@@ -364,8 +364,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   HeroUI's enter and exit animations
 - [x] Popover, on Kobalte's
 - [x] Modal, on Kobalte's dialog
-- [ ] AlertDialog, Drawer, Dropdown, ListBox, Select, ComboBox,
-  Autocomplete
+- [x] AlertDialog, on Kobalte's dialog, sharing Modal's `Dialog_frame`
+- [ ] Drawer, Dropdown, ListBox, Select, ComboBox, Autocomplete
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,

@@ -1,0 +1,166 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+
+type variant = [ `opaque | `blur | `transparent ]
+type placement = [ `auto | `center | `top | `bottom ]
+type size = [ `xs | `sm | `md | `lg | `cover ]
+
+(* What the dialog reads of its container. *)
+type container = { placement : unit -> placement; size : unit -> size }
+
+module Container_context = Solidtype.Context.Make_optional (struct
+  type t = container
+end)
+
+let within part = Dialog_frame.within part ~backdrop:"Alert_dialog.Backdrop"
+
+let container () =
+  match Container_context.use () with
+  | Some c -> c
+  | None -> { placement = (fun () -> `auto); size = (fun () -> `md) }
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+let slots ?variant ?size ?status () =
+  Styles.AlertDialog.slots
+    (Styles.AlertDialog.options ?variant ?size ?status ())
+
+let placement_name = function
+  | `auto -> "auto"
+  | `center -> "center"
+  | `top -> "top"
+  | `bottom -> "bottom"
+
+module Trigger = struct
+  let%component make ?(aria_label : string option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    Dialog_frame.trigger ~slot:"alert-dialog-trigger"
+      ~class_:(fun () ->
+        after (Styles.AlertDialog.trigger (slots ())) (class_ ()))
+      ~aria_label ~others:(Props.others props) children
+end
+
+module Backdrop = struct
+  let%component make ?(variant : variant = `opaque)
+      ?(is_dismissable : bool = false)
+      ?(is_keyboard_dismiss_disabled : bool = true) ?(is_open : bool option)
+      ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    Dialog_frame.backdrop ~slot:"alert-dialog-backdrop"
+      ~class_:(fun () ->
+        after
+          (Styles.AlertDialog.backdrop (slots ~variant:(variant ()) ()))
+          (class_ ()))
+      ~dismissable:is_dismissable
+      ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
+      ~is_open ~default_open
+      ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+      ~others:(Props.others props) children
+end
+
+module Container = struct
+  let%component make ?(placement : placement = `auto) ?(size : size = `md)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let f = within "Alert_dialog.Container" in
+    let c = { placement; size } in
+    Dialog_frame.container f ~slot:"alert-dialog-container"
+      ~class_:(fun () ->
+        after
+          (Styles.AlertDialog.container (slots ~size:(size ()) ()))
+          (class_ ()))
+      ~placement:(fun () -> placement_name (placement ()))
+      ~others:(Props.others props)
+      (fun () ->
+        Jsx.element
+          <Container_context.Provider value=(fun () -> c)>
+            (fun () -> children ())
+          </Container_context.Provider>)
+end
+
+module Dialog = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let f = within "Alert_dialog.Dialog" in
+    let c = container () in
+    Dialog_frame.dialog f ~slot:"alert-dialog-dialog" ~role:`alertdialog
+      ~class_:(fun () ->
+        after
+          (Styles.AlertDialog.dialog (slots ~size:(c.size ()) ()))
+          (class_ ()))
+      ~placement:(fun () -> placement_name (c.placement ()))
+      ~others:(Props.others props) children
+end
+
+module Header = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () ->
+               after (Styles.AlertDialog.header (slots ())) (class_ ()))
+      data_slot="alert-dialog-header"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Body = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.AlertDialog.body (slots ())) (class_ ()))
+      data_slot="alert-dialog-body"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Footer = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () ->
+               after (Styles.AlertDialog.footer (slots ())) (class_ ()))
+      data_slot="alert-dialog-footer"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Icon = struct
+  let%component make ?(status : Status_icon.status = `danger)
+      ?(class_ : string option) ?(children : Jsx.content option) () =
+    <div
+      class_=(fun () ->
+               after
+                 (Styles.AlertDialog.icon (slots ~status:(status ()) ()))
+                 (class_ ()))
+      data_slot="alert-dialog-icon"
+      props=(Props.others props)>
+      <Show
+        when_=(fun () -> Option.is_some (children ()))
+        fallback=(fun () ->
+                   Status_icon.svg ~slot:"alert-dialog-default-icon" status)>
+        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+      </Show>
+    </div>
+end
+
+module Heading = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    Dialog_frame.heading ~slot:"alert-dialog-heading"
+      ~class_:(fun () ->
+        after (Styles.AlertDialog.heading (slots ())) (class_ ()))
+      ~others:(Props.others props) children
+end
+
+module Close_trigger = struct
+  let%component make ?(class_ : string option) () =
+    let f = within "Alert_dialog.Close_trigger" in
+    Dialog_frame.close_trigger f ~slot:"alert-dialog-close-trigger"
+      ~class_:(fun () ->
+        after (Styles.AlertDialog.close_trigger (slots ())) (class_ ()))
+      ~others:(Props.others props)
+end
+
+let%component make ?(is_open : bool option) ?(default_open : bool option)
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+  Dialog_frame.root ~is_open ~default_open
+    ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+    children

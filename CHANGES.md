@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Alert_dialog`: HeroUI's AlertDialog on Kobalte's
+  dialog, an `alertdialog` only its buttons close unless its backdrop says
+  otherwise, with HeroUI's statuses and their icons, placements and sizes.
 - `Solidtype_heroui.Modal`: HeroUI's Modal on Kobalte's dialog, opened by a
   `Button` inside it or a `Modal.Trigger`, or a `Modal.Backdrop` alone and
   controlled; HeroUI's backdrop variants, placements, sizes and scroll, its

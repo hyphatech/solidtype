@@ -1,0 +1,55 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let variants =
+  [| (`opaque, "opaque"); (`blur, "blur"); (`transparent, "transparent") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> variants)>
+      (fun (variant, name) _ ->
+        <Alert_dialog>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Alert_dialog.Backdrop variant=(fun () -> variant)>
+            <Alert_dialog.Container>
+              <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+                <Alert_dialog.Close_trigger />
+                <Alert_dialog.Header>
+                  <Alert_dialog.Icon status=`accent />
+                  <Alert_dialog.Heading>
+                    "Backdrop: "
+                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                  </Alert_dialog.Heading>
+                </Alert_dialog.Header>
+                <Alert_dialog.Body>
+                  <p>
+                    (fun () ->
+                      Jsx.string
+                        (match variant with
+                        | `opaque ->
+                            "An opaque dark backdrop that completely obscures \
+                             the background, providing maximum focus on the \
+                             dialog."
+                        | `blur ->
+                            "A blurred backdrop that softly obscures the \
+                             background while maintaining visual context."
+                        | `transparent ->
+                            "A transparent backdrop that keeps the background \
+                             fully visible, useful for less critical \
+                             confirmations."))
+                  </p>
+                </Alert_dialog.Body>
+                <Alert_dialog.Footer>
+                  <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                  <Button slot=`close>"Confirm"</Button>
+                </Alert_dialog.Footer>
+              </Alert_dialog.Dialog>
+            </Alert_dialog.Container>
+          </Alert_dialog.Backdrop>
+        </Alert_dialog>)
+    </For>
+  </div>

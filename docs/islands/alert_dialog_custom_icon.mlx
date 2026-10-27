@@ -1,0 +1,30 @@
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let make () =
+  <Alert_dialog>
+    <Button variant=`secondary>"Reset Password"</Button>
+    <Alert_dialog.Backdrop>
+      <Alert_dialog.Container>
+        <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+          <Alert_dialog.Close_trigger />
+          <Alert_dialog.Header>
+            <Alert_dialog.Icon status=`warning>
+              <Gravity.Lock_open class_="size-5" />
+            </Alert_dialog.Icon>
+            <Alert_dialog.Heading>"Reset your password?"</Alert_dialog.Heading>
+          </Alert_dialog.Header>
+          <Alert_dialog.Body>
+            <p>
+              "We'll send a password reset link to your email address. You'll \
+               need to create a new password to regain access to your account."
+            </p>
+          </Alert_dialog.Body>
+          <Alert_dialog.Footer>
+            <Button slot=`close variant=`tertiary>"Cancel"</Button>
+            <Button slot=`close>"Send Reset Link"</Button>
+          </Alert_dialog.Footer>
+        </Alert_dialog.Dialog>
+      </Alert_dialog.Container>
+    </Alert_dialog.Backdrop>
+  </Alert_dialog>

@@ -1,0 +1,90 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+(* HeroUI's second dialog closes itself through its render prop's close; here
+   the page keeps the dialog's state, which the buttons set. *)
+let make () =
+  let is_open, set_open = S.create_signal false in
+  <div class_="flex max-w-2xl flex-col gap-8">
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"Using slot=`close"</h3>
+      <p class_="text-sm text-muted">
+        "The simplest way to close a dialog. Add "
+        <code>"slot=`close"</code>
+        " to any Button component within the dialog. When clicked, it will \
+         automatically close the dialog."
+      </p>
+      <Alert_dialog>
+        <Button variant=`secondary>"Open Dialog"</Button>
+        <Alert_dialog.Backdrop>
+          <Alert_dialog.Container>
+            <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+              <Alert_dialog.Header>
+                <Alert_dialog.Icon status=`accent />
+                <Alert_dialog.Heading>"Using slot=`close"</Alert_dialog.Heading>
+              </Alert_dialog.Header>
+              <Alert_dialog.Body>
+                <p>
+                  "Click either button below - both have "
+                  <code>"slot=`close"</code>
+                  " and will close the dialog automatically."
+                </p>
+              </Alert_dialog.Body>
+              <Alert_dialog.Footer>
+                <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                <Button slot=`close>"Confirm"</Button>
+              </Alert_dialog.Footer>
+            </Alert_dialog.Dialog>
+          </Alert_dialog.Container>
+        </Alert_dialog.Backdrop>
+      </Alert_dialog>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"Using the dialog's state"</h3>
+      <p class_="text-sm text-muted">
+        "Keep the dialog's state in a "
+        <code>"signal"</code>
+        " and set it to "
+        <code>"false"</code>
+        ". This gives you full control over when and how to close the dialog, \
+         allowing you to add custom logic before closing."
+      </p>
+      <Alert_dialog
+        is_open=(fun () -> S.get is_open) on_open_change=(S.set set_open)>
+        <Button variant=`secondary>"Open Dialog"</Button>
+        <Alert_dialog.Backdrop>
+          <Alert_dialog.Container>
+            <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+              <Alert_dialog.Header>
+                <Alert_dialog.Icon status=`success />
+                <Alert_dialog.Heading>
+                  "Using the dialog's state"
+                </Alert_dialog.Heading>
+              </Alert_dialog.Header>
+              <Alert_dialog.Body>
+                <p>
+                  "The buttons below set the "
+                  <code>"signal"</code>
+                  " to "
+                  <code>"false"</code>
+                  ". You can add validation or other logic before calling "
+                  <code>"S.set set_open false"</code>
+                  "."
+                </p>
+              </Alert_dialog.Body>
+              <Alert_dialog.Footer>
+                <Button
+                  variant=`tertiary on_click=(fun _ -> S.set set_open false)>
+                  "Cancel"
+                </Button>
+                <Button on_click=(fun _ -> S.set set_open false)>
+                  "Confirm"
+                </Button>
+              </Alert_dialog.Footer>
+            </Alert_dialog.Dialog>
+          </Alert_dialog.Container>
+        </Alert_dialog.Backdrop>
+      </Alert_dialog>
+    </div>
+  </div>

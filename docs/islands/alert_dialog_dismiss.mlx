@@ -1,0 +1,91 @@
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+let make () =
+  <div class_="flex max-w-sm flex-col gap-6">
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"is_dismissable"</h3>
+      <p class_="text-sm text-muted">
+        "Controls whether the alert dialog can be dismissed by clicking the \
+         overlay backdrop. Alert dialogs typically require explicit action, so \
+         this defaults to "
+        <code>"false"</code>
+        ". Set to "
+        <code>"true"</code>
+        " for less critical confirmations."
+      </p>
+      <Alert_dialog>
+        <Button variant=`secondary>"Open Alert Dialog"</Button>
+        <Alert_dialog.Backdrop is_dismissable=false>
+          <Alert_dialog.Container>
+            <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+              <Alert_dialog.Close_trigger />
+              <Alert_dialog.Header>
+                <Alert_dialog.Icon status=`danger>
+                  <Gravity.Circle_info class_="size-5" />
+                </Alert_dialog.Icon>
+                <Alert_dialog.Heading>
+                  "is_dismissable = false"
+                </Alert_dialog.Heading>
+                <p class_="text-sm leading-5 text-muted">
+                  "Clicking the backdrop won't close this alert dialog"
+                </p>
+              </Alert_dialog.Header>
+              <Alert_dialog.Body>
+                <p>
+                  "Try clicking outside this alert dialog on the overlay - it \
+                   won't close. You must use the action buttons to dismiss it."
+                </p>
+              </Alert_dialog.Body>
+              <Alert_dialog.Footer>
+                <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                <Button slot=`close>"Confirm"</Button>
+              </Alert_dialog.Footer>
+            </Alert_dialog.Dialog>
+          </Alert_dialog.Container>
+        </Alert_dialog.Backdrop>
+      </Alert_dialog>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <h3 class_="text-lg font-semibold">"is_keyboard_dismiss_disabled"</h3>
+      <p class_="text-sm text-muted">
+        "Controls whether the ESC key can dismiss the alert dialog. Alert \
+         dialogs typically require explicit action, so this defaults to "
+        <code>"true"</code>
+        ". When set to "
+        <code>"false"</code>
+        ", the ESC key will be enabled."
+      </p>
+      <Alert_dialog>
+        <Button variant=`secondary>"Open Alert Dialog"</Button>
+        <Alert_dialog.Backdrop is_keyboard_dismiss_disabled=true>
+          <Alert_dialog.Container>
+            <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+              <Alert_dialog.Close_trigger />
+              <Alert_dialog.Header>
+                <Alert_dialog.Icon status=`accent>
+                  <Gravity.Circle_info class_="size-5" />
+                </Alert_dialog.Icon>
+                <Alert_dialog.Heading>
+                  "is_keyboard_dismiss_disabled = true"
+                </Alert_dialog.Heading>
+                <p class_="text-sm leading-5 text-muted">
+                  "ESC key is disabled"
+                </p>
+              </Alert_dialog.Header>
+              <Alert_dialog.Body>
+                <p>
+                  "Press ESC - nothing happens. You must use the action \
+                   buttons to dismiss this alert dialog."
+                </p>
+              </Alert_dialog.Body>
+              <Alert_dialog.Footer>
+                <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                <Button slot=`close>"Confirm"</Button>
+              </Alert_dialog.Footer>
+            </Alert_dialog.Dialog>
+          </Alert_dialog.Container>
+        </Alert_dialog.Backdrop>
+      </Alert_dialog>
+    </div>
+  </div>

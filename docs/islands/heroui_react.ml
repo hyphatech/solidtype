@@ -508,6 +508,21 @@ external modal_props :
 external modal : Dom.htmlDivElement -> modal_props -> unit = "modal"
 [@@mel.module "./react/heroui.tsx"]
 
+type alert_dialog_props
+
+external alert_dialog_props :
+  status:
+    ([ `default | `accent | `success | `warning | `danger ][@mel.as "status"]) ->
+  variant:([ `opaque | `blur | `transparent ][@mel.as "variant"]) ->
+  is_dismissable:(bool[@mel.as "isDismissable"]) ->
+  unit ->
+  alert_dialog_props = ""
+[@@mel.obj]
+
+external alert_dialog : Dom.htmlDivElement -> alert_dialog_props -> unit
+  = "alertDialog"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :

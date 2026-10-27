@@ -1,0 +1,228 @@
+---
+title: AlertDialog
+description: A dialog that asks before going on, HeroUI's on Kobalte's.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/alert_dialog_usage.jsx";
+import ExUsageCode from "@islands/alert_dialog_usage.mlx?raw";
+import * as ExStatuses from "@islands/alert_dialog_statuses.jsx";
+import ExStatusesCode from "@islands/alert_dialog_statuses.mlx?raw";
+import * as ExPlacements from "@islands/alert_dialog_placements.jsx";
+import ExPlacementsCode from "@islands/alert_dialog_placements.mlx?raw";
+import * as ExSizes from "@islands/alert_dialog_sizes.jsx";
+import ExSizesCode from "@islands/alert_dialog_sizes.mlx?raw";
+import * as ExControlled from "@islands/alert_dialog_controlled.jsx";
+import ExControlledCode from "@islands/alert_dialog_controlled.mlx?raw";
+import * as ExCustomIcon from "@islands/alert_dialog_custom_icon.jsx";
+import ExCustomIconCode from "@islands/alert_dialog_custom_icon.mlx?raw";
+import * as ExCustomTrigger from "@islands/alert_dialog_custom_trigger.jsx";
+import ExCustomTriggerCode from "@islands/alert_dialog_custom_trigger.mlx?raw";
+import * as ExBackdropVariants from "@islands/alert_dialog_backdrop_variants.jsx";
+import ExBackdropVariantsCode from "@islands/alert_dialog_backdrop_variants.mlx?raw";
+import * as ExCustomBackdrop from "@islands/alert_dialog_custom_backdrop.jsx";
+import ExCustomBackdropCode from "@islands/alert_dialog_custom_backdrop.mlx?raw";
+import * as ExDismiss from "@islands/alert_dialog_dismiss.jsx";
+import ExDismissCode from "@islands/alert_dialog_dismiss.mlx?raw";
+import * as ExCloseMethods from "@islands/alert_dialog_close_methods.jsx";
+import ExCloseMethodsCode from "@islands/alert_dialog_close_methods.mlx?raw";
+import * as ExCustomAnimations from "@islands/alert_dialog_custom_animations.jsx";
+import ExCustomAnimationsCode from "@islands/alert_dialog_custom_animations.mlx?raw";
+import * as ExTailwind from "@islands/alert_dialog_tailwind.jsx";
+import ExTailwindCode from "@islands/alert_dialog_tailwind.mlx?raw";
+import * as Demo from "@islands/alert_dialog_demo.jsx";
+
+`Solidtype_heroui.Alert_dialog` is Kobalte's `Dialog` as an `alertdialog`,
+with the classes HeroUI's own `alertDialogVariants` gives. It is a
+[Modal](/solidtype/heroui/modal/) in all but these: only its own buttons close it, unless
+its backdrop says a press outside or Escape may; its container takes no
+scroll; and its icon draws HeroUI's icon for its status.
+
+## Usage
+
+<Example code={ExUsageCode} title="alert_dialog_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Alert_dialog>
+  <Button>"Open"</Button>
+  <Alert_dialog.Backdrop>
+    <Alert_dialog.Container>
+      <Alert_dialog.Dialog>
+        <Alert_dialog.Close_trigger />
+        <Alert_dialog.Header>
+          <Alert_dialog.Icon />
+          <Alert_dialog.Heading>...</Alert_dialog.Heading>
+        </Alert_dialog.Header>
+        <Alert_dialog.Body>...</Alert_dialog.Body>
+        <Alert_dialog.Footer>...</Alert_dialog.Footer>
+      </Alert_dialog.Dialog>
+    </Alert_dialog.Container>
+  </Alert_dialog.Backdrop>
+</Alert_dialog>
+```
+
+## Examples
+
+### Statuses
+
+<Example code={ExStatusesCode} title="alert_dialog_statuses.mlx"><ExStatuses.make client:visible /></Example>
+
+### Placements
+
+<Example code={ExPlacementsCode} title="alert_dialog_placements.mlx"><ExPlacements.make client:visible /></Example>
+
+### Sizes
+
+<Example code={ExSizesCode} title="alert_dialog_sizes.mlx"><ExSizes.make client:visible /></Example>
+
+### Controlled State
+
+A signal is Solid's state: each half keeps the dialog's open state in one, where HeroUI's uses `React.useState` and `useOverlayState`.
+
+<Example code={ExControlledCode} title="alert_dialog_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Custom Icon
+
+<Example code={ExCustomIconCode} title="alert_dialog_custom_icon.mlx"><ExCustomIcon.make client:visible /></Example>
+
+### Custom Trigger
+
+<Example code={ExCustomTriggerCode} title="alert_dialog_custom_trigger.mlx"><ExCustomTrigger.make client:visible /></Example>
+
+### Backdrop Variants
+
+<Example code={ExBackdropVariantsCode} title="alert_dialog_backdrop_variants.mlx"><ExBackdropVariants.make client:visible /></Example>
+
+### Custom Backdrop
+
+<Example code={ExCustomBackdropCode} title="alert_dialog_custom_backdrop.mlx"><ExCustomBackdrop.make client:visible /></Example>
+
+### Dismiss Behavior
+
+<Example code={ExDismissCode} title="alert_dialog_dismiss.mlx"><ExDismiss.make client:visible /></Example>
+
+### Close Methods
+
+The second half closes the dialog from its own state, where HeroUI's reads `close` from the dialog's render props: the page keeps the state, which the dialog follows.
+
+<Example code={ExCloseMethodsCode} title="alert_dialog_close_methods.mlx"><ExCloseMethods.make client:visible /></Example>
+
+### Custom Animations
+
+<Example code={ExCustomAnimationsCode} title="alert_dialog_custom_animations.mlx"><ExCustomAnimations.make client:visible /></Example>
+
+### Custom Portal
+
+HeroUI's Custom Portal example gives the backdrop React Aria's
+`UNSTABLE_portalContainer`, which the port does not take yet: a dialog is
+drawn at the end of the page.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="alert_dialog_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .alert-dialog__dialog {
+    @apply rounded-2xl;
+  }
+
+  .alert-dialog__heading {
+    @apply text-lg font-semibold;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.alert-dialog__trigger`, `.alert-dialog__backdrop`,
+  `.alert-dialog__container`, `.alert-dialog__dialog`,
+  `.alert-dialog__header`, `.alert-dialog__heading`, `.alert-dialog__icon`,
+  `.alert-dialog__body`, `.alert-dialog__footer`,
+  `.alert-dialog__close-trigger`
+- `.alert-dialog__backdrop--opaque`, `--blur`, `--transparent`
+- `.alert-dialog__dialog--xs`, `--sm`, `--md`, `--lg`, `--cover`
+- `.alert-dialog__icon--default`, `--accent`, `--success`, `--warning`,
+  `--danger`
+
+### Interactive States
+
+- **Entering**: `[data-entering="true"]` on the backdrop and the container
+- **Exiting**: `[data-exiting="true"]` on the backdrop and the container
+- **Placement**: `[data-placement="auto"]`, and the others, on the container
+  and the dialog
+
+## How it is made
+
+It shares Modal's making, on Kobalte's dialog: see [Modal](/solidtype/heroui/modal/#how-it-is-made).
+Its dialog's role is `alertdialog`, as React Aria's is, and a reader's dismiss
+button is in it only while its backdrop may be dismissed.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### AlertDialog
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
+| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
+
+### AlertDialog.Backdrop
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Its look |
+| `isDismissable` | `is_dismissable` | `bool` | `false` | Whether a press on it closes the dialog |
+| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `true` | Whether Escape does not |
+| `isOpen` | `is_open` | `bool` | | With no `Alert_dialog` around it, whether it is open |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | With no `Alert_dialog` around it, told as it opens or closes |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### AlertDialog.Container
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `placement` | `placement` | `` `auto `` \| `` `center `` \| `` `top `` \| `` `bottom `` | `` `auto `` | Where the dialog is |
+| `size` | `size` | `` `xs `` \| `` `sm `` \| `` `md `` \| `` `lg `` \| `` `cover `` | `` `md `` | Its width |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### AlertDialog.Icon
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `status` | `status` | `` `default `` \| `` `accent `` \| `` `success `` \| `` `warning `` \| `` `danger `` | `` `danger `` | Its colour and icon |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | An icon of its own |
+
+### AlertDialog.Dialog, Header, Body, Footer, Heading, CloseTrigger, Trigger
+
+As [Modal's](/solidtype/heroui/modal/#api-reference).
+
+## Beside React
+
+Original HeroUI documentation: [AlertDialog](https://heroui.com/en/docs/react/components/alert-dialog).
+
+The same HeroUI AlertDialog twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each trigger: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

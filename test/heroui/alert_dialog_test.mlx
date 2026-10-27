@@ -1,0 +1,257 @@
+(* HeroUI's AlertDialog on Kobalte's dialog, beside the same alert dialog in
+   React: its trigger, the dialog, what has the focus and what is outside it,
+   as the trigger is pressed, Tab moves within it, Escape and a press on the
+   backdrop leave it open or close it as it says, and a button with
+   slot="close" closes it. *)
+
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+module Button = Solidtype_heroui.Button
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?variant:([ `opaque | `blur | `transparent ][@mel.as "variant"]) ->
+  ?is_dismissable:(bool[@mel.as "isDismissable"]) ->
+  ?is_keyboard_dismiss_disabled:(bool[@mel.as "isKeyboardDismissDisabled"]) ->
+  ?placement:([ `auto | `center | `top | `bottom ][@mel.as "placement"]) ->
+  ?size:([ `xs | `sm | `md | `lg | `cover ][@mel.as "size"]) ->
+  ?status:
+    ([ `default | `accent | `success | `warning | `danger ][@mel.as "status"]) ->
+  ?custom:bool ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/AlertDialog.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/AlertDialog.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/AlertDialog.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+type options
+
+external options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) -> unit -> options
+  = ""
+[@@mel.obj]
+
+(* A user whose press outside is let through Kobalte's modal, which takes
+   pointer events from the rest of the page: in a browser the press lands on
+   the backdrop, which Kobalte's layer reads as outside the dialog. *)
+external setup : options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* A while for a framework's timers and focus moves to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself: Kobalte's own state, present and
+   empty, which no style of HeroUI's reads, and its trigger's popup, which
+   React Aria's leaves out; React Aria's tabindex on what is focusable
+   already, and the slot each of its parts is named for; the id each makes to
+   name one part from another, and how each writes a style. A dismiss button
+   only a reader finds is a [type="button"] here, where React Aria's would
+   submit a form around the modal. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ("data-expanded" | "data-closed"), Some "" -> true
+  | "aria-haspopup", Some "dialog" -> true
+  | ("tabindex" | "slot" | "style" | "aria-controls" | "aria-labelledby"), _ ->
+      true
+  | "type", _ ->
+      Option.equal String.equal (T.attribute e "aria-label") (Some "Dismiss")
+  | _ -> false
+
+(* React Aria's dismiss button stands before the dialog, the port's at its
+   start, where Kobalte's modal leaves it to a reader: each is shown by
+   itself, after the rest. *)
+let dismiss = "[aria-label=Dismiss], div:has(> [aria-label=Dismiss])"
+
+(* An element: its tag, its attributes and its text. *)
+let one e =
+  String.concat " "
+    [
+      tag_name e;
+      T.attributes_but
+        (T.attribute_names e |> Array.to_list |> List.filter (framework_only e))
+        e;
+    ]
+  ^ if element_count e > 0 then "" else " " ^ text e
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+(* The trigger, the dialog and all inside it, wherever it is, whether what is
+   outside it is read, and what has the focus. *)
+let shown () =
+  Array.concat
+    [
+      all
+        "[data-slot=alert-dialog-trigger], \
+         [data-slot=button]:not(.alert-dialog__backdrop *)";
+      all
+        (".alert-dialog__backdrop, .alert-dialog__backdrop \
+          *:not([data-focus-trap]):not(" ^ dismiss ^ ")");
+      all ".alert-dialog__backdrop [aria-label=Dismiss]";
+    ]
+  |> Array.map one
+  |> Fun.flip Array.append
+       (all "[data-testid=outside]"
+       |> Array.map (fun e ->
+           match Js.Null.toOption (closest e "[aria-hidden=true], [inert]") with
+           | Some _ -> "outside: hidden from a reader"
+           | None -> "outside: read"))
+  |> Fun.flip Array.append
+       [|
+         ("focus: "
+         ^
+         match Js.Null.toOption active with
+         | Some e ->
+             Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+         | None -> "none");
+       |]
+
+let first selector =
+  match all selector with [||] -> T.body | found -> found.(0)
+
+let trigger () =
+  first
+    "[data-slot=alert-dialog-trigger], \
+     [data-slot=button]:not(.alert-dialog__backdrop *)"
+
+let walk ~step =
+  let user = setup (options ~pointer_events_check:0 ()) in
+  let seen = ref [] in
+  let after name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    seen := (name, shown ()) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "pressed" (fun () -> T.click user (trigger ())) in
+  let* () = after "Tab" (fun () -> T.tab user) in
+  let* () = after "Escape" (fun () -> T.keyboard user "{Escape}") in
+  let* () = after "pressed again" (fun () -> T.click user (trigger ())) in
+  let* () =
+    after "Continue" (fun () ->
+        T.click user (first ".alert-dialog__footer [data-slot=button]"))
+  in
+  let* () =
+    after "pressed a third time" (fun () -> T.click user (trigger ()))
+  in
+  let* () =
+    after "backdrop pressed" (fun () ->
+        T.click user (first ".alert-dialog__backdrop"))
+  in
+  let* () =
+    after "closed" (fun () ->
+        T.click user (first ".alert-dialog__footer [data-slot=button]"))
+  in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?variant ?is_dismissable ?is_keyboard_dismiss_disabled ?placement ?size
+    ?status ?(custom = false) () =
+  T.render (fun () ->
+      <div>
+        <p data_testid="outside">"Outside"</p>
+        <Alert_dialog>
+          (fun () ->
+            if custom then
+              Solidtype.Jsx.element
+                <Alert_dialog.Trigger aria_label="Open">
+                  <span>"Card"</span>
+                </Alert_dialog.Trigger>
+            else
+              Solidtype.Jsx.element
+                <Button variant=`danger>"Delete Project"</Button>)
+          <Alert_dialog.Backdrop
+            ?variant=(fun () -> variant)
+            ?is_dismissable=(fun () -> is_dismissable)
+            ?is_keyboard_dismiss_disabled=(fun () ->
+                                            is_keyboard_dismiss_disabled)>
+            <Alert_dialog.Container
+              ?placement=(fun () -> placement) ?size=(fun () -> size)>
+              <Alert_dialog.Dialog>
+                <Alert_dialog.Close_trigger />
+                <Alert_dialog.Header>
+                  <Alert_dialog.Icon ?status=(fun () -> status) />
+                  <Alert_dialog.Heading>
+                    "Delete project permanently?"
+                  </Alert_dialog.Heading>
+                </Alert_dialog.Header>
+                <Alert_dialog.Body>
+                  <p>"This will permanently delete the project."</p>
+                </Alert_dialog.Body>
+                <Alert_dialog.Footer>
+                  <Button slot=`close variant=`tertiary>"Cancel"</Button>
+                  <Button slot=`close variant=`danger>"Delete"</Button>
+                </Alert_dialog.Footer>
+              </Alert_dialog.Dialog>
+            </Alert_dialog.Container>
+          </Alert_dialog.Backdrop>
+        </Alert_dialog>
+      </div>);
+  let* solidtype = walk ~step:(fun action -> action ()) in
+  T.cleanup ();
+  let (_ : Dom.element) =
+    Twin.render
+      (props ?variant ?is_dismissable ?is_keyboard_dismiss_disabled ?placement
+         ?size ?status ~custom ())
+  in
+  let* react = walk ~step:Twin.step in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Alert_dialog" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "stays open but by its buttons, as React's does"
+        (fun () ->
+          let* r = both () in
+          same r);
+      Jest.testPromise "closes on Escape and outside, when told, as React's"
+        (fun () ->
+          let* r =
+            both ~is_dismissable:true ~is_keyboard_dismiss_disabled:false
+              ~variant:`blur ()
+          in
+          same r);
+      Jest.testPromise "shows each status, sized and placed, as React's"
+        (fun () ->
+          let* r = both ~status:`success ~size:`sm ~placement:`top () in
+          same r);
+      Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
+          let* r = both ~custom:true ~status:`warning () in
+          same r))

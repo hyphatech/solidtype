@@ -1,0 +1,82 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let statuses =
+  [|
+    (`default, "default");
+    (`accent, "accent");
+    (`success, "success");
+    (`warning, "warning");
+    (`danger, "danger");
+  |]
+
+let variants =
+  [| (`opaque, "opaque"); (`blur, "blur"); (`transparent, "transparent") |]
+
+let make () =
+  let status, set_status = S.create_signal (`danger, "danger") in
+  let variant, set_variant = S.create_signal (`opaque, "opaque") in
+  let dismissable, set_dismissable = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="status"
+        choices=(fun () -> statuses)
+        picked=(fun () -> S.get status)
+        on_pick=(Controls.choose statuses set_status)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="dismissable"
+        on=(fun () -> S.get dismissable)
+        on_toggle=(S.set set_dismissable)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<Alert_dialog>
+                   <Button variant=`danger>"Delete Project"</Button>
+                   <Alert_dialog.Backdrop
+                     variant=(fun () -> fst (S.get variant))
+                     is_dismissable=(fun () -> S.get dismissable)>
+                     <Alert_dialog.Container>
+                       <Alert_dialog.Dialog>
+                         <Alert_dialog.Close_trigger />
+                         <Alert_dialog.Header>
+                           <Alert_dialog.Icon
+                             status=(fun () -> fst (S.get status))
+                           />
+                           <Alert_dialog.Heading>
+                             "Delete project permanently?"
+                           </Alert_dialog.Heading>
+                         </Alert_dialog.Header>
+                         <Alert_dialog.Body>
+                           <p>"This will permanently delete the project."</p>
+                         </Alert_dialog.Body>
+                         <Alert_dialog.Footer>
+                           <Button slot=`close variant=`tertiary>
+                             "Cancel"
+                           </Button>
+                           <Button slot=`close variant=`danger>"Delete"</Button>
+                         </Alert_dialog.Footer>
+                       </Alert_dialog.Dialog>
+                     </Alert_dialog.Container>
+                   </Alert_dialog.Backdrop>
+                 </Alert_dialog>)
+      react=(fun host ->
+              Heroui_react.alert_dialog host
+                (Heroui_react.alert_dialog_props
+                   ~status:(fst (S.get status))
+                   ~variant:(fst (S.get variant))
+                   ~is_dismissable:(S.get dismissable) ()))
+    />
+  </section>

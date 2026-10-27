@@ -1,0 +1,104 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+
+type example = {
+  cancel : string;
+  confirm : string;
+  body : string;
+  classes : string;
+  header : string;
+  status : Solidtype_heroui.Status_icon.status;
+  trigger : string;
+}
+
+let examples =
+  [|
+    {
+      cancel = "Stay Signed In";
+      confirm = "Sign Out";
+      body =
+        "You'll need to sign in again to access your account. Any unsaved \
+         changes will be lost.";
+      classes = "bg-accent-soft text-accent-soft-foreground";
+      header = "Sign out of your account?";
+      status = `accent;
+      trigger = "Sign Out";
+    };
+    {
+      cancel = "Not Yet";
+      confirm = "Mark Complete";
+      body =
+        "This will mark the task as complete and notify all team members. The \
+         task will be moved to your completed list.";
+      classes = "bg-success-soft text-success-soft-foreground";
+      header = "Complete this task?";
+      status = `success;
+      trigger = "Complete Task";
+    };
+    {
+      cancel = "Keep Editing";
+      confirm = "Discard";
+      body =
+        "You have unsaved changes that will be permanently lost. Are you sure \
+         you want to discard them?";
+      classes = "bg-warning-soft text-warning-soft-foreground";
+      header = "Discard unsaved changes?";
+      status = `warning;
+      trigger = "Discard Changes";
+    };
+    {
+      cancel = "Cancel";
+      confirm = "Delete Account";
+      body =
+        "This will permanently delete your account and remove all your data \
+         from our servers. This action is irreversible.";
+      classes = "bg-danger-soft text-danger-soft-foreground";
+      header = "Delete your account?";
+      status = `danger;
+      trigger = "Delete Account";
+    };
+  |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> examples)>
+      (fun (e : example) _ ->
+        <Alert_dialog>
+          <Button class_=(fun () -> e.classes)>
+            (fun () -> Jsx.string e.trigger)
+          </Button>
+          <Alert_dialog.Backdrop>
+            <Alert_dialog.Container>
+              <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+                <Alert_dialog.Close_trigger />
+                <Alert_dialog.Header>
+                  <Alert_dialog.Icon status=(fun () -> e.status) />
+                  <Alert_dialog.Heading>
+                    (fun () -> Jsx.string e.header)
+                  </Alert_dialog.Heading>
+                </Alert_dialog.Header>
+                <Alert_dialog.Body>
+                  <p>(fun () -> Jsx.string e.body)</p>
+                </Alert_dialog.Body>
+                <Alert_dialog.Footer>
+                  <Button slot=`close variant=`tertiary>
+                    (fun () -> Jsx.string e.cancel)
+                  </Button>
+                  <Button
+                    slot=`close
+                    variant=(fun () ->
+                              match e.status with
+                              | `danger -> `danger
+                              | `default | `accent | `success | `warning ->
+                                  `primary)>
+                    (fun () -> Jsx.string e.confirm)
+                  </Button>
+                </Alert_dialog.Footer>
+              </Alert_dialog.Dialog>
+            </Alert_dialog.Container>
+          </Alert_dialog.Backdrop>
+        </Alert_dialog>)
+    </For>
+  </div>
