@@ -38,6 +38,7 @@ module Input_group = H.Input_group
 module Kbd = H.Kbd
 module Label = H.Label
 module Link = H.Link
+module List_box = H.List_box
 module Meter = H.Meter
 module Number_field = H.Number_field
 module Progress_bar = H.Progress_bar
@@ -224,6 +225,16 @@ let () =
                     </Dropdown.Menu>
                   </Dropdown.Popover>
                 </Dropdown>
+                <List_box aria_label="Users" data_testid="List_box">
+                  <List_box.Section data_testid="List_box.Section">
+                    <List_box.Item id="bob" data_testid="List_box.Item">
+                      "Bob"
+                      <List_box.Item_indicator
+                        data_testid="List_box.Item_indicator"
+                      />
+                    </List_box.Item>
+                  </List_box.Section>
+                </List_box>
                 <Drawer default_open=true>
                   <Drawer.Trigger data_testid="Drawer.Trigger">
                     "Open"
@@ -476,6 +487,11 @@ let () =
                    ("Dropdown.Item_indicator", "[data-slot=menu-item-indicator]");
                    ( "Dropdown.Submenu_indicator",
                      "[data-slot=submenu-indicator]" );
+                   ("List_box", "[data-slot=list-box]");
+                   ("List_box.Section", ".list-box-section");
+                   ("List_box.Item", "[data-slot=list-box-item]");
+                   ( "List_box.Item_indicator",
+                     "[data-slot=list-box-item-indicator]" );
                    ("Drawer.Trigger", "[data-slot=drawer-trigger]");
                    ("Drawer.Backdrop", "[data-slot=drawer-backdrop]");
                    ("Drawer.Content", "[data-slot=drawer-content]");

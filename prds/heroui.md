@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover, Modal, AlertDialog, Drawer and Dropdown.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown and ListBox.
 Date: 2026-10-23
 
 ## The problem
@@ -367,7 +367,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] AlertDialog, on Kobalte's dialog, sharing Modal's `Dialog_frame`
 - [x] Drawer, on `Dialog_frame`, dragged to close as HeroUI's is
 - [x] Dropdown, on Kobalte's menu, its selection the menu's or a section's
-- [ ] ListBox, Select, ComboBox, Autocomplete
+- [x] ListBox, on Kobalte's, its options joining it as they are made
+- [ ] Select, ComboBox, Autocomplete
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,

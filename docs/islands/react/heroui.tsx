@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -746,6 +746,40 @@ export function popover(host: HTMLElement, { placement, arrow }: PopoverProps): 
           </Popover.Content>
         </Popover>
       </div>,
+    ),
+  );
+}
+
+type ListBoxProps = {
+  selectionMode: "none" | "single" | "multiple";
+  variant: "default" | "danger";
+};
+
+export function listBox(host: HTMLElement, { selectionMode, variant }: ListBoxProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ListBox
+        key={selectionMode}
+        aria-label="Users"
+        className="w-[220px]"
+        selectionMode={selectionMode}
+        variant={variant}
+        defaultSelectedKeys={["bob"]}
+        disabledKeys={["martha"]}
+      >
+        <ListBox.Item id="bob" textValue="Bob">
+          <Label>Bob</Label>
+          <ListBox.ItemIndicator />
+        </ListBox.Item>
+        <ListBox.Item id="fred" textValue="Fred">
+          <Label>Fred</Label>
+          <ListBox.ItemIndicator />
+        </ListBox.Item>
+        <ListBox.Item id="martha" textValue="Martha">
+          <Label>Martha</Label>
+          <ListBox.ItemIndicator />
+        </ListBox.Item>
+      </ListBox>,
     ),
   );
 }

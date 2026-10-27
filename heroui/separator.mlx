@@ -8,6 +8,12 @@ module Element = Solidtype.Context.Make (struct
   let default = `hr
 end)
 
+(* Where a part above draws its separators, as a list box draws its own among
+   its options: given the separator as it would be drawn. *)
+module Slot = Solidtype.Context.Make_optional (struct
+  type t = ((unit -> Solidtype.Jsx.element) -> Solidtype.Jsx.element[@u])
+end)
+
 (* Kobalte's separator as another element, as React Aria's draws one. *)
 module As = struct
   module Props = struct
@@ -27,19 +33,22 @@ let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
     ?(variant : [ `default | `secondary | `tertiary ] = `default)
     ?(class_ : string option) () =
   let element = Element.use () in
-  <As
-    as_=(fun () ->
-          (* An [<hr>] is a horizontal line, so React Aria draws a vertical
+  let drawn () =
+    <As
+      as_=(fun () ->
+            (* An [<hr>] is a horizontal line, so React Aria draws a vertical
              one as a [<div>]. *)
-          match (element, orientation ()) with
-          | `hr, `horizontal -> "hr"
-          | `hr, `vertical | `div, (`horizontal | `vertical) -> "div")
-    orientation=(fun () -> orientation ())
-    role=`separator
-    class_=(fun () ->
-             Styles.Separator.classes
-               (Styles.Separator.options ~orientation:(orientation ())
-                  ~variant:(variant ()) ?class_:(class_ ()) ()))
-    data_slot="separator"
-    props=(Props.others props)
-  />
+            match (element, orientation ()) with
+            | `hr, `horizontal -> "hr"
+            | `hr, `vertical | `div, (`horizontal | `vertical) -> "div")
+      orientation=(fun () -> orientation ())
+      role=`separator
+      class_=(fun () ->
+               Styles.Separator.classes
+                 (Styles.Separator.options ~orientation:(orientation ())
+                    ~variant:(variant ()) ?class_:(class_ ()) ()))
+      data_slot="separator"
+      props=(Props.others props)
+    />
+  in
+  match Slot.use () with Some slot -> slot drawn [@u] | None -> drawn ()

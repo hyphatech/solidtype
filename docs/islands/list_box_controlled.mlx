@@ -1,0 +1,83 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  let selected, set_selected = S.create_signal [| "1" |] in
+  <div class_="space-y-4">
+    <Surface class_="w-[256px] rounded-3xl shadow-surface">
+      <List_box
+        aria_label="Users"
+        selected_keys=(fun () -> S.get selected)
+        selection_mode=`multiple
+        on_selection_change=(S.set set_selected)>
+        <List_box.Item id="1" text_value="Bob">
+          <Avatar size=`sm>
+            <Avatar.Image
+              alt="Bob"
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+            />
+            <Avatar.Fallback>"B"</Avatar.Fallback>
+          </Avatar>
+          <div class_="flex flex-col">
+            <Label>"Bob"</Label> <Description>"bob@heroui.com"</Description>
+          </div>
+          <List_box.Item_indicator>
+            (fun selected ->
+              if S.get selected then
+                <Gravity.Check class_="size-4 text-accent-soft-foreground" />
+              else Jsx.nothing)
+          </List_box.Item_indicator>
+        </List_box.Item>
+        <List_box.Item id="2" text_value="Fred">
+          <Avatar size=`sm>
+            <Avatar.Image
+              alt="Fred"
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+            />
+            <Avatar.Fallback>"F"</Avatar.Fallback>
+          </Avatar>
+          <div class_="flex flex-col">
+            <Label>"Fred"</Label> <Description>"fred@heroui.com"</Description>
+          </div>
+          <List_box.Item_indicator>
+            (fun selected ->
+              if S.get selected then
+                <Gravity.Check class_="size-4 text-accent-soft-foreground" />
+              else Jsx.nothing)
+          </List_box.Item_indicator>
+        </List_box.Item>
+        <List_box.Item id="3" text_value="Martha">
+          <Avatar size=`sm>
+            <Avatar.Image
+              alt="Martha"
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
+            />
+            <Avatar.Fallback>"M"</Avatar.Fallback>
+          </Avatar>
+          <div class_="flex flex-col">
+            <Label>"Martha"</Label>
+            <Description>"martha@heroui.com"</Description>
+          </div>
+          <List_box.Item_indicator>
+            (fun selected ->
+              if S.get selected then
+                <Gravity.Check class_="size-4 text-accent-soft-foreground" />
+              else Jsx.nothing)
+          </List_box.Item_indicator>
+        </List_box.Item>
+      </List_box>
+    </Surface>
+    <p class_="text-sm text-muted">
+      "Selected: "
+      (fun () ->
+        Jsx.string
+          (match S.get selected with
+          | [||] -> "None"
+          | keys -> String.concat ", " (Array.to_list keys)))
+    </p>
+  </div>

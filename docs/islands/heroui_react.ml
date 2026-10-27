@@ -466,6 +466,18 @@ external tooltip_props :
 external tooltip : Dom.htmlDivElement -> tooltip_props -> unit = "tooltip"
 [@@mel.module "./react/heroui.tsx"]
 
+type list_box_props
+
+external list_box_props :
+  selection_mode:([ `none | `single | `multiple ][@mel.as "selectionMode"]) ->
+  variant:([ `default | `danger ][@mel.as "variant"]) ->
+  unit ->
+  list_box_props = ""
+[@@mel.obj]
+
+external list_box : Dom.htmlDivElement -> list_box_props -> unit = "listBox"
+[@@mel.module "./react/heroui.tsx"]
+
 type dropdown_props
 
 external dropdown_props :

@@ -1,0 +1,61 @@
+module S = Solidtype.Solid
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let modes = [| (`none, "none"); (`single, "single"); (`multiple, "multiple") |]
+let variants = [| (`default, "default"); (`danger, "danger") |]
+
+let make () =
+  let mode, set_mode = S.create_signal (`single, "single") in
+  let variant, set_variant = S.create_signal (`default, "default") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="selectionMode"
+        choices=(fun () -> modes)
+        picked=(fun () -> S.get mode)
+        on_pick=(Controls.choose modes set_mode)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=list-box]"
+      solidtype=(<div>
+                   (fun () ->
+                     (* A list's selection is read as it is made, so another
+                      makes another list, as React's key does. *)
+                     let mode = fst (S.get mode) in
+                     Solidtype.Jsx.element
+                       <List_box
+                         aria_label="Users"
+                         class_="w-[220px]"
+                         selection_mode=(fun () -> mode)
+                         variant=(fun () -> fst (S.get variant))
+                         default_selected_keys=(fun () -> [| "bob" |])
+                         disabled_keys=(fun () -> [| "martha" |])>
+                         <List_box.Item id="bob" text_value="Bob">
+                           <Label>"Bob"</Label> <List_box.Item_indicator />
+                         </List_box.Item>
+                         <List_box.Item id="fred" text_value="Fred">
+                           <Label>"Fred"</Label> <List_box.Item_indicator />
+                         </List_box.Item>
+                         <List_box.Item id="martha" text_value="Martha">
+                           <Label>"Martha"</Label> <List_box.Item_indicator />
+                         </List_box.Item>
+                       </List_box>)
+                 </div>)
+      react=(fun host ->
+              Heroui_react.list_box host
+                (Heroui_react.list_box_props
+                   ~selection_mode:(fst (S.get mode))
+                   ~variant:(fst (S.get variant))
+                   ()))
+    />
+  </section>

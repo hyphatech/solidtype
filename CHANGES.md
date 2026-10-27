@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.List_box`: HeroUI's ListBox on Kobalte's, its options
+  selected one or many at a time, or acted on, with HeroUI's indicators,
+  sections and their `Header`, descriptions and separators.
+- `Solidtype_heroui.Separator.Slot`: where a part above draws the
+  separators inside it.
 - `Solidtype_heroui.Dropdown`: HeroUI's Dropdown on Kobalte's menu, opened by
   a `Button` inside it or a `Dropdown.Trigger`, or by a long press; its
   items acted on, or selected one or many at a time in the menu or in a

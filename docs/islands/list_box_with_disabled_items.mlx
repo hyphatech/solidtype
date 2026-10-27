@@ -1,0 +1,63 @@
+module Description = Solidtype_heroui.Description
+module Header = Solidtype_heroui.Header
+module Kbd = Solidtype_heroui.Kbd
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Separator = Solidtype_heroui.Separator
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="w-[256px] rounded-3xl shadow-surface">
+    <List_box
+      aria_label="File actions"
+      class_="w-full p-2"
+      disabled_keys=(fun () -> [| "delete-file" |])
+      selection_mode=`none
+      on_action=(fun (_ : string) -> ())>
+      <List_box.Section>
+        <Header>"Actions"</Header>
+        <List_box.Item id="new-file" text_value="New file">
+          <div class_="flex h-8 items-start justify-center pt-px">
+            <Gravity.Square_plus class_="size-4 shrink-0 text-muted" />
+          </div>
+          <div class_="flex flex-col">
+            <Label>"New file"</Label>
+            <Description>"Create a new file"</Description>
+          </div>
+          <Kbd class_="ms-auto" variant=`light>
+            <Kbd.Abbr key_value=`command /> <Kbd.Content>"N"</Kbd.Content>
+          </Kbd>
+        </List_box.Item>
+        <List_box.Item id="edit-file" text_value="Edit file">
+          <div class_="flex h-8 items-start justify-center pt-px">
+            <Gravity.Pencil class_="size-4 shrink-0 text-muted" />
+          </div>
+          <div class_="flex flex-col">
+            <Label>"Edit file"</Label> <Description>"Make changes"</Description>
+          </div>
+          <Kbd class_="ms-auto" variant=`light>
+            <Kbd.Abbr key_value=`command /> <Kbd.Content>"E"</Kbd.Content>
+          </Kbd>
+        </List_box.Item>
+      </List_box.Section>
+      <Separator />
+      <List_box.Section>
+        <Header>"Danger zone"</Header>
+        <List_box.Item
+          id="delete-file" text_value="Delete file" variant=`danger>
+          <div class_="flex h-8 items-start justify-center pt-px">
+            <Gravity.Trash_bin class_="size-4 shrink-0 text-danger" />
+          </div>
+          <div class_="flex flex-col">
+            <Label>"Delete file"</Label>
+            <Description>"Move to trash"</Description>
+          </div>
+          <Kbd class_="ms-auto" variant=`light>
+            <Kbd.Abbr key_value=`command />
+            <Kbd.Abbr key_value=`shift />
+            <Kbd.Content>"D"</Kbd.Content>
+          </Kbd>
+        </List_box.Item>
+      </List_box.Section>
+    </List_box>
+  </Surface>

@@ -1,0 +1,88 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+type user = { id : string; name : string; email : string }
+
+let first_names =
+  [|
+    "Emma";
+    "Liam";
+    "Olivia";
+    "Noah";
+    "Ava";
+    "James";
+    "Sophia";
+    "Oliver";
+    "Isabella";
+    "Lucas";
+    "Mia";
+    "Ethan";
+    "Charlotte";
+    "Mason";
+    "Amelia";
+    "Logan";
+    "Harper";
+    "Alexander";
+    "Ella";
+    "Benjamin";
+  |]
+
+let last_names =
+  [|
+    "Smith";
+    "Johnson";
+    "Williams";
+    "Brown";
+    "Jones";
+    "Garcia";
+    "Miller";
+    "Davis";
+    "Rodriguez";
+    "Martinez";
+    "Anderson";
+    "Taylor";
+    "Thomas";
+    "Jackson";
+    "White";
+    "Harris";
+    "Clark";
+    "Lewis";
+    "Robinson";
+    "Walker";
+  |]
+
+let generate_users n =
+  Array.init n (fun i ->
+      let first_name = first_names.(i mod Array.length first_names) in
+      let last_name =
+        last_names.(i / Array.length first_names mod Array.length last_names)
+      in
+      {
+        id = string_of_int (i + 1);
+        name = first_name ^ " " ^ last_name;
+        email =
+          String.lowercase_ascii first_name
+          ^ "."
+          ^ String.lowercase_ascii last_name
+          ^ "@acme.com";
+      })
+
+let make () =
+  let users = generate_users 1000 in
+  <List_box
+    aria_label="Virtualized list with 1000 items"
+    class_="h-[400px] w-[300px] overflow-y-auto">
+    <Solidtype.For each=(fun () -> users)>
+      (fun (user : user) _ ->
+        <List_box.Item id=(fun () -> user.id) text_value=(fun () -> user.name)>
+          <div class_="flex flex-col">
+            <Label>(fun () -> Solidtype.Jsx.string user.name)</Label>
+            <Description>
+              (fun () -> Solidtype.Jsx.string user.email)
+            </Description>
+          </div>
+          <List_box.Item_indicator />
+        </List_box.Item>)
+    </Solidtype.For>
+  </List_box>

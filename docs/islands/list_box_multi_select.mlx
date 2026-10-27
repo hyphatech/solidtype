@@ -1,0 +1,50 @@
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="w-[256px] rounded-3xl shadow-surface">
+    <List_box aria_label="Users" selection_mode=`multiple>
+      <List_box.Item id="1" text_value="Bob">
+        <Avatar size=`sm>
+          <Avatar.Image
+            alt="Bob"
+            src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+          />
+          <Avatar.Fallback>"B"</Avatar.Fallback>
+        </Avatar>
+        <div class_="flex flex-col">
+          <Label>"Bob"</Label> <Description>"bob@heroui.com"</Description>
+        </div>
+        <List_box.Item_indicator />
+      </List_box.Item>
+      <List_box.Item id="2" text_value="Fred">
+        <Avatar size=`sm>
+          <Avatar.Image
+            alt="Fred"
+            src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+          />
+          <Avatar.Fallback>"F"</Avatar.Fallback>
+        </Avatar>
+        <div class_="flex flex-col">
+          <Label>"Fred"</Label> <Description>"fred@heroui.com"</Description>
+        </div>
+        <List_box.Item_indicator />
+      </List_box.Item>
+      <List_box.Item id="3" text_value="Martha">
+        <Avatar size=`sm>
+          <Avatar.Image
+            alt="Martha"
+            src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
+          />
+          <Avatar.Fallback>"M"</Avatar.Fallback>
+        </Avatar>
+        <div class_="flex flex-col">
+          <Label>"Martha"</Label> <Description>"martha@heroui.com"</Description>
+        </div>
+        <List_box.Item_indicator />
+      </List_box.Item>
+    </List_box>
+  </Surface>

@@ -1,0 +1,232 @@
+(* HeroUI's ListBox on Kobalte's, beside the same list box in React: its
+   options and all in them, what it tells and what has the focus, as Tab
+   reaches it, the keys move through it and select, and a press selects. *)
+
+module List_box = Solidtype_heroui.List_box
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module Header = Solidtype_heroui.Header
+module Separator = Solidtype_heroui.Separator
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type list = [ `single | `multiple | `sections ]
+type props
+
+external props : list:list -> told:(string -> unit) -> unit -> props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ListBox.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ListBox.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ListBox.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+(* A while for a framework's timers and focus moves to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself, which no style of HeroUI's reads:
+   Kobalte's own state, present and empty, an [aria-disabled] it writes false,
+   and each option's place in the list, which a reader counts in React Aria's;
+   React Aria's collection, layout and orientation; and each framework's ids
+   and keys, made its own way. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ("data-selected" | "data-highlighted" | "data-disabled"), Some "" -> true
+  | "aria-disabled", Some "false" -> true
+  | ("aria-posinset" | "aria-setsize"), _ -> true
+  | ("data-collection" | "data-layout" | "data-orientation"), _ -> true
+  | ("id" | "style" | "dir" | "data-key"), _ -> true
+  | _ -> false
+
+(* An id one part names another by, which each framework makes its own way. *)
+let names_another = function
+  | "aria-describedby" | "aria-labelledby" -> true
+  | _ -> false
+
+(* An element: its tag, its attributes and its text. *)
+let one e =
+  let names =
+    T.attribute_names e |> Array.to_list
+    |> List.filter (fun name ->
+        not (framework_only e name || T.framework_only name))
+    |> List.sort String.compare
+  in
+  String.concat " "
+    (tag_name e
+    :: List.map
+         (fun name ->
+           if names_another name then name ^ "=(id)"
+           else name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+         names)
+  ^ if element_count e > 0 then "" else " " ^ text e
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+(* The list and all inside it, what it told, and what has the focus. *)
+let shown told =
+  all ".list-box, .list-box *:not([aria-hidden=true] *)"
+  |> Array.map one
+  |> Fun.flip Array.append (Array.of_list (List.rev !told))
+  |> Fun.flip Array.append
+       [|
+         ("focus: "
+         ^
+         match Js.Null.toOption active with
+         | Some e ->
+             Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+             ^ " " ^ text e
+         | None -> "none");
+       |]
+
+let by_text selector wanted =
+  match
+    List.find_opt
+      (fun e -> String.equal (text e) wanted)
+      (Array.to_list (all selector))
+  with
+  | Some e -> e
+  | None -> T.body
+
+(* The keys each list is walked with, from the button before it. *)
+let keys = function
+  | `single | `multiple ->
+      [ "{Tab}"; "{ArrowDown}"; "[Space]"; "{ArrowDown}"; "{Enter}" ]
+  | `sections -> [ "{Tab}"; "{ArrowDown}"; "{ArrowDown}"; "{Enter}" ]
+
+let walk ~step ~told (list : list) =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    seen := (name, shown told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () =
+    after "before" (fun () -> T.click user (by_text "button" "Before"))
+  in
+  let* () =
+    List.fold_left
+      (fun before key ->
+        let* () = before in
+        after key (fun () -> T.keyboard user key))
+      (Js.Promise.resolve ()) (keys list)
+  in
+  let first =
+    match list with `single | `multiple -> "Bob" | `sections -> "New file"
+  in
+  let* () =
+    after "pressed" (fun () -> T.click user (by_text "[data-slot=label]" first))
+  in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let items (list : list) tell =
+  match list with
+  | (`single | `multiple) as mode ->
+      <List_box
+        aria_label="Users"
+        selection_mode=(fun () -> (mode :> [ `none | `single | `multiple ]))
+        default_selected_keys=(fun () -> [| "bob" |])
+        disabled_keys=(fun () -> [| "martha" |])
+        on_selection_change=(fun keys ->
+                              let keys = Array.copy keys in
+                              Array.sort String.compare keys;
+                              tell
+                                ("selected "
+                                ^ String.concat " " (Array.to_list keys)))>
+        <List_box.Item id="bob" text_value="Bob">
+          <Label>"Bob"</Label>
+          <Description>"bob@heroui.com"</Description>
+          <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="fred" text_value="Fred">
+          <Label>"Fred"</Label> <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="martha" text_value="Martha">
+          <Label>"Martha"</Label>
+        </List_box.Item>
+        <List_box.Item id="tom" text_value="Tom" variant=`danger>
+          <Label>"Tom"</Label>
+        </List_box.Item>
+      </List_box>
+  | `sections ->
+      <List_box
+        aria_label="File actions"
+        selection_mode=`none
+        on_action=(fun key -> tell ("action " ^ key))>
+        <List_box.Section>
+          <Header>"Actions"</Header>
+          <List_box.Item id="new" text_value="New file">
+            <Label>"New file"</Label>
+          </List_box.Item>
+          <List_box.Item id="edit" text_value="Edit file">
+            <Label>"Edit file"</Label>
+          </List_box.Item>
+        </List_box.Section>
+        <Separator />
+        <List_box.Section>
+          <Header>"Danger zone"</Header>
+          <List_box.Item id="delete" text_value="Delete file" variant=`danger>
+            <Label>"Delete file"</Label>
+          </List_box.Item>
+        </List_box.Section>
+      </List_box>
+
+let both (list : list) =
+  let told = ref [] in
+  let tell said = told := said :: !told in
+  T.render (fun () ->
+      <div>
+        <button type_=`button>"Before"</button>
+        (fun () -> Solidtype.Jsx.element (items list tell))
+      </div>);
+  let* solidtype = walk ~step:(fun action -> action ()) ~told list in
+  T.cleanup ();
+  told := [];
+  let (_ : Dom.element) = Twin.render (props ~list ~told:tell ()) in
+  let* react = walk ~step:Twin.step ~told list in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "List_box" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "selects one, as React's does" (fun () ->
+          let* r = both `single in
+          same r);
+      Jest.testPromise "selects many, as React's does" (fun () ->
+          let* r = both `multiple in
+          same r);
+      Jest.testPromise "acts on items in sections, as React's does" (fun () ->
+          let* r = both `sections in
+          same r))
