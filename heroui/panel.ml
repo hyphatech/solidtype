@@ -35,6 +35,9 @@ external style_of : _ Dom.element_like -> css_style = "style" [@@mel.get]
 external set_property : css_style -> string -> string -> unit = "setProperty"
 [@@mel.send]
 
+external remove_property : css_style -> string -> string = "removeProperty"
+[@@mel.send]
+
 external computed_style : _ Dom.element_like -> css_style = "getComputedStyle"
 external height : css_style -> string = "height" [@@mel.get]
 
@@ -92,6 +95,15 @@ let watch p e =
   in
   let hide () = set_attribute e "hidden" "until-found" in
   let frame = ref None in
+  (* Kobalte stops its content's transitions as it mounts, and lets them run
+     again only once it has opened; content kept on the page collapsed would
+     open the first time with none. The panel's are its own: a frame on, once
+     Kobalte has stopped them, they run again. *)
+  ignore
+    (request_frame (fun _ ->
+         ignore (remove_property inline "transition-duration" : string);
+         ignore (remove_property inline "animation-name" : string))
+      : int);
   p.toggled <-
     (fun now ->
       Option.iter cancel_frame !frame;

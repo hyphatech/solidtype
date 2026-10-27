@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed: `Solidtype_heroui.Accordion`'s panels and `Disclosure`'s content
+  opened the first time with no animation, as Kobalte keeps transitions
+  off its content until it has opened once.
 - `Solidtype_heroui.Alert_dialog`: HeroUI's AlertDialog on Kobalte's
   dialog, an `alertdialog` only its buttons close unless its backdrop says
   otherwise, with HeroUI's statuses and their icons, placements and sizes.

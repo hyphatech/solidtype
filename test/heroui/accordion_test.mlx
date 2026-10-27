@@ -57,6 +57,13 @@ type style
 
 external style : Dom.element -> style = "style" [@@mel.get]
 external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+
+(* A frame drawn, as a browser draws one after the page changes. *)
+let frame () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      ignore (request_frame (fun _ -> (resolve true [@u])) : int))
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
 
 type event
 
@@ -350,4 +357,34 @@ let () =
                      Some "true",
                      true );
                  |])
+          |> Js.Promise.resolve);
+      Jest.testPromise "leaves each panel free to animate once on the page"
+        (fun () ->
+          (* Kobalte stops its content's transitions as it mounts, until it
+             has opened once; a panel kept on the page collapsed would open
+             the first time with none. *)
+          T.render (fun () ->
+              <Accordion default_expanded_keys=(fun () -> [| "one" |])>
+                <Accordion.Item id="one">
+                  <Accordion.Heading>
+                    <Accordion.Trigger>"One"</Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>"First."</Accordion.Panel>
+                </Accordion.Item>
+                <Accordion.Item id="two">
+                  <Accordion.Heading>
+                    <Accordion.Trigger>"Two"</Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>"Second."</Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>);
+          let* () = frame () in
+          let* () = frame () in
+          let stopped =
+            Js.Array.from (query_all T.body "[data-slot=accordion-panel]")
+            |> Array.map (fun panel ->
+                ( property (style panel) "transition-duration",
+                  property (style panel) "animation-name" ))
+          in
+          E.(expect stopped |> toEqual [| ("", ""); ("", "") |])
           |> Js.Promise.resolve))
