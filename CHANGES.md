@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.3.0 (2026-10-27)
 
 - `Solidtype_heroui.Autocomplete`: HeroUI's Autocomplete on Kobalte's combo
   box, a select whose popover filters its `List_box` by a `Search_field`, one
