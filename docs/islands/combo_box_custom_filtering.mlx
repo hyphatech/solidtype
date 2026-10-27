@@ -1,0 +1,49 @@
+module Jsx = Solidtype.Jsx
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+type animal = { id : string; name : string }
+
+let animals =
+  [|
+    { id = "cat"; name = "Cat" };
+    { id = "dog"; name = "Dog" };
+    { id = "bird"; name = "Bird" };
+    { id = "fish"; name = "Fish" };
+    { id = "hamster"; name = "Hamster" };
+  |]
+
+(* Whether [part] is in [text], whatever their case. *)
+let holds ~part text =
+  let text = String.lowercase_ascii text
+  and part = String.lowercase_ascii part in
+  let n = String.length part in
+  let rec from i =
+    i + n <= String.length text
+    && (String.equal (String.sub text i n) part || from (i + 1))
+  in
+  from 0
+
+let make () =
+  <Combo_box
+    class_="w-[256px]"
+    default_filter=(fun text typed ->
+                     String.equal typed "" || holds ~part:typed text)>
+    <Label>"Animal (custom filter)"</Label>
+    <Combo_box.Input_group>
+      <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+    </Combo_box.Input_group>
+    <Combo_box.Popover>
+      <List_box>
+        <Solidtype.For each=(fun () -> animals)>
+          (fun animal _ ->
+            <List_box.Item
+              id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
+              (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+            </List_box.Item>)
+        </Solidtype.For>
+      </List_box>
+    </Combo_box.Popover>
+  </Combo_box>

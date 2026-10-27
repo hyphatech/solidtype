@@ -352,6 +352,7 @@ let%component make ?(placeholder : string = "Select an item")
       is_selected = (fun key -> Array.exists (String.equal key) (keys ()));
       is_disabled = disabled_key;
       act = (fun (_ : string) -> ());
+      focus = Real;
     }
   in
   let i = Interaction.create () in

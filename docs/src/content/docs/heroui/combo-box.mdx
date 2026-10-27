@@ -1,0 +1,333 @@
+---
+title: ComboBox
+description: An input that filters a list of options to choose one or many of, HeroUI's on Kobalte's.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/combo_box_usage.jsx";
+import ExUsageCode from "@islands/combo_box_usage.mlx?raw";
+import * as ExFullWidth from "@islands/combo_box_full_width.jsx";
+import ExFullWidthCode from "@islands/combo_box_full_width.mlx?raw";
+import * as ExWithDescription from "@islands/combo_box_with_description.jsx";
+import ExWithDescriptionCode from "@islands/combo_box_with_description.mlx?raw";
+import * as ExRequired from "@islands/combo_box_required.jsx";
+import ExRequiredCode from "@islands/combo_box_required.mlx?raw";
+import * as ExDisabled from "@islands/combo_box_disabled.jsx";
+import ExDisabledCode from "@islands/combo_box_disabled.mlx?raw";
+import * as ExWithDisabledOptions from "@islands/combo_box_with_disabled_options.jsx";
+import ExWithDisabledOptionsCode from "@islands/combo_box_with_disabled_options.mlx?raw";
+import * as ExWithSections from "@islands/combo_box_with_sections.jsx";
+import ExWithSectionsCode from "@islands/combo_box_with_sections.mlx?raw";
+import * as ExControlled from "@islands/combo_box_controlled.jsx";
+import ExControlledCode from "@islands/combo_box_controlled.mlx?raw";
+import * as ExControlledInputValue from "@islands/combo_box_controlled_input_value.jsx";
+import ExControlledInputValueCode from "@islands/combo_box_controlled_input_value.mlx?raw";
+import * as ExAsynchronousLoading from "@islands/combo_box_asynchronous_loading.jsx";
+import ExAsynchronousLoadingCode from "@islands/combo_box_asynchronous_loading.mlx?raw";
+import * as ExDefaultSelectedKey from "@islands/combo_box_default_selected_key.jsx";
+import ExDefaultSelectedKeyCode from "@islands/combo_box_default_selected_key.mlx?raw";
+import * as ExAllowsCustomValue from "@islands/combo_box_allows_custom_value.jsx";
+import ExAllowsCustomValueCode from "@islands/combo_box_allows_custom_value.mlx?raw";
+import * as ExCustomIndicator from "@islands/combo_box_custom_indicator.jsx";
+import ExCustomIndicatorCode from "@islands/combo_box_custom_indicator.mlx?raw";
+import * as ExCustomValue from "@islands/combo_box_custom_value.jsx";
+import ExCustomValueCode from "@islands/combo_box_custom_value.mlx?raw";
+import * as ExCustomFiltering from "@islands/combo_box_custom_filtering.jsx";
+import ExCustomFilteringCode from "@islands/combo_box_custom_filtering.mlx?raw";
+import * as ExMenuTrigger from "@islands/combo_box_menu_trigger.jsx";
+import ExMenuTriggerCode from "@islands/combo_box_menu_trigger.mlx?raw";
+import * as ExFormValue from "@islands/combo_box_form_value.jsx";
+import ExFormValueCode from "@islands/combo_box_form_value.mlx?raw";
+import * as ExCustomValidation from "@islands/combo_box_custom_validation.jsx";
+import ExCustomValidationCode from "@islands/combo_box_custom_validation.mlx?raw";
+import * as ExReadOnly from "@islands/combo_box_read_only.jsx";
+import ExReadOnlyCode from "@islands/combo_box_read_only.mlx?raw";
+import * as ExMultipleSelection from "@islands/combo_box_multiple_selection.jsx";
+import ExMultipleSelectionCode from "@islands/combo_box_multiple_selection.mlx?raw";
+import * as ExInSurface from "@islands/combo_box_in_surface.jsx";
+import ExInSurfaceCode from "@islands/combo_box_in_surface.mlx?raw";
+import * as ExTailwind from "@islands/combo_box_tailwind.jsx";
+import ExTailwindCode from "@islands/combo_box_tailwind.mlx?raw";
+import * as Demo from "@islands/combo_box_demo.jsx";
+
+`Solidtype_heroui.Combo_box` is Kobalte's `Combobox`, with the classes
+HeroUI's own `comboBoxVariants` gives. Its input is the `Input` inside its
+input group, and its list the `List_box` inside its popover, as in HeroUI;
+`Label`, `Description` and `Field_error` inside it name, describe and
+qualify it.
+
+## Usage
+
+<Example code={ExUsageCode} title="combo_box_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Combo_box>
+  <Label>...</Label>
+  <Combo_box.Input_group>
+    <Input />
+    <Combo_box.Trigger />
+  </Combo_box.Input_group>
+  <Combo_box.Value />
+  <Description>...</Description>
+  <Combo_box.Popover>
+    <List_box>
+      <List_box.Item id="...">...</List_box.Item>
+    </List_box>
+  </Combo_box.Popover>
+</Combo_box>
+```
+
+## Examples
+
+### Full Width
+
+<Example code={ExFullWidthCode} title="combo_box_full_width.mlx"><ExFullWidth.make client:visible /></Example>
+
+### With Description
+
+<Example code={ExWithDescriptionCode} title="combo_box_with_description.mlx"><ExWithDescription.make client:visible /></Example>
+
+### Required
+
+HeroUI's required combo box is checked by the browser as its form is
+submitted. A `Form` here checks nothing itself, as with a text field: the
+example says the combo box is invalid once a submit finds it empty.
+
+<Example code={ExRequiredCode} title="combo_box_required.mlx"><ExRequired.make client:visible /></Example>
+
+### Disabled
+
+<Example code={ExDisabledCode} title="combo_box_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### With Disabled Options
+
+<Example code={ExWithDisabledOptionsCode} title="combo_box_with_disabled_options.mlx"><ExWithDisabledOptions.make client:visible /></Example>
+
+### With Sections
+
+A section the input's text leaves empty is not drawn, its header with it.
+
+<Example code={ExWithSectionsCode} title="combo_box_with_sections.mlx"><ExWithSections.make client:visible /></Example>
+
+### Controlled
+
+The ids chosen are `value`, an array, as a select's are: one at most in a
+choice of one, where HeroUI's React component also takes `selectedKey`.
+
+<Example code={ExControlledCode} title="combo_box_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Controlled Input Value
+
+<Example code={ExControlledInputValueCode} title="combo_box_controlled_input_value.mlx"><ExControlledInputValue.make client:visible /></Example>
+
+### Asynchronous Loading
+
+HeroUI's example searches a server for each text typed; here the same names
+are searched and loaded a part at a time. The list's
+`List_box.Load_more_item` asks for more as the list scrolls to its end.
+HeroUI's list also draws an empty state while it holds nothing, which a
+`List_box` does not yet.
+
+<Example code={ExAsynchronousLoadingCode} title="combo_box_asynchronous_loading.mlx"><ExAsynchronousLoading.make client:visible /></Example>
+
+### Default Selected Key
+
+<Example code={ExDefaultSelectedKeyCode} title="combo_box_default_selected_key.mlx"><ExDefaultSelectedKey.make client:visible /></Example>
+
+### Allows Custom Value
+
+<Example code={ExAllowsCustomValueCode} title="combo_box_allows_custom_value.mlx"><ExAllowsCustomValue.make client:visible /></Example>
+
+### Custom Indicator
+
+<Example code={ExCustomIndicatorCode} title="combo_box_custom_indicator.mlx"><ExCustomIndicator.make client:visible /></Example>
+
+### Custom Value
+
+<Example code={ExCustomValueCode} title="combo_box_custom_value.mlx"><ExCustomValue.make client:visible /></Example>
+
+### Custom Filtering
+
+`default_filter` is given an option's text and the input's, and keeps the
+options it answers `true` for.
+
+<Example code={ExCustomFilteringCode} title="combo_box_custom_filtering.mlx"><ExCustomFiltering.make client:visible /></Example>
+
+### Render Function
+
+HeroUI's Render Function example gives the combo box `render`, React's way
+to swap the element it renders, which a Solid component has no need of.
+
+### Menu Trigger
+
+<Example code={ExMenuTriggerCode} title="combo_box_menu_trigger.mlx"><ExMenuTrigger.make client:visible /></Example>
+
+### Form Value
+
+<Example code={ExFormValueCode} title="combo_box_form_value.mlx"><ExFormValue.make client:visible /></Example>
+
+### Validation Behavior
+
+HeroUI's `validationBehavior` chooses between the browser's validation and
+React Aria's own. A field here is validated by the application's state, as
+the [Form](/solidtype/heroui/form/) page shows: it is invalid while
+`is_invalid` says so, whenever the application decides.
+
+### Custom Validation
+
+HeroUI's `validate` is a reading of the value the application keeps:
+
+<Example code={ExCustomValidationCode} title="combo_box_custom_validation.mlx"><ExCustomValidation.make client:visible /></Example>
+
+### Read Only
+
+<Example code={ExReadOnlyCode} title="combo_box_read_only.mlx"><ExReadOnly.make client:visible /></Example>
+
+### Multiple Selection
+
+<Example code={ExMultipleSelectionCode} title="combo_box_multiple_selection.mlx"><ExMultipleSelection.make client:visible /></Example>
+
+### In Surface
+
+<Example code={ExInSurfaceCode} title="combo_box_in_surface.mlx"><ExInSurface.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="combo_box_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .combo-box {
+    @apply flex flex-col gap-1;
+  }
+
+  .combo-box__input-group {
+    @apply relative inline-flex items-center;
+  }
+
+  .combo-box__trigger {
+    @apply absolute right-0 text-muted;
+  }
+
+  .combo-box__popover {
+    @apply rounded-lg border border-border bg-surface p-2;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.combo-box`, `.combo-box--full-width`
+- `.combo-box__input-group`, `.combo-box__input-group--full-width`
+- `.combo-box__value`, `.combo-box__trigger`, `.combo-box__popover`
+
+### Interactive States
+
+- **Open**: `[data-open="true"]` on the combo box and its trigger
+- **Focus**: `[data-focused="true"]` on the combo box and its input, and
+  `[data-focus-visible="true"]` on its input and trigger
+- **Hover** and **Pressed**: `[data-hovered="true"]`, `[data-pressed="true"]`
+  on the trigger, pressed while the list is open
+- **Placeholder**: `[data-placeholder="true"]` on the value
+- **Invalid**, **Disabled**, **Read-only**, **Required**:
+  `[data-invalid="true"]`, `[data-disabled="true"]`, `[data-readonly="true"]`,
+  `[data-required="true"]` on the combo box
+- **Entering** and **Exiting**: `[data-entering="true"]`,
+  `[data-exiting="true"]` on the popover
+
+## How it is made
+
+Kobalte's combo box filters its options by the input's text, whatever its
+case or accents, keeps the focus in its input while the arrows move through
+the list, chooses by Enter or a press, and closes on Escape, as React Aria's
+does. Its list is the `List_box` inside its popover, which a combo box takes
+as its own: the list's options join the combo box while it is closed too, so
+its input can show the option chosen, and are drawn while Kobalte's filter
+keeps them.
+
+Focus opens the list with every option, and so does the trigger; typing
+filters it. Escape on a closed list puts back the text of the option chosen,
+and leaving the input does too, unless custom values are allowed. A form is
+sent the ids chosen by hidden inputs, or the input's text where it is the
+value, as React Aria sends them.
+
+While the list is open, the page outside stays as a reader found it, as
+Kobalte's combo box leaves it; React Aria's hides it. Kobalte hides it only
+while its combo box is modal, which would also hold the page's pointer and
+scroll.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### ComboBox
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `selectionMode` | `selection_mode` | `` `single `` \| `` `multiple `` | `` `single `` | One or many, read as it is made |
+| `value`, `selectedKey` | `value` | `string array` | | The ids chosen, controlled |
+| `defaultValue`, `defaultSelectedKey` | `default_value` | `string array` | | The ids chosen at first |
+| `onChange`, `onSelectionChange` | `on_change` | `string array -> unit` | | Told the ids chosen as they change |
+| `inputValue` | `input_value` | `string` | | The input's text, controlled |
+| `defaultInputValue` | `default_input_value` | `string` | | The input's text at first |
+| `onInputChange` | `on_input_change` | `string -> unit` | | Told the input's text as it changes |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as the list opens or closes |
+| `disabledKeys` | `disabled_keys` | `string array` | | The disabled options' ids |
+| `defaultFilter` | `default_filter` | `string -> string -> bool` | contains | Keeps an option given its text and the input's |
+| `menuTrigger` | `menu_trigger` | `` `focus `` \| `` `input `` \| `` `manual `` | `` `focus `` | What opens the list |
+| `allowsCustomValue` | `allows_custom_value` | `bool` | `false` | Whether a text no option has stays |
+| `allowsEmptyCollection` | `allows_empty_collection` | `bool` | `false` | Whether the list opens with no option |
+| `shouldFocusWrap` | `should_focus_wrap` | `bool` | `false` | Whether the arrows wrap |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether its value can be read but not changed |
+| `isRequired` | `is_required` | `bool` | `false` | Whether a choice is required |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `name` | `name` | `string` | | Its name in a form |
+| `formValue` | `form_value` | `` `key `` \| `` `text `` | `` `key `` | Whether a form is sent the ids or the text |
+| `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Told as the focus leaves it |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether it fills its container |
+| `variant` | `variant` | `` `primary `` \| `` `secondary `` | `` `primary `` | Its input's look |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its label, input group, value, description and popover |
+
+### ComboBox.InputGroup, ComboBox.Trigger, ComboBox.Popover
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | The popover's side, `bottom` by default |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | What it holds; the trigger's own icon |
+
+### ComboBox.Value
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `placeholder` | `placeholder` | `string` | Shown while nothing is chosen |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | `string array accessor -> element` | What it draws while something is chosen, given the ids chosen |
+
+## Beside React
+
+Original HeroUI documentation: [ComboBox](https://heroui.com/en/docs/react/components/combo-box).
+
+The same HeroUI ComboBox twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each input: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

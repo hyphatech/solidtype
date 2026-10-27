@@ -39,6 +39,7 @@ module Kbd = H.Kbd
 module Label = H.Label
 module Link = H.Link
 module Select = H.Select
+module Combo_box = H.Combo_box
 module List_box = H.List_box
 module Meter = H.Meter
 module Number_field = H.Number_field
@@ -248,6 +249,18 @@ let () =
                     </List_box>
                   </Select.Popover>
                 </Select>
+                <Combo_box data_testid="Combo_box">
+                  <Combo_box.Input_group data_testid="Combo_box.Input_group">
+                    <Input aria_label="Animal" />
+                    <Combo_box.Trigger data_testid="Combo_box.Trigger" />
+                  </Combo_box.Input_group>
+                  <Combo_box.Value data_testid="Combo_box.Value" />
+                  <Combo_box.Popover>
+                    <List_box>
+                      <List_box.Item id="cat">"Cat"</List_box.Item>
+                    </List_box>
+                  </Combo_box.Popover>
+                </Combo_box>
                 <Drawer default_open=true>
                   <Drawer.Trigger data_testid="Drawer.Trigger">
                     "Open"
@@ -511,6 +524,10 @@ let () =
                    ("Select.Clear_button", "[data-slot=select-clear-button]");
                    ("Select.Indicator", "[data-slot=select-default-indicator]");
                    ("Select.Popover", "[data-slot=select-popover]");
+                   ("Combo_box", "[data-slot=combo-box]");
+                   ("Combo_box.Input_group", "[data-slot=combo-box-input-group]");
+                   ("Combo_box.Trigger", "[data-slot=combo-box-trigger]");
+                   ("Combo_box.Value", "[data-slot=combo-box-value]");
                    ("Drawer.Trigger", "[data-slot=drawer-trigger]");
                    ("Drawer.Backdrop", "[data-slot=drawer-backdrop]");
                    ("Drawer.Content", "[data-slot=drawer-content]");

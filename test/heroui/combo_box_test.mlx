@@ -1,0 +1,470 @@
+(* HeroUI's ComboBox on Kobalte's, beside the same combo box in React: its
+   label, input, trigger, value, description and list, what it tells and what
+   has the focus, as its input takes the focus and is typed into, the keys move
+   through its list and choose, the focus leaves it, and its trigger opens it
+   with every option. *)
+
+module Combo_box = Solidtype_heroui.Combo_box
+module List_box = Solidtype_heroui.List_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props : multiple:bool -> told:(string -> unit) -> unit -> props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ComboBox.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ComboBox.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ComboBox.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external input_value : Dom.element -> string = "value" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+type options
+
+external options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) -> unit -> options
+  = ""
+[@@mel.obj]
+
+external setup : options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* A while for a framework's timers and focus moves to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself, which no style of HeroUI's reads:
+   Kobalte's own state, present and empty, its pointer's type, an
+   [aria-disabled] it writes false, each option's place in the list, which a
+   reader counts in React Aria's, its root's group and its input's popup,
+   which the combobox role implies; React Aria's collection, layout and
+   orientation, its [tabindex] on an input, focusable already, and its input's
+   controlled [value] attribute, whose value each element's line holds; and
+   each framework's ids and keys, made its own way.
+   And while the list is open, React Aria hides the page outside the input and
+   the list from a reader, where Kobalte's combo box, which is not modal,
+   leaves it as it is; and React Aria's group keeps the focus ring it had as
+   the focus came in, which no style of HeroUI's reads, where the port's
+   follows its input's. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ( ( "data-expanded" | "data-closed" | "data-valid" | "data-highlighted"
+      | "data-placeholder-shown" | "data-selected" | "data-disabled" ),
+      Some "" ) ->
+      true
+  | "aria-disabled", Some "false" -> true
+  | ("aria-posinset" | "aria-setsize" | "data-pointer-type"), _ -> true
+  | ("data-collection" | "data-layout" | "data-orientation" | "data-trigger"), _
+    ->
+      true
+  | ("id" | "style" | "dir" | "data-key"), _ -> true
+  | "role", _ -> (
+      match T.attribute e "data-slot" with
+      | Some "combo-box" -> true
+      | Some _ | None -> false)
+  | ("aria-haspopup" | "tabindex" | "value"), _ ->
+      String.equal (tag_name e) "INPUT"
+  | "data-focus-visible", _
+    when Option.equal String.equal
+           (T.attribute e "data-slot")
+           (Some "combo-box-input-group") ->
+      true
+  | "aria-hidden", _ -> (
+      match T.attribute e "data-slot" with
+      | Some ("label" | "description" | "combo-box-trigger" | "combo-box-value")
+        ->
+          true
+      | Some _ | None -> false)
+  | _ -> false
+
+(* What each framework draws for a form, and React Aria's popover holds
+   besides its list for a reader: a button either side that closes it, which
+   Kobalte's leaves to Escape, and the edges of its focus scope. *)
+let framework_element e =
+  match (tag_name e, T.attribute e "aria-label") with
+  | "BUTTON", Some "Dismiss" -> true
+  | "SELECT", _ | "OPTION", _ -> true
+  | "INPUT", _ -> (
+      match T.attribute e "type" with Some "hidden" -> true | _ -> false)
+  | "SPAN", _ ->
+      Option.is_some (T.attribute e "data-focus-scope-start")
+      || Option.is_some (T.attribute e "data-focus-scope-end")
+  | "DIV", _ -> (
+      Option.is_some (T.attribute e "data-a11y-ignore")
+      || (match (T.attribute e "aria-hidden", T.attribute e "data-slot") with
+        | Some "true", None -> true
+        | _ -> false)
+      ||
+      match Js.Array.from (query_all e "button[aria-label=Dismiss]") with
+      | [| _ |] -> element_count e = 1
+      | _ -> false)
+  | _ -> false
+
+(* An id one part names another by, which each framework makes its own way. *)
+let names_another = function
+  | "aria-controls" | "aria-describedby" | "aria-labelledby" | "for"
+  | "aria-activedescendant" ->
+      true
+  | _ -> false
+
+(* An element: its tag, its attributes, its text, and an input's value. *)
+let one e =
+  let names =
+    T.attribute_names e |> Array.to_list
+    |> List.filter (fun name ->
+        not (framework_only e name || T.framework_only name))
+    |> List.sort String.compare
+  in
+  String.concat " "
+    (tag_name e
+    :: List.map
+         (fun name ->
+           if names_another name then name ^ "=(id)"
+           else name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+         names)
+  ^ (if element_count e > 0 then "" else " " ^ text e)
+  ^ match tag_name e with "INPUT" -> " value=" ^ input_value e | _ -> ""
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+(* The combo box and its list, wherever it is, and all inside them, what it
+   told, and what has the focus. *)
+let shown told =
+  all
+    ".combo-box, .combo-box *:not([data-slot=list-box-item-indicator] *), \
+     .combo-box__popover, .combo-box__popover \
+     *:not([data-slot=list-box-item-indicator] *)"
+  |> Array.to_list
+  |> List.filter (fun e -> not (framework_element e))
+  |> List.map one |> Array.of_list
+  |> Fun.flip Array.append (Array.of_list (List.rev !told))
+  |> Fun.flip Array.append
+       [|
+         ("focus: "
+         ^
+         match Js.Null.toOption active with
+         | Some e when e == T.body -> "the page"
+         | Some e ->
+             Option.value (T.attribute e "data-slot") ~default:(tag_name e)
+             ^ " " ^ text e
+         | None -> "none");
+       |]
+
+let first selector =
+  match all selector with [||] -> T.body | found -> found.(0)
+
+let walk ~step ~told =
+  let user = setup (options ~pointer_events_check:0 ()) in
+  let seen = ref [] in
+  let after name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    seen := (name, shown told) :: !seen;
+    told := [];
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () =
+    after "focused" (fun () -> T.click user (first "[data-slot=input]"))
+  in
+  let* () = after "typed a" (fun () -> T.keyboard user "a") in
+  let* () = after "typed n" (fun () -> T.keyboard user "n") in
+  let* () = after "ArrowDown" (fun () -> T.keyboard user "{ArrowDown}") in
+  let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "typed x" (fun () -> T.keyboard user "x") in
+  let* () = after "left" (fun () -> T.tab user) in
+  let* () =
+    after "pressed" (fun () ->
+        T.click user (first "[data-slot=combo-box-trigger]"))
+  in
+  let* () =
+    after "chose" (fun () ->
+        match
+          List.find_opt
+            (fun e -> String.equal (text e) "Cat")
+            (Array.to_list (all "[data-slot=list-box-item]"))
+        with
+        | Some e -> T.click user e
+        | None -> Js.Promise.resolve ())
+  in
+  let* () = after "Escape" (fun () -> T.keyboard user "{Escape}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ~multiple =
+  let told = ref [] in
+  let tell said = told := said :: !told in
+  T.render (fun () ->
+      <div>
+        <button type_=`button>"Before"</button>
+        <Combo_box
+          selection_mode=(fun () -> if multiple then `multiple else `single)
+          disabled_keys=(fun () -> [| "dog" |])
+          name="animal"
+          on_change=(fun keys ->
+                      let keys = Array.copy keys in
+                      Array.sort String.compare keys;
+                      tell
+                        ("changed "
+                        ^
+                        if multiple then String.concat " " (Array.to_list keys)
+                        else match keys with [| k |] -> k | _ -> "null"))
+          on_input_change=(fun text -> tell ("typed " ^ text))>
+          <Label>"Favorite Animal"</Label>
+          <Combo_box.Input_group>
+            <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+          </Combo_box.Input_group>
+          (fun () ->
+            if multiple then
+              Solidtype.Jsx.element
+                <Combo_box.Value placeholder="No animals selected" />
+            else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+          <Description>"Pick the one you like"</Description>
+          <Combo_box.Popover>
+            <List_box
+              selection_mode=(fun () -> if multiple then `multiple else `single)>
+              <List_box.Item id="cat" text_value="Cat">
+                "Cat" <List_box.Item_indicator />
+              </List_box.Item>
+              <List_box.Item id="dog" text_value="Dog">
+                "Dog" <List_box.Item_indicator />
+              </List_box.Item>
+              <List_box.Item id="kangaroo" text_value="Kangaroo">
+                "Kangaroo" <List_box.Item_indicator />
+              </List_box.Item>
+              <List_box.Item id="panda" text_value="Panda">
+                "Panda" <List_box.Item_indicator />
+              </List_box.Item>
+            </List_box>
+          </Combo_box.Popover>
+        </Combo_box>
+        <button type_=`button>"After"</button>
+      </div>);
+  let* solidtype = walk ~step:(fun action -> action ()) ~told in
+  T.cleanup ();
+  told := [];
+  let (_ : Dom.element) = Twin.render (props ~multiple ~told:tell ()) in
+  let* react = walk ~step:Twin.step ~told in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Combo_box" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "chooses one, as React's does" (fun () ->
+          let* r = both ~multiple:false in
+          same r);
+      Jest.testPromise "chooses many, as React's does" (fun () ->
+          let* r = both ~multiple:true in
+          same r))
+
+module S = Solidtype.Solid
+
+type form_data
+
+external form_data : Dom.element -> form_data = "FormData" [@@mel.new]
+external get_all : form_data -> string -> string array = "getAll" [@@mel.send]
+
+let animals () =
+  <List_box>
+    <List_box.Item id="cat" text_value="Cat">"Cat"</List_box.Item>
+    <List_box.Item id="dog" text_value="Dog">"Dog"</List_box.Item>
+    <List_box.Item id="kangaroo" text_value="Kangaroo">
+      "Kangaroo"
+    </List_box.Item>
+    <List_box.Item id="panda" text_value="Panda">"Panda"</List_box.Item>
+  </List_box>
+
+let options () =
+  Array.map text (all "[data-slot=list-box-item]") |> Array.to_list
+
+let input () = first "[data-slot=input]"
+
+let () =
+  Jest.describe "Combo_box, beyond React's" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "keeps the text it is given, told what is typed"
+        (fun () ->
+          let given, set_given = S.create_signal "Ca" in
+          let told = ref [] in
+          T.render (fun () ->
+              <Combo_box
+                input_value=(fun () -> S.get given)
+                on_input_change=(fun t -> told := t :: !told)>
+                <Combo_box.Input_group>
+                  <Input aria_label="Animal" />
+                </Combo_box.Input_group>
+                <Combo_box.Popover>
+                  (fun () -> Solidtype.Jsx.element (animals ()))
+                </Combo_box.Popover>
+              </Combo_box>);
+          let user = T.setup () in
+          let* () = settle () in
+          let shown_first = input_value (input ()) in
+          let* () = T.click user (input ()) in
+          let* () = T.keyboard user "x" in
+          let* () = settle () in
+          let kept = input_value (input ()) in
+          S.set set_given "Dog";
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (shown_first, kept, input_value (input ()), !told)
+              |> toEqual ("Ca", "Ca", "Dog", [ "Cax" ])));
+      Jest.testPromise "keeps a custom value as it is left, and sends it"
+        (fun () ->
+          T.render (fun () ->
+              <form>
+                <Combo_box allows_custom_value=true name="animal">
+                  <Combo_box.Input_group>
+                    <Input aria_label="Animal" />
+                  </Combo_box.Input_group>
+                  <Combo_box.Popover>
+                    (fun () -> Solidtype.Jsx.element (animals ()))
+                  </Combo_box.Popover>
+                </Combo_box>
+                <button type_=`button>"After"</button>
+              </form>);
+          let user = T.setup () in
+          let* () = T.click user (input ()) in
+          let* () = T.keyboard user "Zebra" in
+          let* () = T.tab user in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( input_value (input ()),
+                  get_all (form_data (first "form")) "animal" )
+              |> toEqual ("Zebra", [| "Zebra" |])));
+      Jest.testPromise "sends a form the ids chosen, or their text" (fun () ->
+          let sent by_text =
+            T.render (fun () ->
+                <form>
+                  <Combo_box
+                    name="animal"
+                    form_value=(fun () -> if by_text then `text else `key)
+                    default_value=(fun () -> [| "panda" |])>
+                    <Combo_box.Input_group>
+                      <Input aria_label="Animal" />
+                    </Combo_box.Input_group>
+                    <Combo_box.Popover>
+                      (fun () -> Solidtype.Jsx.element (animals ()))
+                    </Combo_box.Popover>
+                  </Combo_box>
+                </form>);
+            let* () = settle () in
+            let got = get_all (form_data (first "form")) "animal" in
+            T.cleanup ();
+            Js.Promise.resolve got
+          in
+          let* by_key = sent false in
+          let* by_text = sent true in
+          Js.Promise.resolve
+            E.(
+              expect (by_key, by_text) |> toEqual ([| "panda" |], [| "Panda" |])));
+      Jest.testPromise "shows the options the filter given keeps" (fun () ->
+          T.render (fun () ->
+              <Combo_box
+                default_filter=(fun text typed ->
+                                 String.length text > String.length typed)>
+                <Combo_box.Input_group>
+                  <Input aria_label="Animal" />
+                </Combo_box.Input_group>
+                <Combo_box.Popover>
+                  (fun () -> Solidtype.Jsx.element (animals ()))
+                </Combo_box.Popover>
+              </Combo_box>);
+          let user = T.setup () in
+          let* () = T.click user (input ()) in
+          let* () = T.keyboard user "zzzz" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(expect (options ()) |> toEqual [ "Kangaroo"; "Panda" ]));
+      Jest.testPromise "opens only by its keys or trigger, by manual" (fun () ->
+          T.render (fun () ->
+              <Combo_box menu_trigger=`manual>
+                <Combo_box.Input_group>
+                  <Input aria_label="Animal" /> <Combo_box.Trigger />
+                </Combo_box.Input_group>
+                <Combo_box.Popover>
+                  (fun () -> Solidtype.Jsx.element (animals ()))
+                </Combo_box.Popover>
+              </Combo_box>);
+          let user = T.setup () in
+          let* () = T.click user (input ()) in
+          let* () = T.keyboard user "a" in
+          let* () = settle () in
+          let typed = options () in
+          let* () = T.keyboard user "{ArrowDown}" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (typed, options ())
+              |> toEqual ([], [ "Cat"; "Dog"; "Kangaroo"; "Panda" ])));
+      Jest.testPromise "draws no section the filter empties" (fun () ->
+          T.render (fun () ->
+              <Combo_box>
+                <Combo_box.Input_group>
+                  <Input aria_label="Animal" />
+                </Combo_box.Input_group>
+                <Combo_box.Popover data_testid="Combo_box.Popover">
+                  <List_box>
+                    <List_box.Section>
+                      <Solidtype_heroui.Header>"Cats"</Solidtype_heroui.Header>
+                      <List_box.Item id="lion">"Lion"</List_box.Item>
+                    </List_box.Section>
+                    <List_box.Section>
+                      <Solidtype_heroui.Header>"Dogs"</Solidtype_heroui.Header>
+                      <List_box.Item id="wolf">"Wolf"</List_box.Item>
+                    </List_box.Section>
+                  </List_box>
+                </Combo_box.Popover>
+              </Combo_box>);
+          let user = T.setup () in
+          let* () = T.click user (input ()) in
+          let* () = settle () in
+          let headers () = Array.map text (all "[data-slot=header]") in
+          let both = headers () in
+          let* () = T.keyboard user "wo" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( both,
+                  headers (),
+                  T.attribute
+                    (first "[data-slot=combo-box-popover]")
+                    "data-testid" )
+              |> toEqual
+                   ([| "Cats"; "Dogs" |], [| "Dogs" |], Some "Combo_box.Popover"))))

@@ -1,0 +1,65 @@
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Header = Solidtype_heroui.Header
+module Separator = Solidtype_heroui.Separator
+
+let make () =
+  <Combo_box class_="w-[256px]">
+    <Label>"Country"</Label>
+    <Combo_box.Input_group>
+      <Input placeholder="Search countries..." /> <Combo_box.Trigger />
+    </Combo_box.Input_group>
+    <Combo_box.Popover>
+      <List_box>
+        <List_box.Section>
+          <Header>"North America"</Header>
+          <List_box.Item id="usa" text_value="United States">
+            "United States" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="canada" text_value="Canada">
+            "Canada" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="mexico" text_value="Mexico">
+            "Mexico" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box.Section>
+        <Separator />
+        <List_box.Section>
+          <Header>"Europe"</Header>
+          <List_box.Item id="uk" text_value="United Kingdom">
+            "United Kingdom" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="france" text_value="France">
+            "France" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="germany" text_value="Germany">
+            "Germany" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="spain" text_value="Spain">
+            "Spain" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="italy" text_value="Italy">
+            "Italy" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box.Section>
+        <Separator />
+        <List_box.Section>
+          <Header>"Asia"</Header>
+          <List_box.Item id="japan" text_value="Japan">
+            "Japan" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="china" text_value="China">
+            "China" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="india" text_value="India">
+            "India" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="south-korea" text_value="South Korea">
+            "South Korea" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box.Section>
+      </List_box>
+    </Combo_box.Popover>
+  </Combo_box>

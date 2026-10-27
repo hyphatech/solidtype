@@ -64,6 +64,11 @@ val focused : t -> bool
 
 val focus_visible : t -> bool
 
+val keyed : unit -> bool
+(** Whether the page's last input was a key, a key typed into a text included:
+    what an option shows its ring by while the focus it has is a combo box's,
+    which stays in the combo box's input, as React Aria's does. *)
+
 val pointer_inert : t -> bool
 (** Whether [no_pointer_press], given to {!create}, holds. *)
 

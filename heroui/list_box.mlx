@@ -13,7 +13,7 @@ type option_ = {
   key : string;
   text : unit -> string;
   disabled : unit -> bool;
-  draw : node -> Jsx.element;
+  draw : node S.accessor -> Jsx.element;
   content : unit -> Jsx.element;
 }
 
@@ -41,11 +41,14 @@ end)
 
 (* What a list's options read of it: how it selects, which keys are selected
    and disabled, and what an option chosen does. *)
+type focus = Real | Virtual of (unit -> string option)
+
 type listing = {
   mode : unit -> selection_mode;
   is_selected : string -> bool;
   is_disabled : string -> bool;
   act : string -> unit;
+  focus : focus;
 }
 
 module Listing = Solidtype.Context.Make_optional (struct
@@ -167,6 +170,20 @@ module Item = struct
           (Styles.ListboxItem.options ~variant:(variant ()) ())
       in
       let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+      let focused () =
+        match l.focus with
+        | Real -> Interaction.focused i
+        | Virtual focused_key ->
+            Option.equal String.equal (focused_key ()) (Some key_)
+            && not (disabled ())
+      in
+      (* A focus held elsewhere shows its ring by the page's last input alone,
+         as React Aria's virtual focus does. *)
+      let focus_visible () =
+        match l.focus with
+        | Real -> Interaction.focus_visible i
+        | Virtual _ -> focused () && Interaction.keyed ()
+      in
       (* React Aria's list without a selection acts on an option pressed. *)
       let act () =
         match l.mode () with
@@ -175,7 +192,7 @@ module Item = struct
       in
       <As_option
         as_="div"
-        item=(fun () -> node)
+        item=(fun () -> S.get node)
         class_=(fun () ->
                  after (Styles.ListboxItem.item (item_slots ())) (class_ ()))
         ref=(fun e -> Interaction.watch i e)
@@ -191,8 +208,8 @@ module Item = struct
         data_selected=(fun () -> Jsx.flag (selected ()))
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_focused=(fun () -> Jsx.flag (focused ()))
+        data_focus_visible=(fun () -> Jsx.flag (focus_visible ()))
         data_disabled=(fun () -> Jsx.flag (disabled ()))
         props=others>
         <Item_context.Provider value=(fun () -> { item_slots; selected })>
@@ -510,6 +527,7 @@ let%component make ?(aria_label : string option)
       is_selected = (fun key -> Array.exists (String.equal key) (selected ()));
       is_disabled = disabled;
       act = (fun key -> ignore (on_action key : unit option));
+      focus = Real;
     }
   in
   (* Kobalte's list is of its options alone, in order, whatever holds them. *)
@@ -520,18 +538,28 @@ let%component make ?(aria_label : string option)
       | Section s -> s.options ()
       | Separator _ | Loader _ -> [])
   in
+  (* An option is drawn while Kobalte's collection holds it, as a combo box's
+     filter keeps it, and a section while one of its options is. *)
   let draw collection =
+    let node (o : option_) () =
+      Types.Collection.get_item (S.get collection) o.key
+    in
     let option_ (o : option_) =
-      match Types.Collection.get_item (S.get collection) o.key with
-      | Some node -> o.draw node
-      | None -> Jsx.nothing
+      <Show.Some some=(node o)>(fun node -> o.draw node)</Show.Some>
     in
     <For each=(fun () -> Array.of_list (entries ()))>
       (fun entry _ ->
         match entry with
         | Option o -> option_ o
         | Separator (_, drawn) | Loader (_, drawn) -> drawn ()
-        | Section s -> s.draw option_)
+        | Section s ->
+            <Show
+              when_=(fun () ->
+                      List.exists
+                        (fun o -> Option.is_some (node o ()))
+                        (s.options ()))>
+              (fun () -> Jsx.element (s.draw option_))
+            </Show>)
     </For>
   in
   let classes () =

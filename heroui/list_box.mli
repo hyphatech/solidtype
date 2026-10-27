@@ -49,14 +49,23 @@ type node =
   Solidtype_kobalte.Types.CollectionNode.t
 (** Kobalte's node of an option, in a list of options alone. *)
 
+(** How an option is focused. *)
+type focus =
+  | Real  (** An option takes the focus itself. *)
+  | Virtual of (unit -> string option)
+      (** The focus stays elsewhere, a combo box's input, and the option whose
+          key this reads is focused. *)
+
 type listing = {
   mode : unit -> selection_mode;
   is_selected : string -> bool;
   is_disabled : string -> bool;
   act : string -> unit;
+  focus : focus;
 }
 (** What a list's options read of what holds them: how it selects, which keys
-    are selected and disabled, and what an option pressed does. *)
+    are selected and disabled, what an option pressed does, and how an option is
+    focused. *)
 
 (** The {!listing} a part gives the options it draws. *)
 module Listing : sig

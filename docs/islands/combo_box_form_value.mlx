@@ -1,0 +1,83 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Combo_box = Solidtype_heroui.Combo_box
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external current_target : Dom.event -> Dom.element = "currentTarget" [@@mel.get]
+
+type form_data
+
+external form_data : Dom.element -> form_data = "FormData" [@@mel.new]
+external get : form_data -> string -> string Js.null = "get" [@@mel.send]
+
+type animal = { id : string; name : string }
+
+let animals =
+  [|
+    { id = "aardvark"; name = "Aardvark" };
+    { id = "cat"; name = "Cat" };
+    { id = "dog"; name = "Dog" };
+    { id = "kangaroo"; name = "Kangaroo" };
+    { id = "panda"; name = "Panda" };
+    { id = "snake"; name = "Snake" };
+  |]
+
+let list () =
+  <List_box>
+    <Solidtype.For each=(fun () -> animals)>
+      (fun animal _ ->
+        <List_box.Item
+          id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
+          (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+        </List_box.Item>)
+    </Solidtype.For>
+  </List_box>
+
+let make () =
+  let message, set_message = S.create_signal None in
+  let sent data name =
+    Option.value (Js.Null.toOption (get data name)) ~default:"null"
+  in
+  <Form
+    class_="flex w-[256px] flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                let data = form_data (current_target e) in
+                S.set set_message
+                  (Some
+                     ("Key: " ^ sent data "animal" ^ ". Text: "
+                    ^ sent data "animal-text" ^ ".")))>
+    <Combo_box is_required=true class_="w-full" form_value=`key name="animal">
+      <Label>"Animal"</Label>
+      <Combo_box.Input_group>
+        <Input placeholder="Select an animal..." /> <Combo_box.Trigger />
+      </Combo_box.Input_group>
+      <Combo_box.Popover>(fun () -> Jsx.element (list ()))</Combo_box.Popover>
+      <Description>"Submits the selected key"</Description>
+      <Field_error />
+    </Combo_box>
+    <Combo_box
+      is_required=true class_="w-full" form_value=`text name="animal-text">
+      <Label>"Animal (text)"</Label>
+      <Combo_box.Input_group>
+        <Input placeholder="Select an animal..." /> <Combo_box.Trigger />
+      </Combo_box.Input_group>
+      <Combo_box.Popover>(fun () -> Jsx.element (list ()))</Combo_box.Popover>
+      <Description>"Submits the selected text"</Description>
+      <Field_error />
+    </Combo_box>
+    <Button class_="w-fit" type_=`submit>"Submit"</Button>
+    (fun () ->
+      match S.get message with
+      | Some m ->
+          Jsx.element
+            <p class_="text-sm text-muted">(fun () -> Jsx.string m)</p>
+      | None -> Jsx.element Jsx.nothing)
+  </Form>

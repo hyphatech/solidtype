@@ -1,0 +1,641 @@
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Combobox
+module Types = Solidtype_kobalte.Types
+module Fields = Field
+
+type placement = [ `top | `bottom | `left | `right ]
+
+type field = {
+  variant : unit -> [ `primary | `secondary ];
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+  name : unit -> string option;
+  returned : unit -> bool;
+}
+
+module Field = Solidtype.Context.Make_optional (struct
+  type t = field
+end)
+
+(* What a combo box's parts read of it: its classes, its list box once one has
+   joined it, the options chosen, whether it is open, and its state. *)
+type combo = {
+  slots : unit -> Styles.ComboBox.slots;
+  hosted : List_box.hosted option S.accessor;
+  selected : unit -> List_box.option_ list;
+  is_open : unit -> bool;
+  set_placement : placement -> unit;
+  placement : unit -> string;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = combo
+end)
+
+let within part =
+  match Context.use () with
+  | Some c -> c
+  | None -> invalid_arg (part ^ " is used inside a Combo_box")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Input_group = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let c = within "Combo_box.Input_group" in
+    (* Hovered, focused within and focus-visible as React Aria's group is. *)
+    let i = Interaction.create ~disabled:(fun[@u] () -> c.disabled ()) () in
+    <Kobalte.Control
+      role=`group
+      ref=(fun e -> Interaction.watch i e)
+      class_=(fun () ->
+               after (Styles.ComboBox.input_group (c.slots ())) (class_ ()))
+      data_slot="combo-box-input-group"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (c.disabled ()))
+      data_invalid=(fun () -> Jsx.flag (c.invalid ()))
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Kobalte.Control>
+end
+
+module Trigger = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let c = within "Combo_box.Trigger" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> c.disabled ()) () in
+    <Kobalte.Trigger
+      class_=(fun () ->
+               after (Styles.ComboBox.trigger (c.slots ())) (class_ ()))
+      ref=(fun e -> Interaction.watch i e)
+      data_slot="combo-box-trigger"
+      data_open=(fun () -> Jsx.flag (c.is_open ()))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i || c.is_open ()))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (c.disabled ()))
+      props=(Props.others props)>
+      (fun () ->
+        match children () with
+        | Some drawn -> drawn
+        | None ->
+            Jsx.element
+              <svg
+                aria_hidden=true
+                fill="none"
+                height="16"
+                role=`presentation
+                view_box="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+                data_slot="combo-box-trigger-default-icon">
+                <path
+                  clip_rule="evenodd"
+                  d="M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 0 \
+                     1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 \
+                     0l-4.5-4.5a.75.75 0 0 1 0-1.06"
+                  fill="currentColor"
+                  fill_rule="evenodd"
+                />
+              </svg>)
+    </Kobalte.Trigger>
+end
+
+type list_format
+
+external list_format : unit -> list_format = "ListFormat"
+[@@mel.new] [@@mel.scope "Intl"]
+
+external format : list_format -> string array -> string = "format" [@@mel.send]
+
+module Value = struct
+  let%component make ?(placeholder : string option) ?(class_ : string option)
+      ?(children : (string array S.accessor -> Jsx.element) option) () =
+    let c = within "Combo_box.Value" in
+    let keys =
+      S.create_memo (fun () ->
+          Array.of_list (List.map List_box.key (c.selected ())))
+    in
+    let empty () = match c.selected () with [] -> true | _ :: _ -> false in
+    (* React Aria lists the texts chosen as the reader's language lists them. *)
+    let listed () =
+      format (list_format ())
+        (Array.of_list (List.map List_box.text (c.selected ())))
+    in
+    <div
+      class_=(fun () -> after (Styles.ComboBox.value (c.slots ())) (class_ ()))
+      data_slot="combo-box-value"
+      data_placeholder=(fun () -> Jsx.flag (empty ()))
+      props=(Props.others props)>
+      (fun () ->
+        match children keys with
+        | Some drawn when not (empty ()) -> Jsx.element drawn
+        | Some _ | None ->
+            Jsx.string
+              (if empty () then Option.value (placeholder ()) ~default:""
+               else listed ()))
+    </div>
+end
+
+(* Kobalte's list as the [<div>] React Aria's list box is. *)
+module As_list = struct
+  module Props = struct
+    external check :
+      ?as_:string Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:
+         ( List_box.node Types.Collection.t S.accessor -> Jsx.element,
+           [ `render ] )
+         Solidtype.Check.children ->
+      unit ->
+      unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Kobalte.Listbox.component
+end
+
+module Popover = struct
+  let%component make ?(placement : placement option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let c = within "Combo_box.Popover" in
+    S.create_computed (fun () ->
+        c.set_placement (Option.value (placement ()) ~default:`bottom));
+    let o = Overlay.create ~is_open:c.is_open () in
+    let side, watch_side = Overlay.placed_side ~placement:c.placement () in
+    Jsx.fragment
+      [|
+        (* Its list box joins the combo box whether it is open or not, as the
+           input shows the option chosen. *)
+        <Context.Provider value=(fun () -> c)>
+          (fun () -> children ())
+        </Context.Provider>;
+        <Show when_=(fun () -> Overlay.present o)>
+          <Kobalte.Portal>
+            <Kobalte.Content
+              class_=(fun () ->
+                       after (Styles.ComboBox.popover (c.slots ())) (class_ ()))
+              style="--trigger-width: var(--kb-popper-anchor-width); \
+                     --trigger-anchor-point: \
+                     var(--kb-combobox-content-transform-origin); max-height: \
+                     var(--kb-popper-content-available-height);"
+              ref=(fun e ->
+                    Overlay.watch o e;
+                    watch_side e)
+              data_slot="combo-box-popover"
+              data_placement=(fun () -> Jsx.data (side ()))
+              data_entering=(fun () -> Jsx.flag (Overlay.entering o))
+              data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+              props=(Props.others props)>
+              (fun () ->
+                match S.get c.hosted with
+                | Some (h : List_box.hosted) ->
+                    Jsx.element
+                      <As_list
+                        as_="div"
+                        aria_orientation=`vertical
+                        class_=(fun () -> h.classes ())
+                        data_slot="list-box"
+                        props=h.others>
+                        (fun collection -> h.draw collection)
+                      </As_list>
+                | None -> Jsx.element Jsx.nothing)
+            </Kobalte.Content>
+          </Kobalte.Portal>
+        </Show>;
+      |]
+end
+
+(* Its label, description and error: Kobalte's, which name and describe its
+   input. *)
+module Parts = Fields.Slots (struct
+  let label = Kobalte.Label.component
+  let description = Kobalte.Description.component
+  let error = Kobalte.ErrorMessage.component
+end)
+
+(* Kobalte's selection, which knows the option its keys moved to: the focus
+   stays in the input. *)
+let selection kobalte =
+  match !kobalte with
+  | Some k ->
+      let list = S.get (Types.ComboboxContextValue.list_state k) in
+      Some (S.get (Types.ListState.selection_manager list))
+  | None -> None
+
+let focused_key kobalte () =
+  match selection kobalte with
+  | Some m -> Types.SelectionManager.focused_key m ()
+  | None -> None
+
+(* What the port reads and writes of Kobalte's combo box from inside its root:
+   whether its keys moved to an option, and the input's text, which Kobalte
+   keeps and takes no prop for, set as it is given and not told back. *)
+let inside_root ~kobalte ~text ~quiet ~navigated =
+  let k = Kobalte.use_combobox_context () in
+  kobalte := Some k;
+  S.create_computed (fun () ->
+      if Option.is_some (focused_key kobalte ()) then navigated := true);
+  let shown () =
+    Option.value (S.get (Types.ComboboxContextValue.input_value k)) ~default:""
+  in
+  S.create_computed (fun () ->
+      match text () with
+      | Some t when not (String.equal t (S.untrack shown)) ->
+          quiet := true;
+          Types.ComboboxContextValue.set_input_value k t;
+          quiet := false
+      | Some _ | None -> ())
+
+external related_target : Dom.focusEvent -> Dom.element Js.null
+  = "relatedTarget"
+[@@mel.get]
+
+external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+
+module For = Solidtype.For
+
+let%component make ?(selection_mode : [ `single | `multiple ] = `single)
+    ?(value : string array option) ?(default_value : string array option)
+    ?(on_change : (string array -> unit) option) ?(input_value : string option)
+    ?(default_input_value : string option)
+    ?(on_input_change : (string -> unit) option)
+    ?(on_open_change : (bool -> unit) option)
+    ?(disabled_keys : string array option)
+    ?(default_filter : (string -> string -> bool) option)
+    ?(menu_trigger : [ `focus | `input | `manual ] = `focus)
+    ?(allows_custom_value : bool = false)
+    ?(allows_empty_collection : bool = false)
+    ?(should_focus_wrap : bool = false) ?(is_disabled : bool = false)
+    ?(is_read_only : bool = false) ?(is_required : bool = false)
+    ?(is_invalid : bool = false) ?(name : string option)
+    ?(form_value : [ `key | `text ] = `key)
+    ?(on_blur : (Dom.focusEvent -> unit) option) ?(full_width : bool = false)
+    ?(variant : [ `primary | `secondary ] = `primary) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let hosted, set_hosted = S.create_signal None in
+  let kept, set_kept = S.create_signal [||] in
+  S.create_computed (fun () ->
+      S.set set_kept (Option.value (S.untrack default_value) ~default:[||]));
+  let keys () = match value () with Some keys -> keys | None -> S.get kept in
+  let options () =
+    match S.get hosted with
+    | Some (h : List_box.hosted) -> h.options ()
+    | None -> []
+  in
+  (* In the order they were chosen, as React Aria lists them. *)
+  let selected () =
+    let options = options () in
+    keys () |> Array.to_list
+    |> List.filter_map (fun key ->
+        List.find_opt (fun o -> String.equal (List_box.key o) key) options)
+  in
+  let change keys =
+    S.set set_kept keys;
+    in_form.changed ();
+    ignore (on_change keys : unit option)
+  in
+  let opened, set_opened = S.create_signal false in
+  (* Whether keys moved through the list since it opened, so the focus comes
+     back to the input by keys as it closes. *)
+  let navigated = ref false in
+  let returned, set_returned = S.create_signal false in
+  let open_change o =
+    S.set set_opened o;
+    if o then begin
+      navigated := false;
+      S.set set_returned false
+    end
+    else S.set set_returned (!navigated && S.untrack Interaction.keyed);
+    ignore (on_open_change o : unit option)
+  in
+  let placement, set_placement = S.create_signal `bottom in
+  let disabled_key key =
+    Array.exists (String.equal key)
+      (Option.value (disabled_keys ()) ~default:[||])
+  in
+  (* A form is sent the text where it is the value, by the input's name. *)
+  let sends_text () =
+    allows_custom_value ()
+    || match form_value () with `text -> true | `key -> false
+  in
+  let c =
+    {
+      slots =
+        (fun () ->
+          Styles.ComboBox.slots
+            (Styles.ComboBox.options ~full_width:(full_width ()) ()));
+      hosted;
+      selected;
+      is_open = (fun () -> S.get opened);
+      set_placement = S.set set_placement;
+      placement =
+        (fun () ->
+          match S.get placement with
+          | `top -> "top"
+          | `bottom -> "bottom"
+          | `left -> "left"
+          | `right -> "right");
+      disabled = is_disabled;
+      invalid;
+    }
+  in
+  let f =
+    {
+      variant;
+      disabled = is_disabled;
+      invalid;
+      name = (fun () -> if sends_text () then name () else None);
+      returned = (fun () -> S.get returned && Interaction.keyed ());
+    }
+  in
+  let mode = S.untrack selection_mode in
+  let kobalte = ref None in
+  let listing =
+    {
+      List_box.mode = (fun () -> (mode :> List_box.selection_mode));
+      is_selected = (fun key -> Array.exists (String.equal key) (keys ()));
+      is_disabled = disabled_key;
+      act = (fun (_ : string) -> ());
+      focus = Virtual (focused_key kobalte);
+    }
+  in
+  let quiet = ref false in
+  (* Told a moment after Kobalte sets it, so a choice is told first, as React
+     Aria tells it, where Kobalte puts the option's text in the input first;
+     and a text given and kept is put back. *)
+  let shown () =
+    match !kobalte with
+    | Some k ->
+        Option.value
+          (S.untrack (fun () ->
+               S.get (Types.ComboboxContextValue.input_value k)))
+          ~default:""
+    | None -> ""
+  in
+  let put text =
+    match !kobalte with
+    | Some k ->
+        quiet := true;
+        Types.ComboboxContextValue.set_input_value k text;
+        quiet := false
+    | None -> ()
+  in
+  let gone = ref false in
+  S.on_cleanup (fun () -> gone := true);
+  let text () =
+    match input_value () with
+    | Some t -> Some t
+    | None -> S.untrack default_input_value
+  in
+  let next_tick f =
+    ignore
+      (Js.Promise.resolve ()
+       |> Js.Promise.then_ (fun () ->
+           f ();
+           Js.Promise.resolve ())
+        : unit Js.Promise.t)
+  in
+  (* Kobalte puts the text of the option chosen in the input as it mounts,
+     over the text given, which React Aria tells no one of. *)
+  let mounting = ref true in
+  S.on_mount (fun () ->
+      next_tick (fun () ->
+          mounting := false;
+          match S.untrack text with
+          | Some t when not (String.equal t (shown ())) -> put t
+          | Some _ | None -> ()));
+  let told typed =
+    if not (!quiet || !mounting) then
+      ignore
+        (Js.Promise.resolve ()
+         |> Js.Promise.then_ (fun () ->
+             (* A text put back before it is told was never the input's, nor
+                one set as the combo box is gone. *)
+             if String.equal typed (shown ()) && not !gone then begin
+               ignore (on_input_change typed : unit option);
+               match S.untrack input_value with
+               | Some given when not (String.equal given typed) -> put given
+               | Some _ | None -> ()
+             end;
+             Js.Promise.resolve ())
+          : unit Js.Promise.t)
+  in
+  (* Escape on a closed list empties Kobalte's input, the choice kept; React
+     Aria's puts back the text of the option chosen. *)
+  let escaped e =
+    match (key e, mode, S.untrack selected) with
+    | "Escape", `single, o :: _ when String.equal (shown ()) "" ->
+        put (List_box.text o)
+    | _ -> ()
+  in
+  (* A form is sent the ids chosen as React Aria sends them, each by a hidden
+     input, an empty one while none is: Kobalte's hidden select holds an
+     input Tab stops at, which gives its focus back to the combo box's, so Tab
+     would never leave it. *)
+  let sent_keys () =
+    match (sends_text (), name (), keys ()) with
+    | false, Some _, [||] -> [| "" |]
+    | false, Some _, keys -> keys
+    | true, _, _ | false, None, _ -> [||]
+  in
+  let i = Interaction.create () in
+  let root = ref None in
+  (* React Stately opens on focus with every option, where Kobalte's focus
+     mode filters them by the input's text, and reopens them so as a press on
+     the trigger focuses the input: so Kobalte opens by typing alone, and
+     the focus coming in opens it here. *)
+  let focused_in e =
+    match (menu_trigger (), !kobalte, !root) with
+    | `focus, Some k, Some r
+      when not
+             (is_disabled () || is_read_only ()
+             || S.untrack (fun () -> S.get opened)
+             ||
+             match Js.Null.toOption (related_target e) with
+             | Some from -> contains r from
+             | None -> false) ->
+        Types.ComboboxContextValue.open_ k (Types.Either.right false)
+          ~trigger_mode:`manual ()
+    | (`focus | `input | `manual), _, _ -> ()
+  in
+  let kobalte_trigger () =
+    match menu_trigger () with `focus | `input -> `input | `manual -> `manual
+  in
+  let parts () =
+    inside_root ~kobalte ~text ~quiet ~navigated;
+    <Context.Provider value=(fun () -> c)>
+      <Field.Provider value=(fun () -> f)>
+        <List_box.Host.Provider
+          value=(fun () ->
+                  fun[@u] h ->
+                   S.set set_hosted (Some h);
+                   S.on_cleanup (fun () -> S.set set_hosted None);
+                   Jsx.nothing)>
+          <List_box.Listing.Provider value=(fun () -> listing)>
+            <Field_error.Message.Provider value=(fun () -> in_form.error)>
+              <Parts>
+                (fun () -> children ())
+                <For each=(fun () -> sent_keys ())>
+                  (fun key _ ->
+                    <input type_="hidden" ?name=(fun () -> name ()) value=key />)
+                </For>
+              </Parts>
+            </Field_error.Message.Provider>
+          </List_box.Listing.Provider>
+        </List_box.Host.Provider>
+      </Field.Provider>
+    </Context.Provider>
+  in
+  (* An option's text holding what is typed, whatever its case or accents, as
+     Kobalte's own filter and React Aria's judge it; else as the filter given
+     judges it. *)
+  let contains =
+    Solidtype_kobalte.I18n.create_filter
+      ~options:(Types.CollatorOptions.make ~sensitivity:`base ())
+      ()
+  in
+  let filter =
+    Types.Either.right (fun o typed ->
+        let text = List_box.text o in
+        match default_filter text typed with
+        | Some kept -> kept
+        | None -> Types.Filter.contains contains text typed)
+  in
+  let root_classes () = after (Styles.ComboBox.base (c.slots ())) (class_ ()) in
+  let others = Props.others props in
+  (* Its popover keeps as far from the page's edge as React Aria's, 12 pixels,
+     and is no taller than the room it has. *)
+  match mode with
+  | `single ->
+      <Kobalte.Root
+        options=(fun () ->
+                  Array.of_list (List.map Types.Either.left (options ())))
+        option_value=(fun o -> Types.Either.left (List_box.key o))
+        option_text_value=List_box.text
+        option_label=List_box.text
+        option_disabled=(fun o -> disabled_key (List_box.key o))
+        value=(fun () ->
+                (* [null], an empty selection Kobalte keeps: [undefined]
+                   would be no value given. *)
+                match selected () with
+                | o :: _ -> Js.Nullable.return o
+                | [] -> Js.Nullable.null)
+        on_change=(fun o ->
+                    change
+                      (match Js.Nullable.toOption o with
+                      | Some o -> [| List_box.key o |]
+                      | None -> [||]))
+        on_input_change=told
+        on_open_change=(fun o _ -> open_change o)
+        trigger_mode=(fun () -> kobalte_trigger ())
+        default_filter=(fun () -> filter)
+        allows_empty_collection=(fun () -> allows_empty_collection ())
+        should_focus_wrap=(fun () -> should_focus_wrap ())
+        no_reset_input_on_blur=(fun () -> allows_custom_value ())
+        placement=(fun () -> c.placement ())
+        gutter=8.
+        overflow_padding=12.
+        same_width=false
+        virtualized=true
+        force_mount=true
+        disabled=(fun () -> is_disabled ())
+        read_only=(fun () -> is_read_only ())
+        required=(fun () -> is_required ())
+        validation_state=(fun () -> if invalid () then `invalid else `valid)
+        class_=(fun () -> root_classes ())
+        ref=(fun e ->
+              root := Some (as_element e);
+              Interaction.watch i e;
+              in_form.root e)
+        on_focus_in=focused_in
+        on_key_down=escaped
+        on_focus_out=(Fields.on_leave (fun e ->
+                          S.set set_returned false;
+                          in_form.left ();
+                          ignore (on_blur e : unit option)))
+        data_slot="combo-box"
+        data_open=(fun () -> Jsx.flag (S.get opened))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_invalid=(fun () -> Jsx.flag (invalid ()))
+        data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+        data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+        data_required=(fun () -> Jsx.flag (is_required ()))
+        props=others>
+        (fun () -> Jsx.element (parts ()))
+      </Kobalte.Root>
+  | `multiple ->
+      <Kobalte.Root_multiple
+        multiple=true
+        options=(fun () ->
+                  Array.of_list (List.map Types.Either.left (options ())))
+        option_value=(fun o -> Types.Either.left (List_box.key o))
+        option_text_value=List_box.text
+        option_label=List_box.text
+        option_disabled=(fun o -> disabled_key (List_box.key o))
+        value=(fun () -> Array.of_list (selected ()))
+        on_change=(fun os ->
+                    (* Kobalte empties the input of a choice of many, and so
+                       moves the focus off the option chosen, which React
+                       Aria keeps it on. *)
+                    let chosen = focused_key kobalte () in
+                    change (Array.map List_box.key os);
+                    ignore
+                      (Js.Promise.resolve ()
+                       |> Js.Promise.then_ (fun () ->
+                           (match (chosen, selection kobalte) with
+                           | Some key, Some m
+                             when S.untrack (fun () -> S.get opened) ->
+                               Types.SelectionManager.set_focused_key m ~key ()
+                           | _ -> ());
+                           Js.Promise.resolve ())
+                        : unit Js.Promise.t))
+        on_input_change=told
+        on_open_change=(fun o _ -> open_change o)
+        trigger_mode=(fun () -> kobalte_trigger ())
+        default_filter=(fun () -> filter)
+        allows_empty_collection=(fun () -> allows_empty_collection ())
+        should_focus_wrap=(fun () -> should_focus_wrap ())
+        no_reset_input_on_blur=(fun () -> allows_custom_value ())
+        placement=(fun () -> c.placement ())
+        gutter=8.
+        overflow_padding=12.
+        same_width=false
+        virtualized=true
+        force_mount=true
+        disabled=(fun () -> is_disabled ())
+        read_only=(fun () -> is_read_only ())
+        required=(fun () -> is_required ())
+        validation_state=(fun () -> if invalid () then `invalid else `valid)
+        class_=(fun () -> root_classes ())
+        ref=(fun e ->
+              root := Some (as_element e);
+              Interaction.watch i e;
+              in_form.root e)
+        on_focus_in=focused_in
+        on_key_down=escaped
+        on_focus_out=(Fields.on_leave (fun e ->
+                          S.set set_returned false;
+                          in_form.left ();
+                          ignore (on_blur e : unit option)))
+        data_slot="combo-box"
+        data_open=(fun () -> Jsx.flag (S.get opened))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_invalid=(fun () -> Jsx.flag (invalid ()))
+        data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+        data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+        data_required=(fun () -> Jsx.flag (is_required ()))
+        props=others>
+        (fun () -> Jsx.element (parts ()))
+      </Kobalte.Root_multiple>

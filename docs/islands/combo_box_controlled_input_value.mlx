@@ -1,0 +1,48 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+let make () =
+  let input_value, set_input_value = S.create_signal "" in
+  <div class_="space-y-2">
+    <Combo_box
+      class_="w-[256px]"
+      input_value=(fun () -> S.get input_value)
+      on_input_change=(S.set set_input_value)>
+      <Label>"Search (controlled input)"</Label>
+      <Combo_box.Input_group>
+        <Input placeholder="Type to search..." /> <Combo_box.Trigger />
+      </Combo_box.Input_group>
+      <Combo_box.Popover>
+        <List_box>
+          <List_box.Item id="aardvark" text_value="Aardvark">
+            "Aardvark" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="cat" text_value="Cat">
+            "Cat" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="dog" text_value="Dog">
+            "Dog" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="kangaroo" text_value="Kangaroo">
+            "Kangaroo" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="panda" text_value="Panda">
+            "Panda" <List_box.Item_indicator />
+          </List_box.Item>
+          <List_box.Item id="snake" text_value="Snake">
+            "Snake" <List_box.Item_indicator />
+          </List_box.Item>
+        </List_box>
+      </Combo_box.Popover>
+    </Combo_box>
+    <p class_="text-sm text-muted">
+      (fun () ->
+        Jsx.string
+          ("Input value: "
+          ^ match S.get input_value with "" -> "(empty)" | text -> text))
+    </p>
+  </div>

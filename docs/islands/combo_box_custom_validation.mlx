@@ -1,0 +1,70 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Combo_box = Solidtype_heroui.Combo_box
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external alert : string -> unit = "alert" [@@mel.scope "window"]
+
+type animal = { id : string; name : string }
+
+let animals =
+  [|
+    { id = "aardvark"; name = "Aardvark" };
+    { id = "cat"; name = "Cat" };
+    { id = "dog"; name = "Dog" };
+    { id = "kangaroo"; name = "Kangaroo" };
+    { id = "panda"; name = "Panda" };
+    { id = "snake"; name = "Snake" };
+  |]
+
+(* The rule HeroUI's example gives its validate, here a reading of the value
+   the application keeps. *)
+let problem = function
+  | [||] -> Some "Please select an animal"
+  | [| "snake" |] -> Some "Snakes are not allowed"
+  | _ -> None
+
+let make () =
+  let animal, set_animal = S.create_signal [||] in
+  let tried, set_tried = S.create_signal false in
+  let error () = if S.get tried then problem (S.get animal) else None in
+  <Form
+    class_="flex w-[256px] flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                S.set set_tried true;
+                if Option.is_none (problem (S.get animal)) then
+                  alert "Form submitted successfully!")>
+    <Combo_box
+      is_required=true
+      is_invalid=(fun () -> Option.is_some (error ()))
+      class_="w-full"
+      name="animal"
+      on_change=(S.set set_animal)>
+      <Label>"Favorite Animal"</Label>
+      <Combo_box.Input_group>
+        <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+      </Combo_box.Input_group>
+      <Combo_box.Popover>
+        <List_box>
+          <Solidtype.For each=(fun () -> animals)>
+            (fun animal _ ->
+              <List_box.Item
+                id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
+                (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Combo_box.Popover>
+      <Field_error>
+        (fun () -> Jsx.string (Option.value (error ()) ~default:""))
+      </Field_error>
+    </Combo_box>
+    <Button class_="w-fit" type_=`submit>"Submit"</Button>
+  </Form>

@@ -1,0 +1,38 @@
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Description = Solidtype_heroui.Description
+
+let make () =
+  <Combo_box allows_custom_value=true class_="w-[256px]">
+    <Label>"Favorite Animal"</Label>
+    <Combo_box.Input_group>
+      <Input placeholder="Search or type an animal..." /> <Combo_box.Trigger />
+    </Combo_box.Input_group>
+    <Combo_box.Popover>
+      <List_box>
+        <List_box.Item id="aardvark" text_value="Aardvark">
+          "Aardvark" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="cat" text_value="Cat">
+          "Cat" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="dog" text_value="Dog">
+          "Dog" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="kangaroo" text_value="Kangaroo">
+          "Kangaroo" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="panda" text_value="Panda">
+          "Panda" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="snake" text_value="Snake">
+          "Snake" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Combo_box.Popover>
+    <Description>
+      "You can type any animal name, even if it's not in the list"
+    </Description>
+  </Combo_box>

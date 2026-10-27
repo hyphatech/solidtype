@@ -1,0 +1,65 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Combo_box = Solidtype_heroui.Combo_box
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Surface = Solidtype_heroui.Surface
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external alert : string -> unit = "alert" [@@mel.scope "window"]
+
+let make () =
+  let animal, set_animal = S.create_signal [||] in
+  (* A required combo box shows its error once a submit has been tried, as
+     the browser's validation React Aria reads does. *)
+  let tried, set_tried = S.create_signal false in
+  let missing () = S.get tried && Array.length (S.get animal) = 0 in
+  <Surface class_="w-[320px] rounded-3xl p-6">
+    <Form
+      class_="flex w-full flex-col gap-4"
+      on_submit=(fun e ->
+                  prevent_default e;
+                  S.set set_tried true;
+                  if Array.length (S.get animal) > 0 then
+                    alert "Form submitted successfully!")>
+      <Combo_box
+        is_required=true
+        is_invalid=(fun () -> missing ())
+        class_="w-full"
+        name="animal"
+        variant=`secondary
+        on_change=(S.set set_animal)>
+        <Label>"Favorite Animal"</Label>
+        <Combo_box.Input_group>
+          <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+        </Combo_box.Input_group>
+        <Combo_box.Popover>
+          <List_box>
+            <List_box.Item id="aardvark" text_value="Aardvark">
+              "Aardvark" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="cat" text_value="Cat">
+              "Cat" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="dog" text_value="Dog">
+              "Dog" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="kangaroo" text_value="Kangaroo">
+              "Kangaroo" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="panda" text_value="Panda">
+              "Panda" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="snake" text_value="Snake">
+              "Snake" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Combo_box.Popover>
+        <Field_error>"Please select an item in the list."</Field_error>
+      </Combo_box>
+      <Button type_=`submit>"Submit"</Button>
+    </Form>
+  </Surface>

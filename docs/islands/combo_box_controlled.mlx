@@ -1,0 +1,53 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+type animal = { id : string; name : string }
+
+let animals =
+  [|
+    { id = "cat"; name = "Cat" };
+    { id = "dog"; name = "Dog" };
+    { id = "bird"; name = "Bird" };
+    { id = "fish"; name = "Fish" };
+    { id = "hamster"; name = "Hamster" };
+  |]
+
+let make () =
+  let selected, set_selected = S.create_signal [| "cat" |] in
+  let selected_animal () =
+    match S.get selected with
+    | [| key |] -> Array.find_opt (fun a -> String.equal a.id key) animals
+    | _ -> None
+  in
+  <div class_="space-y-2">
+    <Combo_box
+      class_="w-[256px]"
+      value=(fun () -> S.get selected)
+      on_change=(S.set set_selected)>
+      <Label>"Animal (controlled)"</Label>
+      <Combo_box.Input_group>
+        <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+      </Combo_box.Input_group>
+      <Combo_box.Popover>
+        <List_box>
+          <Solidtype.For each=(fun () -> animals)>
+            (fun animal _ ->
+              <List_box.Item
+                id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
+                (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </Solidtype.For>
+        </List_box>
+      </Combo_box.Popover>
+    </Combo_box>
+    <p class_="text-sm text-muted">
+      (fun () ->
+        Jsx.string
+          ("Selected: "
+          ^ match selected_animal () with Some a -> a.name | None -> "None"))
+    </p>
+  </div>

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Combo_box`: HeroUI's ComboBox on Kobalte's, an input that
+  filters a `List_box` as it is typed into, one or many chosen, its text
+  controlled or kept, a filter given, opened by focus, typing or its trigger,
+  custom values, its chosen listed by `Combo_box.Value`, with HeroUI's
+  variants and animations, its label, description and error, in a `Form`
+  too, which is sent its ids or its text.
+- `Solidtype_heroui.Input` inside a `Combo_box` is its input.
+- `Solidtype_heroui.List_box`: an option is drawn while its holder's list
+  holds it, so a combo box's filter hides it, and a section while one of its
+  options is; `List_box.listing` says how an option is focused.
 - `Solidtype_heroui.Select`: HeroUI's Select on Kobalte's, its list a
   `List_box`, one or many chosen, its value drawn as the option chosen or by a
   function, with HeroUI's clear button, variants and animations, its label,

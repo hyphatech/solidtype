@@ -1,0 +1,108 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Spinner = Solidtype_heroui.Spinner
+
+(* The first two pages of https://swapi.py4e.com/api/people/, which HeroUI's
+   example searches, here searched and loaded a part at a time. *)
+let characters =
+  [|
+    "Luke Skywalker";
+    "C-3PO";
+    "R2-D2";
+    "Darth Vader";
+    "Leia Organa";
+    "Owen Lars";
+    "Beru Whitesun lars";
+    "R5-D4";
+    "Biggs Darklighter";
+    "Obi-Wan Kenobi";
+    "Anakin Skywalker";
+    "Wilhuff Tarkin";
+    "Chewbacca";
+    "Han Solo";
+    "Greedo";
+    "Jabba Desilijic Tiure";
+    "Wedge Antilles";
+    "Jek Tono Porkins";
+    "Yoda";
+    "Palpatine";
+  |]
+
+(* How long the fetch it stands in for takes, and how many each brings. *)
+let load_ms = 600
+let page = 10
+
+(* Whether [part] is in [name], whatever their case, as the search finds it. *)
+let holds ~part name =
+  let name = String.lowercase_ascii name
+  and part = String.lowercase_ascii part in
+  let n = String.length part in
+  let rec from i =
+    i + n <= String.length name
+    && (String.equal (String.sub name i n) part || from (i + 1))
+  in
+  from 0
+
+let make () =
+  let filter_text, set_filter_text = S.create_signal "" in
+  let loaded, set_loaded = S.create_signal 0 in
+  let loading, set_loading = S.create_signal false in
+  let found () =
+    Array.of_list
+      (List.filter
+         (fun name -> holds ~part:(S.get filter_text) name)
+         (Array.to_list characters))
+  in
+  let load_more () =
+    let now = S.get loaded in
+    if (not (S.get loading)) && now < Array.length (found ()) then (
+      S.set set_loading true;
+      let timer =
+        Js.Global.setTimeout
+          ~f:(fun () ->
+            S.set set_loaded (now + page);
+            S.set set_loading false)
+          load_ms
+      in
+      S.on_cleanup (fun () -> Js.Global.clearTimeout timer))
+  in
+  let search text =
+    S.set set_filter_text text;
+    S.set set_loaded 0;
+    load_more ()
+  in
+  S.on_mount load_more;
+  <Combo_box
+    allows_empty_collection=true
+    class_="w-[256px]"
+    input_value=(fun () -> S.get filter_text)
+    on_input_change=search>
+    <Label>"Pick a Character"</Label>
+    <Combo_box.Input_group>
+      <Input placeholder="Star Wars characters..." /> <Combo_box.Trigger />
+    </Combo_box.Input_group>
+    <Combo_box.Popover>
+      <List_box>
+        <Solidtype.For
+          each=(fun () ->
+                 let found = found () in
+                 Array.sub found 0 (min (S.get loaded) (Array.length found)))>
+          (fun name _ ->
+            <List_box.Item id=(fun () -> name) text_value=(fun () -> name)>
+              (fun () -> Jsx.string name) <List_box.Item_indicator />
+            </List_box.Item>)
+        </Solidtype.For>
+        <List_box.Load_more_item
+          is_loading=(fun () -> S.get loading) on_load_more=load_more>
+          <div class_="flex items-center justify-center gap-2 py-2">
+            <Spinner size=`sm />
+            <span class_="muted text-sm">"Loading more..."</span>
+          </div>
+        </List_box.Load_more_item>
+      </List_box>
+    </Combo_box.Popover>
+  </Combo_box>

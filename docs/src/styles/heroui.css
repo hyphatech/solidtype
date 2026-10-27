@@ -86,6 +86,7 @@
 @import "@heroui/styles/components/list-box.css" layer(components);
 @import "@heroui/styles/components/list-box-item.css" layer(components);
 @import "@heroui/styles/components/list-box-section.css" layer(components);
+@import "@heroui/styles/components/combo-box.css" layer(components);
 @import "@heroui/styles/components/select.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
@@ -109,7 +110,8 @@
     > .tooltip,
     > .popover,
     > .dropdown__popover,
-    > .select__popover
+    > .select__popover,
+    > .combo-box__popover
   ),
 .modal__backdrop,
 .alert-dialog__backdrop,

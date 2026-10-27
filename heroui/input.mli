@@ -3,8 +3,9 @@
     invalid -- kept by {!Interaction} as React Aria keeps it. It takes every
     attribute an [<input>] takes, and passes them on to it. Inside a
     {!Text_field} it is Kobalte's [TextField.Input], which the field's value,
-    state, label and description reach, and takes the field's variant where it
-    sets none.
+    state, label and description reach, and inside a {!Combo_box} Kobalte's
+    [Combobox.Input], the combo box's; in either it takes the field's variant
+    where it sets none.
 
     {[
       <Input placeholder="Name" aria_label="Name" />

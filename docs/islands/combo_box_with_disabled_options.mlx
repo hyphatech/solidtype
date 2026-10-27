@@ -1,0 +1,35 @@
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+
+let make () =
+  <Combo_box
+    class_="w-[256px]" disabled_keys=(fun () -> [| "cat"; "kangaroo" |])>
+    <Label>"Animal"</Label>
+    <Combo_box.Input_group>
+      <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+    </Combo_box.Input_group>
+    <Combo_box.Popover>
+      <List_box>
+        <List_box.Item id="dog" text_value="Dog">
+          "Dog" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="cat" text_value="Cat">
+          "Cat" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="bird" text_value="Bird">
+          "Bird" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="kangaroo" text_value="Kangaroo">
+          "Kangaroo" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="elephant" text_value="Elephant">
+          "Elephant" <List_box.Item_indicator />
+        </List_box.Item>
+        <List_box.Item id="tiger" text_value="Tiger">
+          "Tiger" <List_box.Item_indicator />
+        </List_box.Item>
+      </List_box>
+    </Combo_box.Popover>
+  </Combo_box>

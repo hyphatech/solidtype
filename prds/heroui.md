@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox and Select.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for Calendar; group 4 has landed; group 5 has Tooltip, Popover, Modal, AlertDialog, Drawer, Dropdown, ListBox, Select and ComboBox.
 Date: 2026-10-23
 
 ## The problem
@@ -246,7 +246,12 @@ always, where Kobalte's does while it is open. Kobalte's accordion moves
 focus between its triggers by the arrows, Home and End, which React Aria's
 disclosure group does not; the port keeps it, and since Kobalte's root never
 tells its list of triggers it has focus, so the arrows would move nothing,
-each item tells it as focus comes in.
+each item tells it as focus comes in. A combo box keeps the focus in its input
+and moves a virtual one through its list, which an option shows as React
+Aria's does; while the list is open, React Aria hides the page outside the
+input and the list from a reader, where Kobalte's combo box, not modal,
+leaves it, and the port keeps Kobalte's, since Kobalte's modal one would
+also hold the page's pointer and scroll.
 
 ### Where HeroUI's own falls short
 
@@ -369,7 +374,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Dropdown, on Kobalte's menu, its selection the menu's or a section's
 - [x] ListBox, on Kobalte's, its options joining it as they are made
 - [x] Select, on Kobalte's, its list a ListBox it hosts
-- [ ] ComboBox, Autocomplete
+- [x] ComboBox, on Kobalte's, its input HeroUI's `Input` and its list a
+  ListBox it hosts, filtered as Kobalte's collection holds it
+- [ ] Autocomplete
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,

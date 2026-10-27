@@ -491,6 +491,19 @@ external select_props :
 external select : Dom.htmlDivElement -> select_props -> unit = "select"
 [@@mel.module "./react/heroui.tsx"]
 
+type combo_box_props
+
+external combo_box_props :
+  selection_mode:([ `single | `multiple ][@mel.as "selectionMode"]) ->
+  variant:([ `primary | `secondary ][@mel.as "variant"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  combo_box_props = ""
+[@@mel.obj]
+
+external combo_box : Dom.htmlDivElement -> combo_box_props -> unit = "comboBox"
+[@@mel.module "./react/heroui.tsx"]
+
 type dropdown_props
 
 external dropdown_props :

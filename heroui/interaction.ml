@@ -39,7 +39,12 @@ module S = Solidtype.Solid
 let modality = ref None
 
 let by_keyboard () =
-  match !modality with Some (keyboard, _) -> S.get keyboard | None -> false
+  match !modality with
+  | Some (keyboard, _, _, _) -> S.get keyboard
+  | None -> false
+
+let keyed () =
+  match !modality with Some (_, _, keyed, _) -> S.get keyed | None -> false
 
 external key_on : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
 external input_type : Dom.element -> string = "type" [@@mel.get]
@@ -67,11 +72,16 @@ let typing e =
 let watch_modality () =
   if Option.is_none !modality then begin
     let keyboard, set_keyboard = S.create_signal false in
-    modality := Some (keyboard, set_keyboard);
+    let keyed, set_keyed = S.create_signal false in
+    modality := Some (keyboard, set_keyboard, keyed, set_keyed);
     on_key document "keydown" (fun e ->
-        if not (meta_key e || ctrl_key e || alt_key e || typing e) then
-          S.set set_keyboard true);
-    on_pointer document "pointerdown" (fun _ -> S.set set_keyboard false)
+        if not (meta_key e || ctrl_key e || alt_key e) then begin
+          S.set set_keyed true;
+          if not (typing e) then S.set set_keyboard true
+        end);
+    on_pointer document "pointerdown" (fun _ ->
+        S.set set_keyboard false;
+        S.set set_keyed false)
   end
 
 external tag_name : _ Dom.element_like -> string = "tagName" [@@mel.get]

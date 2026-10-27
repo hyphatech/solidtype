@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -823,6 +823,49 @@ export function select(host: HTMLElement, { selectionMode, variant, isDisabled }
           </ListBox>
         </Select.Popover>
       </Select>,
+    ),
+  );
+}
+
+type ComboBoxProps = {
+  selectionMode: "single" | "multiple";
+  variant: "primary" | "secondary";
+  isDisabled: boolean;
+};
+
+export function comboBox(host: HTMLElement, { selectionMode, variant, isDisabled }: ComboBoxProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ComboBox
+        key={selectionMode}
+        className="w-[256px]"
+        selectionMode={selectionMode}
+        variant={variant}
+        isDisabled={isDisabled}
+      >
+        <Label>Favorite Animal</Label>
+        <ComboBox.InputGroup>
+          <Input placeholder="Search animals..." />
+          <ComboBox.Trigger />
+        </ComboBox.InputGroup>
+        {selectionMode === "multiple" ? <ComboBox.Value placeholder="No animals selected" /> : null}
+        <ComboBox.Popover>
+          <ListBox selectionMode={selectionMode}>
+            <ListBox.Item id="cat" textValue="Cat">
+              Cat
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="dog" textValue="Dog">
+              Dog
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="panda" textValue="Panda">
+              Panda
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          </ListBox>
+        </ComboBox.Popover>
+      </ComboBox>,
     ),
   );
 }

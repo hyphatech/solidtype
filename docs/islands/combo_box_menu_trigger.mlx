@@ -1,0 +1,110 @@
+module Combo_box = Solidtype_heroui.Combo_box
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Description = Solidtype_heroui.Description
+
+let make () =
+  <div class_="flex flex-col gap-8">
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Focus (default)"</p>
+      <Combo_box class_="w-[256px]" menu_trigger=`focus>
+        <Label>"Favorite Animal"</Label>
+        <Combo_box.Input_group>
+          <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+        </Combo_box.Input_group>
+        <Combo_box.Popover>
+          <List_box>
+            <List_box.Item id="aardvark" text_value="Aardvark">
+              "Aardvark" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="cat" text_value="Cat">
+              "Cat" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="dog" text_value="Dog">
+              "Dog" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="kangaroo" text_value="Kangaroo">
+              "Kangaroo" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="panda" text_value="Panda">
+              "Panda" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="snake" text_value="Snake">
+              "Snake" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Combo_box.Popover>
+        <Description>"Popover opens when the input is focused"</Description>
+      </Combo_box>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Input"</p>
+      <Combo_box class_="w-[256px]" menu_trigger=`input>
+        <Label>"Favorite Animal"</Label>
+        <Combo_box.Input_group>
+          <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+        </Combo_box.Input_group>
+        <Combo_box.Popover>
+          <List_box>
+            <List_box.Item id="aardvark" text_value="Aardvark">
+              "Aardvark" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="cat" text_value="Cat">
+              "Cat" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="dog" text_value="Dog">
+              "Dog" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="kangaroo" text_value="Kangaroo">
+              "Kangaroo" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="panda" text_value="Panda">
+              "Panda" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="snake" text_value="Snake">
+              "Snake" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Combo_box.Popover>
+        <Description>
+          "Popover opens when the user edits the input text"
+        </Description>
+      </Combo_box>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <p class_="text-sm font-medium text-muted">"Manual"</p>
+      <Combo_box class_="w-[256px]" menu_trigger=`manual>
+        <Label>"Favorite Animal"</Label>
+        <Combo_box.Input_group>
+          <Input placeholder="Search animals..." /> <Combo_box.Trigger />
+        </Combo_box.Input_group>
+        <Combo_box.Popover>
+          <List_box>
+            <List_box.Item id="aardvark" text_value="Aardvark">
+              "Aardvark" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="cat" text_value="Cat">
+              "Cat" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="dog" text_value="Dog">
+              "Dog" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="kangaroo" text_value="Kangaroo">
+              "Kangaroo" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="panda" text_value="Panda">
+              "Panda" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="snake" text_value="Snake">
+              "Snake" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Combo_box.Popover>
+        <Description>
+          "Popover only opens when the trigger button is pressed or arrow keys \
+           are used"
+        </Description>
+      </Combo_box>
+    </div>
+  </div>

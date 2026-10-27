@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.TextField.Input
+module Kobalte_combo_box = Solidtype_kobalte.Combobox.Input
 
 module Props = struct
   type t
@@ -25,20 +26,34 @@ end
 (* The props this input takes for itself; the rest it passes on. *)
 let own = [| "variant"; "fullWidth"; "class" |]
 
+(* Where an input is: alone, or a field's, whose state and variant are the
+   field's. *)
+type place =
+  | Alone
+  | In_text_field of Text_field.field
+  | In_combo_box of Combo_box.field
+
 let input ~classes ~slot (props : Props.t) =
-  let field = Text_field.Context.use () in
+  let place =
+    match (Text_field.Context.use (), Combo_box.Field.use ()) with
+    | Some f, _ -> In_text_field f
+    | None, Some f -> In_combo_box f
+    | None, None -> Alone
+  in
   let rest = S.omit props own in
   (* A field's state is the field's; alone, it is what it is given, as React
      Aria's is. *)
   let disabled () =
-    match field with
-    | Some f -> f.disabled ()
-    | None -> Option.value (Props.disabled props) ~default:false
+    match place with
+    | In_text_field f -> f.disabled ()
+    | In_combo_box f -> f.disabled ()
+    | Alone -> Option.value (Props.disabled props) ~default:false
   in
   let invalid () =
-    match field with
-    | Some f -> f.invalid ()
-    | None -> (
+    match place with
+    | In_text_field f -> f.invalid ()
+    | In_combo_box f -> f.invalid ()
+    | Alone -> (
         match Props.aria_invalid props with
         | Some "false" | None -> false
         | Some _ -> true)
@@ -47,12 +62,14 @@ let input ~classes ~slot (props : Props.t) =
   let classes () =
     classes
       ~variant:
-        (match Props.variant props with
-        | Some v -> Some v
-        | None -> Option.bind field (fun (f : Text_field.field) -> f.variant ()))
+        (match (Props.variant props, place) with
+        | Some v, _ -> Some v
+        | None, In_text_field f -> f.variant ()
+        | None, In_combo_box f -> Some (f.variant ())
+        | None, Alone -> None)
   in
-  match field with
-  | Some _ ->
+  match place with
+  | In_text_field _ ->
       (* React Aria titles a field's input with nothing, so a browser shows no
          tooltip of its own for the field's validity. *)
       <Kobalte
@@ -67,7 +84,24 @@ let input ~classes ~slot (props : Props.t) =
         data_disabled=(fun () -> Jsx.flag (disabled ()))
         data_invalid=(fun () -> Jsx.flag (invalid ()))
       />
-  | None ->
+  | In_combo_box f ->
+      <Kobalte_combo_box
+        props=rest
+        class_=(fun () -> classes ())
+        ?title=(fun () -> if disabled () then None else Some "")
+        ?name=(fun () -> f.name ())
+        ref=(fun e -> Interaction.watch i e)
+        data_slot=(fun () -> Jsx.data slot)
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () ->
+                             Jsx.flag
+                               (Interaction.focus_visible i
+                               || (Interaction.focused i && f.returned ())))
+        data_disabled=(fun () -> Jsx.flag (disabled ()))
+        data_invalid=(fun () -> Jsx.flag (invalid ()))
+      />
+  | Alone ->
       <input
         props=rest
         class_=(fun () -> classes ())
