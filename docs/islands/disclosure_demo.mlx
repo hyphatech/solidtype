@@ -16,7 +16,8 @@ let make () =
       compared="[data-slot=disclosure-trigger]"
       solidtype=(<Disclosure is_disabled=(fun () -> S.get disabled)>
                    <Disclosure.Heading>
-                     <Disclosure.Trigger>
+                     <Disclosure.Trigger
+                       class_="flex w-full items-center gap-2">
                        "Shipping" <Disclosure.Indicator />
                      </Disclosure.Trigger>
                    </Disclosure.Heading>

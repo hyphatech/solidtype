@@ -31,7 +31,8 @@ let make () =
                      (fun key _ ->
                        <Disclosure id=(fun () -> key)>
                          <Disclosure.Heading>
-                           <Disclosure.Trigger>
+                           <Disclosure.Trigger
+                             class_="flex w-full items-center gap-2">
                              (fun () -> Solidtype.Jsx.string key)
                              <Disclosure.Indicator />
                            </Disclosure.Trigger>

@@ -553,7 +553,7 @@ export function disclosure(host: HTMLElement, props: DisclosureProps): void {
     rootOf(host).render(
       <Disclosure {...props}>
         <Disclosure.Heading>
-          <Disclosure.Trigger>
+          <Disclosure.Trigger className="flex w-full items-center gap-2">
             Shipping
             <Disclosure.Indicator />
           </Disclosure.Trigger>
@@ -578,7 +578,7 @@ export function disclosureGroup(host: HTMLElement, props: DisclosureGroupProps):
         {["shipping", "returns"].map((key) => (
           <Disclosure key={key} id={key}>
             <Disclosure.Heading>
-              <Disclosure.Trigger>
+              <Disclosure.Trigger className="flex w-full items-center gap-2">
                 {key}
                 <Disclosure.Indicator />
               </Disclosure.Trigger>
