@@ -1,0 +1,44 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Drawer = Solidtype_heroui.Drawer
+
+let nav_items =
+  [|
+    ((fun () -> <Gravity.House class_="size-5 text-muted" />), "Home");
+    ((fun () -> <Gravity.Magnifier class_="size-5 text-muted" />), "Search");
+    ((fun () -> <Gravity.Bell class_="size-5 text-muted" />), "Notifications");
+    ((fun () -> <Gravity.Envelope class_="size-5 text-muted" />), "Messages");
+    ((fun () -> <Gravity.Person class_="size-5 text-muted" />), "Profile");
+    ((fun () -> <Gravity.Gear class_="size-5 text-muted" />), "Settings");
+  |]
+
+let make () =
+  <Drawer>
+    <Button variant=`secondary><Gravity.Bars /> "Menu"</Button>
+    <Drawer.Backdrop>
+      <Drawer.Content placement=`left>
+        <Drawer.Dialog>
+          <Drawer.Close_trigger />
+          <Drawer.Header>
+            <Drawer.Heading>"Navigation"</Drawer.Heading>
+          </Drawer.Header>
+          <Drawer.Body>
+            <nav class_="flex flex-col gap-1">
+              <For each=(fun () -> nav_items)>
+                (fun (icon, label) _ ->
+                  <button
+                    class_="flex items-center gap-3 rounded-xl px-3 py-2.5 \
+                            text-sm text-foreground transition-colors \
+                            hover:bg-default"
+                    type_=`button>
+                    (fun () -> Jsx.element (icon ()))
+                    (fun () -> Jsx.string label)
+                  </button>)
+              </For>
+            </nav>
+          </Drawer.Body>
+        </Drawer.Dialog>
+      </Drawer.Content>
+    </Drawer.Backdrop>
+  </Drawer>

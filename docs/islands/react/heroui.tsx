@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -817,6 +817,39 @@ export function alertDialog(host: HTMLElement, { status, variant, isDismissable 
           </AlertDialog.Container>
         </AlertDialog.Backdrop>
       </AlertDialog>,
+    ),
+  );
+}
+
+type DrawerProps = {
+  placement: "top" | "bottom" | "left" | "right";
+  variant: "opaque" | "blur" | "transparent";
+  isDismissable: boolean;
+};
+
+export function drawer(host: HTMLElement, { placement, variant, isDismissable }: DrawerProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Drawer>
+        <Button variant="secondary">Open Drawer</Button>
+        <Drawer.Backdrop variant={variant} isDismissable={isDismissable}>
+          <Drawer.Content placement={placement}>
+            <Drawer.Dialog>
+              <Drawer.Handle />
+              <Drawer.CloseTrigger />
+              <Drawer.Header>
+                <Drawer.Heading>Drawer Title</Drawer.Heading>
+              </Drawer.Header>
+              <Drawer.Body>
+                <p>Drag the handle toward the edge to close.</p>
+              </Drawer.Body>
+              <Drawer.Footer>
+                <Button slot="close">Continue</Button>
+              </Drawer.Footer>
+            </Drawer.Dialog>
+          </Drawer.Content>
+        </Drawer.Backdrop>
+      </Drawer>,
     ),
   );
 }

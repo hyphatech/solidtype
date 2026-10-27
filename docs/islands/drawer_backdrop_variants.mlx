@@ -1,0 +1,43 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Drawer = Solidtype_heroui.Drawer
+
+let variants =
+  [| (`opaque, "opaque"); (`blur, "blur"); (`transparent, "transparent") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> variants)>
+      (fun (variant, name) _ ->
+        <Drawer>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Drawer.Backdrop variant=(fun () -> variant)>
+            <Drawer.Content>
+              <Drawer.Dialog>
+                <Drawer.Handle />
+                <Drawer.Close_trigger />
+                <Drawer.Header>
+                  <Drawer.Heading>
+                    "Backdrop: "
+                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                  </Drawer.Heading>
+                </Drawer.Header>
+                <Drawer.Body>
+                  <p>
+                    "This drawer uses the "
+                    <code>(fun () -> Jsx.string name)</code>
+                    " backdrop variant."
+                  </p>
+                </Drawer.Body>
+                <Drawer.Footer>
+                  <Button class_="w-full" slot=`close>"Close"</Button>
+                </Drawer.Footer>
+              </Drawer.Dialog>
+            </Drawer.Content>
+          </Drawer.Backdrop>
+        </Drawer>)
+    </For>
+  </div>

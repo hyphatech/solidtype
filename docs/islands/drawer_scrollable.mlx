@@ -1,0 +1,38 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Drawer = Solidtype_heroui.Drawer
+
+let paragraphs = Array.init 20 (fun i -> i + 1)
+
+let make () =
+  <Drawer>
+    <Button variant=`secondary>"Terms & Conditions"</Button>
+    <Drawer.Backdrop>
+      <Drawer.Content>
+        <Drawer.Dialog>
+          <Drawer.Handle />
+          <Drawer.Close_trigger />
+          <Drawer.Header>
+            <Drawer.Heading>"Terms & Conditions"</Drawer.Heading>
+          </Drawer.Header>
+          <Drawer.Body>
+            <For each=(fun () -> paragraphs)>
+              (fun n _ ->
+                <p class_="mb-3">
+                  "Paragraph "
+                  (fun () -> Jsx.int n)
+                  ": Lorem ipsum dolor sit amet, consectetur adipiscing elit. \
+                   Nullam pulvinar risus non risus hendrerit venenatis. \
+                   Pellentesque sit amet hendrerit risus, sed porttitor quam."
+                </p>)
+            </For>
+          </Drawer.Body>
+          <Drawer.Footer>
+            <Button slot=`close variant=`secondary>"Decline"</Button>
+            <Button slot=`close>"Accept"</Button>
+          </Drawer.Footer>
+        </Drawer.Dialog>
+      </Drawer.Content>
+    </Drawer.Backdrop>
+  </Drawer>

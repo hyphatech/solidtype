@@ -29,6 +29,9 @@ val close : t -> unit
 val overlay : t -> Overlay.t
 (** Its presence. *)
 
+val dismissable : t -> bool
+(** Whether a press outside closes it, as its backdrop says. *)
+
 val root :
   is_open:(unit -> bool option) ->
   default_open:(unit -> bool option) ->
@@ -72,6 +75,7 @@ val container :
 (** A [<div>] that enters and exits with the backdrop. *)
 
 val dialog :
+  ?on_element:(Dom.element -> unit) ->
   t ->
   slot:string ->
   role:Solidtype.Html.Section.role ->
@@ -80,6 +84,8 @@ val dialog :
   others:_ Solidtype.Solid.rest ->
   (unit -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
+(** [on_element] is given the dialog's element as it is made, for a part that
+    does more with it, as a drawer is dragged. *)
 
 val heading :
   slot:string ->

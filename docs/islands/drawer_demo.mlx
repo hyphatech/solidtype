@@ -1,0 +1,70 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Drawer = Solidtype_heroui.Drawer
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let placements =
+  [| (`bottom, "bottom"); (`top, "top"); (`left, "left"); (`right, "right") |]
+
+let variants =
+  [| (`opaque, "opaque"); (`blur, "blur"); (`transparent, "transparent") |]
+
+let make () =
+  let placement, set_placement = S.create_signal (`bottom, "bottom") in
+  let variant, set_variant = S.create_signal (`opaque, "opaque") in
+  let dismissable, set_dismissable = S.create_signal true in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="dismissable"
+        on=(fun () -> S.get dismissable)
+        on_toggle=(S.set set_dismissable)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<Drawer>
+                   <Button variant=`secondary>"Open Drawer"</Button>
+                   <Drawer.Backdrop
+                     variant=(fun () -> fst (S.get variant))
+                     is_dismissable=(fun () -> S.get dismissable)>
+                     <Drawer.Content
+                       placement=(fun () -> fst (S.get placement))>
+                       <Drawer.Dialog>
+                         <Drawer.Handle />
+                         <Drawer.Close_trigger />
+                         <Drawer.Header>
+                           <Drawer.Heading>"Drawer Title"</Drawer.Heading>
+                         </Drawer.Header>
+                         <Drawer.Body>
+                           <p>"Drag the handle toward the edge to close."</p>
+                         </Drawer.Body>
+                         <Drawer.Footer>
+                           <Button slot=`close>"Continue"</Button>
+                         </Drawer.Footer>
+                       </Drawer.Dialog>
+                     </Drawer.Content>
+                   </Drawer.Backdrop>
+                 </Drawer>)
+      react=(fun host ->
+              Heroui_react.drawer host
+                (Heroui_react.drawer_props
+                   ~placement:(fst (S.get placement))
+                   ~variant:(fst (S.get variant))
+                   ~is_dismissable:(S.get dismissable) ()))
+    />
+  </section>

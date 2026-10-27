@@ -1,0 +1,310 @@
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+type variant = [ `opaque | `blur | `transparent ]
+type placement = [ `top | `bottom | `left | `right ]
+
+(* What the dialog reads of its content. *)
+module Content_context = Solidtype.Context.Make_optional (struct
+  type t = unit -> placement
+end)
+
+let within part = Dialog_frame.within part ~backdrop:"Drawer.Backdrop"
+
+let placement () =
+  match Content_context.use () with Some p -> p | None -> fun () -> `bottom
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+let slots ?variant ?placement () =
+  Styles.Drawer.slots (Styles.Drawer.options ?variant ?placement ())
+
+let placement_name = function
+  | `top -> "top"
+  | `bottom -> "bottom"
+  | `left -> "left"
+  | `right -> "right"
+
+external add_listener :
+  Dom.element -> string -> ((Dom.pointerEvent -> unit)[@mel.uncurry]) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external client_x : Dom.pointerEvent -> float = "clientX" [@@mel.get]
+external client_y : Dom.pointerEvent -> float = "clientY" [@@mel.get]
+external button : Dom.pointerEvent -> int = "button" [@@mel.get]
+external pointer_id : Dom.pointerEvent -> int = "pointerId" [@@mel.get]
+external target : Dom.pointerEvent -> Dom.element = "target" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external set_pointer_capture : Dom.element -> int -> unit = "setPointerCapture"
+[@@mel.send]
+
+external release_pointer_capture : Dom.element -> int -> unit
+  = "releasePointerCapture"
+[@@mel.send]
+
+external has_pointer_capture : Dom.element -> int -> bool = "hasPointerCapture"
+[@@mel.send]
+
+external offset_height : Dom.element -> float = "offsetHeight" [@@mel.get]
+external offset_width : Dom.element -> float = "offsetWidth" [@@mel.get]
+
+type style
+
+external style_of : Dom.element -> style = "style" [@@mel.get]
+external set_transform : style -> string -> unit = "transform" [@@mel.set]
+external set_transition : style -> string -> unit = "transition" [@@mel.set]
+external set_touch_action : style -> string -> unit = "touchAction" [@@mel.set]
+
+external once_transition_end :
+  Dom.element ->
+  (_[@mel.as "transitionend"]) ->
+  ((Dom.event -> unit)[@mel.uncurry]) ->
+  (_[@mel.as {json|{"once": true}|json}]) ->
+  unit = "addEventListener"
+[@@mel.send]
+
+(* HeroUI's: a drag starts past this many pixels, closes the drawer past
+   this share of its size, or as fast as this many pixels a millisecond. *)
+let drag_threshold = 8.
+let dismiss_fraction = 0.3
+let velocity_threshold = 0.5
+
+(* The dialog dragged toward its edge, which closes it past a third of its
+   size or at a flick, else springs back, as HeroUI's does: from anywhere on
+   it but what a press or a scroll belongs to, while the drawer may be
+   dismissed. *)
+let draggable f ~placement el =
+  let vertical () =
+    match placement () with `top | `bottom -> true | `left | `right -> false
+  in
+  let position e = if vertical () then client_y e else client_x e in
+  (* Only toward the edge it hides at. *)
+  let toward delta =
+    match placement () with
+    | `bottom | `right -> Float.max 0. delta
+    | `top | `left -> Float.min 0. delta
+  in
+  let dragging = ref false
+  and active = ref false
+  and start = ref 0.
+  and offset = ref 0.
+  and velocity = ref 0.
+  and last_time = ref 0.
+  and last_position = ref 0. in
+  if Dialog_frame.dismissable f then set_touch_action (style_of el) "none";
+  add_listener el "pointerdown" (fun e ->
+      let t = target e in
+      let ours =
+        match Js.Null.toOption (closest t "[data-slot=drawer-dialog]") with
+        | Some d -> d == el
+        | None -> false
+      in
+      if
+        Dialog_frame.dismissable f
+        && button e = 0
+        && ours
+        && Js.Null.toOption
+             (closest t
+                "input, textarea, button, [role='button'], select, a, \
+                 [data-slot='drawer-body']")
+           |> Option.is_none
+      then begin
+        dragging := true;
+        active := false;
+        start := position e;
+        last_position := !start;
+        last_time := Js.Date.now ();
+        offset := 0.;
+        velocity := 0.
+      end);
+  add_listener el "pointermove" (fun e ->
+      if !dragging then begin
+        let now_position = position e in
+        let raw = now_position -. !start in
+        let delta = toward raw in
+        if !active || Float.abs raw >= drag_threshold then begin
+          if not !active then begin
+            active := true;
+            set_transition (style_of el) "none";
+            set_pointer_capture el (pointer_id e)
+          end;
+          offset := delta;
+          let now = Js.Date.now () in
+          let elapsed = now -. !last_time in
+          if elapsed > 0. then begin
+            velocity := (now_position -. !last_position) /. elapsed;
+            last_time := now;
+            last_position := now_position
+          end;
+          set_transform (style_of el)
+            ((if vertical () then "translateY(" else "translateX(")
+            ^ Js.Float.toString delta ^ "px)")
+        end
+      end);
+  add_listener el "pointerup" (fun e ->
+      if !dragging then begin
+        dragging := false;
+        if !active then begin
+          active := false;
+          if has_pointer_capture el (pointer_id e) then
+            release_pointer_capture el (pointer_id e);
+          let size =
+            if vertical () then offset_height el else offset_width el
+          in
+          if
+            Float.abs !offset > size *. dismiss_fraction
+            || Float.abs !velocity > velocity_threshold
+          then
+            (* Its transform is kept, so it slides on out from where it was
+               let go. *)
+            Dialog_frame.close f
+          else begin
+            set_transition (style_of el)
+              "transform 300ms cubic-bezier(0.32, 0.72, 0, 1)";
+            set_transform (style_of el) "";
+            once_transition_end el (fun _ -> set_transition (style_of el) "")
+          end;
+          offset := 0.;
+          velocity := 0.
+        end
+      end)
+
+module Trigger = struct
+  (* HeroUI's drawer trigger is a button, not the [<div>] a modal's is: React
+     Aria's, its state its own, pressed while the drawer is open. *)
+  let%component make ?(aria_label : string option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let k = Solidtype_kobalte.Dialog.use_dialog_context () in
+    let open_ = Solidtype_kobalte.Types.DialogContextValue.is_open k in
+    let i = Interaction.create () in
+    <Solidtype_kobalte.Dialog.Trigger
+      ?aria_label
+      class_=(fun () -> after (Styles.Drawer.trigger (slots ())) (class_ ()))
+      ref=(fun b -> Interaction.watch i b)
+      data_slot="drawer-trigger"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i || S.get open_))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Solidtype_kobalte.Dialog.Trigger>
+end
+
+module Backdrop = struct
+  let%component make ?(variant : variant = `opaque)
+      ?(is_dismissable : bool = true)
+      ?(is_keyboard_dismiss_disabled : bool = false) ?(is_open : bool option)
+      ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    Dialog_frame.backdrop ~slot:"drawer-backdrop"
+      ~class_:(fun () ->
+        after
+          (Styles.Drawer.backdrop (slots ~variant:(variant ()) ()))
+          (class_ ()))
+      ~dismissable:is_dismissable
+      ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
+      ~is_open ~default_open
+      ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+      ~others:(Props.others props) children
+end
+
+module Content = struct
+  let%component make ?(placement : placement = `bottom)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let f = within "Drawer.Content" in
+    Dialog_frame.container f ~slot:"drawer-content"
+      ~class_:(fun () ->
+        after
+          (Styles.Drawer.content (slots ~placement:(placement ()) ()))
+          (class_ ()))
+      ~placement:(fun () -> placement_name (placement ()))
+      ~others:(Props.others props)
+      (fun () ->
+        Jsx.element
+          <Content_context.Provider value=(fun () -> placement)>
+            (fun () -> children ())
+          </Content_context.Provider>)
+end
+
+module Dialog = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let f = within "Drawer.Dialog" in
+    let placement = placement () in
+    Dialog_frame.dialog f ~slot:"drawer-dialog" ~role:`dialog
+      ~on_element:(draggable f ~placement)
+      ~class_:(fun () ->
+        after
+          (Styles.Drawer.dialog (slots ~placement:(placement ()) ()))
+          (class_ ()))
+      ~placement:(fun () -> placement_name (placement ()))
+      ~others:(Props.others props) children
+end
+
+module Header = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Drawer.header (slots ())) (class_ ()))
+      data_slot="drawer-header"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Body = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Drawer.body (slots ())) (class_ ()))
+      data_slot="drawer-body"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Footer = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    <div
+      class_=(fun () -> after (Styles.Drawer.footer (slots ())) (class_ ()))
+      data_slot="drawer-footer"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Heading = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    Dialog_frame.heading ~slot:"drawer-heading"
+      ~class_:(fun () -> after (Styles.Drawer.heading (slots ())) (class_ ()))
+      ~others:(Props.others props) children
+end
+
+module Handle = struct
+  let%component make ?(class_ : string option) () =
+    <div
+      aria_hidden=true
+      class_=(fun () -> after (Styles.Drawer.handle (slots ())) (class_ ()))
+      data_slot="drawer-handle"
+      props=(Props.others props)>
+      <div data_slot="drawer-handle-bar" />
+    </div>
+end
+
+module Close_trigger = struct
+  let%component make ?(class_ : string option) () =
+    let f = within "Drawer.Close_trigger" in
+    Dialog_frame.close_trigger f ~slot:"drawer-close-trigger"
+      ~class_:(fun () ->
+        after (Styles.Drawer.close_trigger (slots ())) (class_ ()))
+      ~others:(Props.others props)
+end
+
+let%component make ?(is_open : bool option) ?(default_open : bool option)
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+  Dialog_frame.root ~is_open ~default_open
+    ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
+    children

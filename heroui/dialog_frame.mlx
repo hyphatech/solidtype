@@ -28,6 +28,7 @@ let within part ~backdrop =
   | None -> invalid_arg (part ^ " is used inside a " ^ backdrop)
 
 let close f = f.close ()
+let dismissable f = f.dismissable ()
 let overlay f = f.overlay
 
 external prevent_default : _ Dom.event_like -> unit = "preventDefault"
@@ -240,7 +241,8 @@ let dismiss close =
     />
   </div>
 
-let dialog f ~slot ~role ~class_ ~placement ~others children =
+let dialog ?(on_element = fun (_ : Dom.element) -> ()) f ~slot ~role ~class_
+    ~placement ~others children =
   let content = ref None in
   Overlay.return_focus
     ~is_open:(fun () -> not (Overlay.exiting f.overlay))
@@ -260,7 +262,13 @@ let dialog f ~slot ~role ~class_ ~placement ~others children =
     as_="section"
     class_=(fun () -> class_ ())
     role=(fun () -> role)
-    ref=(fun e -> content := Some (as_element e))
+    ref=(fun e ->
+          let e = as_element e in
+          content := Some e;
+          (* A drawer's dialog slides in and out itself, as its content
+             enters and exits, which the dialog stays on the page for. *)
+          Overlay.watch f.overlay e;
+          on_element e)
     on_open_auto_focus=focus_dialog
     on_escape_key_down=(fun e ->
                          if not (f.keyboard_dismissable ()) then

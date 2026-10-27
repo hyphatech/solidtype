@@ -1,0 +1,47 @@
+module Button = Solidtype_heroui.Button
+module Drawer = Solidtype_heroui.Drawer
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module Text_field = Solidtype_heroui.Text_field
+
+let make () =
+  <Drawer>
+    <Button variant=`secondary>"Edit Profile"</Button>
+    <Drawer.Backdrop>
+      <Drawer.Content placement=`right>
+        <Drawer.Dialog>
+          <Drawer.Close_trigger />
+          <Drawer.Header>
+            <Drawer.Heading>"Edit Profile"</Drawer.Heading>
+          </Drawer.Header>
+          <Drawer.Body>
+            <form class_="flex flex-col gap-4">
+              <Text_field class_="w-full" name="name">
+                <Label>"Name"</Label>
+                <Input
+                  type_="text" placeholder="Enter your name" variant=`secondary
+                />
+              </Text_field>
+              <Text_field class_="w-full" name="email">
+                <Label>"Email"</Label>
+                <Input
+                  type_="email"
+                  placeholder="Enter your email"
+                  variant=`secondary
+                />
+              </Text_field>
+              <Text_field class_="w-full" name="bio">
+                <Label>"Bio"</Label>
+                <Input placeholder="Tell us about yourself" variant=`secondary
+                />
+              </Text_field>
+            </form>
+          </Drawer.Body>
+          <Drawer.Footer>
+            <Button slot=`close variant=`secondary>"Cancel"</Button>
+            <Button slot=`close>"Save Changes"</Button>
+          </Drawer.Footer>
+        </Drawer.Dialog>
+      </Drawer.Content>
+    </Drawer.Backdrop>
+  </Drawer>

@@ -1,0 +1,58 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Drawer = Solidtype_heroui.Drawer
+
+let placements =
+  [| (`bottom, "bottom"); (`top, "top"); (`left, "left"); (`right, "right") |]
+
+let make () =
+  <div class_="flex flex-wrap gap-4">
+    <For each=(fun () -> placements)>
+      (fun (placement, name) _ ->
+        <Drawer>
+          <Button variant=`secondary>
+            (fun () -> Jsx.string (String.capitalize_ascii name))
+          </Button>
+          <Drawer.Backdrop>
+            <Drawer.Content placement=(fun () -> placement)>
+              <Drawer.Dialog>
+                <Drawer.Close_trigger />
+                <Show
+                  when_=(fun () ->
+                          match placement with
+                          | `bottom -> true
+                          | `top | `left | `right -> false)>
+                  <Drawer.Handle />
+                </Show>
+                <Drawer.Header>
+                  <Drawer.Heading>
+                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                    " Drawer"
+                  </Drawer.Heading>
+                </Drawer.Header>
+                <Drawer.Body>
+                  <p>
+                    "This drawer slides in from the "
+                    <strong>(fun () -> Jsx.string name)</strong>
+                    " edge of the screen."
+                  </p>
+                </Drawer.Body>
+                <Drawer.Footer>
+                  <Button slot=`close variant=`secondary>"Cancel"</Button>
+                  <Button slot=`close>"Done"</Button>
+                </Drawer.Footer>
+                <Show
+                  when_=(fun () ->
+                          match placement with
+                          | `top -> true
+                          | `bottom | `left | `right -> false)>
+                  <Drawer.Handle />
+                </Show>
+              </Drawer.Dialog>
+            </Drawer.Content>
+          </Drawer.Backdrop>
+        </Drawer>)
+    </For>
+  </div>

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Drawer`: HeroUI's Drawer on Kobalte's dialog, sliding in
+  from any edge, with HeroUI's handle, and dragged toward its edge to close
+  while it may be dismissed, as HeroUI's is.
 - Fixed: `Solidtype_heroui.Toast` was shorter than its content, which slid
   within it as it entered, its action button small where HeroUI's is
   medium; it is measured and entered as HeroUI's is.

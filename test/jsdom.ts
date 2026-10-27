@@ -68,3 +68,9 @@ if (hidden?.set && hidden.get) {
 // indicator, and the port's, cancel what they start: an element with no
 // animation running stands in, as on a page whose styles animate nothing.
 Element.prototype.getAnimations ??= () => [];
+// Nor has it pointer capture, by which a drawer, HeroUI's and the port's,
+// keeps a drag as the pointer leaves it: an element that captures nothing
+// stands in, as a pointer that never leaves.
+Element.prototype.setPointerCapture ??= () => {};
+Element.prototype.releasePointerCapture ??= () => {};
+Element.prototype.hasPointerCapture ??= () => false;

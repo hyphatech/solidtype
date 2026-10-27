@@ -42,6 +42,11 @@ module Ban = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/ban.svg?raw"]
 end)
 
+module Bars = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/bars.svg?raw"]
+end)
+
 module Bell = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/bell.svg?raw"]
@@ -187,6 +192,11 @@ module Hard_drive = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/hard-drive.svg?raw"]
 end)
 
+module House = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/house.svg?raw"]
+end)
+
 module Link = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/link.svg?raw"]
@@ -195,6 +205,11 @@ end)
 module Lock_open = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/lock-open.svg?raw"]
+end)
+
+module Magnifier = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/magnifier.svg?raw"]
 end)
 
 module Magnifier_minus = Icon.Make (struct
@@ -215,6 +230,11 @@ end)
 module Minus = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/minus.svg?raw"]
+end)
+
+module Person = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/person.svg?raw"]
 end)
 
 module Persons = Icon.Make (struct

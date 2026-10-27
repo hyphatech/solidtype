@@ -67,7 +67,7 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      sized as HeroUI's styles animate it
   overlay            what every overlay shares: on the page while it opens,
                      is open, and closes, as HeroUI's styles animate it
-  dialog_frame       what a modal and an alert dialog share on Kobalte's
+  dialog_frame       what a modal, an alert dialog and a drawer share on Kobalte's
                      dialog: root, trigger, backdrop, container, dialog,
                      heading and close trigger, each port's classes its own
   status_icon        HeroUI's icon for each status, as an alert, a toast and

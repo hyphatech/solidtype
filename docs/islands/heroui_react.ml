@@ -507,6 +507,19 @@ external alert_dialog : Dom.htmlDivElement -> alert_dialog_props -> unit
   = "alertDialog"
 [@@mel.module "./react/heroui.tsx"]
 
+type drawer_props
+
+external drawer_props :
+  placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
+  variant:([ `opaque | `blur | `transparent ][@mel.as "variant"]) ->
+  is_dismissable:(bool[@mel.as "isDismissable"]) ->
+  unit ->
+  drawer_props = ""
+[@@mel.obj]
+
+external drawer : Dom.htmlDivElement -> drawer_props -> unit = "drawer"
+[@@mel.module "./react/heroui.tsx"]
+
 type toggle_button_props
 
 external toggle_button_props :
