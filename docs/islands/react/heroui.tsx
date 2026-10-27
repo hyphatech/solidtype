@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -745,6 +745,42 @@ export function popover(host: HTMLElement, { placement, arrow }: PopoverProps): 
             </Popover.Dialog>
           </Popover.Content>
         </Popover>
+      </div>,
+    ),
+  );
+}
+
+type DropdownProps = {
+  selectionMode: "none" | "single" | "multiple";
+  placement: "top" | "bottom" | "left" | "right";
+  trigger: "press" | "longPress";
+};
+
+export function dropdown(host: HTMLElement, { selectionMode, placement, trigger }: DropdownProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <div className="flex justify-center py-16">
+        <Dropdown key={selectionMode} trigger={trigger}>
+          <Button aria-label="Menu" variant="secondary">
+            Actions
+          </Button>
+          <Dropdown.Popover placement={placement}>
+            <Dropdown.Menu selectionMode={selectionMode} defaultSelectedKeys={["copy"]}>
+              <Dropdown.Item id="new" textValue="New file">
+                {selectionMode === "none" ? null : <Dropdown.ItemIndicator />}
+                <Label>New file</Label>
+              </Dropdown.Item>
+              <Dropdown.Item id="copy" textValue="Copy link">
+                {selectionMode === "none" ? null : <Dropdown.ItemIndicator />}
+                <Label>Copy link</Label>
+              </Dropdown.Item>
+              <Dropdown.Item id="delete" textValue="Delete file" variant="danger">
+                {selectionMode === "none" ? null : <Dropdown.ItemIndicator />}
+                <Label>Delete file</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>
       </div>,
     ),
   );

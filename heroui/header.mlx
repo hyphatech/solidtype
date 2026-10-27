@@ -1,0 +1,29 @@
+module Jsx = Solidtype.Jsx
+
+type slot =
+  ((unit -> string) ->
+   unit Solidtype.Solid.rest ->
+   (unit -> Jsx.content) ->
+   Jsx.element
+  [@u])
+
+(* How a header renders where a part above gives it its element, as React
+   Aria's HeaderContext does: a menu section's label, which names it. *)
+module Slot = Solidtype.Context.Make_optional (struct
+  type t = slot
+end)
+
+let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let classes () =
+    Styles.Header.classes (Styles.Header.options ?class_:(class_ ()) ())
+  in
+  match Slot.use () with
+  | Some render ->
+      render classes (Props.others props) (fun () -> children ()) [@u]
+  | None ->
+      <header
+        class_=(fun () -> classes ())
+        data_slot="header"
+        props=(Props.others props)>
+        (fun () -> children ())
+      </header>

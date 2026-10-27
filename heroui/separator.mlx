@@ -1,14 +1,45 @@
 module Kobalte = Solidtype_kobalte.Separator
 
+(* The element a part above draws its separators as, as React Aria's
+   SeparatorContext gives it: a menu's are [<div>]s. *)
+module Element = Solidtype.Context.Make (struct
+  type t = [ `hr | `div ]
+
+  let default = `hr
+end)
+
+(* Kobalte's separator as another element, as React Aria's draws one. *)
+module As = struct
+  module Props = struct
+    external check :
+      ?as_:string Solidtype.Check.value ->
+      ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Hr.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Kobalte.Root.component
+end
+
 let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
     ?(variant : [ `default | `secondary | `tertiary ] = `default)
     ?(class_ : string option) () =
-  <Kobalte.Root
+  let element = Element.use () in
+  <As
+    as_=(fun () ->
+          (* An [<hr>] is a horizontal line, so React Aria draws a vertical
+             one as a [<div>]. *)
+          match (element, orientation ()) with
+          | `hr, `horizontal -> "hr"
+          | `hr, `vertical | `div, (`horizontal | `vertical) -> "div")
     orientation=(fun () -> orientation ())
     role=`separator
     class_=(fun () ->
              Styles.Separator.classes
                (Styles.Separator.options ~orientation:(orientation ())
                   ~variant:(variant ()) ?class_:(class_ ()) ()))
+    data_slot="separator"
     props=(Props.others props)
   />

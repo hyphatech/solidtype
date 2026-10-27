@@ -4,8 +4,10 @@ type trigger = {
   component : unit Solidtype.Jsx.component;
   is_disabled : (unit -> bool) option;
   controls : string option;
+  described_by : string option;
   pressed : (unit -> bool) option;
   needs_slot : bool;
+  element : (Dom.element -> unit) option;
 }
 
 (* A button another part makes its trigger, as React Aria's ButtonContext
@@ -27,9 +29,13 @@ let no_trigger =
     component = Kobalte.Root.component;
     is_disabled = None;
     controls = None;
+    described_by = None;
     pressed = None;
     needs_slot = true;
+    element = None;
   }
+
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
 
 let%component make
     ?(variant :
@@ -106,7 +112,14 @@ let%component make
     ?aria_label
     ?aria_controls=(fun () ->
                      Option.bind trigger (fun (t : trigger) -> t.controls))
-    ref=(fun b -> Interaction.watch i b)
+    ?aria_describedby=(fun () ->
+                        Option.bind trigger (fun (t : trigger) ->
+                            t.described_by))
+    ref=(fun b ->
+          Interaction.watch i b;
+          match Option.bind trigger (fun (t : trigger) -> t.element) with
+          | Some made -> made (as_element b)
+          | None -> ())
     ?slot=(fun () ->
             Option.map
               (function `trigger -> "trigger" | `close -> "close")

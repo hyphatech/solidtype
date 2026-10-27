@@ -187,8 +187,10 @@ let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)
       Button.component = Kobalte.Trigger.component;
       is_disabled = None;
       controls = None;
+      described_by = None;
       pressed = None;
       needs_slot = false;
+      element = None;
     }
   in
   <Kobalte.Root

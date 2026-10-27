@@ -1,5 +1,5 @@
 (* HeroUI's Separator on Kobalte, beside the same Separator in React: its
-   role, its orientation and HeroUI's classes, for each orientation and
+   element, its slot, its role, its orientation and HeroUI's classes, for each orientation and
    variant. *)
 
 module Separator = Solidtype_heroui.Separator
@@ -17,9 +17,13 @@ module Twin = struct
   [@@mel.module "./twins/Separator.tsx"]
 end
 
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
 (* What a separator shows a reader and HeroUI's styles. *)
 let shown e =
-  ( T.attribute e "role",
+  ( tag_name e,
+    T.attribute e "data-slot",
+    T.attribute e "role",
     T.attribute e "aria-orientation",
     T.attribute e "data-orientation",
     T.class_name e )

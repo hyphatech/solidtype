@@ -13,6 +13,8 @@ module Badge = H.Badge
 module Breadcrumbs = H.Breadcrumbs
 module Alert_dialog = H.Alert_dialog
 module Drawer = H.Drawer
+module Dropdown = H.Dropdown
+module Header = H.Header
 module Modal = H.Modal
 module Pagination = H.Pagination
 module Popover = H.Popover
@@ -189,6 +191,39 @@ let () =
                     </Alert_dialog.Container>
                   </Alert_dialog.Backdrop>
                 </Alert_dialog>
+                <Dropdown default_open=true>
+                  <Dropdown.Trigger data_testid="Dropdown.Trigger">
+                    "Actions"
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover data_testid="Dropdown.Popover">
+                    <Dropdown.Menu
+                      data_testid="Dropdown.Menu"
+                      selection_mode=(fun () -> `single)>
+                      <Dropdown.Section data_testid="Dropdown.Section">
+                        <Header data_testid="Header">"Format"</Header>
+                        <Dropdown.Item id="bold" data_testid="Dropdown.Item">
+                          <Dropdown.Item_indicator
+                            data_testid="Dropdown.Item_indicator"
+                          />
+                          "Bold"
+                        </Dropdown.Item>
+                      </Dropdown.Section>
+                      <Dropdown.Submenu_trigger>
+                        <Dropdown.Item id="share">
+                          "Share"
+                          <Dropdown.Submenu_indicator
+                            data_testid="Dropdown.Submenu_indicator"
+                          />
+                        </Dropdown.Item>
+                        <Dropdown.Popover>
+                          <Dropdown.Menu>
+                            <Dropdown.Item id="email">"Email"</Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown.Popover>
+                      </Dropdown.Submenu_trigger>
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
                 <Drawer default_open=true>
                   <Drawer.Trigger data_testid="Drawer.Trigger">
                     "Open"
@@ -432,6 +467,15 @@ let () =
                    ("Alert_dialog.Heading", "[data-slot=alert-dialog-heading]");
                    ("Alert_dialog.Body", "[data-slot=alert-dialog-body]");
                    ("Alert_dialog.Footer", "[data-slot=alert-dialog-footer]");
+                   ("Dropdown.Trigger", "[data-slot=dropdown-trigger]");
+                   ("Dropdown.Popover", "[data-slot=dropdown-popover]");
+                   ("Dropdown.Menu", "[data-slot=dropdown-menu]");
+                   ("Dropdown.Section", ".menu-section");
+                   ("Header", "[data-slot=header]");
+                   ("Dropdown.Item", "[data-slot=menu-item]");
+                   ("Dropdown.Item_indicator", "[data-slot=menu-item-indicator]");
+                   ( "Dropdown.Submenu_indicator",
+                     "[data-slot=submenu-indicator]" );
                    ("Drawer.Trigger", "[data-slot=drawer-trigger]");
                    ("Drawer.Backdrop", "[data-slot=drawer-backdrop]");
                    ("Drawer.Content", "[data-slot=drawer-content]");

@@ -466,6 +466,19 @@ external tooltip_props :
 external tooltip : Dom.htmlDivElement -> tooltip_props -> unit = "tooltip"
 [@@mel.module "./react/heroui.tsx"]
 
+type dropdown_props
+
+external dropdown_props :
+  selection_mode:([ `none | `single | `multiple ][@mel.as "selectionMode"]) ->
+  placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
+  trigger:([ `press | `long_press [@mel.as "longPress"] ][@mel.as "trigger"]) ->
+  unit ->
+  dropdown_props = ""
+[@@mel.obj]
+
+external dropdown : Dom.htmlDivElement -> dropdown_props -> unit = "dropdown"
+[@@mel.module "./react/heroui.tsx"]
+
 type popover_props
 
 external popover_props :

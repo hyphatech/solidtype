@@ -1,0 +1,424 @@
+(* HeroUI's Dropdown on Kobalte's menu, beside the same dropdown in React: its
+   trigger, its menus and all in them, what the menu tells and what has the
+   focus, as the trigger is pressed, the keys move through the menu, an item
+   is chosen and the menu closes. *)
+
+module Dropdown = Solidtype_heroui.Dropdown
+module Button = Solidtype_heroui.Button
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module Header = Solidtype_heroui.Header
+module Kbd = Solidtype_heroui.Kbd
+module Separator = Solidtype_heroui.Separator
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type menu = [ `actions | `single | `multiple | `sections | `submenu ]
+type props
+
+external props :
+  menu:menu ->
+  ?custom:bool ->
+  long_press:(bool[@mel.as "longPress"]) ->
+  told:(string -> unit) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Dropdown.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Dropdown.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/Dropdown.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+type options
+
+external options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) -> unit -> options
+  = ""
+[@@mel.obj]
+
+external setup : options -> T.user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* A while for a framework's timers and focus moves to run. *)
+let settle () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+(* What one framework writes for itself, which no style of HeroUI's reads:
+   Kobalte's own state, present and empty, its pointer's type, a list's
+   orientation, an [aria-disabled] it writes false and the edges of its
+   focus trap; React Aria's
+   collection and trigger, and its [tabindex] on a button, focusable already;
+   and each framework's ids and keys, made its own way. And the menu's role,
+   name and focus: Kobalte's menu is its popover, where React Aria's popover
+   is a dialog around its menu. *)
+let framework_only e name =
+  match (name, T.attribute e name) with
+  | ( ("data-expanded" | "data-closed" | "data-highlighted" | "data-checked"),
+      Some "" ) ->
+      true
+  | "data-orientation", _ -> true
+  | "aria-disabled", Some "false" -> true
+  | ("data-pointer-type" | "data-collection" | "data-trigger"), _ -> true
+  | ("id" | "style" | "dir" | "data-key"), _ -> true
+  | "tabindex", _ -> (
+      match T.attribute e "data-slot" with
+      | Some
+          ("button" | "dropdown-trigger" | "dropdown-popover" | "dropdown-menu")
+        ->
+          true
+      | Some _ | None -> false)
+  | "aria-labelledby", _ -> (
+      match T.attribute e "data-slot" with
+      | Some ("dropdown-popover" | "dropdown-menu") -> true
+      | Some _ | None -> false)
+  (* A section's header, which names it, is kept from a reader as itself: by
+     [aria-hidden] in Kobalte, by its role in React Aria. *)
+  | "role", _ -> (
+      match T.attribute e "data-slot" with
+      | Some ("dropdown-popover" | "dropdown-menu" | "header") -> true
+      | Some _ | None -> false)
+  | "aria-hidden", _ -> (
+      match T.attribute e "data-slot" with
+      | Some "header" -> true
+      | Some _ | None -> false)
+  (* What a submenu's trigger opens, a menu in React Aria's words, a popup in
+     Kobalte's, which a reader announces alike. *)
+  | "aria-haspopup", Some ("menu" | "true") -> (
+      match T.attribute e "data-slot" with
+      | Some "menu-item" -> true
+      | Some _ | None -> false)
+  | _ -> false
+
+(* An id one part names another by, which each framework makes its own way. *)
+let names_another = function
+  | "aria-controls" | "aria-describedby" | "aria-labelledby" -> true
+  | _ -> false
+
+(* An element: its tag, its attributes and its text. *)
+let one e =
+  let names =
+    T.attribute_names e |> Array.to_list
+    |> List.filter (fun name ->
+        not (framework_only e name || T.framework_only name))
+    |> List.sort String.compare
+  in
+  String.concat " "
+    (tag_name e
+    :: List.map
+         (fun name ->
+           if names_another name then name ^ "=(id)"
+           else name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+         names)
+  ^ if element_count e > 0 then "" else " " ^ text e
+
+let all selector = Js.Array.from (query_all T.body selector)
+
+(* What React Aria's popover holds besides its menu, for a reader and its
+   focus scope: a button either side that closes it, which Kobalte's menu
+   leaves to Escape, as a button in a menu is not one of its items. *)
+let react_aria_only e =
+  match (tag_name e, T.attribute e "aria-label") with
+  | "BUTTON", Some "Dismiss" -> true
+  | "TEMPLATE", _ -> true
+  | "SPAN", _ ->
+      Option.is_some (T.attribute e "data-focus-scope-start")
+      || Option.is_some (T.attribute e "data-focus-scope-end")
+  | "DIV", _ -> (
+      match Js.Array.from (query_all e "button[aria-label=Dismiss]") with
+      | [| _ |] -> element_count e = 1
+      | _ -> false)
+  | _ -> false
+
+(* The trigger, each menu and all inside it, wherever it is, what the menu
+   told, and what has the focus: the menu, wherever its framework puts it. *)
+let shown told =
+  Array.concat
+    [
+      all "[data-slot=dropdown-trigger], [data-slot=button]";
+      all
+        ".dropdown__popover, .dropdown__popover \
+         *:not([data-focus-trap]):not([aria-hidden=true] *)";
+    ]
+  |> Array.to_list
+  |> List.filter (fun e -> not (react_aria_only e))
+  |> List.map one |> Array.of_list
+  |> Fun.flip Array.append (Array.of_list (List.rev !told))
+  |> Fun.flip Array.append
+       [|
+         ("focus: "
+         ^
+         match Js.Null.toOption active with
+         | Some e -> (
+             match T.attribute e "data-slot" with
+             | Some ("dropdown-popover" | "dropdown-menu") -> "the menu"
+             | Some slot -> slot ^ " " ^ text e
+             | None -> tag_name e ^ " " ^ text e)
+         | None -> "none");
+       |]
+
+let trigger () =
+  match all "[data-slot=dropdown-trigger], [data-slot=button]" with
+  | [||] -> T.body
+  | found -> found.(0)
+
+(* The keys each menu is walked with, after the trigger is pressed. *)
+let keys = function
+  | `actions -> [ "{ArrowDown}"; "{ArrowDown}"; "{Enter}" ]
+  | `single | `multiple -> [ "{ArrowDown}"; "{Enter}"; "{Escape}" ]
+  | `sections -> [ "{ArrowDown}"; "{Enter}" ]
+  | `submenu -> [ "{ArrowDown}"; "{ArrowDown}"; "{ArrowRight}"; "{Enter}" ]
+
+(* A while longer than React Aria's long press, 500 milliseconds. *)
+let held () =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 600
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
+let walk ~step ~told ~long_press (menu : menu) =
+  let user = setup (options ~pointer_events_check:0 ()) in
+  let seen = ref [] in
+  let after name action =
+    let* () =
+      step (fun () ->
+          let* () = action () in
+          settle ())
+    in
+    seen := (name, shown told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "pressed" (fun () -> T.click user (trigger ())) in
+  let* () =
+    if long_press then
+      let* () = after "Enter" (fun () -> T.keyboard user "{Enter}") in
+      let* () = after "ArrowDown" (fun () -> T.keyboard user "{ArrowDown}") in
+      let* () =
+        after "Alt and ArrowDown" (fun () ->
+            T.keyboard user "{Alt>}{ArrowDown}{/Alt}")
+      in
+      let* () = after "Escape" (fun () -> T.keyboard user "{Escape}") in
+      let* () =
+        after "held" (fun () ->
+            let* (_ : T.pointers) = T.pointer user "[MouseLeft>]" in
+            held ())
+      in
+      after "let go" (fun () ->
+          let* (_ : T.pointers) = T.pointer user "[/MouseLeft]" in
+          Js.Promise.resolve ())
+    else Js.Promise.resolve ()
+  in
+  let* () =
+    if long_press then Js.Promise.resolve ()
+    else
+      List.fold_left
+        (fun before key ->
+          let* () = before in
+          after key (fun () -> T.keyboard user key))
+        (Js.Promise.resolve ()) (keys menu)
+  in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let act tell key = tell ("action " ^ key)
+
+let items (menu : menu) tell =
+  match menu with
+  | `actions ->
+      <Dropdown.Menu on_action=(act tell)>
+        <Dropdown.Item id="new" text_value="New file">
+          <Label>"New file"</Label>
+          <Description>"Create a new file"</Description>
+          <Kbd>{js|⌘N|js}</Kbd>
+        </Dropdown.Item>
+        <Dropdown.Item id="copy" text_value="Copy link" is_disabled=true>
+          <Label>"Copy link"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="delete" text_value="Delete file" variant=`danger>
+          <Label>"Delete file"</Label>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+  | (`single | `multiple) as mode ->
+      <Dropdown.Menu
+        selection_mode=(fun () -> (mode :> [ `none | `single | `multiple ]))
+        default_selected_keys=(fun () -> [| "bold" |])
+        on_selection_change=(fun keys ->
+                              let keys = Array.copy keys in
+                              Array.sort String.compare keys;
+                              tell
+                                ("selected "
+                                ^ String.concat " " (Array.to_list keys)))>
+        <Dropdown.Item id="bold" text_value="Bold">
+          <Dropdown.Item_indicator /> <Label>"Bold"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="italic" text_value="Italic">
+          <Dropdown.Item_indicator type_=`dot /> <Label>"Italic"</Label>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+  | `sections ->
+      <Dropdown.Menu on_action=(act tell)>
+        <Dropdown.Section>
+          <Header>"Actions"</Header>
+          <Dropdown.Item id="new" text_value="New file">
+            <Label>"New file"</Label>
+          </Dropdown.Item>
+        </Dropdown.Section>
+        <Separator />
+        <Dropdown.Section>
+          <Header>"Danger zone"</Header>
+          <Dropdown.Item id="delete" text_value="Delete file" variant=`danger>
+            <Label>"Delete file"</Label>
+          </Dropdown.Item>
+        </Dropdown.Section>
+      </Dropdown.Menu>
+  | `submenu ->
+      <Dropdown.Menu on_action=(act tell)>
+        <Dropdown.Item id="new" text_value="New file">
+          <Label>"New file"</Label>
+        </Dropdown.Item>
+        <Dropdown.Submenu_trigger>
+          <Dropdown.Item id="share" text_value="Share">
+            <Label>"Share"</Label> <Dropdown.Submenu_indicator />
+          </Dropdown.Item>
+          <Dropdown.Popover>
+            <Dropdown.Menu on_action=(act tell)>
+              <Dropdown.Item id="email" text_value="Email">
+                <Label>"Email"</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown.Submenu_trigger>
+      </Dropdown.Menu>
+
+let both ?(custom = false) ?(long_press = false) (menu : menu) =
+  let told = ref [] in
+  let tell said = told := said :: !told in
+  T.render (fun () ->
+      <div>
+        <p data_testid="outside">"Outside"</p>
+        <Dropdown
+          trigger=(fun () -> if long_press then `long_press else `press)>
+          (fun () ->
+            if custom then
+              Solidtype.Jsx.element
+                <Dropdown.Trigger aria_label="Profile">
+                  <span>"Sarah"</span>
+                </Dropdown.Trigger>
+            else
+              Solidtype.Jsx.element
+                <Button aria_label="Menu" variant=`secondary>"Actions"</Button>)
+          <Dropdown.Popover>
+            (fun () -> Solidtype.Jsx.element (items menu tell))
+          </Dropdown.Popover>
+        </Dropdown>
+      </div>);
+  let* solidtype =
+    walk ~step:(fun action -> action ()) ~told ~long_press menu
+  in
+  T.cleanup ();
+  told := [];
+  let (_ : Dom.element) =
+    Twin.render (props ~menu ~custom ~long_press ~told:tell ())
+  in
+  let* react = walk ~step:Twin.step ~told ~long_press menu in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let same (solidtype, react) =
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Dropdown" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "acts on an item, as React's does" (fun () ->
+          let* r = both `actions in
+          same r);
+      Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
+          let* r = both ~custom:true `actions in
+          same r);
+      Jest.testPromise "selects one, as React's" (fun () ->
+          let* r = both `single in
+          same r);
+      Jest.testPromise "selects many, as React's" (fun () ->
+          let* r = both `multiple in
+          same r);
+      Jest.testPromise "groups items in sections, as React's" (fun () ->
+          let* r = both `sections in
+          same r);
+      Jest.testPromise "opens a submenu, as React's" (fun () ->
+          let* r = both `submenu in
+          same r);
+      Jest.testPromise
+        "draws an indicator of its own while its item is selected" (fun () ->
+          let mark selected =
+            if Solidtype.Solid.get selected then <span>"selected"</span>
+            else Solidtype.Jsx.nothing
+          in
+          T.render (fun () ->
+              <Dropdown default_open=true>
+                <Button>"Fruits"</Button>
+                <Dropdown.Popover>
+                  <Dropdown.Menu
+                    selection_mode=`multiple
+                    default_selected_keys=(fun () -> [| "apple" |])>
+                    <Dropdown.Item id="apple" text_value="Apple">
+                      <Dropdown.Item_indicator>
+                        (fun selected -> mark selected)
+                      </Dropdown.Item_indicator>
+                      <Label>"Apple"</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="pear" text_value="Pear">
+                      <Dropdown.Item_indicator>
+                        (fun selected -> mark selected)
+                      </Dropdown.Item_indicator>
+                      <Label>"Pear"</Label>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>);
+          let shown () =
+            all "[data-slot=menu-item-indicator]" |> Array.map text
+          in
+          let before = shown () in
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () =
+            match all "[data-key$=pear]" with
+            | [| pear |] -> T.click user pear
+            | _ -> Js.Promise.resolve ()
+          in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (before, shown ())
+              |> toEqual ([| "selected"; "" |], [| "selected"; "selected" |])));
+      Jest.testPromise "opens on a long press, as React's" (fun () ->
+          let* r = both ~long_press:true `actions in
+          same r);
+      Jest.testPromise "opens on a long press of its own trigger, as React's"
+        (fun () ->
+          let* r = both ~custom:true ~long_press:true `actions in
+          same r))

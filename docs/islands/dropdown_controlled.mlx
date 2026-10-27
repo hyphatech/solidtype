@@ -1,0 +1,36 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+
+let make () =
+  let selected, set_selected = S.create_signal [| "bold" |] in
+  <div class_="flex min-w-sm flex-col items-center justify-center gap-4">
+    <p class_="text-sm text-muted">
+      "Selected: "
+      (fun () ->
+        match S.get selected with
+        | [||] -> Jsx.string "None"
+        | keys -> Jsx.string (Js.Array.join ~sep:", " keys))
+    </p>
+    <Dropdown>
+      <Button aria_label="Menu" variant=`secondary>"Actions"</Button>
+      <Dropdown.Popover>
+        <Dropdown.Menu
+          selected_keys=(fun () -> S.get selected)
+          selection_mode=`multiple
+          on_selection_change=(S.set set_selected)>
+          <Dropdown.Item id="bold" text_value="Bold">
+            <Label>"Bold"</Label> <Dropdown.Item_indicator />
+          </Dropdown.Item>
+          <Dropdown.Item id="italic" text_value="Italic">
+            <Label>"Italic"</Label> <Dropdown.Item_indicator />
+          </Dropdown.Item>
+          <Dropdown.Item id="underline" text_value="Underline">
+            <Label>"Underline"</Label> <Dropdown.Item_indicator />
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown>
+  </div>

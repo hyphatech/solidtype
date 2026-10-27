@@ -78,6 +78,11 @@
 @import "@heroui/styles/components/modal.css" layer(components);
 @import "@heroui/styles/components/alert-dialog.css" layer(components);
 @import "@heroui/styles/components/drawer.css" layer(components);
+@import "@heroui/styles/components/header.css" layer(components);
+@import "@heroui/styles/components/menu.css" layer(components);
+@import "@heroui/styles/components/menu-item.css" layer(components);
+@import "@heroui/styles/components/menu-section.css" layer(components);
+@import "@heroui/styles/components/dropdown.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
@@ -96,7 +101,7 @@
 /* An overlay is drawn in a portal at the end of the page, outside any
    preview: Kobalte's positioner around one of HeroUI's gives it the same
    ground, but its size, which the overlay's own classes set. */
-[data-popper-positioner]:has(> .tooltip, > .popover),
+[data-popper-positioner]:has(> .tooltip, > .popover, > .dropdown__popover),
 .modal__backdrop,
 .alert-dialog__backdrop,
 .drawer__backdrop {

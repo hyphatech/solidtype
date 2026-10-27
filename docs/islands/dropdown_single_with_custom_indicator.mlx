@@ -1,0 +1,80 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module Header = Solidtype_heroui.Header
+module Label = Solidtype_heroui.Label
+
+module Custom_checkmark_icon = struct
+  let%component make () =
+    <svg
+      height="16"
+      view_box="0 0 16 16"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg">
+      <path
+        class_="text-accent-soft-foreground"
+        clip_rule="evenodd"
+        d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14m3.1-8.55a.75.75 0 1 \
+           0-1.2-.9L7.419 8.858L6.03 7.47a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 \
+           0 0 1.13-.08z"
+        fill="currentColor"
+        fill_rule="evenodd"
+      />
+    </svg>
+end
+
+let make () =
+  let selected, set_selected = S.create_signal [| "apple" |] in
+  <Dropdown>
+    <Button aria_label="Menu" variant=`secondary>"Fruits"</Button>
+    <Dropdown.Popover class_="min-w-[256px]">
+      <Dropdown.Menu
+        selected_keys=(fun () -> S.get selected)
+        selection_mode=`single
+        on_selection_change=(S.set set_selected)>
+        <Dropdown.Section>
+          <Header>"Select a fruit"</Header>
+          <Dropdown.Item id="apple" text_value="Apple">
+            <Dropdown.Item_indicator>
+              (fun selected ->
+                if S.get selected then <Custom_checkmark_icon />
+                else Solidtype.Jsx.nothing)
+            </Dropdown.Item_indicator>
+            <Label>"Apple"</Label>
+          </Dropdown.Item>
+          <Dropdown.Item id="banana" text_value="Banana">
+            <Dropdown.Item_indicator>
+              (fun selected ->
+                if S.get selected then <Custom_checkmark_icon />
+                else Solidtype.Jsx.nothing)
+            </Dropdown.Item_indicator>
+            <Label>"Banana"</Label>
+          </Dropdown.Item>
+          <Dropdown.Item id="cherry" text_value="Cherry">
+            <Dropdown.Item_indicator>
+              (fun selected ->
+                if S.get selected then <Custom_checkmark_icon />
+                else Solidtype.Jsx.nothing)
+            </Dropdown.Item_indicator>
+            <Label>"Cherry"</Label>
+          </Dropdown.Item>
+        </Dropdown.Section>
+        <Dropdown.Item id="orange" text_value="Orange">
+          <Dropdown.Item_indicator>
+            (fun selected ->
+              if S.get selected then <Custom_checkmark_icon />
+              else Solidtype.Jsx.nothing)
+          </Dropdown.Item_indicator>
+          <Label>"Orange"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="pear" text_value="Pear">
+          <Dropdown.Item_indicator>
+            (fun selected ->
+              if S.get selected then <Custom_checkmark_icon />
+              else Solidtype.Jsx.nothing)
+          </Dropdown.Item_indicator>
+          <Label>"Pear"</Label>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>

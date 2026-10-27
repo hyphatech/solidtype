@@ -78,8 +78,10 @@ HeroUI in React:
 - Variants: `.separator--default`, `.separator--secondary`,
   `.separator--tertiary`
 
-A vertical separator is a `<div>` in React and an `<hr>` here, Kobalte's
-element; both have the role `separator` and `aria-orientation="vertical"`.
+A separator is an `<hr>` where it is horizontal and a `<div>` where it is
+vertical, as React Aria's is, and a `<div>` inside a dropdown's menu, as
+React Aria's menu asks; each has the role `separator`, its
+`aria-orientation`, and `data-slot="separator"`, which a menu's styles read.
 
 ## API Reference
 

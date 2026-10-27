@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Dropdown`: HeroUI's Dropdown on Kobalte's menu, opened by
+  a `Button` inside it or a `Dropdown.Trigger`, or by a long press; its
+  items acted on, or selected one or many at a time in the menu or in a
+  section, with HeroUI's indicators, sections and their `Header`,
+  descriptions, keyboard shortcuts, separators and submenus, and HeroUI's
+  enter and exit animations.
+- `Solidtype_heroui.Header`: HeroUI's Header, a menu section's label.
+- Breaking: `Solidtype_heroui.Button.trigger` takes `described_by`, the
+  trigger's `aria-describedby`, and `element`, given the button's element
+  as it is made.
+- Fixed: `Solidtype_heroui.Separator` had no `data-slot`, which HeroUI's
+  menus read, and was an `<hr>` where it is vertical, which React Aria's
+  draws as a `<div>`; inside a menu it is a `<div>`, as React Aria's is.
 - `Solidtype_heroui.Drawer`: HeroUI's Drawer on Kobalte's dialog, sliding in
   from any edge, with HeroUI's handle, and dragged toward its edge to close
   while it may be dismissed, as HeroUI's is.

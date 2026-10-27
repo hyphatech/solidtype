@@ -33,12 +33,18 @@ type trigger = {
           say; a part that says nothing leaves it to the button's group. *)
   controls : string option;
       (** The id of what it shows and hides, its [aria-controls]. *)
+  described_by : string option;
+      (** The id of what describes it, its [aria-describedby]: how a dropdown
+          opened by a long press opens. *)
   pressed : (unit -> bool) option;
       (** Whether the button shows pressed, as a popover's does while it is
           open, besides while it is pressed. *)
   needs_slot : bool;
       (** Whether only a button with [slot=`trigger] takes it, as a disclosure's
           heading gives it, or any button, as a tooltip does. *)
+  element : (Dom.element -> unit) option;
+      (** What the part does with the button's element as it is made, as a
+          dropdown opened by a long press listens to it. *)
 }
 (** The trigger a part gives a button below it. *)
 

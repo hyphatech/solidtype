@@ -1,0 +1,25 @@
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Dropdown>
+    <Button aria_label="Menu" variant=`secondary>"Actions"</Button>
+    <Dropdown.Popover>
+      <Dropdown.Menu on_action=(fun (_ : string) -> ())>
+        <Dropdown.Item id="new-file" text_value="New file">
+          <Label>"New file"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="copy-link" text_value="Copy link">
+          <Label>"Copy link"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="edit-file" text_value="Edit file">
+          <Label>"Edit file"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item
+          id="delete-file" text_value="Delete file" variant=`danger>
+          <Label>"Delete file"</Label>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>

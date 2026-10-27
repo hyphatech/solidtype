@@ -1,0 +1,93 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let modes = [| (`none, "none"); (`single, "single"); (`multiple, "multiple") |]
+
+let placements =
+  [| (`top, "top"); (`bottom, "bottom"); (`left, "left"); (`right, "right") |]
+
+let triggers = [| (`press, "press"); (`long_press, "longPress") |]
+
+let item ~indicator id text variant =
+  <Dropdown.Item
+    id=(fun () -> id) text_value=(fun () -> text) variant=(fun () -> variant)>
+    (fun () ->
+      if indicator then Solidtype.Jsx.element <Dropdown.Item_indicator />
+      else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+    <Label>(fun () -> Solidtype.Jsx.string text)</Label>
+  </Dropdown.Item>
+
+let make () =
+  let mode, set_mode = S.create_signal (`none, "none") in
+  let placement, set_placement = S.create_signal (`bottom, "bottom") in
+  let trigger, set_trigger = S.create_signal (`press, "press") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="selectionMode"
+        choices=(fun () -> modes)
+        picked=(fun () -> S.get mode)
+        on_pick=(Controls.choose modes set_mode)
+      />
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+      <Select
+        label="trigger"
+        choices=(fun () -> triggers)
+        picked=(fun () -> S.get trigger)
+        on_pick=(Controls.choose triggers set_trigger)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=button]"
+      solidtype=(<div class_="flex justify-center py-16">
+                   (fun () ->
+                     (* A menu's selection is read as it is made, so another
+                        makes another menu, as React's key does. *)
+                     let mode = fst (S.get mode) in
+                     let trigger = fst (S.get trigger) in
+                     let indicator =
+                       match mode with
+                       | `none -> false
+                       | `single | `multiple -> true
+                     in
+                     Solidtype.Jsx.element
+                       <Dropdown trigger=(fun () -> trigger)>
+                         <Button aria_label="Menu" variant=`secondary>
+                           "Actions"
+                         </Button>
+                         <Dropdown.Popover
+                           placement=(fun () -> fst (S.get placement))>
+                           <Dropdown.Menu
+                             selection_mode=(fun () -> mode)
+                             default_selected_keys=(fun () -> [| "copy" |])>
+                             (fun () ->
+                               Solidtype.Jsx.element
+                                 (item ~indicator "new" "New file" `default))
+                             (fun () ->
+                               Solidtype.Jsx.element
+                                 (item ~indicator "copy" "Copy link" `default))
+                             (fun () ->
+                               Solidtype.Jsx.element
+                                 (item ~indicator "delete" "Delete file" `danger))
+                           </Dropdown.Menu>
+                         </Dropdown.Popover>
+                       </Dropdown>)
+                 </div>)
+      react=(fun host ->
+              Heroui_react.dropdown host
+                (Heroui_react.dropdown_props
+                   ~selection_mode:(fst (S.get mode))
+                   ~placement:(fst (S.get placement))
+                   ~trigger:(fst (S.get trigger))
+                   ()))
+    />
+  </section>

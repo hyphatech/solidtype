@@ -1,0 +1,329 @@
+---
+title: Dropdown
+description: A menu of actions or options from a trigger, HeroUI's on Kobalte's.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/dropdown_usage.jsx";
+import ExUsageCode from "@islands/dropdown_usage.mlx?raw";
+import * as ExWithIcons from "@islands/dropdown_with_icons.jsx";
+import ExWithIconsCode from "@islands/dropdown_with_icons.mlx?raw";
+import * as ExWithDescriptions from "@islands/dropdown_with_descriptions.jsx";
+import ExWithDescriptionsCode from "@islands/dropdown_with_descriptions.mlx?raw";
+import * as ExWithDisabledItems from "@islands/dropdown_with_disabled_items.jsx";
+import ExWithDisabledItemsCode from "@islands/dropdown_with_disabled_items.mlx?raw";
+import * as ExWithSections from "@islands/dropdown_with_sections.jsx";
+import ExWithSectionsCode from "@islands/dropdown_with_sections.mlx?raw";
+import * as ExWithMultipleSelection from "@islands/dropdown_with_multiple_selection.jsx";
+import ExWithMultipleSelectionCode from "@islands/dropdown_with_multiple_selection.mlx?raw";
+import * as ExControlled from "@islands/dropdown_controlled.jsx";
+import ExControlledCode from "@islands/dropdown_controlled.mlx?raw";
+import * as ExControlledOpenState from "@islands/dropdown_controlled_open_state.jsx";
+import ExControlledOpenStateCode from "@islands/dropdown_controlled_open_state.mlx?raw";
+import * as ExWithSingleSelection from "@islands/dropdown_with_single_selection.jsx";
+import ExWithSingleSelectionCode from "@islands/dropdown_with_single_selection.mlx?raw";
+import * as ExSingleWithCustomIndicator from "@islands/dropdown_single_with_custom_indicator.jsx";
+import ExSingleWithCustomIndicatorCode from "@islands/dropdown_single_with_custom_indicator.mlx?raw";
+import * as ExWithSectionLevelSelection from "@islands/dropdown_with_section_level_selection.jsx";
+import ExWithSectionLevelSelectionCode from "@islands/dropdown_with_section_level_selection.mlx?raw";
+import * as ExWithKeyboardShortcuts from "@islands/dropdown_with_keyboard_shortcuts.jsx";
+import ExWithKeyboardShortcutsCode from "@islands/dropdown_with_keyboard_shortcuts.mlx?raw";
+import * as ExWithSubmenus from "@islands/dropdown_with_submenus.jsx";
+import ExWithSubmenusCode from "@islands/dropdown_with_submenus.mlx?raw";
+import * as ExWithCustomSubmenuIndicator from "@islands/dropdown_with_custom_submenu_indicator.jsx";
+import ExWithCustomSubmenuIndicatorCode from "@islands/dropdown_with_custom_submenu_indicator.mlx?raw";
+import * as ExCustomTrigger from "@islands/dropdown_custom_trigger.jsx";
+import ExCustomTriggerCode from "@islands/dropdown_custom_trigger.mlx?raw";
+import * as ExLongPressTrigger from "@islands/dropdown_long_press_trigger.jsx";
+import ExLongPressTriggerCode from "@islands/dropdown_long_press_trigger.mlx?raw";
+import * as ExTailwind from "@islands/dropdown_tailwind.jsx";
+import ExTailwindCode from "@islands/dropdown_tailwind.mlx?raw";
+import * as Demo from "@islands/dropdown_demo.jsx";
+
+`Solidtype_heroui.Dropdown` is Kobalte's `DropdownMenu`, with the classes
+HeroUI's own `dropdownVariants`, `menuItemVariants` and `menuSectionVariants`
+give. A `Button` inside it is its trigger, as in HeroUI; anything else is
+wrapped in `Dropdown.Trigger`. HeroUI's `Label`, `Description`, `Header`,
+`Kbd` and `Separator` go inside its items and sections, as in React.
+
+## Usage
+
+<Example code={ExUsageCode} title="dropdown_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Dropdown>
+  <Dropdown.Trigger>...</Dropdown.Trigger>
+  <Dropdown.Popover>
+    <Dropdown.Menu>
+      <Dropdown.Item id="...">
+        <Label>...</Label>
+        <Description>...</Description>
+        <Kbd>...</Kbd>
+        <Dropdown.Item_indicator />
+      </Dropdown.Item>
+      <Separator />
+      <Dropdown.Section>
+        <Header>...</Header>
+        <Dropdown.Item id="..." />
+      </Dropdown.Section>
+      <Dropdown.Submenu_trigger>
+        <Dropdown.Item id="...">
+          <Label>...</Label>
+          <Dropdown.Submenu_indicator />
+        </Dropdown.Item>
+        <Dropdown.Popover>
+          <Dropdown.Menu>
+            <Dropdown.Item id="..." />
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown.Submenu_trigger>
+    </Dropdown.Menu>
+  </Dropdown.Popover>
+</Dropdown>
+```
+
+## Examples
+
+### With Icons
+
+<Example code={ExWithIconsCode} title="dropdown_with_icons.mlx"><ExWithIcons.make client:visible /></Example>
+
+### With Descriptions
+
+<Example code={ExWithDescriptionsCode} title="dropdown_with_descriptions.mlx"><ExWithDescriptions.make client:visible /></Example>
+
+### With Disabled Items
+
+<Example code={ExWithDisabledItemsCode} title="dropdown_with_disabled_items.mlx"><ExWithDisabledItems.make client:visible /></Example>
+
+### With Sections
+
+<Example code={ExWithSectionsCode} title="dropdown_with_sections.mlx"><ExWithSections.make client:visible /></Example>
+
+### With Multiple Selection
+
+<Example code={ExWithMultipleSelectionCode} title="dropdown_with_multiple_selection.mlx"><ExWithMultipleSelection.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ExControlledCode} title="dropdown_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### Controlled Open State
+
+<Example code={ExControlledOpenStateCode} title="dropdown_controlled_open_state.mlx"><ExControlledOpenState.make client:visible /></Example>
+
+### With Single Selection
+
+<Example code={ExWithSingleSelectionCode} title="dropdown_with_single_selection.mlx"><ExWithSingleSelection.make client:visible /></Example>
+
+### Single With Custom Indicator
+
+<Example code={ExSingleWithCustomIndicatorCode} title="dropdown_single_with_custom_indicator.mlx"><ExSingleWithCustomIndicator.make client:visible /></Example>
+
+### With Section Level Selection
+
+<Example code={ExWithSectionLevelSelectionCode} title="dropdown_with_section_level_selection.mlx"><ExWithSectionLevelSelection.make client:visible /></Example>
+
+### With Keyboard Shortcuts
+
+<Example code={ExWithKeyboardShortcutsCode} title="dropdown_with_keyboard_shortcuts.mlx"><ExWithKeyboardShortcuts.make client:visible /></Example>
+
+### With Submenus
+
+<Example code={ExWithSubmenusCode} title="dropdown_with_submenus.mlx"><ExWithSubmenus.make client:visible /></Example>
+
+### With Custom Submenu Indicator
+
+<Example code={ExWithCustomSubmenuIndicatorCode} title="dropdown_with_custom_submenu_indicator.mlx"><ExWithCustomSubmenuIndicator.make client:visible /></Example>
+
+### Custom Trigger
+
+<Example code={ExCustomTriggerCode} title="dropdown_custom_trigger.mlx"><ExCustomTrigger.make client:visible /></Example>
+
+### Long Press Trigger
+
+<Example code={ExLongPressTriggerCode} title="dropdown_long_press_trigger.mlx"><ExLongPressTrigger.make client:visible /></Example>
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes.
+
+<Example code={ExTailwindCode} title="dropdown_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+### Global CSS
+
+HeroUI's classes are global, so a stylesheet restyles every one, as with
+HeroUI in React:
+
+```css
+@layer components {
+  .dropdown__trigger {
+    @apply outline-none;
+  }
+
+  .dropdown__popover {
+    @apply rounded-lg border border-border bg-overlay p-2;
+  }
+
+  .dropdown__menu {
+    @apply flex flex-col gap-1;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+- `.dropdown__trigger`, `.dropdown__popover`, `.dropdown__menu`
+- `.menu-item`, `.menu-item--default`, `.menu-item--danger`,
+  `.menu-item__indicator`, `.menu-item__indicator--submenu`, and the
+  indicator's `[data-slot="menu-item-indicator--checkmark"]` and
+  `[data-slot="menu-item-indicator--dot"]`
+- `.menu-section`, and `.header` for its title
+- `[data-slot="separator"]` within the menu
+
+### Interactive States
+
+- **Hover**: `[data-hovered="true"]` on the trigger and the items
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the trigger
+  and the items, and `[data-focused="true"]` on the item with the focus
+- **Pressed**: `[data-pressed="true"]` on the trigger, also while the menu is
+  open, and on the items
+- **Disabled**: `[data-disabled="true"]` on the items
+- **Selected**: `[data-selected="true"]` and `[aria-checked="true"]` on the
+  items
+- **Selection**: `[data-selection-mode="single"]` or `"multiple"` on the menu
+  and its items
+- **Submenu**: `[data-has-submenu="true"]` on an item that opens one, and
+  `[data-open="true"]` while it is open
+- **Entering** and **Exiting**: `[data-entering="true"]` and
+  `[data-exiting="true"]` on the popover, while it appears and disappears
+- **Placement**: `[data-placement="bottom"]`, and the other sides, on the
+  popover
+
+## How it is made
+
+Kobalte's menu opens from its trigger, moves the focus between its items by
+the arrows and by what is typed, opens a submenu by a hover or the arrow
+toward it, closes on Escape or a press outside and gives the focus back to
+its trigger, as React Aria's does. Its content is the menu itself, where
+React Aria's popover is a dialog around its menu; a reader is told the same
+menu and items, and HeroUI's styles read the same classes and attributes.
+
+HeroUI selects in the menu or a section, by the items' ids, where Kobalte
+has an item of each kind: an item of a selection of one is Kobalte's
+checkbox item with the role of a radio, of many a checkbox item, each
+checked while its id is selected. The menu gives the focus to its selected
+item as it opens, as React Aria's does, where Kobalte's gives it to the
+menu. Enter on an item of a selection of many closes the menu, and a press
+or Space keeps it open, as React Aria decides.
+
+A long press is React Aria's: the menu opens on a press held half a second,
+or on Alt and an arrow, and its trigger is described so to a reader. Kobalte
+opens it on any press, so the dropdown keeps its open state and refuses the
+others.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Dropdown
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
+| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
+| `trigger` | `trigger` | `` `press `` \| `` `long_press `` | `` `press `` | What opens it |
+| `children` | `children` | elements | | Its trigger and its popover |
+
+### Dropdown.Trigger
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `aria-label` | `aria_label` | `string` | Its name, where its children give none |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | What it wraps |
+
+### Dropdown.Popover
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | `` `bottom `` | Its side of the trigger |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its menu |
+
+### Dropdown.Menu
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `selectionMode` | `selection_mode` | `` `none `` \| `` `single `` \| `` `multiple `` | `` `none `` | How it selects, read as it is made |
+| `selectedKeys` | `selected_keys` | `string array` | | The selected items' ids, controlled |
+| `defaultSelectedKeys` | `default_selected_keys` | `string array` | | The ids selected at first |
+| `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Told the ids selected as they change |
+| `disabledKeys` | `disabled_keys` | `string array` | | The disabled items' ids |
+| `onAction` | `on_action` | `string -> unit` | | Told the id of an item chosen |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its items, sections and separators |
+
+### Dropdown.Section
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `selectionMode` | `selection_mode` | `` `single `` \| `` `multiple `` | A selection of its own, read as it is made |
+| `selectedKeys` | `selected_keys` | `string array` | Its selected items' ids, controlled |
+| `defaultSelectedKeys` | `default_selected_keys` | `string array` | The ids selected at first |
+| `onSelectionChange` | `on_selection_change` | `string array -> unit` | Told the ids selected as they change |
+| `disabledKeys` | `disabled_keys` | `string array` | Its disabled items' ids |
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | Its header and items |
+
+### Dropdown.Item
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `id` | `id` | `string` | | Its id, which its menu is told |
+| `textValue` | `text_value` | `string` | | Its text, typed to reach it |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `variant` | `variant` | `` `default `` \| `` `danger `` | `` `default `` | Its look |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | What it shows |
+
+### Dropdown.Item_indicator
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `type` | `type_` | `` `checkmark `` \| `` `dot `` | `` `checkmark `` | HeroUI's indicator |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | `bool accessor -> element` | | An indicator of its own, given whether its item is selected |
+
+### Dropdown.Submenu_indicator
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | An indicator of its own, in place of HeroUI's chevron |
+
+### Dropdown.Submenu_trigger
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `children` | `children` | elements | The item that opens the submenu, and its popover |
+
+## Beside React
+
+Original HeroUI documentation: [Dropdown](https://heroui.com/en/docs/react/components/dropdown).
+
+The same HeroUI Dropdown twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each trigger: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

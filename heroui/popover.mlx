@@ -253,8 +253,10 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
       Button.component = Kobalte.Trigger.component;
       is_disabled = None;
       controls = None;
+      described_by = None;
       pressed = Some opened;
       needs_slot = false;
+      element = None;
     }
   in
   <Kobalte.Root

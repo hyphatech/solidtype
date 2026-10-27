@@ -1,0 +1,59 @@
+module Avatar = Solidtype_heroui.Avatar
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Dropdown>
+    <Dropdown.Trigger class_="rounded-full">
+      <Avatar fallback_delay=600.>
+        <Avatar.Image
+          alt="Junior Garcia"
+          src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg"
+        />
+        <Avatar.Fallback>"JD"</Avatar.Fallback>
+      </Avatar>
+    </Dropdown.Trigger>
+    <Dropdown.Popover>
+      <div class_="px-3 pt-3 pb-1">
+        <div class_="flex items-center gap-2">
+          <Avatar fallback_delay=600. size=`sm>
+            <Avatar.Image
+              alt="Jane"
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg"
+            />
+            <Avatar.Fallback>"JD"</Avatar.Fallback>
+          </Avatar>
+          <div class_="flex flex-col gap-0">
+            <p class_="text-sm leading-5 font-medium">"Jane Doe"</p>
+            <p class_="text-xs leading-none text-muted">"jane@example.com"</p>
+          </div>
+        </div>
+      </div>
+      <Dropdown.Menu>
+        <Dropdown.Item id="dashboard" text_value="Dashboard">
+          <Label>"Dashboard"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="profile" text_value="Profile">
+          <Label>"Profile"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="settings" text_value="Settings">
+          <div class_="flex w-full items-center justify-between gap-2">
+            <Label>"Settings"</Label>
+            <Gravity.Gear class_="size-3.5 text-muted" />
+          </div>
+        </Dropdown.Item>
+        <Dropdown.Item id="new-project" text_value="New project">
+          <div class_="flex w-full items-center justify-between gap-2">
+            <Label>"Create Team"</Label>
+            <Gravity.Persons class_="size-3.5 text-muted" />
+          </div>
+        </Dropdown.Item>
+        <Dropdown.Item id="logout" text_value="Logout" variant=`danger>
+          <div class_="flex w-full items-center justify-between gap-2">
+            <Label>"Log Out"</Label>
+            <Gravity.Arrow_right_from_square class_="size-3.5 text-danger" />
+          </div>
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>

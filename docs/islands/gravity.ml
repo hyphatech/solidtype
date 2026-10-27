@@ -12,6 +12,11 @@ module Arrow_right = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/arrow-right.svg?raw"]
 end)
 
+module Arrow_right_from_square = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/arrow-right-from-square.svg?raw"]
+end)
+
 module Arrow_up = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/arrow-up.svg?raw"]
@@ -157,6 +162,11 @@ module Ellipsis = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/ellipsis.svg?raw"]
 end)
 
+module Ellipsis_vertical = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/ellipsis-vertical.svg?raw"]
+end)
+
 module Envelope = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/envelope.svg?raw"]
@@ -170,6 +180,16 @@ end)
 module Eye_slash = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/eye-slash.svg?raw"]
+end)
+
+module Floppy_disk = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/floppy-disk.svg?raw"]
+end)
+
+module Folder_open = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/folder-open.svg?raw"]
 end)
 
 module Funnel = Icon.Make (struct
@@ -232,6 +252,11 @@ module Minus = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/minus.svg?raw"]
 end)
 
+module Pencil = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/pencil.svg?raw"]
+end)
+
 module Person = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/person.svg?raw"]
@@ -290,6 +315,11 @@ end)
 module Sparkles = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/sparkles.svg?raw"]
+end)
+
+module Square_plus = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/square-plus.svg?raw"]
 end)
 
 module Star = Icon.Make (struct

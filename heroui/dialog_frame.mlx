@@ -129,8 +129,10 @@ let root ~is_open ~default_open ~on_open_change children =
       Button.component = Kobalte.Trigger.component;
       is_disabled = None;
       controls = None;
+      described_by = None;
       pressed = Some opened;
       needs_slot = false;
+      element = None;
     }
   in
   <Kobalte.Root

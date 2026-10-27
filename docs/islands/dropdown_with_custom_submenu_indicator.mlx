@@ -1,0 +1,79 @@
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Dropdown>
+    <Button aria_label="Menu" variant=`secondary>"Share"</Button>
+    <Dropdown.Popover>
+      <Dropdown.Menu on_action=(fun (_ : string) -> ())>
+        <Dropdown.Item id="copy-link" text_value="Copy Link">
+          <Label>"Copy Link"</Label>
+        </Dropdown.Item>
+        <Dropdown.Item id="facebook" text_value="Facebook">
+          <Label>"Facebook"</Label>
+        </Dropdown.Item>
+        <Dropdown.Submenu_trigger>
+          <Dropdown.Item id="share" text_value="Share">
+            <Label>"More options"</Label>
+            <Dropdown.Submenu_indicator>
+              <Gravity.Arrow_right class_="size-3.5 text-muted" />
+            </Dropdown.Submenu_indicator>
+          </Dropdown.Item>
+          <Dropdown.Popover>
+            <Dropdown.Menu>
+              <Dropdown.Item id="whatsapp" text_value="WhatsApp">
+                <Label>"WhatsApp"</Label>
+              </Dropdown.Item>
+              <Dropdown.Item id="telegram" text_value="Telegram">
+                <Label>"Telegram"</Label>
+              </Dropdown.Item>
+              <Dropdown.Submenu_trigger>
+                <Dropdown.Item id="email" text_value="Email">
+                  <Label>"Email"</Label>
+                  <Dropdown.Submenu_indicator>
+                    <svg
+                      class_="size-3.5 text-muted"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke_linecap="round"
+                      stroke_linejoin="round"
+                      stroke_width="2"
+                      view_box="0 0 24 24">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </Dropdown.Submenu_indicator>
+                </Dropdown.Item>
+                <Dropdown.Popover>
+                  <Dropdown.Menu>
+                    <Dropdown.Item id="work" text_value="Work email">
+                      <Label>"Work email"</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="personal" text_value="Personal email">
+                      <Label>"Personal email"</Label>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown.Submenu_trigger>
+              <Dropdown.Item id="discord" text_value="Discord">
+                <Label>"Discord"</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown.Submenu_trigger>
+        <Dropdown.Submenu_trigger>
+          <Dropdown.Item id="other" text_value="Other">
+            <Label>"Other (default indicator)"</Label>
+            <Dropdown.Submenu_indicator />
+          </Dropdown.Item>
+          <Dropdown.Popover>
+            <Dropdown.Menu>
+              <Dropdown.Item id="sms" text_value="SMS">
+                <Label>"SMS"</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown.Submenu_trigger>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>
