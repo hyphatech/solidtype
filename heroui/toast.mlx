@@ -377,6 +377,21 @@ external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
 external scroll_height : _ Dom.element_like -> float = "scrollHeight"
 [@@mel.get]
 
+type inline_style
+
+external inline_style : _ Dom.element_like -> inline_style = "style" [@@mel.get]
+external inline_height : inline_style -> string = "height" [@@mel.get]
+
+external set_inline_height : inline_style -> string -> unit = "height"
+[@@mel.set]
+
+type rect
+
+external bounding : _ Dom.element_like -> rect = "getBoundingClientRect"
+[@@mel.send]
+
+external rect_width : rect -> float = "width" [@@mel.get]
+
 type observer
 
 external mutation_observer : (unit -> unit) -> observer = "MutationObserver"
@@ -464,7 +479,6 @@ module Action_button = struct
     let slots = slots_of "Toast.Action_button" in
     <Button
       variant=(fun () -> variant ())
-      size=`sm
       class_=(fun () -> after (Styles.Toast.action (slots ())) (class_ ()))
       on_click=(fun _ -> ignore (on_press () : unit option))
       data_slot="toast-action-button"
@@ -580,8 +594,15 @@ module Item = struct
       ^ ";"
     in
     let entering, set_entering = S.create_signal true in
+    (* Its height as its content needs it, read with its own height let go,
+       since its stylesheet holds it to the one it is given, as HeroUI
+       measures it. *)
     let measure el =
+      let style = inline_style el in
+      let given = inline_height style in
+      set_inline_height style "auto";
       let height = scroll_height el in
+      set_inline_height style given;
       s.set_height e.key height
     in
     let watch el =
@@ -589,7 +610,9 @@ module Item = struct
         (request_frame (fun _ ->
              ignore (request_frame (fun _ -> S.set set_entering false) : int))
           : int);
-      measure el;
+      (* Measured once on the page, before it is first drawn, as HeroUI
+         measures it in a layout effect: in its [ref] it is on none. *)
+      S.on_mount (fun () -> measure el);
       let scheduled = ref false in
       let schedule () =
         if not !scheduled then (
@@ -604,7 +627,17 @@ module Item = struct
       observe mutations el
         (observed ~attributes:true ~attribute_filter:[| "class" |]
            ~character_data:true ~child_list:true ~subtree:true ());
-      let sizes = resize_observer schedule in
+      (* A width that changes reflows its content, which no mutation shows;
+         its height is what animates, and would be measured each frame of
+         it, so only the width is watched, as HeroUI watches it. *)
+      let width = ref (rect_width (bounding el)) in
+      let sizes =
+        resize_observer (fun () ->
+            let now = rect_width (bounding el) in
+            if Float.abs (now -. !width) >= 0.5 then (
+              width := now;
+              schedule ()))
+      in
       observe_size sizes el;
       S.on_cleanup (fun () ->
           disconnect mutations;

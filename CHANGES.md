@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed: `Solidtype_heroui.Toast` was shorter than its content, which slid
+  within it as it entered, its action button small where HeroUI's is
+  medium; it is measured and entered as HeroUI's is.
 - Fixed: `Solidtype_heroui.Accordion`'s panels and `Disclosure`'s content
   opened the first time with no animation, as Kobalte keeps transitions
   off its content until it has opened once.

@@ -90,6 +90,32 @@ let wait ms =
       ())
   |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
 
+(* jsdom has no layout: a toast's scrollHeight stands in for a browser's,
+   its whole height while its own is [auto], and less while its stylesheet
+   holds it to the height it is given, as a browser's reads. *)
+type prototype
+type descriptor
+type inline_style
+
+external element_prototype : prototype = "prototype" [@@mel.scope "HTMLElement"]
+
+external descriptor :
+  get:((Dom.element -> float)[@mel.this]) ->
+  configurable:bool ->
+  unit ->
+  descriptor = ""
+[@@mel.obj]
+
+external define_property : prototype -> string -> descriptor -> unit
+  = "defineProperty"
+[@@mel.scope "Object"]
+
+external delete_property : prototype -> string -> bool = "deleteProperty"
+[@@mel.scope "Reflect"]
+
+external inline_style : Dom.element -> inline_style = "style" [@@mel.get]
+external inline_height : inline_style -> string = "height" [@@mel.get]
+
 let variant_name = function
   | `default -> "default"
   | `accent -> "accent"
@@ -315,7 +341,7 @@ let () =
                    (T.query "[data-slot=toast-action-button]"))
               |> toEqual
                    (Some
-                      "button button--sm button--tertiary toast__action \
+                      "button button--md button--tertiary toast__action \
                        bg-success")));
       Jest.testPromise "keeps what an update does not name" (fun () ->
           T.render (fun () -> <Toast.Provider />);
@@ -377,4 +403,37 @@ let () =
           let* () = T.keyboard user "{Alt>}[KeyT]{/Alt}" in
           Js.Promise.resolve
             E.(
-              expect (with_control, region_focused ()) |> toEqual (false, true))))
+              expect (with_control, region_focused ()) |> toEqual (false, true)));
+      Jest.testPromise "is as tall as its content, measured as HeroUI does"
+        (fun () ->
+          define_property element_prototype "scrollHeight"
+            (descriptor
+               ~get:(fun[@mel.this] e ->
+                 match T.attribute e "data-slot" with
+                 | Some "toast" ->
+                     if String.equal (inline_height (inline_style e)) "auto"
+                     then 64.
+                     else 44.
+                 | _ -> 0.)
+               ~configurable:true ());
+          T.render (fun () -> <Toast.Provider />);
+          let (_ : Toast.key) =
+            Toast.show ~description:"Two lines" ~timeout_ms:0. "Hello"
+          in
+          let* () = wait 50 in
+          let height =
+            match T.query "[data-slot=toast]" with
+            | Some t -> (
+                match T.attribute t "style" with
+                | Some style ->
+                    Js.String.split ~sep:";" style
+                    |> Array.to_list
+                    |> List.filter (fun d ->
+                        Js.String.includes ~search:"--toast-height" d)
+                    |> List.map String.trim
+                | None -> [])
+            | None -> []
+          in
+          let (_ : bool) = delete_property element_prototype "scrollHeight" in
+          Js.Promise.resolve
+            E.(expect height |> toEqual [ "--toast-height: 64px" ])))
