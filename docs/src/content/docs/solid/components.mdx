@@ -23,12 +23,42 @@ A component another component's JSX names is written with
 
 <Example code={greeting} title="solid_greeting.mlx"><Greeting.make client:visible /></Example>
 
-From the parameters, the ppx writes the module's `Props` -- the props' type,
-a getter for each, and `check` -- and `make` and `component`. In the body a
-value prop is read as a thunk, `name ()`, since it is a live read of Solid's
-props, which Solid tracks. An optional parameter with a default,
+`Greeting` is written with `let%component`; the `make` at the bottom is not.
+The difference is who calls them.
+
+The bottom `make` is a root. Nothing passes it props: a page mounts it, or
+`Web.render` renders it, and it is an ordinary OCaml function, `let make ()
+= ...`. No JSX tag names it.
+
+`Greeting` is named by a tag, `<Greeting name="Ada" />`, and Solid calls
+it the way it calls every component: with one JavaScript object of props,
+`{ name: "Ada" }`, not with OCaml's labelled arguments. Each field of that
+object is a getter that Solid tracks when it is read, so a prop whose value
+changes is seen by the code that reads it then -- which is why, in TSX,
+destructuring `props` in the parameters loses updates. A plain `let make
+~name () = ...` could not be given that object, and reading `name` once at
+the top would be that same lost update.
+
+`let%component` bridges the two. From the labelled parameters, the ppx
+writes:
+
+- `Props`, the module that describes the props object: its type, a
+  getter for each field, `check`, which the compiler applies to every
+  `<Greeting ... />` to catch a prop left out or misspelt, and `omit` and
+  `others`, for a spread;
+- `make`, a function of that object, in which each parameter becomes a
+  read of its field: `name ()` reads `props.name` at the moment it runs,
+  inside a thunk, where Solid tracks it;
+- `component`, `make` as the value a JSX tag names.
+
+So in the body a value prop is read as a call, `name ()`, never as a plain
+value. An optional parameter with a default,
 `?(greeting : string = "Hello")`, reads its default while the prop is left
 out; one without, `?(note : string option)`, reads an `option`.
+
+Written by hand, `Greeting` would be its `Props` module, a getter and a
+`check` per prop, kept in step with the body by a reader. `let%component`
+writes them from the one place the props are named, so they cannot drift.
 
 A component is a value, `Greeting.component`, and the tag `<Greeting />`
 names it. The module is the component: `<Greeting.Header />` is the
@@ -74,13 +104,13 @@ A component may also take a function as its only child, which it calls, as
 it takes: `[ `nodes ]` for elements, `[ `render ]` for a function, or both.
 
 A function prop that takes nothing is written `(fun _ -> ...)`, as
-`on_close` is above: `(fun () -> ...)` is a thunk, which would be read as a
+`on_close` is above, which hides the panel and shows a button in its place: `(fun () -> ...)` is a thunk, which would be read as a
 value.
 
 ## Props written by hand
 
-Two components are written without `let%component`. A root, which a page or
-`Web.render` mounts and no JSX names, is `let make () = ...`. A component
+Besides a root, one kind of component is written without
+`let%component`: a component
 that passes its props on whole, as a spread, writes its `Props` by hand,
 its check's labels named as solidtype names a prop, and spreads them with
 the attribute `props`:

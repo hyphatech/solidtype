@@ -1,6 +1,6 @@
 ---
 title: Vite and Astro
-description: The plugin in Vite, in Astro, beside React, and under vitest.
+description: The plugin in Vite, in Astro, and under vitest.
 ---
 
 [Vite](https://vite.dev) bundles what Melange emits. Two plugins take part:
@@ -81,22 +81,6 @@ OCaml.
 
 Each example on this site is such an island: an `.mlx` file under
 `docs/islands`, imported by a page and shown beside its own source.
-
-## Beside React
-
-One Vite build can hold Solid and React, each compiler kept to its own
-files. This documentation does so, to show HeroUI's React components beside
-their ports:
-
-```js
-const reactFiles = /\/islands\/react\/[^/]+\.tsx$/;
-
-integrations: [
-  solid({ exclude: [reactFiles] }),
-  react({ include: [reactFiles] }),
-],
-vite: { plugins: [solidtype()] },
-```
 
 ## vitest
 

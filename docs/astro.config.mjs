@@ -7,6 +7,8 @@ import tailwindcss from "@tailwindcss/vite";
 import links from "starlight-links-validator";
 import hypha from "starlight-theme-hypha";
 import solidtype from "vite-plugin-solidtype";
+import ocaml from "@shikijs/langs/ocaml";
+import mlx from "./src/mlx.mjs";
 
 // solidtype's documentation: how the libraries work and are set up, the
 // Solid and Kobalte bindings, and each HeroUI port live, beside the same
@@ -50,13 +52,17 @@ export default defineConfig({
         links({ exclude: ["**/reference/solidtype*/**", "**/reference/ppx_solidtype/**"] }),
       ],
       customCss: ["./src/styles/heroui.css", "./src/styles/api.css"],
+      // An OCaml block is MLX: its JSX highlighted by a grammar injected
+      // into Shiki's OCaml, which is loaded first so the rules the grammar
+      // includes are there.
+      expressiveCode: { shiki: { langs: [...ocaml, mlx] } },
       favicon: "/favicon-32.png",
       head: [
         { tag: "link", attrs: { rel: "icon", type: "image/png", sizes: "16x16", href: "/solidtype/favicon-16.png" } },
         { tag: "link", attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/solidtype/apple-touch-icon.png" } },
       ],
       sidebar: [
-        { label: "Start here", items: ["index", "start/how-it-works", "start/melange", "start/vite", "start/conventions"] },
+        { label: "Start here", items: ["index", "start/ocaml-over-typescript", "start/how-it-works", "start/melange", "start/vite", "start/conventions"] },
         { label: "Solid", items: ["solid/components", "solid/reactivity", "solid/control-flow", "solid/state", "solid/async", "solid/rendering"] },
         { label: "Kobalte", items: ["kobalte/binding", "kobalte/usage"] },
         { label: "HeroUI", items: ["heroui/coverage", "heroui/accordion", "heroui/alert", "heroui/alert-dialog", "heroui/autocomplete", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/breadcrumbs", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/combo-box", "heroui/description", "heroui/disclosure", "heroui/disclosure-group", "heroui/drawer", "heroui/dropdown", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/list-box", "heroui/meter", "heroui/modal", "heroui/number-field", "heroui/pagination", "heroui/popover", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/select", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/tabs", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/toast", "heroui/toggle-button", "heroui/toggle-button-group", "heroui/tooltip", "heroui/typography"] },

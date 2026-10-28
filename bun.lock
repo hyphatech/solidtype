@@ -53,6 +53,7 @@
         "@heroui/react": "~3.2.6",
         "@heroui/styles": "~3.2.6",
         "@kobalte/core": "~0.13.14",
+        "@shikijs/langs": "~4.5.0",
         "@tailwindcss/vite": "^4.3.3",
         "astro": "^7.3.3",
         "react": "^19.2.0",

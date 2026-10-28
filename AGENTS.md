@@ -94,6 +94,8 @@ docs/                the documentation, a Starlight site in Hypha's look,
   islands/react/     HeroUI's components in React, rendered into a host
                      an island owns: the one place the documentation runs
                      React
+  src/mlx.mjs        MLX's JSX highlighted: a grammar injected into Shiki's
+                     OCaml, which highlights no tag of its own
   src/content/docs/reference.md
                      the packages, and a link to each module's odoc page,
                      which `make docs` copies into public/reference/,
@@ -141,8 +143,7 @@ vitest.config.ts     the OCaml tests, as three projects: the browser's in
                      server's in Node; and hydration, compiled hydratable
 example/             a kanban board: a whole application on the
                      stack -- Solid, Kobalte and HeroUI's ports over a
-                     Spindle server on SQLite -- its README the map and the
-                     rough edges found building it
+                     Spindle server on SQLite -- its README the map
   index.html         the page, built by Vite with vite.config.ts
   pages/             the same board as an Astro page: wiring alone, built
                      with astro.config.mjs, which lets Vite reach _build

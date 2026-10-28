@@ -19,9 +19,9 @@ Five tools take part, each doing the one thing it does anyway:
 |---|---|---|---|
 | 1 | [MLX](https://github.com/ocaml-mlx/mlx) | `.mlx`, OCaml with JSX | OCaml, each element marked `[@JSX]` |
 | 2 | `ppx_solidtype` | the marked elements | calls of `Solidtype.Jsx`, the markers, with their types checked |
-| 3 | Melange | OCaml | a JavaScript module, `.jsx`, the markers as calls |
+| 3 | [Melange](https://melange.re) | OCaml | a JavaScript module, `.jsx`, the markers as calls |
 | 4 | `vite-plugin-solidtype` | the markers | JSX |
-| 5 | `vite-plugin-solid` | JSX | templates and Solid's runtime calls |
+| 5 | [`vite-plugin-solid`](https://github.com/solidjs/vite-plugin-solid) | JSX | templates and Solid's runtime calls |
 
 Below, the counter on [Getting started](/solidtype/) goes through each step.
 Every listing is what the tool wrote, unedited.
@@ -35,10 +35,12 @@ element or a thunk, `(fun () -> ...)`. MLX's parser reads the file into
 OCaml's own syntax tree, where each element is a function application
 marked `[@JSX]`. Nothing in it yet knows about Solid.
 
-## 2. The ppx lowers each element
+## 2. The ppx turns each element into calls
 
 `ppx_solidtype` rewrites each marked element into calls of
-`Solidtype.Jsx`, which the library calls its markers:
+`Solidtype.Jsx`, which the library calls its markers. A marker is a
+function that stands for a piece of JSX: `el` an element, `s` a static
+attribute, `dynamic` a child that changes:
 
 ```ocaml
 Solidtype.Jsx.el "button"
@@ -93,11 +95,13 @@ does not take is a label the function does not have. Both are compile
 errors, as in TSX. [Components](/solidtype/solid/components/) says how a
 component's `Props` are written.
 
-## 3. Melange compiles the calls as calls
+## 3. Melange compiles OCaml to JavaScript
 
-Melange compiles the ppx's output like any OCaml. The markers are
-`external`s of one module, `vite-plugin-solidtype/markers`, so each is a
-plain call through one import:
+Melange knows nothing of JSX: to it, the ppx's output is OCaml like any
+other. The markers are `external`s of one module,
+`vite-plugin-solidtype/markers`, so each comes out as an ordinary
+JavaScript function call through one import, `Markers.el(...)`, which the
+next step finds and turns back into JSX:
 
 ```js title="solid_counter.jsx, from Melange"
 import * as Solidtype__Solid from "solidtype/solid.jsx";

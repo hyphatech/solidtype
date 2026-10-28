@@ -1,5 +1,6 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
 
 module Panel = struct
   let%component make ~(title : string) ~(on_close : unit -> unit)
@@ -20,10 +21,19 @@ module Panel = struct
 end
 
 let make () =
-  let closed, set_closed = S.create_signal 0 in
-  <Panel title="Notes" on_close=(fun _ -> S.update set_closed succ)>
-    <p>"A panel's children are any JSX."</p>
-    <p class_="text-sm text-muted">
-      "Closed " (fun () -> Jsx.int (S.get closed)) " times"
-    </p>
-  </Panel>
+  let is_open, set_open = S.create_signal true in
+  <Show
+    when_=(fun () -> S.get is_open)
+    fallback=(<button
+                class_="button button--sm button--secondary"
+                type_=`button
+                on_click=(fun _ -> S.set set_open true)>
+                "Open the notes"
+              </button>)>
+    <Panel title="Notes" on_close=(fun _ -> S.set set_open false)>
+      <p>"A panel's children are any JSX: these two paragraphs."</p>
+      <p class_="text-sm text-muted">
+        "Close it, and a button takes its place."
+      </p>
+    </Panel>
+  </Show>

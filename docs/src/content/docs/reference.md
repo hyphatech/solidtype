@@ -17,7 +17,7 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 | `solidtype` | `solidtype` | Solid 1.9 bound whole, for Melange: signals, computations, resources, stores, its components and its renderer, server rendering included |
 | `solidtype-kobalte` | `solidtype-kobalte` | Kobalte 0.13 bound whole, generated from its own declarations |
 | `solidtype-heroui` | `solidtype-heroui` | HeroUI's design ported by hand onto Kobalte's components |
-| `ppx_solidtype` | `ppx_solidtype` | The ppx that lowers the JSX of `.mlx` files to calls Melange compiles |
+| `ppx_solidtype` | `ppx_solidtype` | The ppx that rewrites the JSX of `.mlx` files into calls Melange compiles |
 | `vite-plugin-solidtype` | none: an asset of each GitHub release | The Vite plugin that turns those calls back into JSX for Solid's compiler |
 
 ## solidtype
@@ -51,4 +51,4 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 ## ppx_solidtype
 
 - [`Ppx_solidtype`](/solidtype/reference/ppx_solidtype/Ppx_solidtype/index.html)
-  -- what each JSX form is lowered to.
+  -- what each JSX form is rewritten to.

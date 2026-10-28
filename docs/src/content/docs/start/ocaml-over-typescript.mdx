@@ -1,0 +1,243 @@
+---
+title: OCaml over TypeScript
+description: Safe, readable and predictable, and still Solid underneath.
+---
+
+A front end changes every week: a status gains a case, a field becomes
+optional, a route takes a new parameter. In TypeScript each change is a
+search through the code, and a hope that the search found everything. In
+OCaml it is a list of errors, each a place to decide, and when the list is
+empty the change is done. What runs is still Solid: the templates and
+runtime calls its compiler emits for TSX.
+
+## Change a type, fix the list
+
+The [example board](https://github.com/hyphatech/solidtype/tree/main/example)
+keeps its tasks in SQLite behind a Spindle server, and its client is
+printed from the server's routes as dune builds. A task's status is one
+type, on the server:
+
+```ocaml
+type status = To_do | Doing | Done [@@deriving wiretype]
+```
+
+Add `Blocked`, and the front end stops compiling. The compiler names each
+place that must decide what a blocked task is, seven in all: the board's
+own copy of the type, then every `match` on it -- a column's label, the
+next column and the previous one, whether two statuses are equal, the move
+sent back to the server, and what an empty column says:
+
+```
+File "example/src/status.ml", line 8, characters 12-73:
+8 | let label = function To_do -> "To do" | Doing -> "Doing" | Done -> "Done"
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+  Here is an example of a case that is not matched: Blocked
+
+File "example/src/status.ml", line 9, characters 11-75:
+9 | let next = function To_do -> Some Doing | Doing -> Some Done | Done -> None
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+  Here is an example of a case that is not matched: Blocked
+```
+
+The one place it cannot point to is a list, `Status.all`, the columns the
+board draws, since a list is not a `match`. Every other place is on the
+list, and fixed when the build is clean.
+
+The same change in TypeScript compiles, and is wrong:
+
+```ts
+type Status = "to_do" | "doing" | "blocked" | "done";
+
+const label = (s: Status) =>
+  s === "to_do" ? "To do" : s === "doing" ? "Doing" : "Done";
+```
+
+A blocked task is labelled "Done". TypeScript can be made to catch it -- a
+`switch` that ends in `const _: never = s`, a `Record<Status, string>` --
+each written on purpose, by someone who remembered. In OCaml every `match`
+is checked, and the client is part of the build, not a generator someone
+reruns.
+
+## Safe
+
+### Zero is a number
+
+Solid tests a `Show`'s condition for truth, as JavaScript does, and its
+types take any value. A list whose first item has the id `0` never shows
+that item's details:
+
+```tsx
+<Show when={selectedId()}>
+  <Details id={selectedId()!} />
+</Show>
+```
+
+In OCaml a condition is a `bool`, and a value that may be absent is an
+`option`. `Show.Some` shows its child while the value is there, and gives
+it the value, so `Some 0` shows like any other id:
+
+```ocaml
+let details () =
+  <Show.Some some=(fun () -> S.get selected_id)>
+    (fun id -> <Details id=(fun () -> S.get id) />)
+  </Show.Some>
+```
+
+An `option` given where Solid tests for truth does not compile:
+
+```
+2 |   <Solidtype.Show when_=(fun () -> user ())><p>"hello"</p></Solidtype.Show>
+                            ^^^^^^^^^^^^^^^^^^^
+Error: This expression has type string option Solidtype.Check.value
+       but an expression was expected of type bool Solidtype.Check.value
+       Type string option is not compatible with type bool
+```
+
+A resource has the same trap in TSX: a source of `false` means "not ready",
+so a resource keyed on a `boolean` filter never fetches while the filter is
+off. In OCaml the source is an `option`: `None` waits, `Some false`
+fetches.
+
+### Errors have types
+
+What an `ErrorBoundary` catches, and a resource's `error`, is `any` in
+Solid's types, and the fallback guesses what it was given. In OCaml it is
+an `exn`, matched like any value:
+
+```ocaml
+exception Offline
+
+let board () =
+  <ErrorBoundary
+    fallback=(fun exn reset ->
+      match exn with
+      | Offline -> <p>"You are offline."</p>
+      | _ -> <button on_click=(fun _ -> reset ())>"Retry"</button>)>
+    <Columns />
+  </ErrorBoundary>
+```
+
+What JavaScript threw arrives as `Js.Exn.Error`, and a resource's state is
+a variant, `Pending`, `Ready`, `Errored` and the rest, to match whole.
+
+## Readable
+
+### A state reads as what it is
+
+A state with several cases is a `Switch` of `Match`es in TSX. Nothing checks
+that each case has one, and reading a case's data takes a cast, since a
+`when` does not narrow `answer()`:
+
+```tsx
+<Switch>
+  <Match when={answer().kind === "waiting"}><p>waiting</p></Match>
+  <Match when={answer().kind === "ready"}>
+    <p>{(answer() as Ready).n}</p>
+  </Match>
+</Switch>
+```
+
+In OCaml the state is a variant and the `Switch` a `match`, which the ppx
+turns into the same `Match`es. Each case's data is bound where it is used,
+and a case left out is an error:
+
+```ocaml
+type answer = Waiting | Ready of int | Refused
+
+let view answer =
+  <Switch>
+    (fun () ->
+      match answer () with
+      | Waiting -> <p>"waiting"</p>
+      | Ready n -> <p>(fun () -> Jsx.int n)</p>)
+  </Switch>
+```
+
+```
+Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+  Here is an example of a case that is not matched: Refused
+```
+
+### A prop is a call
+
+In TSX, `props.text` is a live read and a destructured `text` a value read
+once, and the two look alike. This label never updates:
+
+```tsx
+function Label({ text }: { text: string }) {
+  return <span>{text}</span>;
+}
+```
+
+In OCaml a prop is a function, `text : unit -> string`. There is nothing to
+destructure, and a read is a call written where it happens, inside the
+thunk Solid tracks:
+
+```ocaml
+let%component make ~(text : string) () =
+  <span>(fun () -> Jsx.string (text ()))</span>
+```
+
+### Props are parameters
+
+In TSX a component's props are an interface beside it, its defaults a
+`mergeProps` inside it:
+
+```tsx
+function Greeting(props: { name: string; greeting?: string }) {
+  const merged = mergeProps({ greeting: "Hello" }, props);
+  return <p>{merged.greeting}, {merged.name}!</p>;
+}
+```
+
+In OCaml they are the function's labelled parameters, each default beside
+its parameter. The check every `<Greeting ... />` is held to is written
+from them, so the two cannot drift:
+
+```ocaml
+let%component make ~(name : string) ?(greeting : string = "Hello") () =
+  <p>(fun () -> Jsx.string (greeting () ^ ", " ^ name () ^ "!"))</p>
+```
+
+## Predictable
+
+### Controlled stays controlled
+
+Kobalte reads a `value` of `undefined` as uncontrolled, and `null` as
+controlled and empty. In TSX, `value={selected()}` compiles where
+`selected()` may be `undefined`, and the moment it is, the select keeps a
+value of its own and stops following the page. In OCaml a value Kobalte
+reads as `null` is a `Js.Nullable.t`, so an empty selection says so:
+
+```ocaml
+let picker () =
+  <Select.Root
+    options=(fun () -> statuses)
+    value=(fun () -> Js.Nullable.fromOption (S.get selected)) />
+```
+
+`None` is `null`, still controlled. Handing the value to Kobalte is leaving
+the prop out.
+
+### It is Solid underneath
+
+There is no runtime of solidtype's between a component and Solid. A read,
+`Solid.get count`, compiles to `count()`, the call Solid's own JSX makes.
+Each of the example's components is compiled beside its TSX twin -- for the
+browser, hydratable, and for the server -- and a test requires the same
+templates and the same runtime calls, in the same order. Solid's
+attributes, Kobalte's components and HeroUI's styles are generated from
+their own TypeScript declarations, and `make lint` fails when they differ,
+so what Kobalte's documentation says a part takes is what its OCaml takes.
+[How it works](/solidtype/start/how-it-works/) follows one component through
+every step.
+
+## What it costs
+
+A dynamic value is written as the thunk Solid's compiler makes of it,
+`(fun () -> ...)`, and text as `Jsx.string` or `Jsx.int`: a few characters
+more, for every read standing where it runs. The build is two steps, dune
+and Vite, run side by side as [Vite and Astro](/solidtype/start/vite/)
+shows.
