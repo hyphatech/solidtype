@@ -189,13 +189,22 @@ Each prop beside the name HeroUI's React component gives it.
 | `children` | `children` | elements | | Its heading and panel |
 | `render` | — | | | Not yet |
 
-### Accordion.Heading, Accordion.Trigger, Accordion.Panel, Accordion.Body
+### Accordion.Trigger
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `onPress` | `on_press` | `unit -> unit` | | Called as it is pressed, by a pointer, Enter or Space, after its item's state has changed |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled, as it is while its item is; the arrows pass it by |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements | | Its content |
+| `render` | — | | | Not yet |
+
+### Accordion.Heading, Accordion.Panel, Accordion.Body
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | Its content |
-| `onPress`, `isDisabled` on the trigger | — | | Not yet: the item's `is_disabled` disables its trigger |
 | `render` | — | | Not yet |
 
 ### Accordion.Indicator

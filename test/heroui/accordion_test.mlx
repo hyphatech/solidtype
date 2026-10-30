@@ -20,6 +20,8 @@ external props :
   ?hide_separator:(bool[@mel.as "hideSeparator"]) ->
   ?disabled:string ->
   ?button:bool ->
+  ?trigger_disabled:(string[@mel.as "triggerDisabled"]) ->
+  ?presses:bool ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -158,7 +160,8 @@ let walk ~step host told =
 
 (* The accordion the twin renders, under the same props. *)
 let render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
-    ?is_disabled ?variant ?hide_separator ?disabled ?(button = false) tell =
+    ?is_disabled ?variant ?hide_separator ?disabled ?(button = false)
+    ?trigger_disabled ?(presses = false) tell =
   T.render (fun () ->
       <Accordion
         ?expanded_keys=(fun () -> expanded_keys)
@@ -189,7 +192,14 @@ let render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
                              <Accordion.Indicator />
                            </Button>
                          else
-                           <Accordion.Trigger>
+                           <Accordion.Trigger
+                             ?is_disabled=(fun () ->
+                                            match trigger_disabled with
+                                            | Some d when String.equal d key ->
+                                                Some true
+                                            | _ -> None)
+                             on_press=(fun () ->
+                                        if presses then tell (key ^ ":pressed"))>
                              (fun () -> Solidtype.Jsx.string key)
                              <Accordion.Indicator />
                            </Accordion.Trigger>))
@@ -204,19 +214,20 @@ let render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
       </Accordion>)
 
 let both ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
-    ?is_disabled ?variant ?hide_separator ?disabled ?(button = false) () =
+    ?is_disabled ?variant ?hide_separator ?disabled ?(button = false)
+    ?trigger_disabled ?(presses = false) () =
   let told = ref [] in
   render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
-    ?is_disabled ?variant ?hide_separator ?disabled ~button (fun t ->
-      told := t :: !told);
+    ?is_disabled ?variant ?hide_separator ?disabled ~button ?trigger_disabled
+    ~presses (fun t -> told := t :: !told);
   let* solidtype = walk ~step:(fun action -> action ()) T.body told in
   T.cleanup ();
   let told' = ref [] in
   let host =
     Twin.render
       (props ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
-         ?is_disabled ?variant ?hide_separator ?disabled ~button ()) (fun t ->
-        told' := t :: !told')
+         ?is_disabled ?variant ?hide_separator ?disabled ~button
+         ?trigger_disabled ~presses ()) (fun t -> told' := t :: !told')
   in
   let* react = walk ~step:Twin.step host told' in
   Twin.cleanup ();
@@ -261,6 +272,27 @@ let () =
       Jest.testPromise "takes a button as a trigger, as React's does" (fun () ->
           let* r = both ~button:true () in
           same r);
+      Jest.testPromise "keeps a trigger disabled of its own, as React's"
+        (fun () ->
+          let* r = both ~trigger_disabled:"returns" () in
+          same r);
+      Jest.testPromise "tells a trigger's presses, as React's" (fun () ->
+          let* r = both ~presses:true () in
+          same r);
+      Jest.testPromise "tells no press of a disabled trigger, as React's"
+        (fun () ->
+          let* r = both ~presses:true ~trigger_disabled:"returns" () in
+          same r);
+      Jest.testPromise "moves focus past a trigger disabled of its own"
+        (fun () ->
+          render ~trigger_disabled:"returns" (fun (_ : string) -> ());
+          let user = T.setup () in
+          T.focus (trigger T.body 0);
+          let* () = T.keyboard user "{ArrowDown}" in
+          let down = focused () in
+          let* () = T.keyboard user "{ArrowUp}" in
+          Js.Promise.resolve
+            E.(expect (down, focused ()) |> toEqual ("warranty", "shipping")));
       Jest.testPromise "is expanded as find in page reaches it, as React's"
         (fun () ->
           let reveal host told =

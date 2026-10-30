@@ -21,12 +21,16 @@ type Props = {
   // A HeroUI Button given the trigger's slot, as HeroUI's examples write it,
   // in place of each Accordion.Trigger.
   button?: boolean;
+  // The key of the one trigger given isDisabled of its own.
+  triggerDisabled?: string;
+  // Whether each trigger tells its presses, as "<key>:pressed".
+  presses?: boolean;
 };
 
 // What the accordion and its items told, in order: the accordion its keys,
 // an item its key and its new state.
 export function render(
-  { disabled, button, ...props }: Props,
+  { disabled, button, triggerDisabled, presses, ...props }: Props,
   tell: (told: string) => void,
 ): HTMLElement {
   const host = document.body.appendChild(document.createElement("div"));
@@ -48,7 +52,10 @@ export function render(
                   <Accordion.Indicator />
                 </Button>
               ) : (
-                <Accordion.Trigger>
+                <Accordion.Trigger
+                  isDisabled={key === triggerDisabled ? true : undefined}
+                  onPress={presses ? () => tell(`${key}:pressed`) : undefined}
+                >
                   {key}
                   <Accordion.Indicator />
                 </Accordion.Trigger>

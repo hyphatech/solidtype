@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Accordion.Trigger`: `on_press`, called as it is pressed,
+  by a pointer, Enter or Space, and `is_disabled`, which disables the trigger
+  alone, its item's state left as it is; the arrows pass a disabled trigger by.
 - `Solidtype_heroui.Tabs.Tab`: `href`, which makes the tab a link, an `<a>`
   that a press or Enter follows and never selects: the tab selected is the
   one `selected_key` names, as a router says which route is open. A disabled

@@ -79,12 +79,16 @@ module Heading : sig
 end
 
 (** The button that expands and collapses its item's panel: Kobalte's trigger, a
-    [<button>]. *)
+    [<button>]. It is disabled while its item is, or while [is_disabled] holds,
+    and the arrows then pass it by. [on_press] is called as it is pressed, by a
+    pointer, Enter or Space, after its item's state has changed. *)
 module Trigger : sig
   module Props : sig
     type t
 
     val check :
+      ?on_press:(unit -> unit) ->
+      ?is_disabled:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->

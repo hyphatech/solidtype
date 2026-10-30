@@ -26,6 +26,9 @@ type item = {
   expanded : unit -> bool;
   item_disabled : unit -> bool;
   content_id : string;
+  disable_trigger : bool -> unit;
+      (* Tells the item its trigger is disabled of its own, which Kobalte's
+         list skips by the arrows only as the item's. *)
 }
 
 module Item_context = Solidtype.Context.Make_optional (struct
@@ -71,12 +74,14 @@ module Item = struct
         (Solid.get (Types.ListState.selection_manager (Solid.get list)))
         true
     in
+    let trigger_disabled, disable_trigger = Solid.create_signal false in
     let i =
       {
         key;
         expanded = (fun () -> a.is_expanded key);
         item_disabled = disabled;
         content_id = item_id ^ "-content";
+        disable_trigger = Solid.set disable_trigger;
       }
     in
     (* Kobalte's panel is kept on the page while collapsed, which HeroUI's
@@ -84,7 +89,7 @@ module Item = struct
     <Kobalte.Item
       id=(fun () -> item_id)
       value=(fun () -> key)
-      disabled=(fun () -> disabled ())
+      disabled=(fun () -> disabled () || Solid.get trigger_disabled)
       force_mount=true
       on_focus_in=focus_in
       class_=(fun () -> after (Styles.Accordion.item (a.slots ())) (class_ ()))
@@ -126,13 +131,38 @@ module Heading = struct
     </Kobalte.Header>
 end
 
+external queue_microtask : (unit -> unit) -> unit = "queueMicrotask"
+external detail : Dom.mouseEvent -> int = "detail" [@@mel.get]
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external repeat : Dom.keyboardEvent -> bool = "repeat" [@@mel.get]
+
 module Trigger = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(on_press : (unit -> unit) option)
+      ?(is_disabled : bool = false) ?(class_ : string option)
+      ~(children : Jsx.content) () =
     let a, i = within_item "Accordion.Trigger" in
-    let n =
-      Interaction.create ~disabled:(fun[@u] () -> i.item_disabled ()) ()
-    in
+    let disabled () = i.item_disabled () || is_disabled () in
+    Solid.create_computed (fun () -> i.disable_trigger (is_disabled ()));
+    let n = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    (* A press as React Aria tells it: a pointer's click, after Kobalte has
+       toggled the item, or Enter or Space let go where it went down, which
+       Kobalte toggles by as it goes down, keeping the browser's click. *)
+    let press () = ignore (on_press () : unit option) in
+    let key_down = ref None in
     <Kobalte.Trigger
+      disabled=(fun () -> disabled ())
+      on_click=(fun e -> if detail e > 0 then queue_microtask press)
+      on_key_down=(fun e ->
+                    match key e with
+                    | ("Enter" | " ") as k when not (repeat e) ->
+                        key_down := Some k
+                    | _ -> ())
+      on_key_up=(fun e ->
+                  match !key_down with
+                  | Some k when String.equal k (key e) ->
+                      key_down := None;
+                      press ()
+                  | Some _ | None -> ())
       class_=(fun () ->
                after (Styles.Accordion.trigger (a.slots ())) (class_ ()))
       aria_controls=(fun () -> i.content_id)
