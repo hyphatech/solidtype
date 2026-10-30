@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted, not yet built.
 Date: 2026-10-23
 
 ## The problem
@@ -231,6 +231,35 @@ Kobalte takes after its own, and its output, from the same formatter.
 The generator binds the options `@internationalized/number` declares and
 Intl's as one type, since TypeScript takes either for the other.
 
+### Dates
+
+A date or a time is `@internationalized/date`'s, the values HeroUI's
+date components take: `Time`, `CalendarDate`, `CalendarDateTime` and
+`ZonedDateTime`, with its calendars, its arithmetic and its time zones.
+Kobalte 0.13 has no time zone and no date component: its `TimeField`
+edits a `{ hour, minute, second }` of its own, and no calendar, date
+field or date picker exists. So the library is bound as a package of its
+own, `solidtype-internationalized-date`, generated from its declarations
+on `generate/binding.ts`'s core, and every date port takes its values:
+
+- **TimeField** takes HeroUI's `TimeValue`, a `Time`, a
+  `CalendarDateTime` or a `ZonedDateTime`, and gives back the same kind.
+  Kobalte still edits it: the port turns the value into Kobalte's time to
+  draw and step, and Kobalte's change back into the value's own kind, by
+  `set`, so a zoned value moves by its zone's rules, daylight saving
+  included, as React Aria's does. A zoned value shows its zone's
+  abbreviation after the segments, a segment of its own that takes no
+  key, unless `hide_time_zone`.
+- **DateField, Calendar, RangeCalendar, DatePicker, DateRangePicker**,
+  group 7, are built on the same values and on the library's calendars, so
+  a calendar other than the Gregorian is theirs too.
+- **The wire** stays a `Js.Date.t`, an instant, as `MELANGE.md` and
+  wiretype's codecs read one: `ZonedDateTime.toDate` and `fromDate` with a
+  zone cross between them, at the boundary.
+
+The library is about 4.7 KB gzipped for its zoned values, and 11 KB
+whole, which a bundler shakes to what a page uses.
+
 ### Where Kobalte and React Aria differ
 
 A port keeps Kobalte's accessible pattern where both are accessible -- a
@@ -309,6 +338,14 @@ last.
 - **The browser's own validation as the base**: its rules alone, nothing
   across fields, and on a field whose input Kobalte hides -- a number
   field's, a slider's -- a bubble that points at nothing.
+- **Dates of our own**, an instant and a zone's name converted by
+  `Intl`: no dependency, but daylight saving's edges and every calendar's
+  arithmetic left to write and keep, Gregorian alone in practice, where
+  HeroUI's users expect React Aria's calendars and its exact values.
+- **Kobalte 2.0**, which has date components: an alpha, on Solid 2's
+  release candidate, and with no time zone either.
+- **The browser's `Temporal`**: Safari ships none, and its polyfill is
+  larger than the library.
 
 ## Rules it adds
 
@@ -327,6 +364,11 @@ Drafted here; they reach `AGENTS.md` when the work lands.
   value, change, blur, name, validity and error are props, and a `Form`
   adds only what a form alone can do. Why: a field's validity has one
   source, the store's, and any store drives every field.
+- **A date is `@internationalized/date`'s**, bound as
+  `solidtype-internationalized-date`, generated from its declarations, and
+  every date port takes and gives its values, Kobalte editing them where
+  Kobalte has a field. Why: HeroUI's values, calendars and time zones are
+  that library's, and a second date model would be one more to convert.
 
 ## Stages
 
@@ -383,6 +425,13 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   ListBox it hosts, filtered as Kobalte's collection holds it
 - [x] Autocomplete, on Kobalte's combo box, its search a SearchField in its
   popover
+
+### Dates
+- [ ] `@internationalized/date` bound as `solidtype-internationalized-date`,
+  generated, with its values, calendars, arithmetic and time zones
+- [ ] TimeField on its `TimeValue`: a `Time`, a `CalendarDateTime` or a
+  `ZonedDateTime`, Kobalte editing it, a zoned value's abbreviation shown
+  unless `hide_time_zone`
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,
