@@ -54,3 +54,12 @@ external slat : layout -> ('row Row.t -> Solidtype.Jsx.element) -> 'row t
 
 let make ?css ?thickness ?inset ?room f =
   slat (layout ?css ?thickness ?inset ?room ()) f
+
+external restyle_js : 'row t -> string -> unit = "restyle"
+[@@mel.module "@bezda/rhp"]
+
+let restyle slat css =
+  match restyle_js slat css with
+  | () -> ()
+  | exception Js.Exn.Error e ->
+      invalid_arg ("restyle: " ^ Option.value (Js.Exn.message e) ~default:"")

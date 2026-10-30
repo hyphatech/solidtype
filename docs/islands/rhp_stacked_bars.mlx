@@ -1,0 +1,48 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type team = { team : string; hours : float option array }
+type segment = { from : float option; to_ : float option; part : int }
+
+let teams =
+  [|
+    { team = "Web"; hours = [| Some 12.; Some 8.; Some 5. |] };
+    { team = "Mobile"; hours = [| Some 9.; None; Some 7. |] };
+    { team = "Data"; hours = [| Some 4.; Some 11.; Some 6. |] };
+  |]
+
+(* A team's hours as segments end to end, a missing one drawing nothing. *)
+let segments hours =
+  let stack = Solidtype_rhp.stack_up hours in
+  Array.mapi
+    (fun part from -> { from; to_ = stack.to_.(part); part })
+    stack.from
+
+let segment d =
+  let s = Row.data d in
+  <Bar
+    ?from=(fun () -> s.from)
+    ?to_=(fun () -> s.to_)
+    color=(fun () -> Color.series (s.part + 1))
+  />
+
+let team =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 64.) ())
+    (fun d ->
+      let t = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string t.team)</Label>
+        <Plot rows=(fun () -> segments t.hours) overlap=true render=segment />
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (0., 30.)) label="Hours a week, by task">
+    <Plot rows=(fun () -> teams) render=team />
+  </Chart>

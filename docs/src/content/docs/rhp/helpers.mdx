@@ -1,0 +1,67 @@
+---
+title: Helpers
+description: "The functions of data rhp gives: stacks, running totals, bins, summaries, densities."
+---
+
+import Example from "@components/Example.astro";
+import * as Stacked from "@islands/rhp_stacked_bars.jsx";
+import StackedCode from "@islands/rhp_stacked_bars.mlx?raw";
+import * as Waterfall from "@islands/rhp_waterfall.jsx";
+import WaterfallCode from "@islands/rhp_waterfall.mlx?raw";
+import * as Histogram from "@islands/rhp_histogram.jsx";
+import HistogramCode from "@islands/rhp_histogram.mlx?raw";
+import * as Box from "@islands/rhp_box_plot.jsx";
+import BoxCode from "@islands/rhp_box_plot.mlx?raw";
+
+rhp's helpers work a chart's values out from its data. Each takes values
+that may be missing, `float option array`, and leaves a missing one out:
+`Array.map Option.some` makes one of plain values.
+
+Original rhp documentation: [Helpers](https://rhp.vercel.app/reference/helpers/).
+
+## Stacked bars
+
+`stack_up` gives each value's segment, positive ones up from 0, negative
+ones down; a missing value is a missing segment, its bar given `None`,
+which draws nothing. The segments are a plot inside the slat, `overlap` so
+they share its band.
+
+<Example code={StackedCode} title="rhp_stacked_bars.mlx" fill><Stacked.make client:visible /></Example>
+
+## A waterfall
+
+`running` gives each change's step, from the total before it to the total
+after.
+
+<Example code={WaterfallCode} title="rhp_waterfall.mlx" fill><Waterfall.make client:visible /></Example>
+
+## A histogram
+
+`bins` counts the samples in bins of equal width over a domain.
+
+<Example code={HistogramCode} title="rhp_histogram.mlx" fill><Histogram.make client:visible /></Example>
+
+## Box plots
+
+`summary` gives the quartiles, the median and the whiskers' ends.
+
+<Example code={BoxCode} title="rhp_box_plot.mlx" fill><Box.make client:visible /></Example>
+
+## API Reference
+
+| Function | Type | Description |
+|---|---|---|
+| `stack_up` | `float option array -> Solidtype_rhp.stack` | Stacked segments, `from` and `to_` |
+| `running` | `float option array -> Solidtype_rhp.stack` | Running totals, for a waterfall |
+| `shares` | `?total:float -> float option array -> float option array` | Each value's share of the sum, scaled to `total`, 100 by default |
+| `summary` | `float option array -> Types.Summary.t` | Quartiles, median, whiskers, mean and outliers |
+| `bins` | `float option array -> ?options:Types.Bins.t -> unit -> Types.Bins2.t` | Histogram bins, `x0`, `x1` and `tally` |
+| `density` | `float option array -> ?options:Types.Density.t -> unit -> (float * float) array` | A kernel density estimate, for an `Area` |
+| `extent` | `float option array -> float * float` | The smallest and the largest |
+| `nice` | `float -> float -> ?count:float -> unit -> Types.Nice.t` | A round scale over a range |
+| `every` | `float -> ?options:Types.Every.t -> unit -> (float * float -> float array)` | Ticks at every multiple of a step |
+| `series` | `?n:int -> unit -> 'row Row.t -> Color.t` | The theme's series colours through the rows |
+| `cycle` | `'a array -> 'row Row.t -> 'a` | A list repeated over the rows |
+
+`every` raises `Invalid_argument` for a step not above 0, and `every_opt`
+gives `None`.

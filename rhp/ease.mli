@@ -15,5 +15,5 @@ val ease_in_out : t
 val cubic_bezier : float -> float -> float -> float -> t
 (** [cubic_bezier x1 y1 x2 y2] is CSS's [cubic-bezier(x1, y1, x2, y2)]. *)
 
-external custom : (float -> float) -> t = "%identity"
+val custom : (float -> float) -> t
 (** The progress at each time, both from 0 to 1. *)

@@ -10,11 +10,15 @@
 module Types = Types
 module Color = Color
 module Ease = Ease
+module Many_dots = Many_dots
+module Order = Order
 module Plot = Plot
 module Row = Row
+module Scale = Scale
 module Shape = Shape
 module Slat = Slat
 module Ticks = Ticks
+include Helpers
 
 module Area = struct
   module Props = struct
@@ -106,7 +110,7 @@ module Chart = struct
       ?id:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?role:string Solidtype.Check.value ->
-      ?style:string Solidtype.Check.value ->
+      ?style:string Js.Dict.t Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"

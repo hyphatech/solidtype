@@ -1,0 +1,41 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Place = Solidtype_rhp.Place
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type parcel = { route : string; kg : float }
+
+let parcels =
+  [|
+    { route = "Air"; kg = 14. };
+    { route = "Road"; kg = 32. };
+    { route = "Sea"; kg = 48. };
+  |]
+
+let parcel =
+  Slat.make ~thickness:(Slat.number 36.)
+    ~room:(Slat.room ~start:(Slat.px 48.) ~end_:(Slat.px 64.) ())
+    ~css:
+      ".badge { margin-left: 6px; padding: 1px 6px; border-radius: 6px; \
+       background: var(--rhp-ink); color: var(--rhp-surface); font-size: 12px; \
+       }"
+    (fun d ->
+      let p = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string p.route)</Label>
+        <Bar to_=(fun () -> p.kg) />
+        <Place at=(fun () -> p.kg)>
+          <span class_="badge">
+            (fun () -> Jsx.string (Js.Float.toString p.kg ^ " kg"))
+          </span>
+        </Place>
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (0., 60.))>
+    <Plot rows=(fun () -> parcels) render=parcel />
+  </Chart>

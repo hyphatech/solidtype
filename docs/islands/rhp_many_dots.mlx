@@ -1,0 +1,33 @@
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Many_dots = Solidtype_rhp.Many_dots
+
+type point = { x : float; y : float; group : int }
+
+(* The same points every time: Park and Miller's generator, exact in a
+   double, so the page and its twin draw the same scatter. *)
+let points =
+  let seed = ref 7. in
+  let next () =
+    seed := Float.rem (!seed *. 16807.) 2147483647.;
+    !seed /. 2147483647.
+  in
+  Array.init 400 (fun i ->
+      let x = next () *. 100. in
+      let y = (x *. 0.6) +. (next () *. 40.) in
+      { x; y; group = i mod 3 })
+
+let make () =
+  <Chart
+    scale=(fun () -> (0., 100.))
+    cross=(fun () -> (0., 100.))
+    height=260.
+    label="400 points">
+    <Many_dots
+      rows=(fun () -> points)
+      at=(fun () -> Many_dots.each (fun p _ -> p.x))
+      cross=(fun () -> Many_dots.each (fun p _ -> p.y))
+      color=(fun () -> Many_dots.each (fun p _ -> Color.series (p.group + 1)))
+      size=(fun () -> Many_dots.same (Many_dots.px 5.))
+    />
+  </Chart>

@@ -11,7 +11,8 @@ import ocaml from "@shikijs/langs/ocaml";
 import mlx from "./src/mlx.mjs";
 
 // solidtype's documentation: how the libraries work and are set up, the
-// Solid and Kobalte bindings, rhp's charts, and each HeroUI port live,
+// Solid and Kobalte bindings, the charts of rhp's binding, and each HeroUI
+// port live,
 // beside the same component in React, with its source. The demos are OCaml, compiled by
 // Melange into the repository's _build; two JSX compilers share the site,
 // React's kept to islands/react, where HeroUI's React components are
@@ -46,7 +47,7 @@ export default defineConfig({
         hypha({
           brand: "hypha",
           github: "hyphatech/solidtype",
-          tabs: { "Start here": "rocket", Solid: "zap", Kobalte: "blocks", HeroUI: "component", rhp: "waves-horizontal", Reference: "library" },
+          tabs: { "Start here": "rocket", Solid: "zap", Kobalte: "blocks", HeroUI: "component", Charts: "waves-horizontal", Reference: "library" },
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
         }),
         // The reference is odoc's, in public/, which the validator cannot see.
@@ -67,7 +68,7 @@ export default defineConfig({
         { label: "Solid", items: ["solid/components", "solid/reactivity", "solid/control-flow", "solid/state", "solid/async", "solid/rendering"] },
         { label: "Kobalte", items: ["kobalte/binding", "kobalte/usage"] },
         { label: "HeroUI", items: ["heroui/coverage", "heroui/accordion", "heroui/alert", "heroui/alert-dialog", "heroui/autocomplete", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/breadcrumbs", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/combo-box", "heroui/description", "heroui/disclosure", "heroui/disclosure-group", "heroui/drawer", "heroui/dropdown", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/list-box", "heroui/meter", "heroui/modal", "heroui/number-field", "heroui/pagination", "heroui/popover", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/select", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/tabs", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/toast", "heroui/toggle-button", "heroui/toggle-button-group", "heroui/tooltip", "heroui/typography"] },
-        { label: "rhp", items: ["rhp/overview", "rhp/chart", "rhp/plot", "rhp/slat", "rhp/bar", "rhp/label"] },
+        { label: "Charts", items: ["rhp/overview", "rhp/chart", "rhp/plot", "rhp/slat", "rhp/scale", "rhp/bar", "rhp/dot", "rhp/tick", "rhp/label", "rhp/cell", "rhp/place", "rhp/line", "rhp/area", "rhp/many-dots", "rhp/poster", "rhp/theme", "rhp/helpers"] },
         { label: "Reference", items: ["reference"] },
       ],
     }),

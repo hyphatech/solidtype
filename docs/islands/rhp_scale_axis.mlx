@@ -1,0 +1,53 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Every = Solidtype_rhp.Types.Every
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Scale = Solidtype_rhp.Scale
+module Slat = Solidtype_rhp.Slat
+module Tick = Solidtype_rhp.Tick
+module Ticks = Solidtype_rhp.Ticks
+
+type fruit = { name : string; sold : float }
+
+let fruits =
+  [|
+    { name = "Apples"; sold = 12. };
+    { name = "Bananas"; sold = 18. };
+    { name = "Cherries"; sold = 7. };
+  |]
+
+let fruit =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 80.) ())
+    (fun d ->
+      let f = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
+        <Bar to_=(fun () -> f.sold) />
+      </div>)
+
+(* A tick of the axis: a line across the band and its value, the last one
+   saying the unit. *)
+let tick (d : Scale.tick Row.t) =
+  let t = Row.data d in
+  <div>
+    <Tick at=(fun () -> t.at) />
+    <Label at=(fun () -> t.at)>
+      (fun () ->
+        Jsx.string (Js.Float.toString t.at ^ if t.last then " sold" else ""))
+    </Label>
+  </div>
+
+let make () =
+  <Chart scale=(fun () -> (0., 20.))>
+    <Plot rows=(fun () -> fruits) render=fruit />
+    <Scale
+      ticks=(fun () ->
+              Ticks.custom
+                (Solidtype_rhp.every 5. ~options:(Every.make ~ends:true ()) ()))
+      render=tick
+    />
+  </Chart>

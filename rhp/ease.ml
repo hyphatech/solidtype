@@ -4,8 +4,13 @@ type t
    which. *)
 external of_string : string -> t = "%identity"
 external of_floats : float array -> t = "%identity"
-external custom : (float -> float) -> t = "%identity"
+external of_function : (float -> float) -> t = "%identity"
 
+(* A function is wrapped by a call Melange keeps: inlined, its identity would
+   let Melange merge the function into the thunk it is written in,
+   (fun () -> custom (fun ...)), into one JavaScript function of all their
+   arguments, which rhp would call with its own. *)
+let[@inline never] custom f = of_function f
 let linear = of_string "linear"
 let ease = of_string "ease"
 let ease_in = of_string "ease-in"

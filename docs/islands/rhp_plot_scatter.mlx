@@ -1,0 +1,29 @@
+module Chart = Solidtype_rhp.Chart
+module Dot = Solidtype_rhp.Dot
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+
+type car = { power : float; price : float }
+
+let cars =
+  [|
+    { power = 90.; price = 18. };
+    { power = 120.; price = 24. };
+    { power = 150.; price = 31. };
+    { power = 110.; price = 27. };
+    { power = 200.; price = 45. };
+    { power = 170.; price = 36. };
+  |]
+
+let car d =
+  let c = Row.data d in
+  <Dot at=(fun () -> c.power) cross=(fun () -> c.price) />
+
+let make () =
+  <Chart
+    scale=(fun () -> (50., 250.))
+    cross=(fun () -> (0., 60.))
+    height=220.
+    label="Price, in k€, by power, in hp">
+    <Plot rows=(fun () -> cars) overlap=true render=car />
+  </Chart>

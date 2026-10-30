@@ -1,0 +1,46 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type step = {
+  name : string;
+  change : float;
+  from : float option;
+  to_ : float option;
+}
+
+(* Each change from the total before it. *)
+let steps =
+  let names = [| "Sales"; "Refunds"; "Services"; "Costs" |] in
+  let changes = [| 40.; -12.; 18.; -6. |] in
+  let total = Solidtype_rhp.running (Array.map Option.some changes) in
+  Array.mapi
+    (fun i name ->
+      { name; change = changes.(i); from = total.from.(i); to_ = total.to_.(i) })
+    names
+
+let step =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 72.) ())
+    (fun d ->
+      let s = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string s.name)</Label>
+        <Bar
+          ?from=(fun () -> s.from)
+          ?to_=(fun () -> s.to_)
+          color=(fun () ->
+                  if s.change < 0. then Color.negative else Color.positive)
+        />
+      </div>)
+
+let make () =
+  <Chart
+    scale=(fun () -> (0., 60.)) label="The month's profit, change by change">
+    <Plot rows=(fun () -> steps) render=step />
+  </Chart>

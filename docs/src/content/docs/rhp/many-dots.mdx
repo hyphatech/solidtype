@@ -1,0 +1,43 @@
+---
+title: Many dots
+description: Many points at once, without a slat or a computation for each.
+---
+
+import Example from "@components/Example.astro";
+import * as Scatter from "@islands/rhp_many_dots.jsx";
+import ScatterCode from "@islands/rhp_many_dots.mlx?raw";
+
+`Solidtype_rhp.Many_dots` is rhp's `ManyDots`, experimental in rhp: a plain
+HTML point for each row, on a chart with a `cross` scale, with no slat and
+no Solid computation per point, for a scatter of thousands.
+
+Original rhp documentation: [ManyDots](https://rhp.vercel.app/reference/manydots/).
+
+## Usage
+
+Four hundred points, each its row's `x` and `y`, coloured by its group.
+
+<Example code={ScatterCode} title="rhp_many_dots.mlx" fill><Scatter.make client:visible /></Example>
+
+## Values
+
+Each prop takes `Many_dots.same v`, one value for every point, or
+`Many_dots.each (fun row i -> v)`, one for each point, worked out once for
+each update of the rows.
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `rows` | `'row array` | required | A point each |
+| `at` | `('row, float) Many_dots.value` | required | Its value on the value axis; a point not finite is left out |
+| `cross` | `('row, float) Many_dots.value` | required | Its value on the cross scale |
+| `key` | `'row -> int -> 'key` | its number | What identifies a point |
+| `color` | `('row, Color.t) Many_dots.value` | | Its colour |
+| `size` | `('row, Many_dots.size) Many_dots.value` | `Many_dots.px 4.` | Its diameter |
+| `shape` | `('row, Shape.t) Many_dots.value` | | Its outline |
+| `point_class` | `('row, string) Many_dots.value` | | A point's own classes |
+| `point_style` | `('row, string Js.Dict.t) Many_dots.value` | | A point's own declarations |
+
+It also takes a `<div>`'s attributes and handlers, `class_`, `style` and
+`data_*`, which it passes on.

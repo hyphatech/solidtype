@@ -1,0 +1,31 @@
+---
+title: Tick
+description: "A short line across the band at a value: a goal, a median, a mark."
+---
+
+import Example from "@components/Example.astro";
+import * as Bullet from "@islands/rhp_tick_bullet.jsx";
+import BulletCode from "@islands/rhp_tick_bullet.mlx?raw";
+
+`Solidtype_rhp.Tick` is rhp's `Tick`, a block: a line across its slat's band
+at `at`.
+
+Original rhp documentation: [Blocks: Tick](https://rhp.vercel.app/reference/blocks/#tick).
+
+## Usage
+
+A bar and a tick, a bullet chart: each metric beside its goal.
+
+<Example code={BulletCode} title="rhp_tick_bullet.mlx" fill><Bullet.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `at` | `float` | | Its value |
+| `thick` | `(string, float) Types.Either.t` | the band less a margin | Its length across the band: a CSS length, or a share |
+| `color` | `Color.t` | `Color.ink` | Its color |
+| `shape` | `Shape.t` | | An outline to wear instead of its rectangle |
+
+It also takes a `<div>`'s attributes and handlers, `class_`, `style` and
+`data_*`, which it passes on.

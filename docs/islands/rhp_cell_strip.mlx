@@ -1,0 +1,41 @@
+module Cell = Solidtype_rhp.Cell
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Ticks = Solidtype_rhp.Ticks
+
+type day = { day : string; visits : float }
+
+let days =
+  [|
+    { day = "Mon"; visits = 12. };
+    { day = "Tue"; visits = 30. };
+    { day = "Wed"; visits = 44. };
+    { day = "Thu"; visits = 38. };
+    { day = "Fri"; visits = 21. };
+    { day = "Sat"; visits = 8. };
+    { day = "Sun"; visits = 5. };
+  |]
+
+let day =
+  Slat.make
+    ~room:(Slat.room ~start:(Slat.px 20.) ())
+    (fun d ->
+      let v = Row.data d in
+      <div>
+        <Cell value=(fun () -> v.visits) />
+        <Label edge="start">(fun () -> Jsx.string v.day)</Label>
+      </div>)
+
+let make () =
+  <Chart
+    orientation=`vertical
+    height=60.
+    scale=(fun () -> (0., 50.))
+    ticks=(fun () -> Ticks.none)
+    label="Visits each day">
+    <Plot rows=(fun () -> days) render=day />
+  </Chart>

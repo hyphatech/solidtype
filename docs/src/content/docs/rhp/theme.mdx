@@ -1,0 +1,32 @@
+---
+title: Theme
+description: The colours and font of every chart inside it.
+---
+
+import Example from "@components/Example.astro";
+import * as Sunset from "@islands/rhp_theme.jsx";
+import SunsetCode from "@islands/rhp_theme.mlx?raw";
+
+`Solidtype_rhp.Theme` is rhp's `Theme`: a theme, `Types.ThemeValues.t`, for
+every chart inside it; a chart's own `theme` wins, key by key, and an inner
+`Theme` changes only the keys it names. A theme's colour is a value, so a
+key can be a CSS variable of the page's, and follow its light and dark.
+
+Original rhp documentation: [Colors and themes](https://rhp.vercel.app/guides/themes/).
+
+## Usage
+
+Four colours and a serif, each city given the series' next by `series`.
+
+<Example code={SunsetCode} title="rhp_theme.mlx" fill><Sunset.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Description |
+|---|---|---|
+| `value` | `Types.ThemeValues.t` | Its theme |
+| `children` | elements | The charts it themes |
+
+`Types.ThemeValues.make` takes `series`, an array, and `positive`,
+`negative`, `ink`, `muted`, `grid`, `surface`, `low`, `high` and `font`,
+each a string; a key left out keeps rhp's, `Solidtype_rhp.theme`.

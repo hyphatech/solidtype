@@ -73,3 +73,10 @@ val make :
     - [inset] is the empty share of the band on each side of a [Bar], a [Tick]
       or an [Area], 0.18 by default.
     - [room] is room outside the plot for what the slat draws there. *)
+
+val restyle : 'row t -> string -> unit
+(** [restyle slat css] gives a slat type new CSS, and every slat of that type
+    restyles at once, without being drawn again: for a live style editor.
+
+    Raises [Invalid_argument] with rhp's message for a slat type made without
+    [css], which an empty string gives. *)

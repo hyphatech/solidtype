@@ -1,10 +1,11 @@
 ; An island rendered on the server and hydrated in the browser, through
-; Solid's hydratable compile: the setup renders it, the test hydrates it.
+; Solid's hydratable compile: the setup renders it, the test hydrates it;
+; and an rhp chart alike.
 
 (library
  (name hydration_test)
  (modes melange)
- (libraries solidtype melange-jest.jest melange.dom)
+ (libraries solidtype solidtype-rhp melange-jest.jest melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

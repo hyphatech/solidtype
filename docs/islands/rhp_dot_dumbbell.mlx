@@ -1,0 +1,41 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Dot = Solidtype_rhp.Dot
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type pay = { role : string; before : float; after : float }
+
+let pays =
+  [|
+    { role = "Design"; before = 48.; after = 61. };
+    { role = "Support"; before = 35.; after = 39. };
+    { role = "Sales"; before = 52.; after = 58. };
+  |]
+
+let pay =
+  Slat.make ~thickness:(Slat.number 36.)
+    ~room:(Slat.room ~start:(Slat.px 72.) ())
+    (fun d ->
+      let p = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string p.role)</Label>
+        <Bar
+          from=(fun () -> p.before)
+          to_=(fun () -> p.after)
+          thick=(fun () -> Either.left "2px")
+          color=(fun () -> Color.muted)
+        />
+        <Dot at=(fun () -> p.before) color=(fun () -> Color.series 2) />
+        <Dot at=(fun () -> p.after) />
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (30., 70.)) label="Pay before and after, in k€">
+    <Plot rows=(fun () -> pays) render=pay />
+  </Chart>

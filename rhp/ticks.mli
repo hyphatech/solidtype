@@ -13,7 +13,7 @@ external values : float array -> t = "%identity"
 val count : int -> t
 (** About this many round values across the scale. *)
 
-external custom : (float * float -> float array) -> t = "%identity"
+val custom : (float * float -> float array) -> t
 (** The ticks a function gives for the scale's [(min, max)], as
     [Solidtype_rhp.every] gives: [Ticks.custom (Solidtype_rhp.every 5. ())]. *)
 

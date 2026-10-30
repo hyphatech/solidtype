@@ -1,0 +1,32 @@
+---
+title: Place
+description: A place on the scale, which draws nothing, for whatever is put in it.
+---
+
+import Example from "@components/Example.astro";
+import * as Badges from "@islands/rhp_place_badges.jsx";
+import BadgesCode from "@islands/rhp_place_badges.mlx?raw";
+
+`Solidtype_rhp.Place` is rhp's `Place`, a block of no size that draws
+nothing: what is put inside it sits at its value.
+
+Original rhp documentation: [Blocks: Place](https://rhp.vercel.app/reference/blocks/#place).
+
+## Usage
+
+A badge of each route's weight, at the end of its bar, styled by the slat's
+CSS.
+
+<Example code={BadgesCode} title="rhp_place_badges.mlx" fill><Badges.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `at` | `float` | | Its value |
+| `across` | `float` | `0.5` | Where it sits across the band, from 0 to 1 |
+| `cross` | `float` | | Its value on the chart's second scale, in place of `across` |
+| `children` | elements | | What sits at its value |
+
+It also takes a `<div>`'s attributes and handlers, `class_`, `style` and
+`data_*`, which it passes on.

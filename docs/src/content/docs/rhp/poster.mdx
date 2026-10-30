@@ -1,0 +1,31 @@
+---
+title: Poster
+description: "A panel around a chart, as a magazine sets one: kicker, headline, dek and note."
+---
+
+import Example from "@components/Example.astro";
+import * as Panel from "@islands/rhp_poster.jsx";
+import PanelCode from "@islands/rhp_poster.mlx?raw";
+
+`Solidtype_rhp.Poster` is rhp's `Poster`, a `<figure>` around a chart with a
+kicker, a headline, a dek and a note: markup alone, its look the page's
+CSS, or one of the looks in `@bezda/rhp/posters.css`, which a page links.
+
+Original rhp documentation: [Poster](https://rhp.vercel.app/reference/poster/).
+
+## Usage
+
+<Example code={PanelCode} title="rhp_poster.mlx" fill><Panel.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Description |
+|---|---|---|
+| `look` | `string` | A class for its look, added to `poster` |
+| `kicker` | `Jsx.element` | Above the headline |
+| `title` | `Jsx.element` | The headline |
+| `dek` | `Jsx.element` | Under the headline |
+| `note` | `Jsx.element` | Under the chart |
+| `children` | elements | The chart |
+
+It also takes a `<figure>`'s attributes and handlers, which it passes on.

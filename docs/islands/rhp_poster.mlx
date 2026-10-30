@@ -1,0 +1,38 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type fruit = { name : string; sold : float }
+
+let fruits =
+  [|
+    { name = "Apples"; sold = 12. };
+    { name = "Bananas"; sold = 18. };
+    { name = "Cherries"; sold = 7. };
+  |]
+
+let fruit =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 80.) ())
+    (fun d ->
+      let f = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
+        <Bar to_=(fun () -> f.sold) />
+      </div>)
+
+let make () =
+  <Poster
+    kicker=(<span>"The market"</span>)
+    title=(<span>"Bananas sell best"</span>)
+    dek=(<span>"Crates sold on Saturday, by fruit"</span>)
+    note=(<span>"Counted at the stall's till."</span>)>
+    <Chart scale=(fun () -> (0., 20.))>
+      <Plot rows=(fun () -> fruits) render=fruit />
+    </Chart>
+  </Poster>

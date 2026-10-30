@@ -1,0 +1,33 @@
+(* A chart both sides render: rhp's, its slat a typed row's. *)
+
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type fruit = { name : string; sold : float }
+
+let fruits =
+  [|
+    { name = "Apples"; sold = 12. };
+    { name = "Bananas"; sold = 18. };
+    { name = "Cherries"; sold = 7. };
+  |]
+
+let fruit =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 80.) ())
+    (fun d ->
+      let f = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
+        <Bar to_=(fun () -> f.sold) />
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (0., 30.)) label="Fruit sold">
+    <Plot rows=(fun () -> fruits) render=fruit />
+  </Chart>

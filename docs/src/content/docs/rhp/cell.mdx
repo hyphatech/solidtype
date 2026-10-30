@@ -1,0 +1,32 @@
+---
+title: Cell
+description: A cell of the band, coloured by its value on the scale.
+---
+
+import Example from "@components/Example.astro";
+import * as Strip from "@islands/rhp_cell_strip.jsx";
+import StripCode from "@islands/rhp_cell_strip.mlx?raw";
+
+`Solidtype_rhp.Cell` is rhp's `Cell`, a block that fills its slat's band,
+coloured from the theme's `low` at the scale's minimum to its `high` at its
+maximum.
+
+Original rhp documentation: [Blocks: Cell](https://rhp.vercel.app/reference/blocks/#cell).
+
+## Usage
+
+A day's visits as a colour, a strip of cells, the chart vertical so the days
+run side by side.
+
+<Example code={StripCode} title="rhp_cell_strip.mlx" fill><Strip.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `value` | `float` | | Coloured on the scale, from the theme's low to its high |
+| `color` | `Color.t` | | A fixed colour instead |
+| `shape` | `Shape.t` | | An outline to wear instead of its rectangle |
+
+It also takes a `<div>`'s attributes and handlers, `class_`, `style` and
+`data_*`, which it passes on.

@@ -1,0 +1,39 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Tick = Solidtype_rhp.Tick
+
+type metric = { metric : string; value : float; goal : float }
+
+let metrics =
+  [|
+    { metric = "Revenue"; value = 72.; goal = 80. };
+    { metric = "Signups"; value = 91.; goal = 75. };
+    { metric = "Retention"; value = 58.; goal = 65. };
+  |]
+
+let metric =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 80.) ())
+    (fun d ->
+      let m = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string m.metric)</Label>
+        <Bar to_=(fun () -> m.value) thick=(fun () -> Either.right 0.4) />
+        <Tick
+          at=(fun () -> m.goal)
+          thick=(fun () -> Either.right 0.8)
+          color=(fun () -> Color.ink)
+        />
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (0., 100.)) label="Each metric against its goal">
+    <Plot rows=(fun () -> metrics) render=metric />
+  </Chart>

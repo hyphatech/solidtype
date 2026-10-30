@@ -1,0 +1,43 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Theme = Solidtype_rhp.Theme
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+
+type city = { city : string; hours : float }
+
+let cities =
+  [|
+    { city = "Lisbon"; hours = 8.2 };
+    { city = "Athens"; hours = 9.1 };
+    { city = "Seville"; hours = 9.4 };
+    { city = "Malta"; hours = 8.8 };
+  |]
+
+let sunset =
+  ThemeValues.make
+    ~series:[| "#ff6b4a"; "#ffa94d"; "#f0b400"; "#b197fc" |]
+    ~font:"Georgia, serif" ()
+
+let colors = Solidtype_rhp.series ()
+
+let city =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 64.) ())
+    (fun d ->
+      let c = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string c.city)</Label>
+        <Bar to_=(fun () -> c.hours) color=(fun () -> colors d) />
+      </div>)
+
+let make () =
+  <Theme value=(fun () -> sunset)>
+    <Chart scale=(fun () -> (0., 12.)) label="Hours of sun a day in June">
+      <Plot rows=(fun () -> cities) render=city />
+    </Chart>
+  </Theme>

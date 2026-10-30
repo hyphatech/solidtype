@@ -46,6 +46,11 @@ export default defineConfig({
         test: {
           name: "hydration",
           environment: "jsdom",
+          // Solid and rhp are compiled with the test, as an application's
+          // build compiles them: left to Node, solid-js/web's import of
+          // Solid's core would be the server's, whose onMount runs with no
+          // element to hydrate.
+          server: { deps: { inline: [/@bezda\/rhp/, /solid-js/] } },
           globalSetup: ["test/hydration/setup.ts"],
           globals: true,
           include: ["_build/default/test/hydration/out/test/hydration/*_test.jsx"],

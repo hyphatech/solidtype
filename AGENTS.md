@@ -56,9 +56,11 @@ kobalte/             solidtype-kobalte: Kobalte's components part by part,
 rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
                      rhp's declarations whole: solidtype_rhp, and the types
                      it names, types
-  plot row slat      what no rule maps, ported by hand, one module each, each
-  color ticks ease   .mli saying why: a plot of typed rows and its slat, and
-  shape              the types of more JavaScript kinds than Either holds
+  plot scale         what no rule maps, ported by hand, one module each, each
+  many_dots row      .mli saying why: a plot of typed rows and its slat, a
+  slat order         scale, many dots, a plot's order, the types of more
+  color ticks ease   JavaScript kinds than Either holds, and helpers, rhp's
+  shape helpers      functions of rows, which solidtype_rhp includes
 heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
@@ -127,8 +129,8 @@ generate/            what writes the generated bindings from Solid's,
                      named, its shared props, roots split by `multiple`
   heroui             HeroUI's variant functions, from @heroui/styles
   rhp                rhp's: its components' elements, the types and exports
-                     ported by hand, and a failure on anything else no rule
-                     maps
+                     ported by hand, each port held to what rhp declares for
+                     it, and a failure on anything else no rule maps
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
@@ -175,9 +177,10 @@ test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
 test/server/         Solid's rendering on the server, in OCaml, run by vitest
                      in Node
-test/hydration/      an island rendered on the server and hydrated by
-                     Web.hydrate, in a vitest project of Solid's hydratable
-                     compile; setup.ts renders it through Vite's server loading
+test/hydration/      an island, and an rhp chart, rendered on the server and
+                     hydrated by Web.hydrate, in a vitest project of Solid's
+                     hydratable compile, Solid and rhp compiled with it;
+                     setup.ts renders them through Vite's server loading
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
@@ -403,7 +406,9 @@ break.
   on the core Kobalte's shares: a type or an export no rule maps is a
   module of `rhp/`, named in the generator, its `.mli` saying why, and the
   generator fails on any other declaration it cannot bind, so no part is
-  bound by halves. A rule is made general only where it would bind the
+  bound by halves; and a hand port is held to the declaration it ports, so
+  a prop, setting, field or key rhp declares there is bound in its `.mli`
+  or named in the generator as left out, with the reason. A rule is made general only where it would bind the
   next version the same way; a rule written for one declaration is a hand
   port instead. Why: a binding half generated leaves out what a user then
   cannot reach, and a rule for one declaration breaks on the next version.

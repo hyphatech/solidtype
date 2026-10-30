@@ -6,6 +6,10 @@ description: A slat for each row, stacked in the chart's band, each in its place
 import Example from "@components/Example.astro";
 import * as Live from "@islands/rhp_plot_live.jsx";
 import LiveCode from "@islands/rhp_plot_live.mlx?raw";
+import * as Sorted from "@islands/rhp_plot_sorted.jsx";
+import SortedCode from "@islands/rhp_plot_sorted.mlx?raw";
+import * as Scatter from "@islands/rhp_plot_scatter.jsx";
+import ScatterCode from "@islands/rhp_plot_scatter.mlx?raw";
 
 `Solidtype_rhp.Plot` is rhp's `Plot`: a slat for each of its rows. Its
 `rows` are an array of an OCaml record, and its slat a
@@ -21,6 +25,24 @@ here one bar, which moves to its new length. `keyboard` lets the slats take
 focus: Tab stops at one, and the arrows, Home and End move through them.
 
 <Example code={LiveCode} title="rhp_plot_live.mlx" fill><Live.make client:visible /></Example>
+
+## Examples
+
+### Sorted
+
+`order` is an `Order.t`: a place for each row, `Order.positions`, or a
+sort, `Order.sort_by`, by what a function of the row gives. Given `None`,
+`?order=`, the rows keep their own order; the bars slide between the two.
+
+<Example code={SortedCode} title="rhp_plot_sorted.mlx" fill><Sorted.make client:visible /></Example>
+
+### A scatter plot
+
+On a chart with a `cross` scale, an `overlap` plot's slats share the whole
+plot, and a `Dot` given `at` and `cross` is a point on both scales. A block
+alone can be an overlap plot's slat, with no element around it.
+
+<Example code={ScatterCode} title="rhp_plot_scatter.mlx" fill><Scatter.make client:visible /></Example>
 
 ## Anatomy
 
@@ -51,10 +73,10 @@ place, as the plot's child:
 | `orientation` | `` [ `horizontal \| `vertical \| `across ] `` | the chart's | `` `across `` is the other way from the plot around it |
 | `overlap` | `bool` | `false` | Every slat in one band: stacked segments, strips of dots, layers |
 | `slats` | `float` | every row | The number of slats |
+| `order` | `'row Order.t` | the rows' | The order they are shown in |
 | `animate` | `(bool, Types.Timing.t) Types.Either.t` | the chart's | The JavaScript version, or its timing |
 | `thick` | `(string, float) Types.Either.t` | `1.` | In a slat, the share of its band the plot fills, or a CSS length |
 | `static` | `bool` | the chart's | Rows drawn once |
 | `keyboard` | `bool` | `false` | The slats take focus |
-| `class_`, `style`, `ref` | | | On the plot's element |
-
-Not bound yet: `order`, and `sortBy`, which sort the slats on screen.
+| `class_`, `ref` | | | On the plot's element |
+| `style` | `string Js.Dict.t` | | Declarations rhp adds to its own |

@@ -1,0 +1,49 @@
+module Area = Solidtype_rhp.Area
+module Chart = Solidtype_rhp.Chart
+module Density = Solidtype_rhp.Types.Density
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type route = { route : string; minutes : float array }
+
+let routes =
+  [|
+    {
+      route = "Bus";
+      minutes = [| 22.; 25.; 24.; 31.; 28.; 26.; 35.; 24.; 27.; 29. |];
+    };
+    {
+      route = "Tram";
+      minutes = [| 18.; 19.; 21.; 20.; 19.; 22.; 18.; 20.; 21.; 19. |];
+    };
+    {
+      route = "Bike";
+      minutes = [| 15.; 17.; 16.; 18.; 15.; 16.; 17.; 19.; 16.; 15. |];
+    };
+  |]
+
+(* Each route's spread of times, as a density over the scale. *)
+let spread minutes =
+  Solidtype_rhp.density
+    (Array.map Option.some minutes)
+    ~options:(Density.make ~domain:(10., 40.) ())
+    ()
+  |> Array.map (fun (x, y) -> Some (Some x, Some y))
+
+let route =
+  Slat.make ~thickness:(Slat.number 48.)
+    ~room:(Slat.room ~start:(Slat.px 48.) ())
+    (fun d ->
+      let r = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string r.route)</Label>
+        <Area points=(fun () -> spread r.minutes) mirror=true smooth=true />
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (10., 40.)) label="Minutes to work, by route">
+    <Plot rows=(fun () -> routes) render=route />
+  </Chart>

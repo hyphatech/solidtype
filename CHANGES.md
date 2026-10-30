@@ -16,17 +16,17 @@
   with a cancelable `invalid` event on the form; preventing it keeps the
   first invalid field from being focused, for the application to move focus
   as it chooses.
-- `solidtype-rhp`, a new package: rhp 2.2's reactive charts of HTML, its
-  components and functions generated from rhp's own declarations, and
-  `Plot`, `Row`, `Slat`, `Color`, `Ticks`, `Ease` and `Shape` ported by hand:
-  a plot's rows are an array of an OCaml record, and its slat a function of
-  that record's row. Not bound yet: `Scale`, `ManyDots`, a plot's `order`,
-  and `stackUp`, `shares`, `running`, `series`, `cycle` and `restyle`.
+- `solidtype-rhp`, a new package: rhp 2.2's reactive charts of HTML, bound
+  whole, its components and functions generated from rhp's own declarations,
+  and `Plot`, `Scale`, `Many_dots`, `Row`, `Slat`, `Order`, `Color`, `Ticks`,
+  `Ease`, `Shape`, and `series`, `cycle`, `stack_up`, `shares` and `running`
+  ported by hand: a plot's rows are an array of an OCaml record, and its slat
+  a function of that record's row.
 - `ppx_solidtype`: a component's render function given by name,
   `<Plot render=fruit />`, is checked and passed as a function child is.
-- The documentation's rhp section: how a chart is made, and Chart, Plot,
-  Slat, Bar and Label, each beside the page of rhp's documentation it
-  follows.
+- The documentation's Charts section, the binding of rhp: how a chart is
+  made, a page for each component and for rhp's helpers, each linking to the
+  page of rhp's documentation it follows.
 
 ## 0.3.0 (2026-10-27)
 

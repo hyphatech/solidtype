@@ -1,0 +1,37 @@
+---
+title: Dot
+description: A round point at a value, or at a value on each of two scales.
+---
+
+import Example from "@components/Example.astro";
+import * as Dumbbell from "@islands/rhp_dot_dumbbell.jsx";
+import DumbbellCode from "@islands/rhp_dot_dumbbell.mlx?raw";
+
+`Solidtype_rhp.Dot` is rhp's `Dot`, a block: a round point at `at` on the
+chart's scale, across its slat's band, or at `cross` on the chart's second
+scale.
+
+Original rhp documentation: [Blocks: Dot](https://rhp.vercel.app/reference/blocks/#dot).
+
+## Usage
+
+Two dots and a thin bar between them, a dumbbell: each role's pay before and
+after.
+
+<Example code={DumbbellCode} title="rhp_dot_dumbbell.mlx" fill><Dumbbell.make client:visible /></Example>
+
+A scatter plot is dots on two scales: see [Plot](/solidtype/rhp/plot/#a-scatter-plot).
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `at` | `float` | | Its value on the value axis |
+| `size` | `(string, float) Types.Either.t` | `"10px"` | Its diameter: a CSS length, or a share of the band |
+| `across` | `float` | `0.5` | Where it sits across the band, from 0 to 1 |
+| `cross` | `float` | | Its value on the chart's second scale, in place of `across` |
+| `color` | `Color.t` | `Color.series 1` | Its color |
+| `shape` | `Shape.t` | | An outline to wear instead of its circle |
+
+It also takes a `<div>`'s attributes and handlers, `class_`, `style` and
+`data_*`, which it passes on.

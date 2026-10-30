@@ -1,0 +1,33 @@
+---
+title: Area
+description: "A filled outline across the band: ridgelines, or violins drawn both ways."
+---
+
+import Example from "@components/Example.astro";
+import * as Violin from "@islands/rhp_area_violin.jsx";
+import ViolinCode from "@islands/rhp_area_violin.mlx?raw";
+
+`Solidtype_rhp.Area` is rhp's `Area`: an SVG shape over `points`, each a
+value and a height across the band, up from its edge or, `mirror`ed, both
+ways from its middle.
+
+Original rhp documentation: [Blocks: Area](https://rhp.vercel.app/reference/blocks/#area).
+
+## Usage
+
+A violin for each route: its times' spread, from `density`, drawn both ways
+from the middle of the band.
+
+<Example code={ViolinCode} title="rhp_area_violin.mlx" fill><Violin.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `points` | `(float option * float option) option array` | | Value and height pairs, sorted by value; a missing one breaks the shape |
+| `peak` | `float` | the largest height | The height that fills the band |
+| `mirror` | `bool` | `false` | Both ways from the band's middle |
+| `smooth` | `bool` | `false` | Curves between the points |
+| `color` | `Color.t` | `Color.series 1` | Its colour |
+
+It also takes an `<svg>`'s attributes and handlers, which it passes on.

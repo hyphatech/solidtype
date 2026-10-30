@@ -8,6 +8,8 @@ import * as BarChart from "@islands/rhp_bar_chart.jsx";
 import BarChartCode from "@islands/rhp_bar_chart.mlx?raw";
 import * as Vertical from "@islands/rhp_chart_vertical.jsx";
 import VerticalCode from "@islands/rhp_chart_vertical.mlx?raw";
+import * as OwnTicks from "@islands/rhp_chart_ticks.jsx";
+import OwnTicksCode from "@islands/rhp_chart_ticks.mlx?raw";
 
 `Solidtype_rhp.Chart` is rhp's `Chart`: the frame its plots draw in, on
 one scale, with its axis.
@@ -29,15 +31,23 @@ chart for a reader, which then reads it as a figure.
 
 <Example code={VerticalCode} title="rhp_chart_vertical.mlx" fill><Vertical.make client:visible /></Example>
 
+### Ticks of your own
+
+`Ticks.custom` takes any function of the scale's minimum and maximum: here
+its ends and its middle.
+
+<Example code={OwnTicksCode} title="rhp_chart_ticks.mlx" fill><OwnTicks.make client:visible /></Example>
+
 ## Ticks
 
 rhp takes four kinds of ticks, which `Ticks` builds:
 
 | rhp | solidtype |
 |---|---|
-| `[0, 10, 20]` | `Ticks.values [| 0.; 10.; 20. |]` |
+| `[0, 10, 20]` | `Ticks.values [\| 0.; 10.; 20. \|]` |
 | `5` | `Ticks.count 5` |
 | `every(10)` | `Ticks.custom (Solidtype_rhp.every 10. ())` |
+| `([lo, hi]) => [lo, hi]` | `Ticks.custom (fun (lo, hi) -> [\| lo; hi \|])` |
 | `false` | `Ticks.none` |
 
 ## API Reference
@@ -58,6 +68,7 @@ rhp takes four kinds of ticks, which `Ticks` builds:
 | `cross` | `float * float` | | A second scale, across the band |
 | `cross_ticks`, `cross_grid`, `cross_format` | | | The second axis', as `ticks`, `grid` and `format` |
 | `label` | `string` | | The chart's name for a reader |
-| `id`, `class_`, `role`, `style`, `ref` | | | On the chart's element |
+| `id`, `class_`, `role`, `ref` | | | On the chart's element |
+| `style` | `string Js.Dict.t` | | Declarations rhp adds to its own |
 
 rhp's `aria-*` props are not taken; `label` names the chart.

@@ -1,0 +1,52 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Order = Solidtype_rhp.Order
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module S = Solidtype.Solid
+module Slat = Solidtype_rhp.Slat
+
+type fruit = { name : string; sold : float }
+
+let fruits =
+  [|
+    { name = "Apples"; sold = 12. };
+    { name = "Bananas"; sold = 18. };
+    { name = "Cherries"; sold = 7. };
+    { name = "Dates"; sold = 15. };
+  |]
+
+let fruit =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 80.) ())
+    (fun d ->
+      let f = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
+        <Bar to_=(fun () -> f.sold) />
+      </div>)
+
+let make () =
+  let ranked, set_ranked = S.create_signal false in
+  <div>
+    <Chart scale=(fun () -> (0., 20.)) label="Crates sold">
+      <Plot
+        rows=(fun () -> fruits)
+        ?order=(fun () ->
+                 if S.get ranked then
+                   Some
+                     (Order.sort_by ~direction:`desc (fun d ->
+                          (Row.data d).sold))
+                 else None)
+        render=fruit
+      />
+    </Chart>
+    <button
+      class_="button button--secondary"
+      type_=`button
+      on_click=(fun _ -> S.set set_ranked (not (S.get ranked)))>
+      "Rank"
+    </button>
+  </div>

@@ -1,0 +1,56 @@
+module Bar = Solidtype_rhp.Bar
+module Bins = Solidtype_rhp.Types.Bins
+module Chart = Solidtype_rhp.Chart
+module Plot = Solidtype_rhp.Plot
+module Range = Solidtype_rhp.Types.Bins2
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type bin = { tally : float }
+
+let ages =
+  [|
+    23.;
+    25.;
+    31.;
+    34.;
+    35.;
+    36.;
+    38.;
+    41.;
+    41.;
+    42.;
+    44.;
+    45.;
+    47.;
+    48.;
+    52.;
+    53.;
+    55.;
+    58.;
+    61.;
+    64.;
+  |]
+
+(* The ages in bins of ten years, a column each. *)
+let bins =
+  let b =
+    Solidtype_rhp.bins
+      (Array.map Option.some ages)
+      ~options:(Bins.make ~domain:(20., 70.) ~count:5. ())
+      ()
+  in
+  Array.map (fun tally -> { tally }) (Range.tally b)
+
+let bin d =
+  let b = Row.data d in
+  <div><Bar to_=(fun () -> b.tally) /></div>
+
+let make () =
+  <Chart
+    orientation=`vertical
+    height=160.
+    scale=(fun () -> (0., 8.))
+    label="Customers by age, in bins of ten years">
+    <Plot rows=(fun () -> bins) render=bin />
+  </Chart>

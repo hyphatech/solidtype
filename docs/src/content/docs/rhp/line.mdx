@@ -1,0 +1,40 @@
+---
+title: Line
+description: "A line through points: a sparkline in a slat, or a line chart on a second scale."
+---
+
+import Example from "@components/Example.astro";
+import * as Sparklines from "@islands/rhp_line_sparklines.jsx";
+import SparklinesCode from "@islands/rhp_line_sparklines.mlx?raw";
+
+`Solidtype_rhp.Line` is rhp's `Line`: an SVG path through `points`, each an
+`x` on the value axis and a `y` across the band, or on the chart's second
+scale.
+
+Original rhp documentation: [Blocks: Line](https://rhp.vercel.app/reference/blocks/#line).
+
+## Usage
+
+A sparkline for each city, its points a month and a temperature each, made
+as the slat draws.
+
+<Example code={SparklinesCode} title="rhp_line_sparklines.mlx" fill><Sparklines.make client:visible /></Example>
+
+## Points
+
+A point is `(float option * float option) option`: `Some (Some x, Some y)`,
+and a missing point, `None`, or a missing `x` or `y`, breaks the line there,
+as rhp's `null` does.
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `points` | `(float option * float option) option array` | | Its points, in any order: out of `x`'s order, a connected scatter plot |
+| `peak` | `float` | the largest `y` | In a slat, the `y` that reaches the band's top |
+| `fill` | `bool` | `false` | Fill under it, to the band's edge or down to `base` |
+| `base` | `float` | `0.` | On a second scale, where the fill ends |
+| `smooth` | `bool` | `false` | Curves between the points |
+| `color` | `Color.t` | `Color.series 1` | Its colour |
+
+It also takes an `<svg>`'s attributes and handlers, which it passes on.

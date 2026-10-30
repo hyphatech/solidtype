@@ -63,3 +63,10 @@ rhp takes a number or a CSS length, for both orientations or for each:
 | `f` | `'row Row.t -> Jsx.element` | required | The slat, left as it was |
 
 Any function of a row is a slat with no layout of its own.
+
+## Restyle
+
+`Slat.restyle slat css` gives a slat type new CSS, and every slat of that
+type restyles at once, without being drawn again, for a live style editor.
+The type must have been made with `css`, an empty string will do; else it
+raises `Invalid_argument`.

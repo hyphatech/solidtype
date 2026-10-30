@@ -1,0 +1,43 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Summary = Solidtype_rhp.Types.Summary
+module Tick = Solidtype_rhp.Tick
+
+type runner = { runner : string; laps : float array }
+
+let runners =
+  [|
+    { runner = "Ana"; laps = [| 61.; 63.; 62.; 65.; 60.; 64.; 70.; 62. |] };
+    { runner = "Ben"; laps = [| 58.; 66.; 59.; 71.; 62.; 57.; 64.; 60. |] };
+    { runner = "Cleo"; laps = [| 67.; 68.; 66.; 69.; 67.; 70.; 68.; 66. |] };
+  |]
+
+let runner =
+  Slat.make ~thickness:(Slat.number 36.)
+    ~room:(Slat.room ~start:(Slat.px 48.) ())
+    (fun d ->
+      let r = Row.data d in
+      let s = Solidtype_rhp.summary (Array.map Option.some r.laps) in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string r.runner)</Label>
+        <Bar
+          from=(fun () -> Summary.low s)
+          to_=(fun () -> Summary.high s)
+          thick=(fun () -> Either.left "2px")
+          color=(fun () -> Color.muted)
+        />
+        <Bar from=(fun () -> Summary.q1 s) to_=(fun () -> Summary.q3 s) />
+        <Tick at=(fun () -> Summary.median s) color=(fun () -> Color.surface) />
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (55., 75.)) label="Lap times, in seconds">
+    <Plot rows=(fun () -> runners) render=runner />
+  </Chart>

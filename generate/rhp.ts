@@ -12,10 +12,10 @@
 // `--check` fails when one differs from what rhp's types give.
 
 import ts from "typescript";
-import { readFileSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { bind, doc, functionBinding, names, part, real, typesFiles, unmapped, valueBinding } from "./binding.ts";
-import { table } from "./names.ts";
+import { label, table } from "./names.ts";
 import { apply, name as tname, type Type } from "./ocaml.ts";
 import { writeOrCheck } from "./output.ts";
 import { Source } from "./source.ts";
@@ -68,16 +68,19 @@ const portedExports = new Set([
   "Plot", "Scale", "ManyDots", "slat", "shape", "restyle", "stackUp", "shares", "running", "sortBy", "series", "cycle",
 ]);
 
-// The hand modules, re-exported beside the generated ones.
-const handModules = ["Color", "Ease", "Plot", "Row", "Shape", "Slat", "Ticks"];
+// The hand modules, re-exported beside the generated ones; Helpers, rhp's
+// functions of rows and their values, is included, as rhp exports them.
+const handModules = ["Color", "Ease", "Many_dots", "Order", "Plot", "Row", "Scale", "Shape", "Slat", "Ticks"];
+const included = "Helpers";
 
 bind(root, checker, {
   name: "rhp",
   throwsUndocumented: () => false,
-  // Solid's CSSProperties is a style, a string, as an element's is.
+  // Solid's CSSProperties alone is a style rhp spreads into its own, an
+  // object of declarations; beside a string, the core's rule makes it one.
   ported: (symbol, args, absent) =>
     symbol.name === "CSSProperties" && ofSolid(symbol)
-      ? tname("string")
+      ? apply("Js.Dict.t", tname("string"))
       : ofRhp(symbol)
         ? portedTypes[symbol.name]?.(args, absent)
         : undefined,
@@ -153,7 +156,67 @@ const { ml: typesText, mli: typesMli } = typesFiles(`(* The types rhp's componen
    Generated from the declarations of @bezda/rhp ${rhp} by generate/rhp.ts;
    never edited by hand. *)`);
 
-// Whole or failing: a declaration no rule maps and nothing ports by hand.
+// What a hand port is held to: each prop, setting, field or key rhp declares
+// for it is bound in its .mli, or named here as left out, with the reason,
+// so one rhp adds fails the run as a type no rule maps does, rather than
+// going unbound with nothing said.
+type Held = { port: string; declared: string; leftOut?: Record<string, string> };
+const held: Held[] = [
+  { port: "plot", declared: "PlotSettings", leftOut: { children: "the slat, given as render=f or a function child" } },
+  { port: "slat", declared: "SlatLayout" },
+  { port: "scale", declared: "ScaleProps", leftOut: { children: "the tick's slat, given as render=f or a function child" } },
+  { port: "scale", declared: "ScaleTick" },
+  { port: "many_dots", declared: "ManyDotsProps" },
+  { port: "color", declared: "Color" },
+];
+
+// The names an interface binds: its labels, ?name: and name:, and its
+// records' fields, as a user writes them.
+function boundIn(mli: string): Set<string> {
+  const text = readFileSync(mli, "utf8");
+  return new Set([
+    ...[...text.matchAll(/[?~]([a-z_][a-z0-9_']*):/g)].map((m) => m[1]!),
+    ...[...text.matchAll(/^\s+([a-z_][a-z0-9_']*)\s?:/gm)].map((m) => m[1]!),
+    ...[...text.matchAll(/^val ([a-z_][a-z0-9_']*) :/gm)].map((m) => m[1]!),
+  ]);
+}
+
+// What rhp declares for a port: an object type's own members, or a union's
+// keys, a template's head the key of its family, series-${number}'s series.
+function declaredNames(name: string): string[] {
+  const symbol = checker.getExportsOfModule(mod!).find((s) => s.name === name);
+  if (!symbol) throw new Error(`rhp declares no ${name}`);
+  const type = checker.getDeclaredTypeOfSymbol(real(symbol));
+  if (type.isUnion()) {
+    return type.types.flatMap((t) =>
+      t.isStringLiteral() ? [t.value] : t.flags & ts.TypeFlags.TemplateLiteral ? [(t as ts.TemplateLiteralType).texts[0]!.replace(/-$/, "")] : [],
+    );
+  }
+  return checker.getPropertiesOfType(type).filter(ofRhp).map((p) => p.name);
+}
+
+const drift: string[] = [];
+const exported = new Set(checker.getExportsOfModule(mod).map((s) => s.name));
+for (const name of portedExports) if (!exported.has(name)) drift.push(`${name}: ported by hand, but rhp no longer exports it`);
+for (const { port, declared, leftOut = {} } of held) {
+  const mli = `${root}rhp/${port}.mli`;
+  if (!existsSync(mli)) {
+    drift.push(`${declared}: ported by rhp/${port}.mli, which is not there`);
+    continue;
+  }
+  const bound = boundIn(mli);
+  for (const name of declaredNames(declared)) {
+    if (!(name in leftOut) && !bound.has(label(name))) drift.push(`${declared}.${name}: rhp declares it, and rhp/${port}.mli neither binds it nor is said to leave it out`);
+  }
+}
+
+// Whole or failing: a declaration no rule maps and nothing ports by hand,
+// and a hand port behind what rhp declares.
+if (drift.length > 0) {
+  for (const d of drift) console.error(d);
+  console.error("rhp's hand ports above are behind its declarations: bind each, or name it as left out in generate/rhp.ts");
+  process.exit(1);
+}
 if (unmapped.size > 0) {
   for (const [k, v] of unmapped) console.error(`${k}: ${v}`);
   console.error("rhp's declarations above map by no rule: port each by hand, in generate/rhp.ts and rhp/");
@@ -163,7 +226,11 @@ if (unmapped.size > 0) {
 // Each module is at the top of the file, where the core writes it one deep.
 const top = (lines: string[]) => lines.map((l) => l.replace(/^  /gm, ""));
 
-const file = (modules: string[]) => `(* rhp's components and functions, and the types they name, in Types.
+// The included module, as the file or its interface writes it: the
+// interface strengthened, so its types are the module's own.
+const include = (mli: boolean) => (mli ? `include module type of struct include ${included} end` : `include ${included}`);
+
+const file = (modules: string[], mli: boolean) => `(* rhp's components and functions, and the types they name, in Types.
    Generated from the declarations of @bezda/rhp ${rhp} by generate/rhp.ts;
    never edited by hand.
 
@@ -174,13 +241,14 @@ const file = (modules: string[]) => `(* rhp's components and functions, and the 
 
 module Types = Types
 ${handModules.map((m) => `module ${m} = ${m}`).join("\n")}
+${include(mli)}
 
 ${modules.join("\n")}`;
 
 writeOrCheck(
   [
-    [out, file(top(src.ml))],
-    [`${out}i`, file(top(src.mli))],
+    [out, file(top(src.ml), false)],
+    [`${out}i`, file(top(src.mli), true)],
     [typesOut, typesText],
     [`${typesOut}i`, typesMli],
     [namesOut, table(names, "generate/rhp.ts")],

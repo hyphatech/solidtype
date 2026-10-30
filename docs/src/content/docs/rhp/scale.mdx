@@ -1,0 +1,41 @@
+---
+title: Scale
+description: An axis drawn as a plot of its ticks, from blocks.
+---
+
+import Example from "@components/Example.astro";
+import * as Axis from "@islands/rhp_scale_axis.jsx";
+import AxisCode from "@islands/rhp_scale_axis.mlx?raw";
+
+`Solidtype_rhp.Scale` is rhp's `Scale`: a slat for each tick of the chart's
+scale, so an axis is drawn from the same blocks as the data. A chart with a
+`Scale` draws no axis of its own.
+
+Original rhp documentation: [Scale](https://rhp.vercel.app/reference/scale/).
+
+## Usage
+
+A tick every five, the ends included, each a `Tick` and a `Label`, the last
+one saying the unit.
+
+<Example code={AxisCode} title="rhp_scale_axis.mlx" fill><Axis.make client:visible /></Example>
+
+## The tick
+
+A tick's slat is a function of a `Scale.tick Row.t`, a record:
+
+| Field | Type | Description |
+|---|---|---|
+| `at` | `float` | The tick's value |
+| `next` | `float` | The next tick's value, the scale's maximum for the last |
+| `first`, `last` | `bool` | Whether it is the first, or the last |
+| `to_end` | `float` | px from it to the scale's end, once measured; `infinity` before |
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `ticks` | `Ticks.t` | the chart's | Its ticks |
+| `render`, or a function child | `Scale.tick Slat.t` | required | A tick's slat |
+| `class_` | `string` | | On its element |
+| `style` | `string Js.Dict.t` | | Declarations rhp adds to its own |
