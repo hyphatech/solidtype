@@ -47,12 +47,15 @@ function stringOf(node: t.Expression): string {
   return node.value;
 }
 
+// A name inside a function that declares a parameter of its own by that name
+// is that function's, as Melange names every unused parameter `param`.
 function referencesName(node: t.Node, name: string): boolean {
-  let found = false;
-  t.traverseFast(node, (n) => {
-    if (t.isIdentifier(n, { name })) found = true;
+  if (t.isIdentifier(node, { name })) return true;
+  if (t.isFunction(node) && node.params.some((p) => t.isIdentifier(p, { name }))) return false;
+  return (t.VISITOR_KEYS[node.type] ?? []).some((key) => {
+    const value: unknown = (node as unknown as Record<string, unknown>)[key];
+    return (Array.isArray(value) ? value : [value]).some((c) => t.isNode(c) && referencesName(c, name));
   });
-  return found;
 }
 
 // A return-only if/else is the conditional expression Melange made it from.

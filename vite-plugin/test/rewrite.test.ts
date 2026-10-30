@@ -71,6 +71,21 @@ function make() {
   expect(code).not.toContain("Markers");
 });
 
+test("a thunk whose element holds a thunk of its own becomes what it returns", async () => {
+  const code = await written(`
+function make() {
+  return Markers.el("div", [], [Markers.dynamic(function (param) {
+    if (on()) {
+      return Markers.el("a", [], [Markers.dynamic(function (param) { return name(); })]);
+    } else {
+      return Markers.el("b", [], []);
+    }
+  })]);
+}`);
+  expect(code).toContain("on() ? <a>{name()}</a> : <b />");
+  expect(code).not.toContain("function (param)");
+});
+
 test("each namespace the ppx writes is JSX's namespaced name", async () => {
   const code = await written(`
 function make() {

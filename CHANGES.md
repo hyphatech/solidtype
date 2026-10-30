@@ -36,6 +36,11 @@
 - The documentation's Charts section, the binding of rhp: how a chart is
   made, a page for each component and for rhp's helpers, each linking to the
   page of rhp's documentation it follows.
+- `vite-plugin-solidtype`: a thunk whose element holds a thunk of its own,
+  `(fun () -> if open_ () then <b>(fun () -> name ())</b> else ...)`, is
+  written as the expression it returns, as TSX writes it, rather than a
+  function called in place: Solid's compiler then memoises its condition and
+  escapes its text on the server, as it does the same JSX in TSX.
 
 ## 0.3.0 (2026-10-27)
 
