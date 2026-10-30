@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.4.0 (2026-10-30)
 
 - `solidtype-internationalized-date`, a package of its own:
   @internationalized/date 3.12 bound whole, generated from its declarations
@@ -29,7 +29,7 @@
   whole, its components and functions generated from rhp's own declarations,
   and `Plot`, `Scale`, `Many_dots`, `Row`, `Slat`, `Order`, `Color`, `Ticks`,
   `Ease`, `Shape`, and `series`, `cycle`, `stack_up`, `shares` and `running`
-  ported by hand: a plot's rows are an array of an OCaml record, and its slat
+  written in OCaml: a plot's rows are an array of an OCaml record, and its slat
   a function of that record's row.
 - `ppx_solidtype`: a component's render function given by name,
   `<Plot render=fruit />`, is checked and passed as a function child is.
