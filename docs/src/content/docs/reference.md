@@ -16,6 +16,7 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 |---|---|---|
 | `solidtype` | `solidtype` | Solid 1.9 bound whole, for Melange: signals, computations, resources, stores, its components and its renderer, server rendering included |
 | `solidtype-kobalte` | `solidtype-kobalte` | Kobalte 0.13 bound whole, generated from its own declarations |
+| `solidtype-headless` | `solidtype-headless` | The components Kobalte lacks, made as Kobalte makes its own, of its hooks, with no style |
 | `solidtype-heroui` | `solidtype-heroui` | HeroUI's components, a maintained port onto Kobalte's |
 | `solidtype-rhp` | `solidtype-rhp` | rhp 2.2's charts, generated from its own declarations where a rule maps them, written in OCaml where none does |
 | `solidtype-internationalized-date` | `solidtype-internationalized-date` | @internationalized/date 3.12's dates, times and time zones, the values HeroUI's date components take, generated from its own declarations |
@@ -51,6 +52,12 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
   -- each of Kobalte's components, part by part, its hooks and values, and
   [`Types`](/solidtype/reference/solidtype-kobalte/Solidtype_kobalte/Types/index.html),
   the types they name.
+
+## solidtype-headless
+
+- [`Solidtype_headless`](/solidtype/reference/solidtype-headless/Solidtype_headless/index.html)
+  -- the components Kobalte lacks, one module each:
+  [`Table`](/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html).
 
 ## solidtype-heroui
 

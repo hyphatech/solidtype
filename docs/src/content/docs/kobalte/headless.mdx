@@ -1,0 +1,54 @@
+---
+title: Components Kobalte lacks
+description: Headless components made as Kobalte makes its own, of its hooks.
+---
+
+import Example from "@components/Example.astro";
+import * as ExTable from "@islands/headless_table.jsx";
+import ExTableCode from "@islands/headless_table.mlx?raw";
+
+Kobalte 0.13 has no table, no calendar, no tag group. `solidtype-headless`
+holds such components, made the way Kobalte makes its own: of Kobalte's
+hooks, bound as `Solidtype_kobalte.Selection`, with no style. Each part is
+the element it names, its roles, keys and state as attributes, state in
+Kobalte's convention, present and empty, `data-selected=""`. A part takes
+every attribute its element does -- a class, a style, a `ref`, a handler --
+and passes them on after its own, so a style's attribute wins and a caller's
+`ref` and handlers are called beside its own. Its state is a context a style
+reads, as Kobalte's `useXContext` is.
+
+[HeroUI's ports](/solidtype/heroui/) are built on them, as on Kobalte's own:
+the port adds HeroUI's classes and React Aria's state, the component's
+behaviour and accessibility stay its own.
+
+```sh
+opam install solidtype-headless
+```
+
+```lisp
+(libraries solidtype solidtype-kobalte solidtype-headless melange.dom)
+```
+
+## Table
+
+`Solidtype_headless.Table` is a `<table role="grid">` whose rows are a list
+of Kobalte's: Tab reaches its focused row, the arrow keys, Home and End,
+Page Up and Page Down and typing move between rows, Right and Left along a
+row's cells, and Up and Down between a cell and the one above or below it.
+Its rows are selected as `selection_mode` says, by a press, Space or Enter,
+Shift and the platform's key extending and adding; a press that begins in a
+control inside a row is the control's.
+
+<Example code={ExTableCode} title="headless_table.mlx"><ExTable.make client:visible /></Example>
+
+| Part | Element | What it adds |
+|---|---|---|
+| `Table.Root` | `<table role="grid">` | the list of rows, their selection: `selection_mode`, `selection_behavior`, `selected_keys`, `default_selected_keys`, `on_selection_change`, `disabled_keys`, `disallow_empty_selection` |
+| `Table.Header` | `<thead>` and its `<tr>` | |
+| `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `is_row_header`, whose cells name their rows |
+| `Table.Body` | `<tbody>` | `empty_state`, a row across every column while it has none |
+| `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled` |
+| `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index` |
+
+`Table.use_context ()` is the table a part is in: how its rows are selected,
+each row's state by its key, and selecting all or none.

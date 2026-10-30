@@ -1,0 +1,16 @@
+; Each headless component, a component Kobalte lacks made of Kobalte's
+; hooks, as a caller meets it: its roles, keys and state, and an axe scan.
+
+(library
+ (name headless_test)
+ (modes melange)
+ (libraries solidtype solidtype-headless melange-jest.jest melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries headless_test)
+ (module_systems
+  (es6 jsx)))

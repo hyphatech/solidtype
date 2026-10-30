@@ -5,6 +5,7 @@
  (libraries
   solidtype
   solidtype-kobalte
+  solidtype-headless
   solidtype-internationalized-date
   melange.dom)
  (preprocess

@@ -139,6 +139,22 @@
    (= :version))))
 
 (package
+ (name solidtype-headless)
+ (synopsis
+  "Components Kobalte lacks for solidtype, made as Kobalte makes its own")
+ (description
+  "Headless, accessible components that Kobalte 0.13 has none of, made of Kobalte's own hooks for OCaml front ends on Solid written with solidtype: their roles, keys and state, and no style, for a design system to dress.")
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))
+  (solidtype
+   (= :version))
+  (solidtype-kobalte
+   (= :version))))
+
+(package
  (name solidtype-heroui)
  (synopsis "HeroUI for solidtype: HeroUI's design on Kobalte's components")
  (description
@@ -151,6 +167,8 @@
   (solidtype
    (= :version))
   (solidtype-kobalte
+   (= :version))
+  (solidtype-headless
    (= :version))
   (solidtype-internationalized-date
    (= :version))))

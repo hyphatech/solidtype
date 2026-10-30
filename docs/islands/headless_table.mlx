@@ -1,0 +1,61 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_headless.Table
+
+type member = { id : string; name : string; role : string }
+
+let members =
+  [|
+    { id = "1"; name = "Kate Moore"; role = "CEO" };
+    { id = "2"; name = "John Smith"; role = "CTO" };
+    { id = "3"; name = "Sara Johnson"; role = "CMO" };
+  |]
+
+(* The table's state, dressed by its attributes: a selected row is
+   [data-selected], a focused row or cell takes the browser's focus. *)
+let row_class =
+  "cursor-default border-t border-gray-200 outline-none \
+   data-[selected]:bg-blue-500/20 focus-visible:ring-2 focus-visible:ring-blue-500"
+
+let cell_class =
+  "px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+
+let make () =
+  let selected, set_selected = S.create_signal [||] in
+  <div class_="flex flex-col gap-3">
+    <Table.Root
+      aria_label="Team members"
+      class_="w-full max-w-md border-collapse text-left text-sm"
+      selection_mode=`multiple
+      selected_keys=(fun () -> S.get selected)
+      on_selection_change=(S.set set_selected)>
+      <Table.Header class_="text-gray-500">
+        <Table.Column is_row_header=true class_=(fun () -> cell_class)>
+          "Name"
+        </Table.Column>
+        <Table.Column class_=(fun () -> cell_class)>"Role"</Table.Column>
+      </Table.Header>
+      <Table.Body>
+        <For each=(fun () -> members)>
+          (fun m _ ->
+            <Table.Row id=(fun () -> m.id) class_=(fun () -> row_class)>
+              <Table.Cell class_=(fun () -> cell_class)>
+                (fun () -> Jsx.string m.name)
+              </Table.Cell>
+              <Table.Cell class_=(fun () -> cell_class)>
+                (fun () -> Jsx.string m.role)
+              </Table.Cell>
+            </Table.Row>)
+        </For>
+      </Table.Body>
+    </Table.Root>
+    <p class_="text-sm">
+      "Selected: "
+      (fun () ->
+        Jsx.string
+          (match S.get selected with
+          | [||] -> "none"
+          | keys -> String.concat ", " (Array.to_list keys)))
+    </p>
+  </div>

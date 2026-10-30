@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `solidtype-headless`, a package of its own: the components Kobalte lacks,
+  made as Kobalte makes its own, of its hooks, with no style, a part taking
+  every attribute its element does. `Solidtype_headless.Table` first: a grid
+  of rows and cells, its rows Kobalte's list, selected by it, walked by the
+  keys, its state a context a style reads.
+- `Solidtype_heroui.Table` is built on `Solidtype_headless.Table`, HeroUI's
+  classes and React Aria's state over it; a press in any control inside a
+  row, a button or a link as well as a checkbox, is the control's, never the
+  row's.
 - `Solidtype_heroui.Table`: rows selected, one or many, by Kobalte's list --
   a press, Space or Enter, Shift and the platform's key -- controlled or
   kept, disabled rows left out, `selection_mode`, `selection_behavior`,

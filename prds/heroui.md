@@ -111,6 +111,13 @@ module of `heroui/`: its `.mli` the contract, its parts submodules
 check written by hand where it passes an element's every attribute on, as
 `Input` does.
 
+A component Kobalte lacks is made headless first, in `solidtype-headless`,
+as Kobalte makes its own, of its hooks: its roles, keys and state, and no
+style. Its port dresses it as it dresses Kobalte's: HeroUI's classes, React
+Aria's state and HeroUI's own parts. Behaviour and accessibility are then
+the component's whoever dresses it, tested once, and a port reads as a
+style. `Table` is the first.
+
 ### What a port is made of
 
 - **Classes**: `Styles.<Component>`, generated, a class string or a string
@@ -468,6 +475,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Table's core, its rows a list of Kobalte's hooks and its cells moved
   through by the port: every part, variants, rows and columns of data, row
   headers, an empty state, a footer
+- [x] `solidtype-headless`, its `Table` the core and selection, the port a
+  skin over it
 - [x] Table's selection, by Kobalte's list, and a Checkbox of
   `slot=`selection`
 - [ ] Table's sorting, loading more, column resizing, expandable rows and

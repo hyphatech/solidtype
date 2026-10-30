@@ -1,0 +1,645 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Selection = Solidtype_kobalte.Selection
+module Types = Solidtype_kobalte.Types
+module Either = Types.Either
+module List_state = Types.ListState
+module Manager = Types.MultipleSelectionManager
+module Selectable_list = Types.Selection_CreateSelectableList
+module Selectable_item = Types.Selection_CreateSelectableItem
+
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+external text_content : _ Dom.element_like -> string = "textContent" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+external attribute : Dom.element -> string -> string Js.null = "getAttribute"
+[@@mel.send]
+
+external query_all :
+  _ Dom.element_like -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+(* Whether [other] follows [e] on the page, by DOM's bit for it. *)
+external position : _ Dom.element_like -> _ Dom.element_like -> int
+  = "compareDocumentPosition"
+[@@mel.send]
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external event_target : _ Dom.event_like -> Dom.element = "target" [@@mel.get]
+
+external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
+[@@mel.send]
+
+(* Whether an event began in a control inside a row, whose press is its own,
+   as a pressable element inside React Aria's row keeps its press. *)
+let in_control e =
+  Js.Null.toOption
+    (closest (event_target e)
+       "input, button, select, textarea, a[href], label, [role=checkbox], \
+        [role=button]")
+  <> None
+
+(* A row as the table keeps it: its key, and its element, which says where it
+   is on the page. *)
+type row = { key : string; element : Dom.htmlTableRowElement }
+
+type context = {
+  selection_mode : unit -> [ `none | `single | `multiple ];
+  is_selected : string -> bool;
+  is_disabled : string -> bool;
+  toggle : string -> unit;
+  is_select_all : unit -> bool;
+  is_empty : unit -> bool;
+  select_all : unit -> unit;
+  clear_selection : unit -> unit;
+}
+
+(* What the parts read of their table beside what a style reads: its rows in
+   the page's order, Kobalte's selection of them, and its columns. *)
+type table = {
+  context : context;
+  rows : unit -> row list;
+  add : row -> unit;
+  remove : string -> unit;
+  manager : Manager.t S.accessor;
+  row_header : unit -> int;
+  set_row_header : int -> unit;
+  next_column : unit -> int;
+  columns : unit -> int;
+}
+
+module Table_context = Solidtype.Context.Make_optional (struct
+  type t = table
+end)
+
+let in_table part =
+  match Table_context.use () with
+  | Some t -> t
+  | None -> invalid_arg (part ^ " is used inside a Table.Root")
+
+let use_context () = (in_table "Table.use_context").context
+
+(* What a row's cells read of it: the column the next is in, and the id of the
+   one that names the row. *)
+type row_cells = { next_cell : unit -> int; header_id : string }
+
+module Row_context = Solidtype.Context.Make_optional (struct
+  type t = row_cells
+end)
+
+let role e = Js.Null.toOption (attribute e "role")
+
+(* A row's cells, in order: a header's columns, or a body row's cells. *)
+let cells row =
+  Js.Array.from
+    (query_all row
+       ":scope > [role=gridcell], :scope > [role=rowheader], :scope > \
+        [role=columnheader]")
+
+let index_of e items =
+  let rec find i =
+    if i >= Array.length items then None
+    else if items.(i) == e then Some i
+    else find (i + 1)
+  in
+  find 0
+
+(* Where a key moves focus from a cell, as an accessible grid moves it: along
+   its row, back to the row from its first cell, and to the cell of the same
+   column in the row above or below, the header's included. *)
+let from_cell table cell k =
+  match Js.Null.toOption (parent cell) with
+  | None -> None
+  | Some row -> (
+      let along = cells row in
+      let last = Array.length along - 1 in
+      let i = Option.value (index_of cell along) ~default:0 in
+      let body_row = Js.Null.toOption (attribute row "data-key") <> None in
+      let vertical step =
+        let rows = Js.Array.from (query_all table "tr[role=row]") in
+        match index_of row rows with
+        | Some r when r + step >= 0 && r + step < Array.length rows ->
+            let next = cells rows.(r + step) in
+            if Array.length next = 0 then None
+            else Some next.(min i (Array.length next - 1))
+        | Some _ | None -> None
+      in
+      match k with
+      | "ArrowRight" ->
+          if i < last then Some along.(i + 1)
+          else if body_row then Some row
+          else None
+      | "ArrowLeft" ->
+          if i > 0 then Some along.(i - 1)
+          else if body_row then Some row
+          else None
+      | "ArrowDown" -> vertical 1
+      | "ArrowUp" -> vertical (-1)
+      | "Home" -> if last >= 0 then Some along.(0) else None
+      | "End" -> if last >= 0 then Some along.(last) else None
+      | _ -> None)
+
+(* From a row, the arrows across reach its first cell, or its last. *)
+let from_row row k =
+  let along = cells row in
+  let last = Array.length along - 1 in
+  match k with
+  | "ArrowRight" when last >= 0 -> Some along.(0)
+  | "ArrowLeft" when last >= 0 -> Some along.(last)
+  | _ -> None
+
+let tabindex = function Some i -> Js.Float.toString i | None -> "-1"
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+(* A handler or a ref the caller gave, called beside the part's own, as
+   Kobalte's parts call theirs. *)
+let call f x = match f with Some f -> f x [@u] | None -> ()
+
+module Root = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
+      ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+      ?selected_keys:string array Solidtype.Check.value ->
+      ?default_selected_keys:string array Solidtype.Check.value ->
+      ?on_selection_change:(string array -> unit) ->
+      ?disabled_keys:string array Solidtype.Check.value ->
+      ?disallow_empty_selection:bool Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Table.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external selection_mode : t -> [ `none | `single | `multiple ] option
+      = "selectionMode"
+    [@@mel.get]
+
+    external selection_behavior : t -> [ `toggle | `replace ] option
+      = "selectionBehavior"
+    [@@mel.get]
+
+    external selected_keys : t -> string array option = "selectedKeys"
+    [@@mel.get]
+
+    external default_selected_keys : t -> string array option
+      = "defaultSelectedKeys"
+    [@@mel.get]
+
+    external on_selection_change : t -> ((string array -> unit)[@u]) option
+      = "onSelectionChange"
+    [@@mel.get]
+
+    external disabled_keys : t -> string array option = "disabledKeys"
+    [@@mel.get]
+
+    external disallow_empty_selection : t -> bool option
+      = "disallowEmptySelection"
+    [@@mel.get]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlTableElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusIn"
+    [@@mel.get]
+
+    external on_focus_out : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusOut"
+    [@@mel.get]
+  end
+
+  (* The props the table takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "selectionMode";
+      "selectionBehavior";
+      "selectedKeys";
+      "defaultSelectedKeys";
+      "onSelectionChange";
+      "disabledKeys";
+      "disallowEmptySelection";
+      "children";
+      "ref";
+      "onKeyDown";
+      "onMouseDown";
+      "onFocusIn";
+      "onFocusOut";
+    |]
+
+  let make (props : Props.t) =
+    let selection_mode () =
+      Option.value (Props.selection_mode props) ~default:`none
+    in
+    let rows, set_rows = S.create_signal [] in
+    let ordered () =
+      List.sort
+        (fun a b -> if position a.element b.element land 4 <> 0 then -1 else 1)
+        (S.get rows)
+    in
+    let keys =
+      S.create_memo (fun () ->
+          Array.of_list (List.map (fun r -> r.key) (ordered ())))
+    in
+    let disabled k =
+      match Props.disabled_keys props with
+      | Some keys -> Array.exists (String.equal k) keys
+      | None -> false
+    in
+    let text k =
+      match List.find_opt (fun r -> String.equal r.key k) (S.get rows) with
+      | Some r -> text_content r.element
+      | None -> ""
+    in
+    let state =
+      Selection.create_list_state
+        (Types.CreateListStateProps.make ~data_source:(Either.right keys)
+           ~get_key:(Either.left Fun.id) ~get_text_value:(Either.left text)
+           ~get_disabled:(Either.left disabled)
+           ~selection_mode:
+             (Either.right (S.create_memo (fun () -> Some (selection_mode ()))))
+           ~selection_behavior:
+             (Either.right
+                (S.create_memo (fun () -> Props.selection_behavior props)))
+           ~disallow_empty_selection:
+             (Either.right
+                (S.create_memo (fun () -> Props.disallow_empty_selection props)))
+           ~selected_keys:
+             (Either.right
+                (S.create_memo (fun () -> Props.selected_keys props)))
+           ?default_selected_keys:
+             (Option.map Either.left
+                (S.untrack (fun () -> Props.default_selected_keys props)))
+           ~on_selection_change:(fun keys ->
+             call (Props.on_selection_change props) (Js.Set.toArray keys))
+           ())
+    in
+    let manager =
+      S.create_memo (fun () ->
+          Types.SelectionManager.to_multiple_selection_manager
+            (S.get (List_state.selection_manager state)))
+    in
+    let element, set_element = S.create_signal None in
+    let list =
+      Selection.create_selectable_list
+        (Types.CreateSelectableListProps.make
+           ~collection:(List_state.collection state)
+           ~selection_manager:(Either.right manager) ())
+        element ()
+    in
+    let row_header, set_row_header = S.create_signal 0 in
+    let columns, set_columns = S.create_signal 0 in
+    let m () = S.get manager in
+    let t =
+      {
+        context =
+          {
+            selection_mode;
+            is_selected = (fun k -> Manager.is_selected (m ()) k);
+            is_disabled = disabled;
+            toggle = (fun k -> Manager.toggle_selection (m ()) k);
+            is_select_all = (fun () -> S.get (Manager.is_select_all (m ())));
+            is_empty = (fun () -> S.get (Manager.is_empty (m ())));
+            select_all = (fun () -> Manager.select_all (m ()) ());
+            clear_selection = (fun () -> Manager.clear_selection (m ()) ());
+          };
+        rows = ordered;
+        add = (fun r -> S.set set_rows (r :: S.get rows));
+        remove =
+          (fun k ->
+            S.set set_rows
+              (List.filter (fun r -> not (String.equal r.key k)) (S.get rows)));
+        manager;
+        row_header = (fun () -> S.get row_header);
+        set_row_header = S.set set_row_header;
+        next_column =
+          (fun () ->
+            let n = S.untrack (fun () -> S.get columns) in
+            S.set set_columns (n + 1);
+            n);
+        columns = (fun () -> S.get columns);
+      }
+    in
+    (* The arrows across a row and through its cells are the table's, which
+       Kobalte's list of rows does not know; the rest are the list's. *)
+    let on_key_down e =
+      call (Props.on_key_down props) e;
+      let moved =
+        match (Js.Null.toOption active, S.get element) with
+        | Some focused, Some table -> (
+            match role focused with
+            | Some ("gridcell" | "rowheader" | "columnheader") ->
+                from_cell table focused (key e)
+            | Some "row" -> from_row focused (key e)
+            | Some _ | None -> None)
+        | _ -> None
+      in
+      match moved with
+      | Some target ->
+          prevent_default e;
+          focus target
+      | None -> Selectable_list.on_key_down list e
+    in
+    <Table_context.Provider value=(fun () -> t)>
+      <table
+        role=`grid
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
+        ?aria_multiselectable=(fun () ->
+                                match selection_mode () with
+                                | `multiple -> Some true
+                                | `single | `none -> None)
+        tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
+        on_key_down
+        on_mouse_down=(fun e ->
+                        call (Props.on_mouse_down props) e;
+                        Selectable_list.on_mouse_down list e)
+        on_focus_in=(fun e ->
+                      call (Props.on_focus_in props) e;
+                      Selectable_list.on_focus_in list e)
+        on_focus_out=(fun e ->
+                       call (Props.on_focus_out props) e;
+                       Selectable_list.on_focus_out list e)
+        props=(S.omit props own)>
+        (fun () -> Props.children props)
+      </table>
+    </Table_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Header = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Thead.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let (_ : table) = in_table "Table.Header" in
+    <thead role=`rowgroup props=(S.omit props [| "children" |])>
+      <tr role=`row>(fun () -> Props.children props)</tr>
+    </thead>
+
+  let component = Jsx.component make
+end
+
+module Column = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?is_row_header:bool Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Th.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external is_row_header : t -> bool option = "isRowHeader" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let t = in_table "Table.Column" in
+    let index = t.next_column () in
+    let names_rows =
+      S.untrack (fun () ->
+          Option.value (Props.is_row_header props) ~default:false)
+    in
+    if names_rows then t.set_row_header index;
+    <th
+      role=`columnheader
+      tabindex="-1"
+      aria_colindex=(fun () -> string_of_int (index + 1))
+      props=(S.omit props [| "isRowHeader"; "children" |])>
+      (fun () -> Props.children props)
+    </th>
+
+  let component = Jsx.component make
+end
+
+module Body = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?empty_state:Jsx.element Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Tbody.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external empty_state : t -> Jsx.element option = "emptyState" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let t = in_table "Table.Body" in
+    let empty () =
+      match t.rows () with [] -> Props.empty_state props | _ :: _ -> None
+    in
+    <tbody role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
+      (fun () -> Props.children props)
+      <Show.Some some=(fun () -> empty ())>
+        (fun shown ->
+          <tr role=`row>
+            <td
+              role=`rowheader colspan=(fun () -> string_of_int (t.columns ()))>
+              (fun () -> Jsx.element (S.get shown))
+            </td>
+          </tr>)
+      </Show.Some>
+    </tbody>
+
+  let component = Jsx.component make
+end
+
+module Row = struct
+  module Props = struct
+    type t
+
+    external check :
+      id:string Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Tr.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external id : t -> string = "id" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlTableRowElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus : t -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+    [@@mel.get]
+  end
+
+  (* The props the row takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "id";
+      "children";
+      "ref";
+      "onPointerDown";
+      "onPointerUp";
+      "onClick";
+      "onKeyDown";
+      "onMouseDown";
+      "onFocus";
+    |]
+
+  let make (props : Props.t) =
+    let t = in_table "Table.Row" in
+    let key = S.untrack (fun () -> Props.id props) in
+    let element, set_element = S.create_signal None in
+    let item =
+      Selection.create_selectable_item
+        (Types.CreateSelectableItemProps.make
+           ~selection_manager:(Either.right t.manager) ~key:(Either.left key) ())
+        element
+    in
+    let cells = ref 0 in
+    let r =
+      {
+        next_cell =
+          (fun () ->
+            let n = !cells in
+            incr cells;
+            n);
+        header_id = S.create_unique_id ();
+      }
+    in
+    (* A row joins the list once it is on the page, where its place among the
+       others is read. *)
+    S.on_mount (fun () ->
+        Option.iter (fun e -> t.add { key; element = e }) (S.get element));
+    S.on_cleanup (fun () -> t.remove key);
+    let selected () = t.context.is_selected key in
+    let disabled () = t.context.is_disabled key in
+    (* A press that began in a control is the control's. *)
+    let pressed given own e =
+      call given e;
+      if not (in_control e) then own e
+    in
+    <Row_context.Provider value=(fun () -> r)>
+      <tr
+        role=`row
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
+        tabindex=(fun () -> tabindex (S.get (Selectable_item.tab_index item)))
+        aria_labelledby=(fun () -> r.header_id)
+        ?aria_selected=(fun () ->
+                         match t.context.selection_mode () with
+                         | `none -> None
+                         | `single | `multiple -> Some (selected ()))
+        ?aria_disabled=(fun () -> if disabled () then Some true else None)
+        data_key=(fun () -> Jsx.data key)
+        data_selected=(fun () -> state (selected ()))
+        data_disabled=(fun () -> state (disabled ()))
+        on_pointer_down=(pressed
+                           (Props.on_pointer_down props)
+                           (Selectable_item.on_pointer_down item))
+        on_pointer_up=(pressed
+                         (Props.on_pointer_up props)
+                         (Selectable_item.on_pointer_up item))
+        on_click=(pressed (Props.on_click props)
+                    (Selectable_item.on_click item))
+        on_key_down=(pressed (Props.on_key_down props)
+                       (Selectable_item.on_key_down item))
+        on_mouse_down=(fun e ->
+                        call (Props.on_mouse_down props) e;
+                        Selectable_item.on_mouse_down item e)
+        on_focus=(fun e ->
+                   call (Props.on_focus props) e;
+                   Selectable_item.on_focus item e)
+        props=(S.omit props own)>
+        (fun () -> Props.children props)
+      </tr>
+    </Row_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Cell = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Td.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let t = in_table "Table.Cell" in
+    let r =
+      match Row_context.use () with
+      | Some r -> r
+      | None -> invalid_arg "Table.Cell is used inside a Table.Row"
+    in
+    let index = r.next_cell () in
+    let names_row () = index = t.row_header () in
+    <td
+      role=(fun () -> if names_row () then `rowheader else `gridcell)
+      ?id=(fun () -> if names_row () then Some r.header_id else None)
+      tabindex="-1"
+      data_column_index=(fun () -> Jsx.data (string_of_int index))
+      props=(S.omit props [| "children" |])>
+      (fun () -> Props.children props)
+    </td>
+
+  let component = Jsx.component make
+end

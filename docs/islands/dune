@@ -10,6 +10,7 @@
   solidtype
   solidtype-heroui
   solidtype-kobalte
+  solidtype-headless
   solidtype-rhp
   solidtype-internationalized-date
   melange.dom)

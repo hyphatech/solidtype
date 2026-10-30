@@ -7,9 +7,11 @@ compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
 `vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
 library bound is an opam package of its own: `solidtype` binds Solid,
 `solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts,
-`solidtype-internationalized-date` the dates HeroUI's date components take; `solidtype-heroui`
-is a maintained port of HeroUI's components onto Kobalte, since HeroUI's are
-React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
+`solidtype-internationalized-date` the dates HeroUI's date components take;
+`solidtype-headless` holds the components Kobalte lacks, made as Kobalte
+makes its own, of its hooks, with no style; and `solidtype-heroui` is a
+maintained port of HeroUI's components onto Kobalte's and those, since
+HeroUI's are React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
 
 ## Commands
 
@@ -54,6 +56,12 @@ src/                 solidtype, for Melange alone
   html               each element's attributes, generated
 kobalte/             solidtype-kobalte: Kobalte's components part by part,
                      its hooks, values and the types they name, generated
+headless/            solidtype-headless: the components Kobalte lacks, one
+                     module each, made of Kobalte's hooks: roles, keys and
+                     state, no style, every attribute of a part's element
+                     taken and passed on
+  table              a grid of rows and cells: Kobalte's list of rows,
+                     their selection, and the keys through their cells
 rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
                      rhp's declarations whole: solidtype_rhp, and the types
                      it names, types
@@ -202,6 +210,8 @@ test/hydration/      an island, and an rhp chart, rendered on the server and
                      setup.ts renders them through Vite's server loading
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
+test/headless/       each headless component as a caller meets it: its roles,
+                     keys and state, and an axe scan
 test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      by vitest, and its state beside the same component in
                      React, its twin in twins/; and the variant functions,
@@ -441,6 +451,20 @@ break.
   components take that library's values, and a binding by hand would be
   a second copy of its types. Test: `make lint` runs the generator with
   `--check`, and `test/internationalized_date` runs it in Node.
+- **A component Kobalte lacks is made headless first, in
+  `solidtype-headless`, and a design system dresses it.** It is made as
+  Kobalte makes its own: of Kobalte's hooks, `Solidtype_kobalte.Selection`
+  first, its parts the elements they name, their roles, keys and state as
+  attributes, Kobalte's convention for state, present and empty, and its
+  state a context a style reads, `Table.use_context`. A part takes every
+  attribute its element does, its `Props` written by hand, and passes them on
+  after its own, so a style's attribute wins, and a caller's `ref` and
+  handlers are called beside its own. Its HeroUI port adds only HeroUI's
+  classes, `data-slot`, React Aria's state, `"true"`, and HeroUI's own parts.
+  Why: behaviour and accessibility are the component's whoever dresses it,
+  tested once, and a port that mixes them with a style cannot be read for
+  either. Test: `test/headless/`, each component as a caller meets it, and
+  its port's test against React's.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;

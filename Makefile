@@ -2,7 +2,7 @@ SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
 # The reference is odoc's, for solidtype's own packages and nothing under them.
-REFERENCE = solidtype solidtype-kobalte solidtype-heroui solidtype-rhp solidtype-internationalized-date ppx_solidtype odoc.support
+REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example example-serve docs docs-serve generate

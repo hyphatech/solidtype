@@ -1,0 +1,201 @@
+(* The headless Table as a caller meets it: a grid of rows and cells, walked by
+   the keys, its rows selected by Kobalte's list and their state written as
+   Kobalte writes it, a control's press left to the control, the caller's ref
+   and handlers called beside its own, an empty state across every column,
+   and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_headless.Table
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+type member = { id : string; name : string; role : string }
+
+let members =
+  [|
+    { id = "1"; name = "Kate Moore"; role = "CEO" };
+    { id = "2"; name = "John Smith"; role = "CTO" };
+    { id = "3"; name = "Sara Johnson"; role = "CMO" };
+  |]
+
+(* The team, its rows selected as [mode] says, row 2 disabled where asked. *)
+let team ?(mode = `none) ?(disabled = [||]) ?(told = ref [||])
+    ?(members = members) ?(on_key_down = fun (_ : Dom.keyboardEvent) -> ())
+    ?(got_table = ref false) ?(clicked = ref 0) () =
+  H.render (fun () ->
+      <Table.Root
+        aria_label="Team members"
+        selection_mode=(fun () -> mode)
+        disabled_keys=(fun () -> disabled)
+        on_selection_change=(fun keys -> told := keys)
+        ref=(fun _ -> got_table := true)
+        on_key_down>
+        <Table.Header>
+          <Table.Column is_row_header=true>"Name"</Table.Column>
+          <Table.Column>"Role"</Table.Column>
+          <Table.Column>"Actions"</Table.Column>
+        </Table.Header>
+        <Table.Body empty_state=(<span>"No members"</span>)>
+          <For each=(fun () -> members)>
+            (fun m _ ->
+              <Table.Row id=(fun () -> m.id) on_click=(fun _ -> incr clicked)>
+                <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                <Table.Cell>
+                  <button type_=`button>
+                    (fun () -> Jsx.string ("Edit " ^ m.name))
+                  </button>
+                </Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Root>)
+
+let where () =
+  Option.value (H.attribute H.focused "role") ~default:"?"
+  ^ ":" ^ H.text H.focused
+
+let row name =
+  match
+    Array.to_list (H.all_by_role "row")
+    |> List.filter (fun r -> Js.String.includes ~search:name (H.text r))
+  with
+  | r :: _ -> r
+  | [] -> Js.Exn.raiseError ("no row of " ^ name)
+
+let () =
+  Jest.describe "Table" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "is a grid of rows and cells, each row named by its header"
+        (fun () ->
+          team ();
+          let kate = row "Kate Moore" in
+          let header =
+            match H.attribute kate "aria-labelledby" with
+            | Some id -> (
+                match Js.Null.toOption (H.by_id id) with
+                | Some e -> H.text e
+                | None -> "missing")
+            | None -> "unnamed"
+          in
+          E.(
+            expect
+              ( Array.map
+                  (fun e -> Option.value (H.attribute e "role") ~default:"")
+                  (H.all_by_role "columnheader"),
+                Array.length (H.all_by_role "rowheader"),
+                Array.length (H.all_by_role "gridcell"),
+                header )
+            |> toEqual
+                 ( [| "columnheader"; "columnheader"; "columnheader" |],
+                   3,
+                   6,
+                   "Kate Moore" )));
+      Jest.testPromise "is walked by the keys, rows and their cells" (fun () ->
+          team ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let seen = ref [ where () ] in
+          let rec go = function
+            | [] -> Js.Promise.resolve ()
+            | k :: rest ->
+                let* () = H.keyboard user k in
+                seen := where () :: !seen;
+                go rest
+          in
+          let* () =
+            go
+              [
+                "{ArrowDown}";
+                "{ArrowRight}";
+                "{ArrowRight}";
+                "{ArrowDown}";
+                "{ArrowLeft}";
+                "{ArrowLeft}";
+                "{ArrowUp}";
+                "{End}";
+              ]
+          in
+          Js.Promise.resolve
+            E.(
+              expect (Array.of_list (List.rev !seen))
+              |> toEqual
+                   [|
+                     "row:Kate MooreCEOEdit Kate Moore";
+                     "row:John SmithCTOEdit John Smith";
+                     "rowheader:John Smith";
+                     "gridcell:CTO";
+                     "gridcell:CMO";
+                     "rowheader:Sara Johnson";
+                     "row:Sara JohnsonCMOEdit Sara Johnson";
+                     "row:John SmithCTOEdit John Smith";
+                     "row:Sara JohnsonCMOEdit Sara Johnson";
+                   |]));
+      Jest.testPromise
+        "selects rows, writing their state as Kobalte writes it, a disabled \
+         row left out" (fun () ->
+          let told = ref [||] in
+          team ~mode:`multiple ~disabled:[| "2" |] ~told ();
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "Kate Moore") in
+          let* () = H.click user (H.by_text "John Smith") in
+          let state name =
+            let r = row name in
+            ( H.attribute r "aria-selected",
+              H.attribute r "data-selected",
+              H.attribute r "aria-disabled",
+              H.attribute r "data-disabled" )
+          in
+          Js.Promise.resolve
+            E.(
+              expect (!told, state "Kate Moore", state "John Smith")
+              |> toEqual
+                   ( [| "1" |],
+                     (Some "true", Some "", None, None),
+                     (Some "false", None, Some "true", Some "") )));
+      Jest.testPromise "leaves a press in a control to the control" (fun () ->
+          let told = ref [||] in
+          team ~mode:`multiple ~told ();
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "Edit Kate Moore") in
+          Js.Promise.resolve
+            E.(
+              expect (!told, H.attribute (row "Kate Moore") "aria-selected")
+              |> toEqual ([||], Some "false")));
+      Jest.testPromise "calls the caller's ref and handlers beside its own"
+        (fun () ->
+          let keys = ref 0 in
+          let got_table = ref false in
+          let clicked = ref 0 in
+          let told = ref [||] in
+          team ~mode:`single ~told ~got_table ~clicked
+            ~on_key_down:(fun _ -> incr keys)
+            ();
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "John Smith") in
+          let* () = H.keyboard user "{ArrowDown}" in
+          Js.Promise.resolve
+            E.(
+              expect (!got_table, !clicked, !keys, !told, where ())
+              |> toEqual
+                   ( true,
+                     1,
+                     1,
+                     [| "2" |],
+                     "row:Sara JohnsonCMOEdit Sara Johnson" )));
+      Jest.test "shows its empty state across every column" (fun () ->
+          team ~members:[||] ();
+          let cell = H.by_text "No members" in
+          let td =
+            match Js.Null.toOption (H.parent cell) with
+            | Some td -> td
+            | None -> cell
+          in
+          E.(expect (H.attribute td "colspan") |> toEqual (Some "3")));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          team ~mode:`multiple ();
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))
