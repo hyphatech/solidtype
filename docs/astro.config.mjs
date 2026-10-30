@@ -88,8 +88,8 @@ export default defineConfig({
     // up the tree: `@islands/<name>.jsx` is an island as Melange compiled
     // it, the demo a page runs, and `@islands/<name>.mlx?raw` its source,
     // the code a page shows; `@example/` is the example, `@components/`
-    // the site's own components, and `@demo/` the pages of the Astro page's
-    // demo, whose sources it shows.
+    // the site's own components, `@styles/` its stylesheets, and `@demo/`
+    // the pages of the Astro page's demo, whose sources it shows.
     resolve: {
       alias: [
         { find: /^@islands\/(.+)\.jsx$/, replacement: `${repository}_build/default/docs/islands/out/docs/islands/$1.jsx` },
@@ -97,6 +97,7 @@ export default defineConfig({
         { find: "@example", replacement: `${repository}example` },
         { find: "@components", replacement: `${repository}docs/src/components` },
         { find: "@demo", replacement: `${repository}docs/src/pages/demo` },
+        { find: "@styles", replacement: `${repository}docs/src/styles` },
       ],
     },
     server: { fs: { allow: [repository] } },

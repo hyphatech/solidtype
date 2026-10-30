@@ -1,6 +1,6 @@
 ---
 title: Astro
-description: A site's pages in Astro and its interactive parts as OCaml islands -- set up, given props, hydrated, routed, and sharing state.
+description: Build a site with Astro, its interactive parts written as OCaml islands.
 ---
 
 import { Code } from "@astrojs/starlight/components";
@@ -17,73 +17,72 @@ import basket from "@islands/astro_basket.ml?raw";
 import teaPage from "@demo/teas/[tea].astro?raw";
 import layout from "@demo/teas/_Layout.astro?raw";
 
-[Astro](https://astro.build) is the framework Hypha builds its own front
-ends on, and the one we recommend for solidtype: Astro owns the site --
-its routes, layouts and data -- and each part of a page that changes in
-the browser is a Solid island written in OCaml. This site is built that
-way.
+We build our own front ends with [Astro](https://astro.build), and
+recommend it for solidtype. Astro builds the site: its pages, as HTML.
+Each part of a page that the reader interacts with is an island: a Solid
+component written in OCaml, which Astro renders with the page and then
+brings to life in the browser.
 
-Astro renders every page to HTML, at build time or per request, and sends
-none of its own JavaScript. An island is an interactive component on an
-otherwise static page: Astro renders it to HTML with the rest of the page,
-then loads its code and hydrates it on its own, when its directive says.
-A page of prose with one search box ships the search box and nothing
-else, and each island hydrates independently, so a slow one never holds
-up the rest.
+## What Astro does
 
-| Astro does | An OCaml island does |
-|---|---|
-| routes, one file per page | what the reader clicks, types and drags |
-| layouts, the head, styles | state, and what changes with it |
-| data read at build time or per request, given to islands as props | what only the browser knows: the clock, storage, the viewport |
+1. **Routing.** Each file in `src/pages/` is a page, at the URL its path
+   names. A file named `[tea].astro` is one page per tea.
+2. **Layouts.** The HTML every page shares -- the head, the navigation,
+   the stylesheets -- is written once.
+3. **HTML first.** Every page is rendered to HTML when the site is built,
+   islands included, so the reader sees it before any JavaScript loads,
+   and so does a search engine.
+4. **JavaScript only where needed.** A page loads the code of its islands
+   and nothing else, each when its directive says: as the page loads, or
+   only once the island is scrolled into view.
+5. **Data to islands.** A page reads its data while it is built, or per
+   request, and gives an island what it needs as props.
+6. **Navigation without reloading.** A link can swap the next page in
+   place, and an island can stay alive from one page to the next.
 
-Solid suits islands well: it has no virtual DOM to ship, so an island
-costs little more than its own code, and it renders on the server, so an
-island arrives as HTML and hydrates. solidtype keeps both, since an island
-compiles as its TSX twin does.
+What is left to the islands is what happens in the browser: state, events,
+and what changes on the page.
 
 ## Setting up
 
-Astro's Solid integration brings Solid's compiler, and solidtype's plugin
-goes in Vite's plugins, where it runs before it. Astro's pages live in
-`src/pages/`, so the islands are a Melange library of their own beside
-them, `islands/`:
-
-```
-dune-project
-dune               (melange.emit (target out) (libraries islands) ...)
-islands/           the islands, .mlx, a library of (modes melange)
-src/pages/         Astro's routes
-src/layouts/       the layouts the pages share
-astro.config.mjs
-```
+Add `astro` and `@astrojs/solid-js` to the packages the
+[start page](/solidtype/#install) installs. Solid's integration compiles
+the JSX; solidtype's plugin goes in Vite's plugins and runs first:
 
 ```js
 // astro.config.mjs
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import solid from "@astrojs/solid-js";
 import solidtype from "vite-plugin-solidtype";
 
-// Melange's output, which a page imports as @islands/<name>.jsx.
-const islands = fileURLToPath(new URL("./_build/default/out/islands", import.meta.url));
-
 export default defineConfig({
   integrations: [solid()],
-  vite: { plugins: [solidtype()], resolve: { alias: { "@islands": islands } } },
+  vite: {
+    plugins: [solidtype()],
+    resolve: {
+      alias: { "@islands": new URL("./_build/default/out/islands", import.meta.url).pathname },
+    },
+  },
 });
 ```
 
-`package.json` adds `astro` and `@astrojs/solid-js` to what the
-[start page](/solidtype/#install) installs; `vite-plugin-solid` comes with
-Astro's integration. In development `dune build --watch` and `astro dev`
-run side by side, and Astro serves the islands from what dune last wrote;
-a build runs `dune build`, then `astro build`.
+The islands are a Melange library in `islands/`, and dune emits them into
+`_build`, where the alias finds them:
+
+```
+astro.config.mjs
+dune               (melange.emit (target out) (libraries islands) ...)
+islands/           the islands, in .mlx
+src/pages/         the pages
+```
+
+While you work, run `dune build --watch` and `astro dev` side by side. To
+build the site, run `dune build`, then `astro build`.
 
 ## An island
 
-A page imports an island's module by its namespace and mounts its `make`
-with a [directive](#hydration), and with props:
+A page imports an island's module and mounts its `make`, with a directive
+and props:
 
 ```astro
 ---
@@ -95,168 +94,78 @@ import * as Counter from "@islands/astro_counter.jsx";
 
 <Example code={counter} title="astro_counter.mlx"><Counter.make client:visible label="Stars" startAt={3} /></Example>
 
-An island that takes nothing is a root, `let make () = ...`. One that
-takes props is written with `let%component`, as any
-[component](/solidtype/solid/components/#letcomponent) is: Astro calls it
-with one object of props, which only a `let%component` reads. A prop's
-name in Astro is its JavaScript name, by the
-[naming rule](/solidtype/start/conventions/)'s inverse: `start_at` is
-`startAt`, and a prop left out takes the default its parameter gives.
+An island that takes props is a `let%component`, as any
+[component](/solidtype/solid/components/) is; one that takes none is
+`let make () = ...`. In the page a prop has its JavaScript name:
+`start_at` is `startAt`.
 
-Astro writes an island's props into the page, for the browser to hydrate
-it with the same ones, so they are
-[values it can serialize](https://docs.astro.build/en/guides/framework-components/#passing-props-to-framework-components):
-a `string`, an `int`, a `float`, a `bool`, an `array` of them, a record,
-and a tag without a payload, which Melange writes as a string. A `list`,
-an ordinary variant and a function are not: a handler is the island's
-own, never the page's.
-
-An OCaml component mounted with no directive is rendered to HTML and
-never hydrated: markup, with no JavaScript sent for it.
+Props are written into the page as data, so they are strings, numbers,
+booleans, arrays and records -- never a list, a variant or a function.
 
 ## Hydration
 
-A directive says when an island's JavaScript loads and takes over the
-HTML the server rendered:
+Hydrating is the browser taking over the HTML the server rendered,
+attaching the island's code to it. A directive says when:
 
-| Directive | Rendered on the server | Hydrated | For |
-|---|---|---|---|
-| `client:load` | yes | as the page loads | what the reader uses first: a header, a form above the fold |
-| `client:idle` | yes | once the browser is idle; `client:idle={{ timeout: 500 }}` waits no more than 500 ms | what can wait a moment |
-| `client:visible` | yes | as it scrolls into view; `client:visible={{ rootMargin: "200px" }}` 200 pixels before | most islands, below the fold |
-| `client:media="(max-width: 50em)"` | yes | once the media query holds | what only some screens use: a mobile menu |
-| `client:only="solid-js"` | no | rendered in the browser alone | what has nothing to show before it runs |
-| none | yes | never | markup |
+| Directive | Hydrates | For |
+|---|---|---|
+| `client:load` | as the page loads | what the reader uses first |
+| `client:idle` | once the browser is idle | what can wait a moment |
+| `client:visible` | when scrolled into view | most islands |
+| `client:media="(max-width: 50em)"` | when the media query matches | a mobile menu |
+| `client:only="solid-js"` | renders in the browser alone, never on the server | what has nothing to show without the browser |
 
-Astro compiles each island twice -- for the server, which renders it to
-HTML, and hydratable, for the browser -- and solidtype's plugin runs under
-both. Hydration walks the server's HTML and attaches to it rather than
-rendering again, so the two must agree: the repository's twin test holds
-an island's outputs to its TSX twin's, both ways.
+With no directive, a component is rendered to HTML and its code never
+loads.
 
-### The same on both sides
-
-The server renders a page without a reader: no clock of theirs, no
-locale, no storage, no window. An island renders the same on both sides,
-and reads what only the browser has in `Solid.on_mount`, which runs in the
-browser alone, once the island is hydrated:
+The browser's first render has to match the server's HTML. The server has
+no window, no storage and not the reader's clock, so an island reads them
+in `on_mount`, which runs in the browser alone, after hydrating:
 
 <Example code={localTime} title="astro_local_time.mlx"><Local_time.make client:idle /></Example>
 
-The page this island is on was rendered when the site was built, with
-`--:--:--` where the time goes. The browser hydrates that HTML, then
-mounts the island, which reads the clock. Had it read the clock as it
-rendered, the server's time would be in the HTML and the browser's in
-the first render, and the two would disagree.
-
-An island with nothing worth rendering before it runs is `client:only`,
-with what the page shows meanwhile in its `fallback` slot:
-
-```astro
-<Map.make client:only="solid-js">
-  <p slot="fallback">Loading the map</p>
-</Map.make>
-```
-
-### Data
-
-Data an island shows is best read by the page, in its frontmatter, and
-given to the island as props: the page reads it at build time or per
-request, the HTML holds it, and the island hydrates with it at once.
-
-Astro also waits, while it renders an island on the server, for each
-resource the island reads, and
-[puts the data in the HTML](https://docs.astro.build/en/guides/integrations-guide/solid-js/#async-rendering-strategy).
-In a static build that is at build time, where an API the island calls
-in the browser may not be running: the example's board fetches its tasks
-in the browser alone, its resource's source `None` while `Web.is_server`.
-
 ## Routing
 
-Astro routes. Each file under `src/pages/` is a page, and a link to
-another page is an `<a href>`. A route with a parameter, `[tea].astro`,
-is one page per value: `getStaticPaths` names each, with the props its
-page is built with, and the page gives its island what the route says.
+Here a route makes a page per tea, and gives each tea's name to the
+page's island:
 
 <Code code={teaPage} lang="astro" title="src/pages/demo/teas/[tea].astro" />
 
-These are this site's own pages, a demo of three teas: open
-[/solidtype/demo/teas/](/solidtype/demo/teas/). Each tea's page is HTML,
-its notes static, and one island, its button, given the tea's name.
+`getStaticPaths` lists the pages, and the props each is built with. Try
+it: [/solidtype/demo/teas/sencha/](/solidtype/demo/teas/sencha/).
 
-An island takes its route as a prop, never from `window.location`: the
-server knows the route when it renders, so the island's HTML is right
-before any of its code runs, and the browser hydrates the same.
+An island takes the route as a prop, never from `window.location`: the
+server knows the route when it renders the page, so the HTML is right
+before any code runs.
 
-A page rendered per request, rather than at build time, is the same page
-with `export const prerender = false` and an
+A page rendered per request, rather than when the site is built, adds
+`export const prerender = false`, and an
 [adapter](https://docs.astro.build/en/guides/on-demand-rendering/) for the
-server it runs on. It reads its parameter from the request instead of
-`getStaticPaths`; the island is unchanged, given its props either way:
+server it runs on.
 
-```astro
----
-export const prerender = false;
-const { tea } = Astro.params;
----
-```
+## Navigating without reloading
 
-A router of Solid's inside an island would route that island alone: its
-URLs are no pages of Astro's, so a reader who opens one gets what the
-server has at that path, and nothing is rendered for it. The routes are
-`src/pages/`, and each island is given what its route says.
-
-### Navigating without reloading
-
-By default a link loads the next page whole: every island on it starts
-afresh, and what the reader did on the last page is gone. Astro's
-`<ClientRouter />`, in the layout's head, swaps the next page in instead,
-so the modules the islands import stay loaded, and `transition:persist`
-keeps an island itself -- its HTML, its state and its owner -- in place
-of the next page's copy:
+By default a link loads the next page whole, and the islands start
+again. With `<ClientRouter />` in the layout's head, Astro swaps the next
+page in place, and an island marked `transition:persist` stays as it is:
 
 <Code code={layout} lang="astro" title="src/pages/demo/teas/_Layout.astro" />
 
-In [the demo](/solidtype/demo/teas/sencha/), add a tea, then go to
-another: the basket in the header keeps its count, and only the new
-page's button hydrates. Code that sets up each page from a `<script>`
-listens for `astro:page-load`, which fires after each swap as after the
-first load, since a module's script runs once.
+In [the demo](/solidtype/demo/teas/sencha/), add a tea and go to another:
+the basket keeps its count.
 
 ## Sharing state between islands
 
-Each island is a root of its own, so a
-[context](/solidtype/solid/state/#context) never reaches from one into another.
-What islands share is the modules they import, which the browser loads
-once: a signal in a module is one signal for every island that reads it.
-Astro's own [recipe](https://docs.astro.build/en/recipes/sharing-state-islands/)
-uses Nano Stores, for islands of several frameworks; when every island is
-Solid, a signal is the store:
+Islands are separate: a context does not reach from one to another. They
+do share the modules they import, so a signal in a module is shared by
+every island that reads it:
 
 <Code code={basket} lang="ocaml" title="astro_basket.ml" />
-
-The signal is made the first time an island reads it, through `lazy`,
-since a module does nothing as it loads. One island reads it and another
-writes it, mounted apart:
 
 <Example code={addToBasket} title="astro_add_to_basket.mlx"><Basket_count.make client:load /> <Add_to_basket.make client:visible tea="Sencha" /></Example>
 
 <Code code={basketCount} lang="ocaml" title="astro_basket_count.mlx" />
 
-The server shares a module too: a static build renders every page in one
-process, and a server renders every reader's requests in one. A store
-written while rendering would carry over from one page, or one reader, to
-the next, so it is written only in the browser: from a handler, as the
-button does, or from `on_mount`.
-
-## HeroUI on an Astro page
-
-The layout imports HeroUI's stylesheet once, for every page, and Tailwind
-reads the islands' classes from their `.mlx` sources, which the stylesheet
-names with `@source`. HeroUI's dark theme applies under `.dark` or
-`data-theme="dark"`, set by an inline script in the head, before the page
-is painted, as the demo's layout does.
-
-The [example](https://github.com/hyphatech/solidtype/tree/main/example)'s
-board is also an Astro page, `example/pages/index.astro`: one island,
-prerendered and hydrated with `client:load`, its page wiring alone.
+The server shares a module between every page it renders, so a shared
+signal is only written in the browser: from a handler, or from
+`on_mount`.

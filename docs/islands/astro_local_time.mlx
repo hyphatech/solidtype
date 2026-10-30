@@ -1,21 +1,10 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
-(* Prerendered at build time, where the reader's clock is not: the server and
-   the browser both render the placeholder, so hydration finds the HTML it
-   expects, and the time is read only once the island is mounted. *)
 let make () =
-  let now, set_now = S.create_signal None in
+  let opened, set_opened = S.create_signal "--:--:--" in
+  (* The reader's clock is read in the browser alone, once the island is
+     hydrated: the server, rendering at build time, has none. *)
   S.on_mount (fun () ->
-      let tick () = S.set set_now (Some (Js.Date.make ())) in
-      tick ();
-      let timer = Js.Global.setInterval ~f:tick 1000 in
-      S.on_cleanup (fun () -> Js.Global.clearInterval timer));
-  <p class_="font-mono text-lg tabular-nums">
-    "Your time: "
-    (fun () ->
-      Jsx.string
-        (match S.get now with
-        | None -> "--:--:--"
-        | Some d -> Js.Date.toLocaleTimeString d))
-  </p>
+      S.set set_opened (Js.Date.toLocaleTimeString (Js.Date.make ())));
+  <p>"You opened this page at " (fun () -> Jsx.string (S.get opened))</p>

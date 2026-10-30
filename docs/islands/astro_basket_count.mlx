@@ -3,5 +3,5 @@ module Chip = Solidtype_heroui.Chip
 
 let make () =
   <Chip color=`accent variant=`soft>
-    "Basket: " (fun () -> Jsx.int (Array.length (Astro_basket.teas ())))
+    "Basket: " (fun () -> Jsx.int (Astro_basket.count ()))
   </Chip>
