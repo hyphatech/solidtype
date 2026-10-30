@@ -70,13 +70,17 @@ module List : sig
 end
 
 (** One tab: Kobalte's trigger, a [<button>] of role [tab], which selects the
-    panel of its [id]. *)
+    panel of its [id]. Given an [href], it is an [<a>] instead, a link that a
+    press or Enter follows and never selects: the tab selected is then the one
+    the [Tabs]' [selected_key] names, as a router says which route is open. A
+    disabled link has no [href], so nothing follows it. *)
 module Tab : sig
   module Props : sig
     type t
 
     val check :
       id:string Solidtype.Check.value ->
+      ?href:string Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->

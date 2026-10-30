@@ -22,10 +22,12 @@ type Props = {
   disabled?: string;
   // Whether the list is held by Tabs.ListContainer.
   container?: boolean;
+  // Whether each tab is a link, to #<key>.
+  links?: boolean;
 };
 
 export function render(
-  { disabled, container, ...props }: Props,
+  { disabled, container, links, ...props }: Props,
   onSelectionChange: (key: string) => void,
 ): HTMLElement {
   const host = document.body.appendChild(document.createElement("div"));
@@ -33,7 +35,12 @@ export function render(
   const list = (
     <Tabs.List aria-label="Options">
       {["overview", "analytics", "reports"].map((key, i) => (
-        <Tabs.Tab key={key} id={key} isDisabled={key === disabled ? true : undefined}>
+        <Tabs.Tab
+          key={key}
+          id={key}
+          href={links ? `#${key}` : undefined}
+          isDisabled={key === disabled ? true : undefined}
+        >
           {i > 0 ? <Tabs.Separator /> : null}
           {key}
           <Tabs.Indicator />

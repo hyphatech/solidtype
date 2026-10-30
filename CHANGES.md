@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Tabs.Tab`: `href`, which makes the tab a link, an `<a>`
+  that a press or Enter follows and never selects: the tab selected is the
+  one `selected_key` names, as a router says which route is open. A disabled
+  one has no `href`.
 - `Solidtype_heroui.Form`: `on_invalid`, called once a submit is refused,
   with a cancelable `invalid` event on the form; preventing it keeps the
   first invalid field from being focused, for the application to move focus

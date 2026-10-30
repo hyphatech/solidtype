@@ -1,0 +1,51 @@
+module S = Solidtype.Solid
+module Tabs = Solidtype_heroui.Tabs
+
+external hash : string = "hash" [@@mel.scope "window", "location"]
+
+external add_listener : string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.scope "window"]
+
+external remove_listener : string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.scope "window"]
+
+let pages = [ "getting-started"; "components"; "releases" ]
+
+(* The page a link went to, as a router would say which route is open: here,
+   the location's hash, read once the page has a location. *)
+let page () = List.find_opt (fun page -> String.equal hash ("#" ^ page)) pages
+
+let make () =
+  let current, set_current = S.create_signal "getting-started" in
+  let follow () = Option.iter (S.set set_current) (page ()) in
+  let on_hash_change (_ : Dom.event) = follow () in
+  S.on_mount (fun () ->
+      follow ();
+      add_listener "hashchange" on_hash_change;
+      S.on_cleanup (fun () -> remove_listener "hashchange" on_hash_change));
+  <Tabs class_="w-full max-w-md" selected_key=(fun () -> S.get current)>
+    <Tabs.List_container>
+      <Tabs.List aria_label="Options">
+        <Tabs.Tab href="#getting-started" id="getting-started">
+          "Getting Started" <Tabs.Indicator />
+        </Tabs.Tab>
+        <Tabs.Tab href="#components" id="components">
+          "Components" <Tabs.Indicator />
+        </Tabs.Tab>
+        <Tabs.Tab href="#releases" id="releases">
+          "Releases" <Tabs.Indicator />
+        </Tabs.Tab>
+      </Tabs.List>
+    </Tabs.List_container>
+    <Tabs.Panel class_="pt-4" id="getting-started">
+      <p>"Install the library and render a first component."</p>
+    </Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="components">
+      <p>"Every component, with its examples and props."</p>
+    </Tabs.Panel>
+    <Tabs.Panel class_="pt-4" id="releases">
+      <p>"What changed in each version."</p>
+    </Tabs.Panel>
+  </Tabs>

@@ -54,6 +54,9 @@ type tabs = {
          with "-panel", of the panel it controls: Kobalte reads each from a
          map the other fills as it is made, which a panel made later than its
          tab, or before, never finds. *)
+  links : (string, unit) Hashtbl.t;
+      (* The keys of the tabs that are links, which a press or a key follows
+         and never selects, as React Aria's do. *)
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -217,9 +220,27 @@ module List_container = struct
     </div>
 end
 
+(* Kobalte's trigger as the element a tab is: an [<a>] while it is a link, a
+   [<button>] else. *)
+module As_tab = struct
+  module Props = struct
+    external check :
+      value:string Solidtype.Check.value ->
+      ?disabled:bool Solidtype.Check.value ->
+      ?as_:string Solidtype.Check.value ->
+      ?props:'spread Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.A.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Kobalte.Trigger.component
+end
+
 module Tab = struct
-  let%component make ~(id : string) ?(is_disabled : bool = false)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ~(id : string) ?(href : string option)
+      ?(is_disabled : bool = false) ?(class_ : string option)
+      ~(children : Jsx.content) () =
     let t = within "Tabs.Tab" in
     let k = Kobalte.use_tabs_context () in
     let selected () =
@@ -233,7 +254,19 @@ module Tab = struct
       is_disabled () || Solid.get (Types.TabsContextValue.is_disabled k)
     in
     let n = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
-    <Kobalte.Trigger
+    (* A disabled link has no [href], since [disabled] keeps no [<a>] from
+       being followed. *)
+    let link () = if disabled () then None else href () in
+    Solid.create_computed (fun () ->
+        let key = id () in
+        match href () with
+        | Some _ ->
+            Hashtbl.replace t.links key ();
+            Solid.on_cleanup (fun () -> Hashtbl.remove t.links key)
+        | None -> ());
+    <As_tab
+      as_=(fun () -> match link () with Some _ -> "a" | None -> "button")
+      ?href=(fun () -> link ())
       id=(fun () -> t.tab_id (id ()))
       ?aria_controls=(fun () ->
                        if selected () then Some (t.tab_id (id ()) ^ "-panel")
@@ -253,7 +286,7 @@ module Tab = struct
       <Tab_context.Provider value=(fun () -> { selected })>
         (fun () -> children ())
       </Tab_context.Provider>
-    </Kobalte.Trigger>
+    </As_tab>
 end
 
 (* Where an indicator is, and the values of what its transition moves. *)
@@ -430,7 +463,15 @@ let%component make ?(selected_key : string option)
                let id = Solid.create_unique_id () in
                Hashtbl.replace ids key id;
                id);
+      links = Hashtbl.create 8;
     }
+  in
+  (* Kobalte is given the key selected while there is one, so a link's key it
+     selects is refused unseen; its first, while none is, stands, as React
+     Aria selects a first tab that is a link. *)
+  let kept, keep = Solid.create_signal (default_selected_key ()) in
+  let selected () =
+    match selected_key () with Some key -> Some key | None -> Solid.get kept
   in
   (* Kobalte tells a selection twice as the arrows go round from the last tab
      to the first, in one press; React Aria tells each press once. *)
@@ -443,10 +484,16 @@ let%component make ?(selected_key : string option)
         queue_microtask (fun () -> just_told := None);
         ignore (on_selection_change key : unit option)
   in
+  let change key =
+    match (Hashtbl.mem t.links key, selected ()) with
+    | true, Some _ -> ()
+    | true, None | false, (Some _ | None) ->
+        Solid.set keep (Some key);
+        tell key
+  in
   <Kobalte.Root
-    ?value=(fun () -> selected_key ())
-    ?default_value=(fun () -> default_selected_key ())
-    on_change=tell
+    ?value=(fun () -> selected ())
+    on_change=change
     orientation=(fun () -> orientation ())
     activation_mode=(fun () -> keyboard_activation ())
     disabled=(fun () -> is_disabled ())

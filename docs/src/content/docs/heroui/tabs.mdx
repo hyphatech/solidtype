@@ -22,6 +22,8 @@ import * as Tailwind from "@islands/tabs_tailwind.jsx";
 import TailwindCode from "@islands/tabs_tailwind.mlx?raw";
 import * as Alignment from "@islands/tabs_alignment.jsx";
 import AlignmentCode from "@islands/tabs_alignment.mlx?raw";
+import * as Links from "@islands/tabs_links.jsx";
+import LinksCode from "@islands/tabs_links.mlx?raw";
 import * as Demo from "@islands/tabs_demo.jsx";
 
 `Solidtype_heroui.Tabs` is Kobalte's tabs with the classes HeroUI's own
@@ -97,6 +99,23 @@ hidden beside the selected one.
 A tab's content is centred, or set to the start or the end by `align`.
 
 <Example code={AlignmentCode} title="tabs_alignment.mlx"><Alignment.make client:visible /></Example>
+
+### Links
+
+A tab given an `href` is a link, an `<a>`: a press or Enter follows it, as
+any link is followed, and never selects it, so the tab selected is the one
+`selected_key` names, the route an application's router says is open. Its
+arrows still move focus along the tabs. A disabled tab has no `href`, so it
+is never followed. HeroUI's Render Function example makes its tabs links
+through Next's `Link`; here each is a link to a hash, which the example's
+selection follows.
+
+<Example code={LinksCode} title="tabs_links.mlx"><Links.make client:visible /></Example>
+
+React Aria calls `onSelectionChange` with the tab still selected each time a
+link tab is pressed, and selects a link tab that End or Home reaches once a
+link has been followed by Enter; the port tells nothing and selects nothing,
+whichever key or press reaches a link.
 
 ## Customization
 
@@ -177,7 +196,8 @@ Each prop beside the name HeroUI's React component gives it.
 | `id` | `id` | `string` | | Its key, and its panel's; required |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `href`, `render` | — | | | Not yet |
+| `href` | `href` | `string` | | Where it links: it is an `<a>`, followed and never selected by a press or a key |
+| `render` | — | | | Not yet |
 
 ### Tabs.Panel
 

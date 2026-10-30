@@ -23,6 +23,7 @@ external props :
   ?is_disabled:(bool[@mel.as "isDisabled"]) ->
   ?disabled:string ->
   ?container:bool ->
+  ?links:bool ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -47,6 +48,8 @@ external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
 external request_frame : (float -> unit) -> int = "requestAnimationFrame"
+external location_hash : string = "hash" [@@mel.scope "window", "location"]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
 
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]
@@ -113,6 +116,11 @@ let shown host =
 
 let keys = [| "overview"; "analytics"; "reports" |]
 
+(* The key of the tab selected. *)
+let selected () =
+  Option.bind (T.query "[role=tab][aria-selected=true]") (fun tab ->
+      T.attribute tab "data-key")
+
 let tab host i =
   match Js.Array.from (query_all host "[role=tab]") with
   | tabs when i < Array.length tabs -> tabs.(i)
@@ -149,13 +157,14 @@ let walk ~step ~vertical host told =
 
 (* The tabs the twin renders, under the same props. *)
 let render ?selected_key ?default_selected_key ?orientation ?variant ?align
-    ?keyboard_activation ?is_disabled ?disabled ~container tell =
+    ?keyboard_activation ?is_disabled ?disabled ~container ~links tell =
   let list () =
     <Tabs.List aria_label="Options">
       <Solidtype.For each=(fun () -> keys)>
         (fun key _ ->
           <Tabs.Tab
             id=(fun () -> key)
+            ?href=(fun () -> if links then Some ("#" ^ key) else None)
             ?is_disabled=(fun () ->
                            match disabled with
                            | Some d when String.equal d key -> Some true
@@ -195,7 +204,8 @@ let render ?selected_key ?default_selected_key ?orientation ?variant ?align
       </Tabs>)
 
 let both ?selected_key ?default_selected_key ?orientation ?variant ?align
-    ?keyboard_activation ?is_disabled ?disabled ?(container = false) () =
+    ?keyboard_activation ?is_disabled ?disabled ?(container = false)
+    ?(links = false) () =
   let vertical =
     match orientation with
     | Some `vertical -> true
@@ -203,7 +213,7 @@ let both ?selected_key ?default_selected_key ?orientation ?variant ?align
   in
   let told = ref [] in
   render ?selected_key ?default_selected_key ?orientation ?variant ?align
-    ?keyboard_activation ?is_disabled ?disabled ~container (fun k ->
+    ?keyboard_activation ?is_disabled ?disabled ~container ~links (fun k ->
       told := k :: !told);
   let* solidtype = walk ~step:(fun action -> action ()) ~vertical T.body told in
   T.cleanup ();
@@ -211,8 +221,8 @@ let both ?selected_key ?default_selected_key ?orientation ?variant ?align
   let host =
     Twin.render
       (props ?selected_key ?default_selected_key ?orientation ?variant ?align
-         ?keyboard_activation ?is_disabled ?disabled ~container ()) (fun k ->
-        told' := k :: !told')
+         ?keyboard_activation ?is_disabled ?disabled ~container ~links ())
+      (fun k -> told' := k :: !told')
   in
   let* react = walk ~step:Twin.step ~vertical host told' in
   Twin.cleanup ();
@@ -255,4 +265,44 @@ let () =
           same r);
       Jest.testPromise "holds its list in a container, as React's" (fun () ->
           let* r = both ~container:true () in
-          same r))
+          same r);
+      Jest.testPromise "makes each tab a link, as React's" (fun () ->
+          render ~container:false ~links:true (fun _ -> ());
+          let solidtype = shown T.body in
+          T.cleanup ();
+          let host = Twin.render (props ~links:true ()) (fun _ -> ()) in
+          let react = shown host in
+          Twin.cleanup ();
+          same (solidtype, react));
+      Jest.testPromise
+        "follows a link tab by a press or Enter, and selects none" (fun () ->
+          let told = ref [] in
+          render ~container:false ~links:true (fun k -> told := k :: !told);
+          let user = T.setup () in
+          let* () = T.click user (tab T.body 1) in
+          let clicked = (location_hash, selected ()) in
+          let* () = T.keyboard user "{ArrowRight}" in
+          let arrowed = (T.attribute active "data-key", selected ()) in
+          let* () = T.keyboard user "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (clicked, arrowed, (location_hash, selected ()), !told)
+              |> toEqual
+                   ( ("#analytics", Some "overview"),
+                     (Some "reports", Some "overview"),
+                     ("#reports", Some "overview"),
+                     [ "overview" ] )));
+      Jest.testPromise "selects a link tab its key names" (fun () ->
+          render ~selected_key:"analytics" ~container:false ~links:true
+            (fun _ -> ());
+          Js.Promise.resolve
+            E.(expect (selected ()) |> toEqual (Some "analytics")));
+      Jest.testPromise "keeps a disabled link from being followed" (fun () ->
+          render ~disabled:"analytics" ~container:false ~links:true (fun _ ->
+              ());
+          let before = location_hash in
+          let* () = T.click (T.setup ()) (tab T.body 1) in
+          Js.Promise.resolve
+            E.(
+              expect (before, location_hash, T.attribute (tab T.body 1) "href")
+              |> toEqual (before, before, None))))
