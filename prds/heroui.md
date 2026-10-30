@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted, its binding landed, TimeField's zones not yet.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted and its binding has landed; TimeField on its values, a breaking change, is next.
 Date: 2026-10-23
 
 ## The problem
@@ -254,8 +254,16 @@ on `generate/binding.ts`'s core, and every date port takes its values:
   group 7, are built on the same values and on the library's calendars, so
   a calendar other than the Gregorian is theirs too.
 - **The wire** stays a `Js.Date.t`, an instant, as `MELANGE.md` and
-  wiretype's codecs read one: `ZonedDateTime.toDate` and `fromDate` with a
-  zone cross between them, at the boundary.
+  wiretype's codecs read one: `Types.ZonedDateTime.to_date` and
+  `from_date` with a zone cross between them, at the boundary.
+
+The binding, as it landed: the four value classes are each a kind of one
+`Types.Value.t`, and a union of them or an interface they satisfy,
+`DateValue`, `AnyTime`, is the open set of kinds TypeScript takes for it,
+so a port passes any value as it is; a date's numbers are `int`; and a
+parser, or whatever takes a zone or a disambiguation, raises
+`Invalid_argument` with an `_opt` beside it, so `set_opt` with
+`` `reject `` is how a port refuses a time its zone skips.
 
 The library is about 4.7 KB gzipped for its zoned values, and 11 KB
 whole, which a bundler shakes to what a page uses.
@@ -431,7 +439,11 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   generated, with its values, calendars, arithmetic and time zones
 - [ ] TimeField on its `TimeValue`: a `Time`, a `CalendarDateTime` or a
   `ZonedDateTime`, Kobalte editing it, a zoned value's abbreviation shown
-  unless `hide_time_zone`
+  unless `hide_time_zone`. Breaking: `value`, `default_value`,
+  `placeholder_value`, `min_value`, `max_value` and `on_change` leave
+  Kobalte's `Types.Time.t`, its floats, for the library's kinds, and
+  `solidtype-heroui` comes to depend on `solidtype-internationalized-date`.
+  Kobalte's time is then made and read only inside the port.
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,
@@ -440,7 +452,8 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 ### Group 7: built from Kobalte's primitives
 - [ ] Kobalte's primitives bound: `createSelectableList`,
   `createSelectableItem`, `createListState`, `createFocusScope`, the
-  popper, the dismissable layer, `createDateFormatter`
+  popper, the dismissable layer; a date's formatting is
+  `@internationalized/date`'s `DateFormatter`, bound already
 - [ ] TagGroup, Toolbar, InputOTP, Table, DateField, Calendar,
   RangeCalendar, DatePicker, DateRangePicker
 
@@ -461,5 +474,7 @@ those its page explains.
 | each port's use, and what it does other than React's and why | its page |
 | the layering, the twin test, a port built from primitives, a field driven from outside | `AGENTS.md`, its *Rules that must hold* |
 | how a form is validated from Solid's store | the `Form` page |
+| the date model, and how its binding maps the library | `AGENTS.md`, its *Rules that must hold* |
+| a date port's values, and a zoned one's daylight saving | its page |
 | what changed for a user | `CHANGES.md` |
 | that the full set is ported | `README.md` |
