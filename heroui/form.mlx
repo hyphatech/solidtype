@@ -63,6 +63,17 @@ external query : Dom.htmlDivElement -> string -> Dom.element Js.Null.t
 external focus : Dom.element -> unit = "focus" [@@mel.send]
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
+type event_init
+
+external event_init : cancelable:bool -> unit -> event_init = "" [@@mel.obj]
+external new_event : string -> event_init -> Dom.event = "Event" [@@mel.new]
+
+(* A submit event's target is always its form. *)
+external target : Dom.event -> Dom.eventTarget = "target" [@@mel.get]
+
+external dispatch : Dom.eventTarget -> Dom.event -> bool = "dispatchEvent"
+[@@mel.send]
+
 (* Node.DOCUMENT_POSITION_PRECEDING: the second element comes before the
    first. *)
 let preceding = 2
@@ -92,7 +103,8 @@ let%component make ?(action : string option)
     ?(aria_labelledby : string option) ?(class_ : string option)
     ?(validation_errors : (string * string) list option)
     ?(on_submit : (Dom.event -> unit) option)
-    ?(on_reset : (Dom.event -> unit) option) ~(children : Jsx.content) () =
+    ?(on_reset : (Dom.event -> unit) option)
+    ?(on_invalid : (Dom.event -> unit) option) ~(children : Jsx.content) () =
   let entries = ref [] in
   (* The names whose server error a change has cleared, with the errors they
      were cleared from: errors given again are another list, shown whole.
@@ -129,9 +141,14 @@ let%component make ?(action : string option)
     | [] -> ignore (on_submit event : unit option)
     | refused ->
         prevent_default event;
-        List.filter_map (fun (e : entry) -> e.element ()) refused
-        |> first_in_page
-        |> Option.iter (fun root -> Option.iter focus (control root))
+        (* React's onInvalid is told the browser's invalid event of each
+           invalid field; this one is told once for the submit refused, and
+           prevents the focus as React's does. *)
+        let invalid = new_event "invalid" (event_init ~cancelable:true ()) in
+        if dispatch (target event) invalid then
+          List.filter_map (fun (e : entry) -> e.element ()) refused
+          |> first_in_page
+          |> Option.iter (fun root -> Option.iter focus (control root))
   in
   <Context.Provider value=(fun () -> form)>
     <form
@@ -143,6 +160,7 @@ let%component make ?(action : string option)
       novalidate=true
       on_submit=submit
       on_reset=(fun e -> ignore (on_reset e : unit option))
+      on_invalid=(fun e -> ignore (on_invalid e : unit option))
       data_slot="form"
       props=(Props.others props)>
       (fun () -> children ())

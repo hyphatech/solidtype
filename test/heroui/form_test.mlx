@@ -37,6 +37,7 @@ end
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 external active : Dom.element = "activeElement" [@@mel.scope "document"]
 external text : Dom.element -> string = "textContent" [@@mel.get]
+external event_type : Dom.event -> string = "type" [@@mel.get]
 
 let part slot =
   match T.query ("[data-slot=" ^ slot ^ "]") with
@@ -141,6 +142,50 @@ let () =
           let* () = submit (T.setup ()) in
           Js.Promise.resolve
             E.(expect (T.attribute active "value") |> toEqual (Some "pro")));
+      Jest.testPromise
+        "tells on_invalid of a refused submit, once, and still focuses the \
+         first invalid field" (fun () ->
+          let told = ref [] in
+          T.render (fun () ->
+              <Form
+                on_submit=prevent_default
+                on_invalid=(fun e -> told := event_type e :: !told)>
+                <Text_field name="email" is_invalid=true>
+                  <Label>"Email"</Label> <Input />
+                </Text_field>
+                <Text_field name="city" is_invalid=true>
+                  <Label>"City"</Label> <Input />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(
+              expect (!told, active == input ()) |> toEqual ([ "invalid" ], true)));
+      Jest.testPromise "focuses nothing once on_invalid prevents it" (fun () ->
+          T.render (fun () ->
+              <Form on_submit=prevent_default on_invalid=prevent_default>
+                <Text_field name="email" is_invalid=true>
+                  <Label>"Email"</Label> <Input />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(
+              expect (T.attribute active "data-slot") |> toEqual (Some "button")));
+      Jest.testPromise "tells on_invalid nothing of a submit it accepts"
+        (fun () ->
+          let told = ref 0 in
+          T.render (fun () ->
+              <Form on_submit=prevent_default on_invalid=(fun _ -> incr told)>
+                <Text_field name="email">
+                  <Label>"Email"</Label> <Input />
+                </Text_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve E.(expect !told |> toBe 0));
       Jest.testPromise "refuses a submit while a server's error stands"
         (fun () ->
           let submitted = ref 0 in

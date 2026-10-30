@@ -77,10 +77,23 @@ prefix off first:
           | _ -> None))
 ```
 
+### Focus on a refused submit
+
+A refused submit calls `on_invalid` once, with a cancelable `invalid` event
+on the form, before it focuses the first invalid field. A handler that calls
+`preventDefault` keeps that focus from moving, and moves it as it chooses.
+React's `onInvalid` is called once for each invalid field, as the browser's
+own `invalid` event is; one submit refused here is one call.
+
+```ocaml
+<Form on_submit=save on_invalid=(fun e -> prevent_default e; focus_summary ())>
+  (* fields *)
+</Form>
+```
+
 ### Not yet
 
-HeroUI's `onInvalid`, to choose what a refused submit focuses, and the
-`render` function.
+HeroUI's `render` function.
 
 ## Styling Reference
 
@@ -99,8 +112,8 @@ from their own components.
 | `aria-label` | `aria_label` | `string` | | Its name |
 | `aria-labelledby` | `aria_labelledby` | `string` | | The element that names it |
 | `className` | `class_` | `string` | | Its classes |
-| `validationBehavior` | — | | | A field validates nothing itself: it is invalid as the application says |
-| `onInvalid` | — | | | Not yet: a refused submit focuses the first invalid field |
+| `onInvalid` | `on_invalid` | `Dom.event -> unit` | | Called once a submit is refused, before the first invalid field is focused; `preventDefault` keeps the focus where it is |
+| `validationBehavior` | — | | | Left out: a field validates nothing itself, and is invalid as the application says |
 
 ## Beside React
 

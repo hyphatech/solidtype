@@ -1,5 +1,12 @@
 # Changes
 
+## Unreleased
+
+- `Solidtype_heroui.Form`: `on_invalid`, called once a submit is refused,
+  with a cancelable `invalid` event on the form; preventing it keeps the
+  first invalid field from being focused, for the application to move focus
+  as it chooses.
+
 ## 0.3.0 (2026-10-27)
 
 - `Solidtype_heroui.Autocomplete`: HeroUI's Autocomplete on Kobalte's combo

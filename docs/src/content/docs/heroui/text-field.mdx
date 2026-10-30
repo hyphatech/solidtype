@@ -75,11 +75,20 @@ A required field marks its label, as HeroUI's styles mark it.
 
 <Example code={InputTypesCode} title="text_field_input_types.mlx"><InputTypes.make client:visible /></Example>
 
+## Validation
+
+A field is invalid as `is_invalid` says, from the application's own state,
+and a [Form](/solidtype/heroui/form/) refuses a submit while it is. React
+Aria's `validate` and the browser's validation on submit are left out: a
+`validate` would be a second source of a field's validity beside the
+application's, narrower than its own checks, which know when they run, wait
+on a server and read other fields; the browser's checks nothing across
+fields, and points its bubble at nothing on a field whose input Kobalte
+hides. A server's errors are the form's `validation_errors`.
+
 ## Not yet
 
-React Aria's `validate`, `validationErrors` and native validation on submit,
-and HeroUI's In Surface example's surface-aware variant, are not ported yet:
-a field is invalid as `is_invalid` says.
+HeroUI's In Surface example's surface-aware variant.
 
 ## Customization
 
@@ -126,7 +135,8 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
 | `children` | `children` | elements | | Its label, input, description and error |
-| `validate`, `validationErrors`, `validationBehavior` | — | | | Not yet |
+| `validate`, `validationBehavior` | — | | | Left out: it is invalid as `is_invalid` says; see Validation |
+| `validationErrors` | — | | | A form's: `Form`'s `validation_errors` |
 
 ## Beside React
 

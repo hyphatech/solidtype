@@ -18,6 +18,10 @@
       </Form>
     ]}
 
+    A refused submit dispatches an [invalid] event on the form, cancelable,
+    which [on_invalid] is given once; preventing it leaves focus where it is,
+    for the application to move.
+
     A field validates nothing itself: whether it is invalid is the application's
     to say, from its own state, by its [is_invalid]. The form asks the browser
     to validate nothing, [novalidate], since a field's input may be one Kobalte
@@ -53,6 +57,7 @@ module Props : sig
     ?validation_errors:(string * string) list Solidtype.Check.value ->
     ?on_submit:(Dom.event -> unit) ->
     ?on_reset:(Dom.event -> unit) ->
+    ?on_invalid:(Dom.event -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     unit ->

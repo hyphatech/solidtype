@@ -35,7 +35,7 @@ accessibility. Each port's page shows it beside the same component in React.
 | [Kbd](/solidtype/heroui/kbd/) | ported: variants, every key's symbol and name, content |
 | [FieldError](/solidtype/heroui/field-error/) | ported: shown while its text field is invalid, a form's server error in place of its own |
 | [Fieldset](/solidtype/heroui/fieldset/) | ported: legend, group, actions, and its disabled state given to buttons, links and radio groups |
-| [Form](/solidtype/heroui/form/) | ported: a submit refused while a field is invalid, the first focused, server errors by name; onInvalid not yet |
+| [Form](/solidtype/heroui/form/) | ported: a submit refused while a field is invalid, the first focused, server errors by name, `on_invalid` told of a refused submit and able to keep the focus where it is |
 | [Input](/solidtype/heroui/input/) | ported: variants, full width, alone or a text field's, interaction state |
 | [Label](/solidtype/heroui/label/) | ported: required, disabled, invalid; inline in a control's content, a radio group's, a text field's |
 | [Link](/solidtype/heroui/link/) | ported: icon, disabled, interaction state |
@@ -50,7 +50,7 @@ accessibility. Each port's page shows it beside the same component in React.
 | [Radio Group](/solidtype/heroui/radio-group/) | ported: variants, orientations, controlled, disabled, invalid, descriptions, interaction state |
 | [ScrollShadow](/solidtype/heroui/scroll-shadow/) | ported: orientations, sizes, offset, visibility given or measured, hidden scrollbar |
 | [SearchField](/solidtype/heroui/search-field/) | ported: query controlled or kept, cleared by Escape or its button, submitted by Enter, variants, disabled, invalid |
-| [Select](/solidtype/heroui/select/) | ported: one or many chosen, controlled or kept, its list a ListBox, placeholder, value drawn as the option or by a function, clear button and Backspace, variants, full width, disabled, disabled options, sections, open controlled or kept, label, description and error, a form's errors; a required select refused on submit not yet, as a text field's |
+| [Select](/solidtype/heroui/select/) | ported: one or many chosen, controlled or kept, its list a ListBox, placeholder, value drawn as the option or by a function, clear button and Backspace, variants, full width, disabled, disabled options, sections, open controlled or kept, label, description and error, a form's errors; required, its error the application's to show, as a text field's |
 | [Separator](/solidtype/heroui/separator/) | ported: orientations, variants |
 | [Skeleton](/solidtype/heroui/skeleton/) | ported: animation types, and the page's `--skeleton-animation` |
 | [Slider](/solidtype/heroui/slider/) | ported: one value or a range, controlled or kept, step and range, vertical, disabled, output, format options |
@@ -60,7 +60,7 @@ accessibility. Each port's page shows it beside the same component in React.
 | [SwitchGroup](/solidtype/heroui/switch/#group) | ported: orientations |
 | [Tabs](/solidtype/heroui/tabs/) | ported: selection controlled or kept, horizontal or vertical, primary or secondary, aligned, disabled, manual activation, separators, an indicator that slides between tabs, a list that scrolls by its chevrons; not yet a tab as a link, `href` |
 | [TextArea](/solidtype/heroui/text-area/) | ported: variants, full width, alone or a text field's, interaction state |
-| [TextField](/solidtype/heroui/text-field/) | ported: value controlled or kept, required, disabled, invalid, read-only, its label, description and error; validate not yet |
+| [TextField](/solidtype/heroui/text-field/) | ported: value controlled or kept, required, disabled, invalid, read-only, its label, description and error; invalid as `is_invalid` says, with no `validate` of its own |
 | [TimeField](/solidtype/heroui/time-field/) | ported: value controlled or kept, granularity, hour cycle and leading zeros by the locale, min and max, variants, full width, disabled, invalid, read-only, required, prefix and suffix, its label, description and error; time zones not yet |
 | [Toast](/solidtype/heroui/toast/) | ported: provider, placements, the stack collapsed and expanded, its hotkey, variants, indicators, action, loading, custom rendering, queues of its own, update, promise, pause and resume |
 | [ToggleButton](/solidtype/heroui/toggle-button/) | ported: variants, sizes, icon only, selected controlled or kept, disabled, interaction state |
