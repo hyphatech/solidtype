@@ -4,6 +4,7 @@ description: "A panel around a chart, as a magazine sets one: kicker, headline, 
 ---
 
 import Example from "@components/Example.astro";
+import "@bezda/rhp/posters.css";
 import * as Panel from "@islands/rhp_poster.jsx";
 import PanelCode from "@islands/rhp_poster.mlx?raw";
 
@@ -14,6 +15,9 @@ CSS, or one of the looks in `@bezda/rhp/posters.css`, which a page links.
 Original rhp documentation: [Poster](https://rhp.vercel.app/reference/poster/).
 
 ## Usage
+
+`look="market"` is one of the looks in rhp's `posters.css`, which this page
+imports, as an application imports it once.
 
 <Example code={PanelCode} title="rhp_poster.mlx" fill><Panel.make client:visible /></Example>
 

@@ -20,9 +20,9 @@ let parcel =
   Slat.make ~thickness:(Slat.number 36.)
     ~room:(Slat.room ~start:(Slat.px 48.) ~end_:(Slat.px 64.) ())
     ~css:
-      ".badge { margin-left: 6px; padding: 1px 6px; border-radius: 6px; \
-       background: var(--rhp-ink); color: var(--rhp-surface); font-size: 12px; \
-       }"
+      ".badge { position: absolute; translate: 6px -50%; padding: 1px 6px; \
+       border-radius: 6px; white-space: nowrap; background: var(--rhp-ink); \
+       color: var(--rhp-surface); font-size: 12px; }"
     (fun d ->
       let p = Row.data d in
       <div>

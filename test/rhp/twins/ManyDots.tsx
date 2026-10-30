@@ -10,7 +10,7 @@ const points: Point[] = (() => {
   };
   return Array.from({ length: 400 }, (_, i) => {
     const x = next() * 100;
-    const y = x * 0.6 + next() * 40;
+    const y = 5 + x * 0.5 + next() * 40;
     return { x, y, group: i % 3 };
   });
 })();

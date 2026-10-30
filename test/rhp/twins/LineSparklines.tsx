@@ -8,10 +8,10 @@ const cities = [
 
 const points = (temps: number[]) => temps.map((t, i) => [i, t + 5] as [number, number]);
 
-const city = slat({ thickness: 40, room: { start: 64 } }, (d) => (
+const city = slat({ thickness: 56, room: { start: 64 } }, (d) => (
   <div>
     <Label edge="start">{d.city}</Label>
-    <Line points={points(d.temps)} peak={34} smooth />
+    <Line points={points(d.temps)} peak={34} smooth fill />
   </div>
 ));
 

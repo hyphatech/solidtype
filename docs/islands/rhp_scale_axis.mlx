@@ -1,5 +1,6 @@
 module Bar = Solidtype_rhp.Bar
 module Chart = Solidtype_rhp.Chart
+module Either = Solidtype_rhp.Types.Either
 module Every = Solidtype_rhp.Types.Every
 module Jsx = Solidtype.Jsx
 module Label = Solidtype_rhp.Label
@@ -29,25 +30,35 @@ let fruit =
         <Bar to_=(fun () -> f.sold) />
       </div>)
 
-(* A tick of the axis: a line across the band and its value, the last one
-   saying the unit. *)
-let tick (d : Scale.tick Row.t) =
-  let t = Row.data d in
-  <div>
-    <Tick at=(fun () -> t.at) />
-    <Label at=(fun () -> t.at)>
-      (fun () ->
-        Jsx.string (Js.Float.toString t.at ^ if t.last then " sold" else ""))
-    </Label>
-  </div>
+(* A tick of the axis: a thin line behind the bars, across the whole plot,
+   and its value under the plot, in the room the slat makes there, the last
+   one saying the unit. *)
+let tick =
+  Slat.make
+    ~room:(Slat.room ~end_:(Slat.px 32.) ~after:28. ())
+    ~css:
+      ".line { background: var(--rhp-grid); --rhp-tick-width: 1px; } .num { \
+       font-size: 11px; color: var(--rhp-muted); padding: 0; } .num:horizontal \
+       { top: calc(100% + 8px); translate: -50% 0; }"
+    (fun (d : Scale.tick Row.t) ->
+      let t = Row.data d in
+      <div>
+        <Tick
+          at=(fun () -> t.at) thick=(fun () -> Either.right 1.) class_="line"
+        />
+        <Label at=(fun () -> t.at) class_="num">
+          (fun () ->
+            Jsx.string (Js.Float.toString t.at ^ if t.last then " sold" else ""))
+        </Label>
+      </div>)
 
 let make () =
   <Chart scale=(fun () -> (0., 20.))>
-    <Plot rows=(fun () -> fruits) render=fruit />
     <Scale
       ticks=(fun () ->
               Ticks.custom
                 (Solidtype_rhp.every 5. ~options:(Every.make ~ends:true ()) ()))
       render=tick
     />
+    <Plot rows=(fun () -> fruits) render=fruit />
   </Chart>

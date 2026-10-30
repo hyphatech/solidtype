@@ -14,7 +14,7 @@ let points =
   in
   Array.init 400 (fun i ->
       let x = next () *. 100. in
-      let y = (x *. 0.6) +. (next () *. 40.) in
+      let y = 5. +. (x *. 0.5) +. (next () *. 40.) in
       { x; y; group = i mod 3 })
 
 let make () =

@@ -13,18 +13,24 @@ const fruit = slat({ thickness: 32, room: { start: 80 } }, (d) => (
   </div>
 ));
 
-const tick = (d: { at: number; last: boolean }) => (
-  <div>
-    <Tick at={d.at} />
-    <Label at={d.at}>{`${d.at}${d.last ? " sold" : ""}`}</Label>
-  </div>
+const tick = slat(
+  {
+    room: { end: 32, after: 28 },
+    css: ".line { background: var(--rhp-grid); --rhp-tick-width: 1px; } .num { font-size: 11px; color: var(--rhp-muted); padding: 0; } .num:horizontal { top: calc(100% + 8px); translate: -50% 0; }",
+  },
+  (t) => (
+    <div>
+      <Tick at={t.at} thick={1} class="line" />
+      <Label at={t.at} class="num">{`${t.at}${t.last ? " sold" : ""}`}</Label>
+    </div>
+  ),
 );
 
 export function make() {
   return (
     <Chart scale={[0, 20]}>
-      <Plot rows={fruits}>{fruit}</Plot>
       <Scale ticks={every(5, { ends: true })}>{tick}</Scale>
+      <Plot rows={fruits}>{fruit}</Plot>
     </Chart>
   );
 }

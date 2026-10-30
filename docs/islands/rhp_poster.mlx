@@ -28,6 +28,7 @@ let fruit =
 
 let make () =
   <Poster
+    look="market"
     kicker=(<span>"The market"</span>)
     title=(<span>"Bananas sell best"</span>)
     dek=(<span>"Crates sold on Saturday, by fruit"</span>)

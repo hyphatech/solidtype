@@ -10,7 +10,7 @@ const parcel = slat(
   {
     thickness: 36,
     room: { start: 48, end: 64 },
-    css: ".badge { margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 12px; }",
+    css: ".badge { position: absolute; translate: 6px -50%; padding: 1px 6px; border-radius: 6px; white-space: nowrap; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 12px; }",
   },
   (d) => (
     <div>

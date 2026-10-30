@@ -1,9 +1,17 @@
 /* A chart takes rhp's theme, written on its root, light by default. On
-   this site a chart's text and grid take the site's colours instead, as an
-   application gives a chart a theme of its own: declared on the chart's
-   body, inside the root, so every block reads them, in light and dark. */
-.rhp-chart > .rhp-body {
+   this site a chart's text, grid and ground take the site's colours
+   instead, as an application gives a chart a theme of its own: declared on
+   the chart's body, inside the root, so every block reads them, in light
+   and dark. Ink and surface change together, since what is drawn in one on
+   the other, a badge, must stay readable. A chart on a poster takes the
+   poster's look, whose paper is its own. */
+.rhp-chart:not(.poster *) > .rhp-body {
   --rhp-ink: var(--sl-color-white);
   --rhp-muted: var(--sl-color-gray-3);
   --rhp-grid: var(--sl-color-hairline-light);
+  --rhp-surface: var(--sl-color-black);
+  /* A cell's colour runs from a tint of the series' blue over the ground to
+     the blue itself, so both ends show on it, in light and dark. */
+  --rhp-high: var(--rhp-series-1);
+  --rhp-low: color-mix(in oklab, var(--rhp-series-1) 25%, var(--sl-color-black));
 }

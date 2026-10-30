@@ -16,6 +16,7 @@ const fruit = slat({ thickness: 32, room: { start: 80 } }, (d) => (
 export function make() {
   return (
     <Poster
+      look="market"
       kicker={<span>The market</span>}
       title={<span>Bananas sell best</span>}
       dek={<span>Crates sold on Saturday, by fruit</span>}

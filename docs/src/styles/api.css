@@ -6,7 +6,10 @@
 .sl-markdown-content td:nth-child(3):not(:where(.not-content *)) {
   min-width: 10rem;
 }
-.sl-markdown-content td:nth-child(3):not(:where(.not-content *)) code {
+/* Code in any cell breaks so: a Charts page's table names its prop and its
+   type first, and a long type never pushes the description out of the
+   page. */
+.sl-markdown-content td:not(:where(.not-content *)) code {
   white-space: normal;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;

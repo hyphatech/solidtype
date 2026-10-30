@@ -31,13 +31,14 @@ let points temps =
   Array.mapi (fun i t -> Some (Some (float_of_int i), Some (t +. 5.))) temps
 
 let city =
-  Slat.make ~thickness:(Slat.number 40.)
+  Slat.make ~thickness:(Slat.number 56.)
     ~room:(Slat.room ~start:(Slat.px 64.) ())
     (fun d ->
       let c = Row.data d in
       <div>
         <Label edge="start">(fun () -> Jsx.string c.city)</Label>
-        <Line points=(fun () -> points c.temps) peak=34. smooth=true />
+        <Line points=(fun () -> points c.temps) peak=34. smooth=true fill=true
+        />
       </div>)
 
 let make () =

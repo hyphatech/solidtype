@@ -1,12 +1,14 @@
 module Bar = Solidtype_rhp.Bar
 module Bins = Solidtype_rhp.Types.Bins
 module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
 module Plot = Solidtype_rhp.Plot
 module Range = Solidtype_rhp.Types.Bins2
 module Row = Solidtype_rhp.Row
 module Slat = Solidtype_rhp.Slat
 
-type bin = { tally : float }
+type bin = { from : float; tally : float }
 
 let ages =
   [|
@@ -40,11 +42,19 @@ let bins =
       ~options:(Bins.make ~domain:(20., 70.) ~count:5. ())
       ()
   in
-  Array.map (fun tally -> { tally }) (Range.tally b)
+  Array.mapi (fun i tally -> { from = (Range.x0 b).(i); tally }) (Range.tally b)
 
-let bin d =
-  let b = Row.data d in
-  <div><Bar to_=(fun () -> b.tally) /></div>
+let bin =
+  Slat.make
+    ~room:(Slat.room ~start:(Slat.px 20.) ())
+    (fun d ->
+      let b = Row.data d in
+      <div>
+        <Bar to_=(fun () -> b.tally) />
+        <Label edge="start">
+          (fun () -> Jsx.string (Js.Float.toString b.from ^ "s"))
+        </Label>
+      </div>)
 
 let make () =
   <Chart
