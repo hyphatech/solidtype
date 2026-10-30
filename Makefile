@@ -78,7 +78,7 @@ docs: build node_modules ## build the documentation site
 docs-serve: docs ## serve the built documentation site
 	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
 
-generate: node_modules ## write the bindings from Solid's, Kobalte's, HeroUI's, rhp's and @internationalized/date's types
+generate: node_modules ## write the generated bindings
 	$(OPAM) bun generate/html.ts
 	$(OPAM) bun generate/kobalte.ts
 	$(OPAM) bun generate/heroui.ts

@@ -40,7 +40,7 @@ export default defineConfig({
       description: "SolidJS for modern OCaml.",
       // The 404 page is src/pages/404.astro, drawn by Starlight.
       disable404Route: true,
-      logo: { src: "starlight-theme-hypha/assets/hypha.webp" },
+      logo: { dark: "starlight-theme-hypha/assets/hypha.webp", light: "starlight-theme-hypha/assets/hypha-day.webp" },
       // Hypha's look, from its theme; heroui.css keeps the demos in HeroUI's,
       // api.css sets this site's API tables, and rhp.css gives rhp's charts
       // the site's colours.
