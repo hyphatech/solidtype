@@ -496,7 +496,7 @@ A raw external under a Kobalte wrapper, which skips what the wrapper adds.
   1 | let f = Solidtype_kobalte.Types.Color.to_format_js
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: Unbound value Solidtype_kobalte.Types.Color.to_format_js
-  Hint:   Did you mean Solidtype_kobalte.Types.Color.to_format?
+  Hint:   Did you mean Solidtype_kobalte.Types.Color.to_format or Solidtype_kobalte.Types.Color.to_format_opt?
   [1]
 
 A method of Bun's File, which a browser's does not have.

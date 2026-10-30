@@ -1,0 +1,15 @@
+; @internationalized/date's binding, in OCaml, run by vitest in Node, which
+; holds every time zone's rules.
+
+(library
+ (name internationalized_date_test)
+ (modes melange)
+ (libraries solidtype-internationalized-date melange-jest.jest)
+ (preprocess
+  (pps melange.ppx)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries internationalized_date_test)
+ (module_systems es6))

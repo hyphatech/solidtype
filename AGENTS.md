@@ -6,7 +6,8 @@ OCaml's JSX (`.mlx`), and reaches the browser as the code Solid's own
 compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
 `vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
 library bound is an opam package of its own: `solidtype` binds Solid,
-`solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts; `solidtype-heroui`
+`solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts,
+`solidtype-internationalized-date` the dates HeroUI's date components take; `solidtype-heroui`
 ports HeroUI's design onto Kobalte by hand, since HeroUI's components are
 React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
 
@@ -61,6 +62,10 @@ rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
   slat order         scale, many dots, a plot's order, the types of more
   color ticks ease   JavaScript kinds than Either holds, and helpers, rhp's
   shape helpers      functions of rows, which solidtype_rhp includes
+internationalized_date/
+                     solidtype-internationalized-date: @internationalized/date's
+                     functions, and its values in types, each a kind of one
+                     Value, generated
 heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
@@ -115,7 +120,8 @@ docs/                the documentation, a Starlight site in Hypha's look,
 prds/               the PRDs of work being decided and built, and which
                      document owns each kind of fact once it lands
 generate/            what writes the generated bindings from Solid's,
-                     Kobalte's, HeroUI's and rhp's own types: `make generate`
+                     Kobalte's, HeroUI's, rhp's and @internationalized/date's
+                     own types: `make generate`
   names              the one spelling of a name, shared by both
   program            the browser's library both read declarations under,
                      with no ambient types: Bun's own would join it
@@ -135,6 +141,10 @@ generate/            what writes the generated bindings from Solid's,
   rhp                rhp's: its components' elements, the types and exports
                      ported by hand, each port held to what rhp declares for
                      it, and a failure on anything else no rule maps
+  internationalized_date
+                     @internationalized/date's: its numbers whole, its value
+                     classes kinds of one Value, what throws though no
+                     declaration says so, and what is left out
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
@@ -156,7 +166,8 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
                      Solid's: a port's page holds it prerendered, to hydrate
 vitest.config.ts     the OCaml tests, as three projects: the browser's in
                      jsdom, the example's server started for them; the
-                     server's in Node; and hydration, compiled hydratable
+                     server's, and the date binding's, in Node; and
+                     hydration, compiled hydratable
 example/             a kanban board: a whole application on the
                      stack -- Solid, Kobalte and HeroUI's ports over a
                      Spindle server on SQLite -- its README the map
@@ -193,6 +204,9 @@ test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      each against HeroUI's own call
 test/rhp/            each rhp chart island of docs/islands beside the same chart
                      in rhp's own JSX, its twin in twins/: the same page drawn
+test/internationalized_date/
+                     the date binding as a caller meets it: a zone's daylight
+                     saving, values of several kinds, a throw as a value
 test/ppx/            what the ppx writes for each JSX form
 test/test_docs.ml    every island of docs/islands on some page, or a part of
                      other islands, and every rhp page linked to rhp's
@@ -397,6 +411,21 @@ break.
   classes, never a copy of them. Test: `make lint` runs the generator with
   `--check`, and `test/heroui/styles_test.ml` checks calls against
   HeroUI's own.
+- **@internationalized/date's binding is generated from its
+  declarations**, by `generate/internationalized_date.ts` into
+  `internationalized_date/`, on the same core: a function an external, a
+  class a module of `Types`. A date's numbers are small whole ones, an
+  `int`, but the milliseconds since 1970 `fromAbsolute` takes and what
+  `compare` gives, a `float`. Its value classes, `CalendarDate`,
+  `CalendarDateTime`, `Time` and `ZonedDateTime`, are each a kind of one
+  `Types.Value.t`, and a union of them, or an interface they satisfy,
+  `AnyTime`, is the kinds TypeScript takes for it, an open set, so a value
+  of any is passed as it is. A parser, and whatever takes a time zone or a
+  disambiguation, throws though no declaration says so: it raises
+  `Invalid_argument`, with an `_opt` beside it. Why: HeroUI's date
+  components take that library's values, and a binding by hand would be
+  a second copy of its types. Test: `make lint` runs the generator with
+  `--check`, and `test/internationalized_date` runs it in Node.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;

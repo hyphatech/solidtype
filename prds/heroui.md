@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted, not yet built.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted, its binding landed, TimeField's zones not yet.
 Date: 2026-10-23
 
 ## The problem
@@ -427,7 +427,7 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   popover
 
 ### Dates
-- [ ] `@internationalized/date` bound as `solidtype-internationalized-date`,
+- [x] `@internationalized/date` bound as `solidtype-internationalized-date`,
   generated, with its values, calendars, arithmetic and time zones
 - [ ] TimeField on its `TimeValue`: a `Time`, a `CalendarDateTime` or a
   `ZonedDateTime`, Kobalte editing it, a zoned value's abbreviation shown

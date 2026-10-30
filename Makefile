@@ -2,7 +2,7 @@ SWITCH ?= hypha-solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
 # The reference is odoc's, for solidtype's own packages and nothing under them.
-REFERENCE = solidtype solidtype-kobalte solidtype-heroui solidtype-rhp ppx_solidtype odoc.support
+REFERENCE = solidtype solidtype-kobalte solidtype-heroui solidtype-rhp solidtype-internationalized-date ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example example-serve docs docs-serve generate
@@ -44,6 +44,7 @@ lint: node_modules ## check formatting, types, the release build and bindings
 	$(OPAM) bun generate/kobalte.ts --check
 	$(OPAM) bun generate/heroui.ts --check
 	$(OPAM) bun generate/rhp.ts --check
+	$(OPAM) bun generate/internationalized_date.ts --check
 
 fmt: ## format the code
 	$(OPAM) dune fmt
@@ -77,8 +78,9 @@ docs: build node_modules ## build the documentation site
 docs-serve: docs ## serve the built documentation site
 	cd docs && bun --bun astro preview --open --port $(DOCS_PORT)
 
-generate: node_modules ## write the bindings from Solid's, Kobalte's, HeroUI's and rhp's types
+generate: node_modules ## write the bindings from Solid's, Kobalte's, HeroUI's, rhp's and @internationalized/date's types
 	$(OPAM) bun generate/html.ts
 	$(OPAM) bun generate/kobalte.ts
 	$(OPAM) bun generate/heroui.ts
 	$(OPAM) bun generate/rhp.ts
+	$(OPAM) bun generate/internationalized_date.ts

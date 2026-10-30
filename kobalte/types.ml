@@ -300,6 +300,7 @@ module Color = struct
     match to_format_js o x0 with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("to_format: " ^ Option.value (Js.Exn.message e) ~default:"")
+  let to_format_opt o x0 = match to_format_js o x0 with v -> Some v | exception Js.Exn.Error _ -> None
   external to_string : t -> ?format:[ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba | `css ] -> unit -> string = "toString" [@@mel.send]
   external clone : t -> unit -> t_color = "clone" [@@mel.send]
   external to_hex_int : t -> unit -> float = "toHexInt" [@@mel.send]
@@ -312,6 +313,7 @@ module Color = struct
     match get_channel_value_js o x0 with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("get_channel_value: " ^ Option.value (Js.Exn.message e) ~default:"")
+  let get_channel_value_opt o x0 = match get_channel_value_js o x0 with v -> Some v | exception Js.Exn.Error _ -> None
   external with_channel_value_js : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float -> t_color = "withChannelValue" [@@mel.send]
   (** Sets the numeric value for a given channel, and returns a new Color object.
       Throws an error if the channel is unsupported in the current color format.
@@ -321,6 +323,7 @@ module Color = struct
     match with_channel_value_js o x0 x1 with
     | v -> v
     | exception Js.Exn.Error e -> invalid_arg ("with_channel_value: " ^ Option.value (Js.Exn.message e) ~default:"")
+  let with_channel_value_opt o x0 x1 = match with_channel_value_js o x0 x1 with v -> Some v | exception Js.Exn.Error _ -> None
   external get_channel_range : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_channel_range = "getChannelRange" [@@mel.send]
   external get_channel_name : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_slider_root_translations -> string = "getChannelName" [@@mel.send]
   external get_channel_format_options : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_number_format_options = "getChannelFormatOptions" [@@mel.send]

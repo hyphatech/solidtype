@@ -18,6 +18,7 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 | `solidtype-kobalte` | `solidtype-kobalte` | Kobalte 0.13 bound whole, generated from its own declarations |
 | `solidtype-heroui` | `solidtype-heroui` | HeroUI's design ported by hand onto Kobalte's components |
 | `solidtype-rhp` | `solidtype-rhp` | rhp 2.2's charts, generated from its own declarations where a rule maps them, ported by hand where none does |
+| `solidtype-internationalized-date` | `solidtype-internationalized-date` | @internationalized/date 3.12's dates, times and time zones, the values HeroUI's date components take, generated from its own declarations |
 | `ppx_solidtype` | `ppx_solidtype` | The ppx that rewrites the JSX of `.mlx` files into calls Melange compiles |
 | `vite-plugin-solidtype` | none: an asset of each GitHub release | The Vite plugin that turns those calls back into JSX for Solid's compiler |
 
@@ -59,6 +60,14 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
   and the others -- and
   [`Types`](/solidtype/reference/solidtype-rhp/Solidtype_rhp/Types/index.html),
   the types they name.
+
+## solidtype-internationalized-date
+
+- [`Solidtype_internationalized_date`](/solidtype/reference/solidtype-internationalized-date/Solidtype_internationalized_date/index.html)
+  -- @internationalized/date's conversions, queries and parsers, and
+  [`Types`](/solidtype/reference/solidtype-internationalized-date/Solidtype_internationalized_date/Types/index.html),
+  its dates, times, date-times and zoned date-times, each a kind of one
+  `Value`, with their calendars and formatter.
 
 ## ppx_solidtype
 

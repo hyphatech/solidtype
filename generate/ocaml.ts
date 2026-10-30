@@ -17,6 +17,10 @@ export type Type =
   // name. Every tag is then named, since Melange writes undefined for a tag
   // left unnamed where others are.
   | { kind: "tags"; tags: string[]; js?: string[] }
+  // Any of a set of kinds of one type of the binding's own, Value, each a
+  // class's: [< `time | `zoned_date_time ] Value.t, an open set, so a value
+  // of any kind in it is taken.
+  | { kind: "kinds"; tags: string[] }
   | { kind: "tuple"; items: Type[] }
   | { kind: "arrow"; params: Param[]; result: Type };
 
@@ -35,6 +39,7 @@ export function vars(t: Type): string[] {
         return;
       case "name":
       case "tags":
+      case "kinds":
         return;
       case "apply":
       case "ref":
@@ -78,6 +83,8 @@ export function print(t: Type, ref: (module: string) => string): string {
       const js = t.js;
       return `[ ${t.tags.map((s, i) => (js ? `\`${s} [@mel.as ${JSON.stringify(js[i])}]` : `\`${s}`)).join(" | ")} ]`;
     }
+    case "kinds":
+      return `[< ${t.tags.map((s) => `\`${s}`).join(" | ")} ] ${ref("Value")}`;
     case "tuple":
       return `(${t.items.map((i) => paren(i, ref)).join(" * ")})`;
     case "arrow": {

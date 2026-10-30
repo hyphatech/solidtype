@@ -20,7 +20,7 @@
     "@heroui/styles": "~3.2.6",
     "@iconify-icons/logos": "2.0.4",
     "@iconify-icons/tabler": "2.0.4",
-    "@internationalized/date": "^3.12.4",
+    "@internationalized/date": "~3.12.4",
     "@kobalte/core": "~0.13.14",
     "@react-aria/ssr": "^3.10.1",
     "@react-aria/utils": "^3.34.1",

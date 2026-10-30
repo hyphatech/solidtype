@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `solidtype-internationalized-date`, a package of its own:
+  @internationalized/date 3.12 bound whole, generated from its declarations
+  -- dates, times, date-times and zoned date-times, their calendars,
+  arithmetic, time zones and formatter -- the values HeroUI's date
+  components take. Its value classes are kinds of one `Types.Value.t`, so a
+  function that takes several takes any of them as it is.
+- `Solidtype_kobalte.Types.Color`: `to_format_opt`, `get_channel_value_opt`
+  and `with_channel_value_opt`, beside the methods that raise: a method
+  that throws has an `_opt`, as a function does.
 - `Solidtype_heroui.Modal.Backdrop` and `Alert_dialog.Backdrop`:
   `portal_container`, React Aria's `UNSTABLE_portalContainer`, the element
   the backdrop is drawn inside instead of the page's body.

@@ -167,6 +167,18 @@
    (= :version))))
 
 (package
+ (name solidtype-internationalized-date)
+ (synopsis
+  "@internationalized/date for solidtype: dates, times and time zones, typed")
+ (description
+  "The dates of @internationalized/date 3, the values HeroUI's date components take: dates, times, date-times and zoned date-times, their calendars, arithmetic, time zones and formatting, for OCaml front ends compiled by Melange. Generated from its own declarations.")
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))))
+
+(package
  (name ppx_solidtype)
  (synopsis "The JSX lowering of solidtype: OCaml's JSX to Solid's")
  (description

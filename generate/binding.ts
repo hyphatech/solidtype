@@ -23,6 +23,14 @@ export type Library = {
   // already an optional prop's absence; undefined for any other, which the
   // core maps by its rules.
   ported?: (symbol: ts.Symbol, args: Type[], absent: boolean) => Type | undefined;
+  // Whether a number is a small whole one where it is met, by where: an int,
+  // as MELANGE.md lets a binding that knows it; a float anywhere else.
+  whole?: (where: string) => boolean;
+  // The classes whose values are one type of Types, Value, a kind each, and
+  // the structural interfaces they satisfy: a union of the classes, or one of
+  // those interfaces, is the kinds of the classes TypeScript takes for it, an
+  // open set, so a value of any of them is passed as it is.
+  kinds?: { classes: ts.Symbol[]; structural: ts.Symbol[] };
 };
 
 // What a run binds: one library, read by one checker, from the repository at
@@ -30,6 +38,12 @@ export type Library = {
 let root: string;
 let checker: ts.TypeChecker;
 let library: Library;
+
+// A type nothing the binding reaches names, bound as a module of Types all
+// the same: a class a library exports alone, its constructor the way in.
+export function reach(symbol: ts.Symbol): void {
+  namedModule(symbol, checker.getDeclaredTypeOfSymbol(symbol));
+}
 
 export function bind(repository: string, typeChecker: ts.TypeChecker, bound: Library): void {
   root = repository;
@@ -221,6 +235,27 @@ const isJsxMember = (t: ts.Type) => {
     (moduleOf(s) === "solid-js" || isDomLib(s));
 };
 
+const number = (where: string) => tname(library.whole?.(where) ? "int" : "float");
+
+// A class of the library's kinds, by its kind: CalendarDate's calendar_date.
+const kindOf = (symbol: ts.Symbol | undefined) =>
+  symbol && library.kinds?.classes.includes(symbol) ? snake(symbol.name) : null;
+
+// The kinds a union of the classes is, or a structural interface of theirs:
+// those of the classes TypeScript takes for it.
+function kindsOf(members: ts.Type[]): Type | null {
+  const k = library.kinds;
+  if (!k) return null;
+  const tags = members.map((m) => kindOf(m.getSymbol()));
+  if (members.length > 1 && tags.every((t) => t !== null)) return { kind: "kinds", tags: (tags as string[]).sort() };
+  const only = members.length === 1 ? members[0]!.getSymbol() : undefined;
+  if (only && k.structural.includes(only)) {
+    const taken = k.classes.filter((c) => checker.isTypeAssignableTo(checker.getDeclaredTypeOfSymbol(c), members[0]!));
+    if (taken.length > 0) return { kind: "kinds", tags: taken.map((c) => snake(c.name)).sort() };
+  }
+  return null;
+}
+
 function mapUnion(members: ts.Type[], vars: Vars, where: string): Type | null {
   if (members.length === 0) return unit;
   // A style is a string, as an element's is: Solid's CSSProperties beside
@@ -247,7 +282,9 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): Type | null {
   if (strings.length === members.length) {
     return strings.every(isTag) ? { kind: "tags", tags: strings } : tname("string");
   }
-  if (members.every((m) => m.flags & ts.TypeFlags.NumberLike)) return tname("float");
+  if (members.every((m) => m.flags & ts.TypeFlags.NumberLike)) return number(where);
+  const kinded = kindsOf(members);
+  if (kinded) return kinded;
   if (members.length === 1) return mapOne(members[0]!, vars, where);
   // Literals beside other kinds are one member, their own set of tags.
   const literals = members.filter((m) => m.isStringLiteral());
@@ -299,7 +336,7 @@ function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
   }
   if (isString(t) || t.isStringLiteral()) return tname("string");
   if (t.flags & ts.TypeFlags.BooleanLike) return tname("bool");
-  if (t.flags & ts.TypeFlags.NumberLike) return tname("float");
+  if (t.flags & ts.TypeFlags.NumberLike) return number(where);
   if (t.flags & (ts.TypeFlags.Void | ts.TypeFlags.Undefined)) return unit;
   if (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never | ts.TypeFlags.Null)) return null;
   const libraryAlias = t.aliasSymbol && isDomLib(t.aliasSymbol);
@@ -559,7 +596,8 @@ export function doc(symbol: ts.Symbol, indent: string, raises = false): string[]
     .join(" ")
     .trim();
   const escaped = text.replace(/\*\)/g, "* )").replace(/[{}\[\]@]/g, (c) => `\\${c}`);
-  const raise = raises ? `Raises [Invalid_argument] with ${library.name}'s message, where it throws.` : "";
+  // odoc reads an @ as a tag's, so a library's scope is escaped.
+  const raise = raises ? `Raises [Invalid_argument] with ${library.name.replace(/@/g, "\\@")}'s message, where it throws.` : "";
   const all = [escaped, raise].filter((t) => t !== "").join("\n\n");
   if (!all) return [];
   return [`${indent}(** ${all.split("\n").join(`\n${indent}    `)} *)`];
@@ -690,7 +728,8 @@ while (queue.length > 0) {
   const t = showIn(self);
   const declared = n.symbol && !(n.symbol.flags & ts.SymbolFlags.TypeAlias) ? checker.getDeclaredTypeOfSymbol(n.symbol) : n.type;
   const flat = showIn(vs.length === 0 ? tname(flatName(n.module)) : apply(flatName(n.module), ...vs));
-  abstracts.push(`  type ${flat}`);
+  const kind = kindOf(n.symbol ?? undefined);
+  abstracts.push(kind ? `  type ${flat} = [ \`${kind} ] t_value` : `  type ${flat}`);
   const src = new Source();
   signatures.push(src);
   src.both(...(n.symbol ? doc(n.symbol, "  ") : []));
@@ -710,6 +749,8 @@ while (queue.length > 0) {
     let methods = 0;
     for (const p of checker.getPropertiesOfType(declared)) {
       if (!named(p.name)) continue;
+      // A class's private or protected member is its own, never a user's.
+      if ((p.declarations ?? []).some((d) => ts.getCombinedModifierFlags(d) & (ts.ModifierFlags.Private | ts.ModifierFlags.Protected))) continue;
       // A standard type's members are Melange's, through a conversion.
       if (!library && n.conversions.length > 0 && p.declarations?.every((d) => /typescript\/lib\/lib\./.test(d.getSourceFile().fileName))) continue;
       const pt = checker.getTypeOfSymbol(p);
@@ -731,7 +772,7 @@ while (queue.length > 0) {
         if (sig && throws(p, `${n.module}.${p.name}`)) {
           src.implementation(`    external ${name}_js : ${t} -> ${showIn(f)} = "${p.name}" [@@mel.send]`);
           src.both(...doc(p, "    ", true));
-          guarded(src, "    ", name, { ...f, params: [{ type: self }, ...f.params] }, showIn, `${name}_js`, sig, true, false);
+          guarded(src, "    ", name, { ...f, params: [{ type: self }, ...f.params] }, showIn, `${name}_js`, sig, true, true);
           continue;
         }
         src.both(`    external ${name} : ${t} -> ${showIn(f)} = "${p.name}" [@@mel.send]`);
@@ -831,7 +872,7 @@ while (queue.length > 0) {
 const opaqueOnly = [...opaques].sort().filter((o) => !moduleNames.has(o));
 const typesInner = (lines: (s: Source) => string[], open: (m: string) => string) => `  (* Members of different JavaScript kinds, each as it is. *)
   type ('a, 'b) either
-${opaqueOnly.map((o) => `  type ${flatName(o)}`).join("\n")}
+${library.kinds ? "  type 'k t_value\n" : ""}${opaqueOnly.map((o) => `  type ${flatName(o)}`).join("\n")}
 ${abstracts.join("\n")}
 
   ${open("Either")}
@@ -839,7 +880,14 @@ ${abstracts.join("\n")}
 
     external left : 'a -> ('a, 'b) t = "%identity"
     external right : 'b -> ('a, 'b) t = "%identity"
-  end
+  end${library.kinds ? `
+
+  (* A value of one of ${library.kinds.classes.map((c) => c.name).join(", ")}, its kind
+     the class it is of: what a union of them, or an interface they
+     satisfy, takes, as the kinds it names. *)
+  ${open("Value")}
+    type 'k t = 'k t_value
+  end` : ""}
 ${opaqueOnly.map((o) => `\n  (* The standard library's ${o}, opaque. *)\n  ${open(o)}\n    type t = ${flatName(o)}\n  end\n`).join("")}
 ${signatures.map((s) => lines(s).join("\n")).join("\n\n")}`;
 

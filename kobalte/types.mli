@@ -294,6 +294,7 @@ module Color : sig
       
       Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val to_format : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba ] -> t_color
+  val to_format_opt : t -> [ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba ] -> t_color option
   external to_string : t -> ?format:[ `rgb | `hsl | `hsb | `hex | `hexa | `rgba | `hsla | `hsba | `css ] -> unit -> string = "toString" [@@mel.send]
   external clone : t -> unit -> t_color = "clone" [@@mel.send]
   external to_hex_int : t -> unit -> float = "toHexInt" [@@mel.send]
@@ -302,11 +303,13 @@ module Color : sig
       
       Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val get_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float
+  val get_channel_value_opt : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float option
   (** Sets the numeric value for a given channel, and returns a new Color object.
       Throws an error if the channel is unsupported in the current color format.
       
       Raises [Invalid_argument] with Kobalte's message, where it throws. *)
   val with_channel_value : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float -> t_color
+  val with_channel_value_opt : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> float -> t_color option
   external get_channel_range : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_channel_range = "getChannelRange" [@@mel.send]
   external get_channel_name : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_color_slider_root_translations -> string = "getChannelName" [@@mel.send]
   external get_channel_format_options : t -> [ `hue | `saturation | `brightness | `lightness | `red | `green | `blue | `alpha ] -> t_number_format_options = "getChannelFormatOptions" [@@mel.send]

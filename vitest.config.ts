@@ -63,7 +63,10 @@ export default defineConfig({
           name: "server",
           environment: "node",
           globals: true,
-          include: ["_build/default/test/server/out/test/server/*_test.jsx"],
+          include: [
+            "_build/default/test/server/out/test/server/*_test.jsx",
+            "_build/default/test/internationalized_date/out/test/internationalized_date/*_test.js",
+          ],
         },
       },
     ],

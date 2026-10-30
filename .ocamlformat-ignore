@@ -12,3 +12,7 @@ rhp/solidtype_rhp.mli
 rhp/types.ml
 rhp/types.mli
 ppx/rhp_names.ml
+internationalized_date/solidtype_internationalized_date.ml
+internationalized_date/solidtype_internationalized_date.mli
+internationalized_date/types.ml
+internationalized_date/types.mli

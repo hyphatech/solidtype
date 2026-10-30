@@ -1,7 +1,8 @@
 # solidtype
 
 SolidJS for modern OCaml.
-Fast, accessible and reactivity-safe. Kobalte, HeroUI and rhp's charts included.
+Fast, accessible and reactivity-safe. Kobalte, HeroUI, rhp's charts and
+@internationalized/date's dates included.
 
 [![ci](https://img.shields.io/github/actions/workflow/status/hyphatech/solidtype/ci.yml?branch=main&label=ci)](https://github.com/hyphatech/solidtype/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/hyphatech/solidtype?label=release)](https://github.com/hyphatech/solidtype/releases)

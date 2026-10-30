@@ -1,0 +1,6 @@
+(library
+ (name solidtype_internationalized_date)
+ (public_name solidtype-internationalized-date)
+ (modes melange)
+ (preprocess
+  (pps melange.ppx)))
