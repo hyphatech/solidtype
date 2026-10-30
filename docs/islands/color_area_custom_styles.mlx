@@ -1,0 +1,9 @@
+module Color_area = Solidtype_heroui.Color_area
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <Color_area
+    class_="size-44 rounded-3xl"
+    default_value=(fun () -> Colors.parse_color "rgb(116, 52, 255)")>
+    <Color_area.Thumb class_="size-5 rounded-full border-4 border-white" />
+  </Color_area>

@@ -626,3 +626,16 @@ external color_swatch_props :
 external color_swatch : Dom.htmlDivElement -> color_swatch_props -> unit
   = "colorSwatch"
 [@@mel.module "./react/heroui.tsx"]
+
+type color_area_props
+
+external color_area_props :
+  show_dots:(bool[@mel.as "showDots"]) ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  color_area_props = ""
+[@@mel.obj]
+
+external color_area : Dom.htmlDivElement -> color_area_props -> unit
+  = "colorArea"
+[@@mel.module "./react/heroui.tsx"]

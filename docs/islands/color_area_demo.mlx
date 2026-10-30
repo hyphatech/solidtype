@@ -1,0 +1,35 @@
+module S = Solidtype.Solid
+module Color_area = Solidtype_heroui.Color_area
+module Colors = Solidtype_kobalte.Colors
+module Toggle = Controls.Toggle
+
+let make () =
+  let show_dots, set_show_dots = S.create_signal false in
+  let is_disabled, set_is_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Toggle
+        label="show dots"
+        on=(fun () -> S.get show_dots)
+        on_toggle=(S.set set_show_dots)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get is_disabled)
+        on_toggle=(S.set set_is_disabled)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Color_area
+                   default_value=(fun () ->
+                                   Colors.parse_color "rgb(116, 52, 255)")
+                   show_dots=(fun () -> S.get show_dots)
+                   is_disabled=(fun () -> S.get is_disabled)>
+                   <Color_area.Thumb />
+                 </Color_area>)
+      react=(fun host ->
+              Heroui_react.color_area host
+                (Heroui_react.color_area_props ~show_dots:(S.get show_dots)
+                   ~is_disabled:(S.get is_disabled) ()))
+    />
+  </section>

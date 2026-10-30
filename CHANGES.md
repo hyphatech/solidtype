@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Color_area`: HeroUI's ColorArea on Kobalte's, two
+  channels of a colour across and up, in any colour space, its thumb dragged
+  or stepped by the keys, with dots over it or disabled; disabled in the
+  port's layer, since Kobalte's area never is.
 - `Solidtype_heroui.Color_swatch`: HeroUI's ColorSwatch on Kobalte's, a
   colour of Kobalte's `Types.Color` in each of HeroUI's sizes and shapes, one
   less than opaque over a checkerboard, named for a reader by Kobalte or by

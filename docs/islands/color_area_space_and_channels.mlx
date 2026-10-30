@@ -1,0 +1,149 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Color_area = Solidtype_heroui.Color_area
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+type 'a option_ = { id : string; name : string; value : 'a }
+
+let color_spaces =
+  [|
+    { id = "rgb"; name = "RGB"; value = `rgb };
+    { id = "hsl"; name = "HSL"; value = `hsl };
+    { id = "hsb"; name = "HSB"; value = `hsb };
+  |]
+
+let channels_by_space = function
+  | `hsb ->
+      [|
+        { id = "hue"; name = "Hue"; value = `hue };
+        { id = "saturation"; name = "Saturation"; value = `saturation };
+        { id = "brightness"; name = "Brightness"; value = `brightness };
+      |]
+  | `hsl ->
+      [|
+        { id = "hue"; name = "Hue"; value = `hue };
+        { id = "saturation"; name = "Saturation"; value = `saturation };
+        { id = "lightness"; name = "Lightness"; value = `lightness };
+      |]
+  | `rgb ->
+      [|
+        { id = "red"; name = "Red"; value = `red };
+        { id = "green"; name = "Green"; value = `green };
+        { id = "blue"; name = "Blue"; value = `blue };
+      |]
+
+(* The channels across and up a space starts with. *)
+let defaults = function
+  | `rgb -> ("blue", "green")
+  | `hsl -> ("saturation", "lightness")
+  | `hsb -> ("saturation", "brightness")
+
+let space_id = function `rgb -> "rgb" | `hsl -> "hsl" | `hsb -> "hsb"
+
+(* The colour as its space writes it. *)
+let written color = function
+  | `rgb -> Color.to_string color ~format:`rgb ()
+  | `hsl -> Color.to_string color ~format:`hsl ()
+  | `hsb -> Color.to_string color ~format:`hsb ()
+
+let find id options = Array.find_opt (fun o -> String.equal o.id id) options
+
+(* A Select of [options], [picked] its one value. *)
+module Picker = struct
+  let%component make ~(class_ : string) ~(label : string)
+      ~(options : 'a option_ array) ~(picked : string)
+      ~(on_pick : string -> unit) () =
+    <Select
+      class_=(fun () -> class_ ())
+      value=(fun () -> [| picked () |])
+      on_change=(fun ids -> Array.iter on_pick ids)>
+      <Label>(fun () -> Jsx.string (label ()))</Label>
+      <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+      <Select.Popover>
+        <List_box>
+          <For each=(fun () -> options ())>
+            (fun o _ ->
+              <List_box.Item id=(fun () -> o.id) text_value=(fun () -> o.name)>
+                (fun () -> Jsx.string o.name) <List_box.Item_indicator />
+              </List_box.Item>)
+          </For>
+        </List_box>
+      </Select.Popover>
+    </Select>
+end
+
+let make () =
+  let space, set_space = S.create_signal `hsb in
+  let color, set_color =
+    S.create_signal (Colors.parse_color "hsb(219, 58%, 93%)")
+  in
+  let x, set_x = S.create_signal "saturation" in
+  let y, set_y = S.create_signal "brightness" in
+  let channels () = channels_by_space (S.get space) in
+  let channel id = Option.map (fun o -> o.value) (find id (channels ())) in
+  let pick_space id =
+    Option.iter
+      (fun o ->
+        S.set set_space o.value;
+        (* Each channel goes back to the new space's own. *)
+        let x', y' = defaults o.value in
+        S.set set_x x';
+        S.set set_y y')
+      (find id color_spaces)
+  in
+  (* No channel is on both axes. *)
+  let other than =
+    Array.of_list
+      (List.filter
+         (fun o -> not (String.equal o.id than))
+         (Array.to_list (channels ())))
+  in
+  <div class_="flex flex-col items-center gap-6">
+    <div class_="flex gap-4">
+      <Picker
+        class_="w-32"
+        label="Color Space"
+        options=(fun () -> color_spaces)
+        picked=(fun () -> space_id (S.get space))
+        on_pick=pick_space
+      />
+      <Picker
+        class_="w-36"
+        label="X Axis"
+        options=(fun () -> other (S.get y))
+        picked=(fun () -> S.get x)
+        on_pick=(S.set set_x)
+      />
+      <Picker
+        class_="w-36"
+        label="Y Axis"
+        options=(fun () -> other (S.get x))
+        picked=(fun () -> S.get y)
+        on_pick=(S.set set_y)
+      />
+    </div>
+    <Color_area
+      color_space=(fun () -> S.get space)
+      value=(fun () -> S.get color)
+      ?x_channel=(fun () -> channel (S.get x))
+      ?y_channel=(fun () -> channel (S.get y))
+      on_change=(S.set set_color)>
+      <Color_area.Thumb />
+    </Color_area>
+    <div class_="flex items-center gap-3">
+      <div
+        class_="size-8 rounded-md border border-default"
+        style=(fun () ->
+                  "background-color: "
+                  ^ Color.to_string (S.get color) ~format:`rgba ())
+      />
+      <code class_="rounded bg-default/50 px-2 py-1 text-sm">
+        (fun () -> Jsx.string (written (S.get color) (S.get space)))
+      </code>
+    </div>
+  </div>

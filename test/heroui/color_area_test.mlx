@@ -1,0 +1,167 @@
+(* HeroUI's ColorArea on Kobalte's, beside the same area in React: the area
+   and its thumb, their classes and state, where the thumb sits, and the
+   colour each is told as its thumb is stepped by the keys. *)
+
+module Color_area = Solidtype_heroui.Color_area
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  default_value:(string[@mel.as "defaultValue"]) ->
+  ?color_space:(string[@mel.as "colorSpace"]) ->
+  ?x_channel:(string[@mel.as "xChannel"]) ->
+  ?y_channel:(string[@mel.as "yChannel"]) ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?show_dots:(bool[@mel.as "showDots"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/ColorArea.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ColorArea.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ColorArea.tsx"]
+end
+
+(* What HeroUI's styles read of a part: its class and state, and for the
+   thumb where it sits, a declaration of its style each. *)
+let part selector =
+  match T.query selector with
+  | None -> "no " ^ selector
+  | Some e ->
+      let placed =
+        Option.value (T.attribute e "style") ~default:""
+        |> String.split_on_char ';' |> List.map String.trim
+        |> List.filter (fun d ->
+            List.exists
+              (fun p ->
+                String.length d > String.length p
+                && String.equal (String.sub d 0 (String.length p)) p)
+              [ "left:"; "top:" ])
+        |> List.sort String.compare
+      in
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             match T.attribute e name with
+             | Some "" | None -> None
+             | Some v -> Some (name ^ "=" ^ v))
+           [
+             "data-slot";
+             "class";
+             "role";
+             "data-disabled";
+             "data-focus-visible";
+             "data-dragging";
+           ]
+        @ placed)
+
+let shown () =
+  (part "[data-slot=color-area]", part "[data-slot=color-area-thumb]")
+
+let channel = function
+  | `hue -> "hue"
+  | `saturation -> "saturation"
+  | `brightness -> "brightness"
+  | `lightness -> "lightness"
+  | `red -> "red"
+  | `green -> "green"
+  | `blue -> "blue"
+  | `alpha -> "alpha"
+
+(* The area at rest, then tabbed to and stepped right twice and up once. *)
+let walk ~step told =
+  let user = T.setup () in
+  let at_rest = shown () in
+  let* () =
+    step (fun () ->
+        let* () = T.tab user in
+        T.keyboard user "{ArrowRight}{ArrowRight}{ArrowUp}")
+  in
+  Js.Promise.resolve (at_rest, shown (), !told)
+
+let both ~default_value ?color_space ?x_channel ?y_channel ?is_disabled
+    ?show_dots () =
+  let told = ref "" in
+  T.render (fun () ->
+      <Color_area
+        default_value=(fun () -> Colors.parse_color default_value)
+        ?color_space=(fun () -> color_space)
+        ?x_channel=(fun () -> x_channel)
+        ?y_channel=(fun () -> y_channel)
+        ?is_disabled=(fun () -> is_disabled)
+        ?show_dots=(fun () -> show_dots)
+        on_change=(fun c -> told := Color.to_string c ~format:`hex ())>
+        <Color_area.Thumb />
+      </Color_area>);
+  let* solidtype = walk ~step:(fun action -> action ()) told in
+  T.cleanup ();
+  let told' = ref "" in
+  let (_ : Dom.element) =
+    Twin.render
+      (props ~default_value
+         ?color_space:
+           (Option.map
+              (function `rgb -> "rgb" | `hsl -> "hsl" | `hsb -> "hsb")
+              color_space)
+         ?x_channel:(Option.map channel x_channel)
+         ?y_channel:(Option.map channel y_channel)
+         ?is_disabled ?show_dots ())
+      (fun hex -> told' := hex)
+  in
+  let* react = walk ~step:Twin.step told' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+(* Whether each of the area's inputs, its channels as a reader meets them, is
+   disabled. *)
+let inputs_disabled () =
+  Js.Array.from (query_all T.body "input[type=range]")
+  |> Array.map (fun e -> Option.is_some (T.attribute e "disabled"))
+
+let () =
+  Jest.describe "Color_area" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is an area and its thumb, stepped, as React's is"
+        (fun () -> both ~default_value:"rgb(116, 52, 255)" ());
+      Jest.testPromise "shows its dots, as React's does" (fun () ->
+          both ~default_value:"hsl(200, 100%, 50%)" ~show_dots:true ());
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          both ~default_value:"hsl(200, 100%, 50%)" ~is_disabled:true ());
+      (* Kobalte's root keeps [disabled] from its form control, so its inputs
+         stay enabled unless the port disables them. *)
+      Jest.test "disables its inputs, as React's does" (fun () ->
+          T.render (fun () ->
+              <Color_area
+                default_value=(fun () -> Colors.parse_color "#9B80FF")
+                is_disabled=true>
+                <Color_area.Thumb />
+              </Color_area>);
+          let solidtype = inputs_disabled () in
+          T.cleanup ();
+          let (_ : Dom.element) =
+            Twin.render (props ~default_value:"#9B80FF" ~is_disabled:true ())
+              (fun _ -> ())
+          in
+          let react = inputs_disabled () in
+          Twin.cleanup ();
+          E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is red across and green up, as React's is" (fun () ->
+          both ~default_value:"#9B80FF" ~color_space:`rgb ~x_channel:`red
+            ~y_channel:`green ()))

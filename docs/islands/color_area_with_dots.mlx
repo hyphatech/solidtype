@@ -1,0 +1,9 @@
+module Color_area = Solidtype_heroui.Color_area
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <Color_area
+    show_dots=true
+    default_value=(fun () -> Colors.parse_color "hsl(200, 100%, 50%)")>
+    <Color_area.Thumb />
+  </Color_area>

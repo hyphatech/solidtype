@@ -1,0 +1,28 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_area = Solidtype_heroui.Color_area
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  let color, set_color = S.create_signal (Colors.parse_color "#9B80FF") in
+  <div class_="flex flex-col gap-4">
+    <Color_area
+      color_space=`rgb
+      value=(fun () -> S.get color)
+      x_channel=`red
+      y_channel=`green
+      on_change=(S.set set_color)>
+      <Color_area.Thumb />
+    </Color_area>
+    <div class_="flex w-[300px] items-center gap-3">
+      <Color_swatch color=(fun () -> S.get color) size=`md />
+      <p class_="text-sm text-muted">
+        "Current color: "
+        <span class_="font-medium">
+          (fun () -> Jsx.string (Color.to_string (S.get color) ~format:`hex ()))
+        </span>
+      </p>
+    </div>
+  </div>

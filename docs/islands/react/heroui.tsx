@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1108,4 +1108,17 @@ type ColorSwatchProps = { shape: "circle" | "square"; size: "xs" | "sm" | "md" |
 // A swatch of HeroUI's blue, as the port's demo shows it.
 export function colorSwatch(host: HTMLElement, props: ColorSwatchProps): void {
   flushSync(() => rootOf(host).render(<ColorSwatch {...props} aria-label="Blue" color="#0485F7" />));
+}
+
+type ColorAreaProps = { showDots: boolean; isDisabled: boolean };
+
+// An area of HeroUI's purple, kept by itself, as the port's demo shows it.
+export function colorArea(host: HTMLElement, props: ColorAreaProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ColorArea {...props} defaultValue="rgb(116, 52, 255)">
+        <ColorArea.Thumb />
+      </ColorArea>,
+    ),
+  );
 }

@@ -453,7 +453,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] ColorSwatch, on Kobalte's, its colour written as rgba, which a
   browser reads where Kobalte's CSS string for a colour less than opaque is
   not
-- [ ] ColorArea, ColorSlider, ColorField, ColorSwatchPicker, ColorPicker
+- [x] ColorArea, on Kobalte's, its background filling the area; disabled
+  in the port's layer, since Kobalte's root keeps `disabled` from its form
+  control
+- [ ] ColorSlider, ColorField, ColorSwatchPicker, ColorPicker
 
 ### Group 7: built from Kobalte's primitives
 - [ ] Kobalte's primitives bound: `createSelectableList`,
