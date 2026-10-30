@@ -199,3 +199,89 @@ let () =
           team ~mode:`multiple ();
           let* found = H.accessibility_violations () in
           Js.Promise.resolve E.(expect found |> toEqual [||])))
+
+module Direction = struct
+  (* A column's direction, as a part inside it reads it. *)
+  let make () =
+    let c = Table.use_column_context () in
+    <span>
+      (fun () ->
+        Jsx.string
+          (match c.direction () with
+          | Some `ascending -> "up"
+          | Some `descending -> "down"
+          | None -> "-"))
+    </span>
+end
+
+let () =
+  Jest.describe "Table, sorted" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "is sorted by a column pressed or keyed, its direction told inside it"
+        (fun () ->
+          let told = ref [] in
+          let sort, set_sort =
+            S.create_signal { Table.column = "name"; direction = `ascending }
+          in
+          H.render (fun () ->
+              <Table.Root
+                aria_label="Sortable"
+                sort_descriptor=(fun () -> S.get sort)
+                on_sort_change=(fun (s : Table.sort_descriptor) ->
+                                 told := s :: !told;
+                                 S.set set_sort s)>
+                <Table.Header>
+                  <Table.Column
+                    id="name" allows_sorting=true is_row_header=true>
+                    "Name " (fun () -> Jsx.element (Direction.make ()))
+                  </Table.Column>
+                  <Table.Column id="role" allows_sorting=true>
+                    "Role " (fun () -> Jsx.element (Direction.make ()))
+                  </Table.Column>
+                  <Table.Column>"Actions"</Table.Column>
+                </Table.Header>
+                <Table.Body>
+                  <Table.Row id="1"><Table.Cell>"Kate"</Table.Cell></Table.Row>
+                </Table.Body>
+              </Table.Root>);
+          let columns () =
+            Array.map
+              (fun c ->
+                (Option.value (H.attribute c "aria-sort") ~default:"", H.text c))
+              (H.all_by_role "columnheader")
+          in
+          let at_first = columns () in
+          let user = H.setup () in
+          let column i = (H.all_by_role "columnheader").(i) in
+          let* () = H.click user (column 0) in
+          let* () = H.click user (column 1) in
+          let* () = H.click user (column 2) in
+          H.focus (column 1);
+          let* () = H.keyboard user "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( at_first,
+                  columns (),
+                  Array.of_list
+                    (List.rev_map
+                       (fun (s : Table.sort_descriptor) ->
+                         s.column
+                         ^
+                         match s.direction with
+                         | `ascending -> "+"
+                         | `descending -> "-")
+                       !told) )
+              |> toEqual
+                   ( [|
+                       ("ascending", "Name up");
+                       ("none", "Role -");
+                       ("", "Actions");
+                     |],
+                     [|
+                       ("none", "Name -");
+                       ("descending", "Role down");
+                       ("", "Actions");
+                     |],
+                     [| "name-"; "role+"; "role-" |] ))))

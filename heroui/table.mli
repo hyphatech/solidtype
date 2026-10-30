@@ -33,6 +33,13 @@
     row's or a cell's inside a {!Content}: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+type sort_descriptor = Solidtype_headless.Table.sort_descriptor = {
+  column : string;
+  direction : [ `ascending | `descending ];
+}
+(** How a table is sorted: by the column whose [id] is [column], one way or the
+    other; the headless table's. *)
+
 (** The [<div>] the table scrolls in, sideways, while the table and its footer
     stay as wide as their container. *)
 module Scroll_container : sig
@@ -61,9 +68,12 @@ end
     [selected_keys] while it is given them, else those it keeps,
     [default_selected_keys] at first; each change calls [on_selection_change]
     with them. A row whose key [disabled_keys] holds is disabled, and
-    [disallow_empty_selection] keeps one selected. A {!Checkbox} of
-    [slot=`selection] in a row stands for its row, and in the {!Header} for
-    every row. *)
+    [disallow_empty_selection] keeps one selected. It is sorted as
+    [sort_descriptor] says, its rows' order the application's to follow:
+    pressing a column that [allows_sorting], or Enter or Space on it, calls
+    [on_sort_change] with it ascending, or turned if it was so sorted. A
+    {!Checkbox} of [slot=`selection] in a row stands for its row, and in the
+    {!Header} for every row. *)
 module Content : sig
   module Props : sig
     type t
@@ -78,6 +88,8 @@ module Content : sig
       ?on_selection_change:(string array -> unit) ->
       ?disabled_keys:string array Solidtype.Check.value ->
       ?disallow_empty_selection:bool Solidtype.Check.value ->
+      ?sort_descriptor:sort_descriptor Solidtype.Check.value ->
+      ?on_sort_change:(sort_descriptor -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
@@ -106,14 +118,43 @@ module Header : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
-(** A column's header, a [<th role="columnheader">]. The column whose
-    [is_row_header] names each row, its cells [rowheader]s. *)
+(** A column's header, a [<th role="columnheader">], its [id] the column a sort
+    names. The column whose [is_row_header] names each row, its cells
+    [rowheader]s. It declares [data-allows-sorting], [data-hovered] and
+    [data-focus-visible]. *)
 module Column : sig
   module Props : sig
     type t
 
     val check :
+      ?id:string Solidtype.Check.value ->
+      ?allows_sorting:bool Solidtype.Check.value ->
       ?is_row_header:bool Solidtype.Check.value ->
+      ?class_:string Solidtype.Check.value ->
+      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
+(** A sortable column's label, a [<span>], and HeroUI's chevron after it while
+    the column is sorted, up for ascending and turned for descending, unless
+    [show_indicator] is [false]; [indicator] in its place, in a [<span>]
+    HeroUI's styles turn. Its direction is its {!Column}'s, unless
+    [sort_direction] says another: HeroUI's is given its column's by a render
+    function. *)
+module Sortable_column_header : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?sort_direction:[ `ascending | `descending ] Solidtype.Check.value ->
+      ?show_indicator:bool Solidtype.Check.value ->
+      ?indicator:Solidtype.Jsx.element Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->

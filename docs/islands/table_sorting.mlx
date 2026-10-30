@@ -1,0 +1,114 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+
+type user = {
+  id : int;
+  name : string;
+  role : string;
+  status : string;
+  email : string;
+}
+
+let users =
+  [|
+    {
+      email = "kate@acme.com";
+      id = 1;
+      name = "Kate Moore";
+      role = "CEO";
+      status = "Active";
+    };
+    {
+      email = "john@acme.com";
+      id = 2;
+      name = "John Smith";
+      role = "CTO";
+      status = "Active";
+    };
+    {
+      email = "sara@acme.com";
+      id = 3;
+      name = "Sara Johnson";
+      role = "CMO";
+      status = "On Leave";
+    };
+    {
+      email = "michael@acme.com";
+      id = 4;
+      name = "Michael Brown";
+      role = "CFO";
+      status = "Active";
+    };
+    {
+      email = "emily@acme.com";
+      id = 5;
+      name = "Emily Davis";
+      role = "Product Manager";
+      status = "Inactive";
+    };
+  |]
+
+let field column (u : user) =
+  match column with
+  | "role" -> u.role
+  | "status" -> u.status
+  | "email" -> u.email
+  | _ -> u.name
+
+external locale_compare : string -> string -> int = "localeCompare" [@@mel.send]
+
+let make () =
+  let sort, set_sort =
+    S.create_signal { Table.column = "name"; direction = `ascending }
+  in
+  let sorted_users () =
+    let { Table.column; direction } = S.get sort in
+    let order =
+      List.sort
+        (fun a b -> locale_compare (field column a) (field column b))
+        (Array.to_list users)
+    in
+    Array.of_list
+      (match direction with
+      | `ascending -> order
+      | `descending -> List.rev order)
+  in
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content
+        aria_label="Sortable table"
+        class_="min-w-[600px]"
+        sort_descriptor=(fun () -> S.get sort)
+        on_sort_change=(S.set set_sort)>
+        <Table.Header>
+          <Table.Column allows_sorting=true is_row_header=true id="name">
+            <Table.Sortable_column_header>"Name"</Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column allows_sorting=true id="role">
+            <Table.Sortable_column_header>"Role"</Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column allows_sorting=true id="status">
+            <Table.Sortable_column_header>
+              "Status"
+            </Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column allows_sorting=true id="email">
+            <Table.Sortable_column_header>"Email"</Table.Sortable_column_header>
+          </Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> sorted_users ())>
+            (fun user _ ->
+              <Table.Row id=(fun () -> string_of_int user.id)>
+                <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.status)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

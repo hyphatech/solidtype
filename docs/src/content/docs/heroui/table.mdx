@@ -8,6 +8,10 @@ import * as ExUsage from "@islands/table_usage.jsx";
 import ExUsageCode from "@islands/table_usage.mlx?raw";
 import * as ExSecondary from "@islands/table_secondary.jsx";
 import ExSecondaryCode from "@islands/table_secondary.mlx?raw";
+import * as ExSorting from "@islands/table_sorting.jsx";
+import ExSortingCode from "@islands/table_sorting.mlx?raw";
+import * as ExCustomCells from "@islands/table_custom_cells.jsx";
+import ExCustomCellsCode from "@islands/table_custom_cells.mlx?raw";
 import * as ExSelection from "@islands/table_selection.jsx";
 import ExSelectionCode from "@islands/table_selection.mlx?raw";
 import * as ExPagination from "@islands/table_pagination.jsx";
@@ -32,9 +36,10 @@ body's `items` and a render function; columns and cells given by data are a
 
 Its rows are selected by Kobalte's list, one or many, by a press, Space or
 Enter, or a `Checkbox` of `slot=`selection` in a row, and all of them by one
-in the header. Sorting, loading more as the table scrolls, resizing columns,
-expandable rows and virtualization are being ported, each in a stage of its
-own; their examples are added with them.
+in the header. A column that allows sorting is pressed, or given Enter or Space, to be
+sorted by. Loading more as the table scrolls, resizing columns, expandable
+rows and virtualization are being ported, each in a stage of its own; their
+examples are added with them.
 
 ## Usage
 
@@ -70,6 +75,16 @@ HeroUI's examples.
 
 <Example code={ExSecondaryCode} title="table_secondary.mlx"><ExSecondary.make client:visible /></Example>
 
+### Sorting
+
+`allows_sorting` and `id` on a `Table.Column`, and `sort_descriptor` and
+`on_sort_change` on `Table.Content`, sort it; the rows' order is the
+application's. `Table.Sortable_column_header` draws HeroUI's chevron for its
+column's direction, which it reads from its column: HeroUI's is given it by
+the column's render function.
+
+<Example code={ExSortingCode} title="table_sorting.mlx"><ExSorting.make client:visible /></Example>
+
 ### Selection
 
 `selection_mode` on `Table.Content` selects its rows. A `Checkbox` of
@@ -89,6 +104,13 @@ HeroUI's examples.
 every column.
 
 <Example code={ExEmptyStateCode} title="table_empty_state.mlx"><ExEmptyState.make client:visible /></Example>
+
+### Custom Cells
+
+Any element in a cell: here a selection, sorting, HeroUI's `Avatar`, `Chip`
+and `Button`, together.
+
+<Example code={ExCustomCellsCode} title="table_custom_cells.mlx"><ExCustomCells.make client:visible /></Example>
 
 ### TanStack Table
 
@@ -111,13 +133,17 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
 - `.table-root`, `.table-root--primary`, `.table-root--secondary`
 - `.table__scroll-container`, `.table__content`, `.table__header`,
   `.table__column`, `.table__body`, `.table__row`, `.table__cell`,
-  `.table__footer`
+  `.table__footer`, `.table__sortable-column-header`,
+  `.table__sortable-column-indicator`
 
 ### Interactive States
 
 - a row: `[data-hovered="true"]`, `[data-focus-visible="true"]`,
   `[data-selected="true"]`, `[aria-disabled="true"]`
-- a column and a cell: `[data-focus-visible="true"]`
+- a column: `[data-allows-sorting="true"]`, `[data-hovered="true"]`,
+  `[data-focus-visible="true"]`
+- a sortable header and its indicator: `[data-direction]`
+- a cell: `[data-focus-visible="true"]`
 
 ## API Reference
 
@@ -147,6 +173,8 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Called with the keys selected; all is every row's but a disabled one |
 | `disabledKeys` | `disabled_keys` | `string array` | | Its rows' keys disabled |
 | `disallowEmptySelection` | `disallow_empty_selection` | `bool` | `false` | Whether one row stays selected |
+| `sortDescriptor` | `sort_descriptor` | `Table.sort_descriptor` | | The column it is sorted by, and which way |
+| `onSortChange` | `on_sort_change` | `Table.sort_descriptor -> unit` | | Called with the sort a column's press asks for |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Header
@@ -160,7 +188,19 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
+| `id` | `id` | `string` | one of its own | The column a sort names |
+| `allowsSorting` | `allows_sorting` | `bool` | `false` | Whether pressing it sorts by it |
 | `isRowHeader` | `is_row_header` | `bool` | `false` | Whether its cells name their rows |
+| `children` | `children` | | | Its label; HeroUI's render function of its sort direction is `Table.Sortable_column_header`'s reading of it |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.SortableColumnHeader
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `sortDirection` | `sort_direction` | `` [ `ascending \| `descending ] `` | its column's | Which way its column is sorted |
+| `showIndicator` | `show_indicator` | `bool` | `true` | Whether the chevron is drawn while it is sorted |
+| `indicator` | `indicator` | `Jsx.element` | HeroUI's chevron | Drawn in a span HeroUI's styles turn, where React clones it with the classes |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Body

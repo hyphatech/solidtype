@@ -28,6 +28,7 @@ let attribute e name = Js.Null.toOption (attribute_js e name)
 external text : Dom.element -> string = "textContent" [@@mel.get]
 external focused : Dom.element = "activeElement" [@@mel.scope "document"]
 external body : Dom.element = "body" [@@mel.scope "document"]
+external focus : Dom.element -> unit = "focus" [@@mel.send]
 
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]

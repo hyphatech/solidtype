@@ -43,8 +43,18 @@
     A part is used inside a {!Root}, a cell inside a {!Row}: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+type sort_descriptor = {
+  column : string;
+  direction : [ `ascending | `descending ];
+}
+(** How a table is sorted: by the column whose [id] is [column], one way or the
+    other. *)
+
 type context = {
   selection_mode : unit -> [ `none | `single | `multiple ];
+  sort : unit -> sort_descriptor option;
+  sort_by : string -> unit;
+      (** Asks for a column's sort: ascending, or turned if it was so. *)
   is_selected : string -> bool;
   is_disabled : string -> bool;
   toggle : string -> unit;  (** Toggles a row's selection. *)
@@ -53,17 +63,27 @@ type context = {
   select_all : unit -> unit;
   clear_selection : unit -> unit;
 }
-(** What a table's parts, and a style over them, read of it: how its rows are
-    selected, and each row's state by its key. *)
+(** What a table's parts, and a style over them, read of it: how it is sorted
+    and its rows are selected, and each row's state by its key. *)
 
 val use_context : unit -> context
 (** The table above; outside a {!Root} it raises [Invalid_argument]. *)
 
+type column = { direction : unit -> [ `ascending | `descending ] option }
+(** What a part inside a {!Column} reads of it: which way it is sorted, if it
+    is. *)
+
+val use_column_context : unit -> column
+(** The column above; outside a {!Column} it raises [Invalid_argument]. *)
+
 (** The [<table role="grid">], [aria-multiselectable] while many rows may be
-    selected. Its rows' keys selected are [selected_keys] while it is given
-    them, else those it keeps, [default_selected_keys] at first; each change
-    calls [on_selection_change] with them, all of them for every row but a
-    disabled one. A row whose key [disabled_keys] holds is disabled, and
+    selected. It is sorted as [sort_descriptor] says, its rows' order the
+    application's to follow: pressing a column that [allows_sorting] calls
+    [on_sort_change] with it ascending, or turned if it was so sorted. Its rows'
+    keys selected are [selected_keys] while it is given them, else those it
+    keeps, [default_selected_keys] at first; each change calls
+    [on_selection_change] with them, all of them for every row but a disabled
+    one. A row whose key [disabled_keys] holds is disabled, and
     [disallow_empty_selection] keeps one selected. *)
 module Root : sig
   module Props : sig
@@ -77,6 +97,8 @@ module Root : sig
       ?on_selection_change:(string array -> unit) ->
       ?disabled_keys:string array Solidtype.Check.value ->
       ?disallow_empty_selection:bool Solidtype.Check.value ->
+      ?sort_descriptor:sort_descriptor Solidtype.Check.value ->
+      ?on_sort_change:(sort_descriptor -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check
@@ -103,13 +125,17 @@ module Header : sig
 end
 
 (** A column's header, a [<th role="columnheader">], [aria-colindex] its place,
-    focused by the keys. The column whose [is_row_header] names each row, its
-    cells [rowheader]s. *)
+    focused by the keys, its [id] the column a sort names. The column whose
+    [is_row_header] names each row, its cells [rowheader]s. One that
+    [allows_sorting] is [aria-sort], and pressed by a pointer, Enter or Space to
+    be sorted by. *)
 module Column : sig
   module Props : sig
     type t
 
     val check :
+      ?id:string Solidtype.Check.value ->
+      ?allows_sorting:bool Solidtype.Check.value ->
       ?is_row_header:bool Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)

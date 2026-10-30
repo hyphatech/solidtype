@@ -34,6 +34,10 @@ external position : _ Dom.element_like -> _ Dom.element_like -> int
 [@@mel.send]
 
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+
+(* A key's name, where a part's own [key] names something else. *)
+let key_name = key
+
 external event_target : _ Dom.event_like -> Dom.element = "target" [@@mel.get]
 
 external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
@@ -52,8 +56,15 @@ let in_control e =
    is on the page. *)
 type row = { key : string; element : Dom.htmlTableRowElement }
 
+type sort_descriptor = {
+  column : string;
+  direction : [ `ascending | `descending ];
+}
+
 type context = {
   selection_mode : unit -> [ `none | `single | `multiple ];
+  sort : unit -> sort_descriptor option;
+  sort_by : string -> unit;
   is_selected : string -> bool;
   is_disabled : string -> bool;
   toggle : string -> unit;
@@ -178,6 +189,8 @@ module Root = struct
       ?on_selection_change:(string array -> unit) ->
       ?disabled_keys:string array Solidtype.Check.value ->
       ?disallow_empty_selection:bool Solidtype.Check.value ->
+      ?sort_descriptor:sort_descriptor Solidtype.Check.value ->
+      ?on_sort_change:(sort_descriptor -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check = "check"
@@ -207,6 +220,13 @@ module Root = struct
 
     external disallow_empty_selection : t -> bool option
       = "disallowEmptySelection"
+    [@@mel.get]
+
+    external sort_descriptor : t -> sort_descriptor option = "sortDescriptor"
+    [@@mel.get]
+
+    external on_sort_change : t -> ((sort_descriptor -> unit)[@u]) option
+      = "onSortChange"
     [@@mel.get]
 
     external children : t -> Jsx.content = "children" [@@mel.get]
@@ -241,6 +261,8 @@ module Root = struct
       "onSelectionChange";
       "disabledKeys";
       "disallowEmptySelection";
+      "sortDescriptor";
+      "onSortChange";
       "children";
       "ref";
       "onKeyDown";
@@ -317,6 +339,18 @@ module Root = struct
         context =
           {
             selection_mode;
+            sort = (fun () -> Props.sort_descriptor props);
+            (* A column pressed is sorted ascending, or turned if it was. *)
+            sort_by =
+              (fun column ->
+                let direction =
+                  match Props.sort_descriptor props with
+                  | Some { column = sorted; direction = `ascending }
+                    when String.equal sorted column ->
+                      `descending
+                  | Some _ | None -> `ascending
+                in
+                call (Props.on_sort_change props) { column; direction });
             is_selected = (fun k -> Manager.is_selected (m ()) k);
             is_disabled = disabled;
             toggle = (fun k -> Manager.toggle_selection (m ()) k);
@@ -413,20 +447,49 @@ module Header = struct
   let component = Jsx.component make
 end
 
+(* What a part inside a column reads of it: how it is sorted. *)
+type column = { direction : unit -> [ `ascending | `descending ] option }
+
+module Column_context = Solidtype.Context.Make_optional (struct
+  type t = column
+end)
+
+let use_column_context () =
+  match Column_context.use () with
+  | Some c -> c
+  | None -> invalid_arg "Table.use_column_context is used inside a Table.Column"
+
 module Column = struct
   module Props = struct
     type t
 
     external check :
+      ?id:string Solidtype.Check.value ->
+      ?allows_sorting:bool Solidtype.Check.value ->
       ?is_row_header:bool Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
+    external id : t -> string option = "id" [@@mel.get]
+    external allows_sorting : t -> bool option = "allowsSorting" [@@mel.get]
     external is_row_header : t -> bool option = "isRowHeader" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
   end
+
+  (* The props the column takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "id"; "allowsSorting"; "isRowHeader"; "children"; "onClick"; "onKeyDown";
+    |]
 
   let make (props : Props.t) =
     let t = in_table "Table.Column" in
@@ -436,13 +499,49 @@ module Column = struct
           Option.value (Props.is_row_header props) ~default:false)
     in
     if names_rows then t.set_row_header index;
-    <th
-      role=`columnheader
-      tabindex="-1"
-      aria_colindex=(fun () -> string_of_int (index + 1))
-      props=(S.omit props [| "isRowHeader"; "children" |])>
-      (fun () -> Props.children props)
-    </th>
+    let key =
+      match S.untrack (fun () -> Props.id props) with
+      | Some k -> k
+      | None -> S.create_unique_id ()
+    in
+    let sortable () =
+      Option.value (Props.allows_sorting props) ~default:false
+    in
+    let direction () =
+      match t.context.sort () with
+      | Some s when String.equal s.column key -> Some s.direction
+      | Some _ | None -> None
+    in
+    (* A sortable column is pressed, by a pointer, Enter or Space, to be
+       sorted by. *)
+    let press () = if sortable () then t.context.sort_by key in
+    <Column_context.Provider value=(fun () -> { direction })>
+      <th
+        role=`columnheader
+        tabindex="-1"
+        aria_colindex=(fun () -> string_of_int (index + 1))
+        ?aria_sort=(fun () ->
+                     if sortable () then
+                       Some
+                         (match direction () with
+                         | Some `ascending -> `ascending
+                         | Some `descending -> `descending
+                         | None -> `none)
+                     else None)
+        on_click=(fun e ->
+                   call (Props.on_click props) e;
+                   press ())
+        on_key_down=(fun e ->
+                      call (Props.on_key_down props) e;
+                      match key_name e with
+                      | ("Enter" | " ") when sortable () ->
+                          prevent_default e;
+                          press ()
+                      | _ -> ())
+        props=(S.omit props own)>
+        (fun () -> Props.children props)
+      </th>
+    </Column_context.Provider>
 
   let component = Jsx.component make
 end

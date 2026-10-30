@@ -1,0 +1,238 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Avatar = Solidtype_heroui.Avatar
+module Button = Solidtype_heroui.Button
+module Checkbox = Solidtype_heroui.Checkbox
+module Chip = Solidtype_heroui.Chip
+module Table = Solidtype_heroui.Table
+
+type status = Active | Inactive | On_leave
+
+type user = {
+  id : int;
+  name : string;
+  image_url : string;
+  role : string;
+  status : status;
+  email : string;
+}
+
+let status_name = function
+  | Active -> "Active"
+  | Inactive -> "Inactive"
+  | On_leave -> "On Leave"
+
+let status_color = function
+  | Active -> `success
+  | Inactive -> `danger
+  | On_leave -> `warning
+
+let avatar color =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/" ^ color
+  ^ ".jpg"
+
+let users =
+  [|
+    {
+      email = "kate@acme.com";
+      id = 4586932;
+      image_url = avatar "red";
+      name = "Kate Moore";
+      role = "Chief Executive Officer";
+      status = Active;
+    };
+    {
+      email = "john@acme.com";
+      id = 5273849;
+      image_url = avatar "green";
+      name = "John Smith";
+      role = "Chief Technology Officer";
+      status = Active;
+    };
+    {
+      email = "sara@acme.com";
+      id = 7492836;
+      image_url = avatar "blue";
+      name = "Sara Johnson";
+      role = "Chief Marketing Officer";
+      status = On_leave;
+    };
+    {
+      email = "michael@acme.com";
+      id = 8293746;
+      image_url = avatar "purple";
+      name = "Michael Brown";
+      role = "Chief Financial Officer";
+      status = Active;
+    };
+    {
+      email = "emily@acme.com";
+      id = 1234567;
+      image_url = avatar "orange";
+      name = "Emily Davis";
+      role = "Product Manager";
+      status = Inactive;
+    };
+  |]
+
+let field column (u : user) =
+  match column with
+  | "id" -> string_of_int u.id
+  | "role" -> u.role
+  | "status" -> status_name u.status
+  | _ -> u.name
+
+external locale_compare : string -> string -> int = "localeCompare" [@@mel.send]
+
+let initials name =
+  String.split_on_char ' ' name
+  |> List.filter_map (fun w ->
+      if String.length w > 0 then Some (String.sub w 0 1) else None)
+  |> String.concat ""
+
+let make () =
+  let selected_keys, set_selected_keys = S.create_signal [||] in
+  let sort, set_sort =
+    S.create_signal { Table.column = "name"; direction = `ascending }
+  in
+  let sorted_users () =
+    let { Table.column; direction } = S.get sort in
+    let order =
+      List.sort
+        (fun a b -> locale_compare (field column a) (field column b))
+        (Array.to_list users)
+    in
+    Array.of_list
+      (match direction with
+      | `ascending -> order
+      | `descending -> List.rev order)
+  in
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content
+        aria_label="Table with custom cells"
+        class_="min-w-[800px]"
+        selected_keys=(fun () -> S.get selected_keys)
+        selection_mode=`multiple
+        sort_descriptor=(fun () -> S.get sort)
+        on_selection_change=(S.set set_selected_keys)
+        on_sort_change=(S.set set_sort)>
+        <Table.Header>
+          <Table.Column class_="pe-0">
+            <Checkbox aria_label="Select all" slot=`selection>
+              <Checkbox.Content>
+                <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+              </Checkbox.Content>
+            </Checkbox>
+          </Table.Column>
+          <Table.Column
+            allows_sorting=true is_row_header=true class_="after:hidden" id="id">
+            <Table.Sortable_column_header>
+              "Worker ID"
+            </Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column allows_sorting=true id="name">
+            <Table.Sortable_column_header>
+              "Member"
+            </Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column allows_sorting=true id="role">
+            <Table.Sortable_column_header>"Role"</Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column allows_sorting=true id="status">
+            <Table.Sortable_column_header>
+              "Status"
+            </Table.Sortable_column_header>
+          </Table.Column>
+          <Table.Column class_="text-end">"Actions"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> sorted_users ())>
+            (fun user _ ->
+              <Table.Row id=(fun () -> string_of_int user.id)>
+                <Table.Cell class_="pe-0">
+                  <Checkbox
+                    aria_label=(fun () -> "Select " ^ user.name)
+                    slot=`selection
+                    variant=`secondary>
+                    <Checkbox.Content>
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                    </Checkbox.Content>
+                  </Checkbox>
+                </Table.Cell>
+                <Table.Cell class_="font-medium">
+                  <div class_="flex items-center gap-2">
+                    (fun () -> Jsx.string ("#" ^ string_of_int user.id))
+                    " "
+                    <Button
+                      is_icon_only=true
+                      aria_label=(fun () -> "Copy ID #" ^ string_of_int user.id)
+                      size=`sm
+                      variant=`ghost>
+                      <Gravity.Copy class_="size-4 text-muted" />
+                    </Button>
+                  </div>
+                </Table.Cell>
+                <Table.Cell>
+                  <div class_="flex items-center gap-3">
+                    <Avatar size=`sm>
+                      <Avatar.Image src=(fun () -> user.image_url) />
+                      <Avatar.Fallback>
+                        (fun () -> Jsx.string (initials user.name))
+                      </Avatar.Fallback>
+                    </Avatar>
+                    <div class_="flex flex-col">
+                      <span class_="text-xs">
+                        (fun () -> Jsx.string user.name)
+                      </span>
+                      <span class_="text-xs text-muted">
+                        (fun () -> Jsx.string user.email)
+                      </span>
+                    </div>
+                  </div>
+                </Table.Cell>
+                <Table.Cell class_="min-w-52">
+                  (fun () -> Jsx.string user.role)
+                </Table.Cell>
+                <Table.Cell class_="min-w-25">
+                  <Chip
+                    color=(fun () -> status_color user.status)
+                    size=`sm
+                    variant=`soft>
+                    (fun () -> Jsx.string (status_name user.status))
+                  </Chip>
+                </Table.Cell>
+                <Table.Cell>
+                  <div class_="flex items-center gap-1">
+                    <Button
+                      is_icon_only=true
+                      aria_label=(fun () -> "View " ^ user.name)
+                      size=`sm
+                      variant=`tertiary>
+                      <Gravity.Eye class_="size-4" />
+                    </Button>
+                    <Button
+                      is_icon_only=true
+                      aria_label=(fun () -> "Edit " ^ user.name)
+                      size=`sm
+                      variant=`tertiary>
+                      <Gravity.Pencil class_="size-4" />
+                    </Button>
+                    <Button
+                      is_icon_only=true
+                      aria_label=(fun () -> "Delete " ^ user.name)
+                      size=`sm
+                      variant=`danger_soft>
+                      <Gravity.Trash_bin class_="size-4" />
+                    </Button>
+                  </div>
+                </Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

@@ -37,18 +37,21 @@ Page Up and Page Down and typing move between rows, Right and Left along a
 row's cells, and Up and Down between a cell and the one above or below it.
 Its rows are selected as `selection_mode` says, by a press, Space or Enter,
 Shift and the platform's key extending and adding; a press that begins in a
-control inside a row is the control's.
+control inside a row is the control's. A column that `allows_sorting` is
+`aria-sort`, and pressed, or given Enter or Space, asks for its sort.
 
 <Example code={ExTableCode} title="headless_table.mlx"><ExTable.make client:visible /></Example>
 
 | Part | Element | What it adds |
 |---|---|---|
-| `Table.Root` | `<table role="grid">` | the list of rows, their selection: `selection_mode`, `selection_behavior`, `selected_keys`, `default_selected_keys`, `on_selection_change`, `disabled_keys`, `disallow_empty_selection` |
+| `Table.Root` | `<table role="grid">` | the list of rows, their selection: `selection_mode`, `selection_behavior`, `selected_keys`, `default_selected_keys`, `on_selection_change`, `disabled_keys`, `disallow_empty_selection`; its sort: `sort_descriptor`, `on_sort_change` |
 | `Table.Header` | `<thead>` and its `<tr>` | |
-| `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `is_row_header`, whose cells name their rows |
+| `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `id`, the column a sort names; `allows_sorting`, `aria-sort`; `is_row_header`, whose cells name their rows |
 | `Table.Body` | `<tbody>` | `empty_state`, a row across every column while it has none |
 | `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled` |
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index` |
 
-`Table.use_context ()` is the table a part is in: how its rows are selected,
-each row's state by its key, and selecting all or none.
+`Table.use_context ()` is the table a part is in: how it is sorted and its
+rows are selected, each row's state by its key, and selecting all or none.
+`Table.use_column_context ()` is the column a part is in: which way it is
+sorted.

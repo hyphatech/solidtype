@@ -382,6 +382,12 @@ let () =
                         <Table.Column data_testid="Table.Column">
                           "Name"
                         </Table.Column>
+                        <Table.Column allows_sorting=true>
+                          <Table.Sortable_column_header
+                            data_testid="Table.Sortable_column_header">
+                            "Role"
+                          </Table.Sortable_column_header>
+                        </Table.Column>
                       </Table.Header>
                       <Table.Body data_testid="Table.Body">
                         <Table.Row data_testid="Table.Row">
@@ -638,6 +644,8 @@ let () =
                    ("Table.Content", "[data-slot=table-content]");
                    ("Table.Header", "[data-slot=table-header]");
                    ("Table.Column", "[data-slot=table-column]");
+                   ( "Table.Sortable_column_header",
+                     "[data-slot=table-sortable-column-header]" );
                    ("Table.Body", "[data-slot=table-body]");
                    ("Table.Row", "[data-slot=table-row]");
                    ("Table.Cell", "[data-slot=table-cell]");

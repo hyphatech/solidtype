@@ -1,0 +1,164 @@
+(* HeroUI's Table with its columns sorted, beside the same table in React:
+   each column's and sortable header's state, the order of its rows, and the
+   sort each is told, as its columns are pressed by the pointer and the keys. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type user = { id : int; name : string; role : string }
+
+let users =
+  [|
+    { id = 1; name = "Kate Moore"; role = "CEO" };
+    { id = 2; name = "John Smith"; role = "CTO" };
+    { id = 3; name = "Sara Johnson"; role = "CMO" };
+  |]
+
+module Twin = struct
+  external render : ((string -> unit)[@mel.uncurry]) -> Dom.element = "render"
+  [@@mel.module "./twins/TableSorting.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableSorting.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableSorting.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "aria-sort";
+    "data-allows-sorting";
+    "data-direction";
+  ]
+
+let shown host =
+  Js.Array.from
+    (query_all host
+       "[data-slot=table-column], [data-slot^=table-sortable], \
+        [data-slot=table-row]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             match T.attribute e name with
+             | Some "" | None -> None
+             | Some v -> Some (name ^ "=" ^ v))
+           state)
+      ^
+      match T.attribute e "data-slot" with
+      | Some "table-row" -> " " ^ text e
+      | Some _ | None -> "")
+
+let column host i =
+  match Js.Array.from (query_all host "[data-slot=table-column]") with
+  | columns when Array.length columns > i -> columns.(i)
+  | _ -> Js.Exn.raiseError "no such column"
+
+(* The table at rest, then its name pressed, its role pressed twice, its
+   actions pressed, which sorts nothing, and its name sorted by Enter. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let seen = ref [ (shown host, !told) ] in
+  let after action =
+    let* () = step action in
+    seen := (shown host, !told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after (fun () -> T.click user (column host 0)) in
+  let* () = after (fun () -> T.click user (column host 1)) in
+  let* () = after (fun () -> T.click user (column host 1)) in
+  let* () = after (fun () -> T.click user (column host 2)) in
+  let* () =
+    after (fun () ->
+        focus (column host 0);
+        T.keyboard user "{Enter}")
+  in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let sorted ({ column; direction } : Table.sort_descriptor) =
+  let field u = if String.equal column "role" then u.role else u.name in
+  let order =
+    List.sort
+      (fun a b -> String.compare (field a) (field b))
+      (Array.to_list users)
+  in
+  Array.of_list
+    (match direction with `ascending -> order | `descending -> List.rev order)
+
+let () =
+  Jest.describe "Table, sorted" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is sorted by its columns, as React's is" (fun () ->
+          let told = ref "" in
+          let sort, set_sort =
+            S.create_signal { Table.column = "name"; direction = `ascending }
+          in
+          T.render (fun () ->
+              <Table>
+                <Table.Scroll_container>
+                  <Table.Content
+                    aria_label="Sortable table"
+                    sort_descriptor=(fun () -> S.get sort)
+                    on_sort_change=(fun (s : Table.sort_descriptor) ->
+                                     (told :=
+                                        s.column ^ ":"
+                                        ^
+                                        match s.direction with
+                                        | `ascending -> "ascending"
+                                        | `descending -> "descending");
+                                     S.set set_sort s)>
+                    <Table.Header>
+                      <Table.Column
+                        allows_sorting=true is_row_header=true id="name">
+                        <Table.Sortable_column_header>
+                          "Name"
+                        </Table.Sortable_column_header>
+                      </Table.Column>
+                      <Table.Column allows_sorting=true id="role">
+                        <Table.Sortable_column_header>
+                          "Role"
+                        </Table.Sortable_column_header>
+                      </Table.Column>
+                      <Table.Column>"Actions"</Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <For each=(fun () -> sorted (S.get sort))>
+                        (fun u _ ->
+                          <Table.Row id=(fun () -> string_of_int u.id)>
+                            <Table.Cell>
+                              (fun () -> Jsx.string u.name)
+                            </Table.Cell>
+                            <Table.Cell>
+                              (fun () -> Jsx.string u.role)
+                            </Table.Cell>
+                            <Table.Cell>"-"</Table.Cell>
+                          </Table.Row>)
+                      </For>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Scroll_container>
+              </Table>);
+          let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+          T.cleanup ();
+          let told' = ref "" in
+          let host = Twin.render (fun s -> told' := s) in
+          let* react = walk ~step:Twin.step host told' in
+          Twin.cleanup ();
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

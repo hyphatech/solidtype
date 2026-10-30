@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `Solidtype_headless.Table` and `Solidtype_heroui.Table`: sorted by their
+  columns, `sort_descriptor` and `on_sort_change` on the root,
+  `allows_sorting` and `id` on a column, pressed or given Enter or Space,
+  `aria-sort`; `Solidtype_headless.Table.use_column_context`, a column's
+  direction; and `Solidtype_heroui.Table.Sortable_column_header`, a column's
+  label and HeroUI's chevron for its direction, read from its column.
 - `solidtype-headless`, a package of its own: the components Kobalte lacks,
   made as Kobalte makes its own, of its hooks, with no style, a part taking
   every attribute its element does. `Solidtype_headless.Table` first: a grid

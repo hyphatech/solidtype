@@ -479,7 +479,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   skin over it
 - [x] Table's selection, by Kobalte's list, and a Checkbox of
   `slot=`selection`
-- [ ] Table's sorting, loading more, column resizing, expandable rows and
+- [x] Table's sorting, the headless column's, its HeroUI header reading
+  its column's direction
+- [ ] Table's loading more, column resizing, expandable rows and
   virtualization, a stage each
 - [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
   DatePicker, DateRangePicker

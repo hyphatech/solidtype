@@ -2,6 +2,15 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Headless = Solidtype_headless.Table
 
+type sort_descriptor = Headless.sort_descriptor = {
+  column : string;
+  direction : [ `ascending | `descending ];
+}
+
+let direction_name = function
+  | `ascending -> "ascending"
+  | `descending -> "descending"
+
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
@@ -36,8 +45,10 @@ module Content = struct
       ?(default_selected_keys : string array option)
       ?(on_selection_change : (string array -> unit) option)
       ?(disabled_keys : string array option)
-      ?(disallow_empty_selection : bool option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(disallow_empty_selection : bool option)
+      ?(sort_descriptor : sort_descriptor option)
+      ?(on_sort_change : (sort_descriptor -> unit) option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
       ?aria_label
@@ -50,6 +61,8 @@ module Content = struct
                             ignore (on_selection_change keys : unit option))
       ?disabled_keys
       ?disallow_empty_selection
+      ?sort_descriptor
+      on_sort_change=(fun sort -> ignore (on_sort_change sort : unit option))
       class_=(fun () -> after (Styles.Table.content (slots ())) (class_ ()))
       data_slot="table-content"
       props=(Props.others props)>
@@ -86,19 +99,89 @@ module Header = struct
 end
 
 module Column = struct
-  let%component make ?(is_row_header : bool option) ?(class_ : string option)
+  let%component make ?(id : string option) ?(allows_sorting : bool = false)
+      ?(is_row_header : bool option) ?(class_ : string option)
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Column" in
     let i = Interaction.create () in
     <Headless.Column
+      ?id
+      allows_sorting=(fun () -> allows_sorting ())
       ?is_row_header
       ref=(fun e -> Interaction.watch i e)
       class_=(fun () -> after (Styles.Table.column (slots ())) (class_ ()))
       data_slot="table-column"
+      data_allows_sorting=(fun () -> Jsx.flag (allows_sorting ()))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Column>
+end
+
+(* A column's label, and HeroUI's chevron for how it is sorted, up for
+   ascending, turned by HeroUI's styles for descending. *)
+module Sortable_column_header = struct
+  let%component make ?(sort_direction : [ `ascending | `descending ] option)
+      ?(show_indicator : bool = true) ?(indicator : Jsx.element option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_table "Table.Sortable_column_header" in
+    let column = Headless.use_column_context () in
+    let direction () =
+      match sort_direction () with
+      | Some d -> Some d
+      | None -> column.direction ()
+    in
+    let shown () = if show_indicator () then direction () else None in
+    let named () =
+      match direction () with
+      | Some d -> Jsx.data (direction_name d)
+      | None -> Jsx.flag false
+    in
+    <span
+      class_=(fun () ->
+               after
+                 (Styles.Table.sortable_column_header (slots ()))
+                 (class_ ()))
+      data_direction=(fun () -> named ())
+      data_slot="table-sortable-column-header"
+      props=(Props.others props)>
+      (fun () -> children ())
+      <Solidtype.Show.Some some=(fun () -> shown ())>
+        (fun _ ->
+          match S.untrack indicator with
+          | Some own ->
+              <span
+                class_=(fun () ->
+                         Styles.Table.sortable_column_indicator (slots ()))
+                data_direction=(fun () -> named ())
+                data_slot="table-sortable-column-indicator">
+                (fun () -> Jsx.element own)
+              </span>
+          | None ->
+              <svg
+                aria_hidden=true
+                class_=(fun () ->
+                         Styles.Table.sortable_column_indicator (slots ()))
+                fill="none"
+                height="16"
+                role=`presentation
+                view_box="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+                data_direction=(fun () -> named ())
+                data_slot="table-sortable-column-indicator">
+                <path
+                  clip_rule="evenodd"
+                  d="M13.03 10.53a.75.75 0 0 1-1.06 0L8 6.56l-3.97 3.97a.75.75 \
+                     0 0 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 \
+                     4.5a.75.75 0 0 1 0 1.06"
+                  fill="currentColor"
+                  fill_rule="evenodd"
+                />
+              </svg>)
+      </Solidtype.Show.Some>
+    </span>
 end
 
 module Body = struct
