@@ -34,7 +34,7 @@ const blocks = new Set(["menu", "popper", "dismissable-layer", "polymorphic"]);
 const entries = readdirSync(dist)
   .filter((d) => existsSync(`${dist}/${d}/index.d.ts`) && !blocks.has(d))
   .sort();
-const program = ts.createProgram(entries.map((d) => `${dist}/${d}/index.d.ts`), {
+const program = ts.createProgram([...entries.map((d) => `${dist}/${d}/index.d.ts`), `${dist}/index.d.ts`], {
   ...browser,
   jsx: ts.JsxEmit.Preserve,
   module: ts.ModuleKind.ESNext,
@@ -46,6 +46,9 @@ bind(root, checker, {
   name: "Kobalte",
   // toFormat throws converting HSL or HSB to hex without saying so.
   throwsUndocumented: (where) => where === "Color.toFormat",
+  // The props a create function is given, whose any is the caller's data:
+  // createListState's dataSource, and the getKey it is read by.
+  data: (symbol) => /^Create[A-Za-z]*Props$/.test(symbol.name),
 });
 
 const pascal = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
@@ -130,6 +133,23 @@ for (const entry of entries) {
   if (src.ml.length === 0) continue;
   body += `\nmodule ${component} = struct\n${src.ml.join("\n")}end\n`;
   bodyMli += `\nmodule ${component} : sig\n${src.mli.join("\n")}end\n`;
+}
+
+// The building blocks of Kobalte's lists, from its root, which a component
+// Kobalte lacks is made of: a list's state and selection, and the handlers
+// that make an element a list of selectable items.
+const selectionNames = ["createListState", "createSelectableCollection", "createSelectableItem", "createSelectableList", "createTypeSelect"];
+const rootSource = program.getSourceFile(`${dist}/index.d.ts`);
+const rootModule = rootSource && checker.getSymbolAtLocation(rootSource);
+if (rootModule) {
+  const exports = new Map(checker.getExportsOfModule(rootModule).map((s) => [s.name, s]));
+  const src = new Source();
+  for (const name of selectionNames) {
+    const sym = exports.get(name);
+    if (sym) functionBinding(src, real(sym), name, "@kobalte/core", `Selection.${name}`);
+  }
+  body += `\nmodule Selection = struct\n${src.ml.join("\n")}end\n`;
+  bodyMli += `\nmodule Selection : sig\n${src.mli.join("\n")}end\n`;
 }
 
 const { ml: typesText, mli: typesMli } = typesFiles(`(* The types Kobalte's components and functions name, each a module.

@@ -1,0 +1,119 @@
+(* Kobalte's list building blocks as a component made of them meets them: a
+   list's state over the caller's own data, its keys and text read by the
+   caller's functions, and the handlers that make a [<ul>] a list of
+   selectable [<li>]s, moved through by the keys and chosen by a press. *)
+
+module S = Solidtype.Solid
+module For = Solidtype.For
+module Jsx = Solidtype.Jsx
+module Selection = Solidtype_kobalte.Selection
+module Types = Solidtype_kobalte.Types
+module Either = Types.Either
+module List_props = Types.CreateListStateProps
+module List_state = Types.ListState
+module Manager = Types.SelectionManager
+module Selectable_list = Types.Selection_CreateSelectableList
+module Selectable_item = Types.Selection_CreateSelectableItem
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+type fruit = { id : string; name : string }
+
+let fruits =
+  [|
+    { id = "a"; name = "Apple" };
+    { id = "b"; name = "Banana" };
+    { id = "c"; name = "Cherry" };
+  |]
+
+let focused () = H.text H.focused
+
+(* A list of fruit, one chosen at a time, each choice told by its keys. *)
+let render ~told =
+  H.render (fun () ->
+      let state =
+        Selection.create_list_state
+          (List_props.make ~data_source:(Either.left fruits)
+             ~get_key:(Either.left (fun f -> f.id))
+             ~get_text_value:(Either.left (fun f -> f.name))
+             ~selection_mode:(Either.left `single)
+             ~on_selection_change:(fun keys -> told := Js.Set.toArray keys)
+             ())
+      in
+      (* The list's manager, as the hooks that take any manager take it. *)
+      let multiple =
+        S.create_memo (fun () ->
+            Manager.to_multiple_selection_manager
+              (S.get (List_state.selection_manager state)))
+      in
+      let list_ref, set_list_ref = S.create_signal None in
+      let list =
+        Selection.create_selectable_list
+          (Types.CreateSelectableListProps.make
+             ~collection:(List_state.collection state)
+             ~selection_manager:(Either.right multiple) ())
+          list_ref ()
+      in
+      <ul
+        role=`listbox
+        ref=(fun e -> S.set set_list_ref (Some e))
+        tabindex=(fun () ->
+                   match S.get (Selectable_list.tab_index list) with
+                   | Some i -> Js.Float.toString i
+                   | None -> "-1")
+        on_key_down=(fun e -> Selectable_list.on_key_down list e)
+        on_mouse_down=(fun e -> Selectable_list.on_mouse_down list e)
+        on_focus_in=(fun e -> Selectable_list.on_focus_in list e)
+        on_focus_out=(fun e -> Selectable_list.on_focus_out list e)>
+        <For each=(fun () -> fruits)>
+          (fun fruit _ ->
+            let item_ref, set_item_ref = S.create_signal None in
+            let item =
+              Selection.create_selectable_item
+                (Types.CreateSelectableItemProps.make
+                   ~selection_manager:(Either.right multiple)
+                   ~key:(Either.left fruit.id) ())
+                item_ref
+            in
+            <li
+              role=`option
+              ref=(fun e -> S.set set_item_ref (Some e))
+              aria_selected=(fun () -> Selectable_item.is_selected item ())
+              tabindex=(fun () ->
+                         match S.get (Selectable_item.tab_index item) with
+                         | Some i -> Js.Float.toString i
+                         | None -> "-1")
+              on_pointer_down=(fun e -> Selectable_item.on_pointer_down item e)
+              on_pointer_up=(fun e -> Selectable_item.on_pointer_up item e)
+              on_click=(fun e -> Selectable_item.on_click item e)
+              on_key_down=(fun e -> Selectable_item.on_key_down item e)
+              on_mouse_down=(fun e -> Selectable_item.on_mouse_down item e)
+              on_focus=(fun e -> Selectable_item.on_focus item e)>
+              (fun () -> Jsx.string fruit.name)
+            </li>)
+        </For>
+      </ul>)
+
+let () =
+  Jest.describe "Kobalte's list building blocks" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "move focus through a list by the keys" (fun () ->
+          let told = ref [||] in
+          render ~told;
+          let user = H.setup () in
+          let* () = H.tab user in
+          let first = focused () in
+          let* () = H.keyboard user "{ArrowDown}" in
+          let second = focused () in
+          let* () = H.keyboard user "{End}" in
+          Js.Promise.resolve
+            E.(
+              expect [| first; second; focused () |]
+              |> toEqual [| "Apple"; "Banana"; "Cherry" |]));
+      Jest.testPromise "choose an item by a press, and tell its key" (fun () ->
+          let told = ref [||] in
+          render ~told;
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "Banana") in
+          Js.Promise.resolve E.(expect !told |> toEqual [| "b" |])))

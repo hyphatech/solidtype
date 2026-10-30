@@ -99,6 +99,15 @@ type t_toast_context_value
 type t_toggle_button_root_state
 type t_toggle_group_context_value
 type t_tooltip_context_value
+type 'data t_create_list_state_props
+type t_create_selectable_collection_props
+type t_selection_create_selectable_collection
+type t_create_selectable_item_props
+type t_selection_create_selectable_item
+type 'data t_create_selectable_list_props
+type t_selection_create_selectable_list
+type t_create_type_select_props
+type t_selection_create_type_select
 type t_checkbox_data_set
 type t_collapsible_data_set
 type t_color_channel_range
@@ -106,7 +115,6 @@ type t_color_get_color_space_axes
 type t_color_axes
 type t_color_area_state
 type t_color_area_context_value_on_drag
-type t_color_field_context_value_on_blur
 type ('t, 'e, 'e_handler) t_bound_event_handler
 type t_context_id
 type ('p, 'c) t_flow_props
@@ -114,7 +122,6 @@ type t_context_provider
 type t_color_wheel_state
 type t_color_wheel_context_value_on_drag
 type t_combobox_data_set
-type t_combobox_context_value_on_input_key_down
 type t_context_menu_context_value_set_anchor_rect
 type t_hover_card_data_set
 type t_date_time_format_part
@@ -123,7 +130,6 @@ type t_selection_manager
 type t_menubar_data_set
 type t_meter_data_set
 type t_navigation_menu_data_set
-type t_number_field_context_value_on_input
 type t_popover_data_set
 type t_progress_data_set
 type t_select_data_set
@@ -133,12 +139,13 @@ type t_collection_item_with_ref
 type t_slider_context_value_on_slide_move
 type t_switch_data_set
 type t_single_select_list_state
-type t_text_field_context_value_on_input
 type t_swipe_event_detail
 type t_toast_component_props
 type t_show_toast_options
 type ('t, 'u) t_toast_promise_component_props
 type t_tooltip_data_set
+type t_multiple_selection_manager
+type t_selection_create_type_select_type_select_handlers
 type t_color_area_state_get_thumb_position
 type t_color_area_state_channels
 type t_color_area_state_get_thumb_percent
@@ -348,8 +355,8 @@ end
 
 module ColorFieldContextValue : sig
   type t = t_color_field_context_value
-  external on_blur : t -> (t_color_field_context_value_on_blur -> unit, (Dom.htmlInputElement, Dom.focusEvent, t_color_field_context_value_on_blur -> unit) t_bound_event_handler) either = "onBlur" [@@mel.get]
-  external make : on_blur:((t_color_field_context_value_on_blur -> unit, (Dom.htmlInputElement, Dom.focusEvent, t_color_field_context_value_on_blur -> unit) t_bound_event_handler) either [@mel.as "onBlur"]) -> unit -> t = "" [@@mel.obj]
+  external on_blur : t -> (Dom.focusEvent -> unit, (Dom.htmlInputElement, Dom.focusEvent, Dom.focusEvent -> unit) t_bound_event_handler) either = "onBlur" [@@mel.get]
+  external make : on_blur:((Dom.focusEvent -> unit, (Dom.htmlInputElement, Dom.focusEvent, Dom.focusEvent -> unit) t_bound_event_handler) either [@mel.as "onBlur"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module Context : sig
@@ -600,10 +607,10 @@ module ComboboxContextValue : sig
   external placeholder : t -> Solidtype.Jsx.element Solidtype.Solid.accessor = "placeholder" [@@mel.get]
   external render_item : t -> _ t_collection_node -> Solidtype.Jsx.element = "renderItem" [@@mel.send]
   external render_section : t -> _ t_collection_node -> Solidtype.Jsx.element = "renderSection" [@@mel.send]
-  external on_input_key_down : t -> (t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either = "onInputKeyDown" [@@mel.get]
+  external on_input_key_down : t -> (Dom.keyboardEvent -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, Dom.keyboardEvent -> unit) t_bound_event_handler) either = "onInputKeyDown" [@@mel.get]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   val register_listbox_id : t -> string -> (unit -> unit)
-  val make : dataset:t_combobox_data_set Solidtype.Solid.accessor -> is_open:bool Solidtype.Solid.accessor -> is_disabled:bool Solidtype.Solid.accessor -> is_multiple:bool Solidtype.Solid.accessor -> is_virtualized:bool Solidtype.Solid.accessor -> is_modal:bool Solidtype.Solid.accessor -> prevent_scroll:bool Solidtype.Solid.accessor -> is_input_focused:bool Solidtype.Solid.accessor -> allows_empty_collection:bool Solidtype.Solid.accessor -> should_focus_wrap:bool Solidtype.Solid.accessor -> remove_on_backspace:bool Solidtype.Solid.accessor -> content_present:bool Solidtype.Solid.accessor -> auto_focus:([ `first | `last ], bool) either Solidtype.Solid.accessor -> active_descendant:string option Solidtype.Solid.accessor -> input_value:string option Solidtype.Solid.accessor -> trigger_mode:[ `focus | `input | `manual ] Solidtype.Solid.accessor -> control_ref:Dom.htmlElement option Solidtype.Solid.accessor -> input_ref:Dom.htmlInputElement option Solidtype.Solid.accessor -> trigger_ref:Dom.htmlElement option Solidtype.Solid.accessor -> content_ref:Dom.htmlElement option Solidtype.Solid.accessor -> listbox_id:string option Solidtype.Solid.accessor -> trigger_aria_label:string option Solidtype.Solid.accessor -> listbox_aria_label:string option Solidtype.Solid.accessor -> list_state:t_list_state Solidtype.Solid.accessor -> keyboard_delegate:t_keyboard_delegate Solidtype.Solid.accessor -> reset_input_value:(string Js.Set.t -> unit) -> set_is_input_focused:(bool -> unit) -> set_input_value:(string -> unit) -> set_control_ref:(Dom.htmlElement -> unit) -> set_input_ref:(Dom.htmlInputElement -> unit) -> set_trigger_ref:(Dom.htmlElement -> unit) -> set_content_ref:(Dom.htmlElement -> unit) -> set_listbox_ref:(Dom.htmlElement -> unit) -> open_:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> close:(unit -> unit) -> toggle:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> placeholder:Solidtype.Jsx.element Solidtype.Solid.accessor -> render_item:(_ t_collection_node -> Solidtype.Jsx.element) -> render_section:(_ t_collection_node -> Solidtype.Jsx.element) -> on_input_key_down:(t_combobox_context_value_on_input_key_down -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, t_combobox_context_value_on_input_key_down -> unit) t_bound_event_handler) either -> generate_id:(string -> string) -> register_listbox_id:(string -> (unit -> unit)) -> unit -> t
+  val make : dataset:t_combobox_data_set Solidtype.Solid.accessor -> is_open:bool Solidtype.Solid.accessor -> is_disabled:bool Solidtype.Solid.accessor -> is_multiple:bool Solidtype.Solid.accessor -> is_virtualized:bool Solidtype.Solid.accessor -> is_modal:bool Solidtype.Solid.accessor -> prevent_scroll:bool Solidtype.Solid.accessor -> is_input_focused:bool Solidtype.Solid.accessor -> allows_empty_collection:bool Solidtype.Solid.accessor -> should_focus_wrap:bool Solidtype.Solid.accessor -> remove_on_backspace:bool Solidtype.Solid.accessor -> content_present:bool Solidtype.Solid.accessor -> auto_focus:([ `first | `last ], bool) either Solidtype.Solid.accessor -> active_descendant:string option Solidtype.Solid.accessor -> input_value:string option Solidtype.Solid.accessor -> trigger_mode:[ `focus | `input | `manual ] Solidtype.Solid.accessor -> control_ref:Dom.htmlElement option Solidtype.Solid.accessor -> input_ref:Dom.htmlInputElement option Solidtype.Solid.accessor -> trigger_ref:Dom.htmlElement option Solidtype.Solid.accessor -> content_ref:Dom.htmlElement option Solidtype.Solid.accessor -> listbox_id:string option Solidtype.Solid.accessor -> trigger_aria_label:string option Solidtype.Solid.accessor -> listbox_aria_label:string option Solidtype.Solid.accessor -> list_state:t_list_state Solidtype.Solid.accessor -> keyboard_delegate:t_keyboard_delegate Solidtype.Solid.accessor -> reset_input_value:(string Js.Set.t -> unit) -> set_is_input_focused:(bool -> unit) -> set_input_value:(string -> unit) -> set_control_ref:(Dom.htmlElement -> unit) -> set_input_ref:(Dom.htmlInputElement -> unit) -> set_trigger_ref:(Dom.htmlElement -> unit) -> set_content_ref:(Dom.htmlElement -> unit) -> set_listbox_ref:(Dom.htmlElement -> unit) -> open_:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> close:(unit -> unit) -> toggle:(([ `first | `last ], bool) either -> [ `focus | `input | `manual ] option -> unit) -> placeholder:Solidtype.Jsx.element Solidtype.Solid.accessor -> render_item:(_ t_collection_node -> Solidtype.Jsx.element) -> render_section:(_ t_collection_node -> Solidtype.Jsx.element) -> on_input_key_down:(Dom.keyboardEvent -> unit, (Dom.htmlInputElement, Dom.keyboardEvent, Dom.keyboardEvent -> unit) t_bound_event_handler) either -> generate_id:(string -> string) -> register_listbox_id:(string -> (unit -> unit)) -> unit -> t
 end
 
 module ContextMenuContextValue : sig
@@ -942,7 +949,7 @@ module NumberFieldContextValue : sig
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
   external format_number : t -> float -> string = "formatNumber" [@@mel.send]
   external format : t -> unit -> unit = "format" [@@mel.send]
-  external on_input : t -> (t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either = "onInput" [@@mel.get]
+  external on_input : t -> (Dom.inputEvent -> unit, (Dom.htmlInputElement, Dom.inputEvent, Dom.inputEvent -> unit) t_bound_event_handler) either = "onInput" [@@mel.get]
   external text_value : t -> string option Solidtype.Solid.accessor = "textValue" [@@mel.get]
   external min_value : t -> float Solidtype.Solid.accessor = "minValue" [@@mel.get]
   external max_value : t -> float Solidtype.Solid.accessor = "maxValue" [@@mel.get]
@@ -955,7 +962,7 @@ module NumberFieldContextValue : sig
   external hidden_input_ref : t -> Dom.htmlInputElement option Solidtype.Solid.accessor = "hiddenInputRef" [@@mel.get]
   external set_hidden_input_ref : t -> Dom.htmlInputElement -> unit = "setHiddenInputRef" [@@mel.send]
   external vary_value : t -> float -> unit = "varyValue" [@@mel.send]
-  external make : value:((string, float) either option Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:(((string, float) either -> unit) [@mel.as "setValue"]) -> raw_value:(float Solidtype.Solid.accessor [@mel.as "rawValue"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> format_number:((float -> string) [@mel.as "formatNumber"]) -> format:((unit -> unit) [@mel.as "format"]) -> on_input:((t_number_field_context_value_on_input -> unit, (Dom.htmlInputElement, Dom.inputEvent, t_number_field_context_value_on_input -> unit) t_bound_event_handler) either [@mel.as "onInput"]) -> text_value:(string option Solidtype.Solid.accessor [@mel.as "textValue"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> step:(float Solidtype.Solid.accessor [@mel.as "step"]) -> large_step:(float Solidtype.Solid.accessor [@mel.as "largeStep"]) -> change_on_wheel:(bool Solidtype.Solid.accessor [@mel.as "changeOnWheel"]) -> translations:(t_color_channel_field_root_translations option Solidtype.Solid.accessor [@mel.as "translations"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> hidden_input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "hiddenInputRef"]) -> set_hidden_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setHiddenInputRef"]) -> vary_value:((float -> unit) [@mel.as "varyValue"]) -> unit -> t = "" [@@mel.obj]
+  external make : value:((string, float) either option Solidtype.Solid.accessor [@mel.as "value"]) -> set_value:(((string, float) either -> unit) [@mel.as "setValue"]) -> raw_value:(float Solidtype.Solid.accessor [@mel.as "rawValue"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> format_number:((float -> string) [@mel.as "formatNumber"]) -> format:((unit -> unit) [@mel.as "format"]) -> on_input:((Dom.inputEvent -> unit, (Dom.htmlInputElement, Dom.inputEvent, Dom.inputEvent -> unit) t_bound_event_handler) either [@mel.as "onInput"]) -> text_value:(string option Solidtype.Solid.accessor [@mel.as "textValue"]) -> min_value:(float Solidtype.Solid.accessor [@mel.as "minValue"]) -> max_value:(float Solidtype.Solid.accessor [@mel.as "maxValue"]) -> step:(float Solidtype.Solid.accessor [@mel.as "step"]) -> large_step:(float Solidtype.Solid.accessor [@mel.as "largeStep"]) -> change_on_wheel:(bool Solidtype.Solid.accessor [@mel.as "changeOnWheel"]) -> translations:(t_color_channel_field_root_translations option Solidtype.Solid.accessor [@mel.as "translations"]) -> input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "inputRef"]) -> set_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setInputRef"]) -> hidden_input_ref:(Dom.htmlInputElement option Solidtype.Solid.accessor [@mel.as "hiddenInputRef"]) -> set_hidden_input_ref:((Dom.htmlInputElement -> unit) [@mel.as "setHiddenInputRef"]) -> vary_value:((float -> unit) [@mel.as "varyValue"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module Pagination_Root_ItemComponent : sig
@@ -1194,8 +1201,8 @@ module TextFieldContextValue : sig
   type t = t_text_field_context_value
   external value : t -> string option Solidtype.Solid.accessor = "value" [@@mel.get]
   external generate_id : t -> string -> string = "generateId" [@@mel.send]
-  external on_input : t -> (t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either = "onInput" [@@mel.get]
-  external make : value:(string option Solidtype.Solid.accessor [@mel.as "value"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> on_input:((t_text_field_context_value_on_input -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, t_text_field_context_value_on_input -> unit) t_bound_event_handler) either [@mel.as "onInput"]) -> unit -> t = "" [@@mel.obj]
+  external on_input : t -> (Dom.inputEvent -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, Dom.inputEvent -> unit) t_bound_event_handler) either = "onInput" [@@mel.get]
+  external make : value:(string option Solidtype.Solid.accessor [@mel.as "value"]) -> generate_id:((string -> string) [@mel.as "generateId"]) -> on_input:((Dom.inputEvent -> unit, ((Dom.htmlInputElement, Dom.htmlTextAreaElement) either, Dom.inputEvent, Dom.inputEvent -> unit) t_bound_event_handler) either [@mel.as "onInput"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module Time : sig
@@ -1359,6 +1366,181 @@ module TooltipContextValue : sig
   val make : dataset:t_tooltip_data_set Solidtype.Solid.accessor -> is_open:bool Solidtype.Solid.accessor -> is_disabled:bool Solidtype.Solid.accessor -> trigger_on_focus_only:bool Solidtype.Solid.accessor -> content_id:string option Solidtype.Solid.accessor -> content_present:bool Solidtype.Solid.accessor -> open_tooltip:(bool option -> unit) -> hide_tooltip:(bool option -> unit) -> cancel_opening:(unit -> unit) -> generate_id:(string -> string) -> register_content_id:(string -> (unit -> unit)) -> is_target_on_tooltip:(Dom.node Js.Nullable.t -> bool) -> set_trigger_ref:(Dom.htmlElement -> unit) -> set_content_ref:(Dom.htmlElement -> unit) -> unit -> t
 end
 
+module CreateListStateProps : sig
+  type 'data t = 'data t_create_list_state_props
+  (** Filter function to generate a filtered list of nodes. *)
+  external filter : 'data t -> ('data t_collection_node array -> 'data t_collection_node array) option = "filter" [@@mel.get]
+  (** The source data to be managed by the collection. *)
+  external data_source : 'data t -> ('data array, 'data array Solidtype.Solid.accessor) either = "dataSource" [@@mel.get]
+  (** Property name or getter function to use as the key of an item. *)
+  external get_key : 'data t -> ('data -> string, ('data -> string) option Solidtype.Solid.accessor) either option = "getKey" [@@mel.get]
+  (** Property name or getter function to use as the text value of an item for typeahead purpose. *)
+  external get_text_value : 'data t -> ('data -> string, ('data -> string) option Solidtype.Solid.accessor) either option = "getTextValue" [@@mel.get]
+  (** Property name or getter function to use as the disabled flag of an item. *)
+  external get_disabled : 'data t -> ('data -> bool, ('data -> bool) option Solidtype.Solid.accessor) either option = "getDisabled" [@@mel.get]
+  (** Property name or getter function that refers to the children items of a section. *)
+  external get_section_children : 'data t -> ('data -> 'data array, ('data -> 'data array) option Solidtype.Solid.accessor) either option = "getSectionChildren" [@@mel.get]
+  (** How multiple selection should behave in the collection. *)
+  external selection_behavior : 'data t -> ([ `toggle | `replace ], [ `toggle | `replace ] option Solidtype.Solid.accessor) either option = "selectionBehavior" [@@mel.get]
+  (** Whether onSelectionChange should fire even if the new set of keys is the same as the last. *)
+  external allow_duplicate_selection_events : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "allowDuplicateSelectionEvents" [@@mel.get]
+  (** The type of selection that is allowed in the collection. *)
+  external selection_mode : 'data t -> ([ `none | `single | `multiple ], [ `none | `single | `multiple ] option Solidtype.Solid.accessor) either option = "selectionMode" [@@mel.get]
+  (** Whether the collection allows empty selection. *)
+  external disallow_empty_selection : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "disallowEmptySelection" [@@mel.get]
+  (** The currently selected keys in the collection (controlled). *)
+  external selected_keys : 'data t -> (string array, string array option Solidtype.Solid.accessor) either option = "selectedKeys" [@@mel.get]
+  (** The initial selected keys in the collection (uncontrolled). *)
+  external default_selected_keys : 'data t -> (string array, string array option Solidtype.Solid.accessor) either option = "defaultSelectedKeys" [@@mel.get]
+  (** Handler that is called when the selection changes. *)
+  external on_selection_change : 'data t -> (string Js.Set.t -> unit) option = "onSelectionChange" [@@mel.get]
+  external make : ?filter:(('data t_collection_node array -> 'data t_collection_node array) [@mel.as "filter"]) -> data_source:(('data array, 'data array Solidtype.Solid.accessor) either [@mel.as "dataSource"]) -> ?get_key:(('data -> string, ('data -> string) option Solidtype.Solid.accessor) either [@mel.as "getKey"]) -> ?get_text_value:(('data -> string, ('data -> string) option Solidtype.Solid.accessor) either [@mel.as "getTextValue"]) -> ?get_disabled:(('data -> bool, ('data -> bool) option Solidtype.Solid.accessor) either [@mel.as "getDisabled"]) -> ?get_section_children:(('data -> 'data array, ('data -> 'data array) option Solidtype.Solid.accessor) either [@mel.as "getSectionChildren"]) -> ?selection_behavior:(([ `toggle | `replace ], [ `toggle | `replace ] option Solidtype.Solid.accessor) either [@mel.as "selectionBehavior"]) -> ?allow_duplicate_selection_events:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "allowDuplicateSelectionEvents"]) -> ?selection_mode:(([ `none | `single | `multiple ], [ `none | `single | `multiple ] option Solidtype.Solid.accessor) either [@mel.as "selectionMode"]) -> ?disallow_empty_selection:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disallowEmptySelection"]) -> ?selected_keys:((string array, string array option Solidtype.Solid.accessor) either [@mel.as "selectedKeys"]) -> ?default_selected_keys:((string array, string array option Solidtype.Solid.accessor) either [@mel.as "defaultSelectedKeys"]) -> ?on_selection_change:((string Js.Set.t -> unit) [@mel.as "onSelectionChange"]) -> unit -> 'data t = "" [@@mel.obj]
+end
+
+module CreateSelectableCollectionProps : sig
+  type t = t_create_selectable_collection_props
+  (** An interface for reading and updating multiple selection state. *)
+  external selection_manager : t -> (t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either = "selectionManager" [@@mel.get]
+  (** A delegate object that implements behavior for keyboard focus movement. *)
+  external keyboard_delegate : t -> (t_keyboard_delegate, t_keyboard_delegate Solidtype.Solid.accessor) either = "keyboardDelegate" [@@mel.get]
+  (** Whether the collection or one of its items should be automatically focused upon render. *)
+  external auto_focus : t -> ([ `first | `last ], (bool, ([ `first | `last ], bool) either option Solidtype.Solid.accessor) either) either option = "autoFocus" [@@mel.get]
+  (** Whether the autofocus should run on next tick. *)
+  external defer_auto_focus : t -> (bool, bool option Solidtype.Solid.accessor) either option = "deferAutoFocus" [@@mel.get]
+  (** Whether focus should wrap around when the end/start is reached. *)
+  external should_focus_wrap : t -> (bool, bool option Solidtype.Solid.accessor) either option = "shouldFocusWrap" [@@mel.get]
+  (** Whether the collection allows empty selection. *)
+  external disallow_empty_selection : t -> (bool, bool option Solidtype.Solid.accessor) either option = "disallowEmptySelection" [@@mel.get]
+  (** Whether the collection allows the user to select all items via keyboard shortcut. *)
+  external disallow_select_all : t -> (bool, bool option Solidtype.Solid.accessor) either option = "disallowSelectAll" [@@mel.get]
+  (** Whether selection should occur automatically on focus. *)
+  external select_on_focus : t -> (bool, bool option Solidtype.Solid.accessor) either option = "selectOnFocus" [@@mel.get]
+  (** Whether typeahead is disabled. *)
+  external disallow_type_ahead : t -> (bool, bool option Solidtype.Solid.accessor) either option = "disallowTypeAhead" [@@mel.get]
+  (** Whether the collection items should use virtual focus instead of being focused directly. *)
+  external should_use_virtual_focus : t -> (bool, bool option Solidtype.Solid.accessor) either option = "shouldUseVirtualFocus" [@@mel.get]
+  (** Whether navigation through tab key is enabled. *)
+  external allows_tab_navigation : t -> (bool, bool option Solidtype.Solid.accessor) either option = "allowsTabNavigation" [@@mel.get]
+  (** Whether the collection items are contained in a virtual scroller. *)
+  external is_virtualized : t -> (bool, bool option Solidtype.Solid.accessor) either option = "isVirtualized" [@@mel.get]
+  (** When virtualized, the Virtualizer function used to scroll to the item of the key provided. *)
+  external scroll_to_key : t -> (string -> unit) option = "scrollToKey" [@@mel.get]
+  (** The orientation of the selectable collection interactions. *)
+  external orientation : t -> ([ `horizontal | `vertical ], [ `horizontal | `vertical ] option Solidtype.Solid.accessor) either option = "orientation" [@@mel.get]
+  external make : selection_manager:((t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either [@mel.as "selectionManager"]) -> keyboard_delegate:((t_keyboard_delegate, t_keyboard_delegate Solidtype.Solid.accessor) either [@mel.as "keyboardDelegate"]) -> ?auto_focus:(([ `first | `last ], (bool, ([ `first | `last ], bool) either option Solidtype.Solid.accessor) either) either [@mel.as "autoFocus"]) -> ?defer_auto_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "deferAutoFocus"]) -> ?should_focus_wrap:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "shouldFocusWrap"]) -> ?disallow_empty_selection:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disallowEmptySelection"]) -> ?disallow_select_all:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disallowSelectAll"]) -> ?select_on_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "selectOnFocus"]) -> ?disallow_type_ahead:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disallowTypeAhead"]) -> ?should_use_virtual_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "shouldUseVirtualFocus"]) -> ?allows_tab_navigation:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "allowsTabNavigation"]) -> ?is_virtualized:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "isVirtualized"]) -> ?scroll_to_key:((string -> unit) [@mel.as "scrollToKey"]) -> ?orientation:(([ `horizontal | `vertical ], [ `horizontal | `vertical ] option Solidtype.Solid.accessor) either [@mel.as "orientation"]) -> unit -> t = "" [@@mel.obj]
+end
+
+module Selection_CreateSelectableCollection : sig
+  type t = t_selection_create_selectable_collection
+  external tab_index : t -> float option Solidtype.Solid.accessor = "tabIndex" [@@mel.get]
+  external on_key_down : t -> Dom.keyboardEvent -> unit = "onKeyDown" [@@mel.send]
+  external on_mouse_down : t -> Dom.mouseEvent -> unit = "onMouseDown" [@@mel.send]
+  external on_focus_in : t -> Dom.focusEvent -> unit = "onFocusIn" [@@mel.send]
+  external on_focus_out : t -> Dom.focusEvent -> unit = "onFocusOut" [@@mel.send]
+  external make : tab_index:(float option Solidtype.Solid.accessor [@mel.as "tabIndex"]) -> on_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onKeyDown"]) -> on_mouse_down:((Dom.mouseEvent -> unit) [@mel.as "onMouseDown"]) -> on_focus_in:((Dom.focusEvent -> unit) [@mel.as "onFocusIn"]) -> on_focus_out:((Dom.focusEvent -> unit) [@mel.as "onFocusOut"]) -> unit -> t = "" [@@mel.obj]
+end
+
+module CreateSelectableItemProps : sig
+  type t = t_create_selectable_item_props
+  (** An interface for reading and updating multiple selection state. *)
+  external selection_manager : t -> (t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either = "selectionManager" [@@mel.get]
+  (** A unique key for the item. *)
+  external key : t -> (string, string Solidtype.Solid.accessor) either = "key" [@@mel.get]
+  (** By default, selection occurs on pointer down. This can be strange if selecting an
+      item causes the UI to disappear immediately (e.g. menus). *)
+  external should_select_on_press_up : t -> (bool, bool option Solidtype.Solid.accessor) either option = "shouldSelectOnPressUp" [@@mel.get]
+  (** Whether the option should use virtual focus instead of being focused directly. *)
+  external should_use_virtual_focus : t -> (bool, bool option Solidtype.Solid.accessor) either option = "shouldUseVirtualFocus" [@@mel.get]
+  (** Whether selection requires the pointer/mouse down and up events to occur on the same target or triggers selection on
+      the target of the pointer/mouse up event. *)
+  external allows_different_press_origin : t -> (bool, bool option Solidtype.Solid.accessor) either option = "allowsDifferentPressOrigin" [@@mel.get]
+  (** Whether the option is contained in a virtual scroller. *)
+  external virtualized : t -> (bool, bool option Solidtype.Solid.accessor) either option = "virtualized" [@@mel.get]
+  (** Whether the item is disabled. *)
+  external disabled : t -> (bool, bool option Solidtype.Solid.accessor) either option = "disabled" [@@mel.get]
+  (** Function to focus the item. *)
+  external focus : t -> (unit -> unit) option = "focus" [@@mel.get]
+  external make : selection_manager:((t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either [@mel.as "selectionManager"]) -> key:((string, string Solidtype.Solid.accessor) either [@mel.as "key"]) -> ?should_select_on_press_up:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "shouldSelectOnPressUp"]) -> ?should_use_virtual_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "shouldUseVirtualFocus"]) -> ?allows_different_press_origin:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "allowsDifferentPressOrigin"]) -> ?virtualized:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "virtualized"]) -> ?disabled:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disabled"]) -> ?focus:((unit -> unit) [@mel.as "focus"]) -> unit -> t = "" [@@mel.obj]
+end
+
+module Selection_CreateSelectableItem : sig
+  type t = t_selection_create_selectable_item
+  external is_selected : t -> unit -> bool = "isSelected" [@@mel.send]
+  external is_disabled : t -> unit -> bool = "isDisabled" [@@mel.send]
+  external allows_selection : t -> unit -> bool = "allowsSelection" [@@mel.send]
+  external tab_index : t -> float option Solidtype.Solid.accessor = "tabIndex" [@@mel.get]
+  external data_key : t -> string option Solidtype.Solid.accessor = "dataKey" [@@mel.get]
+  external on_pointer_down : t -> Dom.pointerEvent -> unit = "onPointerDown" [@@mel.send]
+  external on_pointer_up : t -> Dom.pointerEvent -> unit = "onPointerUp" [@@mel.send]
+  external on_click : t -> Dom.mouseEvent -> unit = "onClick" [@@mel.send]
+  external on_key_down : t -> Dom.keyboardEvent -> unit = "onKeyDown" [@@mel.send]
+  external on_mouse_down : t -> Dom.mouseEvent -> unit = "onMouseDown" [@@mel.send]
+  external on_focus : t -> Dom.focusEvent -> unit = "onFocus" [@@mel.send]
+  external make : is_selected:((unit -> bool) [@mel.as "isSelected"]) -> is_disabled:((unit -> bool) [@mel.as "isDisabled"]) -> allows_selection:((unit -> bool) [@mel.as "allowsSelection"]) -> tab_index:(float option Solidtype.Solid.accessor [@mel.as "tabIndex"]) -> data_key:(string option Solidtype.Solid.accessor [@mel.as "dataKey"]) -> on_pointer_down:((Dom.pointerEvent -> unit) [@mel.as "onPointerDown"]) -> on_pointer_up:((Dom.pointerEvent -> unit) [@mel.as "onPointerUp"]) -> on_click:((Dom.mouseEvent -> unit) [@mel.as "onClick"]) -> on_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onKeyDown"]) -> on_mouse_down:((Dom.mouseEvent -> unit) [@mel.as "onMouseDown"]) -> on_focus:((Dom.focusEvent -> unit) [@mel.as "onFocus"]) -> unit -> t = "" [@@mel.obj]
+end
+
+module CreateSelectableListProps : sig
+  type 'data t = 'data t_create_selectable_list_props
+  (** State of the collection. *)
+  external collection : 'data t -> 'data t_collection_node t_collection Solidtype.Solid.accessor = "collection" [@@mel.get]
+  (** An interface for reading and updating multiple selection state. *)
+  external selection_manager : 'data t -> (t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either = "selectionManager" [@@mel.get]
+  (** A delegate that returns collection item keys with respect to visual layout. *)
+  external keyboard_delegate : 'data t -> (t_keyboard_delegate, t_keyboard_delegate option Solidtype.Solid.accessor) either option = "keyboardDelegate" [@@mel.get]
+  (** Whether the collection or one of its items should be automatically focused upon render. *)
+  external auto_focus : 'data t -> ([ `first | `last ], (bool, ([ `first | `last ], bool) either option Solidtype.Solid.accessor) either) either option = "autoFocus" [@@mel.get]
+  (** Whether the autofocus should run on next tick. *)
+  external defer_auto_focus : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "deferAutoFocus" [@@mel.get]
+  (** Whether focus should wrap around when the end/start is reached. *)
+  external should_focus_wrap : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "shouldFocusWrap" [@@mel.get]
+  (** Whether the collection allows empty selection. *)
+  external disallow_empty_selection : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "disallowEmptySelection" [@@mel.get]
+  (** Whether selection should occur automatically on focus. *)
+  external select_on_focus : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "selectOnFocus" [@@mel.get]
+  (** Whether typeahead is disabled. *)
+  external disallow_type_ahead : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "disallowTypeAhead" [@@mel.get]
+  (** Whether the collection items should use virtual focus instead of being focused directly. *)
+  external should_use_virtual_focus : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "shouldUseVirtualFocus" [@@mel.get]
+  (** Whether navigation through tab key is enabled. *)
+  external allows_tab_navigation : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "allowsTabNavigation" [@@mel.get]
+  (** Whether the option is contained in a virtual scroller. *)
+  external is_virtualized : 'data t -> (bool, bool option Solidtype.Solid.accessor) either option = "isVirtualized" [@@mel.get]
+  (** When virtualized, the Virtualizer function used to scroll to the item of the key provided. *)
+  external scroll_to_key : 'data t -> (string -> unit, (string -> unit) option Solidtype.Solid.accessor) either option = "scrollToKey" [@@mel.get]
+  (** The orientation of the selectable list. *)
+  external orientation : 'data t -> ([ `horizontal | `vertical ], [ `horizontal | `vertical ] option Solidtype.Solid.accessor) either option = "orientation" [@@mel.get]
+  external make : collection:('data t_collection_node t_collection Solidtype.Solid.accessor [@mel.as "collection"]) -> selection_manager:((t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either [@mel.as "selectionManager"]) -> ?keyboard_delegate:((t_keyboard_delegate, t_keyboard_delegate option Solidtype.Solid.accessor) either [@mel.as "keyboardDelegate"]) -> ?auto_focus:(([ `first | `last ], (bool, ([ `first | `last ], bool) either option Solidtype.Solid.accessor) either) either [@mel.as "autoFocus"]) -> ?defer_auto_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "deferAutoFocus"]) -> ?should_focus_wrap:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "shouldFocusWrap"]) -> ?disallow_empty_selection:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disallowEmptySelection"]) -> ?select_on_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "selectOnFocus"]) -> ?disallow_type_ahead:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "disallowTypeAhead"]) -> ?should_use_virtual_focus:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "shouldUseVirtualFocus"]) -> ?allows_tab_navigation:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "allowsTabNavigation"]) -> ?is_virtualized:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "isVirtualized"]) -> ?scroll_to_key:((string -> unit, (string -> unit) option Solidtype.Solid.accessor) either [@mel.as "scrollToKey"]) -> ?orientation:(([ `horizontal | `vertical ], [ `horizontal | `vertical ] option Solidtype.Solid.accessor) either [@mel.as "orientation"]) -> unit -> 'data t = "" [@@mel.obj]
+end
+
+module Selection_CreateSelectableList : sig
+  type t = t_selection_create_selectable_list
+  external tab_index : t -> float option Solidtype.Solid.accessor = "tabIndex" [@@mel.get]
+  external on_key_down : t -> Dom.keyboardEvent -> unit = "onKeyDown" [@@mel.send]
+  external on_mouse_down : t -> Dom.mouseEvent -> unit = "onMouseDown" [@@mel.send]
+  external on_focus_in : t -> Dom.focusEvent -> unit = "onFocusIn" [@@mel.send]
+  external on_focus_out : t -> Dom.focusEvent -> unit = "onFocusOut" [@@mel.send]
+  external make : tab_index:(float option Solidtype.Solid.accessor [@mel.as "tabIndex"]) -> on_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onKeyDown"]) -> on_mouse_down:((Dom.mouseEvent -> unit) [@mel.as "onMouseDown"]) -> on_focus_in:((Dom.focusEvent -> unit) [@mel.as "onFocusIn"]) -> on_focus_out:((Dom.focusEvent -> unit) [@mel.as "onFocusOut"]) -> unit -> t = "" [@@mel.obj]
+end
+
+module CreateTypeSelectProps : sig
+  type t = t_create_type_select_props
+  (** Whether the type to select should be disabled. *)
+  external is_disabled : t -> (bool, bool option Solidtype.Solid.accessor) either option = "isDisabled" [@@mel.get]
+  (** A delegate that returns collection item keys with respect to visual layout. *)
+  external keyboard_delegate : t -> (t_keyboard_delegate, t_keyboard_delegate Solidtype.Solid.accessor) either = "keyboardDelegate" [@@mel.get]
+  (** An interface for reading and updating multiple selection state. *)
+  external selection_manager : t -> (t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either = "selectionManager" [@@mel.get]
+  (** Called when an item is focused by typing. *)
+  external on_type_select : t -> (string -> unit) option = "onTypeSelect" [@@mel.get]
+  external make : ?is_disabled:((bool, bool option Solidtype.Solid.accessor) either [@mel.as "isDisabled"]) -> keyboard_delegate:((t_keyboard_delegate, t_keyboard_delegate Solidtype.Solid.accessor) either [@mel.as "keyboardDelegate"]) -> selection_manager:((t_multiple_selection_manager, t_multiple_selection_manager Solidtype.Solid.accessor) either [@mel.as "selectionManager"]) -> ?on_type_select:((string -> unit) [@mel.as "onTypeSelect"]) -> unit -> t = "" [@@mel.obj]
+end
+
+module Selection_CreateTypeSelect : sig
+  type t = t_selection_create_type_select
+  external type_select_handlers : t -> t_selection_create_type_select_type_select_handlers = "typeSelectHandlers" [@@mel.get]
+  external make : type_select_handlers:(t_selection_create_type_select_type_select_handlers [@mel.as "typeSelectHandlers"]) -> unit -> t = "" [@@mel.obj]
+end
+
 module CheckboxDataSet : sig
   type t = t_checkbox_data_set
 end
@@ -1434,19 +1616,6 @@ module ColorAreaContextValue_OnDrag : sig
   external make : delta_x:(float [@mel.as "deltaX"]) -> delta_y:(float [@mel.as "deltaY"]) -> unit -> t = "" [@@mel.obj]
 end
 
-module ColorFieldContextValue_OnBlur : sig
-  type t = t_color_field_context_value_on_blur
-  (** The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/currentTarget) *)
-  external current_target : t -> Dom.eventTarget = "currentTarget" [@@mel.get]
-  (** The read-only **`target`** property of the dispatched.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
-  external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external to_focus_event : t -> Dom.focusEvent = "%identity"
-end
-
 module BoundEventHandler : sig
   type ('t, 'e, 'e_handler) t = ('t, 'e, 'e_handler) t_bound_event_handler
 end
@@ -1506,19 +1675,6 @@ module ComboboxDataSet : sig
   type t = t_combobox_data_set
 end
 
-module ComboboxContextValue_OnInputKeyDown : sig
-  type t = t_combobox_context_value_on_input_key_down
-  (** The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/currentTarget) *)
-  external current_target : t -> Dom.eventTarget = "currentTarget" [@@mel.get]
-  (** The read-only **`target`** property of the dispatched.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
-  external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external to_keyboard_event : t -> Dom.keyboardEvent = "%identity"
-end
-
 module ContextMenuContextValue_SetAnchorRect : sig
   type t = t_context_menu_context_value_set_anchor_rect
   external x : t -> float = "x" [@@mel.get]
@@ -1571,6 +1727,7 @@ module SelectionManager : sig
   external is_selection_equal : t -> string Js.Set.t -> bool = "isSelectionEqual" [@@mel.send]
   external can_select_item : t -> string -> bool = "canSelectItem" [@@mel.send]
   external is_disabled : t -> string -> bool = "isDisabled" [@@mel.send]
+  external to_multiple_selection_manager : t -> t_multiple_selection_manager = "%identity"
   external make : _ t_collection_node t_collection Solidtype.Solid.accessor -> t_multiple_selection_state -> t = "SelectionManager" [@@mel.new] [@@mel.module "@kobalte/core"]
 end
 
@@ -1584,19 +1741,6 @@ end
 
 module NavigationMenuDataSet : sig
   type t = t_navigation_menu_data_set
-end
-
-module NumberFieldContextValue_OnInput : sig
-  type t = t_number_field_context_value_on_input
-  (** The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/currentTarget) *)
-  external current_target : t -> Dom.eventTarget = "currentTarget" [@@mel.get]
-  (** The read-only **`target`** property of the dispatched.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
-  external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external to_input_event : t -> Dom.inputEvent = "%identity"
 end
 
 module PopoverDataSet : sig
@@ -1682,19 +1826,6 @@ module SingleSelectListState : sig
   external selection_manager : t -> t_selection_manager Solidtype.Solid.accessor = "selectionManager" [@@mel.get]
 end
 
-module TextFieldContextValue_OnInput : sig
-  type t = t_text_field_context_value_on_input
-  (** The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/currentTarget) *)
-  external current_target : t -> Dom.eventTarget = "currentTarget" [@@mel.get]
-  (** The read-only **`target`** property of the dispatched.
-      
-      \[MDN Reference\](https://developer.mozilla.org/docs/Web/API/Event/target) *)
-  external target : t -> Dom.eventTarget = "target" [@@mel.get]
-  external to_input_event : t -> Dom.inputEvent = "%identity"
-end
-
 module SwipeEvent_Detail : sig
   type t = t_swipe_event_detail
   external original_event : t -> Dom.pointerEvent = "originalEvent" [@@mel.get]
@@ -1731,6 +1862,58 @@ end
 
 module TooltipDataSet : sig
   type t = t_tooltip_data_set
+end
+
+module MultipleSelectionManager : sig
+  type t = t_multiple_selection_manager
+  (** The type of selection that is allowed in the collection. *)
+  external selection_mode : t -> [ `none | `single | `multiple ] Solidtype.Solid.accessor = "selectionMode" [@@mel.get]
+  (** The selection behavior for the collection. *)
+  external selection_behavior : t -> [ `toggle | `replace ] Solidtype.Solid.accessor = "selectionBehavior" [@@mel.get]
+  (** Whether the collection allows empty selection. *)
+  external disallow_empty_selection : t -> bool option Solidtype.Solid.accessor = "disallowEmptySelection" [@@mel.get]
+  (** The currently selected keys in the collection. *)
+  external selected_keys : t -> string Js.Set.t Solidtype.Solid.accessor = "selectedKeys" [@@mel.get]
+  (** Whether the selection is empty. *)
+  external is_empty : t -> bool Solidtype.Solid.accessor = "isEmpty" [@@mel.get]
+  (** Whether all items in the collection are selected. *)
+  external is_select_all : t -> bool Solidtype.Solid.accessor = "isSelectAll" [@@mel.get]
+  (** The first selected key in the collection. *)
+  external first_selected_key : t -> string option Solidtype.Solid.accessor = "firstSelectedKey" [@@mel.get]
+  (** The last selected key in the collection. *)
+  external last_selected_key : t -> string option Solidtype.Solid.accessor = "lastSelectedKey" [@@mel.get]
+  (** Returns whether a key is selected. *)
+  external is_selected : t -> string -> bool = "isSelected" [@@mel.send]
+  external is_selection_equal : t -> string Js.Set.t -> bool = "isSelectionEqual" [@@mel.send]
+  external extend_selection : t -> string -> unit = "extendSelection" [@@mel.send]
+  (** Toggles whether the given key is selected. *)
+  external toggle_selection : t -> string -> unit = "toggleSelection" [@@mel.send]
+  (** Replaces the selection with only the given key. *)
+  external replace_selection : t -> string -> unit = "replaceSelection" [@@mel.send]
+  external set_selected_keys : t -> string array -> unit = "setSelectedKeys" [@@mel.send]
+  external select_all : t -> unit -> unit = "selectAll" [@@mel.send]
+  external clear_selection : t -> unit -> unit = "clearSelection" [@@mel.send]
+  external toggle_select_all : t -> unit -> unit = "toggleSelectAll" [@@mel.send]
+  external select : t -> string -> ?e:Dom.pointerEvent -> unit -> unit = "select" [@@mel.send]
+  (** Returns whether the given key can be selected. *)
+  external can_select_item : t -> string -> bool = "canSelectItem" [@@mel.send]
+  (** Returns whether the given key is non-interactive,
+      i.e. both selection and actions are disabled. *)
+  external is_disabled : t -> string -> bool = "isDisabled" [@@mel.send]
+  (** Sets the selection behavior for the collection. *)
+  external set_selection_behavior : t -> [ `toggle | `replace ] -> unit = "setSelectionBehavior" [@@mel.send]
+  (** Whether the collection is currently focused. *)
+  external is_focused : t -> bool Solidtype.Solid.accessor = "isFocused" [@@mel.get]
+  (** The current focused key in the collection. *)
+  external focused_key : t -> string option Solidtype.Solid.accessor = "focusedKey" [@@mel.get]
+  external set_focused : t -> bool -> unit = "setFocused" [@@mel.send]
+  external set_focused_key : t -> ?key:string -> unit -> unit = "setFocusedKey" [@@mel.send]
+end
+
+module Selection_CreateTypeSelect_TypeSelectHandlers : sig
+  type t = t_selection_create_type_select_type_select_handlers
+  external on_key_down : t -> Dom.keyboardEvent -> unit = "onKeyDown" [@@mel.send]
+  external make : on_key_down:((Dom.keyboardEvent -> unit) [@mel.as "onKeyDown"]) -> unit -> t = "" [@@mel.obj]
 end
 
 module ColorAreaState_GetThumbPosition : sig

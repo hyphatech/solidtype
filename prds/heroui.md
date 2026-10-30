@@ -459,10 +459,12 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [ ] ColorSlider, ColorField, ColorSwatchPicker, ColorPicker
 
 ### Group 7: built from Kobalte's primitives
-- [ ] Kobalte's primitives bound: `createSelectableList`,
-  `createSelectableItem`, `createListState`, `createFocusScope`, the
-  popper, the dismissable layer; a date's formatting is
-  `@internationalized/date`'s `DateFormatter`, bound already
+- [x] Kobalte's list hooks bound, as `Selection`: `createListState`,
+  `createSelectableList`, `createSelectableItem`,
+  `createSelectableCollection`, `createTypeSelect`
+- [ ] `createFocusScope`, the popper, the dismissable layer, as a component
+  needs them; a date's formatting is `@internationalized/date`'s
+  `DateFormatter`, bound already
 - [ ] TagGroup, Toolbar, InputOTP, Table, DateField, Calendar,
   RangeCalendar, DatePicker, DateRangePicker
 

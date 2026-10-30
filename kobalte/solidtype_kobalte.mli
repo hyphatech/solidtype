@@ -6134,3 +6134,26 @@ module Tooltip : sig
   external use_tooltip_context : unit -> Types.TooltipContextValue.t = "useTooltipContext"
   [@@mel.module "@kobalte/core/tooltip"]
 end
+
+module Selection : sig
+  (** Provides state management for list-like components.
+      Handles building a collection of items from props, and manages multiple selection state. *)
+  external create_list_state : _ Types.CreateListStateProps.t -> Types.ListState.t = "createListState"
+  [@@mel.module "@kobalte/core"]
+
+  (** Handles interactions with selectable collections. *)
+  external create_selectable_collection : Types.CreateSelectableCollectionProps.t -> 't Dom.element_like option Solidtype.Solid.accessor -> ?scroll_ref:'u Dom.element_like option Solidtype.Solid.accessor -> unit -> Types.Selection_CreateSelectableCollection.t = "createSelectableCollection"
+  [@@mel.module "@kobalte/core"]
+
+  (** Handles interactions with an item in a selectable collection. *)
+  external create_selectable_item : Types.CreateSelectableItemProps.t -> 't Dom.element_like option Solidtype.Solid.accessor -> Types.Selection_CreateSelectableItem.t = "createSelectableItem"
+  [@@mel.module "@kobalte/core"]
+
+  (** Handles interactions with a selectable list. *)
+  external create_selectable_list : _ Types.CreateSelectableListProps.t -> 't Dom.element_like option Solidtype.Solid.accessor -> ?scroll_ref:'u Dom.element_like option Solidtype.Solid.accessor -> unit -> Types.Selection_CreateSelectableList.t = "createSelectableList"
+  [@@mel.module "@kobalte/core"]
+
+  (** Handles typeahead interactions with collections. *)
+  external create_type_select : Types.CreateTypeSelectProps.t -> Types.Selection_CreateTypeSelect.t = "createTypeSelect"
+  [@@mel.module "@kobalte/core"]
+end

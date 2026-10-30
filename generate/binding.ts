@@ -31,7 +31,14 @@ export type Library = {
   // those interfaces, is the kinds of the classes TypeScript takes for it, an
   // open set, so a value of any of them is passed as it is.
   kinds?: { classes: ts.Symbol[]; structural: ts.Symbol[] };
+  // Whether an object type's members typed any are the caller's own data,
+  // given in and handed back only to the caller's functions: they are one
+  // type variable of the type, 'data, never read back out as another.
+  data?: (symbol: ts.Symbol) => boolean;
 };
+
+// The type variable the caller's data is, in a type whose any is its data.
+const DATA = "Data";
 
 // What a run binds: one library, read by one checker, from the repository at
 // root. A generator binds one library and then exits, so it is set once.
@@ -139,6 +146,8 @@ function namedModule(symbol: ts.Symbol, type: ts.Type): Named {
       decl && (ts.isInterfaceDeclaration(decl) || ts.isClassDeclaration(decl) || ts.isTypeAliasDeclaration(decl))
         ? (decl.typeParameters ?? []).map((p) => p.name.text)
         : [];
+    const hasAny = (t: ts.Type) => /\bany\b/.test(checker.typeToString(t));
+    if (library.data?.(symbol) && checker.getPropertiesOfType(type).some((p) => hasAny(checker.getTypeOfSymbol(p)))) params.push(DATA);
     n = { module: freshModule(symbol.name), symbol, type, params, conversions: [] };
     types.set(symbol, n);
     queue.push(n);
@@ -176,18 +185,29 @@ function opaque(name: string): string {
 
 const isElement = (t: ts.Type) => t.aliasSymbol?.name === "Element" && moduleOf(t.aliasSymbol) === "solid-js";
 
+// A type parameter bound by a DOM element, the element a hook is given, is
+// any element, as solidtype's own functions of an element take one: Html
+// types an element Melange has no type for, a <ul>, as Dom.element.
+function elementBound(t: ts.Type, vars: Vars): Type | null {
+  const c = checker.getBaseConstraintOfType(t);
+  const symbol = c?.getSymbol();
+  const dom = symbol && isDomLib(symbol) ? domType(symbol.name) : null;
+  return dom ? apply("Dom.element_like", typeVar(t.symbol?.name ?? "t", vars)) : null;
+}
+
 // [absent] drops undefined, which an optional prop's absence already says;
 // anywhere else -- a callback's argument, a result -- it is an option.
 // The OCaml type of a TypeScript one, by AGENTS.md's "Kobalte's binding is
 // generated from its declarations"; null when none of its mappings covers it.
 function map(t: ts.Type, vars: Vars, where: string, absent = false): Type | null {
-  if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
+  if (t.flags & ts.TypeFlags.TypeParameter) return elementBound(t, vars) ?? typeVar(t.symbol?.name ?? "t", vars);
   const hand = portedType(t, vars, where, absent);
   if (hand) return hand;
   if (isElement(t)) return jsxElement;
   // Exclude<Option, null> and its kind: the type it narrows.
   if (t.flags & ts.TypeFlags.Conditional) return map((t as ts.ConditionalType).checkType, vars, where);
   if (t.flags & ts.TypeFlags.Substitution) return map((t as ts.SubstitutionType).baseType, vars, where);
+  if (t.flags & ts.TypeFlags.Any && vars.has(DATA)) return vars.get(DATA)!;
   if (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) return null;
   if (t.flags & ts.TypeFlags.Void) return unit;
   if (t.flags & ts.TypeFlags.Undefined) return unit;
@@ -275,6 +295,11 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): Type | null {
   if (members.some(isString)) {
     const others = members.filter((m) => !isString(m) && !m.isStringLiteral());
     if (others.length === 0) return tname("string");
+    // A string beside a function of the caller's data names a field of it,
+    // which OCaml cannot check: the function is taken alone, as an option
+    // accessor's key is.
+    const ofData = others.filter((m) => m.getCallSignatures().some((c) => c.getParameters().some((q) => checker.getTypeOfSymbol(q).flags & ts.TypeFlags.Any)));
+    if (vars.has(DATA) && ofData.length > 0) return mapUnion(others, vars, where);
   }
   const booleans = members.filter((m) => m.flags & ts.TypeFlags.BooleanLike);
   if (booleans.length === members.length) return tname("bool");
@@ -328,7 +353,7 @@ function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
     return map(t, vars, where);
   const hand = portedType(t, vars, where, false);
   if (hand) return hand;
-  if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
+  if (t.flags & ts.TypeFlags.TypeParameter) return elementBound(t, vars) ?? typeVar(t.symbol?.name ?? "t", vars);
   if (t.flags & ts.TypeFlags.Index) return tname("string");
   if (checker.isTupleType(t)) {
     const items = checker.getTypeArguments(t as ts.TypeReference).map((a) => map(a, vars, where));
@@ -338,6 +363,7 @@ function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
   if (t.flags & ts.TypeFlags.BooleanLike) return tname("bool");
   if (t.flags & ts.TypeFlags.NumberLike) return number(where);
   if (t.flags & (ts.TypeFlags.Void | ts.TypeFlags.Undefined)) return unit;
+  if (t.flags & ts.TypeFlags.Any && vars.has(DATA)) return vars.get(DATA)!;
   if (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never | ts.TypeFlags.Null)) return null;
   const libraryAlias = t.aliasSymbol && isDomLib(t.aliasSymbol);
   if (libraryAlias && t.aliasSymbol!.name === "NonNullable" && t.aliasTypeArguments?.[0])
@@ -394,6 +420,18 @@ function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
     return mapFunction(calls[0]!, vars, where);
   }
   const anonymous = !symbol || symbol.name === "__type" || symbol.name === "__object";
+  // Solid's handler argument, an event with its current target and target
+  // named, is the event, as an element's handler in Html takes it.
+  if (t.isIntersection()) {
+    const event = t.types.find((m) => {
+      const e = m.getSymbol();
+      return e !== undefined && isDomLib(e) && /Event$/.test(e.name);
+    });
+    const targets = t.types.filter((m) => m !== event);
+    if (event && targets.every((m) => checker.getPropertiesOfType(m).every((p) => p.name === "currentTarget" || p.name === "target"))) {
+      return mapOne(event, vars, where);
+    }
+  }
   if (t.isIntersection()) {
     // Its own members are the module's; a standard member is a conversion.
     const standard = t.types.filter((m) => m.getSymbol() && isDomLib(m.getSymbol()!));
@@ -448,7 +486,9 @@ function mapFunction(sig: ts.Signature, vars: Vars, where: string, labelled = fa
     return optional ? { label: value(snake(q.name)), optional: true, type: m } : { type: m };
   });
   if (params.some((p) => p === null)) return null;
-  const result = map(sig.getReturnType(), vars, where);
+  // What a function JavaScript calls gives back as any, JavaScript ignores.
+  const returned = sig.getReturnType();
+  const result = !labelled && returned.flags & ts.TypeFlags.Any ? unit : map(returned, vars, where);
   if (!result) return null;
   const args = params.length === 0 ? [{ type: unit }] : (params as Param[]);
   if (labelled && ps.some(leftOut)) args.push({ type: unit });
@@ -835,6 +875,21 @@ while (queue.length > 0) {
     // as the stdlib names a conversion, to_html_div_element.
     for (const d of n.conversions) {
       src.both(`    external to_${snake(d.slice(4))} : ${t} -> ${d} = "%identity"`);
+    }
+    // A class is each interface it declares it implements, which a function
+    // that takes the interface takes it as: SelectionManager a
+    // MultipleSelectionManager.
+    const classDecl = isClass ? n.symbol!.declarations?.find(ts.isClassDeclaration) : undefined;
+    for (const clause of classDecl?.heritageClauses ?? []) {
+      if (clause.token !== ts.SyntaxKind.ImplementsKeyword) continue;
+      for (const e of clause.types) {
+        // The library's own interfaces; a standard one is Melange's.
+        const implemented = checker.getTypeAtLocation(e);
+        const symbol = implemented.getSymbol();
+        if (!symbol || isDomLib(symbol)) continue;
+        const it = map(implemented, vars, n.module);
+        if (it?.kind === "ref") src.both(`    external to_${snake(it.module)} : ${t} -> ${showIn(it)} = "%identity"`);
+      }
     }
     if (!isClass && !library && methods === 0 && fields.length > 0 && n.conversions.length === 0) {
       const label = ([k, ft, opt]: [string, Type, boolean]) =>

@@ -395,12 +395,23 @@ break.
   wrapper per function it holds and a constructor where it has neither
   methods nor a class, and two declarations of one name that TypeScript
   takes for each other, Intl's `NumberFormatOptions` and
-  `@internationalized/number`'s, are one module. A member typed `any` is not bound, nor one whose
-  value would be a type its caller chooses, an unchecked cast, and nor are
-  Kobalte's building blocks, menu, popper, dismissable-layer and
-  polymorphic. Why: Kobalte's parts are hundreds, and a binding by hand
-  would be a second copy of its types. Test: `make lint` runs the
-  generator with `--check`.
+  `@internationalized/number`'s, are one module; a class is each interface
+  it declares it implements, by a `to_` conversion; Solid's handler
+  argument, an event with its targets named, is the event; and a type
+  parameter bound by an element, the element a hook is given, is any
+  element, `'t Dom.element_like`. A member typed `any` is not bound, nor one
+  whose value would be a type its caller chooses, an unchecked cast, but
+  for the caller's own data: in the props a `create` function takes, `any`
+  is the props' type variable `'data`, given in and handed only to the
+  caller's functions, and a string beside such a function, a field's name,
+  is left for the function; and what a callback gives back as `any`, which
+  JavaScript ignores, is `unit`. Kobalte's building blocks, menu, popper,
+  dismissable-layer and polymorphic, are not bound as components; the
+  hooks its lists are made of are, from its root, as `Selection`. Why:
+  Kobalte's parts are hundreds, and a binding by hand would be a second
+  copy of its types; a component Kobalte lacks is made of its hooks. Test:
+  `make lint` runs the generator with `--check`, and
+  `test/kobalte/selection_test.mlx` makes a list of them.
 - **HeroUI's variant functions are generated from @heroui/styles'
   declarations**, by `generate/heroui.ts` into `heroui/styles.ml` and its
   `.mli`, on the same core as Kobalte's: a module per function,

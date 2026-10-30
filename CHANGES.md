@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- `Solidtype_kobalte.Selection`: the hooks Kobalte's lists are made of,
+  `create_list_state`, `create_selectable_list`, `create_selectable_item`,
+  `create_selectable_collection` and `create_type_select`, for a component
+  Kobalte lacks. A list's state is over the caller's own data, its props'
+  type variable `'data`, read by the caller's `get_key` and
+  `get_text_value`; a hook takes any element; and `SelectionManager` is a
+  `MultipleSelectionManager` by `to_multiple_selection_manager`.
+- Breaking: `Solidtype_kobalte.Types`' context handlers that took Solid's
+  handler argument -- `ColorFieldContextValue.on_blur`, and the `on_input`
+  and `on_input_key_down` of the combo box's, number field's and text
+  field's -- take the plain event, `Dom.focusEvent`, `Dom.inputEvent` or
+  `Dom.keyboardEvent`, as an element's handler does; the modules of the
+  handler arguments are gone.
 - `Solidtype_heroui.Color_area`: HeroUI's ColorArea on Kobalte's, two
   channels of a colour across and up, in any colour space, its thumb dragged
   or stepped by the keys, with dots over it or disabled; disabled in the
