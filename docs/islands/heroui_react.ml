@@ -639,3 +639,10 @@ external color_area_props :
 external color_area : Dom.htmlDivElement -> color_area_props -> unit
   = "colorArea"
 [@@mel.module "./react/heroui.tsx"]
+
+type table_props
+
+external table_props : variant:string -> unit -> table_props = "" [@@mel.obj]
+
+external table : Dom.htmlDivElement -> table_props -> unit = "table"
+[@@mel.module "./react/heroui.tsx"]

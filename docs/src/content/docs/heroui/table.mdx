@@ -1,0 +1,178 @@
+---
+title: Table
+description: Rows and columns of data, moved through by the keys.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/table_usage.jsx";
+import ExUsageCode from "@islands/table_usage.mlx?raw";
+import * as ExSecondary from "@islands/table_secondary.jsx";
+import ExSecondaryCode from "@islands/table_secondary.mlx?raw";
+import * as ExPagination from "@islands/table_pagination.jsx";
+import ExPaginationCode from "@islands/table_pagination.mlx?raw";
+import * as ExEmptyState from "@islands/table_empty_state.jsx";
+import ExEmptyStateCode from "@islands/table_empty_state.mlx?raw";
+import * as ExTailwind from "@islands/table_tailwind.jsx";
+import ExTailwindCode from "@islands/table_tailwind.mlx?raw";
+import * as Demo from "@islands/table_demo.jsx";
+
+`Solidtype_heroui.Table` is HeroUI's Table, its classes HeroUI's own
+`tableVariants`, around a `<table role="grid">` moved through by the keys as
+React Aria's grid is. Kobalte has no table: its rows are a list of Kobalte's,
+made of the hooks Kobalte's own lists are, `Solidtype_kobalte.Selection`,
+which focus a row and move between rows by the arrow keys, Home and End, Page
+Up and Page Down and typing; the port moves along a row's cells and between a
+cell and the cell above or below it.
+
+Rows given by data are Solid's `For` inside `Table.Body`, as HeroUI's are its
+body's `items` and a render function; columns and cells given by data are a
+`For` too, as HeroUI's are its header's `columns` and `Table.Collection`.
+
+Selection, sorting, loading more as the table scrolls, resizing columns,
+expandable rows and virtualization are being ported, each in a stage of its
+own; their examples are added with them.
+
+## Usage
+
+HeroUI's examples.
+
+<Example code={ExUsageCode} title="table_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Table>
+  <Table.Scroll_container>
+    <Table.Content aria_label="Example table">
+      <Table.Header>
+        <Table.Column>"Name"</Table.Column>
+        <Table.Column>"Role"</Table.Column>
+      </Table.Header>
+      <Table.Body>
+        <Table.Row>
+          <Table.Cell>"Kate Moore"</Table.Cell>
+          <Table.Cell>"CEO"</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table.Content>
+  </Table.Scroll_container>
+  <Table.Footer />
+</Table>
+```
+
+## Examples
+
+### Secondary Variant
+
+<Example code={ExSecondaryCode} title="table_secondary.mlx"><ExSecondary.make client:visible /></Example>
+
+### Pagination
+
+`Table.Footer` holds a `Pagination` below the table.
+
+<Example code={ExPaginationCode} title="table_pagination.mlx"><ExPagination.make client:visible /></Example>
+
+### Empty State
+
+`render_empty_state` on `Table.Body` is drawn while it has no row, across
+every column.
+
+<Example code={ExEmptyStateCode} title="table_empty_state.mlx"><ExEmptyState.make client:visible /></Example>
+
+### TanStack Table
+
+HeroUI's TanStack Table example drives the table with `@tanstack/react-table`,
+React's; a Solid application has `@tanstack/solid-table`, which a table of
+`For`s takes as it is.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on each part.
+
+<Example code={ExTailwindCode} title="table_tailwind.mlx"><ExTailwind.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.table-root`, `.table-root--primary`, `.table-root--secondary`
+- `.table__scroll-container`, `.table__content`, `.table__header`,
+  `.table__column`, `.table__body`, `.table__row`, `.table__cell`,
+  `.table__footer`
+
+### Interactive States
+
+- a row: `[data-hovered="true"]`, `[data-focus-visible="true"]`
+- a column and a cell: `[data-focus-visible="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### Table
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+### Table.ScrollContainer, Table.Footer
+
+Each takes `class_`, added after HeroUI's class, and its `children`.
+
+### Table.Content
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `aria-labelledby` | `aria_labelledby` | `string` | | What names it |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.Header
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `columns` | — | | | Its columns given by data are a `For` |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.Column
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isRowHeader` | `is_row_header` | `bool` | `false` | Whether its cells name their rows |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.Body
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `items` | — | | | Its rows given by data are a `For` |
+| `renderEmptyState` | `render_empty_state` | `unit -> Jsx.element` | | Drawn while it has no row |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.Row
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `id` | `id` | `string` | one of its own | Its key |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.Cell
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+## Beside React
+
+Original HeroUI documentation: [Table](https://heroui.com/en/docs/react/components/table).
+
+The same HeroUI Table twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two tables: a marked
+row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

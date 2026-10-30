@@ -1,0 +1,164 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Pagination = Solidtype_heroui.Pagination
+module Table = Solidtype_heroui.Table
+
+type user = {
+  id : int;
+  name : string;
+  role : string;
+  status : string;
+  email : string;
+}
+
+type column = { field : user -> string; name : string; row_header : bool }
+
+let columns =
+  [|
+    { field = (fun u -> u.name); name = "Name"; row_header = true };
+    { field = (fun u -> u.role); name = "Role"; row_header = false };
+    { field = (fun u -> u.status); name = "Status"; row_header = false };
+    { field = (fun u -> u.email); name = "Email"; row_header = false };
+  |]
+
+let users =
+  [|
+    {
+      email = "kate@acme.com";
+      id = 1;
+      name = "Kate Moore";
+      role = "CEO";
+      status = "Active";
+    };
+    {
+      email = "john@acme.com";
+      id = 2;
+      name = "John Smith";
+      role = "CTO";
+      status = "Active";
+    };
+    {
+      email = "sara@acme.com";
+      id = 3;
+      name = "Sara Johnson";
+      role = "CMO";
+      status = "On Leave";
+    };
+    {
+      email = "michael@acme.com";
+      id = 4;
+      name = "Michael Brown";
+      role = "CFO";
+      status = "Active";
+    };
+    {
+      email = "emily@acme.com";
+      id = 5;
+      name = "Emily Davis";
+      role = "Product Manager";
+      status = "Inactive";
+    };
+    {
+      email = "davis@acme.com";
+      id = 6;
+      name = "Davis Wilson";
+      role = "Lead Designer";
+      status = "Active";
+    };
+    {
+      email = "olivia@acme.com";
+      id = 7;
+      name = "Olivia Martinez";
+      role = "Frontend Engineer";
+      status = "Active";
+    };
+    {
+      email = "james@acme.com";
+      id = 8;
+      name = "James Taylor";
+      role = "Backend Engineer";
+      status = "Active";
+    };
+  |]
+
+let rows_per_page = 4
+let total_pages = (Array.length users + rows_per_page - 1) / rows_per_page
+let pages = Array.init total_pages (fun i -> i + 1)
+
+let make () =
+  let page, set_page = S.create_signal 1 in
+  let shown () =
+    let start = (S.get page - 1) * rows_per_page in
+    Array.sub users start (Int.min rows_per_page (Array.length users - start))
+  in
+  let first () = ((S.get page - 1) * rows_per_page) + 1 in
+  let last () = Int.min (S.get page * rows_per_page) (Array.length users) in
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content aria_label="Table with pagination" class_="min-w-[600px]">
+        <Table.Header>
+          <For each=(fun () -> columns)>
+            (fun column _ ->
+              <Table.Column is_row_header=(fun () -> column.row_header)>
+                (fun () -> Jsx.string column.name)
+              </Table.Column>)
+          </For>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> shown ())>
+            (fun user _ ->
+              <Table.Row>
+                <For each=(fun () -> columns)>
+                  (fun column _ ->
+                    <Table.Cell>
+                      (fun () -> Jsx.string (column.field user))
+                    </Table.Cell>)
+                </For>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+    <Table.Footer>
+      <Pagination size=`sm>
+        <Pagination.Summary>
+          (fun () -> Jsx.int (first ()))
+          " to "
+          (fun () -> Jsx.int (last ()))
+          " of "
+          (fun () -> Jsx.int (Array.length users))
+          " results"
+        </Pagination.Summary>
+        <Pagination.Content>
+          <Pagination.Item>
+            <Pagination.Previous
+              is_disabled=(fun () -> S.get page = 1)
+              on_press=(fun () ->
+                         S.update set_page (fun p -> Int.max 1 (p - 1)))>
+              <Pagination.Previous_icon /> "Prev"
+            </Pagination.Previous>
+          </Pagination.Item>
+          <For each=(fun () -> pages)>
+            (fun p _ ->
+              <Pagination.Item>
+                <Pagination.Link
+                  is_active=(fun () -> p = S.get page)
+                  on_press=(fun () -> S.set set_page p)>
+                  (fun () -> Jsx.int p)
+                </Pagination.Link>
+              </Pagination.Item>)
+          </For>
+          <Pagination.Item>
+            <Pagination.Next
+              is_disabled=(fun () -> S.get page = total_pages)
+              on_press=(fun () ->
+                         S.update set_page (fun p ->
+                             Int.min total_pages (p + 1)))>
+              "Next" <Pagination.Next_icon />
+            </Pagination.Next>
+          </Pagination.Item>
+        </Pagination.Content>
+      </Pagination>
+    </Table.Footer>
+  </Table>

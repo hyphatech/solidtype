@@ -1,0 +1,44 @@
+module S = Solidtype.Solid
+module Table = Solidtype_heroui.Table
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Table variant=(fun () -> fst (S.get variant))>
+                   <Table.Scroll_container>
+                     <Table.Content aria_label="Team members">
+                       <Table.Header>
+                         <Table.Column is_row_header=true>"Name"</Table.Column>
+                         <Table.Column>"Role"</Table.Column>
+                       </Table.Header>
+                       <Table.Body>
+                         <Table.Row>
+                           <Table.Cell>"Kate Moore"</Table.Cell>
+                           <Table.Cell>"CEO"</Table.Cell>
+                         </Table.Row>
+                         <Table.Row>
+                           <Table.Cell>"John Smith"</Table.Cell>
+                           <Table.Cell>"CTO"</Table.Cell>
+                         </Table.Row>
+                       </Table.Body>
+                     </Table.Content>
+                   </Table.Scroll_container>
+                 </Table>)
+      react=(fun host ->
+              Heroui_react.table host
+                (Heroui_react.table_props ~variant:(snd (S.get variant)) ()))
+    />
+  </section>

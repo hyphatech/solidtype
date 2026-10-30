@@ -465,8 +465,13 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [ ] `createFocusScope`, the popper, the dismissable layer, as a component
   needs them; a date's formatting is `@internationalized/date`'s
   `DateFormatter`, bound already
-- [ ] TagGroup, Toolbar, InputOTP, Table, DateField, Calendar,
-  RangeCalendar, DatePicker, DateRangePicker
+- [x] Table's core, its rows a list of Kobalte's hooks and its cells moved
+  through by the port: every part, variants, rows and columns of data, row
+  headers, an empty state, a footer
+- [ ] Table's selection, sorting, loading more, column resizing,
+  expandable rows and virtualization, a stage each
+- [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
+  DatePicker, DateRangePicker
 
 ## Verification
 

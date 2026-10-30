@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1119,6 +1119,36 @@ export function colorArea(host: HTMLElement, props: ColorAreaProps): void {
       <ColorArea {...props} defaultValue="rgb(116, 52, 255)">
         <ColorArea.Thumb />
       </ColorArea>,
+    ),
+  );
+}
+
+type TableProps = { variant: "primary" | "secondary" };
+
+// Two members of HeroUI's team table, as the port's demo shows them.
+export function table(host: HTMLElement, props: TableProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <Table {...props}>
+        <Table.ScrollContainer>
+          <Table.Content aria-label="Team members">
+            <Table.Header>
+              <Table.Column isRowHeader>Name</Table.Column>
+              <Table.Column>Role</Table.Column>
+            </Table.Header>
+            <Table.Body>
+              <Table.Row>
+                <Table.Cell>Kate Moore</Table.Cell>
+                <Table.Cell>CEO</Table.Cell>
+              </Table.Row>
+              <Table.Row>
+                <Table.Cell>John Smith</Table.Cell>
+                <Table.Cell>CTO</Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          </Table.Content>
+        </Table.ScrollContainer>
+      </Table>,
     ),
   );
 }

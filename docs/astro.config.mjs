@@ -74,7 +74,7 @@ export default defineConfig({
         { label: "Start here", items: ["index", "start/ocaml-over-typescript", "start/how-it-works", "start/melange", "start/vite", "start/astro", "start/conventions"] },
         { label: "Solid", items: [{ slug: "solid", label: "Overview" }, "solid/components", "solid/reactivity", "solid/control-flow", "solid/state", "solid/async", "solid/rendering"] },
         { label: "Kobalte", items: [{ slug: "kobalte", label: "Overview" }, "kobalte/binding", "kobalte/usage"] },
-        { label: "HeroUI", items: [{ slug: "heroui", label: "Overview" }, "heroui/coverage", "heroui/accordion", "heroui/alert", "heroui/alert-dialog", "heroui/autocomplete", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/breadcrumbs", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/color-area", "heroui/color-swatch", "heroui/combo-box", "heroui/description", "heroui/disclosure", "heroui/disclosure-group", "heroui/drawer", "heroui/dropdown", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/list-box", "heroui/meter", "heroui/modal", "heroui/number-field", "heroui/pagination", "heroui/popover", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/select", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/tabs", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/toast", "heroui/toggle-button", "heroui/toggle-button-group", "heroui/tooltip", "heroui/typography"] },
+        { label: "HeroUI", items: [{ slug: "heroui", label: "Overview" }, "heroui/coverage", "heroui/accordion", "heroui/alert", "heroui/alert-dialog", "heroui/autocomplete", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/breadcrumbs", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/color-area", "heroui/color-swatch", "heroui/combo-box", "heroui/description", "heroui/disclosure", "heroui/disclosure-group", "heroui/drawer", "heroui/dropdown", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/list-box", "heroui/meter", "heroui/modal", "heroui/number-field", "heroui/pagination", "heroui/popover", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/select", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/table", "heroui/tabs", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/toast", "heroui/toggle-button", "heroui/toggle-button-group", "heroui/tooltip", "heroui/typography"] },
         { label: "Charts", items: [{ slug: "rhp", label: "Overview" }, "rhp/gallery", "rhp/chart", "rhp/plot", "rhp/slat", "rhp/scale", "rhp/bar", "rhp/dot", "rhp/tick", "rhp/label", "rhp/cell", "rhp/place", "rhp/line", "rhp/area", "rhp/many-dots", "rhp/poster", "rhp/theme", "rhp/helpers"] },
         { label: "Reference", items: ["reference"] },
       ],
@@ -101,9 +101,9 @@ export default defineConfig({
       ],
     },
     server: { fs: { allow: [repository] } },
-    // The comparisons' React -- React itself, React Aria under HeroUI's
-    // components, and HeroUI's React components -- shared by every port's
-    // page, each a chunk of its own, the three together past what one chunk
+    // The comparisons' React -- React itself, React Aria's components and
+    // the hooks under them, and HeroUI's React components -- shared by every
+    // port's page, each a chunk of its own, together past what one chunk
     // should hold.
     build: {
       rolldownOptions: {
@@ -111,9 +111,13 @@ export default defineConfig({
           codeSplitting: {
             groups: [
               { name: "react", test: /\/node_modules\/(react|react-dom|scheduler)\// },
+              // React Aria's components carry their hooks, past a chunk alone:
+              // a module each, split in two by name, for size.
+              { name: "react-aria-components-a", test: /\/node_modules\/react-aria-components\/dist\/[a-z]+\/[A-La-l]/ },
+              { name: "react-aria-components", test: /\/node_modules\/react-aria-components\// },
               {
                 name: "react-aria",
-                test: /\/node_modules\/(@react-aria|@react-stately|@react-types|react-aria|react-aria-components|react-stately|@internationalized)\//,
+                test: /\/node_modules\/(@react-aria|@react-stately|@react-types|react-aria|react-stately|@internationalized)\//,
               },
               { name: "heroui-react", test: /\/node_modules\/@heroui\/react\// },
             ],

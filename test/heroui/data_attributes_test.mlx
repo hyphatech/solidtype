@@ -37,6 +37,7 @@ module Form = H.Form
 module Input = H.Input
 module Input_group = H.Input_group
 module Kbd = H.Kbd
+module Table = H.Table
 module Color_swatch = H.Color_swatch
 module Color_area = H.Color_area
 module Label = H.Label
@@ -373,6 +374,26 @@ let () =
                   color=(fun () ->
                             Solidtype_kobalte.Colors.parse_color "#0485F7")
                 />
+                <Table data_testid="Table">
+                  <Table.Scroll_container data_testid="Table.Scroll_container">
+                    <Table.Content
+                      data_testid="Table.Content" aria_label="Members">
+                      <Table.Header data_testid="Table.Header">
+                        <Table.Column data_testid="Table.Column">
+                          "Name"
+                        </Table.Column>
+                      </Table.Header>
+                      <Table.Body data_testid="Table.Body">
+                        <Table.Row data_testid="Table.Row">
+                          <Table.Cell data_testid="Table.Cell">
+                            "Kate"
+                          </Table.Cell>
+                        </Table.Row>
+                      </Table.Body>
+                    </Table.Content>
+                  </Table.Scroll_container>
+                  <Table.Footer data_testid="Table.Footer">"1"</Table.Footer>
+                </Table>
                 <Kbd data_testid="Kbd">
                   <Kbd.Abbr data_testid="Kbd.Abbr" key_value=`command />
                   <Kbd.Content data_testid="Kbd.Content">"K"</Kbd.Content>
@@ -611,6 +632,16 @@ let () =
                    ("Color_area", "[data-slot=color-area]");
                    ("Color_area.Thumb", "[data-slot=color-area-thumb]");
                    ("Color_swatch", "[data-slot=color-swatch]");
+                   ("Table", "[data-slot=table]");
+                   ( "Table.Scroll_container",
+                     "[data-slot=table-scroll-container]" );
+                   ("Table.Content", "[data-slot=table-content]");
+                   ("Table.Header", "[data-slot=table-header]");
+                   ("Table.Column", "[data-slot=table-column]");
+                   ("Table.Body", "[data-slot=table-body]");
+                   ("Table.Row", "[data-slot=table-row]");
+                   ("Table.Cell", "[data-slot=table-cell]");
+                   ("Table.Footer", "[data-slot=table-footer]");
                    ("Kbd", "kbd");
                    ("Kbd.Abbr", "abbr");
                    ("Kbd.Content", "kbd > span");

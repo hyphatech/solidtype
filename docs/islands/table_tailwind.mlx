@@ -1,0 +1,46 @@
+module Table = Solidtype_heroui.Table
+
+let header_cell =
+  "text-xs font-semibold uppercase tracking-wide text-neutral-500 \
+   dark:text-neutral-400"
+
+let row_class =
+  "border-t border-border/60 transition-colors hover:bg-neutral-100/60 \
+   even:bg-neutral-50/50 dark:hover:bg-neutral-800/50 \
+   dark:even:bg-neutral-900/30"
+
+let name_cell = "font-medium text-neutral-900 dark:text-neutral-100"
+
+let make () =
+  <Table
+    class_="w-full max-w-2xl overflow-hidden rounded-xl border \
+            border-border/80 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+    <Table.Scroll_container>
+      <Table.Content aria_label="Team members" class_="min-w-[600px]">
+        <Table.Header class_="bg-neutral-100/80 dark:bg-neutral-800/80">
+          <Table.Column is_row_header=true class_=(fun () -> header_cell)>
+            "Name"
+          </Table.Column>
+          <Table.Column class_=(fun () -> header_cell)>"Role"</Table.Column>
+          <Table.Column class_=(fun () -> header_cell)>"Status"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <Table.Row class_=(fun () -> row_class)>
+            <Table.Cell class_=(fun () -> name_cell)>"Kate Moore"</Table.Cell>
+            <Table.Cell>"CEO"</Table.Cell>
+            <Table.Cell>"Active"</Table.Cell>
+          </Table.Row>
+          <Table.Row class_=(fun () -> row_class)>
+            <Table.Cell class_=(fun () -> name_cell)>"John Smith"</Table.Cell>
+            <Table.Cell>"CTO"</Table.Cell>
+            <Table.Cell>"Active"</Table.Cell>
+          </Table.Row>
+          <Table.Row class_=(fun () -> row_class)>
+            <Table.Cell class_=(fun () -> name_cell)>"Sara Johnson"</Table.Cell>
+            <Table.Cell>"CMO"</Table.Cell>
+            <Table.Cell>"On leave"</Table.Cell>
+          </Table.Row>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

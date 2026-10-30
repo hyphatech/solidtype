@@ -1,0 +1,29 @@
+module Empty_state = Solidtype_heroui.Empty_state
+module Table = Solidtype_heroui.Table
+
+let make () =
+  <Table class_="min-h-[200px]">
+    <Table.Scroll_container>
+      <Table.Content aria_label="Empty table" class_="h-full min-w-[600px]">
+        <Table.Header>
+          <Table.Column is_row_header=true>"Name"</Table.Column>
+          <Table.Column>"Role"</Table.Column>
+          <Table.Column>"Status"</Table.Column>
+          <Table.Column>"Email"</Table.Column>
+        </Table.Header>
+        <Table.Body
+          render_empty_state=(fun _ ->
+                                 <Empty_state
+                                   class_="flex h-full w-full flex-col \
+                                           items-center justify-center gap-4 \
+                                           text-center">
+                                   <Gravity.Tray class_="size-6 text-muted" />
+                                   <span class_="text-sm text-muted">
+                                     "No results found"
+                                   </span>
+                                 </Empty_state>)>
+          ""
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

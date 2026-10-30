@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Table`: HeroUI's Table, its rows a list of Kobalte's
+  list hooks, focused and moved between by the keys as React Aria's grid
+  is, and its cells moved through by the port: every part, both variants,
+  rows and columns given by data as `For`s, row headers, an empty state
+  across every column, and a footer.
 - `Solidtype_kobalte.Selection`: the hooks Kobalte's lists are made of,
   `create_list_state`, `create_selectable_list`, `create_selectable_item`,
   `create_selectable_collection` and `create_type_select`, for a component

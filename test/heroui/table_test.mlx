@@ -1,0 +1,190 @@
+(* HeroUI's Table on Kobalte's list hooks, beside the same table in React:
+   every part, its role, classes and state, and where focus goes as the keys
+   walk its rows and cells. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type member = {
+  id : string;
+  name : string;
+  role : string;
+  status : string;
+  email : string;
+}
+[@@warning "-69"]
+
+external member :
+  id:string ->
+  name:string ->
+  role:string ->
+  status:string ->
+  email:string ->
+  unit ->
+  member = ""
+[@@mel.obj]
+
+let members =
+  [|
+    member ~id:"1" ~name:"Kate Moore" ~role:"CEO" ~status:"Active"
+      ~email:"kate@acme.com" ();
+    member ~id:"2" ~name:"John Smith" ~role:"CTO" ~status:"Active"
+      ~email:"john@acme.com" ();
+    member ~id:"3" ~name:"Sara Johnson" ~role:"CMO" ~status:"On Leave"
+      ~email:"sara@acme.com" ();
+  |]
+
+type props
+
+external props : ?variant:string -> members:member array -> unit -> props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/Table.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/Table.tsx"]
+
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Table.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+
+(* What HeroUI's styles read of a part and what a reader reaches: its tag,
+   role, class and state. Ids, keys and the attributes each framework writes
+   for itself are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "aria-label";
+    "aria-colindex";
+    "colspan";
+    "data-column-index";
+    "data-level";
+    "style";
+    "data-hovered";
+    "data-focus-visible";
+    "data-selected";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], [role]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (tag_name e
+        :: List.filter_map
+             (fun name ->
+               match T.attribute e name with
+               | Some "" | None -> None
+               (* A style however a framework spaces and ends it. *)
+               | Some v when String.equal name "style" ->
+                   Some
+                     (name ^ "="
+                     ^ String.concat ""
+                         (String.split_on_char ' '
+                            (String.concat "" (String.split_on_char ';' v))))
+               | Some v -> Some (name ^ "=" ^ v))
+             state))
+
+let where () =
+  Option.value (T.attribute active "role") ~default:"?" ^ ":" ^ text active
+
+(* The table, then tabbed into and walked by each key, where focus is after
+   each. *)
+let keys =
+  [
+    "{ArrowDown}";
+    "{ArrowRight}";
+    "{ArrowRight}";
+    "{ArrowDown}";
+    "{ArrowLeft}";
+    "{ArrowLeft}";
+    "{ArrowLeft}";
+    "{ArrowUp}";
+    "{ArrowUp}";
+    "{ArrowRight}";
+    "{End}";
+    "{Home}";
+    "{Control>}{End}{/Control}";
+  ]
+
+let walk ~step host =
+  let user = T.setup () in
+  let at_rest = shown host in
+  let* () = step (fun () -> T.tab user) in
+  let seen = ref [ "tab -> " ^ where () ] in
+  let rec go = function
+    | [] -> Js.Promise.resolve ()
+    | k :: rest ->
+        let* () = step (fun () -> T.keyboard user k) in
+        seen := (k ^ " -> " ^ where ()) :: !seen;
+        go rest
+  in
+  let* () = go keys in
+  Js.Promise.resolve (at_rest, Array.of_list (List.rev !seen))
+
+let both ?variant ?(members = members) () =
+  T.render (fun () ->
+      <Table ?variant=(fun () -> variant)>
+        <Table.Scroll_container>
+          <Table.Content aria_label="Team members" class_="min-w-[600px]">
+            <Table.Header>
+              <Table.Column is_row_header=true>"Name"</Table.Column>
+              <Table.Column>"Role"</Table.Column>
+              <Table.Column>"Status"</Table.Column>
+              <Table.Column>"Email"</Table.Column>
+            </Table.Header>
+            <Table.Body render_empty_state=(fun _ -> <span>"No members"</span>)>
+              <For each=(fun () -> members)>
+                (fun m _ ->
+                  <Table.Row id=(fun () -> m.id)>
+                    <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
+                    <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                    <Table.Cell>(fun () -> Jsx.string m.status)</Table.Cell>
+                    <Table.Cell>(fun () -> Jsx.string m.email)</Table.Cell>
+                  </Table.Row>)
+              </For>
+            </Table.Body>
+          </Table.Content>
+        </Table.Scroll_container>
+        <Table.Footer>"4 members"</Table.Footer>
+      </Table>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body in
+  T.cleanup ();
+  let host =
+    Twin.render
+      (props
+         ?variant:
+           (Option.map
+              (function `primary -> "primary" | `secondary -> "secondary")
+              variant)
+         ~members ())
+  in
+  let* react = walk ~step:Twin.step host in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Table" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is every part, walked by the keys, as React's is"
+        (fun () -> both ());
+      Jest.testPromise "is secondary, as React's is" (fun () ->
+          both ~variant:`secondary ());
+      Jest.testPromise "shows its empty state, as React's does" (fun () ->
+          both ~members:[||] ()))

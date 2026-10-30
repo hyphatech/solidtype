@@ -367,6 +367,11 @@ module Trash_bin = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/trash-bin.svg?raw"]
 end)
 
+module Tray = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/tray.svg?raw"]
+end)
+
 module Triangle_exclamation = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/triangle-exclamation.svg?raw"]
