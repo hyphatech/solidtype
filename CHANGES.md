@@ -1,5 +1,25 @@
 # Changes
 
+## Unreleased
+
+- Breaking: `Solidtype_heroui.Time_field` takes and gives
+  @internationalized/date's `Time`, from `solidtype-internationalized-date`,
+  in place of Kobalte's `Types.Time`: `value`, `default_value`,
+  `placeholder_value`, `min_value`, `max_value` and `on_change`, whose numbers
+  are `int`s now. `solidtype-heroui` depends on
+  `solidtype-internationalized-date`.
+- `Solidtype_heroui.Time_field.Date_time` and `Time_field.Zoned`: HeroUI's
+  TimeField given a `CalendarDateTime` or a `ZonedDateTime`, each editing the
+  time alone and giving back the value of its own kind, its date and zone
+  kept; the date and zone a time typed while empty is put on is its
+  `placeholder_value`, which each requires. A zoned field shows its zone's
+  name, as the reader's locale writes it at the time shown, unless
+  `hide_time_zone`, and moves a time its clocks skip to the one after it.
+- `Solidtype_heroui.Time_field`: a form is sent its value as
+  @internationalized/date writes it, `09:30:00`, and a dated or zoned value
+  whole, where Kobalte's input sent a clock's text, `9:30 AM`; and a time typed
+  again as it was is no change, so `on_change` is not told it.
+
 ## 0.4.0 (2026-10-30)
 
 - `solidtype-internationalized-date`, a package of its own:

@@ -4,21 +4,17 @@ module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
-module Time = Solidtype_kobalte.Types.Time
+module D = Solidtype_internationalized_date
+module Time = D.Types.Time
 
-let min_time = Time.make ~hour:9. ~minute:0. ()
-let max_time = Time.make ~hour:17. ~minute:0. ()
-
-(* A time's seconds since midnight, which order two times. *)
-let seconds t =
-  let part p = Option.value (p t) ~default:0. in
-  (part Time.hour *. 3600.) +. (part Time.minute *. 60.) +. part Time.second
+let min_time = D.parse_time "09:00"
+let max_time = D.parse_time "17:00"
 
 let make () =
   let value, set_value = S.create_signal None in
   let is_invalid () =
     match S.get value with
-    | Some t -> seconds t < seconds min_time || seconds t > seconds max_time
+    | Some t -> Time.compare t min_time < 0. || Time.compare t max_time > 0.
     | None -> false
   in
   <div class_="flex flex-col gap-4">

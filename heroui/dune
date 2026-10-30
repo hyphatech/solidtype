@@ -2,6 +2,10 @@
  (name solidtype_heroui)
  (public_name solidtype-heroui)
  (modes melange)
- (libraries solidtype solidtype-kobalte melange.dom)
+ (libraries
+  solidtype
+  solidtype-kobalte
+  solidtype-internationalized-date
+  melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))

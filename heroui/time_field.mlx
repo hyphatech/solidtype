@@ -4,15 +4,19 @@ module For = Solidtype.For
 module Kobalte = Solidtype_kobalte.TimeField
 module I18n = Solidtype_kobalte.I18n
 module Types = Solidtype_kobalte.Types
-module Time = Types.Time
+module Clock = Types.Time
+module D = Solidtype_internationalized_date
+module Time = D.Types.Time
 
 type segment = [ `hour | `minute | `second | `dayPeriod ]
 
-(* What a field's parts read of it: its value, as Kobalte has it, and its
+(* What a field's parts read of it: its time, as Kobalte has it, and its
    state. *)
 type field = {
-  value : unit -> Time.t option;
+  value : unit -> Clock.t option;
   around : segment -> string array * string array;
+  zone_after : segment -> (string * string) option;
+      (** The literal and the zone's name shown after a segment, its last. *)
   disabled : unit -> bool;
   invalid : unit -> bool;
   read_only : unit -> bool;
@@ -137,7 +141,44 @@ module Input = struct
               </span>)
           </For>
         in
-        Jsx.fragment [| literals fst; children segment; literals snd |])
+        (* React Aria's zone is a segment a reader reaches and nothing
+           edits. *)
+        let zone =
+          <Solidtype.Show.Some some=(fun () -> f.zone_after (S.get segment))>
+            (fun after ->
+              let zone_i =
+                Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) ()
+              in
+              Jsx.fragment
+                [|
+                  <span
+                    aria_hidden=true
+                    class_=(fun () -> Styles.DateInputGroup.segment (slots ()))
+                    data_slot="date-input-group-segment"
+                    data_type="literal"
+                    data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+                    data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+                    (fun () -> Jsx.string (fst (S.get after)))
+                  </span>;
+                  <span
+                    role=`textbox
+                    aria_readonly=true
+                    aria_label="time zone"
+                    tabindex="0"
+                    ref=(fun e -> Interaction.watch zone_i e)
+                    class_=(fun () -> Styles.DateInputGroup.segment (slots ()))
+                    data_slot="date-input-group-segment"
+                    data_type="timeZoneName"
+                    data_focused=(fun () ->
+                                   Jsx.flag (Interaction.focused zone_i))
+                    data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+                    data_disabled=(fun () -> Jsx.flag (f.disabled ()))>
+                    (fun () -> Jsx.string (snd (S.get after)))
+                  </span>;
+                |])
+          </Solidtype.Show.Some>
+        in
+        Jsx.fragment [| literals fst; children segment; literals snd; zone |])
     </Kobalte.Input>
 end
 
@@ -151,9 +192,9 @@ module Segment = struct
     let placeholder () =
       let part =
         match segment () with
-        | `hour | `dayPeriod -> Time.hour
-        | `minute -> Time.minute
-        | `second -> Time.second
+        | `hour | `dayPeriod -> Clock.hour
+        | `minute -> Clock.minute
+        | `second -> Clock.second
       in
       Option.is_none (Option.bind (f.value ()) part)
     in
@@ -194,19 +235,71 @@ let twelve_hours formatter =
           ~date:(Types.Either.right (thirteen ()))
           ()))
 
-let%component make ?(value : Time.t Js.Nullable.t option)
-    ?(default_value : Time.t option)
-    ?(on_change : (Time.t option -> unit) option)
-    ?(placeholder_value : Time.t option) ?(min_value : Time.t option)
-    ?(max_value : Time.t option)
-    ?(granularity : [ `hour | `minute | `second ] option)
-    ?(hour_cycle : [ `h12 | `h24 ] option)
-    ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
-    ?(is_invalid : bool = false) ?(is_disabled : bool = false)
-    ?(is_read_only : bool = false) ?(name : string option)
-    ?(aria_label : string option) ?(full_width : bool option)
-    ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
-    ~(children : Jsx.content) () =
+(* A time of day as Kobalte edits it, each part a float. *)
+let clock t =
+  Clock.make
+    ~hour:(float_of_int (Time.hour t))
+    ~minute:(float_of_int (Time.minute t))
+    ~second:(float_of_int (Time.second t))
+    ()
+
+(* Kobalte's time once it is whole, a part the field does not show zero. *)
+let of_clock c =
+  let part get = Option.fold ~none:0 ~some:int_of_float (get c) in
+  Time.make ~hour:(part Clock.hour) ~minute:(part Clock.minute)
+    ~second:(part Clock.second) ()
+
+let fields t =
+  D.Types.ZonedDateTime_Set.make ~hour:(Time.hour t) ~minute:(Time.minute t)
+    ~second:(Time.second t) ()
+
+(* What a kind of value is to a field, which edits its time of day alone: that
+   time, the same value at another, its zone, and what a form is sent. *)
+type 'v kind = {
+  time : 'v -> Time.t;
+  at : 'v -> Time.t -> 'v;
+  zoned : 'v -> D.Types.ZonedDateTime.t option;
+  to_string : 'v -> string;
+}
+
+let time_kind =
+  {
+    time = Fun.id;
+    at = (fun _ t -> t);
+    zoned = (fun _ -> None);
+    to_string = (fun t -> Time.to_string t ());
+  }
+
+let date_time_kind =
+  {
+    time = D.to_time;
+    at = (fun v t -> D.Types.CalendarDateTime.set v (fields t));
+    zoned = (fun _ -> None);
+    to_string = (fun v -> D.Types.CalendarDateTime.to_string v ());
+  }
+
+let zoned_kind =
+  {
+    time = D.to_time;
+    (* A time the zone's clocks skip is the one after it; [`compatible] reads
+       every time so, and never throws. *)
+    at =
+      (fun v t ->
+        D.Types.ZonedDateTime.set v (fields t) ~disambiguation:`compatible ());
+    zoned = Option.some;
+    to_string = (fun v -> D.Types.ZonedDateTime.to_string v ());
+  }
+
+(* The field each root is, given its kind of value and what a time typed is
+   put on while it has none. *)
+let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
+    ~(value : unit -> v Js.Nullable.t option)
+    ~(default_value : unit -> v option) ~(on_change : v option -> unit option)
+    ~(placeholder_value : unit -> v option) ~(min_value : unit -> Time.t option)
+    ~(max_value : unit -> Time.t option) ~(hide_time_zone : unit -> bool)
+    ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
+    ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width ~class_
+    ~on_blur ~children ~others =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let current, set =
@@ -217,6 +310,8 @@ let%component make ?(value : Time.t Js.Nullable.t option)
         in_form.changed ();
         ignore (on_change v : unit option))
   in
+  (* What a time typed is put on: the value, else what stands for it. *)
+  let base () = match current () with Some v -> v | None -> fallback () in
   (* A time partly typed is the field's alone, as React Aria keeps it: the
      field's value changes, and its on_change is told, once every segment has
      its part. Kobalte is given the time shown, either, and an empty one for
@@ -224,28 +319,40 @@ let%component make ?(value : Time.t Js.Nullable.t option)
      field emptied by its owner would go on showing. *)
   let typed, set_typed = S.create_signal None in
   let shown () =
-    match S.get typed with Some t -> Some t | None -> current ()
+    match S.get typed with
+    | Some t -> Some t
+    | None -> Option.map (fun v -> clock (kind.time v)) (current ())
   in
   let whole t =
     let has part = Option.is_some (part t) in
-    has Time.hour
+    has Clock.hour
     &&
     match Option.value (granularity ()) ~default:`minute with
     | `hour -> true
-    | `minute -> has Time.minute
-    | `second -> has Time.minute && has Time.second
+    | `minute -> has Clock.minute
+    | `second -> has Clock.minute && has Clock.second
   in
-  (* A time with every part erased is none, as React Aria tells it. *)
+  (* A time with every part it shows erased is none, as React Aria tells it. *)
   let erased t =
-    not
-      (List.exists
-         (fun part -> Option.is_some (part t))
-         Time.[ hour; minute; second ])
+    let parts =
+      match Option.value (granularity ()) ~default:`minute with
+      | `hour -> Clock.[ hour ]
+      | `minute -> Clock.[ hour; minute ]
+      | `second -> Clock.[ hour; minute; second ]
+    in
+    not (List.exists (fun part -> Option.is_some (part t)) parts)
+  in
+  (* A value typed again as it was is no change. *)
+  let unchanged next =
+    match current () with
+    | Some v -> String.equal (kind.to_string v) (kind.to_string next)
+    | None -> false
   in
   let change t =
     if whole t then (
       S.set set_typed None;
-      set (Some t))
+      let next = kind.at (base ()) (of_clock t) in
+      if not (unchanged next) then set (Some next))
     else if erased t then (
       S.set set_typed None;
       if Option.is_some (current ()) then set None)
@@ -335,10 +442,60 @@ let%component make ?(value : Time.t Js.Nullable.t option)
         | `minute | `second | `dayPeriod -> own),
       if last then [| {js|⁩|js} |] else [||] )
   in
+  (* The zone at the time shown, partly typed or not, since its offset, and so
+     its name, can change within a day. *)
+  let zone () =
+    match (hide_time_zone (), kind.zoned (base ())) with
+    | true, _ | false, None -> None
+    | false, Some z -> (
+        match shown () with
+        | Some c -> kind.zoned (kind.at (base ()) (of_clock c))
+        | None -> Some z)
+  in
+  let zone_names =
+    I18n.create_date_formatter
+      (Types.Either.right (fun[@u] () ->
+           Types.DateTimeFormatOptions.make ~hour:"numeric" ~hour12:(twelve ())
+             ?time_zone:(Option.map D.Types.ZonedDateTime.time_zone (zone ()))
+             ~time_zone_name:`short ~numbering_system:"latn" ()))
+  in
+  (* The zone's name as the reader's locale writes it at the value's instant,
+     since a zone's name follows its offset, and the literal before it. *)
+  let zone_name z =
+    let rec find previous = function
+      | [] -> None
+      | p :: rest -> (
+          match Types.DateTimeFormatPart.type_ p with
+          | `timeZoneName ->
+              Some
+                ( Option.value previous ~default:"",
+                  Types.DateTimeFormatPart.value p )
+          | `literal -> find (Some (Types.DateTimeFormatPart.value p)) rest
+          | _ -> find None rest)
+    in
+    Types.DateTimeFormat.format_to_parts (S.get zone_names)
+      ~date:(Types.Either.right (D.Types.ZonedDateTime.to_date z ()))
+      ()
+    |> Array.to_list |> find None
+  in
+  (* The zone follows the last of Kobalte's segments, AM or PM on a 12-hour
+     clock. *)
+  let zone_after segment =
+    let last =
+      match (segment, twelve (), granularity ()) with
+      | `dayPeriod, true, _ -> true
+      | `hour, false, `hour | `minute, false, `minute | `second, false, `second
+        ->
+          true
+      | (`hour | `minute | `second | `dayPeriod), _, _ -> false
+    in
+    if last then Option.bind (zone ()) zone_name else None
+  in
   let f =
     {
       value = shown;
       around;
+      zone_after;
       disabled = (fun () -> is_disabled ());
       invalid;
       read_only = (fun () -> is_read_only ());
@@ -347,11 +504,14 @@ let%component make ?(value : Time.t Js.Nullable.t option)
   in
   <Context.Provider value=(fun () -> f)>
     <Kobalte.Root
-      value=(fun () -> Option.value (shown ()) ~default:(Time.make ()))
+      value=(fun () -> Option.value (shown ()) ~default:(Clock.make ()))
       on_change=change
-      ?placeholder=(fun () -> placeholder_value ())
-      ?min=(fun () -> min_value ())
-      ?max=(fun () -> max_value ())
+      ?placeholder=(fun () ->
+                     Option.map
+                       (fun v -> clock (kind.time v))
+                       (placeholder_value ()))
+      ?min=(fun () -> Option.map clock (min_value ()))
+      ?max=(fun () -> Option.map clock (max_value ()))
       granularity=(fun () -> Types.Either.left (granularity ()))
       hour_cycle=(fun () -> if twelve () then 12. else 24.)
       force_leading_zeros=(fun () ->
@@ -377,10 +537,90 @@ let%component make ?(value : Time.t Js.Nullable.t option)
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
-      props=(Props.others props)>
+      props=others>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
         <Parts>(fun () -> children ())</Parts>
       </Field_error.Message.Provider>
-      <Kobalte.HiddenInput />
+      (* The value as @internationalized/date writes it, whole: Kobalte's own
+         input sends a clock's text, and React Aria's the time without the
+         date or zone its value has. *)
+      <input
+        type_="hidden"
+        ?name=(fun () -> name ())
+        value=(fun () ->
+                match current () with Some v -> kind.to_string v | None -> "")
+        disabled=(fun () -> is_disabled ())
+      />
     </Kobalte.Root>
   </Context.Provider>
+
+let%component make ?(value : Time.t Js.Nullable.t option)
+    ?(default_value : Time.t option)
+    ?(on_change : (Time.t option -> unit) option)
+    ?(placeholder_value : Time.t option) ?(min_value : Time.t option)
+    ?(max_value : Time.t option)
+    ?(granularity : [ `hour | `minute | `second ] option)
+    ?(hour_cycle : [ `h12 | `h24 ] option)
+    ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+    ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+    ?(is_read_only : bool = false) ?(name : string option)
+    ?(aria_label : string option) ?(full_width : bool option)
+    ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ~(children : Jsx.content) () =
+  field ~kind:time_kind
+    ~fallback:(fun () ->
+      Option.value (placeholder_value ()) ~default:(Time.make ()))
+    ~value ~default_value ~on_change ~placeholder_value ~min_value ~max_value
+    ~hide_time_zone:(fun () -> true)
+    ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
+    ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width ~class_
+    ~on_blur ~children ~others:(Props.others props)
+
+module Date_time = struct
+  module V = D.Types.CalendarDateTime
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ~(placeholder_value : V.t) ?(min_value : Time.t option)
+      ?(max_value : Time.t option)
+      ?(granularity : [ `hour | `minute | `second ] option)
+      ?(hour_cycle : [ `h12 | `h24 ] option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(aria_label : string option) ?(full_width : bool option)
+      ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+      ~(children : Jsx.content) () =
+    field ~kind:date_time_kind ~fallback:placeholder_value ~value ~default_value
+      ~on_change
+      ~placeholder_value:(fun () -> Some (placeholder_value ()))
+      ~min_value ~max_value
+      ~hide_time_zone:(fun () -> true)
+      ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
+      ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width
+      ~class_ ~on_blur ~children ~others:(Props.others props)
+end
+
+module Zoned = struct
+  module V = D.Types.ZonedDateTime
+
+  let%component make ?(value : V.t Js.Nullable.t option)
+      ?(default_value : V.t option) ?(on_change : (V.t option -> unit) option)
+      ~(placeholder_value : V.t) ?(min_value : Time.t option)
+      ?(max_value : Time.t option) ?(hide_time_zone : bool = false)
+      ?(granularity : [ `hour | `minute | `second ] option)
+      ?(hour_cycle : [ `h12 | `h24 ] option)
+      ?(should_force_leading_zeros : bool option) ?(is_required : bool = false)
+      ?(is_invalid : bool = false) ?(is_disabled : bool = false)
+      ?(is_read_only : bool = false) ?(name : string option)
+      ?(aria_label : string option) ?(full_width : bool option)
+      ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+      ~(children : Jsx.content) () =
+    field ~kind:zoned_kind ~fallback:placeholder_value ~value ~default_value
+      ~on_change
+      ~placeholder_value:(fun () -> Some (placeholder_value ()))
+      ~min_value ~max_value ~hide_time_zone ~granularity ~hour_cycle
+      ~should_force_leading_zeros ~is_required ~is_invalid ~is_disabled
+      ~is_read_only ~name ~aria_label ~full_width ~class_ ~on_blur ~children
+      ~others:(Props.others props)
+end

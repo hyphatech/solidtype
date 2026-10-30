@@ -30,6 +30,8 @@ import * as ExForm from "@islands/time_field_form.jsx";
 import ExFormCode from "@islands/time_field_form.mlx?raw";
 import * as ExWithValidation from "@islands/time_field_with_validation.jsx";
 import ExWithValidationCode from "@islands/time_field_with_validation.mlx?raw";
+import * as ExZoned from "@islands/time_field_zoned.jsx";
+import ExZonedCode from "@islands/time_field_zoned.mlx?raw";
 import * as ExTailwind from "@islands/time_field_tailwind.jsx";
 import ExTailwindCode from "@islands/time_field_tailwind.mlx?raw";
 import * as Demo from "@islands/time_field_demo.jsx";
@@ -39,11 +41,15 @@ HeroUI's own `timeFieldVariants` gives, and its group, input and segments
 HeroUI's `dateInputGroupVariants`. Each part of the time -- the hour, the
 minute, the second and AM or PM -- is a segment, typed into or stepped by the
 arrow keys. Its label names it, its description describes it, its error shows
-while it is invalid, and it submits its value with a form, by Kobalte's hidden
-input.
+while it is invalid, and it submits its value with a form, as
+`@internationalized/date` writes it.
 
-Its value is Kobalte's `Types.Time`, an hour, a minute and a second, made by
-`Solidtype_kobalte.Types.Time.make ~hour:14. ~minute:30. ()`.
+Its value is `@internationalized/date`'s, bound by
+`solidtype-internationalized-date`: a `Time`, made by
+`Time.make ~hour:14 ~minute:30 ()` or `parse_time "14:30"`. A time on a date,
+a `CalendarDateTime`, is `Time_field.Date_time`'s, and a time in a zone, a
+`ZonedDateTime`, `Time_field.Zoned`'s: each edits the time alone and gives back
+the kind it was given, its date and zone kept.
 
 ## Usage
 
@@ -104,6 +110,17 @@ HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={ExControlledCode} title="time_field_controlled.mlx"><ExControlled.make client:visible /></Example>
 
+### Dates and Zones
+
+A field whose value has a date or a zone takes the date, and the zone, a time
+typed while it is empty is put on: its `placeholder_value`, which it requires.
+A zoned field shows its zone's name after the time, as the reader's locale
+names it at the time shown, and a time its zone's clocks skip is the one after
+it. HeroUI has no example of either; the field below is in Kyiv on the day its
+clocks go forward, at 03:00.
+
+<Example code={ExZonedCode} title="time_field_zoned.mlx"><ExZoned.make client:visible /></Example>
+
 ### Form Example
 
 HeroUI's button takes `isPending` while the time is sent; the port's button has no pending state yet.
@@ -143,7 +160,7 @@ HeroUI's Render Function example gives the field `render`, React's way to swap t
 - the group: `[data-hovered="true"]`, `[data-focus-within="true"]`,
   `[data-focus-visible="true"]`
 - a segment: `[data-focused="true"]`, `[data-placeholder="true"]`,
-  `[data-type="literal"]`
+  `[data-type="literal"]`, and a zoned field's zone `[data-type="timeZoneName"]`
 
 ## API Reference
 
@@ -153,12 +170,12 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Types.Time.t Js.Nullable.t` | | Its value, controlled; null controls it empty |
-| `defaultValue` | `default_value` | `Types.Time.t` | | Its value at first, kept by itself |
-| `onChange` | `on_change` | `Types.Time.t option -> unit` | | Called once every segment has its part, and with `None` once every segment is erased |
-| `placeholderValue` | `placeholder_value` | `Types.Time.t` | | What an arrow key steps an empty segment from |
-| `minValue` | `min_value` | `Types.Time.t` | | The earliest time |
-| `maxValue` | `max_value` | `Types.Time.t` | | The latest time |
+| `value` | `value` | `Time.t Js.Nullable.t` | | Its value, controlled; null controls it empty |
+| `defaultValue` | `default_value` | `Time.t` | | Its value at first, kept by itself |
+| `onChange` | `on_change` | `Time.t option -> unit` | | Called once every segment has its part and the time is another, and with `None` once every segment is erased |
+| `placeholderValue` | `placeholder_value` | `Time.t` | midnight | What an arrow key steps an empty segment from |
+| `minValue` | `min_value` | `Time.t` | | The earliest time of day |
+| `maxValue` | `max_value` | `Time.t` | | The latest time of day |
 | `granularity` | `granularity` | `` [ `hour \| `minute \| `second ] `` | `` `minute `` | The smallest part it shows |
 | `hourCycle` | `hour_cycle` | `` [ `h12 \| `h24 ] `` | the locale's | Its clock |
 | `shouldForceLeadingZeros` | `should_force_leading_zeros` | `bool` | the locale's | Whether an hour of one digit has a zero before it |
@@ -166,13 +183,29 @@ Each prop beside the name HeroUI's React component gives it.
 | `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
 | `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its value |
-| `name` | `name` | `string` | | Its name in a form |
+| `name` | `name` | `string` | | Its name in a form, which is sent its value as `@internationalized/date` writes it, `14:30:00` |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
 | `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
 | `validate`, `validationBehavior` | — | | | A field validates nothing itself: it is invalid as the application says |
-| `hideTimeZone` | — | | | Not yet |
+| `hideTimeZone` | — | | | A time of day has no zone: `Time_field.Zoned`'s |
+
+### TimeField.Date_time, TimeField.Zoned
+
+HeroUI's one TimeField, given a `CalendarDateTime` or a `ZonedDateTime`. Each
+takes TimeField's props, its value of its own kind, and:
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `placeholderValue` | `placeholder_value` | `CalendarDateTime.t`, `ZonedDateTime.t` | required | The date, and the zone, a time typed while it is empty is put on, and what an arrow key steps an empty segment from |
+| `minValue`, `maxValue` | `min_value`, `max_value` | `Time.t` | | The earliest and latest time of day, on any date |
+| `hideTimeZone` | `hide_time_zone` | `bool` | `false` | Whether a zoned field leaves out its zone's name |
+| `name` | `name` | `string` | | Its name in a form, which is sent its value whole, `2026-03-29T09:30:00+03:00[Europe/Kyiv]`: React's sends the time alone, its date and zone lost |
+
+A field without a value of its own kind has nothing to put a typed time on, so
+`placeholder_value` is required where React's falls back to a time of day,
+which its value's type does not allow.
 
 ### TimeField.Group
 

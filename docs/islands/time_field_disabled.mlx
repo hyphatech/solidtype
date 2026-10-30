@@ -2,13 +2,17 @@ module S = Solidtype.Solid
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
-module Time = Solidtype_kobalte.Types.Time
+module D = Solidtype_internationalized_date
+module Time = D.Types.Time
 
 (* The time now, in the reader's time zone. *)
 let now () =
-  let d = Js.Date.make () in
-  Time.make ~hour:(Js.Date.getHours d) ~minute:(Js.Date.getMinutes d)
-    ~second:(Js.Date.getSeconds d) ()
+  let current = D.now (D.get_local_time_zone ()) in
+  Time.make
+    ~hour:(D.Types.ZonedDateTime.hour current)
+    ~minute:(D.Types.ZonedDateTime.minute current)
+    ~second:(D.Types.ZonedDateTime.second current)
+    ()
 
 let make () =
   let time_value = now () in

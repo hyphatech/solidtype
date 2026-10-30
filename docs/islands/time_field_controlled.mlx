@@ -4,21 +4,17 @@ module Button = Solidtype_heroui.Button
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
-module Time = Solidtype_kobalte.Types.Time
+module D = Solidtype_internationalized_date
+module Time = D.Types.Time
 
 (* The time now, in the reader's time zone. *)
 let now () =
-  let d = Js.Date.make () in
-  Time.make ~hour:(Js.Date.getHours d) ~minute:(Js.Date.getMinutes d)
-    ~second:(Js.Date.getSeconds d) ()
-
-(* A time as @internationalized/date's [Time] writes it, 09:45:00. *)
-let to_string t =
-  let two part =
-    let n = Option.value (part t) ~default:0. in
-    (if n < 10. then "0" else "") ^ Js.Float.toString n
-  in
-  String.concat ":" [ two Time.hour; two Time.minute; two Time.second ]
+  let current = D.now (D.get_local_time_zone ()) in
+  Time.make
+    ~hour:(D.Types.ZonedDateTime.hour current)
+    ~minute:(D.Types.ZonedDateTime.minute current)
+    ~second:(D.Types.ZonedDateTime.second current)
+    ()
 
 let make () =
   let value, set_value = S.create_signal None in
@@ -39,7 +35,10 @@ let make () =
         (fun () ->
           Jsx.string
             ("Current value: "
-            ^ match S.get value with Some t -> to_string t | None -> "(empty)"))
+            ^
+            match S.get value with
+            | Some t -> Time.to_string t ()
+            | None -> "(empty)"))
       </Description>
     </Time_field>
     <div class_="flex gap-2">

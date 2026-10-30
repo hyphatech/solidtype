@@ -11,6 +11,7 @@
   solidtype-heroui
   solidtype-kobalte
   solidtype-rhp
+  solidtype-internationalized-date
   melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))

@@ -14,6 +14,7 @@ depends: [
   "melange" {>= "7.0.1-55"}
   "solidtype" {= version}
   "solidtype-kobalte" {= version}
+  "solidtype-internationalized-date" {= version}
   "odoc" {with-doc}
 ]
 build: [

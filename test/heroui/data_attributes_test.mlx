@@ -5,6 +5,7 @@
    has loaded, is checked by the avatar's own test. *)
 
 module H = Solidtype_heroui
+module Date = Solidtype_internationalized_date
 module Accordion = H.Accordion
 module Alert = H.Alert
 module Avatar = H.Avatar
@@ -757,6 +758,22 @@ let () =
                         </Time_field.Suffix>
                       </Time_field.Group>
                     </Time_field>
+                    <div id="on-date">
+                      <Time_field.Date_time
+                        data_testid="Time_field.Date_time"
+                        placeholder_value=(fun () ->
+                                            Date.Types.CalendarDateTime.make
+                                              2026 10 30 ())>
+                        <Label>"Time"</Label>
+                      </Time_field.Date_time>
+                    </div>
+                    <div id="in-zone">
+                      <Time_field.Zoned
+                        data_testid="Time_field.Zoned"
+                        placeholder_value=(fun () -> Date.now "Europe/Kyiv")>
+                        <Label>"Time"</Label>
+                      </Time_field.Zoned>
+                    </div>
                   </Fieldset.Group>
                   <Fieldset.Actions data_testid="Fieldset.Actions">
                     <Button>"Save"</Button>
@@ -822,6 +839,8 @@ let () =
                    ("Time_field.Input", "[data-slot=date-input-group-input]");
                    ("Time_field.Segment", "[data-slot=date-input-group-segment]");
                    ("Time_field.Suffix", "[data-slot=date-input-group-suffix]");
+                   ("Time_field.Date_time", "#on-date [data-slot=time-field]");
+                   ("Time_field.Zoned", "#in-zone [data-slot=time-field]");
                  ])
             |> toEqual [||]));
       Jest.test "reaches each part of a status" (fun () ->

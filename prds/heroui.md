@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted and its binding has landed; TimeField on its values, a breaking change, is next.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; dates on `@internationalized/date` are accepted, its binding has landed, and TimeField takes its values.
 Date: 2026-10-23
 
 ## The problem
@@ -242,14 +242,19 @@ field or date picker exists. So the library is bound as a package of its
 own, `solidtype-internationalized-date`, generated from its declarations
 on `generate/binding.ts`'s core, and every date port takes its values:
 
-- **TimeField** takes HeroUI's `TimeValue`, a `Time`, a
-  `CalendarDateTime` or a `ZonedDateTime`, and gives back the same kind.
-  Kobalte still edits it: the port turns the value into Kobalte's time to
-  draw and step, and Kobalte's change back into the value's own kind, by
-  `set`, so a zoned value moves by its zone's rules, daylight saving
-  included, as React Aria's does. A zoned value shows its zone's
-  abbreviation after the segments, a segment of its own that takes no
-  key, unless `hide_time_zone`.
+- **TimeField** takes HeroUI's `TimeValue` as three roots, each giving
+  back its own kind: `Time_field` a `Time`, `Time_field.Date_time` a
+  `CalendarDateTime` and `Time_field.Zoned` a `ZonedDateTime`. One generic
+  field would have to make a value of its caller's kind from nothing when
+  it is empty, which React Aria does by giving back a `Time` whatever its
+  type says; so a dated or zoned root requires the `placeholder_value` a
+  time typed while empty is put on. Kobalte still edits the time: the port
+  turns the value into Kobalte's time to draw and step, and Kobalte's
+  change back into the value's own kind, by `set`, so a zoned value moves
+  by its zone's rules, daylight saving included. A zoned value shows its
+  zone's name after the segments, as the locale writes it at the time
+  shown, a segment of its own that takes no key, unless `hide_time_zone`.
+  A form is sent the value whole, where React Aria's sends the time alone.
 - **DateField, Calendar, RangeCalendar, DatePicker, DateRangePicker**,
   group 7, are built on the same values and on the library's calendars, so
   a calendar other than the Gregorian is theirs too.
@@ -437,13 +442,12 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 ### Dates
 - [x] `@internationalized/date` bound as `solidtype-internationalized-date`,
   generated, with its values, calendars, arithmetic and time zones
-- [ ] TimeField on its `TimeValue`: a `Time`, a `CalendarDateTime` or a
-  `ZonedDateTime`, Kobalte editing it, a zoned value's abbreviation shown
-  unless `hide_time_zone`. Breaking: `value`, `default_value`,
-  `placeholder_value`, `min_value`, `max_value` and `on_change` leave
-  Kobalte's `Types.Time.t`, its floats, for the library's kinds, and
-  `solidtype-heroui` comes to depend on `solidtype-internationalized-date`.
-  Kobalte's time is then made and read only inside the port.
+- [x] TimeField on its values: `Time_field` a `Time`, `Time_field.Date_time`
+  a `CalendarDateTime` and `Time_field.Zoned` a `ZonedDateTime`, each with the
+  `placeholder_value` a time typed while empty is put on, Kobalte editing the
+  time; a zoned value's zone shown unless `hide_time_zone`; a form sent the
+  value whole. Breaking, and `solidtype-heroui` depends on
+  `solidtype-internationalized-date`.
 
 ### Group 6: color
 - [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,

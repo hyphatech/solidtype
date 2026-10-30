@@ -1,33 +1,56 @@
 (* HeroUI's TimeField on Kobalte's, beside the same field in React: every part
-   -- its label, group, input, each segment and the literals between them, its
-   description and error -- at rest, given a value, typed into, and in each
-   state. *)
+   -- its label, group, input, each segment and the literals between them, a
+   zoned value's zone, its description and error -- at rest, given a value,
+   typed into, and in each state; and each kind of value given back as it was
+   given, what a form is sent of it, and a time its zone's clocks skip. Kyiv's
+   clocks go from 03:00 to 04:00 on 29 March 2026. *)
 
 module S = Solidtype.Solid
 module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
-module Time = Solidtype_kobalte.Types.Time
+module D = Solidtype_internationalized_date
+module Time = D.Types.Time
+module Date_time = D.Types.CalendarDateTime
+module Zoned = D.Types.ZonedDateTime
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
 
+let kyiv = "Europe/Kyiv"
+
 type clock
 
-external clock : ?hour:float -> ?minute:float -> ?second:float -> unit -> clock
-  = ""
+external clock : ?hour:int -> ?minute:int -> ?second:int -> unit -> clock = ""
 [@@mel.obj]
 
-external clock_hour : clock -> float option = "hour" [@@mel.get]
-external clock_minute : clock -> float option = "minute" [@@mel.get]
+(* What React's field was told: its time, and its value as written. *)
+type told
+
+external told_hour : told -> int = "hour" [@@mel.get]
+external told_minute : told -> int = "minute" [@@mel.get]
+external told_iso : told -> string = "iso" [@@mel.get]
+
+type on
+
+external on :
+  year:int ->
+  month:int ->
+  day:int ->
+  ?time_zone:(string[@mel.as "timeZone"]) ->
+  unit ->
+  on = ""
+[@@mel.obj]
 
 type props
 
 external props :
   ?default_value:(clock[@mel.as "defaultValue"]) ->
+  ?on:on ->
   ?granularity:string ->
   ?hour_cycle:(int[@mel.as "hourCycle"]) ->
+  ?hide_time_zone:(bool[@mel.as "hideTimeZone"]) ->
   ?is_disabled:(bool[@mel.as "isDisabled"]) ->
   ?is_invalid:(bool[@mel.as "isInvalid"]) ->
   ?is_required:(bool[@mel.as "isRequired"]) ->
@@ -39,7 +62,7 @@ external props :
 [@@mel.obj]
 
 module Twin = struct
-  external render : props -> ((clock -> unit)[@mel.uncurry]) -> Dom.element
+  external render : props -> ((told -> unit)[@mel.uncurry]) -> Dom.element
     = "render"
   [@@mel.module "./twins/TimeField.tsx"]
 
@@ -55,11 +78,12 @@ external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
   = "querySelectorAll"
 [@@mel.send]
 
-external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
 
 external parent : Dom.element -> Dom.element Js.null = "parentElement"
 [@@mel.get]
+
+external input_value : Dom.element -> string = "value" [@@mel.get]
 
 (* What HeroUI's styles read of a part and what a reader reaches: its state as
    React Aria writes it, its role and its text. Ids, and the attributes each
@@ -78,6 +102,7 @@ let state =
     "data-focused";
     "data-focus-within";
     "aria-hidden";
+    "aria-readonly";
   ]
 
 let shown host =
@@ -113,11 +138,13 @@ let segment host kind =
   | e :: _ -> e
   | [] -> Js.Exn.raiseError ("no " ^ kind ^ " segment")
 
-let told_of c =
-  String.concat ":"
-    (List.map
-       (fun v -> Js.Float.toString (Option.value v ~default:(-1.)))
-       [ clock_hour c; clock_minute c ])
+let told_text ~hour ~minute iso =
+  string_of_int hour ^ ":" ^ string_of_int minute ^ " " ^ iso
+
+let told_time t = told_text ~hour:(Time.hour t) ~minute:(Time.minute t)
+
+let told_of t =
+  told_text ~hour:(told_hour t) ~minute:(told_minute t) (told_iso t)
 
 (* The field shown, then its hour typed into, then its minute. *)
 let walk ~step host told =
@@ -136,37 +163,97 @@ let walk ~step host told =
   in
   Js.Promise.resolve (at_rest, typed, (shown host, !told))
 
-let both ?default_value ?granularity ?hour_cycle ?is_disabled ?is_invalid
-    ?is_required ?is_read_only ?variant () =
+(* What a field holds: a time of day, one on 30 October 2026, or one in Kyiv
+   on 29 March 2026, the day its clocks go forward. *)
+type kind = Of_day | On_date | In_kyiv
+
+let on_date = Date_time.make 2026 10 30
+
+let in_kyiv ~hour ~minute =
+  D.to_zoned (Date_time.make 2026 3 29 ~hour ~minute ()) kyiv ()
+
+let inside ?variant () =
+  Solidtype.Jsx.(
+    element
+      (fragment
+         [|
+           <Label>"Time"</Label>;
+           <Time_field.Group ?variant=(fun () -> variant)>
+             <Time_field.Input>
+               (fun segment ->
+                 <Time_field.Segment segment=(fun () -> S.get segment) />)
+             </Time_field.Input>
+           </Time_field.Group>;
+           <Description>"When it starts."</Description>;
+           <Field_error>"Pick a time."</Field_error>;
+         |]))
+
+let both ?(kind = Of_day) ?default_value ?granularity ?hour_cycle
+    ?hide_time_zone ?is_disabled ?is_invalid ?is_required ?is_read_only ?variant
+    () =
   let told = ref "" in
   T.render (fun () ->
-      <Time_field
-        ?default_value=(fun () ->
-                         Option.map
-                           (fun (h, m) -> Time.make ~hour:h ~minute:m ())
-                           default_value)
-        ?granularity=(fun () -> granularity)
-        ?hour_cycle=(fun () -> hour_cycle)
-        ?is_disabled=(fun () -> is_disabled)
-        ?is_invalid=(fun () -> is_invalid)
-        ?is_required=(fun () -> is_required)
-        ?is_read_only=(fun () -> is_read_only)
-        name="time"
-        class_="w-64"
-        on_change=(Option.iter (fun t ->
-                       told :=
-                         told_of
-                           (clock ?hour:(Time.hour t) ?minute:(Time.minute t) ())))>
-        <Label>"Time"</Label>
-        <Time_field.Group ?variant=(fun () -> variant)>
-          <Time_field.Input>
-            (fun segment ->
-              <Time_field.Segment segment=(fun () -> S.get segment) />)
-          </Time_field.Input>
-        </Time_field.Group>
-        <Description>"When it starts."</Description>
-        <Field_error>"Pick a time."</Field_error>
-      </Time_field>);
+      match kind with
+      | Of_day ->
+          <Time_field
+            ?default_value=(fun () ->
+                             Option.map
+                               (fun (hour, minute) ->
+                                 Time.make ~hour ~minute ())
+                               default_value)
+            ?granularity=(fun () -> granularity)
+            ?hour_cycle=(fun () -> hour_cycle)
+            ?is_disabled=(fun () -> is_disabled)
+            ?is_invalid=(fun () -> is_invalid)
+            ?is_required=(fun () -> is_required)
+            ?is_read_only=(fun () -> is_read_only)
+            name="time"
+            class_="w-64"
+            on_change=(Option.iter (fun t ->
+                           told := told_time t (Time.to_string t ())))>
+            (fun () -> inside ?variant ())
+          </Time_field>
+      | On_date ->
+          <Time_field.Date_time
+            ?default_value=(fun () ->
+                             Option.map
+                               (fun (hour, minute) -> on_date ~hour ~minute ())
+                               default_value)
+            placeholder_value=(fun () -> on_date ())
+            ?granularity=(fun () -> granularity)
+            ?hour_cycle=(fun () -> hour_cycle)
+            ?is_disabled=(fun () -> is_disabled)
+            ?is_invalid=(fun () -> is_invalid)
+            ?is_required=(fun () -> is_required)
+            ?is_read_only=(fun () -> is_read_only)
+            name="time"
+            class_="w-64"
+            on_change=(Option.iter (fun v ->
+                           told :=
+                             told_time (D.to_time v) (Date_time.to_string v ())))>
+            (fun () -> inside ?variant ())
+          </Time_field.Date_time>
+      | In_kyiv ->
+          <Time_field.Zoned
+            ?default_value=(fun () ->
+                             Option.map
+                               (fun (hour, minute) -> in_kyiv ~hour ~minute)
+                               default_value)
+            placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)
+            ?hide_time_zone=(fun () -> hide_time_zone)
+            ?granularity=(fun () -> granularity)
+            ?hour_cycle=(fun () -> hour_cycle)
+            ?is_disabled=(fun () -> is_disabled)
+            ?is_invalid=(fun () -> is_invalid)
+            ?is_required=(fun () -> is_required)
+            ?is_read_only=(fun () -> is_read_only)
+            name="time"
+            class_="w-64"
+            on_change=(Option.iter (fun v ->
+                           told :=
+                             told_time (D.to_time v) (Zoned.to_string v ())))>
+            (fun () -> inside ?variant ())
+          </Time_field.Zoned>);
   let host =
     match T.query "[data-slot=time-field]" with
     | Some e -> Option.value (Js.Null.toOption (parent e)) ~default:T.body
@@ -179,7 +266,14 @@ let both ?default_value ?granularity ?hour_cycle ?is_disabled ?is_invalid
     Twin.render
       (props
          ?default_value:
-           (Option.map (fun (h, m) -> clock ~hour:h ~minute:m ()) default_value)
+           (Option.map
+              (fun (hour, minute) -> clock ~hour ~minute ())
+              default_value)
+         ?on:
+           (match kind with
+           | Of_day -> None
+           | On_date -> Some (on ~year:2026 ~month:10 ~day:30 ())
+           | In_kyiv -> Some (on ~year:2026 ~month:3 ~day:29 ~time_zone:kyiv ()))
          ?granularity:
            (Option.map
               (function
@@ -187,13 +281,13 @@ let both ?default_value ?granularity ?hour_cycle ?is_disabled ?is_invalid
               granularity)
          ?hour_cycle:
            (Option.map (function `h12 -> 12 | `h24 -> 24) hour_cycle)
-         ?is_disabled ?is_invalid ?is_required ?is_read_only
+         ?hide_time_zone ?is_disabled ?is_invalid ?is_required ?is_read_only
          ?variant:
            (Option.map
               (function `primary -> "primary" | `secondary -> "secondary")
               variant)
          ())
-      (fun c -> told' := told_of c)
+      (fun t -> told' := told_of t)
   in
   let* react = walk ~step:Twin.step host told' in
   Twin.cleanup ();
@@ -209,7 +303,7 @@ let () =
           let* r = both () in
           same r);
       Jest.testPromise "shows its value, as React's does" (fun () ->
-          let* r = both ~default_value:(14., 30.) () in
+          let* r = both ~default_value:(14, 30) () in
           same r);
       Jest.testPromise "is on a 24-hour clock to the second, as React's is"
         (fun () ->
@@ -219,31 +313,134 @@ let () =
           let* r = both ~is_invalid:true ~is_required:true () in
           same r);
       Jest.testPromise "is disabled, as React's is" (fun () ->
-          let* r = both ~is_disabled:true ~default_value:(9., 5.) () in
+          let* r = both ~is_disabled:true ~default_value:(9, 5) () in
           same r);
       Jest.testPromise "is secondary, as React's is" (fun () ->
           let* r = both ~variant:`secondary () in
+          same r);
+      Jest.testPromise "keeps a time's date, as React's does" (fun () ->
+          let* r = both ~kind:On_date ~default_value:(14, 30) () in
+          same r);
+      Jest.testPromise "shows a zoned time's zone, as React's does" (fun () ->
+          let* r = both ~kind:In_kyiv ~default_value:(9, 30) () in
+          same r);
+      Jest.testPromise
+        "names its zone at the time shown, on a 24-hour clock, as React's does"
+        (fun () ->
+          (* React's moves focus on, out of the last segment typed and onto the
+             zone, which nothing types into; Kobalte keeps it on the minute. *)
+          let* (rest, typed, _), (rest', typed', _) =
+            both ~kind:In_kyiv ~hour_cycle:`h24 ()
+          in
+          Js.Promise.resolve E.(expect (rest, typed) |> toEqual (rest', typed')));
+      Jest.testPromise "hides its zone, as React's does" (fun () ->
+          let* r =
+            both ~kind:In_kyiv ~hide_time_zone:true ~default_value:(9, 30) ()
+          in
           same r);
       Jest.test "tells it is left once focus leaves it" (fun () ->
           let solidtype =
             T.blurs ~root:"[data-slot=time-field]" (fun on_blur ->
                 T.render (fun () ->
-                    <Time_field on_blur>
-                      <Label>"Time"</Label>
-                      <Time_field.Group>
-                        <Time_field.Input>
-                          (fun segment ->
-                            <Time_field.Segment
-                              segment=(fun () -> S.get segment)
-                            />)
-                        </Time_field.Input>
-                      </Time_field.Group>
-                    </Time_field>))
+                    <Time_field on_blur>(fun () -> inside ())</Time_field>))
           in
           (* React's TimeField tells its onBlur more than once on the way
              through its segments and out; a form reads a field left once, as
              every other port tells it. *)
           E.(expect solidtype |> toEqual 1)))
+
+let sent () =
+  match T.query "input[name=time]" with
+  | Some input -> input_value input
+  | None -> Js.Exn.raiseError "no input named time"
+
+let () =
+  Jest.describe "Time_field, its value" (fun () ->
+      Jest.afterEach T.cleanup;
+      (* React's sends a zoned value's time alone, its date and zone lost. *)
+      Jest.test "is sent to a form as @internationalized/date writes it"
+        (fun () ->
+          let sent_of field =
+            T.render field;
+            let v = sent () in
+            T.cleanup ();
+            v
+          in
+          let of_day =
+            sent_of (fun () ->
+                <Time_field
+                  name="time"
+                  default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())>
+                  (fun () -> inside ())
+                </Time_field>)
+          in
+          let on_date =
+            sent_of (fun () ->
+                <Time_field.Date_time
+                  name="time"
+                  default_value=(fun () -> on_date ~hour:9 ~minute:30 ())
+                  placeholder_value=(fun () -> on_date ())>
+                  (fun () -> inside ())
+                </Time_field.Date_time>)
+          in
+          let in_kyiv =
+            sent_of (fun () ->
+                <Time_field.Zoned
+                  name="time"
+                  default_value=(fun () -> in_kyiv ~hour:9 ~minute:30)
+                  placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)>
+                  (fun () -> inside ())
+                </Time_field.Zoned>)
+          in
+          let empty =
+            sent_of (fun () ->
+                <Time_field name="time">(fun () -> inside ())</Time_field>)
+          in
+          E.(
+            expect (of_day, on_date, in_kyiv, empty)
+            |> toEqual
+                 ( "09:30:00",
+                   "2026-10-30T09:30:00",
+                   "2026-03-29T09:30:00+03:00[Europe/Kyiv]",
+                   "" )));
+      Jest.testPromise "is typed onto its placeholder's date and zone, empty"
+        (fun () ->
+          let told = ref "" in
+          let value, set_value = S.create_signal Js.Nullable.null in
+          T.render (fun () ->
+              <Time_field.Zoned
+                value=(fun () -> S.get value)
+                placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)
+                hour_cycle=`h24
+                on_change=(fun v ->
+                            S.set set_value (Js.Nullable.fromOption v);
+                            Option.iter
+                              (fun v -> told := Zoned.to_string v ())
+                              v)>
+                (fun () -> inside ())
+              </Time_field.Zoned>);
+          let user = T.setup () in
+          let* () = T.click user (segment T.body "hour") in
+          let* () = T.keyboard user "0930" in
+          Js.Promise.resolve
+            E.(expect !told |> toEqual "2026-03-29T09:30:00+03:00[Europe/Kyiv]"));
+      Jest.testPromise "moves a time its zone skips to the hour after it"
+        (fun () ->
+          let told = ref "" in
+          T.render (fun () ->
+              <Time_field.Zoned
+                placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)
+                hour_cycle=`h24
+                on_change=(Option.iter (fun v -> told := Zoned.to_string v ()))>
+                (fun () -> inside ())
+              </Time_field.Zoned>);
+          let user = T.setup () in
+          let* () = T.click user (segment T.body "hour") in
+          let* () = T.keyboard user "0330" in
+          Js.Promise.resolve
+            E.(
+              expect (!told, text (segment T.body "hour"))
+              |> toEqual ("2026-03-29T04:30:00+03:00[Europe/Kyiv]", "04"))))
 
 (* A field of hours and minutes, 24 hours to the day, so no segment is AM or
    PM, told each change. *)
@@ -255,18 +452,9 @@ let field ~default_value ~told () =
         on_change=(fun t ->
                     told :=
                       match t with
-                      | Some t ->
-                          told_of
-                            (clock ?hour:(Time.hour t) ?minute:(Time.minute t)
-                               ())
+                      | Some t -> told_time t (Time.to_string t ())
                       | None -> "none")>
-        <Label>"Time"</Label>
-        <Time_field.Group>
-          <Time_field.Input>
-            (fun segment ->
-              <Time_field.Segment segment=(fun () -> S.get segment) />)
-          </Time_field.Input>
-        </Time_field.Group>
+        (fun () -> inside ())
       </Time_field>)
 
 let placeholder kind = T.attribute (segment T.body kind) "data-placeholder"
@@ -282,13 +470,7 @@ let () =
                 value=(fun () -> S.get time)
                 hour_cycle=`h24
                 on_change=(fun t -> S.set set_time (Js.Nullable.fromOption t))>
-                <Label>"Time"</Label>
-                <Time_field.Group>
-                  <Time_field.Input>
-                    (fun segment ->
-                      <Time_field.Segment segment=(fun () -> S.get segment) />)
-                  </Time_field.Input>
-                </Time_field.Group>
+                (fun () -> inside ())
               </Time_field>);
           let user = T.setup () in
           let* () = T.click user (segment T.body "hour") in
@@ -302,7 +484,7 @@ let () =
       Jest.testPromise "tells its change once every segment is erased"
         (fun () ->
           let told = ref "" in
-          field ~default_value:(Time.make ~hour:9. ~minute:45. ()) ~told ();
+          field ~default_value:(Time.make ~hour:9 ~minute:45 ()) ~told ();
           let user = T.setup () in
           let* () = T.click user (segment T.body "minute") in
           let* () = T.keyboard user "{Backspace}{Backspace}{Backspace}" in

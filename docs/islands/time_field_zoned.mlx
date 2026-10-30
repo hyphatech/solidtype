@@ -1,0 +1,37 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Time_field = Solidtype_heroui.Time_field
+module D = Solidtype_internationalized_date
+
+(* A meeting in Kyiv on 29 March 2026, when its clocks go from 03:00 to 04:00:
+   a time typed in that hour is the one after it. *)
+let day = D.parse_zoned_date_time "2026-03-29T00:00[Europe/Kyiv]" ()
+
+let make () =
+  let value, set_value =
+    S.create_signal
+      (Some (D.parse_zoned_date_time "2026-03-29T09:30[Europe/Kyiv]" ()))
+  in
+  <Time_field.Zoned
+    class_="w-[256px]"
+    name="meeting"
+    value=(fun () -> Js.Nullable.fromOption (S.get value))
+    placeholder_value=(fun () -> day)
+    on_change=(S.set set_value)>
+    <Label>"Meeting in Kyiv"</Label>
+    <Time_field.Group>
+      <Time_field.Input>
+        (fun segment ->
+          <Time_field.Segment segment=(fun () -> S.get segment) />)
+      </Time_field.Input>
+    </Time_field.Group>
+    <Description>
+      (fun () ->
+        Jsx.string
+          (match S.get value with
+          | Some v -> D.Types.ZonedDateTime.to_string v ()
+          | None -> "(empty)"))
+    </Description>
+  </Time_field.Zoned>
