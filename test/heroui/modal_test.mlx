@@ -9,6 +9,15 @@ module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
 
+external create_div : string -> Dom.htmlDivElement = "createElement"
+[@@mel.scope "document"]
+
+external append : Dom.element -> Dom.htmlDivElement -> unit = "appendChild"
+[@@mel.send]
+
+external contains : Dom.htmlDivElement -> Dom.element -> bool = "contains"
+[@@mel.send]
+
 type props
 
 external props :
@@ -262,4 +271,18 @@ let () =
           Js.Promise.resolve
             E.(
               expect (before, opened, shown (), List.rev !told)
-              |> toEqual (0, 1, 0, [ false ]))))
+              |> toEqual (0, 1, 0, [ false ])));
+      Jest.testPromise "is drawn in the portal container it is given" (fun () ->
+          let host = create_div "div" in
+          append T.body host;
+          T.render (fun () ->
+              <Modal.Backdrop is_open=true portal_container=(fun () -> host)>
+                <Modal.Container>
+                  <Modal.Dialog>
+                    <Modal.Heading>"Inside"</Modal.Heading>
+                  </Modal.Dialog>
+                </Modal.Container>
+              </Modal.Backdrop>);
+          let* () = settle () in
+          let backdrop = first "[data-slot=modal-backdrop]" in
+          Js.Promise.resolve E.(expect (contains host backdrop) |> toBe true)))

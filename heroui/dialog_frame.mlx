@@ -162,8 +162,23 @@ let trigger ~slot ~class_ ~aria_label ~others children =
     (fun () -> children ())
   </As_div>
 
-let backdrop ~slot ~class_ ~dismissable ~keyboard_dismissable ~is_open
-    ~default_open ~on_open_change ~others children =
+(* Kobalte's portal, mounted on any element: its own check names [Dom.node]
+   alone, which no element an application holds is. *)
+module Portal = struct
+  module Props = struct
+    external check :
+      ?mount:_ Dom.node_like Solidtype.Check.value ->
+      children:('f, [ `nodes ]) Solidtype.Check.children ->
+      unit ->
+      unit = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  let component = Kobalte.Portal.component
+end
+
+let backdrop ~slot ~portal_container ~class_ ~dismissable ~keyboard_dismissable
+    ~is_open ~default_open ~on_open_change ~others children =
   (* The backdrop inside Kobalte's root, its own or the dialog's. *)
   let shown () =
     let k = Kobalte.use_dialog_context () in
@@ -179,7 +194,7 @@ let backdrop ~slot ~class_ ~dismissable ~keyboard_dismissable ~is_open
     in
     let height = viewport_height () in
     <Show when_=(fun () -> Overlay.present o)>
-      <Kobalte.Portal>
+      <Portal ?mount=(fun () -> portal_container ())>
         <div
           class_=(fun () -> class_ ())
           style=(fun () ->
@@ -196,7 +211,7 @@ let backdrop ~slot ~class_ ~dismissable ~keyboard_dismissable ~is_open
             (fun () -> children ())
           </Context.Provider>
         </div>
-      </Kobalte.Portal>
+      </Portal>
     </Show>
   in
   match Root.use () with

@@ -59,7 +59,9 @@ end
 (** What covers the page while the modal is open: a [<div>], [opaque] by
     default. A press on it closes the modal while [is_dismissable], and Escape
     while not [is_keyboard_dismiss_disabled]. With no {!Modal} around it,
-    [is_open], [default_open] and [on_open_change] are its own. *)
+    [is_open], [default_open] and [on_open_change] are its own. It is drawn at
+    the end of the page's body, or inside [portal_container] while that is
+    given. *)
 module Backdrop : sig
   module Props : sig
     type t
@@ -71,6 +73,7 @@ module Backdrop : sig
       ?is_open:bool Solidtype.Check.value ->
       ?default_open:bool Solidtype.Check.value ->
       ?on_open_change:(bool -> unit) ->
+      ?portal_container:_ Dom.element_like Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->

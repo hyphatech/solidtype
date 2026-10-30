@@ -46,8 +46,9 @@ module Backdrop = struct
       ?(is_dismissable : bool = false)
       ?(is_keyboard_dismiss_disabled : bool = true) ?(is_open : bool option)
       ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
-    Dialog_frame.backdrop ~slot:"alert-dialog-backdrop"
+      ?(portal_container : _ Dom.element_like option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    Dialog_frame.backdrop ~slot:"alert-dialog-backdrop" ~portal_container
       ~class_:(fun () ->
         after
           (Styles.AlertDialog.backdrop (slots ~variant:(variant ()) ()))

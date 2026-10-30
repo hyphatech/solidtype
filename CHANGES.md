@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Modal.Backdrop` and `Alert_dialog.Backdrop`:
+  `portal_container`, React Aria's `UNSTABLE_portalContainer`, the element
+  the backdrop is drawn inside instead of the page's body.
 - `Solidtype_heroui.Accordion.Trigger`: `on_press`, called as it is pressed,
   by a pointer, Enter or Space, and `is_disabled`, which disables the trigger
   alone, its item's state left as it is; the arrows pass a disabled trigger by.

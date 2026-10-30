@@ -51,6 +51,7 @@ val trigger :
 
 val backdrop :
   slot:string ->
+  portal_container:(unit -> _ Dom.element_like option) ->
   class_:(unit -> string) ->
   dismissable:(unit -> bool) ->
   keyboard_dismissable:(unit -> bool) ->
@@ -62,7 +63,8 @@ val backdrop :
   Solidtype.Jsx.element
 (** A press on it closes the dialog while [dismissable], and Escape while
     [keyboard_dismissable]; [is_open], [default_open] and [on_open_change] are
-    its own where no root is above it. *)
+    its own where no root is above it. It is drawn at the end of the page's
+    body, or inside [portal_container] while that gives an element. *)
 
 val container :
   t ->

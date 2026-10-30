@@ -203,6 +203,7 @@ module Backdrop = struct
       ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
       ?(class_ : string option) ~(children : Jsx.content) () =
     Dialog_frame.backdrop ~slot:"drawer-backdrop"
+      ~portal_container:(fun () -> None)
       ~class_:(fun () ->
         after
           (Styles.Drawer.backdrop (slots ~variant:(variant ()) ()))

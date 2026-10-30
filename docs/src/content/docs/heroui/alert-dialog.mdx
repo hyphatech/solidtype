@@ -26,6 +26,8 @@ import * as ExDismiss from "@islands/alert_dialog_dismiss.jsx";
 import ExDismissCode from "@islands/alert_dialog_dismiss.mlx?raw";
 import * as ExCloseMethods from "@islands/alert_dialog_close_methods.jsx";
 import ExCloseMethodsCode from "@islands/alert_dialog_close_methods.mlx?raw";
+import * as ExCustomPortal from "@islands/alert_dialog_custom_portal.jsx";
+import ExCustomPortalCode from "@islands/alert_dialog_custom_portal.mlx?raw";
 import * as ExCustomAnimations from "@islands/alert_dialog_custom_animations.jsx";
 import ExCustomAnimationsCode from "@islands/alert_dialog_custom_animations.mlx?raw";
 import * as ExTailwind from "@islands/alert_dialog_tailwind.jsx";
@@ -115,9 +117,12 @@ The second half closes the dialog from its own state, where HeroUI's reads `clos
 
 ### Custom Portal
 
-HeroUI's Custom Portal example gives the backdrop React Aria's
-`UNSTABLE_portalContainer`, which the port does not take yet: a dialog is
-drawn at the end of the page.
+The backdrop's `portal_container`, React Aria's `UNSTABLE_portalContainer`,
+draws it inside an element of the page's instead of at the end of its body:
+here a box whose `transform` makes it a stacking context, which the backdrop
+fills. Any element a `ref` gives is taken.
+
+<Example code={ExCustomPortalCode} title="alert_dialog_custom_portal.mlx"><ExCustomPortal.make client:visible /></Example>
 
 ## Customization
 
@@ -192,6 +197,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `true` | Whether Escape does not |
 | `isOpen` | `is_open` | `bool` | | With no `Alert_dialog` around it, whether it is open |
 | `onOpenChange` | `on_open_change` | `bool -> unit` | | With no `Alert_dialog` around it, told as it opens or closes |
+| `UNSTABLE_portalContainer` | `portal_container` | `_ Dom.element_like` | the page's body | The element it is drawn inside |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### AlertDialog.Container

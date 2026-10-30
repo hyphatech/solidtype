@@ -1,0 +1,75 @@
+module S = Solidtype.Solid
+module Button = Solidtype_heroui.Button
+module Modal = Solidtype_heroui.Modal
+
+let make () =
+  (* The box is known once it is on the page, as React's ref and state know
+     it; the modal is made after the page hydrates, as the server, with no
+     box, never made it. *)
+  let box = ref None in
+  let container, set_container = S.create_signal None in
+  S.on_mount (fun () -> S.set set_container !box);
+  <div class_="flex flex-col gap-4">
+    <div>
+      <p class_="text-sm">
+        "Render modals inside a custom container instead of "
+        <code>"document.body"</code>
+      </p>
+      <p class_="text-sm text-muted">
+        "Apply "
+        <code class_="rounded px-1 py-0.5 text-xs">
+          "transform: translateZ(0)"
+        </code>
+        " to the container to create a new stacking context."
+      </p>
+    </div>
+    <div
+      ref=(fun e -> box := Some e)
+      class_="relative flex h-[380px] items-center justify-center \
+              overflow-hidden rounded bg-muted/20"
+      style="transform: translate(0);">
+      <Solidtype.Show.Some some=(fun () -> S.get container)>
+        (fun element ->
+          <Modal>
+            <Button>"Open Modal"</Button>
+            <Modal.Backdrop
+              class_="h-full" portal_container=(fun () -> S.get element)>
+              <Modal.Container class_="h-full max-h-full">
+                <Modal.Dialog class_="h-full max-h-full sm:max-w-md">
+                  <Modal.Close_trigger />
+                  <Modal.Header>
+                    <Modal.Heading>"Custom Portal"</Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <p class_="text-sm text-muted">
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing \
+                       elit. Sed do eiusmod tempor incididunt ut labore et \
+                       dolore magna aliqua. Ut enim ad minim veniam, quis \
+                       nostrud exercitation ullamco laboris nisi ut aliquip ex \
+                       ea commodo consequat."
+                    </p>
+                    <p class_="text-sm text-muted">
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing \
+                       elit. Sed do eiusmod tempor incididunt ut labore et \
+                       dolore magna aliqua. Ut enim ad minim veniam, quis \
+                       nostrud exercitation ullamco laboris nisi ut aliquip ex \
+                       ea commodo consequat."
+                    </p>
+                    <p class_="text-sm text-muted">
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing \
+                       elit. Sed do eiusmod tempor incididunt ut labore et \
+                       dolore magna aliqua. Ut enim ad minim veniam, quis \
+                       nostrud exercitation ullamco laboris nisi ut aliquip ex \
+                       ea commodo consequat."
+                    </p>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button slot=`close variant=`secondary>"Close"</Button>
+                  </Modal.Footer>
+                </Modal.Dialog>
+              </Modal.Container>
+            </Modal.Backdrop>
+          </Modal>)
+      </Solidtype.Show.Some>
+    </div>
+  </div>
