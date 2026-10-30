@@ -1,0 +1,105 @@
+---
+title: Gallery
+description: "rhp's gallery charts in OCaml: grouped bars, a waterfall, a pie, a heatmap, a Gantt chart and candlesticks."
+---
+
+import Example from "@components/Example.astro";
+import "@bezda/rhp/posters.css";
+import * as Grouped from "@islands/rhp_grouped_bars.jsx";
+import GroupedCode from "@islands/rhp_grouped_bars.mlx?raw";
+import * as Waterfall from "@islands/rhp_waterfall_budget.jsx";
+import WaterfallCode from "@islands/rhp_waterfall_budget.mlx?raw";
+import * as Pie from "@islands/rhp_pie.jsx";
+import PieCode from "@islands/rhp_pie.mlx?raw";
+import * as Heatmap from "@islands/rhp_heatmap.jsx";
+import HeatmapCode from "@islands/rhp_heatmap.mlx?raw";
+import * as Gantt from "@islands/rhp_gantt.jsx";
+import GanttCode from "@islands/rhp_gantt.mlx?raw";
+import * as Candlestick from "@islands/rhp_candlestick.jsx";
+import CandlestickCode from "@islands/rhp_candlestick.mlx?raw";
+
+Whole charts from rhp's gallery, each written in OCaml from rhp's own
+code: the same slats, the same CSS and the same poster around it, from
+the looks in `@bezda/rhp/posters.css`. Each chart is tested against the
+same chart in rhp's JSX, which it draws exactly, before and after it is
+pointed at or clicked.
+
+Their data is fixed, where rhp's has a button for new data, and each
+keeps one orientation, the one rhp's page opens with. An event rhp's
+poster catches and traces to its row by a `data-` attribute is caught by
+the row's own element here, so no handler reads the page.
+
+Original rhp documentation: [Examples](https://rhp.vercel.app/examples/bar-chart/).
+
+## Grouped bars
+
+A team's slat holds a plot of its own, which shares the team's band out
+among its three counts: that is the group. The teams are ranked as a
+medal table is, golds first, by `Order.sort_by`, and keyed by name, so a
+team keeps its slat as the order changes. A medal's face is an element
+inside its `Dot`, so its lift on hover is a transition of its own.
+
+Original rhp documentation: [Grouped bars](https://rhp.vercel.app/examples/grouped-bars/).
+
+<Example code={GroupedCode} title="rhp_grouped_bars.mlx" fill><Grouped.make client:visible /></Example>
+
+## A waterfall
+
+`running` gives each step, from the total before it to the total after,
+and a `Tick` at each step's end links it to the next. An expense is a
+button: a click cuts it from the month, its step falls to nothing with a
+dashed outline where it was, and the steps after it, the savings and the
+headline follow.
+
+Original rhp documentation: [Waterfall](https://rhp.vercel.app/examples/waterfall/).
+
+<Example code={WaterfallCode} title="rhp_waterfall_budget.mlx" fill><Waterfall.make client:visible /></Example>
+
+## A pie
+
+A pie is a stacked bar of shares bent into a circle: `shares` makes the
+hours percentages, `stack_up` their spans, and `overlap` puts every slat
+in one box. rhp has no wedge, so each `Bar` holds an SVG path drawn from
+its span, its corners rounded by a stroke of its own colour. `animated`
+moves the two numbers, and the wedge is drawn again from them each
+frame, since a path's points moved by CSS would flatten its rim.
+`keyboard` lets Tab and the arrows reach each slice.
+
+Original rhp documentation: [Pie](https://rhp.vercel.app/examples/pie-chart/).
+
+<Example code={PieCode} title="rhp_pie.mlx" fill><Pie.make client:visible /></Example>
+
+## A heatmap
+
+Each day is a slat, and its hours a plot across it, `` orientation=`across ``,
+each a `Cell` coloured from the theme's `low` to its `high`.
+`use_orientation` gives a cell the orientation it is drawn in, the other
+one, so the hour numbers stay beside the first day. The hour pointed at
+lights its day and its hour, and the dek reads it.
+
+Original rhp documentation: [Heatmap](https://rhp.vercel.app/examples/heatmap/).
+
+<Example code={HeatmapCode} title="rhp_heatmap.mlx" fill><Heatmap.make client:visible /></Example>
+
+## A Gantt chart
+
+A trade is a bar from the week it starts to the week it ends, the part
+done by today a second bar over it. The months are a `Scale` of a tick
+every four weeks, each a band from its tick to the next; today is a plot
+of one row, `overlap`, over the trades, which the pointer passes
+through.
+
+Original rhp documentation: [Gantt](https://rhp.vercel.app/examples/gantt/).
+
+<Example code={GanttCode} title="rhp_gantt.mlx" fill><Gantt.make client:visible /></Example>
+
+## Candlesticks
+
+A day is two bars, its wick from the low to the high and its body from
+the open to the close, and the scale is fitted to the month by `nice`.
+The day pointed at is read out above the chart and crossed by a second
+plot, `overlap`, of that one day, or of none.
+
+Original rhp documentation: [Candlestick](https://rhp.vercel.app/examples/candlestick/).
+
+<Example code={CandlestickCode} title="rhp_candlestick.mlx" fill><Candlestick.make client:visible /></Example>

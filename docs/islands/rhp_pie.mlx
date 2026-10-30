@@ -1,0 +1,206 @@
+module Animated = Solidtype_rhp.Types.Animated
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+module Ticks = Solidtype_rhp.Ticks
+
+type part = {
+  name : string;
+  hours : float;
+  color : string;
+  from : float;
+  to_ : float; [@mel.as "to"]
+}
+
+(* A day of 24 hours, its parts as shares of 100, stacked: the first from 0
+   to 37, the next from 37 to 61, and so on round to 100. *)
+let parts =
+  let names =
+    [| "Sleep"; "Chores and errands"; "Work and study"; "Free time" |]
+  in
+  let hours = [| 8.8; 5.8; 5.0; 4.4 |] in
+  let colors = [| "#8d93ff"; "#9aa7c7"; "#ffb547"; "#ff5d73" |] in
+  let stack =
+    Solidtype_rhp.stack_up (Solidtype_rhp.shares (Array.map Option.some hours))
+  in
+  Array.mapi
+    (fun i name ->
+      {
+        name;
+        hours = hours.(i);
+        color = colors.(i);
+        from = Option.value stack.from.(i) ~default:0.;
+        to_ = Option.value stack.to_.(i) ~default:0.;
+      })
+    names
+
+let day =
+  ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#eef1f8" ~muted:"#8b93ab"
+    ~grid:"#242a3e" ~surface:"#0f1220" ()
+
+(* rhp has no wedge, so a wedge is an SVG path in a 100 by 100 box around
+   the middle, its angles turns from twelve o'clock, clockwise. A stroke of
+   the fill's colour rounds its corners and grows it by half its width, so
+   the path is drawn that much smaller; the gap between two wedges is a
+   distance, not an angle, so each straight edge is pushed aside rather
+   than turned, and stays one width from its neighbour all the way out. *)
+let tau = 2. *. Js.Math._PI
+let corner = 1.9
+let gap = 1.9
+
+(* Where a wedge starts, so the tips do not pile up in the middle. *)
+let hole = 9.
+let off = corner +. (gap /. 2.)
+let radius = 50. -. corner
+
+(* How far round pushing an edge aside moves the end of an arc, at the rim
+   and at the hole. *)
+let rim_turn = Js.Math.asin (off /. radius) /. tau
+let hole_turn = Js.Math.asin (Float.min 1. (off /. hole)) /. tau
+
+(* Unrounded: near half a turn, an arc moves visibly when its ends are a few
+   thousandths off. *)
+let point t r =
+  Js.Float.toString (r *. Js.Math.sin (t *. tau))
+  ^ ","
+  ^ Js.Float.toString (-.r *. Js.Math.cos (t *. tau))
+
+let large turns = if turns > 0.5 then "1" else "0"
+
+let wedge (from, to_) =
+  let a = from /. 100. and b = to_ /. 100. in
+  let mid = (a +. b) /. 2. in
+  let u = Float.min (a +. rim_turn) mid and v = Float.max (b -. rim_turn) mid in
+  let r = Js.Float.toString radius in
+  let rim =
+    "L" ^ point u radius ^ "A" ^ r ^ "," ^ r ^ " 0 "
+    ^ large (v -. u)
+    ^ " 1 " ^ point v radius
+  in
+  if b -. a <= 2. *. hole_turn then
+    (* Too narrow to reach the hole: the edges end where they cross. *)
+    "M"
+    ^ point mid
+        (Float.min (off /. Js.Math.sin ((b -. a) *. Js.Math._PI)) radius)
+    ^ rim ^ "Z"
+  else
+    let s = a +. hole_turn and e = b -. hole_turn in
+    let h = Js.Float.toString hole in
+    "M" ^ point s hole ^ rim ^ "L" ^ point e hole ^ "A" ^ h ^ "," ^ h ^ " 0 "
+    ^ large (e -. s)
+    ^ " 0 " ^ point s hole ^ "Z"
+
+let css =
+  {|
+.slat { container-type: size; }
+.slat:vertical .slice { inset: 0; left: 0; top: 0; width: 100%; height: 100%; translate: none; background: none; }
+.slat:vertical .slice svg { display: block; width: 100%; height: 100%; }
+.slat:vertical { pointer-events: none; }
+.slat:vertical :is(.slice path, .tag) { pointer-events: auto; }
+.slice path { fill: var(--rhp-color); stroke: var(--rhp-color); stroke-width: 3.8; stroke-linejoin: round; }
+.slat:vertical .tag { left: 50%; top: 50%; bottom: auto; translate: -50% -50%; padding: 0;
+  transform: rotate(calc(var(--turn) * 1turn)) translateY(-31cqmin) rotate(calc(var(--turn) * -1turn)); }
+.slat:vertical .slice { --mid: calc((var(--rhp-lo) + var(--rhp-hi)) / 2); }
+.slat:vertical :is(.slice svg, .tag .move) { transition: translate .25s ease-out; }
+.slat:vertical:is(:hover, :focus-within) .slice svg { translate: calc(sin(var(--mid) * 1turn) * 13px) calc(cos(var(--mid) * 1turn) * -13px); }
+.slat:vertical:is(:hover, :focus-within) .tag .move { translate: calc(sin(var(--rhp-p) * 1turn) * 13px) calc(cos(var(--rhp-p) * 1turn) * -13px); }
+.tag { z-index: 2; color: var(--rhp-surface); text-align: center; }
+.move { display: block; }
+.tag b { display: block; font: 800 clamp(20px, 6cqmin, 32px)/1 var(--rhp-font); letter-spacing: -.03em; }
+.said { display: grid; font-size: clamp(9px, 2.2cqmin, 12px); }
+.said i { grid-area: 1 / 1; font-style: normal; transition: opacity .2s; }
+.said i + i { opacity: 0; }
+.slat:is(:hover, :focus-within) .said i { opacity: 0; }
+.slat:is(:hover, :focus-within) .said i + i { opacity: 1; }
+.slat:focus-visible { outline: none; }
+.slat:focus-visible .tag b { text-decoration: underline; text-underline-offset: 4px; }
+|}
+
+(* A path cannot be transitioned without flattening its rim, so the two
+   numbers move instead, and the wedge and its label's turn are drawn again
+   from them each frame. *)
+let part =
+  Slat.make
+    ~thickness:(Slat.lengths ~horizontal:(Slat.number 82.) ())
+    ~room:(Slat.room ~start:(Slat.px 24.) ~end_:(Slat.px 24.) ())
+    ~css
+    (fun d ->
+      let p = Row.data d in
+      let span =
+        Solidtype_rhp.animated
+          (fun () -> (p.from, p.to_))
+          ~settings:(fun () -> Animated.make ~duration:600. ())
+          ()
+      in
+      <div class_="slat">
+        <Bar
+          from=(fun () -> p.from)
+          to_=(fun () -> p.to_)
+          color=(fun () -> Color.css p.color)
+          class_="slice">
+          <svg
+            view_box="-50 -50 100 100"
+            preserve_aspect_ratio="xMidYMid meet"
+            aria_hidden=true>
+            <path d=(fun () -> wedge (span None)) />
+          </svg>
+        </Bar>
+        <Label
+          at=(fun () -> (p.from +. p.to_) /. 2.)
+          class_="tag"
+          style=(fun () ->
+                  let from, to_ = span None in
+                  "--turn: " ^ Js.Float.toString ((from +. to_) /. 200.))>
+          <span class_="move">
+            <b>
+              (fun () ->
+                Jsx.string
+                  (Js.Float.toString (Js.Math.round (p.to_ -. p.from)) ^ "%"))
+            </b>
+            <span class_="said">
+              <i>(fun () -> Jsx.string p.name)</i>
+              <i>
+                (fun () ->
+                  Jsx.string (Js.Float.toFixed ~digits:1 p.hours ^ " hours"))
+              </i>
+            </span>
+          </span>
+        </Label>
+      </div>)
+
+let make () =
+  <Poster
+    look="day"
+    kicker=(<span>"A day · 25 to 34 year olds"</span>)
+    title=(<span>"Four hours to yourself"</span>)
+    dek=(<span>
+           "Sleep takes the largest share of a day, and once work and the \
+            running of a life are counted, about four hours of it are yours."
+         </span>)
+    note=(<span>
+            "Illustrative, after the American Time Use Survey, averaged over \
+             every day of the week. Point at a slice, or tab into the chart, \
+             for the hours behind its share."
+          </span>)>
+    <Chart
+      orientation=`vertical
+      scale=(fun () -> (0., 100.))
+      ticks=(fun () -> Ticks.none)
+      height=450.
+      theme=(fun () -> day)>
+      <Plot
+        rows=(fun () -> parts)
+        keyboard=true
+        overlap=true
+        key=(fun d -> (Row.data d).name)
+        render=part
+      />
+    </Chart>
+  </Poster>

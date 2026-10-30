@@ -1,0 +1,180 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Order = Solidtype_rhp.Order
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module Scale = Solidtype_rhp.Scale
+module Show = Solidtype.Show
+module Slat = Solidtype_rhp.Slat
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+module Tick = Solidtype_rhp.Tick
+module Ticks = Solidtype_rhp.Ticks
+
+(* Weeks from the start of March. *)
+type trade = { trade : string; start : float; end_ : float [@mel.as "end"] }
+type today = { week : float }
+
+let trades =
+  [|
+    { trade = "Groundworks"; start = 0.; end_ = 6. };
+    { trade = "Frame"; start = 5.; end_ = 13. };
+    { trade = "Roof"; start = 12.; end_ = 17. };
+    { trade = "Services"; start = 14.; end_ = 23. };
+    { trade = "Interiors"; start = 20.; end_ = 30. };
+    { trade = "Garden"; start = 27.; end_ = 32. };
+  |]
+
+let months = [| "Mar"; "Apr"; "May"; "Jun"; "Jul"; "Aug"; "Sep"; "Oct" |]
+let now = { week = 14. }
+
+let drawing =
+  ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#141414" ~muted:"#77736d"
+    ~grid:"#e7e4de" ~surface:"#fbfaf7" ()
+
+(* The months are a scale of intervals: a slat for each four weeks, from
+   one tick to the next, every other one shaded. *)
+let month =
+  Slat.make
+    ~room:
+      (Slat.rooms ~horizontal:(Slat.room ~before:26. ())
+         ~vertical:(Slat.room ~before:40. ()) ())
+    ~css:
+      {|
+.band { background: none; --rhp-radius: 0px; }
+.odd .band { background: rgb(20 20 20 / .035); }
+.band:horizontal { top: 0; height: 100%; translate: none; }
+.band:vertical { left: 0; width: 100%; translate: none; }
+.month { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--rhp-muted); padding: 0; }
+.month:horizontal { top: -20px; translate: 6px 0; }
+.month:vertical { left: -34px; translate: 0 -4px; }
+@container (max-width: 360px) { .odd > .month:horizontal { display: none; } }
+|}
+    (fun (d : Scale.tick Row.t) ->
+      let t = Row.data d in
+      let i = Row.index d in
+      <div class_=(fun () -> if i mod 2 = 1 then "odd" else "")>
+        <Bar from=(fun () -> t.at) to_=(fun () -> t.next) class_="band" />
+        <Show when_=(fun () -> not t.last)>
+          <Label at=(fun () -> t.at) class_="month">
+            (fun () -> Jsx.string months.(i))
+          </Label>
+        </Show>
+      </div>)
+
+(* A trade on site: the whole job a thin grey bar, the part done by today
+   orange; pointed at, a dimension line measures it, as a drawing does. *)
+let trade =
+  Slat.make
+    ~thickness:(Slat.lengths ~horizontal:(Slat.number 44.) ())
+    ~room:
+      (Slat.rooms
+         ~horizontal:(Slat.room ~start:(Slat.px 116.) ~end_:(Slat.px 16.) ())
+         ~vertical:(Slat.room ~start:(Slat.px 40.) ~end_:(Slat.px 10.) ())
+         ())
+    ~css:
+      {|
+.trade { font-size: 14px; font-weight: 700; }
+.trade small { display: block; font-size: 10.5px; font-weight: 500; color: var(--rhp-muted); }
+.trade:horizontal { --rhp-label-gap: 14px; }
+.job { background: #d8d5cf; --rhp-radius: 99px; }
+.done { background: #ff5a1f; --rhp-radius: 99px; }
+.slat:hover .job { background: #c4c0b8; }
+.slat:hover .trade { color: #ff5a1f; }
+.dim, .weeks { visibility: hidden; }
+.slat:hover :is(.dim, .weeks) { visibility: visible; }
+.dim { background: var(--rhp-ink); --rhp-radius: 0px; }
+.dim:horizontal { translate: 0 -13px; }
+.dim::before, .dim::after { content: ""; position: absolute; background: var(--rhp-ink); }
+.dim:horizontal::before, .dim:horizontal::after { top: -4px; width: 1px; height: 9px; }
+.dim:horizontal::before { left: 0; } .dim:horizontal::after { right: 0; }
+.weeks { padding: 0 4px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; background: var(--rhp-surface); }
+.weeks:horizontal { translate: -50% calc(-50% - 13px); }
+|}
+    (fun d ->
+      let t = Row.data d in
+      <div class_="slat">
+        <Label edge="start" class_="trade">
+          (fun () -> Jsx.string t.trade)
+          <small>
+            (fun () ->
+              Jsx.string
+                ("wk " ^ Js.Float.toString t.start ^ "-"
+               ^ Js.Float.toString t.end_))
+          </small>
+        </Label>
+        <Bar
+          from=(fun () -> t.start)
+          to_=(fun () -> t.end_)
+          thick=(fun () -> Either.left "10px")
+          class_="job"
+        />
+        <Show when_=(fun () -> t.start < now.week)>
+          <Bar
+            from=(fun () -> t.start)
+            to_=(fun () -> Float.min now.week t.end_)
+            thick=(fun () -> Either.left "10px")
+            class_="done"
+          />
+        </Show>
+        <Bar
+          from=(fun () -> t.start)
+          to_=(fun () -> t.end_)
+          thick=(fun () -> Either.left "1px")
+          class_="dim"
+        />
+        <Label at=(fun () -> (t.start +. t.end_) /. 2.) class_="weeks">
+          (fun () -> Jsx.string (Js.Float.toString (t.end_ -. t.start) ^ " WK"))
+        </Label>
+      </div>)
+
+(* Today, a line across the trades, named below the plot, where the months
+   above leave room. *)
+let today =
+  Slat.make
+    ~room:(Slat.rooms ~horizontal:(Slat.room ~after:24. ()) ())
+    ~css:
+      {|
+.now { background: #ff5a1f; --rhp-tick-width: 2px; }
+.now-label { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: #ff5a1f; padding: 0; }
+.now-label:horizontal { top: calc(100% + 6px); translate: -50% 0; }
+|}
+    (fun d ->
+      let n = Row.data d in
+      <div>
+        <Tick
+          at=(fun () -> n.week) thick=(fun () -> Either.right 1.) class_="now"
+        />
+        <Label at=(fun () -> n.week) class_="now-label">"TODAY"</Label>
+      </div>)
+
+let make () =
+  <Poster
+    look="drawing"
+    kicker=(<span>"Building a house · week 14 of 32"</span>)
+    title=(<span>"From plot to keys"</span>)
+    dek=(<span>
+           "Each bar is a trade on site; the orange part is done. Point at one \
+            to measure it."
+         </span>)>
+    <Chart scale=(fun () -> (0., 32.)) height=340. theme=(fun () -> drawing)>
+      <Scale
+        ticks=(fun () -> Ticks.custom (Solidtype_rhp.every 4. ())) render=month
+      />
+      <Plot
+        rows=(fun () -> trades)
+        key=(fun d -> (Row.data d).trade)
+        order=(fun () -> Order.sort_by (fun d -> (Row.data d).start))
+        render=trade
+      />
+      <Plot
+        rows=(fun () -> [| now |])
+        overlap=true
+        style=(fun () -> Js.Dict.fromArray [| ("pointer-events", "none") |])
+        render=today
+      />
+    </Chart>
+  </Poster>

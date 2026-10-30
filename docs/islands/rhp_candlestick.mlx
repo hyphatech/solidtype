@@ -1,0 +1,204 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Nice = Solidtype_rhp.Types.Nice
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Slat = Solidtype_rhp.Slat
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+module Tick = Solidtype_rhp.Tick
+module Ticks = Solidtype_rhp.Ticks
+
+type day = {
+  day : int;
+  open_ : float; [@mel.as "open"]
+  close : float;
+  low : float;
+  high : float;
+  latest : bool;
+}
+
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+
+(* The same month on every load, so the page and its prerendered HTML
+   agree: a hash of the draw's number, not a random one. *)
+let draw k lo hi =
+  let x = Js.Math.sin (float_of_int k *. 12.9898) *. 43758.5453 in
+  lo +. ((x -. Js.Math.floor_float x) *. (hi -. lo))
+
+(* A price that walks: each day opens where the last one closed. *)
+let days =
+  let count = 22 in
+  let price = ref 48. in
+  Array.init count (fun day ->
+      let open_ = !price in
+      let close = Float.max 20. (open_ +. draw ((day * 3) + 1) (-3.2) 3.6) in
+      price := close;
+      {
+        day;
+        open_;
+        close;
+        low = Float.min open_ close -. draw ((day * 3) + 2) 0.2 2.2;
+        high = Float.max open_ close +. draw ((day * 3) + 3) 0.2 2.2;
+        latest = day = count - 1;
+      })
+
+(* The scale fitted to the month, in round numbers. *)
+let range =
+  Solidtype_rhp.nice
+    (Array.fold_left (fun m d -> Float.min m d.low) infinity days)
+    (Array.fold_left (fun m d -> Float.max m d.high) neg_infinity days)
+    ~count:4. ()
+
+let market =
+  ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#33302e" ~muted:"#66605c"
+    ~grid:"#eadbcc" ~surface:"#fff1e5" ()
+
+let dollars v = "$" ^ Js.Float.toFixed ~digits:(if v < 100. then 2 else 0) v
+let rose d = d.close >= d.open_
+
+(* The cross's one row, the day pointed at, or none. *)
+let crossed = function Some i -> [| days.(i) |] | None -> [||]
+
+(* The day under the pointer: a dashed line at its close, and its price
+   over the axis numbers. *)
+let cross =
+  Slat.make ~room:(Slat.room ())
+    ~css:
+      {|
+.cross { background: none; --rhp-tick-width: 0px; }
+.cross:horizontal { border-left: 1px dashed var(--rhp-ink); }
+.cross:vertical { border-top: 1px dashed var(--rhp-ink); }
+.price { padding: 3px 6px; border-radius: 3px; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 11px; font-weight: 800; }
+.price:horizontal { top: calc(100% + 1px); translate: -50% 0; }
+.price:vertical { left: auto; right: calc(100% + 3px); translate: 0 50%; }
+|}
+    (fun r ->
+      let d = Row.data r in
+      <div>
+        <Tick
+          at=(fun () -> d.close)
+          thick=(fun () -> Either.right 1.)
+          class_="cross"
+        />
+        <Label at=(fun () -> d.close) class_="price">
+          (fun () -> Jsx.string (dollars d.close))
+        </Label>
+      </div>)
+
+let make () =
+  let picked, set_picked = S.create_signal None in
+  (* The day the readout shows: the one pointed at, or the latest. *)
+  let read () =
+    match S.get picked with Some i -> i | None -> Array.length days - 1
+  in
+  let change () =
+    let i = read () in
+    let before = if i > 0 then days.(i - 1).close else days.(i).open_ in
+    (days.(i).close -. before) /. before *. 100.
+  in
+  (* A day: its wick over its range, its body from the open to the close,
+     and on the latest day its closing price. *)
+  let candle =
+    Slat.make
+      ~thickness:(Slat.lengths ~horizontal:(Slat.number 15.) ())
+      ~room:
+        (Slat.rooms
+           ~horizontal:(Slat.room ~start:(Slat.px 24.) ~end_:(Slat.px 64.) ())
+           ~vertical:(Slat.room ~start:(Slat.px 10.) ~end_:(Slat.px 30.) ())
+           ())
+      ~css:
+        {|
+.day:hover { background: rgb(51 48 46 / .07); }
+.wick { background: #807973; }
+.body { --rhp-radius: 1px; }
+.last { font-size: 11.5px; font-weight: 800; color: #fff; padding: 2px 6px; border-radius: 3px; background: var(--rhp-color); font-variant-numeric: tabular-nums; }
+.last:horizontal { margin-left: 8px; }
+.last:vertical { left: auto; right: 0; translate: 0 -8px; }
+|}
+      (fun r ->
+        let d = Row.data r in
+        let pick _ = S.set set_picked (Some d.day) in
+        <div class_="day" on_pointer_enter=pick on_pointer_down=pick>
+          <Bar
+            from=(fun () -> d.low)
+            to_=(fun () -> d.high)
+            thick=(fun () -> Either.left "1.5px")
+            class_="wick"
+          />
+          <Bar
+            from=(fun () -> d.open_)
+            to_=(fun () -> d.close)
+            thick=(fun () -> Either.right 0.72)
+            color=(fun () ->
+                    Color.css (if rose d then "#0d7680" else "#990f3d"))
+            class_="body"
+          />
+          <Show when_=(fun () -> d.latest)>
+            <Label
+              at=(fun () -> d.close)
+              class_="last"
+              style=(fun () ->
+                      "--rhp-color: " ^ if rose d then "#0d7680" else "#990f3d")>
+              (fun () -> Jsx.string (dollars d.close))
+            </Label>
+          </Show>
+        </div>)
+  in
+  <Poster
+    look="market"
+    kicker=(<span>{js|Share price · daily|js}</span>)
+    title=(<span>"A month on the market"</span>)
+    dek=(<span>
+           "Each candle is a day: its body runs from the open to the close, \
+            its wick covers the day's range."
+         </span>)
+    note=(<span>"Illustrative data. Point at a day for its prices."</span>)
+    on_pointer_leave=(fun e ->
+                       if not (String.equal (pointer_type e) "touch") then
+                         S.set set_picked None)>
+    <p class_="ohlc">
+      <b>(fun () -> Jsx.string ("Day " ^ string_of_int (read () + 1)))</b>
+      <span>
+        (fun () -> Jsx.string ("Open " ^ dollars days.(read ()).open_))
+      </span>
+      <span>
+        (fun () -> Jsx.string ("High " ^ dollars days.(read ()).high))
+      </span>
+      <span>(fun () -> Jsx.string ("Low " ^ dollars days.(read ()).low))</span>
+      <span>
+        "Close "
+        <b class_=(fun () -> if change () >= 0. then "up" else "down")>
+          (fun () ->
+            let c = change () in
+            Jsx.string
+              (dollars days.(read ()).close
+              ^ (if c >= 0. then {js| ▲ |js} else {js| ▼ |js})
+              ^ Js.Float.toFixed ~digits:1 (Js.Math.abs_float c)
+              ^ "%"))
+        </b>
+      </span>
+    </p>
+    <Chart
+      orientation=`vertical
+      scale=(fun () -> (Nice.min range, Nice.max range))
+      ticks=(fun () -> Ticks.values (Nice.ticks range))
+      format=(fun v ->
+               <span>(fun () -> Jsx.string ("$" ^ Js.Float.toString v))</span>)
+      height=300.
+      theme=(fun () -> market)>
+      <Plot rows=(fun () -> days) render=candle />
+      <Plot
+        rows=(fun () -> crossed (S.get picked))
+        overlap=true
+        style=(fun () -> Js.Dict.fromArray [| ("pointer-events", "none") |])
+        render=cross
+      />
+    </Chart>
+  </Poster>

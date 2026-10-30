@@ -33,6 +33,10 @@
   a function of that record's row.
 - `ppx_solidtype`: a component's render function given by name,
   `<Plot render=fruit />`, is checked and passed as a function child is.
+- The documentation's chart gallery: rhp's grouped bars, waterfall, pie,
+  heatmap, Gantt chart and candlesticks, written in OCaml from rhp's own
+  gallery code, each drawing what rhp's JSX draws, before and after it is
+  pointed at or clicked.
 - The documentation's Charts section, the binding of rhp: how a chart is
   made, a page for each component and for rhp's helpers, each linking to the
   page of rhp's documentation it follows.

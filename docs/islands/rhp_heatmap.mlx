@@ -1,0 +1,142 @@
+module Cell = Solidtype_rhp.Cell
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Slat = Solidtype_rhp.Slat
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+module Ticks = Solidtype_rhp.Ticks
+
+type hour = { day : int; hour : int; visitors : float }
+type day = { name : string; hours : hour array }
+
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+
+let names = [| "Mon"; "Tue"; "Wed"; "Thu"; "Fri"; "Sat"; "Sun" |]
+
+(* The same scatter on every load, so the page and its prerendered HTML
+   agree: a hash of the hour, not a random number. *)
+let noise day hour =
+  let x =
+    Js.Math.sin (float_of_int ((day * 24) + hour + 1) *. 12.9898) *. 43758.5453
+  in
+  x -. Js.Math.floor_float x
+
+(* Visitors peak after lunch, two hours later and fewer at the weekend. *)
+let days =
+  Array.mapi
+    (fun day name ->
+      let weekend = day > 4 in
+      let peak = if weekend then 15. else 13. in
+      {
+        name;
+        hours =
+          Array.init 24 (fun hour ->
+              let h = float_of_int hour -. peak in
+              {
+                day;
+                hour;
+                visitors =
+                  Float.max 0.
+                    ((70. *. Js.Math.exp (-.(h *. h) /. 18.))
+                    +. (30. *. noise day hour)
+                    -. if weekend then 15. else 0.);
+              });
+      })
+    names
+
+let heat =
+  ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#f3f1ed" ~muted:"#9b9893"
+    ~grid:"#2b2a28" ~surface:"#151515" ~low:"#332214" ~high:"#ffb94c" ()
+
+let two_digits n = (if n < 10 then "0" else "") ^ string_of_int n
+
+(* The hour pointed at, read out in the dek on one line, so the chart never
+   moves. *)
+let reading = function
+  | None -> "Weekdays peak at 1 pm, weekends at 3 pm."
+  | Some (day, hour) ->
+      names.(day) ^ " " ^ two_digits hour ^ {js|:00 · |js}
+      ^ Js.Float.toString (Js.Math.round days.(day).hours.(hour).visitors)
+      ^ " visitors"
+
+let make () =
+  let picked, set_picked = S.create_signal None in
+  let pick (h : hour) = S.set set_picked (Some (h.day, h.hour)) in
+  (* An hour lit while nothing is pointed at, or its day or its hour is. *)
+  let lit (h : hour) =
+    match S.get picked with
+    | None -> true
+    | Some (day, hour) -> day = h.day || hour = h.hour
+  in
+  (* The cells run across the day's band, so their orientation is the
+     other one: the hour numbers go before the first day's cells either
+     way. *)
+  let hour =
+    Slat.make
+      ~css:
+        {|
+.cell { --rhp-cell-gap: 1px; --rhp-radius: 2px; }
+.hour { --rhp-label-size: 10px; color: var(--rhp-muted); pointer-events: none; }
+.hour:horizontal { width: auto; }
+.faded { opacity: .25; }
+|}
+      (fun d ->
+        let h = Row.data d in
+        let orientation = Solidtype_rhp.use_orientation () in
+        <div
+          on_pointer_enter=(fun _ -> pick h) on_pointer_down=(fun _ -> pick h)>
+          <Cell
+            value=(fun () -> h.visitors)
+            class_=(fun () -> if lit h then "cell" else "cell faded")
+          />
+          <Show when_=(fun () -> h.day = 0 && h.hour mod 3 = 0)>
+            <Label
+              edge=(fun () ->
+                     match orientation () with
+                     | `vertical -> "end"
+                     | `horizontal -> "start")
+              class_="hour">
+              (fun () -> Jsx.string (string_of_int h.hour))
+            </Label>
+          </Show>
+        </div>)
+  in
+  let day =
+    Slat.make
+      ~thickness:(Slat.lengths ~horizontal:(Slat.number 26.) ())
+      ~room:
+        (Slat.rooms
+           ~horizontal:(Slat.room ~start:(Slat.px 40.) ~before:18. ())
+           ~vertical:(Slat.room ~start:(Slat.px 24.) ~before:30. ())
+           ())
+      (fun d ->
+        let w = Row.data d in
+        <div>
+          <Label edge="start">(fun () -> Jsx.string w.name)</Label>
+          <Plot
+            orientation=(fun () -> `across) rows=(fun () -> w.hours) render=hour
+          />
+        </div>)
+  in
+  <Poster
+    look="heat"
+    kicker=(<span>{js|An online shop · visitors per hour|js}</span>)
+    title=(<span>"Lunch break is rush hour"</span>)
+    dek=(<span>(fun () -> Jsx.string (reading (S.get picked)))</span>)
+    note=(<span>"Point at an hour to read it. Illustrative data."</span>)
+    on_pointer_leave=(fun e ->
+                       if not (String.equal (pointer_type e) "touch") then
+                         S.set set_picked None)>
+    <Chart
+      scale=(fun () -> (0., 100.))
+      ticks=(fun () -> Ticks.none)
+      height=320.
+      theme=(fun () -> heat)>
+      <Plot rows=(fun () -> days) render=day />
+    </Chart>
+  </Poster>

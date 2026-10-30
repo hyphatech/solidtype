@@ -1,0 +1,143 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Dot = Solidtype_rhp.Dot
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Nice = Solidtype_rhp.Types.Nice
+module Order = Solidtype_rhp.Order
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+
+type count = { metal : string; value : float }
+type team = { name : string; medals : count array; total : float }
+
+let team name gold silver bronze =
+  {
+    name;
+    medals =
+      [|
+        { metal = "gold"; value = gold };
+        { metal = "silver"; value = silver };
+        { metal = "bronze"; value = bronze };
+      |];
+    total = gold +. silver +. bronze;
+  }
+
+let teams =
+  [|
+    team "North" 13. 9. 17.;
+    team "East" 16. 6. 8.;
+    team "South" 17. 20. 9.;
+    team "West" 4. 4. 16.;
+  |]
+
+let table =
+  ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#111214" ~muted:"#6d6a63"
+    ~grid:"#e4ddd0" ~surface:"#f7f3ec" ()
+
+(* The medal's face is an element inside the Dot, so its lift on hover is
+   its own transition, whatever rhp does to the Dot. *)
+let count =
+  Slat.make
+    ~css:
+      {|
+.ribbon { --rhp-radius: 2px; background: linear-gradient(var(--rhp-toward-end), transparent, var(--metal)); }
+.medal { background: none; }
+.face { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%;
+  font: 800 11px/1 var(--rhp-font); font-variant-numeric: tabular-nums; color: var(--stamp);
+  background: radial-gradient(circle at 30% 26%, var(--shine), var(--metal) 46%, var(--edge));
+  box-shadow: 0 1px 2px rgb(0 0 0 / .28), inset 0 0 0 2px rgb(255 255 255 / .28);
+  transition: scale .3s cubic-bezier(.3, 1.6, .5, 1), translate .3s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s; }
+.count:hover { z-index: 1; }
+.count:hover .face { scale: 1.45; translate: 0 -4px; box-shadow: 0 10px 14px -5px rgb(0 0 0 / .45), inset 0 0 0 2px rgb(255 255 255 / .45); }
+.count:hover .ribbon { filter: saturate(1.5); }
+.gold { --metal: #e0b43f; --shine: #fff4c4; --edge: #a87a14; --stamp: #3f2c02; }
+.silver { --metal: #bfc5cb; --shine: #ffffff; --edge: #858d95; --stamp: #22272c; }
+.bronze { --metal: #cf8a55; --shine: #ffe2c9; --edge: #8a4b23; --stamp: #2e1405; }
+|}
+    (fun d ->
+      let m = Row.data d in
+      <div class_=(fun () -> "count " ^ m.metal)>
+        <Bar
+          to_=(fun () -> m.value)
+          thick=(fun () -> Either.left "3px")
+          class_="ribbon"
+        />
+        <Dot
+          at=(fun () -> m.value)
+          size=(fun () -> Either.left "24px")
+          class_="medal">
+          <span class_="face">
+            (fun () -> Jsx.string (Js.Float.toString m.value))
+          </span>
+        </Dot>
+      </div>)
+
+(* A team's band holds a plot of its own, which shares the band out among
+   its three counts: that is the group. *)
+let team =
+  Slat.make
+    ~thickness:(Slat.lengths ~horizontal:(Slat.number 84.) ())
+    ~room:
+      (Slat.rooms
+         ~horizontal:(Slat.room ~start:(Slat.px 96.) ~end_:(Slat.px 22.) ())
+         ~vertical:(Slat.room ~start:(Slat.px 46.) ~end_:(Slat.px 18.) ())
+         ())
+    ~css:
+      {|
+.team { font: 700 22px/1 "Barlow Condensed", "Arial Narrow", sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+.team small { display: block; margin-top: 3px; font: 500 11px/1 var(--rhp-font); letter-spacing: .06em; text-transform: none; color: var(--rhp-muted); }
+.team:horizontal { --rhp-label-gap: 14px; }
+.team:vertical { font-size: 18px; }
+|}
+    (fun d ->
+      let t = Row.data d in
+      <div>
+        <Label edge="start" class_="team">
+          (fun () -> Jsx.string t.name)
+          <small>
+            (fun () -> Jsx.string (Js.Float.toString t.total ^ " medals"))
+          </small>
+        </Label>
+        <Plot
+          thick=(fun () -> Either.right 0.86)
+          rows=(fun () -> t.medals)
+          render=count
+        />
+      </div>)
+
+(* Ranked as a medal table is: golds first, then silvers, then bronzes. *)
+let ranked =
+  Order.sort_by ~direction:`desc (fun d ->
+      let t = Row.data d in
+      (t.medals.(0).value *. 1e4)
+      +. (t.medals.(1).value *. 100.)
+      +. t.medals.(2).value)
+
+let make () =
+  <Poster
+    look="medals"
+    kicker=(<span>"Regional Games · final table"</span>)
+    title=(<span>"Gold rush"</span>)
+    dek=(<span class_="keys">
+           <span><i class_="gold" /> "Gold"</span>
+           <span><i class_="silver" /> "Silver"</span>
+           <span><i class_="bronze" /> "Bronze"</span>
+         </span>)>
+    <Chart
+      orientation=`vertical
+      scale=(fun () -> (0., Nice.max (Solidtype_rhp.nice 0. 20. ~count:4. ())))
+      height=320.
+      theme=(fun () -> table)>
+      <Plot
+        rows=(fun () -> teams)
+        key=(fun d -> (Row.data d).name)
+        order=(fun () -> ranked)
+        render=team
+      />
+    </Chart>
+  </Poster>

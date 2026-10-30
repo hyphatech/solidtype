@@ -92,6 +92,12 @@ const islands = [
   ["rhp", "rhp_box_plot", "BoxPlot"],
   ["rhp", "rhp_plot_sorted", "PlotSorted"],
   ["rhp", "rhp_plot_scatter", "PlotScatter"],
+  ["rhp", "rhp_grouped_bars", "GroupedBars"],
+  ["rhp", "rhp_waterfall_budget", "WaterfallBudget"],
+  ["rhp", "rhp_pie", "Pie"],
+  ["rhp", "rhp_heatmap", "Heatmap"],
+  ["rhp", "rhp_gantt", "Gantt"],
+  ["rhp", "rhp_candlestick", "Candlestick"],
 ] as const;
 
 for (const [from, ml, tsx] of islands) {

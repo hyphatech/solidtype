@@ -1,0 +1,197 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Either = Solidtype_rhp.Types.Either
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Poster = Solidtype_rhp.Poster
+module Row = Solidtype_rhp.Row
+module S = Solidtype.Solid
+module Show = Solidtype.Show
+module Slat = Solidtype_rhp.Slat
+module ThemeValues = Solidtype_rhp.Types.ThemeValues
+module Tick = Solidtype_rhp.Tick
+module Ticks = Solidtype_rhp.Ticks
+
+type step = {
+  line : int;
+  item : string;
+  from : float;
+  to_ : float; [@mel.as "to"]
+  amount : float;
+  cut : bool;
+  kind : [ `in_ | `out | `total ];
+  class_name : string;  (** The slat's class, which its CSS reads. *)
+}
+
+let lines =
+  [| "Salary"; "Rent"; "Groceries"; "Transport"; "Bills"; "Going out" |]
+
+(* £ in, then out; what is left is saved. *)
+let month = [| 4200.; -1450.; -520.; -180.; -230.; -300. |]
+
+let budget =
+  ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#1c2433" ~muted:"#6b7385"
+    ~grid:"#edf0f4" ~surface:"#ffffff" ()
+
+let pounds v =
+  let rec thousands s =
+    let n = String.length s in
+    if n <= 3 then s
+    else thousands (String.sub s 0 (n - 3)) ^ "," ^ String.sub s (n - 3) 3
+  in
+  (if v < 0. then {js|−|js} else "")
+  ^ {js|£|js}
+  ^ thousands (Js.Float.toString (Js.Math.abs_float (Js.Math.round v)))
+
+(* Each step runs from the total before it to the one after; a cut expense
+   is a step of nothing, and the last step is what is left, from 0. *)
+let steps cut =
+  let total =
+    Solidtype_rhp.running
+      (Array.mapi (fun i v -> Some (if cut.(i) then 0. else v)) month)
+  in
+  let at ends i = Option.value ends.(i) ~default:0. in
+  let saved = at total.to_ (Array.length month - 1) in
+  Array.append
+    (Array.mapi
+       (fun i item ->
+         {
+           line = i;
+           item;
+           from = at total.from i;
+           to_ = at total.to_ i;
+           amount = month.(i);
+           cut = cut.(i);
+           kind = (if month.(i) > 0. then `in_ else `out);
+           class_name = (if month.(i) > 0. then "in" else "out");
+         })
+       lines)
+    [|
+      {
+        line = Array.length lines;
+        item = "Saved";
+        from = 0.;
+        to_ = saved;
+        amount = saved;
+        cut = false;
+        kind = `total;
+        class_name = "total";
+      };
+    |]
+
+let is_expense = function `out -> true | `in_ | `total -> false
+
+let css =
+  {|
+.item { font-size: 14px; font-weight: 600; }
+.item:horizontal { --rhp-label-gap: 14px; }
+.item button { all: unset; cursor: pointer; border-radius: 3px; text-decoration: underline 1.5px dotted #b5bcc8; text-underline-offset: 3px; }
+.item button:focus-visible { outline: 2px solid #0b8a63; outline-offset: 2px; }
+.out:hover .item button { text-decoration-color: #d2423f; }
+.cut .item button { color: #8a93a3; text-decoration: line-through 1.5px #d2423f; }
+.step { --rhp-radius: 6px; }
+.out .step, .ghost { cursor: pointer; }
+.out:hover .step { box-shadow: 0 6px 12px -6px rgb(210 66 63 / .8); }
+.ghost { background: none; border: 1.5px dashed #f25f5c; opacity: 0; }
+.cut .ghost { opacity: .75; }
+.amount { font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.in .amount { color: #0b8a63; }
+.out .amount { color: #d2423f; }
+.cut .amount { color: #8a93a3; text-decoration: line-through; }
+.amount:horizontal { --rhp-label-gap: 8px; }
+.link { background: #b5bcc8; }
+.link:horizontal { width: 1px; top: calc(50% + 12px); height: 22px; translate: -50% 0; }
+|}
+
+let make () =
+  let cut, set_cut = S.create_signal (Array.map (fun _ -> false) month) in
+  let shown = S.create_memo (fun () -> steps (S.get cut)) in
+  let toggle line =
+    S.set set_cut
+      (Array.mapi (fun i c -> if i = line then not c else c) (S.get cut))
+  in
+  (* An expense is cut by a click on its name or its bar, and brought back
+     by another. *)
+  let step =
+    Slat.make
+      ~thickness:(Slat.lengths ~horizontal:(Slat.number 46.) ())
+      ~room:(Slat.room ~start:(Slat.px 100.) ~end_:(Slat.px 66.) ())
+      ~css
+      (fun d ->
+        let s = Row.data d in
+        <div
+          class_=(fun () -> s.class_name ^ if s.cut then " cut" else "")
+          on_click=(fun _ -> if is_expense s.kind then toggle s.line)>
+          <Label edge="start" class_="item">
+            (fun () ->
+              if is_expense s.kind then
+                Jsx.element
+                  <button
+                    type_=`button
+                    aria_pressed=(fun () -> if s.cut then "true" else "false")>
+                    (fun () -> Jsx.string s.item)
+                  </button>
+              else Jsx.string s.item)
+          </Label>
+          <Show when_=(fun () -> is_expense s.kind)>
+            <Bar
+              from=(fun () -> s.from)
+              to_=(fun () -> s.from +. s.amount)
+              thick=(fun () -> Either.left "24px")
+              class_="ghost"
+            />
+          </Show>
+          <Bar
+            from=(fun () -> s.from)
+            to_=(fun () -> s.to_)
+            thick=(fun () -> Either.left "24px")
+            color=(fun () ->
+                    match s.kind with
+                    | `in_ -> Color.css "#12b886"
+                    | `out -> Color.css "#f25f5c"
+                    | `total -> Color.css "#1c2433")
+            class_="step"
+          />
+          <Show
+            when_=(fun () ->
+                    match s.kind with `total -> false | `in_ | `out -> true)>
+            <Tick at=(fun () -> s.to_) class_="link" />
+          </Show>
+          <Label at=(fun () -> Float.max s.from s.to_) class_="amount">
+            (fun () -> Jsx.string (pounds s.amount))
+          </Label>
+        </div>)
+  in
+  let saved () =
+    let all = S.get shown in
+    all.(Array.length all - 1).to_
+  in
+  <Poster
+    look="budget"
+    kicker=(<span>"Monthly budget"</span>)
+    title=(<span>"Where the salary goes"</span>)
+    dek=(<span>
+           <b>(fun () -> Jsx.string (pounds (saved ())))</b>
+           " left to save this month."
+         </span>)
+    note=(<span>
+            "Click an expense to cut it from the month; click it again to \
+             bring it back."
+          </span>)>
+    <Chart
+      scale=(fun () -> (0., 5000.))
+      ticks=(fun () -> Ticks.values [| 0.; 1000.; 2000.; 3000.; 4000.; 5000. |])
+      format=(fun v ->
+               <span>
+                 (fun () ->
+                   Jsx.string
+                     (if v = 0. then "0"
+                      else {js|£|js} ^ Js.Float.toString (v /. 1000.) ^ "k"))
+               </span>)
+      height=320.
+      theme=(fun () -> budget)>
+      <Plot rows=(fun () -> S.get shown) render=step />
+    </Chart>
+  </Poster>
