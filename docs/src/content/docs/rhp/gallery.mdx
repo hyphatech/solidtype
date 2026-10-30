@@ -7,14 +7,22 @@ import Example from "@components/Example.astro";
 import "@bezda/rhp/posters.css";
 import * as Waterfall from "@islands/rhp_waterfall_budget.jsx";
 import WaterfallCode from "@islands/rhp_waterfall_budget.mlx?raw";
+import WaterfallBudgetCss from "@islands/rhp_waterfall_budget.css?raw";
 import * as Pie from "@islands/rhp_pie.jsx";
 import PieCode from "@islands/rhp_pie.mlx?raw";
+import PieCss from "@islands/rhp_pie.css?raw";
 import * as Heatmap from "@islands/rhp_heatmap.jsx";
 import HeatmapCode from "@islands/rhp_heatmap.mlx?raw";
+import HeatmapCss from "@islands/rhp_heatmap.css?raw";
 import * as Gantt from "@islands/rhp_gantt.jsx";
 import GanttCode from "@islands/rhp_gantt.mlx?raw";
+import GanttMonthCss from "@islands/rhp_gantt_month.css?raw";
+import GanttTradeCss from "@islands/rhp_gantt_trade.css?raw";
+import GanttTodayCss from "@islands/rhp_gantt_today.css?raw";
 import * as Candlestick from "@islands/rhp_candlestick.jsx";
 import CandlestickCode from "@islands/rhp_candlestick.mlx?raw";
+import CandlestickCrossCss from "@islands/rhp_candlestick_cross.css?raw";
+import CandlestickCandleCss from "@islands/rhp_candlestick_candle.css?raw";
 
 Whole charts from rhp's gallery, each written in OCaml from rhp's own
 code: the same slats, the same CSS and the same poster around it, from
@@ -39,7 +47,7 @@ headline follow.
 
 Original rhp documentation: [Waterfall](https://rhp.vercel.app/examples/waterfall/).
 
-<Example code={WaterfallCode} title="rhp_waterfall_budget.mlx" fill><Waterfall.make client:visible /></Example>
+<Example code={WaterfallCode} title="rhp_waterfall_budget.mlx" css={{ "rhp_waterfall_budget.css": WaterfallBudgetCss }} fill><Waterfall.make client:visible /></Example>
 
 ## A pie
 
@@ -53,7 +61,7 @@ frame, since a path's points moved by CSS would flatten its rim.
 
 Original rhp documentation: [Pie](https://rhp.vercel.app/examples/pie-chart/).
 
-<Example code={PieCode} title="rhp_pie.mlx" fill><Pie.make client:visible /></Example>
+<Example code={PieCode} title="rhp_pie.mlx" css={{ "rhp_pie.css": PieCss }} fill><Pie.make client:visible /></Example>
 
 ## A heatmap
 
@@ -65,7 +73,7 @@ lights its day and its hour, and the dek reads it.
 
 Original rhp documentation: [Heatmap](https://rhp.vercel.app/examples/heatmap/).
 
-<Example code={HeatmapCode} title="rhp_heatmap.mlx" fill><Heatmap.make client:visible /></Example>
+<Example code={HeatmapCode} title="rhp_heatmap.mlx" css={{ "rhp_heatmap.css": HeatmapCss }} fill><Heatmap.make client:visible /></Example>
 
 ## A Gantt chart
 
@@ -77,7 +85,7 @@ through.
 
 Original rhp documentation: [Gantt](https://rhp.vercel.app/examples/gantt/).
 
-<Example code={GanttCode} title="rhp_gantt.mlx" fill><Gantt.make client:visible /></Example>
+<Example code={GanttCode} title="rhp_gantt.mlx" css={{ "rhp_gantt_month.css": GanttMonthCss, "rhp_gantt_trade.css": GanttTradeCss, "rhp_gantt_today.css": GanttTodayCss }} fill><Gantt.make client:visible /></Example>
 
 ## Candlesticks
 
@@ -88,4 +96,4 @@ plot, `overlap`, of that one day, or of none.
 
 Original rhp documentation: [Candlestick](https://rhp.vercel.app/examples/candlestick/).
 
-<Example code={CandlestickCode} title="rhp_candlestick.mlx" fill><Candlestick.make client:visible /></Example>
+<Example code={CandlestickCode} title="rhp_candlestick.mlx" css={{ "rhp_candlestick_cross.css": CandlestickCrossCss, "rhp_candlestick_candle.css": CandlestickCandleCss }} fill><Candlestick.make client:visible /></Example>

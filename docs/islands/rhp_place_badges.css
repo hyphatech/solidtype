@@ -1,0 +1,1 @@
+.badge { position: absolute; translate: 6px -50%; padding: 1px 6px; border-radius: 6px; white-space: nowrap; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 12px; }

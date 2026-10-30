@@ -15,11 +15,11 @@ let languages =
     { name = "Shell"; share = 8. };
   |]
 
+external css : string = "default" [@@mel.module "./rhp_slat_layout.css?raw"]
+
 let language =
   Slat.make ~thickness:(Slat.number 40.) ~inset:(Slat.number 0.3)
-    ~room:Slat.auto_room
-    ~css:".bar { --rhp-end-radius: 8px; } .value { color: var(--rhp-muted); }"
-    (fun d ->
+    ~room:Slat.auto_room ~css (fun d ->
       let l = Row.data d in
       <div>
         <Label edge="start">(fun () -> Jsx.string l.name)</Label>

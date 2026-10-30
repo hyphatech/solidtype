@@ -15,10 +15,12 @@ let stores =
     { store = "Old town"; sales = 17. };
   |]
 
+external css : string = "default" [@@mel.module "./rhp_label_edges.css?raw"]
+
 let store =
   Slat.make ~thickness:(Slat.number 36.)
     ~room:(Slat.room ~start:(Slat.px 80.) ~end_:(Slat.px 48.) ())
-    ~css:".inside { color: white; }"
+    ~css
     (fun d ->
       let s = Row.data d in
       <div>

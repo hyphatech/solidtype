@@ -1,6 +1,7 @@
 ; The documentation's islands: each example of Solid's and Kobalte's
 ; bindings, each demo of a HeroUI port, and the port beside the same
-; component in React, which react/ renders.
+; component in React, which react/ renders. A chart's CSS is a file beside
+; its island, which the island imports as a string for rhp to scope.
 
 (library
  (name docs_islands)
@@ -19,6 +20,7 @@
  (modules)
  (libraries docs_islands)
  (runtime_deps
-  (glob_files react/*.tsx))
+  (glob_files react/*.tsx)
+  (glob_files *.css))
  (module_systems
   (es6 jsx)))

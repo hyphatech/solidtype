@@ -1,4 +1,5 @@
 import { Bar, Chart, Label, Plot, slat } from "@bezda/rhp";
+import css from "../../../docs/islands/rhp_label_edges.css?raw";
 
 const stores = [
   { store: "North", sales: 48 },
@@ -7,7 +8,7 @@ const stores = [
 ];
 
 const store = slat(
-  { thickness: 36, room: { start: 80, end: 48 }, css: ".inside { color: white; }" },
+  { thickness: 36, room: { start: 80, end: 48 }, css },
   (d) => (
     <div>
       <Label edge="start">{d.store}</Label>

@@ -1,5 +1,7 @@
 import { Bar, Chart, Label, Plot, Poster, Tick, nice, slat } from "@bezda/rhp";
 import { Show, createSignal } from "solid-js";
+import crossCss from "../../../docs/islands/rhp_candlestick_cross.css?raw";
+import candleCss from "../../../docs/islands/rhp_candlestick_candle.css?raw";
 
 const draw = (k: number, lo: number, hi: number) => {
   const x = Math.sin(k * 12.9898) * 43758.5453;
@@ -35,14 +37,7 @@ const crossed = (i: number | undefined) => (i === undefined ? [] : [days[i]]);
 const cross = slat(
   {
     room: {},
-    css: `
-.cross { background: none; --rhp-tick-width: 0px; }
-.cross:horizontal { border-left: 1px dashed var(--rhp-ink); }
-.cross:vertical { border-top: 1px dashed var(--rhp-ink); }
-.price { padding: 3px 6px; border-radius: 3px; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 11px; font-weight: 800; }
-.price:horizontal { top: calc(100% + 1px); translate: -50% 0; }
-.price:vertical { left: auto; right: calc(100% + 3px); translate: 0 50%; }
-`,
+    css: crossCss,
   },
   (d) => (
     <div>
@@ -67,14 +62,7 @@ export function make() {
     {
       thickness: { horizontal: 15 },
       room: { horizontal: { start: 24, end: 64 }, vertical: { start: 10, end: 30 } },
-      css: `
-.day:hover { background: rgb(51 48 46 / .07); }
-.wick { background: #807973; }
-.body { --rhp-radius: 1px; }
-.last { font-size: 11.5px; font-weight: 800; color: #fff; padding: 2px 6px; border-radius: 3px; background: var(--rhp-color); font-variant-numeric: tabular-nums; }
-.last:horizontal { margin-left: 8px; }
-.last:vertical { left: auto; right: 0; translate: 0 -8px; }
-`,
+      css: candleCss,
     },
     (d) => {
       const pick = () => setPicked(d.day);

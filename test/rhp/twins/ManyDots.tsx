@@ -1,5 +1,6 @@
 import { Chart, ManyDots } from "@bezda/rhp";
 import { createSignal } from "solid-js";
+import css from "../../../docs/islands/rhp_many_dots.css?raw";
 
 type Point = { id: number; x: number; y: number; group: number; color: string };
 type Coloring = "shared" | "category" | "unique";
@@ -27,17 +28,6 @@ const hovering = (p: Point | undefined) => (p ? coordinates(p) : "Hover over a p
 
 const selection = (p: Point | undefined) => (p ? "Selected " + coordinates(p).toLowerCase() + "." : "No point selected.");
 
-const css = `
-.manydots-demo .mode-category .group-0 { background-color: var(--rhp-series-1); }
-.manydots-demo .mode-category .group-1 { background-color: var(--rhp-series-2); }
-.manydots-demo .mode-category .group-2 { background-color: var(--rhp-series-3); }
-.manydots-demo .mode-category .group-3 { background-color: var(--rhp-series-4); }
-.manydots-demo .rhp-manydot:hover,
-.manydots-demo .rhp-manydot.selected { outline: 2px solid var(--rhp-ink); outline-offset: 2px; }
-.manydots-demo .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .75rem; }
-.manydots-demo select { font: inherit; color: inherit; background: transparent; border: 1px solid var(--color-border); border-radius: .5rem; padding: .2rem .4rem; }
-.manydots-demo .readout { min-height: 1.5em; margin: .5rem 0 0; font-size: .875rem; }
-`;
 
 export function make() {
   const [rows, setRows] = createSignal(samples(0));

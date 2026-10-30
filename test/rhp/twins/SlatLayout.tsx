@@ -1,4 +1,5 @@
 import { Bar, Chart, Label, Plot, slat } from "@bezda/rhp";
+import css from "../../../docs/islands/rhp_slat_layout.css?raw";
 
 const languages = [
   { name: "OCaml", share: 64 },
@@ -11,7 +12,7 @@ const language = slat(
     thickness: 40,
     inset: 0.3,
     room: "auto",
-    css: ".bar { --rhp-end-radius: 8px; } .value { color: var(--rhp-muted); }",
+    css,
   },
   (d) => (
     <div>

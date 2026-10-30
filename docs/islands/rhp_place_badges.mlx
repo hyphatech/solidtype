@@ -16,13 +16,12 @@ let parcels =
     { route = "Sea"; kg = 48. };
   |]
 
+external css : string = "default" [@@mel.module "./rhp_place_badges.css?raw"]
+
 let parcel =
   Slat.make ~thickness:(Slat.number 36.)
     ~room:(Slat.room ~start:(Slat.px 48.) ~end_:(Slat.px 64.) ())
-    ~css:
-      ".badge { position: absolute; translate: 6px -50%; padding: 1px 6px; \
-       border-radius: 6px; white-space: nowrap; background: var(--rhp-ink); \
-       color: var(--rhp-surface); font-size: 12px; }"
+    ~css
     (fun d ->
       let p = Row.data d in
       <div>

@@ -6,6 +6,7 @@ description: Many points at once, without a slat or a computation for each.
 import Example from "@components/Example.astro";
 import * as Scatter from "@islands/rhp_many_dots.jsx";
 import ScatterCode from "@islands/rhp_many_dots.mlx?raw";
+import ManyDotsCss from "@islands/rhp_many_dots.css?raw";
 
 `Solidtype_rhp.Many_dots` is rhp's `ManyDots`, experimental in rhp: a plain
 HTML point for each row, on a chart with a `cross` scale, with no slat and
@@ -25,7 +26,7 @@ and its row by the number rhp writes on it, `data-rhp-index`, rather than
 a handler for each point. The selected point is given a class of its own
 by `point_class`, which an outline styles.
 
-<Example code={ScatterCode} title="rhp_many_dots.mlx" fill><Scatter.make client:visible /></Example>
+<Example code={ScatterCode} title="rhp_many_dots.mlx" css={{ "rhp_many_dots.css": ManyDotsCss }} fill><Scatter.make client:visible /></Example>
 
 ## Values
 

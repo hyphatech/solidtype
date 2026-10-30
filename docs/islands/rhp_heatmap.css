@@ -1,0 +1,4 @@
+.cell { --rhp-cell-gap: 1px; --rhp-radius: 2px; }
+.hour { --rhp-label-size: 10px; color: var(--rhp-muted); pointer-events: none; }
+.hour:horizontal { width: auto; }
+.faded { opacity: .25; }

@@ -1,5 +1,6 @@
 import { Cell, Chart, Label, Plot, Poster, slat, useOrientation } from "@bezda/rhp";
 import { Show, createSignal } from "solid-js";
+import css from "../../../docs/islands/rhp_heatmap.css?raw";
 
 const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -43,12 +44,7 @@ export function make() {
   };
   const hour = slat(
     {
-      css: `
-.cell { --rhp-cell-gap: 1px; --rhp-radius: 2px; }
-.hour { --rhp-label-size: 10px; color: var(--rhp-muted); pointer-events: none; }
-.hour:horizontal { width: auto; }
-.faded { opacity: .25; }
-`,
+      css,
     },
     (h) => {
       const orientation = useOrientation();

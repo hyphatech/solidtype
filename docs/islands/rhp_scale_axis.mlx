@@ -30,16 +30,15 @@ let fruit =
         <Bar to_=(fun () -> f.sold) />
       </div>)
 
+external css : string = "default" [@@mel.module "./rhp_scale_axis.css?raw"]
+
 (* A tick of the axis: a thin line behind the bars, across the whole plot,
    and its value under the plot, in the room the slat makes there, the last
    one saying the unit. *)
 let tick =
   Slat.make
     ~room:(Slat.room ~end_:(Slat.px 32.) ~after:28. ())
-    ~css:
-      ".line { background: var(--rhp-grid); --rhp-tick-width: 1px; } .num { \
-       font-size: 11px; color: var(--rhp-muted); padding: 0; } .num:horizontal \
-       { top: calc(100% + 8px); translate: -50% 0; }"
+    ~css
     (fun (d : Scale.tick Row.t) ->
       let t = Row.data d in
       <div>

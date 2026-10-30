@@ -1,4 +1,5 @@
 import { Bar, Chart, Label, Plot, Scale, Tick, every, slat } from "@bezda/rhp";
+import css from "../../../docs/islands/rhp_scale_axis.css?raw";
 
 const fruits = [
   { name: "Apples", sold: 12 },
@@ -16,7 +17,7 @@ const fruit = slat({ thickness: 32, room: { start: 80 } }, (d) => (
 const tick = slat(
   {
     room: { end: 32, after: 28 },
-    css: ".line { background: var(--rhp-grid); --rhp-tick-width: 1px; } .num { font-size: 11px; color: var(--rhp-muted); padding: 0; } .num:horizontal { top: calc(100% + 8px); translate: -50% 0; }",
+    css,
   },
   (t) => (
     <div>

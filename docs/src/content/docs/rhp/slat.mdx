@@ -6,6 +6,7 @@ description: The template for one row, with the CSS and layout every slat of its
 import Example from "@components/Example.astro";
 import * as Layout from "@islands/rhp_slat_layout.jsx";
 import LayoutCode from "@islands/rhp_slat_layout.mlx?raw";
+import SlatLayoutCss from "@islands/rhp_slat_layout.css?raw";
 
 A slat is a function of a row that returns one element: the row's root,
 which rhp places in its band. `Solidtype_rhp.Slat.make` is rhp's `slat()`,
@@ -22,7 +23,7 @@ bar, `room` the room outside the plot for its labels -- `Slat.auto_room`
 fits each side to its widest label -- and `css` styles this type's slats
 alone.
 
-<Example code={LayoutCode} title="rhp_slat_layout.mlx" fill><Layout.make client:visible /></Example>
+<Example code={LayoutCode} title="rhp_slat_layout.mlx" css={{ "rhp_slat_layout.css": SlatLayoutCss }} fill><Layout.make client:visible /></Example>
 
 ## The row
 

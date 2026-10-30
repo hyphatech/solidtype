@@ -6,6 +6,7 @@ description: Text placed on the chart's scale, or outside it at an edge.
 import Example from "@components/Example.astro";
 import * as Edges from "@islands/rhp_label_edges.jsx";
 import EdgesCode from "@islands/rhp_label_edges.mlx?raw";
+import LabelEdgesCss from "@islands/rhp_label_edges.css?raw";
 
 `Solidtype_rhp.Label` is rhp's `Label`, a block: text that starts just past
 a value, or ends just before it, or sits outside the plot, in the chart's
@@ -19,7 +20,7 @@ Original rhp documentation: [Blocks: Label](https://rhp.vercel.app/reference/blo
 it, each in the room the slat makes; `at` with ``side=`before`` ends the text
 just before the value, inside the bar.
 
-<Example code={EdgesCode} title="rhp_label_edges.mlx" fill><Edges.make client:visible /></Example>
+<Example code={EdgesCode} title="rhp_label_edges.mlx" css={{ "rhp_label_edges.css": LabelEdgesCss }} fill><Edges.make client:visible /></Example>
 
 ## API Reference
 

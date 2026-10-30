@@ -1,0 +1,3 @@
+.line { background: var(--rhp-grid); --rhp-tick-width: 1px; }
+.num { font-size: 11px; color: var(--rhp-muted); padding: 0; }
+.num:horizontal { top: calc(100% + 8px); translate: -50% 0; }

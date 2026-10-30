@@ -1,4 +1,5 @@
 import { Bar, Chart, Label, Place, Plot, slat } from "@bezda/rhp";
+import css from "../../../docs/islands/rhp_place_badges.css?raw";
 
 const parcels = [
   { route: "Air", kg: 14 },
@@ -10,7 +11,7 @@ const parcel = slat(
   {
     thickness: 36,
     room: { start: 48, end: 64 },
-    css: ".badge { position: absolute; translate: 6px -50%; padding: 1px 6px; border-radius: 6px; white-space: nowrap; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 12px; }",
+    css,
   },
   (d) => (
     <div>

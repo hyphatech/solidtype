@@ -35,6 +35,9 @@ let drawing =
   ThemeValues.make ~font:"system-ui, sans-serif" ~ink:"#141414" ~muted:"#77736d"
     ~grid:"#e7e4de" ~surface:"#fbfaf7" ()
 
+external month_css : string = "default"
+[@@mel.module "./rhp_gantt_month.css?raw"]
+
 (* The months are a scale of intervals: a slat for each four weeks, from
    one tick to the next, every other one shaded. *)
 let month =
@@ -42,17 +45,7 @@ let month =
     ~room:
       (Slat.rooms ~horizontal:(Slat.room ~before:26. ())
          ~vertical:(Slat.room ~before:40. ()) ())
-    ~css:
-      {|
-.band { background: none; --rhp-radius: 0px; }
-.odd .band { background: rgb(20 20 20 / .035); }
-.band:horizontal { top: 0; height: 100%; translate: none; }
-.band:vertical { left: 0; width: 100%; translate: none; }
-.month { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--rhp-muted); padding: 0; }
-.month:horizontal { top: -20px; translate: 6px 0; }
-.month:vertical { left: -34px; translate: 0 -4px; }
-@container (max-width: 360px) { .odd > .month:horizontal { display: none; } }
-|}
+    ~css:month_css
     (fun (d : Scale.tick Row.t) ->
       let t = Row.data d in
       let i = Row.index d in
@@ -65,6 +58,9 @@ let month =
         </Show>
       </div>)
 
+external trade_css : string = "default"
+[@@mel.module "./rhp_gantt_trade.css?raw"]
+
 (* A trade on site: the whole job a thin grey bar, the part done by today
    orange; pointed at, a dimension line measures it, as a drawing does. *)
 let trade =
@@ -75,25 +71,7 @@ let trade =
          ~horizontal:(Slat.room ~start:(Slat.px 116.) ~end_:(Slat.px 16.) ())
          ~vertical:(Slat.room ~start:(Slat.px 40.) ~end_:(Slat.px 10.) ())
          ())
-    ~css:
-      {|
-.trade { font-size: 14px; font-weight: 700; }
-.trade small { display: block; font-size: 10.5px; font-weight: 500; color: var(--rhp-muted); }
-.trade:horizontal { --rhp-label-gap: 14px; }
-.job { background: #d8d5cf; --rhp-radius: 99px; }
-.done { background: #ff5a1f; --rhp-radius: 99px; }
-.slat:hover .job { background: #c4c0b8; }
-.slat:hover .trade { color: #ff5a1f; }
-.dim, .weeks { visibility: hidden; }
-.slat:hover :is(.dim, .weeks) { visibility: visible; }
-.dim { background: var(--rhp-ink); --rhp-radius: 0px; }
-.dim:horizontal { translate: 0 -13px; }
-.dim::before, .dim::after { content: ""; position: absolute; background: var(--rhp-ink); }
-.dim:horizontal::before, .dim:horizontal::after { top: -4px; width: 1px; height: 9px; }
-.dim:horizontal::before { left: 0; } .dim:horizontal::after { right: 0; }
-.weeks { padding: 0 4px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; background: var(--rhp-surface); }
-.weeks:horizontal { translate: -50% calc(-50% - 13px); }
-|}
+    ~css:trade_css
     (fun d ->
       let t = Row.data d in
       <div class_="slat">
@@ -131,17 +109,15 @@ let trade =
         </Label>
       </div>)
 
+external today_css : string = "default"
+[@@mel.module "./rhp_gantt_today.css?raw"]
+
 (* Today, a line across the trades, named below the plot, where the months
    above leave room. *)
 let today =
   Slat.make
     ~room:(Slat.rooms ~horizontal:(Slat.room ~after:24. ()) ())
-    ~css:
-      {|
-.now { background: #ff5a1f; --rhp-tick-width: 2px; }
-.now-label { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: #ff5a1f; padding: 0; }
-.now-label:horizontal { top: calc(100% + 6px); translate: -50% 0; }
-|}
+    ~css:today_css
     (fun d ->
       let n = Row.data d in
       <div>

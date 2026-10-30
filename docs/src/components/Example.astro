@@ -2,21 +2,24 @@
 // One example: the component live, on HeroUI's own ground, so it looks as
 // it does on heroui.com, and its code beneath, the code the preview runs, in
 // a frame of the site's rule. A chart, which takes its width from the page,
-// fills the preview rather than sitting in its middle.
+// fills the preview rather than sitting in its middle; its CSS, a file of
+// its own, follows its code, each file by its name.
 import { Code } from "@astrojs/starlight/components";
 
 interface Props {
   code: string;
   title: string;
+  css?: Record<string, string>;
   fill?: boolean;
 }
 
-const { code, title, fill = false } = Astro.props;
+const { code, title, css = {}, fill = false } = Astro.props;
 ---
 
 <figure class="not-content example">
   <div class:list={["preview heroui-ground", { fill }]}><slot /></div>
   <Code code={code} lang="ocaml" title={title} />
+  {Object.entries(css).map(([name, text]) => <Code code={text} lang="css" title={name} />)}
 </figure>
 
 <style>

@@ -64,6 +64,8 @@ let reading = function
       ^ Js.Float.toString (Js.Math.round days.(day).hours.(hour).visitors)
       ^ " visitors"
 
+external css : string = "default" [@@mel.module "./rhp_heatmap.css?raw"]
+
 let make () =
   let picked, set_picked = S.create_signal None in
   let pick (h : hour) = S.set set_picked (Some (h.day, h.hour)) in
@@ -77,15 +79,7 @@ let make () =
      other one: the hour numbers go before the first day's cells either
      way. *)
   let hour =
-    Slat.make
-      ~css:
-        {|
-.cell { --rhp-cell-gap: 1px; --rhp-radius: 2px; }
-.hour { --rhp-label-size: 10px; color: var(--rhp-muted); pointer-events: none; }
-.hour:horizontal { width: auto; }
-.faded { opacity: .25; }
-|}
-      (fun d ->
+    Slat.make ~css (fun d ->
         let h = Row.data d in
         let orientation = Solidtype_rhp.use_orientation () in
         <div

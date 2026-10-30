@@ -1,0 +1,8 @@
+.band { background: none; --rhp-radius: 0px; }
+.odd .band { background: rgb(20 20 20 / .035); }
+.band:horizontal { top: 0; height: 100%; translate: none; }
+.band:vertical { left: 0; width: 100%; translate: none; }
+.month { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--rhp-muted); padding: 0; }
+.month:horizontal { top: -20px; translate: 6px 0; }
+.month:vertical { left: -34px; translate: 0 -4px; }
+@container (max-width: 360px) { .odd > .month:horizontal { display: none; } }

@@ -1,0 +1,2 @@
+.bar { --rhp-end-radius: 8px; }
+.value { color: var(--rhp-muted); }

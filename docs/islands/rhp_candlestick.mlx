@@ -66,20 +66,13 @@ let rose d = d.close >= d.open_
 (* The cross's one row, the day pointed at, or none. *)
 let crossed = function Some i -> [| days.(i) |] | None -> [||]
 
+external cross_css : string = "default"
+[@@mel.module "./rhp_candlestick_cross.css?raw"]
+
 (* The day under the pointer: a dashed line at its close, and its price
    over the axis numbers. *)
 let cross =
-  Slat.make ~room:(Slat.room ())
-    ~css:
-      {|
-.cross { background: none; --rhp-tick-width: 0px; }
-.cross:horizontal { border-left: 1px dashed var(--rhp-ink); }
-.cross:vertical { border-top: 1px dashed var(--rhp-ink); }
-.price { padding: 3px 6px; border-radius: 3px; background: var(--rhp-ink); color: var(--rhp-surface); font-size: 11px; font-weight: 800; }
-.price:horizontal { top: calc(100% + 1px); translate: -50% 0; }
-.price:vertical { left: auto; right: calc(100% + 3px); translate: 0 50%; }
-|}
-    (fun r ->
+  Slat.make ~room:(Slat.room ()) ~css:cross_css (fun r ->
       let d = Row.data r in
       <div>
         <Tick
@@ -91,6 +84,9 @@ let cross =
           (fun () -> Jsx.string (dollars d.close))
         </Label>
       </div>)
+
+external candle_css : string = "default"
+[@@mel.module "./rhp_candlestick_candle.css?raw"]
 
 let make () =
   let picked, set_picked = S.create_signal None in
@@ -113,15 +109,7 @@ let make () =
            ~horizontal:(Slat.room ~start:(Slat.px 24.) ~end_:(Slat.px 64.) ())
            ~vertical:(Slat.room ~start:(Slat.px 10.) ~end_:(Slat.px 30.) ())
            ())
-      ~css:
-        {|
-.day:hover { background: rgb(51 48 46 / .07); }
-.wick { background: #807973; }
-.body { --rhp-radius: 1px; }
-.last { font-size: 11.5px; font-weight: 800; color: #fff; padding: 2px 6px; border-radius: 3px; background: var(--rhp-color); font-variant-numeric: tabular-nums; }
-.last:horizontal { margin-left: 8px; }
-.last:vertical { left: auto; right: 0; translate: 0 -8px; }
-|}
+      ~css:candle_css
       (fun r ->
         let d = Row.data r in
         let pick _ = S.set set_picked (Some d.day) in

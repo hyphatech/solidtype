@@ -1,0 +1,16 @@
+.trade { font-size: 14px; font-weight: 700; }
+.trade small { display: block; font-size: 10.5px; font-weight: 500; color: var(--rhp-muted); }
+.trade:horizontal { --rhp-label-gap: 14px; }
+.job { background: #d8d5cf; --rhp-radius: 99px; }
+.done { background: #ff5a1f; --rhp-radius: 99px; }
+.slat:hover .job { background: #c4c0b8; }
+.slat:hover .trade { color: #ff5a1f; }
+.dim, .weeks { visibility: hidden; }
+.slat:hover :is(.dim, .weeks) { visibility: visible; }
+.dim { background: var(--rhp-ink); --rhp-radius: 0px; }
+.dim:horizontal { translate: 0 -13px; }
+.dim::before, .dim::after { content: ""; position: absolute; background: var(--rhp-ink); }
+.dim:horizontal::before, .dim:horizontal::after { top: -4px; width: 1px; height: 9px; }
+.dim:horizontal::before { left: 0; } .dim:horizontal::after { right: 0; }
+.weeks { padding: 0 4px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; background: var(--rhp-surface); }
+.weeks:horizontal { translate: -50% calc(-50% - 13px); }
