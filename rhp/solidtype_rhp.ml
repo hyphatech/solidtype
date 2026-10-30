@@ -8,6 +8,7 @@
    What no rule maps is ported by hand, a module each, re-exported here. *)
 
 module Types = Types
+module Animate = Animate
 module Color = Color
 module Ease = Ease
 module Many_dots = Many_dots

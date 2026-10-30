@@ -1,3 +1,4 @@
+module Animate = Solidtype_rhp.Animate
 module Bar = Solidtype_rhp.Bar
 module Chart = Solidtype_rhp.Chart
 module Jsx = Solidtype.Jsx
@@ -37,7 +38,12 @@ let make () =
   in
   <div>
     <Chart scale=(fun () -> (0., 40.)) label="Points">
-      <Plot rows=(fun () -> S.get teams) keyboard=true render=team />
+      <Plot
+        rows=(fun () -> S.get teams)
+        keyboard=true
+        animate=(fun () -> Animate.groups [| "points" |])
+        render=team
+      />
     </Chart>
     <button
       class_="button button--secondary"

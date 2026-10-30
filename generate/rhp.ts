@@ -70,7 +70,7 @@ const portedExports = new Set([
 
 // The hand modules, re-exported beside the generated ones; Helpers, rhp's
 // functions of rows and their values, is included, as rhp exports them.
-const handModules = ["Color", "Ease", "Many_dots", "Order", "Plot", "Row", "Scale", "Shape", "Slat", "Ticks"];
+const handModules = ["Animate", "Color", "Ease", "Many_dots", "Order", "Plot", "Row", "Scale", "Shape", "Slat", "Ticks"];
 const included = "Helpers";
 
 bind(root, checker, {

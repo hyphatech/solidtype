@@ -7,7 +7,7 @@ module Props = struct
     ?slats:float Solidtype.Check.value ->
     ?order:'row Order.t Solidtype.Check.value ->
     ?key:('row Row.t -> 'key) ->
-    ?animate:(bool, Types.Timing.t) Types.Either.t Solidtype.Check.value ->
+    ?animate:Animate.t Solidtype.Check.value ->
     ?thick:(string, float) Types.Either.t Solidtype.Check.value ->
     ?static:bool Solidtype.Check.value ->
     ?keyboard:bool Solidtype.Check.value ->

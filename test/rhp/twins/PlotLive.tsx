@@ -21,7 +21,7 @@ export function make() {
   return (
     <div>
       <Chart scale={[0, 40]} label="Points">
-        <Plot rows={teams()} keyboard>{team}</Plot>
+        <Plot rows={teams()} keyboard animate={["points"]}>{team}</Plot>
       </Chart>
       <button class="button button--secondary" type="button" onClick={() => score(2)}>
         Herons score

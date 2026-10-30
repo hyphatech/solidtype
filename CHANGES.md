@@ -30,6 +30,12 @@
   `solidtype-rhp` rhp and `solidtype-internationalized-date`
   @internationalized/date. `opam show <package> --field x-npm-depends`
   prints them as `bun add` takes them.
+- Breaking: `Solidtype_rhp.Plot`'s `animate` is a `Solidtype_rhp.Animate.t`,
+  which also names the fields that move, as rhp's own Plot takes them:
+  `Animate.all`, `Animate.groups [| "points" |]`, or `Animate.make` with
+  `groups` and the timing. `Types.Either.left true` is `Animate.all`, and
+  `Types.Either.right (Types.Timing.make ~duration ())` is `Animate.make
+  ~duration ()`.
 
 ## 0.4.0 (2026-10-30)
 

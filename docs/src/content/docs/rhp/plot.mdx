@@ -74,7 +74,7 @@ place, as the plot's child:
 | `overlap` | `bool` | `false` | Every slat in one band: stacked segments, strips of dots, layers |
 | `slats` | `float` | every row | The number of slats |
 | `order` | `'row Order.t` | the rows' | The order they are shown in |
-| `animate` | `(bool, Types.Timing.t) Types.Either.t` | the chart's | The JavaScript version, or its timing |
+| `animate` | `Animate.t` | the chart's | The JavaScript version: `Animate.all`, only the fields that change, `Animate.groups [\| "points" \|]`, or with its timing, `Animate.make` |
 | `thick` | `(string, float) Types.Either.t` | `1.` | In a slat, the share of its band the plot fills, or a CSS length |
 | `static` | `bool` | the chart's | Rows drawn once |
 | `keyboard` | `bool` | `false` | The slats take focus |

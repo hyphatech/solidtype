@@ -19,7 +19,7 @@ module Props : sig
     ?slats:float Solidtype.Check.value ->
     ?order:'row Order.t Solidtype.Check.value ->
     ?key:('row Row.t -> 'key) ->
-    ?animate:(bool, Types.Timing.t) Types.Either.t Solidtype.Check.value ->
+    ?animate:Animate.t Solidtype.Check.value ->
     ?thick:(string, float) Types.Either.t Solidtype.Check.value ->
     ?static:bool Solidtype.Check.value ->
     ?keyboard:bool Solidtype.Check.value ->
@@ -37,10 +37,11 @@ module Props : sig
       segments, strips of dots and layers; [slats], the number of rows, all of
       them by default; [key], what identifies a row, so a row removed takes its
       own slat with it; [animate], the JavaScript version, where the numbers
-      themselves move, or its timing; [thick], the share of the band, or a CSS
-      length, a plot inside a slat fills; [static], each row drawn once, for
-      data that does not change; [keyboard], the slats take focus, Tab stopping
-      at one and the arrows, Home and End moving it. *)
+      themselves move: every field of numbers, the fields named, and the timing;
+      [thick], the share of the band, or a CSS length, a plot inside a slat
+      fills; [static], each row drawn once, for data that does not change;
+      [keyboard], the slats take focus, Tab stopping at one and the arrows, Home
+      and End moving it. *)
 end
 
 external component : unit Solidtype.Jsx.component = "Plot"
