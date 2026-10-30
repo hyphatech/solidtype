@@ -39,6 +39,15 @@ A slat's argument is a `'row Row.t`, rhp's row for a plot whose rows are
 `Row.data` costs nothing: `let f = Row.data d in f.sold` is `d.sold`, the
 read rhp tracks, so a thunk that reads it follows the row.
 
+## The root's style
+
+rhp places a slat's root by its style, so a `style` on the root that
+changes replaces rhp's and loses the slat's place, as
+[rhp's gotchas](https://rhp.vercel.app/ai/rhp/references/api.md#15-gotchas)
+warn: an element's `style` is a string, which Solid writes whole. Give the
+root a class that changes, and its look in the slat's `css`; a block's
+`style` may change, since rhp keeps a block's own.
+
 ## Sizes
 
 rhp takes a number or a CSS length, for both orientations or for each:
