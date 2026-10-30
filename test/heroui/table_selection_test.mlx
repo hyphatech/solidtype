@@ -1,0 +1,188 @@
+(* HeroUI's Table with its rows selected, beside the same table in React: each
+   row's and checkbox's state, and the keys each is told, as rows are pressed
+   and their checkboxes, and the header's, checked. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Checkbox = Solidtype_heroui.Checkbox
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type user = { id : string; name : string }
+
+let users =
+  [|
+    { id = "1"; name = "Kate Moore" };
+    { id = "2"; name = "John Smith" };
+    { id = "3"; name = "Sara Johnson" };
+  |]
+
+type props
+
+external props :
+  selection_mode:(string[@mel.as "selectionMode"]) ->
+  ?selection_behavior:(string[@mel.as "selectionBehavior"]) ->
+  ?disabled_keys:(string array[@mel.as "disabledKeys"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render :
+    props -> ((string array -> unit)[@mel.uncurry]) -> Dom.element = "render"
+  [@@mel.module "./twins/TableSelection.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableSelection.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableSelection.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+let state =
+  [
+    "data-slot";
+    "role";
+    "aria-selected";
+    "aria-disabled";
+    "aria-multiselectable";
+    "data-selected";
+    "data-indeterminate";
+    "data-disabled";
+  ]
+
+let shown host =
+  Js.Array.from
+    (query_all host "[role=grid], [data-slot=table-row], [data-slot=checkbox]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (List.filter_map
+           (fun name ->
+             (* Kobalte's checkbox is a group, React Aria's a bare label. *)
+             if
+               String.equal name "role"
+               && Option.equal String.equal
+                    (T.attribute e "data-slot")
+                    (Some "checkbox")
+             then None
+             else
+               match T.attribute e name with
+               | Some "" | None -> None
+               | Some v -> Some (name ^ "=" ^ v))
+           state))
+
+let nth host selector i =
+  match Js.Array.from (query_all host selector) |> Array.to_list with
+  | items when List.length items > i -> List.nth items i
+  | _ -> Js.Exn.raiseError ("no " ^ selector)
+
+(* The table at rest, then its first row pressed, its second row's checkbox
+   checked, and the header's checked and unchecked. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let seen = ref [ (shown host, !told) ] in
+  let after action =
+    let* () = step action in
+    seen := (shown host, !told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let label n =
+    nth host "[data-slot=checkbox] label, [data-slot=checkbox-content]" n
+  in
+  let* () = after (fun () -> T.click user (nth host "td:nth-child(2)" 0)) in
+  let* () = after (fun () -> T.click user (label 2)) in
+  let* () = after (fun () -> T.click user (label 0)) in
+  let* () = after (fun () -> T.click user (label 0)) in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let checkbox ~aria_label ~variant =
+  <Checkbox
+    aria_label=(fun () -> aria_label)
+    slot=`selection
+    variant=(fun () -> variant)>
+    <Checkbox.Content>
+      <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+    </Checkbox.Content>
+  </Checkbox>
+
+let both ~mode ?behavior ?disabled_keys () =
+  let told = ref [||] in
+  T.render (fun () ->
+      <Table>
+        <Table.Scroll_container>
+          <Table.Content
+            aria_label="Table with selection"
+            selection_mode=(fun () -> mode)
+            ?selection_behavior=(fun () -> behavior)
+            ?disabled_keys=(fun () -> disabled_keys)
+            on_selection_change=(fun keys ->
+                                  told :=
+                                    Array.of_list
+                                      (List.sort String.compare
+                                         (Array.to_list keys)))>
+            <Table.Header>
+              <Table.Column class_="pe-0">
+                (fun () ->
+                  Jsx.element
+                    (checkbox ~aria_label:"Select all" ~variant:`primary))
+              </Table.Column>
+              <Table.Column is_row_header=true>"Name"</Table.Column>
+            </Table.Header>
+            <Table.Body>
+              <For each=(fun () -> users)>
+                (fun u _ ->
+                  <Table.Row id=(fun () -> u.id)>
+                    <Table.Cell class_="pe-0">
+                      (fun () ->
+                        Jsx.element
+                          (checkbox ~aria_label:("Select " ^ u.name)
+                             ~variant:`secondary))
+                    </Table.Cell>
+                    <Table.Cell>(fun () -> Jsx.string u.name)</Table.Cell>
+                  </Table.Row>)
+              </For>
+            </Table.Body>
+          </Table.Content>
+        </Table.Scroll_container>
+      </Table>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [||] in
+  let host =
+    Twin.render
+      (props
+         ~selection_mode:
+           (match mode with
+           | `single -> "single"
+           | `multiple -> "multiple"
+           | `none -> "none")
+         ?selection_behavior:
+           (Option.map
+              (function `toggle -> "toggle" | `replace -> "replace")
+              behavior)
+         ?disabled_keys ())
+      (fun keys -> told' := keys)
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Table, selected" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "selects many, by row and by checkbox, as React's does"
+        (fun () -> both ~mode:`multiple ());
+      Jest.testPromise "selects one, as React's does" (fun () ->
+          both ~mode:`single ());
+      Jest.testPromise "keeps a disabled row out, as React's does" (fun () ->
+          both ~mode:`multiple ~disabled_keys:[| "2" |] ()))

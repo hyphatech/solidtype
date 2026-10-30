@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Table`: rows selected, one or many, by Kobalte's list --
+  a press, Space or Enter, Shift and the platform's key -- controlled or
+  kept, disabled rows left out, `selection_mode`, `selection_behavior`,
+  `selected_keys`, `default_selected_keys`, `on_selection_change`,
+  `disabled_keys` and `disallow_empty_selection` on `Table.Content`.
+- `Solidtype_heroui.Checkbox`: `slot=`selection`, the checkbox of the part
+  above it, React Aria's selection slot: a table's row, or all of them in
+  its header.
 - `Solidtype_heroui.Table`: HeroUI's Table, its rows a list of Kobalte's
   list hooks, focused and moved between by the keys as React Aria's grid
   is, and its cells moved through by the port: every part, both variants,

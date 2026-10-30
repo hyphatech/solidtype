@@ -30,6 +30,14 @@ external position : _ Dom.element_like -> _ Dom.element_like -> int
 [@@mel.send]
 
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external event_target : _ Dom.event_like -> Dom.element = "target" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+(* Whether an event began in a checkbox, which handles its own press. *)
+let in_checkbox e =
+  Js.Null.toOption (closest (event_target e) "[data-slot=checkbox]") <> None
 
 external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
 [@@mel.send]
@@ -58,6 +66,8 @@ type content = {
   add : row -> unit;
   remove : string -> unit;
   manager : Types.MultipleSelectionManager.t S.accessor;
+  selection_mode : unit -> [ `none | `single | `multiple ];
+  disabled : string -> bool;
   row_header : unit -> int;
   set_row_header : int -> unit;
   next_column : unit -> int;
@@ -158,7 +168,14 @@ end
 
 module Content = struct
   let%component make ?(aria_label : string option)
-      ?(aria_labelledby : string option) ?(class_ : string option)
+      ?(aria_labelledby : string option)
+      ?(selection_mode : [ `none | `single | `multiple ] = `none)
+      ?(selection_behavior : [ `toggle | `replace ] = `toggle)
+      ?(selected_keys : string array option)
+      ?(default_selected_keys : string array option)
+      ?(on_selection_change : (string array -> unit) option)
+      ?(disabled_keys : string array option)
+      ?(disallow_empty_selection : bool = false) ?(class_ : string option)
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Content" in
     let rows, set_rows = S.create_signal [] in
@@ -171,6 +188,11 @@ module Content = struct
       S.create_memo (fun () ->
           Array.of_list (List.map (fun r -> r.key) (ordered ())))
     in
+    let disabled k =
+      match disabled_keys () with
+      | Some keys -> Array.exists (String.equal k) keys
+      | None -> false
+    in
     let text k =
       match List.find_opt (fun r -> String.equal r.key k) (S.get rows) with
       | Some r -> text_content r.element
@@ -180,7 +202,21 @@ module Content = struct
       Selection.create_list_state
         (Types.CreateListStateProps.make ~data_source:(Either.right keys)
            ~get_key:(Either.left Fun.id) ~get_text_value:(Either.left text)
-           ~selection_mode:(Either.left `none) ())
+           ~get_disabled:(Either.left disabled)
+           ~selection_mode:
+             (Either.right (S.create_memo (fun () -> Some (selection_mode ()))))
+           ~selection_behavior:
+             (Either.right
+                (S.create_memo (fun () -> Some (selection_behavior ()))))
+           ~disallow_empty_selection:
+             (Either.right
+                (S.create_memo (fun () -> Some (disallow_empty_selection ()))))
+           ~selected_keys:(Either.right (S.create_memo selected_keys))
+           ?default_selected_keys:
+             (Option.map Either.left (S.untrack default_selected_keys))
+           ~on_selection_change:(fun keys ->
+             ignore (on_selection_change (Js.Set.toArray keys) : unit option))
+           ())
     in
     let manager =
       S.create_memo (fun () ->
@@ -206,6 +242,8 @@ module Content = struct
             S.set set_rows
               (List.filter (fun r -> not (String.equal r.key k)) (S.get rows)));
         manager;
+        selection_mode = (fun () -> selection_mode ());
+        disabled;
         row_header = (fun () -> S.get row_header);
         set_row_header = S.set set_row_header;
         next_column =
@@ -239,6 +277,10 @@ module Content = struct
       <table
         role=`grid
         ref=(fun e -> S.set set_element (Some e))
+        ?aria_multiselectable=(fun () ->
+                                match selection_mode () with
+                                | `multiple -> Some true
+                                | `single | `none -> None)
         ?aria_label
         ?aria_labelledby
         tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
@@ -257,13 +299,40 @@ end
 module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Header" in
-    <thead
-      role=`rowgroup
-      class_=(fun () -> after (Styles.Table.header (slots ())) (class_ ()))
-      data_slot="table-header"
-      props=(Props.others props)>
-      <tr role=`row>(fun () -> children ())</tr>
-    </thead>
+    let c = in_content "Table.Header" in
+    (* A checkbox of slot=`selection in the header stands for every row. *)
+    let all =
+      {
+        Checkbox.selected =
+          (fun () ->
+            S.get
+              (Types.MultipleSelectionManager.is_select_all (S.get c.manager)));
+        indeterminate =
+          (fun () ->
+            let m = S.get c.manager in
+            (not (S.get (Types.MultipleSelectionManager.is_empty m)))
+            && not (S.get (Types.MultipleSelectionManager.is_select_all m)));
+        set =
+          (fun now ->
+            let m = S.get c.manager in
+            if now then Types.MultipleSelectionManager.select_all m ()
+            else Types.MultipleSelectionManager.clear_selection m ());
+        disabled =
+          (fun () ->
+            match c.selection_mode () with
+            | `multiple -> false
+            | `single | `none -> true);
+      }
+    in
+    <Checkbox.Selection.Provider value=(fun () -> all)>
+      <thead
+        role=`rowgroup
+        class_=(fun () -> after (Styles.Table.header (slots ())) (class_ ()))
+        data_slot="table-header"
+        props=(Props.others props)>
+        <tr role=`row>(fun () -> children ())</tr>
+      </thead>
+    </Checkbox.Selection.Provider>
 end
 
 module Column = struct
@@ -345,30 +414,63 @@ module Row = struct
     S.on_mount (fun () ->
         Option.iter (fun e -> c.add { key; element = e }) (S.get element));
     S.on_cleanup (fun () -> c.remove key);
+    let manager () = S.get c.manager in
+    let selected () =
+      Types.MultipleSelectionManager.is_selected (manager ()) key
+    in
+    let disabled () = c.disabled key in
+    let one =
+      {
+        Checkbox.selected;
+        indeterminate = (fun () -> false);
+        set =
+          (fun _ ->
+            Types.MultipleSelectionManager.toggle_selection (manager ()) key);
+        disabled;
+      }
+    in
     <Row_context.Provider value=(fun () -> r)>
-      <tr
-        role=`row
-        ref=(fun e ->
-              S.set set_element (Some e);
-              Interaction.watch i e)
-        tabindex=(fun () -> tabindex (S.get (Selectable_item.tab_index item)))
-        aria_labelledby=(fun () -> r.header_id)
-        style="--table-row-level: 1"
-        class_=(fun () -> after (Styles.Table.row (slots ())) (class_ ()))
-        data_slot="table-row"
-        data_key=(fun () -> Jsx.data key)
-        data_level="1"
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        on_pointer_down=(fun e -> Selectable_item.on_pointer_down item e)
-        on_pointer_up=(fun e -> Selectable_item.on_pointer_up item e)
-        on_click=(fun e -> Selectable_item.on_click item e)
-        on_key_down=(fun e -> Selectable_item.on_key_down item e)
-        on_mouse_down=(fun e -> Selectable_item.on_mouse_down item e)
-        on_focus=(fun e -> Selectable_item.on_focus item e)
-        props=(Props.others props)>
-        (fun () -> children ())
-      </tr>
+      <Checkbox.Selection.Provider value=(fun () -> one)>
+        <tr
+          role=`row
+          ref=(fun e ->
+                S.set set_element (Some e);
+                Interaction.watch i e)
+          tabindex=(fun () -> tabindex (S.get (Selectable_item.tab_index item)))
+          aria_labelledby=(fun () -> r.header_id)
+          style="--table-row-level: 1"
+          class_=(fun () -> after (Styles.Table.row (slots ())) (class_ ()))
+          data_slot="table-row"
+          data_key=(fun () -> Jsx.data key)
+          data_level="1"
+          ?aria_selected=(fun () ->
+                           match c.selection_mode () with
+                           | `none -> None
+                           | `single | `multiple -> Some (selected ()))
+          ?aria_disabled=(fun () -> if disabled () then Some true else None)
+          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+          data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+          data_selected=(fun () -> Jsx.flag (selected ()))
+          data_disabled=(fun () -> Jsx.flag (disabled ()))
+                        (* A checkbox in the row is pressed alone: the row would select its
+           row again. *)
+          on_pointer_down=(fun e ->
+                            if not (in_checkbox e) then
+                              Selectable_item.on_pointer_down item e)
+          on_pointer_up=(fun e ->
+                          if not (in_checkbox e) then
+                            Selectable_item.on_pointer_up item e)
+          on_click=(fun e ->
+                     if not (in_checkbox e) then Selectable_item.on_click item e)
+          on_key_down=(fun e ->
+                        if not (in_checkbox e) then
+                          Selectable_item.on_key_down item e)
+          on_mouse_down=(fun e -> Selectable_item.on_mouse_down item e)
+          on_focus=(fun e -> Selectable_item.on_focus item e)
+          props=(Props.others props)>
+          (fun () -> children ())
+        </tr>
+      </Checkbox.Selection.Provider>
     </Row_context.Provider>
 end
 

@@ -1,0 +1,107 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Checkbox = Solidtype_heroui.Checkbox
+module Table = Solidtype_heroui.Table
+
+type user = {
+  id : int;
+  name : string;
+  role : string;
+  status : string;
+  email : string;
+}
+
+let users =
+  [|
+    {
+      email = "kate@acme.com";
+      id = 1;
+      name = "Kate Moore";
+      role = "CEO";
+      status = "Active";
+    };
+    {
+      email = "john@acme.com";
+      id = 2;
+      name = "John Smith";
+      role = "CTO";
+      status = "Active";
+    };
+    {
+      email = "sara@acme.com";
+      id = 3;
+      name = "Sara Johnson";
+      role = "CMO";
+      status = "On Leave";
+    };
+    {
+      email = "michael@acme.com";
+      id = 4;
+      name = "Michael Brown";
+      role = "CFO";
+      status = "Active";
+    };
+  |]
+
+let make () =
+  let selected_keys, set_selected_keys = S.create_signal [||] in
+  <div class_="flex flex-col gap-3">
+    <Table>
+      <Table.Scroll_container>
+        <Table.Content
+          aria_label="Table with selection"
+          class_="min-w-[600px]"
+          selected_keys=(fun () -> S.get selected_keys)
+          selection_mode=`multiple
+          on_selection_change=(S.set set_selected_keys)>
+          <Table.Header>
+            <Table.Column class_="pe-0">
+              <Checkbox aria_label="Select all" slot=`selection>
+                <Checkbox.Content>
+                  <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                </Checkbox.Content>
+              </Checkbox>
+            </Table.Column>
+            <Table.Column is_row_header=true>"Name"</Table.Column>
+            <Table.Column>"Role"</Table.Column>
+            <Table.Column>"Status"</Table.Column>
+            <Table.Column>"Email"</Table.Column>
+          </Table.Header>
+          <Table.Body>
+            <For each=(fun () -> users)>
+              (fun user _ ->
+                <Table.Row id=(fun () -> string_of_int user.id)>
+                  <Table.Cell class_="pe-0">
+                    <Checkbox
+                      aria_label=(fun () -> "Select " ^ user.name)
+                      slot=`selection
+                      variant=`secondary>
+                      <Checkbox.Content>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                      </Checkbox.Content>
+                    </Checkbox>
+                  </Table.Cell>
+                  <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
+                  <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
+                  <Table.Cell>(fun () -> Jsx.string user.status)</Table.Cell>
+                  <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+                </Table.Row>)
+            </For>
+          </Table.Body>
+        </Table.Content>
+      </Table.Scroll_container>
+    </Table>
+    <p class_="text-sm text-muted">
+      "Selected: "
+      <span class_="font-medium">
+        (fun () ->
+          Jsx.string
+            (match S.get selected_keys with
+            | [||] -> "None"
+            | keys -> String.concat ", " (Array.to_list keys)))
+      </span>
+    </p>
+  </div>

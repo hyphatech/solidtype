@@ -97,6 +97,34 @@ module Indicator : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type selection = {
+  selected : unit -> bool;
+  indeterminate : unit -> bool;
+  set : bool -> unit;
+  disabled : unit -> bool;
+}
+(** What a checkbox of [slot=`selection] is, as the part above it gives it, as
+    React Aria's selection slot does: whether it is checked, or some but not all
+    of what it stands for is, what checking it does, and whether it is disabled.
+    A {!Table.Row} gives its row's selection, and a {!Table.Header} its rows',
+    all of them. *)
+
+module Selection : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:selection Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Solidtype.Jsx.component
+  end
+
+  val use : unit -> selection option
+end
+
 module Props : sig
   type t
 
@@ -114,6 +142,7 @@ module Props : sig
     ?value:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?slot:[ `selection ] Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->

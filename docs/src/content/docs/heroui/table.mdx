@@ -8,6 +8,8 @@ import * as ExUsage from "@islands/table_usage.jsx";
 import ExUsageCode from "@islands/table_usage.mlx?raw";
 import * as ExSecondary from "@islands/table_secondary.jsx";
 import ExSecondaryCode from "@islands/table_secondary.mlx?raw";
+import * as ExSelection from "@islands/table_selection.jsx";
+import ExSelectionCode from "@islands/table_selection.mlx?raw";
 import * as ExPagination from "@islands/table_pagination.jsx";
 import ExPaginationCode from "@islands/table_pagination.mlx?raw";
 import * as ExEmptyState from "@islands/table_empty_state.jsx";
@@ -28,7 +30,9 @@ Rows given by data are Solid's `For` inside `Table.Body`, as HeroUI's are its
 body's `items` and a render function; columns and cells given by data are a
 `For` too, as HeroUI's are its header's `columns` and `Table.Collection`.
 
-Selection, sorting, loading more as the table scrolls, resizing columns,
+Its rows are selected by Kobalte's list, one or many, by a press, Space or
+Enter, or a `Checkbox` of `slot=`selection` in a row, and all of them by one
+in the header. Sorting, loading more as the table scrolls, resizing columns,
 expandable rows and virtualization are being ported, each in a stage of its
 own; their examples are added with them.
 
@@ -65,6 +69,13 @@ HeroUI's examples.
 ### Secondary Variant
 
 <Example code={ExSecondaryCode} title="table_secondary.mlx"><ExSecondary.make client:visible /></Example>
+
+### Selection
+
+`selection_mode` on `Table.Content` selects its rows. A `Checkbox` of
+`slot=`selection` stands for its row, and in the header for every row.
+
+<Example code={ExSelectionCode} title="table_selection.mlx"><ExSelection.make client:visible /></Example>
 
 ### Pagination
 
@@ -104,7 +115,8 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
 
 ### Interactive States
 
-- a row: `[data-hovered="true"]`, `[data-focus-visible="true"]`
+- a row: `[data-hovered="true"]`, `[data-focus-visible="true"]`,
+  `[data-selected="true"]`, `[aria-disabled="true"]`
 - a column and a cell: `[data-focus-visible="true"]`
 
 ## API Reference
@@ -128,6 +140,13 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 |---|---|---|---|---|
 | `aria-label` | `aria_label` | `string` | | Its name |
 | `aria-labelledby` | `aria_labelledby` | `string` | | What names it |
+| `selectionMode` | `selection_mode` | `` [ `none \| `single \| `multiple ] `` | `` `none `` | How many rows may be selected |
+| `selectionBehavior` | `selection_behavior` | `` [ `toggle \| `replace ] `` | `` `toggle `` | Whether a press toggles a row or chooses it alone |
+| `selectedKeys` | `selected_keys` | `string array` | | Its rows' keys selected, controlled |
+| `defaultSelectedKeys` | `default_selected_keys` | `string array` | | Its rows' keys selected at first, kept by itself |
+| `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Called with the keys selected; all is every row's but a disabled one |
+| `disabledKeys` | `disabled_keys` | `string array` | | Its rows' keys disabled |
+| `disallowEmptySelection` | `disallow_empty_selection` | `bool` | `false` | Whether one row stays selected |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Header

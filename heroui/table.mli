@@ -52,7 +52,18 @@ module Scroll_container : sig
 end
 
 (** The [<table role="grid">], named by [aria_label] or [aria_labelledby]: a
-    page's Tab reaches its focused row, the first at first, and leaves it. *)
+    page's Tab reaches its focused row, the first at first, and leaves it.
+
+    Its rows are selected as [selection_mode] says, by Kobalte's list: none, one
+    at a time, or many. Pressing a row, or Space or Enter on it, toggles it, or
+    with [selection_behavior] [`replace] chooses it alone, Shift and the
+    platform's key extending and adding, as Kobalte's list does. Its keys are
+    [selected_keys] while it is given them, else those it keeps,
+    [default_selected_keys] at first; each change calls [on_selection_change]
+    with them. A row whose key [disabled_keys] holds is disabled, and
+    [disallow_empty_selection] keeps one selected. A {!Checkbox} of
+    [slot=`selection] in a row stands for its row, and in the {!Header} for
+    every row. *)
 module Content : sig
   module Props : sig
     type t
@@ -60,6 +71,13 @@ module Content : sig
     val check :
       ?aria_label:string Solidtype.Check.value ->
       ?aria_labelledby:string Solidtype.Check.value ->
+      ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
+      ?selection_behavior:[ `toggle | `replace ] Solidtype.Check.value ->
+      ?selected_keys:string array Solidtype.Check.value ->
+      ?default_selected_keys:string array Solidtype.Check.value ->
+      ?on_selection_change:(string array -> unit) ->
+      ?disabled_keys:string array Solidtype.Check.value ->
+      ?disallow_empty_selection:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->

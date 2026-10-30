@@ -10,6 +10,20 @@ module Context = Solidtype.Context.Make_optional (struct
   type t = checkbox
 end)
 
+(* What a checkbox of slot=`selection is, as the part above it gives it, as
+   React Aria's selection slot does: a table's row, or its header, all its
+   rows. *)
+type selection = {
+  selected : unit -> bool;
+  indeterminate : unit -> bool;
+  set : bool -> unit;
+  disabled : unit -> bool;
+}
+
+module Selection = Solidtype.Context.Make_optional (struct
+  type t = selection
+end)
+
 let within part =
   match Context.use () with
   | Some c -> c
@@ -144,7 +158,14 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_read_only : bool = false) ?(is_required : bool = false)
     ?(name : string option) ?(value : string option)
     ?(aria_label : string option) ?(class_ : string option)
-    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(slot : [ `selection ] option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ~(children : Jsx.content) () =
+  (* Given its slot, its state is the selection of the part above it. *)
+  let slotted =
+    match (slot (), Selection.use ()) with
+    | Some `selection, Some s -> Some s
+    | Some `selection, None | None, _ -> None
+  in
   (* The state is the checkbox's, read by Kobalte and by every part alike: in
      a group, whether its value is checked there, and the group's state. *)
   let group = Checkbox_group.Context.use () in
@@ -173,6 +194,25 @@ let%component make ?(variant : [ `primary | `secondary ] option)
           fun now ->
             in_form.changed ();
             own_change now )
+  in
+  let on, change =
+    match slotted with
+    | Some s ->
+        ( s.selected,
+          fun now ->
+            s.set now;
+            ignore (on_change now : unit option) )
+    | None -> (on, change)
+  in
+  let is_indeterminate () =
+    match slotted with
+    | Some s -> s.indeterminate ()
+    | None -> is_indeterminate ()
+  in
+  let is_disabled () =
+    match slotted with
+    | Some s -> s.disabled () || is_disabled ()
+    | None -> is_disabled ()
   in
   let disabled = in_group (fun g -> g.disabled ()) is_disabled in
   let invalid =

@@ -468,8 +468,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Table's core, its rows a list of Kobalte's hooks and its cells moved
   through by the port: every part, variants, rows and columns of data, row
   headers, an empty state, a footer
-- [ ] Table's selection, sorting, loading more, column resizing,
-  expandable rows and virtualization, a stage each
+- [x] Table's selection, by Kobalte's list, and a Checkbox of
+  `slot=`selection`
+- [ ] Table's sorting, loading more, column resizing, expandable rows and
+  virtualization, a stage each
 - [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
   DatePicker, DateRangePicker
 
