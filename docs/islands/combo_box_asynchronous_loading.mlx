@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Combo_box = Solidtype_heroui.Combo_box
+module Empty_state = Solidtype_heroui.Empty_state
 module Input = Solidtype_heroui.Input
 module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
@@ -86,7 +87,7 @@ let make () =
       <Input placeholder="Star Wars characters..." /> <Combo_box.Trigger />
     </Combo_box.Input_group>
     <Combo_box.Popover>
-      <List_box>
+      <List_box render_empty_state=(fun _ -> <Empty_state />)>
         <Solidtype.For
           each=(fun () ->
                  let found = found () in

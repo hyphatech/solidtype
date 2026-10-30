@@ -126,9 +126,9 @@ choice of one, where HeroUI's React component also takes `selectedKey`.
 
 HeroUI's example searches a server for each text typed; here the same names
 are searched and loaded a part at a time. The list's
-`List_box.Load_more_item` asks for more as the list scrolls to its end.
-HeroUI's list also draws an empty state while it holds nothing, which a
-`List_box` does not yet.
+`List_box.Load_more_item` asks for more as the list scrolls to its end, and
+its `render_empty_state` draws an `Empty_state` while no name holds the text
+typed.
 
 <Example code={ExAsynchronousLoadingCode} title="combo_box_asynchronous_loading.mlx"><ExAsynchronousLoading.make client:visible /></Example>
 

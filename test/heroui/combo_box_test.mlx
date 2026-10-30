@@ -467,4 +467,42 @@ let () =
                     (first "[data-slot=combo-box-popover]")
                     "data-testid" )
               |> toEqual
-                   ([| "Cats"; "Dogs" |], [| "Dogs" |], Some "Combo_box.Popover"))))
+                   ([| "Cats"; "Dogs" |], [| "Dogs" |], Some "Combo_box.Popover")));
+      Jest.testPromise
+        "shows its list's empty state while the text matches no option"
+        (fun () ->
+          T.render (fun () ->
+              <Combo_box allows_empty_collection=true>
+                <Combo_box.Input_group>
+                  <Input aria_label="Animal" />
+                </Combo_box.Input_group>
+                <Combo_box.Popover>
+                  <List_box
+                    render_empty_state=(fun _ ->
+                                         <span data_slot="nothing">
+                                           "No results found"
+                                         </span>)>
+                    <List_box.Item id="cat">"Cat"</List_box.Item>
+                    <List_box.Item id="dog">"Dog"</List_box.Item>
+                  </List_box>
+                </Combo_box.Popover>
+              </Combo_box>);
+          let user = T.setup () in
+          let* () = T.click user (input ()) in
+          let* () = T.keyboard user "c" in
+          let* () = settle () in
+          let matching =
+            (options (), Option.map text (T.query "[data-slot=nothing]"))
+          in
+          let* () = T.keyboard user "zz" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( matching,
+                  ( options (),
+                    Option.map text (T.query "[data-slot=nothing]"),
+                    T.attribute (first "[data-slot=list-box]") "data-empty" ) )
+              |> toEqual
+                   ( ([ "Cat" ], None),
+                     ([], Some "No results found", Some "true") ))))
