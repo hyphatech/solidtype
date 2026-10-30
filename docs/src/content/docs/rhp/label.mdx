@@ -1,0 +1,36 @@
+---
+title: Label
+description: Text placed on the chart's scale, or outside it at an edge.
+---
+
+import Example from "@components/Example.astro";
+import * as Edges from "@islands/rhp_label_edges.jsx";
+import EdgesCode from "@islands/rhp_label_edges.mlx?raw";
+
+`Solidtype_rhp.Label` is rhp's `Label`, a block: text that starts just past
+a value, or ends just before it, or sits outside the plot, in the chart's
+gutter.
+
+Original rhp documentation: [Blocks: Label](https://rhp.vercel.app/reference/blocks/#label).
+
+## Usage
+
+`edge="start"` puts a name before the plot and `edge="end"` a unit after
+it, each in the room the slat makes; `at` with ``side=`before`` ends the text
+just before the value, inside the bar.
+
+<Example code={EdgesCode} title="rhp_label_edges.mlx" fill><Edges.make client:visible /></Example>
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `at` | `float` | | The text starts just past this value |
+| `side` | `` [ `after \| `before ] `` | `` `after `` | With `at`, `` `before `` ends the text just before it |
+| `edge` | `string` | | `"start"` or `"end"`: outside the plot, before it or after it |
+| `cross` | `float` | | With `at`, its place on the chart's second axis |
+| `shape` | `Shape.t` | | An outline to wear instead of its box |
+| `children` | elements | | The text |
+
+`edge` is a `string`, since `end` is OCaml's keyword and no tag can be it.
+It also takes a `<div>`'s attributes and handlers, which it passes on.

@@ -7,3 +7,8 @@ kobalte/types.mli
 kobalte/solidtype_kobalte.mli
 heroui/styles.ml
 heroui/styles.mli
+rhp/solidtype_rhp.ml
+rhp/solidtype_rhp.mli
+rhp/types.ml
+rhp/types.mli
+ppx/rhp_names.ml

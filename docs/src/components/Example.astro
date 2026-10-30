@@ -1,19 +1,21 @@
 ---
 // One example: the component live, on HeroUI's own ground, so it looks as
 // it does on heroui.com, and its code beneath, the code the preview runs, in
-// a frame of the site's rule.
+// a frame of the site's rule. A chart, which takes its width from the page,
+// fills the preview rather than sitting in its middle.
 import { Code } from "@astrojs/starlight/components";
 
 interface Props {
   code: string;
   title: string;
+  fill?: boolean;
 }
 
-const { code, title } = Astro.props;
+const { code, title, fill = false } = Astro.props;
 ---
 
 <figure class="not-content example">
-  <div class="preview heroui-ground"><slot /></div>
+  <div class:list={["preview heroui-ground", { fill }]}><slot /></div>
   <Code code={code} lang="ocaml" title={title} />
 </figure>
 
@@ -31,6 +33,10 @@ const { code, title } = Astro.props;
     min-height: 10rem;
     padding: 3rem 1.5rem;
     background: var(--background);
+  }
+  .preview.fill {
+    display: block;
+    padding: 2rem 1.5rem;
   }
   /* On a phone, to the screen's edges, as hypha.pub's code is: the gutter
      is room the preview needs more. */

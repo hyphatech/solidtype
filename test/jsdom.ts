@@ -28,6 +28,9 @@ globalThis.IntersectionObserver ??= class {
 // arrow key moves the choice: CSSOM's serialisation of an identifier
 // stands in.
 globalThis.CSS ??= {} as typeof CSS;
+// Nor CSS.supports, by which rhp asks whether a path's outline moves by
+// CSS: jsdom has no CSS engine, so nothing is supported.
+CSS.supports ??= () => false;
 CSS.escape ??= (value: string) => {
   let out = "";
   for (let i = 0; i < value.length; i++) {

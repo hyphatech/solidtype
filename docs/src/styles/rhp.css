@@ -1,0 +1,9 @@
+/* A chart takes rhp's theme, written on its root, light by default. On
+   this site a chart's text and grid take the site's colours instead, as an
+   application gives a chart a theme of its own: declared on the chart's
+   body, inside the root, so every block reads them, in light and dark. */
+.rhp-chart > .rhp-body {
+  --rhp-ink: var(--sl-color-white);
+  --rhp-muted: var(--sl-color-gray-3);
+  --rhp-grid: var(--sl-color-hairline-light);
+}

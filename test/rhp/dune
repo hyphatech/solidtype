@@ -1,0 +1,23 @@
+; Each rhp chart island of the documentation beside the same chart in rhp's
+; own JSX, its twin: the two must draw the same elements.
+
+(library
+ (name rhp_test)
+ (modes melange)
+ (libraries
+  solidtype
+  solidtype-rhp
+  docs_islands
+  melange-jest.jest
+  melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))
+
+(melange.emit
+ (target out)
+ (modules)
+ (libraries rhp_test)
+ (runtime_deps
+  (glob_files twins/*.tsx))
+ (module_systems
+  (es6 jsx)))

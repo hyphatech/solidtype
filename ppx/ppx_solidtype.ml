@@ -23,7 +23,7 @@ let names =
   let t = Hashtbl.create 64 in
   List.iter
     (fun (l, js) -> Hashtbl.replace t l js)
-    (Html_names.names @ Kobalte_names.names);
+    (Html_names.names @ Kobalte_names.names @ Rhp_names.names);
   t
 
 let starts_with ~prefix s =
@@ -98,8 +98,30 @@ let is_thunk (e : expression) =
       is_unit p
   | _ -> false
 
+(* A component's render function given by name, [render=f], as a slat rhp
+   reads its layout from must be: marked as it is split from the props, and
+   read as a function child. MLX names a component's children [children],
+   which ocamlformat cannot print beside an attribute of that name. *)
+let render = "render"
+let named_render = "solidtype.render"
+
+let is_named_render (e : expression) =
+  List.exists
+    (fun (a : attribute) -> String.equal a.attr_name.txt named_render)
+    e.pexp_attributes
+
+let unmark (e : expression) =
+  {
+    e with
+    pexp_attributes =
+      List.filter
+        (fun (a : attribute) -> not (String.equal a.attr_name.txt named_render))
+        e.pexp_attributes;
+  }
+
 let is_function (e : expression) =
-  match e.pexp_desc with Pexp_function _ -> not (is_thunk e) | _ -> false
+  is_named_render e
+  || match e.pexp_desc with Pexp_function _ -> not (is_thunk e) | _ -> false
 
 (* What a prop is decides how Solid's compiler is handed it: a literal, an
    element, a function and a name as they are, a thunk as the expression it
@@ -148,10 +170,32 @@ let split args =
       args
   in
   let props = List.filter_map Fun.id props in
-  match children with
-  | [] -> Ok (props, [])
-  | [ list ] -> Result.map (fun cs -> (props, cs)) (list_items list)
-  | _ :: extra :: _ -> Error (extra.pexp_loc, "children are given twice")
+  let given, props =
+    List.partition
+      (fun (label, _) ->
+        match label with Labelled l -> String.equal l render | _ -> false)
+      props
+  in
+  let* cs =
+    match children with
+    | [] -> Ok []
+    | [ list ] -> list_items list
+    | _ :: extra :: _ -> Error (extra.pexp_loc, "children are given twice")
+  in
+  match (given, cs) with
+  | [], cs -> Ok (props, cs)
+  | [ (_, (f : expression)) ], [] ->
+      let loc = f.pexp_loc in
+      Ok
+        ( props,
+          [
+            {
+              f with
+              pexp_attributes = attribute ~loc named_render :: f.pexp_attributes;
+            };
+          ] )
+  | (_, (f : expression)) :: _, _ ->
+      Error (f.pexp_loc, "render=f is a component's only child")
 
 let labelled ~loc = function
   | Labelled label -> Ok label
@@ -450,7 +494,7 @@ let component map ~loc path args =
     | [ f ] when is_function f ->
         let x = B.evar ~loc (bound "children") in
         Ok
-          ( Some (bound "children", (None, map f)),
+          ( Some (bound "children", (None, map (unmark f))),
             Some (Labelled "children", [%expr Solidtype.Check.render [%e x]]),
             [ [%expr Solidtype.Jsx.render [%e x]] ] )
     | cs ->

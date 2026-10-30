@@ -12,3 +12,4 @@ document that owns that kind of fact, and the PRD is deleted.
 | how a part behaves, its contract | its `.mli` |
 | a port's use, its examples and how it differs from React's | its page under `docs/src/content/docs/heroui/` |
 | which of HeroUI's components are ported, and what of each is not yet | `docs/src/content/docs/heroui/coverage.mdx` |
+| a chart's use, each block, and how it differs from rhp's JSX | the pages under `docs/src/content/docs/rhp/` |

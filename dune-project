@@ -154,6 +154,19 @@
    (= :version))))
 
 (package
+ (name solidtype-rhp)
+ (synopsis "rhp for solidtype: reactive charts of HTML, typed")
+ (description
+  "The charts of rhp 2.2, reactive HTML plots built on Solid, for OCaml front ends written with solidtype: generated from rhp's own declarations where a rule maps them whole, and ported by hand where none does.")
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))
+  (solidtype
+   (= :version))))
+
+(package
  (name ppx_solidtype)
  (synopsis "The JSX lowering of solidtype: OCaml's JSX to Solid's")
  (description

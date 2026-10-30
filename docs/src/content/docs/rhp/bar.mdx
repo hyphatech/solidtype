@@ -1,0 +1,43 @@
+---
+title: Bar
+description: A bar along the value axis, from one value to another.
+---
+
+import Example from "@components/Example.astro";
+import * as Range from "@islands/rhp_bar_range.jsx";
+import RangeCode from "@islands/rhp_bar_range.mlx?raw";
+
+`Solidtype_rhp.Bar` is rhp's `Bar`, a block: a `<div>` from `from` to
+`to_` on the chart's scale, across its slat's band.
+
+Original rhp documentation: [Blocks: Bar](https://rhp.vercel.app/reference/blocks/#bar).
+
+## Usage
+
+A bar from one value to another, here a city's lowest temperature to its
+highest; below `from`, a bar runs backward. `thick` is its size across the
+band, and `color` a theme's key or any CSS color.
+
+<Example code={RangeCode} title="rhp_bar_range.mlx" fill><Range.make client:visible /></Example>
+
+## Colors
+
+`Color.t` is a key of the chart's theme, which follows the page's, or any
+CSS color: `Color.series 1` to `Color.series 6`, `Color.positive`,
+`Color.negative`, `Color.ink`, `Color.muted`, `Color.grid`,
+`Color.surface`, `Color.low`, `Color.high`, and `Color.css "#c00"`.
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `from` | `float` | `0.` | Where the bar starts |
+| `to_` | `float` | `0.` | Where it ends |
+| `thick` | `(string, float) Types.Either.t` | the band less a margin | A CSS length, or a share of the band |
+| `color` | `Color.t` | `Color.series 1` | Its color |
+| `shape` | `Shape.t` | | An outline to wear instead of its rectangle |
+| `children` | elements | | Drawn inside it, cropped to its length |
+
+It also takes a `<div>`'s attributes and handlers, `class_`, `style` and
+`data_*`, which it passes on. A missing value is the prop left out, or
+`?to_=` given `None`, and draws nothing.

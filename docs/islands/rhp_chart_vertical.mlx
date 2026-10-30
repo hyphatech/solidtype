@@ -1,0 +1,43 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Ticks = Solidtype_rhp.Ticks
+
+type month = { month : string; rain : float }
+
+let months =
+  [|
+    { month = "Jan"; rain = 61. };
+    { month = "Feb"; rain = 48. };
+    { month = "Mar"; rain = 52. };
+    { month = "Apr"; rain = 44. };
+    { month = "May"; rain = 51. };
+    { month = "Jun"; rain = 45. };
+  |]
+
+let column =
+  Slat.make
+    ~room:(Slat.room ~start:(Slat.px 24.) ())
+    (fun d ->
+      let m = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string m.month)</Label>
+        <Bar to_=(fun () -> m.rain) color=(fun () -> Color.series 2) />
+      </div>)
+
+let make () =
+  <Chart
+    orientation=`vertical
+    height=200.
+    scale=(fun () -> (0., 80.))
+    ticks=(fun () -> Ticks.custom (Solidtype_rhp.every 20. ()))
+    format=(fun mm ->
+             <span>(fun () -> Jsx.string (Js.Float.toString mm ^ " mm"))</span>)
+    label="Rain each month">
+    <Plot rows=(fun () -> months) render=column />
+  </Chart>

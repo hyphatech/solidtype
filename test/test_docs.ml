@@ -52,6 +52,24 @@ let every_island_is_on_a_page () =
          if shown name || built_on name then None else Some name)
        sources)
 
+(* rhp's own documentation is the reference for what a prop does: a page of
+   ours says how it is written in OCaml, and links to rhp's it follows. *)
+let every_rhp_page_links_to_rhp () =
+  let dir = "../docs/src/content/docs/rhp" in
+  let pages =
+    Sys.readdir dir |> Array.to_list
+    |> List.filter (fun f -> Filename.check_suffix f ".mdx")
+  in
+  Alcotest.(check bool)
+    "the rhp section has pages" true
+    (not (List.is_empty pages));
+  Alcotest.(check (list string))
+    "an rhp page with no link to rhp's documentation" []
+    (List.filter
+       (fun f ->
+         not (contains (read (Filename.concat dir f)) "https://rhp.vercel.app/"))
+       pages)
+
 let () =
   Alcotest.run "docs"
     [
@@ -59,5 +77,10 @@ let () =
         [
           Alcotest.test_case "every island is on a page" `Quick
             every_island_is_on_a_page;
+        ] );
+      ( "rhp",
+        [
+          Alcotest.test_case "every page links to rhp's" `Quick
+            every_rhp_page_links_to_rhp;
         ] );
     ]

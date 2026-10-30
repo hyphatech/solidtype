@@ -18,6 +18,11 @@ export type Library = {
   // Whether a function throws though its documentation does not say so, by
   // its module and name: Color.toFormat.
   throwsUndocumented: (where: string) => boolean;
+  // The OCaml type of a declared type the library's binding ports by hand,
+  // by its symbol, its type arguments mapped, and whether undefined is
+  // already an optional prop's absence; undefined for any other, which the
+  // core maps by its rules.
+  ported?: (symbol: ts.Symbol, args: Type[], absent: boolean) => Type | undefined;
 };
 
 // What a run binds: one library, read by one checker, from the repository at
@@ -163,6 +168,8 @@ const isElement = (t: ts.Type) => t.aliasSymbol?.name === "Element" && moduleOf(
 // generated from its declarations"; null when none of its mappings covers it.
 function map(t: ts.Type, vars: Vars, where: string, absent = false): Type | null {
   if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
+  const hand = portedType(t, vars, where, absent);
+  if (hand) return hand;
   if (isElement(t)) return jsxElement;
   // Exclude<Option, null> and its kind: the type it narrows.
   if (t.flags & ts.TypeFlags.Conditional) return map((t as ts.ConditionalType).checkType, vars, where);
@@ -260,9 +267,30 @@ function mapUnion(members: ts.Type[], vars: Vars, where: string): Type | null {
   return null;
 }
 
+// A type the library ports by hand, by its alias or its own name: an alias's
+// arguments are its own, an interface's or a class's its reference's.
+function portedType(t: ts.Type, vars: Vars, where: string, absent: boolean): Type | null {
+  const symbol = t.aliasSymbol ?? t.getSymbol();
+  if (!library.ported || !symbol) return null;
+  const given = (t.aliasSymbol ? t.aliasTypeArguments : (t as ts.TypeReference).typeArguments) ?? [];
+  const args = given.map((a) => map(a, vars, where) ?? tname("_"));
+  return library.ported(symbol, args, absent) ?? null;
+}
+
+// A property's or a parameter's type as its declaration names it, where that
+// is a type the library ports by hand: an optional one's type, made a union
+// with undefined, has lost the alias it was declared by.
+function declaredPorted(p: ts.Symbol, vars: Vars, where: string, absent: boolean): Type | null {
+  const d = p.valueDeclaration;
+  const node = d && (ts.isPropertySignature(d) || ts.isPropertyDeclaration(d) || ts.isParameter(d)) ? d.type : undefined;
+  return node && ts.isTypeReferenceNode(node) ? portedType(checker.getTypeFromTypeNode(node), vars, where, absent) : null;
+}
+
 function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
   if (t.isUnion() || isElement(t) || t.flags & (ts.TypeFlags.Conditional | ts.TypeFlags.Substitution))
     return map(t, vars, where);
+  const hand = portedType(t, vars, where, false);
+  if (hand) return hand;
   if (t.flags & ts.TypeFlags.TypeParameter) return typeVar(t.symbol?.name ?? "t", vars);
   if (t.flags & ts.TypeFlags.Index) return tname("string");
   if (checker.isTupleType(t)) {
@@ -277,6 +305,11 @@ function mapOne(t: ts.Type, vars: Vars, where: string): Type | null {
   const libraryAlias = t.aliasSymbol && isDomLib(t.aliasSymbol);
   if (libraryAlias && t.aliasSymbol!.name === "NonNullable" && t.aliasTypeArguments?.[0])
     return map(t.aliasTypeArguments[0], vars, where);
+  // Required<ThemeValues>: a type of its own, whose every field is there,
+  // named for both.
+  const required = libraryAlias && t.aliasSymbol!.name === "Required" ? t.aliasTypeArguments?.[0] : undefined;
+  const requiredName = required && (required.aliasSymbol ?? required.getSymbol())?.name;
+  if (requiredName && named(requiredName)) return reference(anonymousModule(t, `Required${requiredName}`), t, undefined, vars, where);
   // A standard alias -- Partial, Omit -- is the type it makes.
   const alias = libraryAlias ? undefined : t.aliasSymbol;
   // A type of one argument, the argument mapped.
@@ -373,7 +406,7 @@ function mapFunction(sig: ts.Signature, vars: Vars, where: string, labelled = fa
   const params: (Param | null)[] = ps.map((q) => {
     const optional = labelled && leftOut(q);
     const t = checker.getTypeOfSymbol(q);
-    const m = map(optional ? checker.getNonNullableType(t) : t, vars, where);
+    const m = declaredPorted(q, vars, where, optional) ?? map(optional ? checker.getNonNullableType(t) : t, vars, where);
     if (m === null) return null;
     return optional ? { label: value(snake(q.name)), optional: true, type: m } : { type: m };
   });
@@ -425,19 +458,37 @@ function fixedElement(decl: ts.SignatureDeclaration): { element: string; own: ts
   return null;
 }
 
+export type Given = { element: string | null; own: ts.Symbol[] };
+
+// The attributes of an element solidtype's Html has a module for, each as a
+// user writes it: those of the signature its module has, and the ones every
+// element has, which that signature includes.
+export function elementAttributes(element: string): Set<string> {
+  const text = html();
+  const m = element.charAt(0).toUpperCase() + element.slice(1);
+  const signature = text.match(new RegExp(`^module ${m} : (\\w+) with`, "m"))?.[1];
+  if (!signature) throw new Error(`Html has no module ${m}`);
+  const body = (name: string) => text.match(new RegExp(`^module type ${name} = sig\\n([\\s\\S]*?)^end$`, "m"))?.[1] ?? "";
+  const types = (b: string) => b.match(/^  type [A-Za-z_0-9]+ =/gm)?.map((t) => t.slice(7, -2)) ?? [];
+  return new Set([...types(body("Dom_attributes")), ...types(body(signature))]);
+}
+
 // One part's binding, its component [js] from [jsModule] and its props
 // check -- its options, a spread, then its children, then its element's
 // attributes --
 // [where] naming it in what is not bound. [extra] are props of its own its
 // options do not hold, a library's shared props that are no attribute.
-export function part(src: Source, jsModule: string, where: string, decl: ts.SignatureDeclaration, options: ts.Type | null, extra: ts.Symbol[], js: string): void {
+// [given], where the library's generator knows them, are the element the
+// part renders and the props of its own, in place of what the core reads
+// from Kobalte's shapes of a declaration.
+export function part(src: Source, jsModule: string, where: string, decl: ts.SignatureDeclaration, options: ts.Type | null, extra: ts.Symbol[], js: string, given?: Given): void {
   const vars: Vars = new Map();
   const tp = decl.typeParameters?.find((p) => p.default && /ValidComponent/.test(p.constraint?.getText() ?? ""));
   const polymorphic = tp?.default && ts.isLiteralTypeNode(tp.default) ? (tp.default.literal as ts.StringLiteral).text : null;
   // A part that is not polymorphic renders the element its props extend,
   // ComponentProps<"input">, and its options are that interface's own.
   const fixed = polymorphic ? null : fixedElement(decl);
-  const element = polymorphic ?? fixed?.element ?? null;
+  const element = given ? given.element : (polymorphic ?? fixed?.element ?? null);
   const commons = extra.filter((p) => !attributeNames.has(label(p.name)));
   // A part with neither options nor an element, I18nProvider, takes the
   // props its signature declares.
@@ -445,7 +496,9 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
     const param = decl.parameters[0];
     return param ? checker.getPropertiesOfType(checker.getTypeAtLocation(param)) : [];
   };
-  const own = [...(options ? checker.getPropertiesOfType(options) : (fixed?.own ?? (polymorphic ? [] : declaredProps()))), ...commons];
+  const own = given
+    ? given.own
+    : [...(options ? checker.getPropertiesOfType(options) : (fixed?.own ?? (polymorphic ? [] : declaredProps()))), ...commons];
   const args: string[] = [];
   let children = "?children:('f, [ `nodes ]) Solidtype.Check.children ->";
   for (const p of own) {
@@ -455,7 +508,7 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
     // A prop only false, as a single-value root's multiple, is not given.
     if (pt.isUnion() && pt.types.every((m) => m.flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.Undefined)) &&
       pt.types.filter((m) => m.flags & ts.TypeFlags.BooleanLiteral).length === 1 && checker.typeToString(pt).includes("false")) continue;
-    const t = map(pt, vars, `${where}.${p.name}`, optional);
+    const t = declaredPorted(p, vars, `${where}.${p.name}`, optional) ?? map(pt, vars, `${where}.${p.name}`, optional);
     if (!t) {
       unmapped.set(`${where}.${p.name}`, checker.typeToString(pt));
       continue;
@@ -499,7 +552,12 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
 // The library's comment on a declaration, as odoc: its documentation is the
 // binding's.
 export function doc(symbol: ts.Symbol, indent: string, raises = false): string[] {
-  const text = ts.displayPartsToString(symbol.getDocumentationComment(checker)).trim();
+  // A package a comment names, @bezda/rhp/rhp.css, is read by TypeScript as
+  // a tag, and the comment after it with it: it is given back as written.
+  const named = symbol.getJsDocTags(checker).filter((t) => ts.displayPartsToString(t.text).startsWith("/"));
+  const text = [ts.displayPartsToString(symbol.getDocumentationComment(checker)), ...named.map((t) => `@${t.name}${ts.displayPartsToString(t.text)}`)]
+    .join(" ")
+    .trim();
   const escaped = text.replace(/\*\)/g, "* )").replace(/[{}\[\]@]/g, (c) => `\\${c}`);
   const raise = raises ? `Raises [Invalid_argument] with ${library.name}'s message, where it throws.` : "";
   const all = [escaped, raise].filter((t) => t !== "").join("\n\n");
@@ -512,7 +570,7 @@ export function doc(symbol: ts.Symbol, indent: string, raises = false): string[]
 // with the library's message. One at the top of a module reads input from
 // outside, so it also has an _opt that gives None for it.
 const throws = (symbol: ts.Symbol, where: string) =>
-  library.throwsUndocumented(where) || /\bThrows\b/.test(ts.displayPartsToString(symbol.getDocumentationComment(checker)));
+  library.throwsUndocumented(where) || /\bthrows\b/i.test(ts.displayPartsToString(symbol.getDocumentationComment(checker)));
 
 // The OCaml function over [js], an external that may throw, of [type],
 // written into [src]: [self] its object where it is a method, and [opt]
@@ -550,6 +608,10 @@ export function functionBinding(src: Source, symbol: ts.Symbol, jsName: string, 
     return;
   }
   const name = value(snake(jsName));
+  if (sig && isArrow(t.result)) {
+    returnsFunction(src, symbol, name, t, t.result, sig, jsName, jsModule);
+    return;
+  }
   if (sig && throws(symbol, jsName)) {
     src.implementation(`  external ${name}_js : ${showOut(t)} = "${jsName}"`, `  [@@mel.module "${jsModule}"]`);
     src.both(...doc(symbol, "  ", true));
@@ -559,6 +621,41 @@ export function functionBinding(src: Source, symbol: ts.Symbol, jsName: string, 
   }
   src.both(...doc(symbol, "  "));
   src.both(`  external ${name} : ${showOut(t)} = "${jsName}"`, `  [@@mel.module "${jsModule}"]`, ``);
+}
+
+// A function that returns one, every(step): Melange counts an external's
+// arguments through the parentheses of its result, so a curried result would
+// make every(step) wait for the result's own arguments and call rhp with all
+// of them at once. The external returns it uncurried, and the function wraps
+// it once, curried; one that may throw raises where it is called, with an
+// _opt beside it.
+function returnsFunction(src: Source, symbol: ts.Symbol, name: string, t: Extract<Type, { kind: "arrow" }>, returned: Extract<Type, { kind: "arrow" }>, sig: ts.Signature, jsName: string, jsModule: string): void {
+  const uncurried = tname(`(${returned.params.map((p) => argOut(p.type)).join(" -> ")} -> ${argOut(returned.result)} [@u])`);
+  const ps = sig.getParameters();
+  const named = ps.map((q, i) => (leftOut(q) ? `?${value(snake(q.name))}` : `x${i}`));
+  if (ps.some(leftOut)) named.push("()");
+  const xs = named.length === 0 ? "()" : named.join(" ");
+  // A function of no arguments takes (), as JavaScript calls it with none.
+  const none = returned.params.length === 1 && isUnit(returned.params[0]!.type);
+  const ys = none ? "()" : returned.params.map((_, i) => `y${i}`).join(" ");
+  const curried = `fun ${ys} -> (r ${ys} [@u])`;
+  const raises = throws(symbol, jsName);
+  src.implementation(`  external ${name}_js : ${showOut({ ...t, result: uncurried })} = "${jsName}"`, `  [@@mel.module "${jsModule}"]`);
+  src.both(...doc(symbol, "  ", raises));
+  if (raises) {
+    src.implementation(
+      `  let ${name} ${xs} =`,
+      `    match ${name}_js ${xs} with`,
+      `    | r -> ${curried}`,
+      `    | exception Js.Exn.Error e -> invalid_arg ("${name}: " ^ Option.value (Js.Exn.message e) ~default:"")`,
+      `  let ${name}_opt ${xs} = match ${name}_js ${xs} with r -> Some (${curried}) | exception Js.Exn.Error _ -> None`,
+    );
+    src.interface(`  val ${name} : ${showOut(t)}`, `  val ${name}_opt : ${showOut({ ...t, result: apply("option", t.result) })}`);
+  } else {
+    src.implementation(`  let ${name} ${xs} = let r = ${name}_js ${xs} in ${curried}`);
+    src.interface(`  val ${name} : ${showOut(t)}`);
+  }
+  src.both(``);
 }
 
 // A value the library exports, as an external.
@@ -640,7 +737,7 @@ while (queue.length > 0) {
         src.both(`    external ${name} : ${t} -> ${showIn(f)} = "${p.name}" [@@mel.send]`);
         continue;
       }
-      const ft = map(pt, vars, `${n.module}.${p.name}`, optional);
+      const ft = declaredPorted(p, vars, `${n.module}.${p.name}`, optional) ?? map(pt, vars, `${n.module}.${p.name}`, optional);
       if (!ft) {
         unmapped.set(`${n.module}.${p.name}`, checker.typeToString(pt));
         continue;

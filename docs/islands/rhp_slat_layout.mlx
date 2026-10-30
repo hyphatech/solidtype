@@ -1,0 +1,35 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type language = { name : string; share : float }
+
+let languages =
+  [|
+    { name = "OCaml"; share = 64. };
+    { name = "TypeScript"; share = 28. };
+    { name = "Shell"; share = 8. };
+  |]
+
+let language =
+  Slat.make ~thickness:(Slat.number 40.) ~inset:(Slat.number 0.3)
+    ~room:Slat.auto_room
+    ~css:".bar { --rhp-end-radius: 8px; } .value { color: var(--rhp-muted); }"
+    (fun d ->
+      let l = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string l.name)</Label>
+        <Bar to_=(fun () -> l.share) class_="bar" />
+        <Label edge="end" class_="value">
+          (fun () -> Jsx.string (Js.Float.toString l.share ^ "%"))
+        </Label>
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (0., 100.))>
+    <Plot rows=(fun () -> languages) render=language />
+  </Chart>

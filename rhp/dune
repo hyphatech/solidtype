@@ -1,0 +1,7 @@
+(library
+ (name solidtype_rhp)
+ (public_name solidtype-rhp)
+ (modes melange)
+ (libraries solidtype melange.dom)
+ (preprocess
+  (pps melange.ppx)))

@@ -5,7 +5,12 @@
 (library
  (name docs_islands)
  (modes melange)
- (libraries solidtype solidtype-heroui solidtype-kobalte melange.dom)
+ (libraries
+  solidtype
+  solidtype-heroui
+  solidtype-kobalte
+  solidtype-rhp
+  melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

@@ -1,0 +1,48 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module S = Solidtype.Solid
+module Slat = Solidtype_rhp.Slat
+
+type team = { team : string; points : float }
+
+let start =
+  [|
+    { team = "Ravens"; points = 21. };
+    { team = "Otters"; points = 14. };
+    { team = "Herons"; points = 9. };
+  |]
+
+let team =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 72.) ())
+    (fun d ->
+      let t = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string t.team)</Label>
+        <Bar to_=(fun () -> t.points) />
+      </div>)
+
+let make () =
+  let teams, set_teams = S.create_signal start in
+  let score i =
+    S.set set_teams
+      (Array.mapi
+         (fun j (t : team) ->
+           if i = j then { t with points = t.points +. 3. } else t)
+         (S.get teams))
+  in
+  <div>
+    <Chart scale=(fun () -> (0., 40.)) label="Points">
+      <Plot rows=(fun () -> S.get teams) keyboard=true render=team />
+    </Chart>
+    <button
+      class_="button button--secondary"
+      type_=`button
+      on_click=(fun _ -> score 2)>
+      "Herons score"
+    </button>
+  </div>

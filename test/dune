@@ -8,7 +8,8 @@
   (package solidtype-kobalte)
   (package ppx_solidtype)))
 
-; Every island of the documentation is on one of its pages.
+; Every island of the documentation is on one of its pages, and every page
+; of rhp's links to the page of rhp's documentation it follows.
 
 (test
  (name test_docs)

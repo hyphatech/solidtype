@@ -14,9 +14,18 @@ import { transformAsync } from "@babel/core";
 import { rewrite } from "../src/rewrite.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const melange = (name: string) =>
-  `${root}_build/default/example/out/example/src/${name}.jsx`;
-const twin = (name: string) => `${root}example/twin/${name}.tsx`;
+// An island and its twin: the example's, or one of rhp's charts, a page's
+// island of the documentation beside the same chart in rhp's own JSX.
+const sources = {
+  example: {
+    melange: (name: string) => `${root}_build/default/example/out/example/src/${name}.jsx`,
+    twin: (name: string) => `${root}example/twin/${name}.tsx`,
+  },
+  rhp: {
+    melange: (name: string) => `${root}_build/default/docs/islands/out/docs/islands/${name}.jsx`,
+    twin: (name: string) => `${root}test/rhp/twins/${name}.tsx`,
+  },
+} as const;
 
 export const modes = {
   dom: { generate: "dom" },
@@ -46,7 +55,8 @@ function shape(code: string) {
   return { templates, calls };
 }
 
-export async function compiled(ml: string, tsx: string, mode: Mode = "dom") {
+export async function compiled(ml: string, tsx: string, mode: Mode = "dom", from: keyof typeof sources = "example") {
+  const { melange, twin } = sources[from];
   const rewritten = await rewrite(readFileSync(melange(ml), "utf8"), `${ml}.jsx`);
   if (!rewritten) throw new Error(`the plugin rewrote nothing in ${ml}`);
   return {
@@ -55,12 +65,22 @@ export async function compiled(ml: string, tsx: string, mode: Mode = "dom") {
   };
 }
 
-const islands = [["app", "App"], ["card", "Card"], ["add_task", "AddTask"]] as const;
+const islands = [
+  ["example", "app", "App"],
+  ["example", "card", "Card"],
+  ["example", "add_task", "AddTask"],
+  ["rhp", "rhp_bar_chart", "BarChart"],
+  ["rhp", "rhp_chart_vertical", "ChartVertical"],
+  ["rhp", "rhp_plot_live", "PlotLive"],
+  ["rhp", "rhp_slat_layout", "SlatLayout"],
+  ["rhp", "rhp_bar_range", "BarRange"],
+  ["rhp", "rhp_label_edges", "LabelEdges"],
+] as const;
 
-for (const [ml, tsx] of islands) {
+for (const [from, ml, tsx] of islands) {
   for (const mode of Object.keys(modes) as Mode[]) {
     test(`${ml}.mlx compiles as ${tsx}.tsx does, ${mode}`, async () => {
-      const { ocaml, tsx: expected } = await compiled(ml, tsx, mode);
+      const { ocaml, tsx: expected } = await compiled(ml, tsx, mode, from);
       if (process.env.SHOW) console.log(`--- ${ml}.mlx, ${mode}\n${ocaml}\n--- ${tsx}.tsx, ${mode}\n${expected}`);
       expect(shape(ocaml)).toEqual(shape(expected));
     });

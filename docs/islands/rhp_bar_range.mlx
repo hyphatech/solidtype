@@ -1,0 +1,40 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Color = Solidtype_rhp.Color
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+module Either = Solidtype_rhp.Types.Either
+
+type city = { city : string; low : float; high : float }
+
+let cities =
+  [|
+    { city = "Oslo"; low = -7.; high = 22. };
+    { city = "Lisbon"; low = 8.; high = 28. };
+    { city = "Cairo"; low = 9.; high = 35. };
+  |]
+
+let city =
+  Slat.make ~thickness:(Slat.number 32.)
+    ~room:(Slat.room ~start:(Slat.px 64.) ())
+    (fun d ->
+      let c = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string c.city)</Label>
+        <Bar
+          from=(fun () -> c.low)
+          to_=(fun () -> c.high)
+          thick=(fun () -> Either.left "10px")
+          color=(fun () ->
+                  if c.low < 0. then Color.negative else Color.positive)
+        />
+      </div>)
+
+let make () =
+  <Chart
+    scale=(fun () -> (-10., 40.)) label="Each city's range of temperatures">
+    <Plot rows=(fun () -> cities) render=city />
+  </Chart>

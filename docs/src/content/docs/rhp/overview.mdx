@@ -1,0 +1,71 @@
+---
+title: rhp
+description: rhp's reactive charts of HTML, typed, as solidtype-rhp.
+---
+
+import Example from "@components/Example.astro";
+import * as BarChart from "@islands/rhp_bar_chart.jsx";
+import BarChartCode from "@islands/rhp_bar_chart.mlx?raw";
+
+[rhp](https://rhp.vercel.app), reactive HTML plots, draws a chart out of
+HTML elements placed by CSS, with Solid, where other libraries draw into an
+SVG or a canvas. `solidtype-rhp` binds rhp 2.2 for OCaml: the same
+components, compiled as Solid compiles rhp's own JSX, with a typed row in
+place of rhp's untyped one.
+
+Original rhp documentation: [Introduction](https://rhp.vercel.app/start/introduction/)
+and [Your first chart](https://rhp.vercel.app/start/first-chart/). rhp's
+pages are the reference for what each prop does; these say how it is
+written in OCaml.
+
+<Example code={BarChartCode} title="rhp_bar_chart.mlx" fill><BarChart.make client:visible /></Example>
+
+## Install
+
+rhp is Solid's only peer, and adds its CSS to the page itself.
+
+```sh
+bun add @bezda/rhp
+opam install solidtype-rhp
+```
+
+```lisp
+(libraries solidtype solidtype-rhp melange.dom)
+```
+
+## How a chart is made
+
+A `Chart` is the frame: its scale, its axis, its orientation. A `Plot`
+inside it draws one **slat** for each of its rows, and a slat is the
+template for one row: a function of the row that returns one element, made
+of **blocks** -- `Bar`, `Label` and the others -- that place themselves on
+the chart's scale.
+
+- **Rows are records.** A plot's `rows` is an array of an OCaml record,
+  which Melange writes as JavaScript objects of the same fields, and its
+  slat is a function of that record's [`Row.t`](/solidtype/rhp/slat/#the-row).
+  `Row.data d` is the row itself, so a slat reads only the fields its
+  record has, and a misspelt one does not compile.
+- **A read is a thunk.** rhp reads a row's field when a block reads it, so
+  a change redraws only what reads it: a field is read inside a thunk,
+  `to_=(fun () -> f.sold)`, as everywhere in solidtype.
+- **A slat is given by name**, `render=fruit`, since rhp reads its layout
+  from the slat itself; a slat written in place is a function child,
+  `(fun d -> ...)`.
+
+## What is bound
+
+`solidtype-rhp` is generated from rhp's own declarations wherever a rule
+maps them whole, by `generate/rhp.ts`, on the same core as
+`solidtype-kobalte`; what no rule maps is ported by hand, a module each,
+and the generator fails on anything else, so nothing is bound by halves.
+
+| Generated | Ported by hand |
+|---|---|
+| `Chart`, `Bar`, `Dot`, `Tick`, `Cell`, `Place`, `Label`, `Line`, `Area`, `Poster`, `Theme`, `Axis` | `Plot`, `Row`, `Slat` |
+| `extent`, `every`, `nice`, `summary`, `bins`, `density`, `animated`, `curve`, `drawing`, `at`, `use_orientation`, `theme`, `linked_css`, `no_css_guard`, `inherit_position` | `Color`, `Ticks`, `Ease`, `Shape` |
+
+Not bound yet: `Scale`, `ManyDots`, a plot's `order` with `sortBy`, and
+`stackUp`, `shares`, `running`, `series`, `cycle` and `restyle`, each a hand
+port of its own. rhp's data groups, a plot's columns given as props of
+their own, are not bound: rows draw every chart they do.

@@ -11,8 +11,8 @@ import ocaml from "@shikijs/langs/ocaml";
 import mlx from "./src/mlx.mjs";
 
 // solidtype's documentation: how the libraries work and are set up, the
-// Solid and Kobalte bindings, and each HeroUI port live, beside the same
-// component in React, with its source. The demos are OCaml, compiled by
+// Solid and Kobalte bindings, rhp's charts, and each HeroUI port live,
+// beside the same component in React, with its source. The demos are OCaml, compiled by
 // Melange into the repository's _build; two JSX compilers share the site,
 // React's kept to islands/react, where HeroUI's React components are
 // rendered, and Solid's to everything else. It is published to GitHub Pages
@@ -40,18 +40,19 @@ export default defineConfig({
       disable404Route: true,
       logo: { src: "starlight-theme-hypha/assets/hypha.webp" },
       // Hypha's look, from its theme; heroui.css keeps the demos in HeroUI's,
-      // and api.css sets this site's API tables.
+      // api.css sets this site's API tables, and rhp.css gives rhp's charts
+      // the site's colours.
       plugins: [
         hypha({
           brand: "hypha",
           github: "hyphatech/solidtype",
-          tabs: { "Start here": "rocket", Solid: "zap", Kobalte: "blocks", HeroUI: "component", Reference: "library" },
+          tabs: { "Start here": "rocket", Solid: "zap", Kobalte: "blocks", HeroUI: "component", rhp: "waves-horizontal", Reference: "library" },
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
         }),
         // The reference is odoc's, in public/, which the validator cannot see.
         links({ exclude: ["**/reference/solidtype*/**", "**/reference/ppx_solidtype/**"] }),
       ],
-      customCss: ["./src/styles/heroui.css", "./src/styles/api.css"],
+      customCss: ["./src/styles/heroui.css", "./src/styles/api.css", "./src/styles/rhp.css"],
       // An OCaml block is MLX: its JSX highlighted by a grammar injected
       // into Shiki's OCaml, which is loaded first so the rules the grammar
       // includes are there.
@@ -66,6 +67,7 @@ export default defineConfig({
         { label: "Solid", items: ["solid/components", "solid/reactivity", "solid/control-flow", "solid/state", "solid/async", "solid/rendering"] },
         { label: "Kobalte", items: ["kobalte/binding", "kobalte/usage"] },
         { label: "HeroUI", items: ["heroui/coverage", "heroui/accordion", "heroui/alert", "heroui/alert-dialog", "heroui/autocomplete", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/breadcrumbs", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/combo-box", "heroui/description", "heroui/disclosure", "heroui/disclosure-group", "heroui/drawer", "heroui/dropdown", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/list-box", "heroui/meter", "heroui/modal", "heroui/number-field", "heroui/pagination", "heroui/popover", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/select", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/tabs", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/toast", "heroui/toggle-button", "heroui/toggle-button-group", "heroui/tooltip", "heroui/typography"] },
+        { label: "rhp", items: ["rhp/overview", "rhp/chart", "rhp/plot", "rhp/slat", "rhp/bar", "rhp/label"] },
         { label: "Reference", items: ["reference"] },
       ],
     }),

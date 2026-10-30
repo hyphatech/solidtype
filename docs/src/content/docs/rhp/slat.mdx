@@ -1,0 +1,65 @@
+---
+title: Slat
+description: The template for one row, with the CSS and layout every slat of its type shares.
+---
+
+import Example from "@components/Example.astro";
+import * as Layout from "@islands/rhp_slat_layout.jsx";
+import LayoutCode from "@islands/rhp_slat_layout.mlx?raw";
+
+A slat is a function of a row that returns one element: the row's root,
+which rhp places in its band. `Solidtype_rhp.Slat.make` is rhp's `slat()`,
+which gives a slat type its own CSS and layout, so it looks and lays out the
+same in any chart.
+
+Original rhp documentation: [slat()](https://rhp.vercel.app/reference/slat/)
+and [Layout](https://rhp.vercel.app/guides/layout/).
+
+## Usage
+
+`thickness` is a row's height, `inset` the empty share of the band beside a
+bar, `room` the room outside the plot for its labels -- `Slat.auto_room`
+fits each side to its widest label -- and `css` styles this type's slats
+alone.
+
+<Example code={LayoutCode} title="rhp_slat_layout.mlx" fill><Layout.make client:visible /></Example>
+
+## The row
+
+A slat's argument is a `'row Row.t`, rhp's row for a plot whose rows are
+`'row`:
+
+| Function | Type | Description |
+|---|---|---|
+| `Row.data` | `'row Row.t -> 'row` | The row: each field read from rhp as it is read |
+| `Row.index` | `'row Row.t -> int` | Its number among the rows, from 0 |
+| `Row.position` | `'row Row.t -> int option` | Its place on screen, `None` while hidden |
+
+`Row.data` costs nothing: `let f = Row.data d in f.sold` is `d.sold`, the
+read rhp tracks, so a thunk that reads it follows the row.
+
+## Sizes
+
+rhp takes a number or a CSS length, for both orientations or for each:
+
+| rhp | solidtype |
+|---|---|
+| `thickness: 40` | `~thickness:(Slat.number 40.)` |
+| `thickness: "var(--row)"` | `~thickness:(Slat.css "var(--row)")` |
+| `thickness: { horizontal: 40, vertical: 60 }` | `~thickness:(Slat.lengths ~horizontal:(Slat.number 40.) ~vertical:(Slat.number 60.) ())` |
+| `room: { start: 80, end: "auto" }` | `~room:(Slat.room ~start:(Slat.px 80.) ~end_:Slat.auto ())` |
+| `room: "auto"` | `~room:Slat.auto_room` |
+
+## API Reference
+
+`Slat.make ?css ?thickness ?inset ?room f`:
+
+| Argument | Type | Default | Description |
+|---|---|---|---|
+| `css` | `string` | | CSS scoped to this type's slats; the theme's colors are `var(--rhp-<key>)` |
+| `thickness` | `_ Slat.length` | the chart's share, or 32px | A row's height, or a column's width |
+| `inset` | `_ Slat.length` | `0.18` | The empty share of the band beside a `Bar`, a `Tick` or an `Area` |
+| `room` | `_ Slat.room` | | Room outside the plot, in px, at its `start`, `end_`, `before` and `after` |
+| `f` | `'row Row.t -> Jsx.element` | required | The slat, left as it was |
+
+Any function of a row is a slat with no layout of its own.

@@ -1,0 +1,60 @@
+---
+title: Plot
+description: A slat for each row, stacked in the chart's band, each in its place as the rows change.
+---
+
+import Example from "@components/Example.astro";
+import * as Live from "@islands/rhp_plot_live.jsx";
+import LiveCode from "@islands/rhp_plot_live.mlx?raw";
+
+`Solidtype_rhp.Plot` is rhp's `Plot`: a slat for each of its rows. Its
+`rows` are an array of an OCaml record, and its slat a
+[`Slat.t`](/solidtype/rhp/slat/) of that record, so the two agree or the
+chart does not compile.
+
+Original rhp documentation: [Plot](https://rhp.vercel.app/reference/plot/).
+
+## Usage
+
+`rows` is read as it changes: a new array redraws only what changed in it,
+here one bar, which moves to its new length. `keyboard` lets the slats take
+focus: Tab stops at one, and the arrows, Home and End move through them.
+
+<Example code={LiveCode} title="rhp_plot_live.mlx" fill><Live.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Chart scale=(fun () -> (0., 30.))>
+  <Plot rows=(fun () -> fruits) render=fruit />
+</Chart>
+```
+
+A slat made by `Slat.make` is given by name, `render=fruit`, since rhp
+reads its layout from it; one with no layout of its own can be written in
+place, as the plot's child:
+
+```ocaml
+<Plot rows=(fun () -> fruits)>
+  (fun d -> let f = Row.data d in <Bar to_=(fun () -> f.sold) />)
+</Plot>
+```
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `rows` | `'row array` | required | The rows, a slat each |
+| `render`, or a function child | `'row Slat.t` | required | The slat |
+| `key` | `'row Row.t -> 'key` | the row's number | What identifies a row, so a row removed takes its own slat with it |
+| `reorder` | `` [ `slide \| `move \| `refill ] `` | `` `slide `` | How slats change places |
+| `orientation` | `` [ `horizontal \| `vertical \| `across ] `` | the chart's | `` `across `` is the other way from the plot around it |
+| `overlap` | `bool` | `false` | Every slat in one band: stacked segments, strips of dots, layers |
+| `slats` | `float` | every row | The number of slats |
+| `animate` | `(bool, Types.Timing.t) Types.Either.t` | the chart's | The JavaScript version, or its timing |
+| `thick` | `(string, float) Types.Either.t` | `1.` | In a slat, the share of its band the plot fills, or a CSS length |
+| `static` | `bool` | the chart's | Rows drawn once |
+| `keyboard` | `bool` | `false` | The slats take focus |
+| `class_`, `style`, `ref` | | | On the plot's element |
+
+Not bound yet: `order`, and `sortBy`, which sort the slats on screen.

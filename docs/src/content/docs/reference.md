@@ -17,6 +17,7 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 | `solidtype` | `solidtype` | Solid 1.9 bound whole, for Melange: signals, computations, resources, stores, its components and its renderer, server rendering included |
 | `solidtype-kobalte` | `solidtype-kobalte` | Kobalte 0.13 bound whole, generated from its own declarations |
 | `solidtype-heroui` | `solidtype-heroui` | HeroUI's design ported by hand onto Kobalte's components |
+| `solidtype-rhp` | `solidtype-rhp` | rhp 2.2's charts, generated from its own declarations where a rule maps them, ported by hand where none does |
 | `ppx_solidtype` | `ppx_solidtype` | The ppx that rewrites the JSX of `.mlx` files into calls Melange compiles |
 | `vite-plugin-solidtype` | none: an asset of each GitHub release | The Vite plugin that turns those calls back into JSX for Solid's compiler |
 
@@ -47,6 +48,17 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
   -- each port, one module each, and
   [`Styles`](/solidtype/reference/solidtype-heroui/Solidtype_heroui/Styles/index.html),
   HeroUI's variant functions, the classes of each look.
+
+## solidtype-rhp
+
+- [`Solidtype_rhp`](/solidtype/reference/solidtype-rhp/Solidtype_rhp/index.html)
+  -- rhp's components and functions, the hand ports among them --
+  [`Plot`](/solidtype/reference/solidtype-rhp/Solidtype_rhp/Plot/index.html),
+  [`Slat`](/solidtype/reference/solidtype-rhp/Solidtype_rhp/Slat/index.html),
+  [`Row`](/solidtype/reference/solidtype-rhp/Solidtype_rhp/Row/index.html)
+  and the others -- and
+  [`Types`](/solidtype/reference/solidtype-rhp/Solidtype_rhp/Types/index.html),
+  the types they name.
 
 ## ppx_solidtype
 

@@ -371,3 +371,12 @@ let optional_name =
                                                      Js.Undefined.fromOption
                                                        (solidtype__count ())))|]
     [||]
+let named_render =
+  let solidtype__each : unit -> _ = fun () -> items ()
+  and solidtype__children = row in
+  if false
+  then
+    For.Props.check ~each:(Solidtype.Check.thunk solidtype__each)
+      ~children:(Solidtype.Check.render solidtype__children) ();
+  Solidtype.Jsx.c For.component [|(Solidtype.Jsx.d "each" solidtype__each)|]
+    [|(Solidtype.Jsx.render solidtype__children)|]

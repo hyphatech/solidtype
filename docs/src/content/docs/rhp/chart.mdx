@@ -1,0 +1,63 @@
+---
+title: Chart
+description: The frame of a chart -- its scale, its axis and its orientation.
+---
+
+import Example from "@components/Example.astro";
+import * as BarChart from "@islands/rhp_bar_chart.jsx";
+import BarChartCode from "@islands/rhp_bar_chart.mlx?raw";
+import * as Vertical from "@islands/rhp_chart_vertical.jsx";
+import VerticalCode from "@islands/rhp_chart_vertical.mlx?raw";
+
+`Solidtype_rhp.Chart` is rhp's `Chart`: the frame its plots draw in, on
+one scale, with its axis.
+
+Original rhp documentation: [Chart](https://rhp.vercel.app/reference/chart/).
+
+## Usage
+
+<Example code={BarChartCode} title="rhp_bar_chart.mlx" fill><BarChart.make client:visible /></Example>
+
+## Examples
+
+### Vertical, with its own ticks
+
+``orientation=`vertical`` runs the bars bottom to top, the slats side by side.
+`ticks` is a [`Ticks.t`](#ticks), here a function of the scale that
+`every` gives, and `format` writes each tick's text. `label` names the
+chart for a reader, which then reads it as a figure.
+
+<Example code={VerticalCode} title="rhp_chart_vertical.mlx" fill><Vertical.make client:visible /></Example>
+
+## Ticks
+
+rhp takes four kinds of ticks, which `Ticks` builds:
+
+| rhp | solidtype |
+|---|---|
+| `[0, 10, 20]` | `Ticks.values [| 0.; 10.; 20. |]` |
+| `5` | `Ticks.count 5` |
+| `every(10)` | `Ticks.custom (Solidtype_rhp.every 10. ())` |
+| `false` | `Ticks.none` |
+
+## API Reference
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `scale` | `float * float` | `(0., 100.)` | The value axis' minimum and maximum |
+| `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Bars left to right, or bottom to top |
+| `ticks` | `Ticks.t` | about 5 | The axis' ticks |
+| `grid` | `bool` | `true` | Whether the axis draws its grid lines |
+| `format` | `float -> Jsx.element` | the number | A tick's text |
+| `height` | `float` | `240.` when vertical | The plot's height, in px |
+| `aspect` | `float` | | The whole chart's width over its height, kept at any width |
+| `animate` | `(bool, Types.Timing.t) Types.Either.t` | off | The JavaScript version, or its timing |
+| `theme` | `Types.ThemeValues.t` | rhp's | Colors and font, over a `Theme`'s around it |
+| `static` | `bool` | `false` | Rows drawn once, for data that does not change |
+| `no_css_guard` | `bool` | `false` | Without the CSS that keeps the page's out of the chart |
+| `cross` | `float * float` | | A second scale, across the band |
+| `cross_ticks`, `cross_grid`, `cross_format` | | | The second axis', as `ticks`, `grid` and `format` |
+| `label` | `string` | | The chart's name for a reader |
+| `id`, `class_`, `role`, `style`, `ref` | | | On the chart's element |
+
+rhp's `aria-*` props are not taken; `label` names the chart.

@@ -92,3 +92,4 @@ end
 let optional_attribute = <a title=(fun () -> "x") ?href=(fun () -> link ()) />
 let optional_prop = <Label text=(fun () -> "x") ?count=(fun () -> count ()) />
 let optional_name = <Label text=(fun () -> "x") ?count />
+let named_render = <For each=(fun () -> items ()) render=row />

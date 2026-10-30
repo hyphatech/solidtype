@@ -1,0 +1,36 @@
+module Bar = Solidtype_rhp.Bar
+module Chart = Solidtype_rhp.Chart
+module Jsx = Solidtype.Jsx
+module Label = Solidtype_rhp.Label
+module Plot = Solidtype_rhp.Plot
+module Row = Solidtype_rhp.Row
+module Slat = Solidtype_rhp.Slat
+
+type store = { store : string; sales : float }
+
+let stores =
+  [|
+    { store = "North"; sales = 48. };
+    { store = "Harbour"; sales = 31. };
+    { store = "Old town"; sales = 17. };
+  |]
+
+let store =
+  Slat.make ~thickness:(Slat.number 36.)
+    ~room:(Slat.room ~start:(Slat.px 80.) ~end_:(Slat.px 48.) ())
+    ~css:".inside { color: white; }"
+    (fun d ->
+      let s = Row.data d in
+      <div>
+        <Label edge="start">(fun () -> Jsx.string s.store)</Label>
+        <Bar to_=(fun () -> s.sales) />
+        <Label at=(fun () -> s.sales) side=`before class_="inside">
+          (fun () -> Jsx.string (Js.Float.toString s.sales))
+        </Label>
+        <Label edge="end">"k€"</Label>
+      </div>)
+
+let make () =
+  <Chart scale=(fun () -> (0., 50.)) ticks=(fun () -> Solidtype_rhp.Ticks.none)>
+    <Plot rows=(fun () -> stores) render=store />
+  </Chart>

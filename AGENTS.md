@@ -6,9 +6,9 @@ OCaml's JSX (`.mlx`), and reaches the browser as the code Solid's own
 compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
 `vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
 library bound is an opam package of its own: `solidtype` binds Solid,
-`solidtype-kobalte` Kobalte; `solidtype-heroui` ports HeroUI's design onto
-Kobalte by hand, since HeroUI's components are React's. This file is for anyone changing it, human or
-agent. Users start at [README.md](README.md).
+`solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts; `solidtype-heroui`
+ports HeroUI's design onto Kobalte by hand, since HeroUI's components are
+React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
 
 ## Commands
 
@@ -53,6 +53,12 @@ src/                 solidtype, for Melange alone
   html               each element's attributes, generated
 kobalte/             solidtype-kobalte: Kobalte's components part by part,
                      its hooks, values and the types they name, generated
+rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
+                     rhp's declarations whole: solidtype_rhp, and the types
+                     it names, types
+  plot row slat      what no rule maps, ported by hand, one module each, each
+  color ticks ease   .mli saying why: a plot of typed rows and its slat, and
+  shape              the types of more JavaScript kinds than Either holds
 heroui/              solidtype-heroui: HeroUI's components ported by hand onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
@@ -102,8 +108,8 @@ docs/                the documentation, a Starlight site in Hypha's look,
                      ignored, since Starlight serves public/ as it is
 prds/               the PRDs of work being decided and built, and which
                      document owns each kind of fact once it lands
-generate/            what writes the generated bindings from Solid's and
-                     Kobalte's own types: `make generate`
+generate/            what writes the generated bindings from Solid's,
+                     Kobalte's, HeroUI's and rhp's own types: `make generate`
   names              the one spelling of a name, shared by both
   program            the browser's library both read declarations under,
                      with no ambient types: Bun's own would join it
@@ -120,9 +126,13 @@ generate/            what writes the generated bindings from Solid's and
   kobalte            Kobalte's: which entries, how its parts and options are
                      named, its shared props, roots split by `multiple`
   heroui             HeroUI's variant functions, from @heroui/styles
+  rhp                rhp's: its components' elements, the types and exports
+                     ported by hand, and a failure on anything else no rule
+                     maps
 ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
+  rhp_names
 vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   src/index          the plugin Vite runs: a .jsx module's markers rewritten
   src/rewrite        the markers rewritten into Solid's JSX
@@ -174,9 +184,11 @@ test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      by vitest, and its state beside the same component in
                      React, its twin in twins/; and the variant functions,
                      each against HeroUI's own call
+test/rhp/            each rhp chart island of docs/islands beside the same chart
+                     in rhp's own JSX, its twin in twins/: the same page drawn
 test/ppx/            what the ppx writes for each JSX form
 test/test_docs.ml    every island of docs/islands on some page, or a part of
-                     other islands
+                     other islands, and every rhp page linked to rhp's
 test/does_not_compile.t
                      each mistake the types refuse, built against the
                      installed library, with the error a user reads
@@ -195,7 +207,10 @@ optional prop, `?name=`, a thunk of an option, `undefined` while it is
 `None`, and `?name:` in the check, so a required prop refuses it; a
 name is given back its JavaScript spelling, and a value wrapped in one
 of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
-argument is therefore written `(fun _ -> ...)`. A string literal, however
+argument is therefore written `(fun _ -> ...)`; a component's render
+function given by name, a slat rhp reads its layout from, is `render=f`,
+its only child, checked and passed as a function child is, since
+ocamlformat cannot print an attribute named `children` beside MLX's own. A string literal, however
 quoted, becomes a JavaScript string, `{js|...|js}`, its backslashes
 doubled, since Melange reads any other as bytes and reads escapes in
 that one; one written `{js|...|js}` is left as it is. An element's attributes are
@@ -383,6 +398,26 @@ break.
   and accessibility, which only a running component shows. Symptom: a
   component of `kobalte/solidtype_kobalte.ml` with no
   `test/kobalte/*_test.mlx`.
+- **rhp's binding is generated from its declarations where a rule maps
+  them whole, and ported by hand where none does**, by `generate/rhp.ts`
+  on the core Kobalte's shares: a type or an export no rule maps is a
+  module of `rhp/`, named in the generator, its `.mli` saying why, and the
+  generator fails on any other declaration it cannot bind, so no part is
+  bound by halves. A rule is made general only where it would bind the
+  next version the same way; a rule written for one declaration is a hand
+  port instead. Why: a binding half generated leaves out what a user then
+  cannot reach, and a rule for one declaration breaks on the next version.
+  Test: `make lint` runs `generate/rhp.ts --check`.
+- **Each rhp chart island draws as its twin, rhp's own JSX, does.** A
+  chart island of `docs/islands` compiles as its twin in `test/rhp/twins/`
+  does, the three ways, and draws the same page: its test renders both,
+  lets rhp write its styles, and compares them, the count rhp gives a
+  second slat type of the same CSS set aside. Why: rhp is Solid's, so the
+  binding promises the page rhp draws, which a type cannot show. Test:
+  `vite-plugin/test/twin.test.ts`, `test/rhp/*_test.ml`.
+- **Each rhp page links to the page of rhp's documentation it follows.**
+  Why: rhp's documentation is the reference for what a prop does, and a
+  copy of it would drift. Test: `test/test_docs.ml`.
 - **A component is a value.** A binding's part is an `external` of type
   `_ Jsx.component`, never a function type, and an OCaml component is
   `Jsx.component make`. Why: Melange wraps an external function used as
