@@ -7,14 +7,9 @@ import Example from "@components/Example.astro";
 import * as BarChart from "@islands/rhp_bar_chart.jsx";
 import BarChartCode from "@islands/rhp_bar_chart.mlx?raw";
 
-Charts are part of solidtype's ecosystem, and they are
-[rhp](https://rhp.vercel.app)'s: reactive charts on Solid, drawn out of
-HTML elements placed by CSS, where other libraries draw into an SVG or a
-canvas. `solidtype-rhp` binds all of rhp 2.2 for OCaml -- its components
-compiled as Solid compiles rhp's own JSX, with a typed row in place of
-rhp's untyped one -- so a chart is a component like any other in a
-solidtype application, its data a record the compiler checks. The
-[Gallery](/solidtype/rhp/gallery/) shows whole charts built with it.
+Charts in solidtype are powered by [rhp](https://rhp.vercel.app), a chart
+library for Solid, which `solidtype-rhp` binds in full. The
+[Gallery](/solidtype/rhp/gallery/) shows what you can build with it.
 
 Original rhp documentation: [Introduction](https://rhp.vercel.app/start/introduction/)
 and [Your first chart](https://rhp.vercel.app/start/first-chart/). rhp's
@@ -64,20 +59,3 @@ sold)` with `sold : float option`, written as `undefined` while it is
 `None`; a prop left out keeps its default, a bar's `from` its 0. A helper
 takes and gives `float option array`, and a point of a `Line` or an `Area`
 is an option of two options.
-
-## What is bound
-
-`solidtype-rhp` is generated from rhp's own declarations
-wherever a rule maps them whole, by `generate/rhp.ts`, on the same core as
-`solidtype-kobalte`; what no rule maps is written in OCaml, a module each. The
-generator fails on a declaration neither binds, and on a prop, a setting or
-a key rhp declares for a module written in OCaml that the module does not bind, so a new
-version of rhp is bound whole or not at all.
-
-| Generated | Written in OCaml |
-|---|---|
-| `Chart`, `Bar`, `Dot`, `Tick`, `Cell`, `Place`, `Label`, `Line`, `Area`, `Poster`, `Theme`, `Axis` | `Plot`, `Scale`, `Many_dots`, `Row`, `Slat`, `Order` |
-| `extent`, `every`, `nice`, `summary`, `bins`, `density`, `animated`, `curve`, `drawing`, `at`, `use_orientation`, `theme`, `linked_css`, `no_css_guard`, `inherit_position` | `Color`, `Ticks`, `Ease`, `Shape`, and `series`, `cycle`, `stack_up`, `shares`, `running` |
-
-rhp's data groups, a plot's columns given as props of their own, are not
-bound: rows draw every chart they do.
