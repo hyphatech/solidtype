@@ -1,0 +1,21 @@
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Color_swatch
+      aria_label="Blue" color=(fun () -> Colors.parse_color "#0485F7")
+    />
+    <Color_swatch
+      aria_label="Red" color=(fun () -> Colors.parse_color "#EF4444")
+    />
+    <Color_swatch
+      aria_label="Amber" color=(fun () -> Colors.parse_color "#F59E0B")
+    />
+    <Color_swatch
+      aria_label="Green" color=(fun () -> Colors.parse_color "#10B981")
+    />
+    <Color_swatch
+      aria_label="Fuchsia" color=(fun () -> Colors.parse_color "#D946EF")
+    />
+  </div>

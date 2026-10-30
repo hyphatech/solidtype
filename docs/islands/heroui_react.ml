@@ -616,3 +616,13 @@ external toggle_button_group_props :
 external toggle_button_group :
   Dom.htmlDivElement -> toggle_button_group_props -> unit = "toggleButtonGroup"
 [@@mel.module "./react/heroui.tsx"]
+
+type color_swatch_props
+
+external color_swatch_props :
+  shape:string -> size:string -> unit -> color_swatch_props = ""
+[@@mel.obj]
+
+external color_swatch : Dom.htmlDivElement -> color_swatch_props -> unit
+  = "colorSwatch"
+[@@mel.module "./react/heroui.tsx"]

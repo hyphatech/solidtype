@@ -1,0 +1,27 @@
+module Kobalte = Solidtype_kobalte.ColorSwatch
+module Color = Solidtype_kobalte.Types.Color
+
+(* HeroUI's styles paint the colour over a checkerboard. Kobalte writes a
+   colour less than opaque for CSS as rgb(4, 133, 247 / 0.5), which no browser
+   reads, so its background too is written as rgba. *)
+let painted color style =
+  let css = Color.to_string color ~format:`rgba () in
+  "--color-swatch-current: " ^ css ^ "; background-color: " ^ css
+  ^ match style with Some s -> "; " ^ s | None -> ""
+
+let%component make ~(color : Color.t) ?(color_name : string option)
+    ?(aria_label : string option) ?(shape : [ `circle | `square ] option)
+    ?(size : [ `xs | `sm | `md | `lg | `xl ] option) ?(class_ : string option)
+    ?(style : string option) () =
+  <Kobalte.Root
+    value=(fun () -> color ())
+    ?color_name
+    ?aria_label
+    class_=(fun () ->
+             Styles.ColorSwatch.classes
+               (Styles.ColorSwatch.options ?shape:(shape ()) ?size:(size ())
+                  ?class_:(class_ ()) ()))
+    style=(fun () -> painted (color ()) (style ()))
+    data_slot="color-swatch"
+    props=(Props.others props)
+  />

@@ -450,8 +450,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   `solidtype-internationalized-date`.
 
 ### Group 6: color
-- [ ] ColorSwatch, ColorArea, ColorSlider, ColorField, ColorSwatchPicker,
-  ColorPicker
+- [x] ColorSwatch, on Kobalte's, its colour written as rgba, which a
+  browser reads where Kobalte's CSS string for a colour less than opaque is
+  not
+- [ ] ColorArea, ColorSlider, ColorField, ColorSwatchPicker, ColorPicker
 
 ### Group 7: built from Kobalte's primitives
 - [ ] Kobalte's primitives bound: `createSelectableList`,

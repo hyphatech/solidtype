@@ -1,0 +1,120 @@
+(* HeroUI's ColorSwatch on Kobalte's, beside the same swatch in React: its
+   element, its classes, the colour it paints and what a reader is told, for
+   each size, shape and opacity. *)
+
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+module E = Jest.Expect
+module T = Testing
+
+type props
+
+external props :
+  color:string ->
+  ?color_name:(string[@mel.as "colorName"]) ->
+  ?aria_label:(string[@mel.as "aria-label"]) ->
+  ?shape:string ->
+  ?size:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> Dom.element = "render"
+  [@@mel.module "./twins/ColorSwatch.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ColorSwatch.tsx"]
+end
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+(* The swatch's element: its tag, its attributes, and its style one
+   declaration at a time, however a framework spaces and ends them. *)
+let shown () =
+  match T.query "[data-slot=color-swatch]" with
+  | None -> "no swatch"
+  | Some e ->
+      let style =
+        Option.value (T.attribute e "style") ~default:""
+        |> String.split_on_char ';' |> List.map String.trim
+        |> List.filter (fun d -> String.length d > 0)
+        |> List.sort String.compare |> String.concat "; "
+      in
+      (* Kobalte writes a reader's words in its own case, Color Swatch and
+         vibrant Red, which a reader reads as React Aria's. *)
+      let told name =
+        name ^ "="
+        ^ String.lowercase_ascii (Option.value (T.attribute e name) ~default:"")
+      in
+      String.concat " "
+        [
+          tag_name e;
+          T.attributes_but [ "style"; "aria-label"; "aria-roledescription" ] e;
+          told "aria-label";
+          told "aria-roledescription";
+          "style=" ^ style;
+        ]
+
+let both ~color ?color_name ?aria_label ?shape ?size () =
+  T.render (fun () ->
+      <Color_swatch
+        color=(fun () -> Colors.parse_color color)
+        ?color_name=(fun () -> color_name)
+        ?aria_label=(fun () -> aria_label)
+        ?shape=(fun () -> shape)
+        ?size=(fun () -> size)
+      />);
+  let solidtype = shown () in
+  T.cleanup ();
+  let (_ : Dom.element) =
+    Twin.render
+      (props ~color ?color_name ?aria_label
+         ?shape:
+           (Option.map
+              (function `circle -> "circle" | `square -> "square")
+              shape)
+         ?size:
+           (Option.map
+              (function
+                | `xs -> "xs"
+                | `sm -> "sm"
+                | `md -> "md"
+                | `lg -> "lg"
+                | `xl -> "xl")
+              size)
+         ())
+  in
+  let react = shown () in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let same pairs =
+  E.(
+    expect (Array.of_list (List.map fst pairs))
+    |> toEqual (Array.of_list (List.map snd pairs)))
+
+let () =
+  Jest.describe "Color_swatch" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a swatch, as React's is" (fun () ->
+          same [ both ~color:"#0485F7" ~aria_label:"Blue" () ]);
+      Jest.test "is named as it is told, as React's is" (fun () ->
+          same
+            [
+              both ~color:"#0485F7" ~color_name:"Ocean Blue"
+                ~aria_label:"Primary brand color" ();
+            ]);
+      Jest.test "is of each size, as React's is" (fun () ->
+          same
+            (List.map
+               (fun size -> both ~color:"#EF4444" ~size ())
+               [ `xs; `sm; `md; `lg; `xl ]));
+      Jest.test "is square, as React's is" (fun () ->
+          same [ both ~color:"#0485F7" ~shape:`square () ]);
+      Jest.test "is less than opaque, as React's is" (fun () ->
+          same
+            (List.map
+               (fun alpha ->
+                 both ~color:("rgba(4, 133, 247, " ^ alpha ^ ")") ())
+               [ "1"; "0.5"; "0" ])))

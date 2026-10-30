@@ -1,0 +1,26 @@
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Color_swatch
+      aria_label="100% opacity"
+      color=(fun () -> Colors.parse_color "rgba(4, 133, 247, 1)")
+    />
+    <Color_swatch
+      aria_label="75% opacity"
+      color=(fun () -> Colors.parse_color "rgba(4, 133, 247, 0.75)")
+    />
+    <Color_swatch
+      aria_label="50% opacity"
+      color=(fun () -> Colors.parse_color "rgba(4, 133, 247, 0.5)")
+    />
+    <Color_swatch
+      aria_label="25% opacity"
+      color=(fun () -> Colors.parse_color "rgba(4, 133, 247, 0.25)")
+    />
+    <Color_swatch
+      aria_label="0% opacity"
+      color=(fun () -> Colors.parse_color "rgba(4, 133, 247, 0)")
+    />
+  </div>

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Color_swatch`: HeroUI's ColorSwatch on Kobalte's, a
+  colour of Kobalte's `Types.Color` in each of HeroUI's sizes and shapes, one
+  less than opaque over a checkerboard, named for a reader by Kobalte or by
+  its `color_name`.
 - `vite-plugin-solidtype` names `vite-plugin-solid` as a peer, beside Vite,
   since what it writes is Solid's compiler's to compile next: installing
   the plugin installs Solid's.

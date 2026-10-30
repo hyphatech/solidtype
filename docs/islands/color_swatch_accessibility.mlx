@@ -1,0 +1,21 @@
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Color_swatch
+      aria_label="Primary brand color"
+      color=(fun () -> Colors.parse_color "#0485F7")
+      color_name="Ocean Blue"
+    />
+    <Color_swatch
+      aria_label="Error state color"
+      color=(fun () -> Colors.parse_color "#EF4444")
+      color_name="Coral Red"
+    />
+    <Color_swatch
+      aria_label="Warning color"
+      color=(fun () -> Colors.parse_color "#F59E0B")
+      color_name="Sunset Orange"
+    />
+  </div>

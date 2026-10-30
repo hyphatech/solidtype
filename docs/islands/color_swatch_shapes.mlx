@@ -1,0 +1,10 @@
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Color_swatch color=(fun () -> Colors.parse_color "#0485F7") shape=`circle
+    />
+    <Color_swatch color=(fun () -> Colors.parse_color "#0485F7") shape=`square
+    />
+  </div>

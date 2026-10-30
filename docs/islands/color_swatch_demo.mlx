@@ -1,0 +1,44 @@
+module S = Solidtype.Solid
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Colors = Solidtype_kobalte.Colors
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let shapes = [| (`circle, "circle"); (`square, "square") |]
+
+let sizes =
+  [| (`xs, "xs"); (`sm, "sm"); (`md, "md"); (`lg, "lg"); (`xl, "xl") |]
+
+let make () =
+  let shape, set_shape = S.create_signal (`circle, "circle") in
+  let size, set_size = S.create_signal (`md, "md") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="shape"
+        choices=(fun () -> shapes)
+        picked=(fun () -> S.get shape)
+        on_pick=(Controls.choose shapes set_shape)
+      />
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Color_swatch
+                   aria_label="Blue"
+                   color=(fun () -> Colors.parse_color "#0485F7")
+                   shape=(fun () -> fst (S.get shape))
+                   size=(fun () -> fst (S.get size))
+                 />)
+      react=(fun host ->
+              Heroui_react.color_swatch host
+                (Heroui_react.color_swatch_props
+                   ~shape:(snd (S.get shape))
+                   ~size:(snd (S.get size))
+                   ()))
+    />
+  </section>

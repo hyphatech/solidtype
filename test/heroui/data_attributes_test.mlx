@@ -37,6 +37,7 @@ module Form = H.Form
 module Input = H.Input
 module Input_group = H.Input_group
 module Kbd = H.Kbd
+module Color_swatch = H.Color_swatch
 module Label = H.Label
 module Link = H.Link
 module Select = H.Select
@@ -360,6 +361,11 @@ let () =
                   <Close_button.Icon data_testid="Close_button.Icon" />
                 </Close_button>
                 <Empty_state data_testid="Empty_state">"Empty"</Empty_state>
+                <Color_swatch
+                  data_testid="Color_swatch"
+                  color=(fun () ->
+                            Solidtype_kobalte.Colors.parse_color "#0485F7")
+                />
                 <Kbd data_testid="Kbd">
                   <Kbd.Abbr data_testid="Kbd.Abbr" key_value=`command />
                   <Kbd.Content data_testid="Kbd.Content">"K"</Kbd.Content>
@@ -595,6 +601,7 @@ let () =
                    ("Close_button", "[data-slot=close-button]");
                    ("Close_button.Icon", "[data-slot=close-button-icon]");
                    ("Empty_state", "[data-slot=empty-state]");
+                   ("Color_swatch", "[data-slot=color-swatch]");
                    ("Kbd", "kbd");
                    ("Kbd.Abbr", "abbr");
                    ("Kbd.Content", "kbd > span");
