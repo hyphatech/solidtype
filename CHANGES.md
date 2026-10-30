@@ -19,6 +19,12 @@
   @internationalized/date writes it, `09:30:00`, and a dated or zoned value
   whole, where Kobalte's input sent a clock's text, `9:30 AM`; and a time typed
   again as it was is no change, so `on_change` is not told it.
+- Each opam package names what its library imports from npm, at the range
+  it is tested against, in `x-npm-depends`: `solidtype` Solid,
+  `solidtype-kobalte` Kobalte, `solidtype-heroui` HeroUI's styles,
+  `solidtype-rhp` rhp and `solidtype-internationalized-date`
+  @internationalized/date. `opam show <package> --field x-npm-depends`
+  prints them as `bun add` takes them.
 
 ## 0.4.0 (2026-10-30)
 

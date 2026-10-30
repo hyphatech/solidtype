@@ -49,3 +49,4 @@ build: [
 ]
 dev-repo: "git+https://github.com/hyphatech/solidtype.git"
 x-maintenance-intent: ["(latest)"]
+x-npm-depends: [ "solid-js@~1.9.17" ]

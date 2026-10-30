@@ -22,6 +22,15 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 | `ppx_solidtype` | `ppx_solidtype` | The ppx that rewrites the JSX of `.mlx` files into calls Melange compiles |
 | `vite-plugin-solidtype` | none: an asset of each GitHub release | The Vite plugin that turns those calls back into JSX for Solid's compiler |
 
+Each package names what it imports from npm in its opam file's
+`x-npm-depends`, at the range it is tested against, in the spelling `bun
+add` takes, so an application installs exactly what the packages it uses
+import:
+
+```sh
+bun add $(opam show solidtype-rhp --field x-npm-depends)
+```
+
 ## solidtype
 
 - [`Solidtype`](/solidtype/reference/solidtype/Solidtype/index.html) --

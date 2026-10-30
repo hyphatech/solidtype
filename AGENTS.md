@@ -162,6 +162,8 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   test/rewrite       what the plugin writes for a marker form
   test/browser       every module of the libraries built for the browser,
                      each import found in Solid's and Kobalte's browser build
+  test/npm           each package's x-npm-depends: what its library imports
+                     from npm, at the workspace's range
   test/astro         the example's Astro page built: it holds the board
                      prerendered, to hydrate
   test/docs          the documentation built, React's compiler beside
@@ -458,6 +460,17 @@ break.
 - **Each rhp page links to the page of rhp's documentation it follows.**
   Why: rhp's documentation is the reference for what a prop does, and a
   copy of it would drift. Test: `test/test_docs.ml`.
+- **Each opam package declares what its library imports from npm**, in
+  `x-npm-depends`, written by its `.opam.template` -- `"@bezda/rhp@~2.2.0"`,
+  npm's own spelling, at the range the root `package.json` builds and tests
+  it against -- and nothing else: Kobalte is `solidtype-kobalte`'s, and
+  `solidtype-heroui` reaches it through that package, never by naming it
+  again. Why: an application installs a JavaScript library only where it
+  uses the package that binds it, any of them or none, and reads the list
+  from the opam package at the version opam resolved
+  (`opam show solidtype-rhp --field x-npm-depends`), so it is never a copy
+  kept elsewhere. Test: `vite-plugin/test/npm.test.ts`, against each
+  library's `mel.module` imports.
 - **A component is a value.** A binding's part is an `external` of type
   `_ Jsx.component`, never a function type, and an OCaml component is
   `Jsx.component make`. Why: Melange wraps an external function used as
