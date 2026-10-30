@@ -1,12 +1,10 @@
 ---
 title: Gallery
-description: "rhp's gallery charts in OCaml: grouped bars, a waterfall, a pie, a heatmap, a Gantt chart and candlesticks."
+description: "rhp's gallery charts in OCaml: a waterfall, a pie, a heatmap, a Gantt chart and candlesticks."
 ---
 
 import Example from "@components/Example.astro";
 import "@bezda/rhp/posters.css";
-import * as Grouped from "@islands/rhp_grouped_bars.jsx";
-import GroupedCode from "@islands/rhp_grouped_bars.mlx?raw";
 import * as Waterfall from "@islands/rhp_waterfall_budget.jsx";
 import WaterfallCode from "@islands/rhp_waterfall_budget.mlx?raw";
 import * as Pie from "@islands/rhp_pie.jsx";
@@ -30,18 +28,6 @@ poster catches and traces to its row by a `data-` attribute is caught by
 the row's own element here, so no handler reads the page.
 
 Original rhp documentation: [Examples](https://rhp.vercel.app/examples/bar-chart/).
-
-## Grouped bars
-
-A team's slat holds a plot of its own, which shares the team's band out
-among its three counts: that is the group. The teams are ranked as a
-medal table is, golds first, by `Order.sort_by`, and keyed by name, so a
-team keeps its slat as the order changes. A medal's face is an element
-inside its `Dot`, so its lift on hover is a transition of its own.
-
-Original rhp documentation: [Grouped bars](https://rhp.vercel.app/examples/grouped-bars/).
-
-<Example code={GroupedCode} title="rhp_grouped_bars.mlx" fill><Grouped.make client:visible /></Example>
 
 ## A waterfall
 
