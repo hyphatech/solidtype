@@ -10,6 +10,10 @@ import * as ToggleGroup from "@islands/kobalte_toggle_group.jsx";
 import toggleGroup from "@islands/kobalte_toggle_group.mlx?raw";
 import * as Select from "@islands/kobalte_select.jsx";
 import select from "@islands/kobalte_select.mlx?raw";
+import * as Slider from "@islands/kobalte_slider.jsx";
+import slider from "@islands/kobalte_slider.mlx?raw";
+import * as Dialog from "@islands/kobalte_dialog.jsx";
+import dialog from "@islands/kobalte_dialog.mlx?raw";
 
 A Kobalte component is used as Kobalte's documentation shows it, part by
 part, in OCaml's JSX. Kobalte has no look of its own: it writes its state
@@ -62,6 +66,28 @@ A select shows more of the binding:
   page's flow, as Kobalte's own does; the list is given HeroUI's ground
   there, since it no longer inherits the example's.
 
+## Slider
+
+<Example code={slider} title="kobalte_slider.mlx"><Slider.make client:visible /></Example>
+
+A slider's value is a `float array`, one number for each thumb: two
+thumbs make a range. `default_value` is a thunk, read once, where the
+uncontrolled slider starts; `value` and `on_change` would control it.
+Each thumb holds a `Slider.Input`, the native range input a form submits,
+and the arrows move the focused thumb by its step, Page Up and Down by a
+tenth of the range, and Home and End to its ends.
+
+## Dialog
+
+<Example code={dialog} title="kobalte_dialog.mlx"><Dialog.make client:visible /></Example>
+
+`Dialog.Trigger` opens it, and Escape, a click outside or
+`Dialog.CloseButton` closes it. While it is open, focus stays inside it and
+the page behind is hidden from a screen reader, and on closing focus goes
+back to the trigger. `Dialog.Title` and `Dialog.Description` label it.
+`Dialog.Portal` mounts it in `document.body`, so it is given HeroUI's
+ground there, as the select's list is.
+
 ## Every component
 
 The binding holds every component in Kobalte's documentation, from
@@ -69,6 +95,6 @@ Accordion to Tooltip, by the same rules. Each module's `.mli` is the
 reference for its parts and their props, in OCaml; Kobalte's documentation
 is the reference for what they do.
 
-[HeroUI](/solidtype/heroui/coverage/) is built on these components: each port is
+[HeroUI](/solidtype/heroui/) is built on these components: each port is
 a Kobalte component with HeroUI's classes, and its page shows it beside
 HeroUI's own.

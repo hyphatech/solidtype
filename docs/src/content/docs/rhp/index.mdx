@@ -1,17 +1,20 @@
 ---
 title: Charts
-description: Charts in OCaml -- the binding of rhp, reactive charts of HTML on Solid, as solidtype-rhp.
+description: "solidtype's charts: rhp's reactive charts of HTML on Solid, bound for OCaml whole and typed."
 ---
 
 import Example from "@components/Example.astro";
 import * as BarChart from "@islands/rhp_bar_chart.jsx";
 import BarChartCode from "@islands/rhp_bar_chart.mlx?raw";
 
-solidtype's charts are rhp's: `solidtype-rhp` binds
-[rhp](https://rhp.vercel.app) 2.2, reactive HTML plots, which draws a chart
-out of HTML elements placed by CSS, with Solid, where other libraries draw
-into an SVG or a canvas. The binding is rhp's own components, compiled as
-Solid compiles rhp's JSX, with a typed row in place of rhp's untyped one.
+Charts are part of solidtype's ecosystem, and they are
+[rhp](https://rhp.vercel.app)'s: reactive charts on Solid, drawn out of
+HTML elements placed by CSS, where other libraries draw into an SVG or a
+canvas. `solidtype-rhp` binds all of rhp 2.2 for OCaml -- its components
+compiled as Solid compiles rhp's own JSX, with a typed row in place of
+rhp's untyped one -- so a chart is a component like any other in a
+solidtype application, its data a record the compiler checks. The
+[Gallery](/solidtype/rhp/gallery/) shows whole charts built with it.
 
 Original rhp documentation: [Introduction](https://rhp.vercel.app/start/introduction/)
 and [Your first chart](https://rhp.vercel.app/start/first-chart/). rhp's
@@ -66,12 +69,12 @@ is an option of two options.
 
 All of rhp 2.2. `solidtype-rhp` is generated from rhp's own declarations
 wherever a rule maps them whole, by `generate/rhp.ts`, on the same core as
-`solidtype-kobalte`; what no rule maps is ported by hand, a module each. The
+`solidtype-kobalte`; what no rule maps is written in OCaml, a module each. The
 generator fails on a declaration neither binds, and on a prop, a setting or
-a key rhp declares for a hand port that the port does not bind, so a new
+a key rhp declares for a module written in OCaml that the module does not bind, so a new
 version of rhp is bound whole or not at all.
 
-| Generated | Ported by hand |
+| Generated | Written in OCaml |
 |---|---|
 | `Chart`, `Bar`, `Dot`, `Tick`, `Cell`, `Place`, `Label`, `Line`, `Area`, `Poster`, `Theme`, `Axis` | `Plot`, `Scale`, `Many_dots`, `Row`, `Slat`, `Order` |
 | `extent`, `every`, `nice`, `summary`, `bins`, `density`, `animated`, `curve`, `drawing`, `at`, `use_orientation`, `theme`, `linked_css`, `no_css_guard`, `inherit_position` | `Color`, `Ticks`, `Ease`, `Shape`, and `series`, `cycle`, `stack_up`, `shares`, `running` |

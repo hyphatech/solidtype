@@ -45,6 +45,11 @@
   written as the expression it returns, as TSX writes it, rather than a
   function called in place: Solid's compiler then memoises its condition and
   escapes its text on the server, as it does the same JSX in TSX.
+- The documentation's tabs each open with an overview at their root, what
+  that part of solidtype is: Solid, its core; Kobalte, its accessible
+  components, every one listed, with a slider and a dialog added to its
+  examples; HeroUI, its design system, a maintained port onto Kobalte; and
+  the charts, whose overview moves from `rhp/overview/` to `rhp/`.
 
 ## 0.3.0 (2026-10-27)
 

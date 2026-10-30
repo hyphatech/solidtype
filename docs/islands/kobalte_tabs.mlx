@@ -1,0 +1,32 @@
+module Tabs = Solidtype_kobalte.Tabs
+
+let trigger =
+  "rounded-lg px-3 py-1.5 text-sm text-muted outline-none \
+   data-[selected]:bg-surface data-[selected]:text-foreground \
+   data-[selected]:shadow-sm focus-visible:ring-2 focus-visible:ring-focus"
+
+let make () =
+  <Tabs.Root default_value="profile" class_="flex w-80 flex-col gap-3">
+    <Tabs.List
+      aria_label="Settings"
+      class_="flex gap-1 self-start rounded-xl bg-default p-1">
+      <Tabs.Trigger value="profile" class_=(fun () -> trigger)>
+        "Profile"
+      </Tabs.Trigger>
+      <Tabs.Trigger value="account" class_=(fun () -> trigger)>
+        "Account"
+      </Tabs.Trigger>
+      <Tabs.Trigger value="billing" class_=(fun () -> trigger)>
+        "Billing"
+      </Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content value="profile" class_="text-sm">
+      "Your name and photo."
+    </Tabs.Content>
+    <Tabs.Content value="account" class_="text-sm">
+      "Your email and password."
+    </Tabs.Content>
+    <Tabs.Content value="billing" class_="text-sm">
+      "Your plan and invoices."
+    </Tabs.Content>
+  </Tabs.Root>

@@ -1,0 +1,29 @@
+module Dialog = Solidtype_kobalte.Dialog
+
+let make () =
+  <Dialog.Root>
+    <Dialog.Trigger
+      class_="rounded-xl bg-accent px-4 py-2 text-sm text-accent-foreground \
+              outline-none focus-visible:ring-2 focus-visible:ring-focus">
+      "Open settings"
+    </Dialog.Trigger>
+    <Dialog.Portal>
+      <Dialog.Overlay class_="fixed inset-0 z-50 bg-black/40" />
+      <div class_="fixed inset-0 z-50 grid place-items-center p-4">
+        <Dialog.Content
+          class_="heroui-ground flex w-80 flex-col gap-2 rounded-2xl \
+                  bg-overlay p-5 shadow-lg">
+          <Dialog.Title class_="text-lg font-semibold">"Settings"</Dialog.Title>
+          <Dialog.Description class_="text-sm text-muted">
+            "Focus stays in here until it closes, by Escape, a click outside, \
+             or the button."
+          </Dialog.Description>
+          <Dialog.CloseButton
+            class_="self-end rounded-xl bg-default px-3 py-1.5 text-sm \
+                    outline-none focus-visible:ring-2 focus-visible:ring-focus">
+            "Done"
+          </Dialog.CloseButton>
+        </Dialog.Content>
+      </div>
+    </Dialog.Portal>
+  </Dialog.Root>

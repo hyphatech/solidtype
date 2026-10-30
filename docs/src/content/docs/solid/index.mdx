@@ -1,0 +1,65 @@
+---
+title: Solid
+description: "solidtype's core: Solid's fine-grained reactivity, its components and its renderer, bound whole and typed."
+---
+
+import Example from "@components/Example.astro";
+import * as Flow from "@islands/solid_flow.jsx";
+import flow from "@islands/solid_flow.mlx?raw";
+
+Solid is solidtype's core, and everything else in it is built on it:
+Kobalte's components, HeroUI's port and the charts. `solidtype` binds all of
+[Solid](https://www.solidjs.com) 1.9 -- signals, memos and effects,
+components and their props, control flow, stores and context, resources and
+Suspense, and its renderer in the browser and on the server -- and a
+component written in OCaml's JSX reaches the browser as the code Solid's
+own compiler emits for the same JSX.
+
+<Example code={flow} title="solid_flow.mlx"><Flow.make client:visible /></Example>
+
+The filter is a variant, and the `Switch` over it a `match`: a filter added
+to the type is a case the compiler asks for, where Solid's own `Switch`
+would show nothing for it. That is what the binding adds to Solid: its
+types.
+
+## What the types hold
+
+- **A reactive read is a thunk.** A value that changes is read inside
+  `(fun () -> ...)`, where Solid tracks it; one read outside, which would
+  stop updating without a sound, does not compile.
+- **A component's props are checked**, as TSX checks them: a prop left
+  out, a prop the component does not take, a value of the wrong type.
+- **An element's attributes are typed** from Solid's own JSX types, so an
+  attribute an element does not take, or a value it cannot hold, is an
+  error.
+- **A test Solid reads for truth is a `bool` or an `option`**, never an
+  OCaml value JavaScript would read as false.
+
+## In this section
+
+| Page | What it covers | Modules |
+|---|---|---|
+| [Components](/solidtype/solid/components/) | a component, its props and children, `let%component` | `Jsx`, `Check` |
+| [Reactivity](/solidtype/solid/reactivity/) | signals, memos, effects, and why a read is a thunk | `Solid` |
+| [Control flow](/solidtype/solid/control-flow/) | `Show`, `For`, `Index`, `Switch`, `Match`, `ErrorBoundary`, `Portal` | one module each, named as Solid names them |
+| [Stores and context](/solidtype/solid/state/) | state tracked field by field, a value given to everything below | `Store`, `Context` |
+| [Async](/solidtype/solid/async/) | resources, `Suspense`, transitions | `Solid`, `Suspense` |
+| [Rendering](/solidtype/solid/rendering/) | mounting, rendering on the server, hydration | `Web`, `Server` |
+
+Solid's documentation stays the reference for what each function does;
+these pages say how it is written in OCaml, and
+[Conventions](/solidtype/start/conventions/) how a name of Solid's is
+spelt.
+
+## Install
+
+```sh
+opam install solidtype
+```
+
+```lisp
+(libraries solidtype melange.dom)
+(preprocess (pps melange.ppx ppx_solidtype))
+```
+
+[Getting Started](/solidtype/) sets up dune and Vite around it.

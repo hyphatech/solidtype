@@ -20,7 +20,8 @@ test("Each port's page has HeroUI's stylesheet for it", () => {
   );
   const pages = [...new Bun.Glob("*.mdx").scanSync(`${root}docs/src/content/docs/heroui`)]
     .map((page) => page.replace(/\.mdx$/, ""))
-    .filter((page) => page !== "coverage");
+    // The section's overview and its coverage are no port's page.
+    .filter((page) => page !== "index" && page !== "coverage");
   const missing = pages.flatMap((page) => {
     // HeroUI names a few of its stylesheets without the hyphen: textfield.
     const sheet = [`${page}.css`, `${page.replaceAll("-", "")}.css`].find((s) => shipped.has(s));

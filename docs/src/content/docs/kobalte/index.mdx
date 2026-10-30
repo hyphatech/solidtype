@@ -1,0 +1,73 @@
+---
+title: Kobalte
+description: "solidtype's accessible components: every one of Kobalte's, its behaviour, keyboard and ARIA, bound whole and typed."
+---
+
+import Example from "@components/Example.astro";
+import * as Tabs from "@islands/kobalte_tabs.jsx";
+import tabs from "@islands/kobalte_tabs.mlx?raw";
+
+Kobalte is solidtype's layer of accessible components. [Kobalte](https://kobalte.dev)
+is Solid's library of components with behaviour and no look: the keyboard,
+focus and ARIA of a select, a dialog, a slider, done right once, styled by
+whoever uses it. `solidtype-kobalte` binds every one of them, part by part,
+with its hooks and the types they name, and HeroUI's port is built on
+them.
+
+<Example code={tabs} title="kobalte_tabs.mlx"><Tabs.make client:visible /></Example>
+
+The arrows move between the tabs, Home and End reach the ends, and each
+panel is labelled by its tab: Kobalte's behaviour, as it is in TSX. The
+look is a handful of Tailwind classes on the state Kobalte writes,
+`data-[selected]`.
+
+## What it holds
+
+All of Kobalte 0.13: every component, and the context and colour utilities
+they use.
+
+| Kind | Components |
+|---|---|
+| Forms | `Button`, `Checkbox`, `Switch`, `RadioGroup`, `TextField`, `NumberField`, `TimeField`, `Search`, `Slider`, `Rating`, `FileField`, `SegmentedControl`, `ToggleButton`, `ToggleGroup`, `SpinButton` |
+| Lists | `Select`, `Combobox`, `Listbox` |
+| Overlays | `Dialog`, `AlertDialog`, `Popover`, `Tooltip`, `HoverCard`, `Toast` |
+| Menus and navigation | `DropdownMenu`, `ContextMenu`, `Menubar`, `NavigationMenu`, `Tabs`, `Breadcrumbs`, `Link`, `Pagination` |
+| Disclosure | `Accordion`, `Collapsible` |
+| Status | `Alert`, `Badge`, `Meter`, `Progress`, `Skeleton`, `Separator`, `Image` |
+| Colour | `ColorArea`, `ColorWheel`, `ColorSlider`, `ColorField`, `ColorChannelField`, `ColorSwatch`, `Colors` |
+| Context | `I18n`, `ColorMode` |
+
+Each is a module of `Solidtype_kobalte`, its parts modules of it named as
+Kobalte names them, `Select.Trigger`, `Slider.Thumb`.
+
+## Why it can be trusted
+
+- **Generated from Kobalte's own declarations.** The binding is written by
+  a generator from Kobalte's `.d.ts` files, so its types are Kobalte's,
+  and taking a new Kobalte is generating again.
+- **Typed as tightly as Kobalte's types allow.** A prop a part does not
+  take, or a value of the wrong kind, does not compile; a select holding
+  several values is a module of its own, with its own type.
+- **Tested against Kobalte in TSX.** Every component is rendered from OCaml
+  and from TSX side by side, checked alike -- roles, names, states, keys --
+  and scanned by axe on both.
+
+## In this section
+
+[The binding](/solidtype/kobalte/binding/) says how the binding is made and
+how Kobalte's types become OCaml's. [Using Kobalte](/solidtype/kobalte/usage/)
+shows its components in use: a switch, a toggle group, a select, a slider
+and a dialog. Kobalte's documentation stays the reference for what each
+part does; each module's [`.mli`](/solidtype/reference/) is the reference
+for how it is written.
+
+## Install
+
+```sh
+opam install solidtype-kobalte
+bun add @kobalte/core
+```
+
+```lisp
+(libraries solidtype solidtype-kobalte melange.dom)
+```

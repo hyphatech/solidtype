@@ -13,10 +13,10 @@ the types they name -- as one OCaml library.
 (libraries solidtype solidtype-kobalte melange.dom)
 ```
 
-## Generated, never written by hand
+## Generated from Kobalte's declarations
 
 Kobalte's parts are hundreds, and their props thousands. A binding written
-by hand would be a second copy of Kobalte's types, drifting from the version
+out would be a second copy of Kobalte's types, drifting from the version
 it binds. `solidtype-kobalte` is written instead by a generator,
 `generate/kobalte.ts`, which reads Kobalte's own `.d.ts` declarations with
 TypeScript's type checker and writes:

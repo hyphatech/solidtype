@@ -8,7 +8,7 @@ compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
 library bound is an opam package of its own: `solidtype` binds Solid,
 `solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts,
 `solidtype-internationalized-date` the dates HeroUI's date components take; `solidtype-heroui`
-ports HeroUI's design onto Kobalte by hand, since HeroUI's components are
+is a maintained port of HeroUI's components onto Kobalte, since HeroUI's are
 React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
 
 ## Commands
@@ -66,7 +66,7 @@ internationalized_date/
                      solidtype-internationalized-date: @internationalized/date's
                      functions, and its values in types, each a kind of one
                      Value, generated
-heroui/              solidtype-heroui: HeroUI's components ported by hand onto
+heroui/              solidtype-heroui: HeroUI's components ported onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
                      generated
@@ -88,9 +88,11 @@ heroui/              solidtype-heroui: HeroUI's components ported by hand onto
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte
-                     bindings, and each port's page, which shows it beside
-                     the same component in React, with its source, and
-                     each module's odoc reference; built into _build/docs,
+                     bindings, the charts, and each port's page, which
+                     shows it beside the same component in React, with its
+                     source, and each module's odoc reference; each tab
+                     opens at its section's root, an overview of what that
+                     part of solidtype is; built into _build/docs,
                      which `dune clean` removes and nothing ignores, and a
                      link to a page or heading that is not there fails it
   package.json       the site's dependencies, a member of the root's Bun
@@ -406,8 +408,8 @@ break.
   whose keys are `true` and `false` is a `bool`; any other is its keys as
   tags by the one spelling rule, a space taken as a hyphen, each named by
   `[@mel.as]`, since Melange writes `undefined` for a tag left unnamed where
-  others are. HeroUI's components are React's and are ported by hand;
-  only their classes are bound. Why: a port's look is HeroUI's own
+  others are. HeroUI's components are React's and are ported, written
+  in OCaml; only their classes are bound. Why: a port's look is HeroUI's own
   classes, never a copy of them. Test: `make lint` runs the generator with
   `--check`, and `test/heroui/styles_test.ml` checks calls against
   HeroUI's own.

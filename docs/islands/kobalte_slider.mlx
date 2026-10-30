@@ -1,0 +1,23 @@
+module Slider = Solidtype_kobalte.Slider
+
+let make () =
+  <Slider.Root
+    default_value=(fun () -> [| 20.; 60. |]) class_="flex w-72 flex-col gap-2">
+    <div class_="flex justify-between text-sm">
+      <Slider.Label>"Price"</Slider.Label>
+      <Slider.ValueLabel class_="text-muted" />
+    </div>
+    <Slider.Track class_="relative h-2 w-full rounded-full bg-default">
+      <Slider.Fill class_="absolute h-full rounded-full bg-accent" />
+      <Slider.Thumb
+        class_="-top-1 block size-4 rounded-full bg-white shadow outline-none \
+                focus-visible:ring-2 focus-visible:ring-focus">
+        <Slider.Input />
+      </Slider.Thumb>
+      <Slider.Thumb
+        class_="-top-1 block size-4 rounded-full bg-white shadow outline-none \
+                focus-visible:ring-2 focus-visible:ring-focus">
+        <Slider.Input />
+      </Slider.Thumb>
+    </Slider.Track>
+  </Slider.Root>

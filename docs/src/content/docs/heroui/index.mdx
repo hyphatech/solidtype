@@ -1,0 +1,62 @@
+---
+title: HeroUI
+description: "solidtype's design system: HeroUI's components, a maintained port onto Kobalte, with HeroUI's look and Kobalte's behaviour."
+---
+
+import Example from "@components/Example.astro";
+import * as Login from "@islands/card_form.jsx";
+import login from "@islands/card_form.mlx?raw";
+
+HeroUI is solidtype's design system. `solidtype-heroui` is a port of
+[HeroUI](https://heroui.com)'s components, a maintained one, kept to each
+HeroUI release: HeroUI's look, from HeroUI's own styles, on Kobalte's
+behaviour and accessibility, written in OCaml. It is the part of solidtype's
+ecosystem an application is drawn with -- a button, a form, a select, a
+modal, a toast -- each the component HeroUI's documentation shows, used
+as solidtype's JSX uses any component.
+
+<Example code={login} title="card_form.mlx"><Login.make client:visible /></Example>
+
+## What a port is
+
+- **HeroUI's look, never a copy of it.** A port's classes are the ones
+  HeroUI's own variant functions give, bound from `@heroui/styles` by a
+  generator, so a port looks as HeroUI does and takes HeroUI's next look
+  with it.
+- **Kobalte's behaviour.** Each port is a Kobalte component -- its
+  keyboard, focus, ARIA -- with HeroUI's parts and props on it. Where HeroUI
+  does more than Kobalte, the port does that too.
+- **HeroUI's state, written as React Aria writes it.** HeroUI's styles read
+  `data-hovered`, `data-pressed`, `data-selected`; a port declares the same
+  attributes, so the styles meet the state they expect, and a page
+  prerendered on the server already holds them.
+- **Held to HeroUI in React.** Each port's page shows it beside HeroUI's own
+  React component, and each port is tested against that component: the
+  same classes, the same states, as the same user acts on both.
+
+## How far it goes
+
+58 of HeroUI 3.2's components are ported, the forms, lists, overlays and
+navigation an application needs among them; [Coverage](/solidtype/heroui/coverage/)
+lists each, what it does, and the 16 still to come, in the order they are
+being ported. Every port has its page in this section, with HeroUI's own
+examples written in OCaml.
+
+## Install
+
+```sh
+opam install solidtype-heroui
+bun add @heroui/styles @kobalte/core tailwindcss
+```
+
+```lisp
+(libraries solidtype solidtype-kobalte solidtype-heroui melange.dom)
+```
+
+HeroUI's styles are Tailwind's, and a page imports them as HeroUI's own
+installation does:
+
+```css
+@import "tailwindcss";
+@import "@heroui/styles";
+```
