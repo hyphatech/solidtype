@@ -22,6 +22,8 @@
   @internationalized/date writes it, `09:30:00`, and a dated or zoned value
   whole, where Kobalte's input sent a clock's text, `9:30 AM`; and a time typed
   again as it was is no change, so `on_change` is not told it.
+- `Solidtype_heroui.Time_field`: one colon between an hour and a minute, and
+  a minute and a second, where Kobalte's own was drawn beside it, `9 :: 30`.
 - Each opam package names what its library imports from npm, at the range
   it is tested against, in `x-npm-depends`: `solidtype` Solid,
   `solidtype-kobalte` Kobalte, `solidtype-heroui` HeroUI's styles,

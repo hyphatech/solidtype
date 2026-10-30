@@ -493,3 +493,37 @@ let () =
             E.(
               expect (!told, placeholder "hour", placeholder "minute")
               |> toEqual ("none", Some "true", Some "true"))))
+
+(* The colons a reader sees between a field's segments: each child of its
+   input that is a colon and is not hidden. *)
+let colons () =
+  Js.Array.from (query_all T.body "[data-slot=date-input-group-input] > *")
+  |> Array.to_list
+  |> List.filter (fun e ->
+      String.equal (text e) ":" && Option.is_none (T.attribute e "hidden"))
+  |> List.length
+
+let () =
+  Jest.describe "Time_field, its colons" (fun () ->
+      Jest.afterEach T.cleanup;
+      (* Kobalte's segment writes a colon of its own beside the literal. *)
+      Jest.test "draws one between each part, as React's does" (fun () ->
+          T.render (fun () ->
+              <Time_field
+                default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+                granularity=`second
+                hour_cycle=`h24>
+                (fun () -> inside ())
+              </Time_field>);
+          E.(expect (colons ()) |> toEqual 2));
+      Jest.test "draws one when it comes to show fewer parts" (fun () ->
+          let granularity, set_granularity = S.create_signal `second in
+          T.render (fun () ->
+              <Time_field
+                default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+                granularity=(fun () -> S.get granularity)
+                hour_cycle=`h24>
+                (fun () -> inside ())
+              </Time_field>);
+          S.set set_granularity `minute;
+          E.(expect (colons ()) |> toEqual 1)))

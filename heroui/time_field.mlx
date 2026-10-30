@@ -108,16 +108,39 @@ module Suffix = struct
     </div>
 end
 
+external query_all :
+  _ Dom.element_like -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external set_hidden : Dom.element -> bool -> unit = "hidden" [@@mel.set]
+
+(* Kobalte's segment writes a colon of its own after an hour and a minute
+   followed by another part, a span nothing styles and a reader reads, beside
+   the literal the port writes as React Aria does, muted with HeroUI's other
+   literals: it is hidden. *)
+let hide_kobalte_colons input =
+  Js.Array.from (query_all input ":scope > span:not([data-slot])")
+  |> Array.iter (fun span -> set_hidden span true)
+
 module Input = struct
   let%component make ?(class_ : string option)
       ~(children : segment S.accessor -> Jsx.element) () =
     let f = within "Time_field.Input" in
     let slots = in_group "Time_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let hide = ref (fun () -> ()) in
+    (* Again as the field comes to show other parts, which Kobalte's colons
+       follow. *)
+    S.create_effect (fun () ->
+        ignore (f.around `hour : string array * string array);
+        !hide ());
     (* React Aria's input is a group of its own, where Kobalte's presents. *)
     <Kobalte.Input
       role=`group
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            (hide := fun () -> hide_kobalte_colons e);
+            Interaction.watch i e)
       class_=(fun () ->
                after (Styles.DateInputGroup.input (slots ())) (class_ ()))
       data_slot="date-input-group-input"
