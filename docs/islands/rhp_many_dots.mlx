@@ -1,33 +1,184 @@
 module Chart = Solidtype_rhp.Chart
 module Color = Solidtype_rhp.Color
+module Jsx = Solidtype.Jsx
 module Many_dots = Solidtype_rhp.Many_dots
+module S = Solidtype.Solid
+module Ticks = Solidtype_rhp.Ticks
 
-type point = { x : float; y : float; group : int }
+type point = { id : int; x : float; y : float; group : int; color : string }
+type coloring = Shared | Category | Unique
 
-(* The same points every time: Park and Miller's generator, exact in a
-   double, so the page and its twin draw the same scatter. *)
-let points =
-  let seed = ref 7. in
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+external pointer_target : Dom.pointerEvent -> Dom.element = "target" [@@mel.get]
+external click_target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+external change_target : Dom.event -> Dom.element = "target" [@@mel.get]
+external value : Dom.element -> string = "value" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.Nullable.t
+  = "closest"
+[@@mel.send]
+
+external get_attribute : Dom.element -> string -> string Js.Nullable.t
+  = "getAttribute"
+[@@mel.send]
+
+(* The same points for a seed every time, so the page and its prerendered
+   HTML agree: Park and Miller's generator, exact in a double. *)
+let samples seed =
+  let state = ref (float_of_int ((seed * 7919) + 7)) in
   let next () =
-    seed := Float.rem (!seed *. 16807.) 2147483647.;
-    !seed /. 2147483647.
+    state := Float.rem (!state *. 16807.) 2147483647.;
+    !state /. 2147483647.
   in
-  Array.init 400 (fun i ->
-      let x = next () *. 100. in
-      let y = 5. +. (x *. 0.5) +. (next () *. 40.) in
-      { x; y; group = i mod 3 })
+  Array.init 1200 (fun id ->
+      let x = 4. +. (next () *. 92.) in
+      let y = 4. +. (next () *. 92.) in
+      {
+        id;
+        x;
+        y;
+        group = id mod 4;
+        color =
+          "hsl("
+          ^ Js.Float.toString (Float.rem (float_of_int id *. 137.508) 360.)
+          ^ " 65% 48%)";
+      })
+
+let coloring_of = function
+  | "shared" -> Shared
+  | "unique" -> Unique
+  | _ -> Category
+
+let mode_class = function
+  | Shared -> "mode-shared"
+  | Category -> "mode-category"
+  | Unique -> "mode-unique"
+
+let coordinates p =
+  "Point "
+  ^ string_of_int (p.id + 1)
+  ^ ": "
+  ^ Js.Float.toFixed ~digits:1 p.x
+  ^ ", "
+  ^ Js.Float.toFixed ~digits:1 p.y
+
+let hovering = function
+  | Some p -> coordinates p
+  | None -> "Hover over a point, or tap/click one to select it."
+
+let selection = function
+  | Some p -> "Selected " ^ String.lowercase_ascii (coordinates p) ^ "."
+  | None -> "No point selected."
+
+let css =
+  {|
+.manydots-demo .mode-category .group-0 { background-color: var(--rhp-series-1); }
+.manydots-demo .mode-category .group-1 { background-color: var(--rhp-series-2); }
+.manydots-demo .mode-category .group-2 { background-color: var(--rhp-series-3); }
+.manydots-demo .mode-category .group-3 { background-color: var(--rhp-series-4); }
+.manydots-demo .rhp-manydot:hover,
+.manydots-demo .rhp-manydot.selected { outline: 2px solid var(--rhp-ink); outline-offset: 2px; }
+.manydots-demo .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+.manydots-demo select { font: inherit; color: inherit; background: transparent; border: 1px solid var(--color-border); border-radius: .5rem; padding: .2rem .4rem; }
+.manydots-demo .readout { min-height: 1.5em; margin: .5rem 0 0; font-size: .875rem; }
+|}
 
 let make () =
-  <Chart
-    scale=(fun () -> (0., 100.))
-    cross=(fun () -> (0., 100.))
-    height=260.
-    label="400 points">
-    <Many_dots
-      rows=(fun () -> points)
-      at=(fun () -> Many_dots.each (fun p _ -> p.x))
-      cross=(fun () -> Many_dots.each (fun p _ -> p.y))
-      color=(fun () -> Many_dots.each (fun p _ -> Color.series (p.group + 1)))
-      size=(fun () -> Many_dots.same (Many_dots.px 5.))
-    />
-  </Chart>
+  let rows, set_rows = S.create_signal (samples 0) in
+  let mode, set_mode = S.create_signal Category in
+  let hovered, set_hovered = S.create_signal None in
+  let selected, set_selected = S.create_signal None in
+  let seed = ref 0 in
+  (* A point's events bubble to the collection, which finds the point's row
+     by the number rhp writes on it: one handler, not one per point. *)
+  let row_at target =
+    match Js.Nullable.toOption (closest target ".rhp-manydot") with
+    | None -> None
+    | Some point -> (
+        match Js.Nullable.toOption (get_attribute point "data-rhp-index") with
+        | None -> None
+        | Some index -> (
+            let all = S.get rows in
+            match int_of_string_opt index with
+            | Some i when i >= 0 && i < Array.length all -> Some all.(i)
+            | Some _ | None -> None))
+  in
+  let clear () =
+    S.set set_hovered None;
+    S.set set_selected None
+  in
+  let chosen () =
+    match S.get selected with
+    | None -> None
+    | Some id -> Array.find_opt (fun p -> p.id = id) (S.get rows)
+  in
+  <div class_="manydots-demo">
+    <style>(fun () -> Jsx.string css)</style>
+    <div class_="controls">
+      <label>
+        "Coloring "
+        <select
+          on_change=(fun e ->
+                      S.set set_mode (coloring_of (value (change_target e))))>
+          <option value="shared">"Shared color"</option>
+          <option value="category" selected=true>"Category classes"</option>
+          <option value="unique">"Unique colors"</option>
+        </select>
+      </label>
+      <button
+        class_="button button--sm button--secondary"
+        type_=`button
+        on_click=(fun _ ->
+                     clear ();
+                     incr seed;
+                     S.set set_rows (samples !seed))>
+        "New data"
+      </button>
+      <button
+        class_="button button--sm button--secondary"
+        type_=`button
+        on_click=(fun _ -> clear ())>
+        "Clear selection"
+      </button>
+    </div>
+    <Chart
+      scale=(fun () -> (0., 100.))
+      cross=(fun () -> (0., 100.))
+      ticks=(fun () -> Ticks.values [| 0.; 25.; 50.; 75.; 100. |])
+      cross_ticks=(fun () -> Ticks.values [| 0.; 25.; 50.; 75.; 100. |])
+      height=290.
+      label="1,200 sample measurements, each with two coordinates from 4 to 96">
+      <Many_dots
+        rows=(fun () -> S.get rows)
+        at=(fun () -> Many_dots.each (fun p _ -> p.x))
+        cross=(fun () -> Many_dots.each (fun p _ -> p.y))
+        key=(fun p _ -> p.id)
+        size=(fun () -> Many_dots.same (Many_dots.css "5px"))
+        class_=(fun () -> mode_class (S.get mode))
+        color=(fun () ->
+                match S.get mode with
+                | Unique -> Many_dots.each (fun p _ -> Color.css p.color)
+                | Shared | Category -> Many_dots.same (Color.series 1))
+        point_class=(fun () ->
+                      let picked = S.get selected in
+                      Many_dots.each (fun p _ ->
+                          "group-" ^ string_of_int p.group
+                          ^
+                          match picked with
+                          | Some id when id = p.id -> " selected"
+                          | Some _ | None -> ""))
+        on_pointer_move=(fun e ->
+                          if not (String.equal (pointer_type e) "touch") then
+                            S.set set_hovered (row_at (pointer_target e)))
+        on_pointer_leave=(fun _ -> S.set set_hovered None)
+        on_click=(fun e ->
+                   S.set set_hovered None;
+                   S.set set_selected
+                     (Option.map (fun p -> p.id) (row_at (click_target e))))
+      />
+    </Chart>
+    <p class_="readout">(fun () -> Jsx.string (hovering (S.get hovered)))</p>
+    <p class_="readout" role=`status>
+      (fun () -> Jsx.string (selection (chosen ())))
+    </p>
+  </div>

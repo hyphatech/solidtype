@@ -50,6 +50,9 @@
   components, every one listed, with a slider and a dialog added to its
   examples; HeroUI, its design system, a maintained port onto Kobalte; and
   the charts, whose overview moves from `rhp/overview/` to `rhp/`.
+- The documentation's Many dots example is rhp's own: twelve hundred points,
+  three ways of colouring them, a point read on hover and selected by a
+  click, through one handler on the collection.
 
 ## 0.3.0 (2026-10-27)
 

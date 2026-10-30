@@ -15,7 +15,15 @@ Original rhp documentation: [ManyDots](https://rhp.vercel.app/reference/manydots
 
 ## Usage
 
-Four hundred points, each its row's `x` and `y`, coloured by its group.
+rhp's own example: twelve hundred points, coloured by one shared colour,
+by a class for each group, or each in a colour of its own. Point at a dot
+to read it, and click or tap one to select it.
+
+A point is a plain element, so its events bubble to the collection: one
+handler on `Many_dots` finds the point under the pointer with `closest`,
+and its row by the number rhp writes on it, `data-rhp-index`, rather than
+a handler for each point. The selected point is given a class of its own
+by `point_class`, which an outline styles.
 
 <Example code={ScatterCode} title="rhp_many_dots.mlx" fill><Scatter.make client:visible /></Example>
 
