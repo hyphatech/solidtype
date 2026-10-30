@@ -1,0 +1,4 @@
+module Button = Solidtype_heroui.Button
+
+let%component make ~(tea : string) () =
+  <Button on_click=(fun _ -> Astro_basket.add (tea ()))>"Add to basket"</Button>

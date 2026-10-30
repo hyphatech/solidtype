@@ -1,6 +1,6 @@
 ---
-title: Vite and Astro
-description: The plugin in Vite, in Astro, and under vitest.
+title: Vite
+description: The plugin in Vite, under Astro, and under vitest.
 ---
 
 [Vite](https://vite.dev) bundles what Melange emits. Two plugins take part:
@@ -62,25 +62,11 @@ export default defineConfig({
 });
 ```
 
-A page imports the island's module from Melange's output by its namespace
-and mounts the component by name:
-
-```astro
----
-import * as App from "../../_build/default/out/src/app.jsx";
----
-
-<App.make client:load />
-```
-
-Astro compiles the island three ways, and the plugin runs under each: for
-the server, to prerender it; hydratable, for the browser to take over the
-prerendered HTML; and, with `client:only="solid-js"`, for the browser
-alone. The page holds that wiring and nothing else; what the island does is
-OCaml.
-
-Each example on this site is such an island: an `.mlx` file under
-`docs/islands`, imported by a page and shown beside its own source.
+The plugin runs under each of Astro's builds: for the server, to prerender
+an island; hydratable, for the browser to take over the prerendered HTML;
+and, with `client:only="solid-js"`, for the browser alone. [Astro](/solidtype/start/astro/)
+is the page on building a site of Astro's pages and OCaml islands: props,
+hydration, routing and state shared between islands.
 
 ## vitest
 

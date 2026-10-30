@@ -7,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 import links from "starlight-links-validator";
 import hypha from "starlight-theme-hypha";
 import solidtype from "vite-plugin-solidtype";
+import astro from "@shikijs/langs/astro";
 import ocaml from "@shikijs/langs/ocaml";
 import mlx from "./src/mlx.mjs";
 
@@ -50,21 +51,27 @@ export default defineConfig({
           tabs: { "Start here": "rocket", Solid: "zap", Kobalte: "blocks", HeroUI: "component", Charts: "waves-horizontal", Reference: "library" },
           links: [{ label: "Hypha Stack", href: "https://hyphatech.io/stack", icon: "layers" }],
         }),
-        // The reference is odoc's, in public/, which the validator cannot see.
-        links({ exclude: ["**/reference/solidtype*/**", "**/reference/ppx_solidtype/**"] }),
+        // The reference is odoc's, in public/, and the Astro page's demo is
+        // pages of its own, src/pages/demo: the validator sees neither.
+        links({ exclude: ["**/reference/solidtype*/**", "**/reference/ppx_solidtype/**", "/solidtype/demo/**"] }),
       ],
       customCss: ["./src/styles/heroui.css", "./src/styles/api.css", "./src/styles/rhp.css"],
       // An OCaml block is MLX: its JSX highlighted by a grammar injected
       // into Shiki's OCaml, which is loaded first so the rules the grammar
-      // includes are there.
-      expressiveCode: { shiki: { langs: [...ocaml, mlx] } },
+      // includes are there. A <Code> block highlights in the prerendered
+      // pages, under _build, which cannot import a grammar Shiki would load
+      // as it needs it: Astro's is loaded here, without the styles it would
+      // load so, Sass's and the like, which no page writes.
+      expressiveCode: {
+        shiki: { langs: [...ocaml, mlx, ...astro.map((lang) => ({ ...lang, embeddedLangsLazy: [] }))] },
+      },
       favicon: "/favicon-32.png",
       head: [
         { tag: "link", attrs: { rel: "icon", type: "image/png", sizes: "16x16", href: "/solidtype/favicon-16.png" } },
         { tag: "link", attrs: { rel: "apple-touch-icon", sizes: "180x180", href: "/solidtype/apple-touch-icon.png" } },
       ],
       sidebar: [
-        { label: "Start here", items: ["index", "start/ocaml-over-typescript", "start/how-it-works", "start/melange", "start/vite", "start/conventions"] },
+        { label: "Start here", items: ["index", "start/ocaml-over-typescript", "start/how-it-works", "start/melange", "start/vite", "start/astro", "start/conventions"] },
         { label: "Solid", items: ["solid/components", "solid/reactivity", "solid/control-flow", "solid/state", "solid/async", "solid/rendering"] },
         { label: "Kobalte", items: ["kobalte/binding", "kobalte/usage"] },
         { label: "HeroUI", items: ["heroui/coverage", "heroui/accordion", "heroui/alert", "heroui/alert-dialog", "heroui/autocomplete", "heroui/avatar", "heroui/avatar-group", "heroui/badge", "heroui/breadcrumbs", "heroui/button", "heroui/button-group", "heroui/card", "heroui/checkbox", "heroui/checkbox-group", "heroui/chip", "heroui/close-button", "heroui/combo-box", "heroui/description", "heroui/disclosure", "heroui/disclosure-group", "heroui/drawer", "heroui/dropdown", "heroui/empty-state", "heroui/field-error", "heroui/fieldset", "heroui/form", "heroui/input", "heroui/input-group", "heroui/kbd", "heroui/label", "heroui/link", "heroui/list-box", "heroui/meter", "heroui/modal", "heroui/number-field", "heroui/pagination", "heroui/popover", "heroui/progress-bar", "heroui/progress-circle", "heroui/radio-group", "heroui/scroll-shadow", "heroui/search-field", "heroui/select", "heroui/separator", "heroui/skeleton", "heroui/slider", "heroui/spinner", "heroui/surface", "heroui/switch", "heroui/tabs", "heroui/text-area", "heroui/text-field", "heroui/time-field", "heroui/toast", "heroui/toggle-button", "heroui/toggle-button-group", "heroui/tooltip", "heroui/typography"] },
@@ -80,14 +87,16 @@ export default defineConfig({
     // A page imports across the repository by these names, never by a path
     // up the tree: `@islands/<name>.jsx` is an island as Melange compiled
     // it, the demo a page runs, and `@islands/<name>.mlx?raw` its source,
-    // the code a page shows; `@example/` is the example, and `@components/`
-    // the site's own components.
+    // the code a page shows; `@example/` is the example, `@components/`
+    // the site's own components, and `@demo/` the pages of the Astro page's
+    // demo, whose sources it shows.
     resolve: {
       alias: [
         { find: /^@islands\/(.+)\.jsx$/, replacement: `${repository}_build/default/docs/islands/out/docs/islands/$1.jsx` },
         { find: "@islands", replacement: `${repository}docs/islands` },
         { find: "@example", replacement: `${repository}example` },
         { find: "@components", replacement: `${repository}docs/src/components` },
+        { find: "@demo", replacement: `${repository}docs/src/pages/demo` },
       ],
     },
     server: { fs: { allow: [repository] } },

@@ -1,0 +1,20 @@
+---
+// A page per tea: getStaticPaths names each route and the props its page
+// is built with, and the page hands the island what it needs as props.
+import Layout from "./_Layout.astro";
+import * as Add from "@islands/astro_add_to_basket.jsx";
+import { teas, type Tea } from "./_teas";
+
+export function getStaticPaths() {
+  return teas.map((tea) => ({ params: { tea: tea.slug }, props: { tea } }));
+}
+
+const { tea } = Astro.props as { tea: Tea };
+---
+
+<Layout title={tea.name}>
+  <h1 class="mb-2 text-3xl font-semibold tracking-tight">{tea.name}</h1>
+  <p class="mb-1 text-muted">{tea.origin}</p>
+  <p class="mb-6">{tea.notes}</p>
+  <Add.make client:visible tea={tea.name} />
+</Layout>

@@ -53,7 +53,7 @@ Astro does all of this for an island: it renders it on the server, writes
 the hydration script, and hydrates it in the browser. `client:load`
 prerenders the island and hydrates it as the page loads, `client:visible`
 when it scrolls into view, and `client:only="solid-js"` skips the server and
-renders it in the browser alone. See [Vite and Astro](/solidtype/start/vite/#astro).
+renders it in the browser alone. See [Astro](/solidtype/start/astro/#hydration).
 
 A `data-` attribute that marks a state, `data-selected`, is written by Solid
 as an attribute, never set from a `ref`, so the state is in the HTML a page

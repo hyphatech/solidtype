@@ -1,0 +1,11 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+
+(* A root an Astro page mounts with props: Astro passes them as one object,
+   which only a let%component reads. *)
+let%component make ~(label : string) ?(start_at : int = 0) () =
+  let count, set_count = S.create_signal (start_at ()) in
+  <Button variant=`secondary on_click=(fun _ -> S.update set_count succ)>
+    (fun () -> Jsx.string (label ())) ": " (fun () -> Jsx.int (S.get count))
+  </Button>

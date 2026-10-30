@@ -3,7 +3,7 @@
 // prerendered with HeroUI's classes, to hydrate as they are scrolled to, and
 // its demo beside React, to hydrate as the page loads.
 
-import { expect, test } from "bun:test";
+import { beforeAll, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -45,9 +45,21 @@ test("No port's island stands in the prose's flow", () => {
   expect(bare).toEqual([]);
 });
 
-test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
+// The site, built once for the tests that read it.
+beforeAll(() => {
   const build = Bun.spawnSync(["bun", "--bun", "astro", "build", "--root", "docs"], { cwd: root, stdout: "pipe", stderr: "pipe" });
   expect(build.exitCode, build.stderr.toString()).toBe(0);
+}, 60_000);
+
+const islandsOf = (html: string) =>
+  [...html.matchAll(/<astro-island [^>]*>/g)].map(([tag]) => ({
+    name: /component-url="\/solidtype\/_astro\/(\w+)\./.exec(tag)?.[1],
+    client: /client="(\w+)"/.exec(tag)?.[1],
+    props: JSON.parse((/ props="([^"]*)"/.exec(tag)?.[1] ?? "{}").replaceAll("&quot;", '"')),
+    persist: /data-astro-transition-persist="([^"]*)"/.exec(tag)?.[1],
+  }));
+
+test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
   const html = readFileSync(`${root}_build/docs/heroui/button/index.html`, "utf8");
   const islands = [...html.matchAll(/<astro-island [^>]*component-url="\/solidtype\/_astro\/(\w+)\.[^"]*"[^>]*client="(\w+)"/g)].map((m) => `${m[1]} ${m[2]}`);
   expect(islands).toEqual([
@@ -73,4 +85,27 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
     "button button--md button--danger",
     "button button--md button--danger-soft",
   ]);
-}, 60_000);
+});
+
+// The Astro page's islands take what the page gives them, and its demo is a
+// route per tea, each tea's island given its name, under one basket that
+// the client router keeps from page to page by its one persist name.
+test("The Astro page's islands are given props, and its demo's routes keep one basket", () => {
+  const page = islandsOf(readFileSync(`${root}_build/docs/start/astro/index.html`, "utf8"));
+  expect(page.map((i) => [i.name, i.client, i.props])).toEqual([
+    ["astro_counter", "visible", { label: [0, "Stars"], startAt: [0, 3] }],
+    ["astro_local_time", "idle", {}],
+    ["astro_basket_count", "load", {}],
+    ["astro_add_to_basket", "visible", { tea: [0, "Sencha"] }],
+  ]);
+  const routes = { sencha: "Sencha", darjeeling: "Darjeeling", "pu-erh": "Pu-erh" };
+  const baskets = Object.entries(routes).map(([slug, name]) => {
+    const html = readFileSync(`${root}_build/docs/demo/teas/${slug}/index.html`, "utf8");
+    expect(html).toContain('<meta name="astro-view-transitions-enabled" content="true">');
+    const islands = islandsOf(html);
+    expect(islands.find((i) => i.name === "astro_add_to_basket")?.props).toEqual({ tea: [0, name] });
+    return islands.find((i) => i.name === "astro_basket_count")?.persist;
+  });
+  expect(baskets[0]).toBeString();
+  expect(new Set(baskets).size).toBe(1);
+});

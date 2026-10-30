@@ -1,0 +1,42 @@
+---
+// Every page of the demo: a head with Astro's client router, so a link
+// swaps the page in place instead of loading it, and a header whose basket
+// is one island kept alive across pages by transition:persist.
+import { ClientRouter } from "astro:transitions";
+import * as Basket from "@islands/astro_basket_count.jsx";
+import { teas } from "./_teas";
+import "../../../styles/heroui.css";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const base = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/demo/teas`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title} · Teas, an Astro demo</title>
+    <script is:inline>
+      if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark";
+    </script>
+    <ClientRouter />
+  </head>
+  <body class="heroui-ground min-h-screen bg-background">
+    <header class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-4 px-4 py-6">
+      <nav class="flex flex-wrap gap-4 text-sm">
+        <a class="link" href={`${base}/`}>All teas</a>
+        {teas.map((tea) => <a class="link" href={`${base}/${tea.slug}/`}>{tea.name}</a>)}
+      </nav>
+      <Basket.make client:load transition:persist />
+    </header>
+    <main class="mx-auto max-w-2xl px-4 pb-16">
+      <slot />
+    </main>
+  </body>
+</html>

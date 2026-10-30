@@ -108,6 +108,10 @@ docs/                the documentation, a Starlight site in Hypha's look,
                      the packages, and a link to each module's odoc page,
                      which `make docs` copies into public/reference/,
                      ignored, since Starlight serves public/ as it is
+  src/pages/demo/    the Astro page's demo, pages of Astro's own outside
+                     Starlight: a route per tea, its islands given props,
+                     under a basket the client router keeps; the page
+                     imports their sources as @demo/<path>?raw
 prds/               the PRDs of work being decided and built, and which
                      document owns each kind of fact once it lands
 generate/            what writes the generated bindings from Solid's,
