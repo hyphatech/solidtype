@@ -1,19 +1,15 @@
 ---
 title: HeroUI
-description: "solidtype's design system: HeroUI's components, a maintained port onto Kobalte, with HeroUI's look and Kobalte's behaviour."
+description: "A maintained port of HeroUI's design system to solidtype."
 ---
 
 import Example from "@components/Example.astro";
 import * as Login from "@islands/card_form.jsx";
 import login from "@islands/card_form.mlx?raw";
 
-HeroUI is solidtype's design system. `solidtype-heroui` is a port of
-[HeroUI](https://heroui.com)'s components, a maintained one, kept to each
-HeroUI release: HeroUI's look, from HeroUI's own styles, on Kobalte's
-behaviour and accessibility, written in OCaml. It is the part of solidtype's
-ecosystem an application is drawn with -- a button, a form, a select, a
-modal, a toast -- each the component HeroUI's documentation shows, used
-as solidtype's JSX uses any component.
+[HeroUI](https://heroui.com)'s look and feel, reimplemented on Kobalte. The
+port follows each HeroUI release, and every component is tested against
+HeroUI's own React one.
 
 <Example code={login} title="card_form.mlx"><Login.make client:visible /></Example>
 
