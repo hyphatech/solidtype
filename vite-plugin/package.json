@@ -20,6 +20,7 @@
     "@types/babel__core": "^7.20.5"
   },
   "peerDependencies": {
-    "vite": ">=7"
+    "vite": ">=7",
+    "vite-plugin-solid": "^2.11.14"
   }
 }

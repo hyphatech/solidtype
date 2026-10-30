@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `vite-plugin-solidtype` names `vite-plugin-solid` as a peer, beside Vite,
+  since what it writes is Solid's compiler's to compile next: installing
+  the plugin installs Solid's.
 - Breaking: `Solidtype_heroui.Time_field` takes and gives
   @internationalized/date's `Time`, from `solidtype-internationalized-date`,
   in place of Kobalte's `Types.Time`: `value`, `default_value`,
