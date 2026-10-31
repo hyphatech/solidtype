@@ -1,0 +1,369 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+type list_layout = {
+  orientation : [ `vertical | `horizontal ];
+  row_size : float option;
+  estimated_row_size : float option;
+  heading_size : float option;
+  estimated_heading_size : float option;
+  loader_size : float;
+  gap : float;
+  padding : float;
+}
+
+type layout = List of list_layout
+
+let list_layout ?(orientation = `vertical) ?row_size ?estimated_row_size
+    ?heading_size ?estimated_heading_size ?(loader_size = 48.) ?(gap = 0.)
+    ?(padding = 0.) () =
+  List
+    {
+      orientation;
+      row_size;
+      estimated_row_size;
+      heading_size;
+      estimated_heading_size;
+      loader_size;
+      gap;
+      padding;
+    }
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = layout
+end)
+
+let use () = Context.use ()
+
+let%component make ~(layout : layout) ~(children : Jsx.content) () =
+  <Context.Provider value=(fun () -> layout ())>
+    (fun () -> children ())
+  </Context.Provider>
+
+(* What the window reads of the page: an element's box, what scrolls it, and
+   where it is scrolled to. *)
+type rect
+
+external rect : Dom.element -> rect = "getBoundingClientRect" [@@mel.send]
+external rect_top : rect -> float = "top" [@@mel.get]
+external rect_left : rect -> float = "left" [@@mel.get]
+external rect_height : rect -> float = "height" [@@mel.get]
+external rect_width : rect -> float = "width" [@@mel.get]
+external client_height : Dom.element -> float = "clientHeight" [@@mel.get]
+external client_width : Dom.element -> float = "clientWidth" [@@mel.get]
+external scroll_top : Dom.element -> float = "scrollTop" [@@mel.get]
+external set_scroll_top : Dom.element -> float -> unit = "scrollTop" [@@mel.set]
+external scroll_left : Dom.element -> float = "scrollLeft" [@@mel.get]
+external scroll_height : Dom.element -> float = "scrollHeight" [@@mel.get]
+external scroll_width : Dom.element -> float = "scrollWidth" [@@mel.get]
+
+external set_scroll_left : Dom.element -> float -> unit = "scrollLeft"
+[@@mel.set]
+
+external parent : Dom.element -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+type style
+
+external computed : Dom.element -> style = "getComputedStyle"
+[@@mel.scope "window"]
+
+external overflow_x : style -> string = "overflowX" [@@mel.get]
+external overflow_y : style -> string = "overflowY" [@@mel.get]
+
+external listen : Dom.element -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external unlisten : Dom.element -> string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.send]
+
+type observer
+type observed
+
+external observer : ((observed array -> unit)[@mel.uncurry]) -> observer
+  = "ResizeObserver"
+[@@mel.new]
+
+external observe : observer -> Dom.element -> unit = "observe" [@@mel.send]
+external unobserve : observer -> Dom.element -> unit = "unobserve" [@@mel.send]
+external disconnect : observer -> unit = "disconnect" [@@mel.send]
+external target : observed -> Dom.element = "target" [@@mel.get]
+
+(* What a window keeps by row: a row is an object of its own, kept while it
+   is a row, so a map that lets one go keeps nothing after it. *)
+type ('k, 'v) weak
+
+external weak : unit -> ('k, 'v) weak = "WeakMap" [@@mel.new]
+external weak_get : ('k, 'v) weak -> 'k -> 'v Js.undefined = "get" [@@mel.send]
+
+external weak_set : ('k, 'v) weak -> 'k -> 'v -> ('k, 'v) weak = "set"
+[@@mel.send]
+
+(* The two directions of a layout: along it, where rows follow one another and
+   it scrolls, and across it. *)
+type axis = {
+  start : rect -> float;
+  length : rect -> float;
+  client : Dom.element -> float;
+  scroll : Dom.element -> float;
+  set_scroll : Dom.element -> float -> unit;
+  scroll_size : Dom.element -> float;
+  overflow : style -> string;
+  along : string;
+  along_size : string;
+  across : string;
+  across_size : string;
+}
+
+let axis = function
+  | `vertical ->
+      {
+        start = rect_top;
+        length = rect_height;
+        client = client_height;
+        scroll = scroll_top;
+        set_scroll = set_scroll_top;
+        scroll_size = scroll_height;
+        overflow = overflow_y;
+        along = "top";
+        along_size = "height";
+        across = "left";
+        across_size = "width";
+      }
+  | `horizontal ->
+      {
+        start = rect_left;
+        length = rect_width;
+        client = client_width;
+        scroll = scroll_left;
+        set_scroll = set_scroll_left;
+        scroll_size = scroll_width;
+        overflow = overflow_x;
+        along = "left";
+        along_size = "width";
+        across = "top";
+        across_size = "height";
+      }
+
+(* What scrolls an element along an axis: the nearest element above it whose
+   content scrolls so. *)
+let rec scroller a e =
+  match Js.Null.toOption (parent e) with
+  | None -> None
+  | Some p -> (
+      match a.overflow (computed p) with
+      | "auto" | "scroll" -> Some p
+      | _ -> scroller a p)
+
+(* An element brought into view of what scrolls it, by as little as it takes,
+   as a browser's scrollIntoView with "nearest" does. *)
+let reveal a scrolling e =
+  let s = rect scrolling and r = rect e in
+  let before = a.start r -. a.start s
+  and after = a.start r +. a.length r -. (a.start s +. a.client scrolling) in
+  if before < 0. then a.set_scroll scrolling (a.scroll scrolling +. before)
+  else if after > 0. then a.set_scroll scrolling (a.scroll scrolling +. after)
+
+let to_px n = Js.Float.toString n ^ "px"
+
+(* What a page prerendered shows before it knows the size of what scrolls the
+   list: its first rows, in the first 400 pixels, the same on the server and
+   in the browser as it hydrates. *)
+let prerendered = 400.
+
+type 'row window = {
+  drawn : unit -> 'row array;
+  place : 'row -> string;
+  block : unit -> string;
+  frame : 'row -> Dom.element -> unit;
+  watch : Dom.element -> unit;
+  scroll_to : 'row -> unit;
+}
+
+let window (l : list_layout) ~(rows : unit -> 'row array)
+    ~(fixed : 'row -> float option) ~(estimate : 'row -> float)
+    ~(keep : 'row -> bool) =
+  let a = axis l.orientation in
+  let sizes : ('row, float) weak = weak () in
+  let measured, set_measured = S.create_signal 0 in
+  let size row =
+    match fixed row with
+    | Some n -> n
+    | None -> (
+        match Js.Undefined.toOption (weak_get sizes row) with
+        | Some n -> n
+        | None -> estimate row)
+  in
+  (* Each row's start along the layout, and the length of them all. *)
+  let placed =
+    S.create_memo (fun () ->
+        ignore (S.get measured : int);
+        let rows = rows () in
+        let starts = Array.make (Array.length rows) 0. in
+        let at = ref l.padding in
+        Array.iteri
+          (fun i row ->
+            if i > 0 then at := !at +. l.gap;
+            starts.(i) <- !at;
+            at := !at +. size row)
+          rows;
+        (rows, starts, !at +. l.padding))
+  in
+  let index : ('row, int) weak = weak () in
+  let indexed =
+    S.create_memo (fun () ->
+        let rows, _, _ = S.get placed in
+        Array.iteri (fun i row -> ignore (weak_set index row i : _ weak)) rows;
+        rows)
+  in
+  let start_of row =
+    let _ = S.get indexed in
+    let _, starts, _ = S.get placed in
+    match Js.Undefined.toOption (weak_get index row) with
+    | Some i when i < Array.length starts -> starts.(i)
+    | Some _ | None -> 0.
+  in
+  (* What scrolls the list, where the list starts in it, and the part of the
+     list in view. *)
+  let scrolling = ref None and block = ref None and offset = ref 0. in
+  let view, set_view = S.create_signal (0., prerendered) in
+  let update () =
+    match !scrolling with
+    | Some s -> S.set set_view (a.scroll s -. !offset, a.client s)
+    | None -> ()
+  in
+  let locate () =
+    match (!scrolling, !block) with
+    | Some s, Some b ->
+        offset := a.start (rect b) -. a.start (rect s) +. a.scroll s;
+        update ()
+    | _ -> ()
+  in
+  let scrolled (_ : Dom.event) = update () in
+  let frames : (Dom.element, 'row) weak = weak () in
+  let measured_by seen =
+    let changed = ref false in
+    Array.iter
+      (fun o ->
+        let e = target o in
+        match Js.Undefined.toOption (weak_get frames e) with
+        | Some row ->
+            (* A length of 0 is an element not laid out yet. *)
+            let n = a.length (rect e) in
+            let was = Js.Undefined.toOption (weak_get sizes row) in
+            if n > 0. && not (Option.equal Float.equal was (Some n)) then begin
+              ignore (weak_set sizes row n : _ weak);
+              changed := true
+            end
+        | None -> ())
+      seen;
+    if !changed then S.update set_measured succ
+  in
+  (* The observers are the browser's, made once the block is on the page; a
+     row made before it is measured from then. *)
+  let resizing = ref None and measuring = ref None and waiting = ref [] in
+  S.on_cleanup (fun () ->
+      Option.iter (fun s -> unlisten s "scroll" scrolled) !scrolling;
+      Option.iter disconnect !resizing;
+      Option.iter disconnect !measuring);
+  let watch b =
+    block := Some b;
+    S.on_mount (fun () ->
+        let m = observer measured_by in
+        measuring := Some m;
+        List.iter (observe m) !waiting;
+        waiting := [];
+        scrolling := scroller a b;
+        match !scrolling with
+        | Some s ->
+            let r = observer (fun _ -> locate ()) in
+            resizing := Some r;
+            listen s "scroll" scrolled;
+            observe r s;
+            locate ()
+        (* Nothing scrolls it: all of it is in view. *)
+        | None -> S.set set_view (0., Float.infinity))
+  in
+  (* The rows in view, and those kept wherever they are, in order: found by
+     their starts, which grow along the rows. *)
+  let drawn () =
+    let rows, starts, _ = S.get placed in
+    let from, length = S.get view in
+    let until = from +. length in
+    let n = Array.length rows in
+    let rec first lo hi =
+      if lo >= hi then lo
+      else
+        let mid = (lo + hi) / 2 in
+        if starts.(mid) +. size rows.(mid) <= from then first (mid + 1) hi
+        else first lo mid
+    in
+    let shown = ref [] in
+    let i = ref (first 0 n) in
+    while !i < n && starts.(!i) < until do
+      shown := !i :: !shown;
+      incr i
+    done;
+    let seen = Array.make n false in
+    List.iter (fun i -> seen.(i) <- true) !shown;
+    Array.iteri
+      (fun i row -> if (not seen.(i)) && keep row then seen.(i) <- true)
+      rows;
+    let out = ref [] in
+    for i = n - 1 downto 0 do
+      if seen.(i) then out := rows.(i) :: !out
+    done;
+    Array.of_list !out
+  in
+  let place row =
+    "position: absolute; " ^ a.along ^ ": "
+    ^ to_px (start_of row)
+    ^ "; " ^ a.across ^ ": 0; " ^ a.across_size ^ ": 100%"
+    ^
+    match fixed row with
+    | Some n -> "; " ^ a.along_size ^ ": " ^ to_px n
+    | None -> ""
+  in
+  let block_style () =
+    let _, _, total = S.get placed in
+    "position: relative; " ^ a.along_size ^ ": " ^ to_px total ^ "; "
+    ^ a.across_size ^ ": 100%"
+  in
+  let frame row e =
+    match fixed row with
+    | Some _ -> ()
+    | None ->
+        ignore (weak_set frames e row : _ weak);
+        (match !measuring with
+        | Some m -> observe m e
+        | None -> waiting := e :: !waiting);
+        S.on_cleanup (fun () ->
+            match !measuring with
+            | Some m -> unobserve m e
+            | None -> waiting := List.filter (fun o -> o != e) !waiting)
+  in
+  let scroll_to row =
+    match !scrolling with
+    | Some s ->
+        let from, length = S.untrack (fun () -> S.get view) in
+        let start = S.untrack (fun () -> start_of row) in
+        let ends = start +. size row in
+        let _, _, total = S.untrack (fun () -> S.get placed) in
+        (* The first row and the last are shown with what is around the list
+           as well, its padding and its scroller's: scrolled to the end. *)
+        if start < from then
+          a.set_scroll s (if start <= l.padding then 0. else !offset +. start)
+        else if ends > from +. length then
+          a.set_scroll s
+            (if ends >= total -. l.padding then a.scroll_size s
+             else !offset +. ends -. length);
+        update ()
+    | None -> ()
+  in
+  { drawn; place; block = block_style; frame; watch; scroll_to }
+
+let reveal_in orientation e =
+  let a = axis orientation in
+  match scroller a e with Some s -> reveal a s e | None -> ()

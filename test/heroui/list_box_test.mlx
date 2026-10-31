@@ -7,6 +7,7 @@ module Label = Solidtype_heroui.Label
 module Description = Solidtype_heroui.Description
 module Header = Solidtype_heroui.Header
 module Separator = Solidtype_heroui.Separator
+module Virtualizer = Solidtype_heroui.Virtualizer
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -84,6 +85,62 @@ let one e =
   ^ if element_count e > 0 then "" else " " ^ text e
 
 let all selector = Js.Array.from (query_all T.body selector)
+
+(* What jsdom has no layout for, given as a browser would measure it: the
+   height of what a list scrolls in, and where it is scrolled to. *)
+type descriptor
+
+external descriptor : value:'a -> writable:bool -> unit -> descriptor = ""
+[@@mel.obj]
+
+external define : Dom.element -> string -> descriptor -> unit = "defineProperty"
+[@@mel.scope "Object"]
+
+external scroll_top : Dom.element -> float = "scrollTop" [@@mel.get]
+external set_scroll_top : Dom.element -> float -> unit = "scrollTop" [@@mel.set]
+
+type event
+
+external event : string -> event = "Event" [@@mel.new]
+external dispatch : Dom.element -> event -> bool = "dispatchEvent" [@@mel.send]
+
+let measured list ~height =
+  define list "clientHeight" (descriptor ~value:height ~writable:false ());
+  define list "scrollTop" (descriptor ~value:0. ~writable:true ());
+  define list "scrollHeight" (descriptor ~value:50000. ~writable:false ())
+
+let scrolled list top =
+  set_scroll_top list top;
+  ignore (dispatch list (event "scroll") : bool)
+
+(* A thousand users, each an option of its name. *)
+let users () = Array.init 1000 (fun i -> "User " ^ string_of_int (i + 1))
+
+let virtualized () =
+  T.render (fun () ->
+      <div data_testid="scroller" style="overflow-y: auto">
+        <Virtualizer
+          layout=(fun () -> Virtualizer.list_layout ~row_size:50. ())>
+          <List_box aria_label="Users">
+            <Solidtype.For each=(fun () -> users ())>
+              (fun name _ ->
+                <List_box.Item id=(fun () -> name)>
+                  (fun () -> Solidtype.Jsx.string name)
+                </List_box.Item>)
+            </Solidtype.For>
+          </List_box>
+        </Virtualizer>
+      </div>);
+  let list =
+    match T.query "[data-testid=scroller]" with
+    | Some e -> e
+    | None -> T.by_role "listbox"
+  in
+  measured list ~height:400;
+  scrolled list 0.;
+  list
+
+let drawn () = all "[role=option]" |> Array.map text
 
 (* The list and all inside it, what it told, and what has the focus. *)
 let shown told =
@@ -272,4 +329,59 @@ let () =
             [| "bulbasaur"; "charmander"; "squirtle" |];
           E.(
             expect (shown ())
-            |> toEqual [| "bulbasaur"; "charmander"; "squirtle" |])))
+            |> toEqual [| "bulbasaur"; "charmander"; "squirtle" |]));
+      Jest.test "virtualized, draws only the options in view, in a block of all"
+        (fun () ->
+          let list = virtualized () in
+          let at_top = drawn () in
+          scrolled list 1000.;
+          let block =
+            match all "[role=listbox] > [role=presentation]" with
+            | [| b |] -> T.attribute b "style"
+            | _ -> None
+          in
+          E.(
+            expect
+              ( at_top,
+                drawn (),
+                Option.map (Js.String.includes ~search:"height: 50000px") block
+              )
+            |> toEqual
+                 ( Array.init 8 (fun i -> "User " ^ string_of_int (i + 1)),
+                   Array.init 8 (fun i -> "User " ^ string_of_int (i + 21)),
+                   Some true )));
+      Jest.test "virtualized, tells each option's place in the whole list"
+        (fun () ->
+          let (_ : Dom.element) = virtualized () in
+          let first = (all "[role=option]").(0) in
+          E.(
+            expect
+              ( T.attribute first "aria-posinset",
+                T.attribute first "aria-setsize" )
+            |> toEqual (Some "1", Some "1000")));
+      Jest.testPromise
+        "virtualized, scrolls to the option the keys move to, the last to the \
+         end" (fun () ->
+          let list = virtualized () in
+          let user = T.setup () in
+          let* () = T.tab user in
+          let* () = T.keyboard user "{End}" in
+          let focused =
+            match Js.Null.toOption active with Some e -> text e | None -> ""
+          in
+          Js.Promise.resolve
+            E.(
+              expect (focused, scroll_top list) |> toEqual ("User 1000", 50000.)));
+      Jest.testPromise "virtualized, keeps the option with the focus drawn"
+        (fun () ->
+          let list = virtualized () in
+          let user = T.setup () in
+          let* () = T.tab user in
+          scrolled list 20000.;
+          let focused =
+            match Js.Null.toOption active with Some e -> text e | None -> ""
+          in
+          Js.Promise.resolve
+            E.(
+              expect (focused, Array.exists (String.equal "User 1") (drawn ()))
+              |> toEqual ("User 1", true))))

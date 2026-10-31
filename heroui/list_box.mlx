@@ -67,6 +67,8 @@ let content (o : option_) = o.content ()
 type hosted = {
   options : unit -> option_ list;
   draw : node Types.Collection.t S.accessor -> Jsx.element;
+  list_ref : Dom.element -> unit;
+  scroll_to_item : string -> unit;
   empty : unit -> bool;
   classes : unit -> string;
   aria_label : unit -> string option;
@@ -285,6 +287,12 @@ let separator = fun[@u] drawn -> Entry.element (Separator drawn)
 
 external as_element : _ Dom.element_like -> Dom.element = "%identity"
 
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+external css_escape : string -> string = "escape" [@@mel.scope "CSS"]
+
 (* Where it scrolls: the nearest element above that scrolls its content. *)
 external parent : Dom.element -> Dom.element Js.null = "parentElement"
 [@@mel.get]
@@ -458,6 +466,7 @@ module As_list = struct
       ?option_disabled:(option_ -> bool) ->
       ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
       ?virtualized:bool Solidtype.Check.value ->
+      ?scroll_to_item:(string -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:
          ( node Types.Collection.t S.accessor -> Jsx.element,
@@ -498,6 +507,23 @@ let%component make ?(aria_label : string option)
   in
   let empty, set_empty = S.create_signal false in
   let kept, set_kept = S.create_signal [||] in
+  (* The option the keys move to is brought into view of what scrolls the
+     list, as Kobalte asks of a list it does not draw: where it is drawn, by
+     its element; where a virtualizer has not drawn it, by its place. *)
+  let layout = Virtualizer.use () in
+  let orientation =
+    match layout with Some (List l) -> l.orientation | None -> `vertical
+  in
+  let list_element = ref None in
+  let placed = ref (fun (_ : string) -> false) in
+  let scroll_to_item key =
+    if not (!placed key) then
+      Option.iter
+        (Virtualizer.reveal_in orientation)
+        (Option.bind !list_element (fun e ->
+             Js.Null.toOption
+               (query_in e ("[data-key=\"" ^ css_escape key ^ "\"]"))))
+  in
   S.create_computed (fun () ->
       S.set set_kept
         (Option.value (S.untrack default_selected_keys) ~default:[||]));
@@ -537,22 +563,110 @@ let%component make ?(aria_label : string option)
     S.create_computed (fun () ->
         S.set set_empty
           (not (List.exists (fun o -> Option.is_some (node o ())) (options ()))));
+    let shows (s : unit -> option_ list) () =
+      List.exists (fun o -> Option.is_some (node o ())) (s ())
+    in
+    let entries_drawn =
+      match layout with
+      | None ->
+          <For each=(fun () -> Array.of_list (entries ()))>
+            (fun entry _ ->
+              match entry with
+              | Option o -> option_ o
+              | Separator drawn | Loader drawn -> drawn ()
+              | Section s ->
+                  <Show when_=(shows s.options)>
+                    (fun () -> Jsx.element (s.draw option_))
+                  </Show>)
+          </For>
+      | Some (List l) ->
+          let shown = function
+            | Option o -> Option.is_some (node o ())
+            | Section s -> shows s.options ()
+            | Separator _ | Loader _ -> true
+          in
+          let rows () = Array.of_list (List.filter shown (entries ())) in
+          let holds key = function
+            | Option o -> String.equal o.key key
+            | Section s ->
+                List.exists (fun o -> String.equal o.key key) (s.options ())
+            | Separator _ | Loader _ -> false
+          in
+          let state = Kobalte.use_listbox_context () in
+          let focused () =
+            Types.SelectionManager.focused_key
+              (S.get
+                 (Types.ListState.selection_manager
+                    (S.get (Types.ListboxContextValue.list_state state))))
+              ()
+          in
+          let row_estimate =
+            match (l.row_size, l.estimated_row_size) with
+            | _, Some n | Some n, None -> n
+            | None, None -> 48.
+          in
+          let w =
+            Virtualizer.window l ~rows
+              ~fixed:(function
+                | Option _ -> (
+                    match (l.row_size, l.estimated_row_size) with
+                    | Some n, _ -> Some n
+                    | None, Some _ -> None
+                    | None, None -> Some 48.)
+                | Loader _ -> Some l.loader_size
+                | Section _ | Separator _ -> None)
+              ~estimate:(function
+                | Option _ -> row_estimate
+                | Section s ->
+                    let heading =
+                      match (l.heading_size, l.estimated_heading_size) with
+                      | _, Some n | Some n, None -> n
+                      | None, None -> 48.
+                    in
+                    heading
+                    +. (row_estimate +. l.gap)
+                       *. float_of_int (List.length (s.options ()))
+                | Separator _ -> 1.
+                | Loader _ -> l.loader_size)
+              ~keep:(fun entry ->
+                match focused () with
+                | Some key -> holds key entry
+                | None -> false)
+          in
+          (* An option of the list is placed by the layout, exactly; one in a
+             section, by its element. *)
+          (placed :=
+             fun key ->
+               match Array.find_opt (holds key) (S.untrack rows) with
+               | Some (Option _ as entry) ->
+                   w.scroll_to entry;
+                   true
+               | Some ((Section _ | Separator _ | Loader _) as entry) ->
+                   w.scroll_to entry;
+                   false
+               | None -> false);
+          <div
+            role=`presentation
+            ref=(fun e -> w.watch (as_element e))
+            style=(fun () -> w.block ())>
+            <For each=(fun () -> w.drawn ())>
+              (fun entry _ ->
+                <div
+                  role=`presentation
+                  ref=(fun e -> w.frame entry (as_element e))
+                  style=(fun () -> w.place entry)>
+                  (fun () ->
+                    match entry with
+                    | Option o -> Jsx.element (option_ o)
+                    | Separator drawn | Loader drawn -> Jsx.element (drawn ())
+                    | Section s -> Jsx.element (s.draw option_))
+                </div>)
+            </For>
+          </div>
+    in
     Jsx.fragment
       [|
-        <For each=(fun () -> Array.of_list (entries ()))>
-          (fun entry _ ->
-            match entry with
-            | Option o -> option_ o
-            | Separator drawn | Loader drawn -> drawn ()
-            | Section s ->
-                <Show
-                  when_=(fun () ->
-                          List.exists
-                            (fun o -> Option.is_some (node o ()))
-                            (s.options ()))>
-                  (fun () -> Jsx.element (s.draw option_))
-                </Show>)
-        </For>;
+        entries_drawn;
         (* What it shows while it holds no option, as React Aria's draws it. *)
         <Show when_=(fun () -> S.get empty)>
           (fun () ->
@@ -580,6 +694,8 @@ let%component make ?(aria_label : string option)
           classes;
           aria_label = (fun () -> aria_label ());
           others = Props.others props;
+          list_ref = (fun e -> list_element := Some e);
+          scroll_to_item;
         } [@u]
   | None ->
       <As_list
@@ -597,6 +713,8 @@ let%component make ?(aria_label : string option)
         option_disabled=(fun o -> o.disabled () || disabled o.key)
         selection_mode=(fun () -> selection_mode ())
         virtualized=true
+        scroll_to_item
+        ref=(fun e -> list_element := Some (as_element e))
         aria_orientation=`vertical
         class_=(fun () -> classes ())
         data_slot="list-box"

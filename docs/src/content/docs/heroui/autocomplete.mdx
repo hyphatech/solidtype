@@ -36,6 +36,8 @@ import * as ExCustomIndicator from "@islands/autocomplete_custom_indicator.jsx";
 import ExCustomIndicatorCode from "@islands/autocomplete_custom_indicator.mlx?raw";
 import * as ExCustomValue from "@islands/autocomplete_custom_value.jsx";
 import ExCustomValueCode from "@islands/autocomplete_custom_value.mlx?raw";
+import * as ExVirtualization from "@islands/autocomplete_virtualization.jsx";
+import ExVirtualizationCode from "@islands/autocomplete_virtualization.mlx?raw";
 import * as ExInSurface from "@islands/autocomplete_in_surface.jsx";
 import ExInSurfaceCode from "@islands/autocomplete_in_surface.mlx?raw";
 import * as ExUserSelection from "@islands/autocomplete_user_selection.jsx";
@@ -166,9 +168,11 @@ while one is; the autocomplete draws its placeholder while none is.
 
 ### Virtualization
 
-HeroUI's Virtualization example draws a long list by React Aria's
-`Virtualizer`, which a `List_box` has no counterpart of yet: it draws every
-option.
+A [`Virtualizer`](/solidtype/heroui/list-box/#virtualizer) around the list
+draws only the options in view of the popover, a thousand users' 50 pixels
+each; the one the keys move to is scrolled into view.
+
+<Example code={ExVirtualizationCode} title="autocomplete_virtualization.mlx"><ExVirtualization.make client:visible /></Example>
 
 ## Advanced Examples
 

@@ -1,6 +1,9 @@
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 module Show = Solidtype.Show
+
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+
 module Kobalte = Solidtype_kobalte.Select
 module Types = Solidtype_kobalte.Types
 
@@ -196,6 +199,7 @@ module As_list = struct
   module Props = struct
     external check :
       ?as_:string Solidtype.Check.value ->
+      ?scroll_to_item:(string -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:
          ( List_box.node Types.Collection.t S.accessor -> Jsx.element,
@@ -247,6 +251,8 @@ module Popover = struct
                     Jsx.element
                       <As_list
                         as_="div"
+                        ref=(fun e -> h.list_ref (as_element e))
+                        scroll_to_item=(fun key -> h.scroll_to_item key)
                         ?aria_label=(fun () -> h.aria_label ())
                         aria_orientation=`vertical
                         class_=(fun () -> h.classes ())

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Virtualizer`, React Aria's: around a `List_box`, alone or
+  in a `Select`, a `Combo_box` or an `Autocomplete`, it draws only the entries
+  in view of what scrolls the list, each placed by
+  `Virtualizer.list_layout`, React Aria's `ListLayout` and its options; the
+  option with the focus stays drawn, one the keys move to is scrolled into
+  view, and a prerendered page holds the list's first entries.
+  `Virtualizer.window`, the same placing for any collection of rows. HeroUI's
+  ListBox and Autocomplete Virtualization examples.
+- `Solidtype_heroui.Select`, `Combo_box` and `Autocomplete`, and a
+  `List_box`: the option the keys move to is scrolled into view of a long
+  list, where Kobalte, told the list is virtualized so the port may draw it,
+  scrolled nothing.
+
 - `Solidtype_heroui.Button`: `is_pending`, as React Aria's: focusable but
   pressed by nothing, its click and a trigger's reaching nothing, a submit
   button submitting nothing, `aria-disabled` and `data-pending`, and

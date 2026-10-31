@@ -91,6 +91,12 @@ type hosted = {
       (** Its options, sections and separators, given Kobalte's collection, as
           the children of Kobalte's list: inside a {!Listing}; or, while it
           draws no option, its empty state. *)
+  list_ref : Dom.element -> unit;
+      (** Kobalte's list's element, given as it is made: where an option is
+          found to bring it into view. *)
+  scroll_to_item : string -> unit;
+      (** Brings the option of a key into view of what scrolls the list, as
+          Kobalte asks of a list it does not draw: its [scroll_to_item]. *)
   empty : unit -> bool;  (** Whether it draws no option. *)
   classes : unit -> string;  (** Its classes. *)
   aria_label : unit -> string option;  (** Its name. *)

@@ -1,6 +1,7 @@
 module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
+module Virtualizer = Solidtype_heroui.Virtualizer
 
 type user = { id : string; name : string; email : string }
 
@@ -70,19 +71,22 @@ let generate_users n =
 
 let make () =
   let users = generate_users 1000 in
-  <List_box
-    aria_label="Virtualized list with 1000 items"
-    class_="h-[400px] w-[300px] overflow-y-auto">
-    <Solidtype.For each=(fun () -> users)>
-      (fun (user : user) _ ->
-        <List_box.Item id=(fun () -> user.id) text_value=(fun () -> user.name)>
-          <div class_="flex flex-col">
-            <Label>(fun () -> Solidtype.Jsx.string user.name)</Label>
-            <Description>
-              (fun () -> Solidtype.Jsx.string user.email)
-            </Description>
-          </div>
-          <List_box.Item_indicator />
-        </List_box.Item>)
-    </Solidtype.For>
-  </List_box>
+  <Virtualizer layout=(fun () -> Virtualizer.list_layout ~row_size:50. ())>
+    <List_box
+      aria_label="Virtualized list with 1000 items"
+      class_="h-[400px] w-[300px] overflow-y-auto">
+      <Solidtype.For each=(fun () -> users)>
+        (fun (user : user) _ ->
+          <List_box.Item
+            id=(fun () -> user.id) text_value=(fun () -> user.name)>
+            <div class_="flex flex-col">
+              <Label>(fun () -> Solidtype.Jsx.string user.name)</Label>
+              <Description>
+                (fun () -> Solidtype.Jsx.string user.email)
+              </Description>
+            </div>
+            <List_box.Item_indicator />
+          </List_box.Item>)
+      </Solidtype.For>
+    </List_box>
+  </Virtualizer>

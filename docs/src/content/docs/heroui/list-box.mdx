@@ -68,9 +68,11 @@ options and sections, as in React.
 
 ### Virtualization
 
-HeroUI's list is drawn by React Aria's virtualizer, which draws only the
-options in view. The port draws every option, here a thousand: Kobalte's
-list is told it is virtualized only so that the port may draw it.
+A [`Virtualizer`](#virtualizer) around a list draws only the options in view of
+what scrolls it, here the list itself, in a block as long as a thousand
+options: each is placed by its layout, React Aria's `ListLayout`, 50 pixels
+long. The option with the focus stays drawn, one the keys move to is
+scrolled into view, and a reader is told each one's place in the thousand.
 
 
 <Example code={ExVirtualizationCode} title="list_box_virtualization.mlx"><ExVirtualization.make client:visible /></Example>
@@ -192,6 +194,33 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | Its header and options |
+
+### Virtualizer
+
+`Virtualizer`, around a `List_box` alone or in a `Select`, a `Combo_box` or an
+`Autocomplete`, as React Aria's is. What scrolls the list is its own element
+where it scrolls, else the nearest above that does; until the list knows its
+size -- on the server, and as the page hydrates -- it draws the options in its
+first 400 pixels, so a prerendered page holds them. A section is drawn whole
+while any of it is in view.
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `layout`, `layoutOptions` | `layout` | `Virtualizer.layout` | Its layout and the layout's options, `Virtualizer.list_layout` |
+| `children` | `children` | elements | The list |
+
+`Virtualizer.list_layout`, React Aria's `ListLayout`, in pixels:
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `orientation` | `orientation` | `` `vertical `` \| `` `horizontal `` | `` `vertical `` | The direction its entries follow one another, and it scrolls |
+| `rowSize` | `row_size` | `float` | `48.` | An option's length |
+| `estimatedRowSize` | `estimated_row_size` | `float` | | Given without `row_size`, an option is as long as it is drawn, this until it is |
+| `headingSize` | `heading_size` | `float` | `48.` | A section header's length, taken until the section is drawn |
+| `estimatedHeadingSize` | `estimated_heading_size` | `float` | | Likewise, an estimate |
+| `loaderSize` | `loader_size` | `float` | `48.` | What loads more's length |
+| `gap` | `gap` | `float` | `0.` | The space between entries |
+| `padding` | `padding` | `float` | `0.` | The space around them |
 
 ## Beside React
 

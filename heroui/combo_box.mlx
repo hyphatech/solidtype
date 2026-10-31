@@ -1,6 +1,9 @@
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 module Show = Solidtype.Show
+
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+
 module Kobalte = Solidtype_kobalte.Combobox
 module Types = Solidtype_kobalte.Types
 module Fields = Field
@@ -148,6 +151,7 @@ module As_list = struct
   module Props = struct
     external check :
       ?as_:string Solidtype.Check.value ->
+      ?scroll_to_item:(string -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:
          ( List_box.node Types.Collection.t S.accessor -> Jsx.element,
@@ -200,6 +204,8 @@ module Popover = struct
                     Jsx.element
                       <As_list
                         as_="div"
+                        ref=(fun e -> h.list_ref (as_element e))
+                        scroll_to_item=(fun key -> h.scroll_to_item key)
                         aria_orientation=`vertical
                         class_=(fun () -> h.classes ())
                         data_slot="list-box"
@@ -260,7 +266,6 @@ external related_target : Dom.focusEvent -> Dom.element Js.null
 [@@mel.get]
 
 external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
-external as_element : _ Dom.element_like -> Dom.element = "%identity"
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
 
 module For = Solidtype.For
