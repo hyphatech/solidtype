@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Time_field` on a prerendered page shows one colon
+  between its parts, where it showed two until it hydrated: the colon
+  Kobalte's segment writes of its own is drawn inside a hidden span, on the
+  server as in the browser.
+
 - `Solidtype_headless.Table`, and so `Solidtype_heroui.Table`: a column, or
   a cell, added between two or taken away, by a `For` or a `Show`, moves
   those after it, its `aria-colindex`, its cells' column and the column that

@@ -108,39 +108,16 @@ module Suffix = struct
     </div>
 end
 
-external query_all :
-  _ Dom.element_like -> string -> Dom.element Js.Array.array_like
-  = "querySelectorAll"
-[@@mel.send]
-
-external set_hidden : Dom.element -> bool -> unit = "hidden" [@@mel.set]
-
-(* Kobalte's segment writes a colon of its own after an hour and a minute
-   followed by another part, a span nothing styles and a reader reads, beside
-   the literal the port writes as React Aria does, muted with HeroUI's other
-   literals: it is hidden. *)
-let hide_kobalte_colons input =
-  Js.Array.from (query_all input ":scope > span:not([data-slot])")
-  |> Array.iter (fun span -> set_hidden span true)
-
 module Input = struct
   let%component make ?(class_ : string option)
       ~(children : segment S.accessor -> Jsx.element) () =
     let f = within "Time_field.Input" in
     let slots = in_group "Time_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
-    let hide = ref (fun () -> ()) in
-    (* Again as the field comes to show other parts, which Kobalte's colons
-       follow. *)
-    S.create_effect (fun () ->
-        ignore (f.around `hour : string array * string array);
-        !hide ());
     (* React Aria's input is a group of its own, where Kobalte's presents. *)
     <Kobalte.Input
       role=`group
-      ref=(fun e ->
-            (hide := fun () -> hide_kobalte_colons e);
-            Interaction.watch i e)
+      ref=(fun e -> Interaction.watch i e)
       class_=(fun () ->
                after (Styles.DateInputGroup.input (slots ())) (class_ ()))
       data_slot="date-input-group-input"
@@ -221,29 +198,53 @@ module Segment = struct
       in
       Option.is_none (Option.bind (f.value ()) part)
     in
-    <Kobalte.Segment
-      segment=(fun () -> segment ())
-      ref=(fun e -> Interaction.watch i e)
-      class_=(fun () ->
-               after (Styles.DateInputGroup.segment (slots ())) (class_ ()))
-             (* Kobalte leaves a disabled segment editable, its text typed into. *)
-      content_editable=(fun () ->
-                         if f.disabled () || f.read_only () then "false"
-                         else "true")
-      data_slot="date-input-group-segment"
-      data_placeholder=(fun () -> Jsx.flag (placeholder ()))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_invalid=(fun () -> Jsx.flag (f.invalid ()))
-      data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-      data_readonly=(fun () -> Jsx.flag (f.read_only ()))
-      props=(Props.others props)>
-      (* Kobalte's placeholder is a dash an hour, React Aria's two. *)
-      (fun () ->
-        match segment () with
-        | (`hour | `minute | `second) when placeholder () ->
-            Jsx.string {js|––|js}
-        | `hour | `minute | `second | `dayPeriod -> Jsx.string "")
-    </Kobalte.Segment>
+    let drawn () =
+      <Kobalte.Segment
+        segment=(fun () -> segment ())
+        ref=(fun e -> Interaction.watch i e)
+        class_=(fun () ->
+                 after (Styles.DateInputGroup.segment (slots ())) (class_ ()))
+               (* Kobalte leaves a disabled segment editable, its text typed into. *)
+        content_editable=(fun () ->
+                           if f.disabled () || f.read_only () then "false"
+                           else "true")
+        data_slot="date-input-group-segment"
+        data_placeholder=(fun () -> Jsx.flag (placeholder ()))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+        data_readonly=(fun () -> Jsx.flag (f.read_only ()))
+        props=(Props.others props)>
+        (* Kobalte's placeholder is a dash an hour, React Aria's two. *)
+        (fun () ->
+          match segment () with
+          | (`hour | `minute | `second) when placeholder () ->
+              Jsx.string {js|––|js}
+          | `hour | `minute | `second | `dayPeriod -> Jsx.string "")
+      </Kobalte.Segment>
+    in
+    (* Kobalte's segment is its element and, after an hour or a minute another
+       part follows, a colon of its own, a span nothing styles, beside the
+       literal the port writes as React Aria does, muted with HeroUI's other
+       literals: the element is drawn, and the colon inside a hidden span,
+       on the server as in the browser, which looks for it there as it
+       hydrates. *)
+    let resolved = S.children (fun () -> Jsx.element (drawn ())) in
+    let parts () = S.to_array (S.get resolved) in
+    let rest () =
+      let all = parts () in
+      Array.sub all 1 (max 0 (Array.length all - 1))
+    in
+    match S.untrack parts with
+    | [||] -> Jsx.nothing
+    | all ->
+        Jsx.fragment
+          [|
+            all.(0);
+            <span hidden="">
+              (fun () -> Jsx.element (Jsx.fragment (rest ())))
+            </span>;
+          |]
 end
 
 let thirteen () =

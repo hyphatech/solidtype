@@ -1,6 +1,7 @@
-// The island, a chart, and a HeroUI Select, rendered on the server, through Vite's
-// server-side loading, so the same plugin and Solid's compiler for the server
-// make the HTML, handed to each test as "html", "chart" and "select".
+// The island, a chart, and a HeroUI Select and TimeField, rendered on the
+// server, through Vite's server-side loading, so the same plugin and Solid's
+// compiler for the server make the HTML, handed to each test as "html",
+// "chart", "select" and "timeField".
 import type { TestProject } from "vitest/node";
 
 export default async function setup(project: TestProject) {
@@ -11,6 +12,7 @@ export default async function setup(project: TestProject) {
   project.provide("script", rendered.script());
   project.provide("chart", rendered.chart());
   project.provide("select", rendered.select());
+  project.provide("timeField", rendered.time_field());
 }
 
 declare module "vitest" {
@@ -19,5 +21,6 @@ declare module "vitest" {
     script: string;
     chart: string;
     select: string;
+    timeField: string;
   }
 }

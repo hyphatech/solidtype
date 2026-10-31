@@ -1,0 +1,38 @@
+(* A TimeField as the server writes it: one colon a reader sees between each
+   of its parts in the HTML a page is prerendered with, as React's is, the one
+   Kobalte's segment writes of its own beside the literal the port writes
+   inside a hidden span. *)
+
+module Server = Solidtype.Server
+module Time_field = Solidtype_heroui.Time_field
+module Time = Solidtype_internationalized_date.Types.Time
+module E = Jest.Expect
+
+let page () =
+  <Time_field
+    aria_label="Time"
+    default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+    granularity=`second
+    hour_cycle=`h24>
+    <Time_field.Group>
+      <Time_field.Input>
+        (fun segment ->
+          <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment) />)
+      </Time_field.Input>
+    </Time_field.Group>
+  </Time_field>
+
+(* How many times [part] is in [s]. *)
+let count part s = Array.length (Js.String.split ~sep:part s) - 1
+
+let () =
+  Jest.describe "Time_field on the server" (fun () ->
+      Jest.test "writes one colon between each part, Kobalte's hidden"
+        (fun () ->
+          let html = Server.render_to_string page in
+          E.(
+            expect
+              ( count {js|data-type="literal">:<|js} html,
+                count {js| hidden><span|js} html,
+                count ":<" html )
+            |> toEqual (2, 2, 4))))

@@ -9,6 +9,9 @@ let chart () = Solidtype.Server.render_to_string Chart.make
 (* A HeroUI Select, Kobalte's, as the server renders it. *)
 let select () = Solidtype.Server.render_to_string Select_island.make
 
+(* A HeroUI TimeField, Kobalte's, as the server renders it. *)
+let time_field () = Solidtype.Server.render_to_string Time_field_island.make
+
 (* The script a page rendered on the server carries in its head, which
    hydration reads. *)
 let script () = Solidtype.Server.generate_hydration_script ()

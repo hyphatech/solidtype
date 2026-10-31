@@ -4,7 +4,12 @@
 (library
  (name server_test)
  (modes melange)
- (libraries solidtype solidtype-kobalte solidtype-heroui melange-jest.jest)
+ (libraries
+  solidtype
+  solidtype-kobalte
+  solidtype-heroui
+  solidtype-internationalized-date
+  melange-jest.jest)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

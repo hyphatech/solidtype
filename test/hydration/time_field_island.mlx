@@ -1,0 +1,20 @@
+(* A HeroUI TimeField given its value, its hours, minutes and seconds apart:
+   one colon between each, as the server writes them and once it hydrates,
+   though Kobalte's segment writes one of its own. *)
+
+module Time_field = Solidtype_heroui.Time_field
+module Time = Solidtype_internationalized_date.Types.Time
+
+let make () =
+  <Time_field
+    aria_label="Time"
+    default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+    granularity=`second
+    hour_cycle=`h24>
+    <Time_field.Group>
+      <Time_field.Input>
+        (fun segment ->
+          <Time_field.Segment segment=(fun () -> Solidtype.Solid.get segment) />)
+      </Time_field.Input>
+    </Time_field.Group>
+  </Time_field>
