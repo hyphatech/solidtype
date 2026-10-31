@@ -1,0 +1,17 @@
+(* A HeroUI Select given its value, which a page prerendered shows from the
+   start once it hydrates: Kobalte's components, rendered on the server and
+   hydrated in the browser as an application's are. *)
+
+module Select = Solidtype_heroui.Select
+module List_box = Solidtype_heroui.List_box
+
+let make () =
+  <Select name="state" value=(fun () -> [| "texas" |])>
+    <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
+    <Select.Popover>
+      <List_box>
+        <List_box.Item id="florida">"Florida"</List_box.Item>
+        <List_box.Item id="texas">"Texas"</List_box.Item>
+      </List_box>
+    </Select.Popover>
+  </Select>

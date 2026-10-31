@@ -204,10 +204,11 @@ test/jsdom.ts        what jsdom lacks, stood in for in every vitest file
 test/browser/        Solid's bindings in a browser, in OCaml, run by vitest
 test/server/         Solid's rendering on the server, in OCaml, run by vitest
                      in Node
-test/hydration/      an island, and an rhp chart, rendered on the server and
-                     hydrated by Web.hydrate, in a vitest project of Solid's
-                     hydratable compile, Solid and rhp compiled with it;
-                     setup.ts renders them through Vite's server loading
+test/hydration/      an island, an rhp chart and a HeroUI select on Kobalte,
+                     rendered on the server and hydrated by Web.hydrate, in
+                     a vitest project of Solid's hydratable compile, Solid,
+                     rhp and Kobalte compiled with it; setup.ts renders them
+                     through Vite's server loading
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/headless/       each headless component as a caller meets it: its roles,

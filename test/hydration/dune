@@ -1,11 +1,16 @@
 ; An island rendered on the server and hydrated in the browser, through
 ; Solid's hydratable compile: the setup renders it, the test hydrates it;
-; and an rhp chart alike.
+; and an rhp chart and a HeroUI port on Kobalte alike.
 
 (library
  (name hydration_test)
  (modes melange)
- (libraries solidtype solidtype-rhp melange-jest.jest melange.dom)
+ (libraries
+  solidtype
+  solidtype-rhp
+  solidtype-heroui
+  melange-jest.jest
+  melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))
 

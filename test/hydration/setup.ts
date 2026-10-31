@@ -1,4 +1,4 @@
-// The island, and a chart, rendered on the server, through Vite's
+// The island, a chart, and a HeroUI Select, rendered on the server, through Vite's
 // server-side loading, so the same plugin and Solid's compiler for the server
 // make the HTML, handed to each test as "html" and "chart".
 import type { TestProject } from "vitest/node";
@@ -10,6 +10,7 @@ export default async function setup(project: TestProject) {
   project.provide("html", rendered.html());
   project.provide("script", rendered.script());
   project.provide("chart", rendered.chart());
+  project.provide("select", rendered.select());
 }
 
 declare module "vitest" {
@@ -17,5 +18,6 @@ declare module "vitest" {
     html: string;
     script: string;
     chart: string;
+    select: string;
   }
 }
