@@ -86,12 +86,18 @@ end)
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
-(* Entries kept in the order they joined: Solid makes them in their order. *)
+(* Entries kept in the order they joined: Solid makes them, and mounts them,
+   in their order. An entry joins once it is on the page, as a table's row
+   does: one joining as a prerendered page hydrates is never seen by
+   Kobalte's list, built as the page hydrates, so a select would show its
+   placeholder for the value it was given. *)
 let holding () =
   let entries, set_entries = S.create_signal [] in
   ( (fun () -> S.get entries),
     {
-      join = (fun e -> S.update set_entries (fun l -> l @ [ e ]));
+      join =
+        (fun e ->
+          S.on_mount (fun () -> S.update set_entries (fun l -> l @ [ e ])));
       leave =
         (fun gone -> S.update set_entries (List.filter (fun e -> not (gone e))));
     } )

@@ -299,10 +299,18 @@ let%component make ?(placeholder : string = "Select an item")
       (fun o -> Array.exists (String.equal (List_box.key o)) keys)
       (options ())
   in
-  let change keys =
-    S.set set_kept keys;
-    in_form.changed ();
-    ignore (on_change keys : unit option)
+  (* Kobalte tells its selection as its options join it, empty as it was: a
+     change to the keys it has is none. *)
+  let same now =
+    let held = S.untrack keys in
+    Array.length now = Array.length held
+    && Array.for_all (fun k -> Array.exists (String.equal k) held) now
+  in
+  let change now =
+    if not (same now) then (
+      S.set set_kept now;
+      in_form.changed ();
+      ignore (on_change now : unit option))
   in
   let opened_kept, set_opened = S.create_signal false in
   S.create_computed (fun () ->

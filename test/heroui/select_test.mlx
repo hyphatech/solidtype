@@ -257,6 +257,68 @@ let () =
       Jest.testPromise "chooses many, as React's does" (fun () ->
           let* r = both ~multiple:true in
           same r);
+      Jest.testPromise "shows the option it is given, before it opens"
+        (fun () ->
+          let shown given =
+            T.render (fun () ->
+                match given with
+                | `value ->
+                    <Select value=(fun () -> [| "texas" |])>
+                      <Select.Trigger>
+                        <Select.Value /> <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <List_box>
+                          <List_box.Item id="florida">"Florida"</List_box.Item>
+                          <List_box.Item id="texas">"Texas"</List_box.Item>
+                        </List_box>
+                      </Select.Popover>
+                    </Select>
+                | `listed ->
+                    let states =
+                      [| ("florida", "Florida"); ("texas", "Texas") |]
+                    in
+                    <Select value=(fun () -> [| "texas" |])>
+                      <Select.Trigger>
+                        <Select.Value /> <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <List_box>
+                          <Solidtype.For each=(fun () -> states)>
+                            (fun (id, name) _ ->
+                              <List_box.Item
+                                id=(fun () -> id) text_value=(fun () -> name)>
+                                (fun () -> Solidtype.Jsx.string name)
+                              </List_box.Item>)
+                          </Solidtype.For>
+                        </List_box>
+                      </Select.Popover>
+                    </Select>
+                | `default_value ->
+                    <Select default_value=(fun () -> [| "texas" |])>
+                      <Select.Trigger>
+                        <Select.Value /> <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <List_box>
+                          <List_box.Item id="florida">"Florida"</List_box.Item>
+                          <List_box.Item id="texas">"Texas"</List_box.Item>
+                        </List_box>
+                      </Select.Popover>
+                    </Select>);
+            let* () = settle () in
+            let value = first "[data-slot=select-value]" in
+            let drawn = (text value, T.attribute value "data-placeholder") in
+            T.cleanup ();
+            Js.Promise.resolve drawn
+          in
+          let* controlled = shown `value in
+          let* kept = shown `default_value in
+          let* listed = shown `listed in
+          Js.Promise.resolve
+            E.(
+              expect (controlled, kept, listed)
+              |> toEqual (("Texas", None), ("Texas", None), ("Texas", None))));
       Jest.testPromise "draws its value by a function of the ids chosen"
         (fun () ->
           T.render (fun () ->

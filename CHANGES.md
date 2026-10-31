@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Select` on a prerendered page shows the option it is
+  given, `value` or `default_value`, from the start, where it showed its
+  placeholder until an option was chosen: a `List_box`'s options join it
+  once they are on the page, after the page has hydrated. A selection
+  Kobalte tells as it was is no change, never told to `on_change`.
 - `Solidtype_headless.Table` and `Solidtype_heroui.Table`: sorted by their
   columns, `sort_descriptor` and `on_sort_change` on the root,
   `allows_sorting` and `id` on a column, pressed or given Enter or Space,
