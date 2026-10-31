@@ -13,6 +13,16 @@
 
     An icon-only button is named by its [aria_label].
 
+    While [is_pending] holds, as React Aria's pending button is, it keeps the
+    focus but takes no press: a click reaches neither its [on_click] nor a
+    trigger's handler, a [`submit] button is a [`button] so Enter in a field
+    submits nothing, it is neither hovered nor pressed, and it is
+    [aria-disabled="true"] and [data-pending]. A reader is told, in an assertive
+    live region, as it comes to be pending or stops while it has the focus. A
+    {!Spinner} inside it takes an id of its own, which names the button beside
+    its [aria_label] while it is pending; the button's [id] is the one it is
+    given, else its trigger's, else one of its own.
+
     Given [slot=`trigger], a button is the trigger of the part above it that
     takes one, as React Aria's slots are: inside a {!Disclosure.Heading}, the
     button that expands and collapses the disclosure, in HeroUI's look and
@@ -104,6 +114,8 @@ module Props : sig
     ?full_width:bool Solidtype.Check.value ->
     ?is_icon_only:bool Solidtype.Check.value ->
     ?is_disabled:bool Solidtype.Check.value ->
+    ?is_pending:bool Solidtype.Check.value ->
+    ?id:string Solidtype.Check.value ->
     ?slot:[ `trigger | `close ] Solidtype.Check.value ->
     ?type_:Solidtype.Html.Button.type_ Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->

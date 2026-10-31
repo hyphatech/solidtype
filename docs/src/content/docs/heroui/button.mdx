@@ -14,6 +14,10 @@ import * as Icons from "@islands/button_icons.jsx";
 import icons from "@islands/button_icons.mlx?raw";
 import * as IconOnly from "@islands/button_icon_only.jsx";
 import iconOnly from "@islands/button_icon_only.mlx?raw";
+import * as Loading from "@islands/button_loading.jsx";
+import loading from "@islands/button_loading.mlx?raw";
+import * as LoadingState from "@islands/button_loading_state.jsx";
+import loadingState from "@islands/button_loading_state.mlx?raw";
 import * as FullWidth from "@islands/button_full_width.jsx";
 import fullWidth from "@islands/button_full_width.mlx?raw";
 import * as Disabled from "@islands/button_disabled.jsx";
@@ -50,6 +54,21 @@ An icon-only button is named by its `aria_label`, as in React.
 
 <Example code={iconOnly} title="button_icon_only.mlx"><IconOnly.make client:visible /></Example>
 
+### Loading
+
+A pending button keeps its focus but takes no press: its click, and a
+trigger's, reach nothing, a submit button submits nothing, and it is
+`aria-disabled`, as React Aria's is. A reader is told as it comes to be
+pending, or stops, while it has the focus; and one named by its `aria_label`
+is named with a `Spinner` inside it too. HeroUI's render function, given
+`isPending`, is a read of what is given as `is_pending`.
+
+<Example code={loading} title="button_loading.mlx"><Loading.make client:visible /></Example>
+
+### Loading State
+
+<Example code={loadingState} title="button_loading_state.mlx"><LoadingState.make client:visible /></Example>
+
 ### Full Width
 
 <Example code={fullWidth} title="button_full_width.mlx"><FullWidth.make client:visible /></Example>
@@ -60,9 +79,8 @@ An icon-only button is named by its `aria_label`, as in React.
 
 ### Not yet
 
-HeroUI's Loading, Social Buttons, Render Function and custom variants
-examples need what the port does not take yet: `isPending`, render props and
-`render`.
+HeroUI's Social Buttons, Render Function and custom variants examples need
+what the port does not take yet: render props and `render`.
 
 ## Customization
 
@@ -133,13 +151,14 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 | `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
 | `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `isPending` | `is_pending` | `bool` | `false` | Whether it is pending: focusable, pressed by nothing, `aria-disabled`, `data-pending` |
+| `id` | `id` | `string` | | Its id, which names it with its spinner while it is pending |
 | `slot` | `slot` | `` [ `trigger ] `` | | Makes it the trigger of the part above it, a [`Disclosure.Heading`](/solidtype/heroui/disclosure/)'s |
 | `type` | `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
 | `aria-label` | `aria_label` | `string` | | Its name where it shows an icon alone |
 | `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its content |
-| `isPending` | — | | | Not yet |
 | render props | — | | | Not yet |
 
 ## Beside React

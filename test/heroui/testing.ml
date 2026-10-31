@@ -62,6 +62,7 @@ let state e =
     "data-focused";
     "data-focus-visible";
     "data-disabled";
+    "data-pending";
   ]
   |> List.filter_map (fun name ->
       Option.map (fun v -> name ^ "=" ^ v) (attribute e name))

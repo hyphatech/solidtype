@@ -1,5 +1,9 @@
 module Solid = Solidtype.Solid
 
+module Progress = Solidtype.Context.Make_optional (struct
+  type t = string
+end)
+
 let%component make
     ?(color : [ `accent | `current | `danger | `success | `warning ] option)
     ?(size : [ `sm | `md | `lg | `xl ] option)
@@ -7,7 +11,9 @@ let%component make
   (* A page may show several spinners, and a gradient is found by its id. *)
   let id = Solid.create_unique_id () in
   let fading = "spinner-fading-" ^ id and rising = "spinner-rising-" ^ id in
+  let given = Progress.use () in
   <span
+    ?id=(fun () -> given)
     aria_label=(fun () -> aria_label ())
     class_=(fun () ->
              Styles.Spinner.classes

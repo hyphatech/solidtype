@@ -1,0 +1,20 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+module Spinner = Solidtype_heroui.Spinner
+
+let make () =
+  let loading, set_loading = S.create_signal false in
+  let press _ =
+    S.set set_loading true;
+    ignore
+      (Js.Global.setTimeout ~f:(fun () -> S.set set_loading false) 2000
+        : Js.Global.timeoutId)
+  in
+  <Button is_pending=(fun () -> S.get loading) on_click=press>
+    (fun () ->
+      if S.get loading then Jsx.element <Spinner color=`current size=`sm />
+      else Jsx.element <Icons.Paperclip />)
+    (fun () ->
+      Jsx.string (if S.get loading then "Uploading..." else "Upload File"))
+  </Button>

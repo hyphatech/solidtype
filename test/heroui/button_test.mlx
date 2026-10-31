@@ -3,12 +3,13 @@
 
 module S = Solidtype.Solid
 module Button = Solidtype_heroui.Button
+module Spinner = Solidtype_heroui.Spinner
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
 
 module Twin = struct
-  external render : bool -> Dom.element = "render"
+  external render : bool -> bool -> Dom.element = "render"
   [@@mel.module "./twins/Button.tsx"]
 
   external step :
@@ -21,11 +22,14 @@ end
 
 (* The walk on HeroUI's Button in solidtype, then in React, each alone on
    the page, so Tab reaches it. *)
-let both ~disabled =
-  T.render (fun () -> <Button is_disabled=(fun () -> disabled)>"Save"</Button>);
+let both ?(pending = false) ~disabled () =
+  T.render (fun () ->
+      <Button is_disabled=(fun () -> disabled) is_pending=(fun () -> pending)>
+        "Save"
+      </Button>);
   let* solidtype = T.walk ~step:Twin.step (T.by_role "button") in
   T.cleanup ();
-  let* react = T.walk ~step:Twin.step (Twin.render disabled) in
+  let* react = T.walk ~step:Twin.step (Twin.render disabled pending) in
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
 
@@ -87,9 +91,94 @@ let () =
               expect (!clicks, T.attribute b "disabled") |> toEqual (1, Some "")));
       Jest.testPromise "shows hover, press and focus as React Aria does"
         (fun () ->
-          let* solidtype, react = both ~disabled:false in
+          let* solidtype, react = both ~disabled:false () in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "shows none of them while disabled, as React Aria does"
         (fun () ->
-          let* solidtype, react = both ~disabled:true in
-          Js.Promise.resolve E.(expect solidtype |> toEqual react)))
+          let* solidtype, react = both ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "shows focus alone while pending, as React Aria does"
+        (fun () ->
+          let* solidtype, react = both ~pending:true ~disabled:false () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "is not clicked while pending, nor submits, though it is focusable"
+        (fun () ->
+          let clicks = ref 0 in
+          let pending, set_pending = S.create_signal true in
+          T.render (fun () ->
+              <Button
+                type_=`submit
+                is_pending=(fun () -> S.get pending)
+                on_click=(fun _ -> incr clicks)>
+                "Save"
+              </Button>);
+          let user = T.setup () in
+          let b = T.by_role "button" in
+          let* () = T.click user b in
+          let while_pending =
+            ( !clicks,
+              T.attribute b "aria-disabled",
+              T.attribute b "type",
+              T.attribute b "disabled" )
+          in
+          S.set set_pending false;
+          let* () = T.click user b in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( while_pending,
+                  (!clicks, T.attribute b "aria-disabled", T.attribute b "type")
+                )
+              |> toEqual
+                   ( (0, Some "true", Some "button", None),
+                     (1, None, Some "submit") )));
+      Jest.test
+        "is named with its spinner while pending, where its aria-label names it"
+        (fun () ->
+          T.render (fun () ->
+              <Button
+                is_icon_only=true
+                aria_label="Delete"
+                is_pending=(fun () -> true)>
+                <Spinner size=`sm />
+              </Button>);
+          let b = T.by_role "button" in
+          let named =
+            match T.attribute b "aria-labelledby" with
+            | Some ids ->
+                Js.String.split ~sep:" " ids
+                |> Array.map (fun id ->
+                    match T.query ("[id=\"" ^ id ^ "\"]") with
+                    | Some e ->
+                        Option.value (T.attribute e "aria-label") ~default:""
+                    | None -> "")
+            | None -> [||]
+          in
+          E.(expect named |> toEqual [| "Delete"; "Loading" |]));
+      Jest.testPromise "is announced as it comes to be pending with the focus"
+        (fun () ->
+          let pending, set_pending = S.create_signal false in
+          T.render (fun () ->
+              <Button is_pending=(fun () -> S.get pending)>"Save"</Button>);
+          let b = T.by_role "button" in
+          T.focus b;
+          S.set set_pending true;
+          (* The newest message: an earlier test's may stay its seven
+             seconds. *)
+          let announced =
+            match
+              List.rev
+                (Array.to_list
+                   (Js.Array.from
+                      (T.query_all_in T.body "[role=log] [role=img]")))
+            with
+            | e :: _ -> T.attribute e "aria-labelledby"
+            | [] -> None
+          in
+          let id = T.attribute b "id" in
+          Js.Promise.resolve
+            E.(
+              expect
+                (Option.is_some id && Option.equal String.equal announced id)
+              |> toBe true)))

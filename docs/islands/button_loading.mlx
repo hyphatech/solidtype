@@ -1,0 +1,7 @@
+module Button = Solidtype_heroui.Button
+module Spinner = Solidtype_heroui.Spinner
+
+let make () =
+  <Button is_pending=true>
+    <Spinner color=`current size=`sm /> "Uploading..."
+  </Button>

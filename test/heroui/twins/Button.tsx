@@ -11,10 +11,16 @@ import { createRoot, type Root } from "react-dom/client";
 
 let mounted: { root: Root; host: HTMLElement } | null = null;
 
-export function render(disabled: boolean): HTMLElement {
+export function render(disabled: boolean, pending: boolean): HTMLElement {
   const host = document.body.appendChild(document.createElement("div"));
   const root = createRoot(host);
-  act(() => root.render(<Button isDisabled={disabled}>Save</Button>));
+  act(() =>
+    root.render(
+      <Button isDisabled={disabled} isPending={pending}>
+        Save
+      </Button>,
+    ),
+  );
   mounted = { root, host };
   const button = host.querySelector("button");
   if (!button) throw new Error("HeroUI's Button rendered no button");

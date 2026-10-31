@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Kobalte = Solidtype_kobalte.Button
 
 type trigger = {
@@ -36,6 +37,67 @@ let no_trigger =
   }
 
 external as_element : _ Dom.element_like -> Dom.element = "%identity"
+external body : Dom.element = "body" [@@mel.scope "document"]
+
+external create_element : string -> Dom.element = "createElement"
+[@@mel.scope "document"]
+
+external set_attribute : Dom.element -> string -> string -> unit
+  = "setAttribute"
+[@@mel.send]
+
+external append : Dom.element -> Dom.element -> unit = "appendChild"
+[@@mel.send]
+
+external remove : Dom.element -> unit = "remove" [@@mel.send]
+external connected : Dom.element -> bool = "isConnected" [@@mel.get]
+external element_id : Dom.element -> string = "id" [@@mel.get]
+external set_element_id : Dom.element -> string -> unit = "id" [@@mel.set]
+
+external on_capture :
+  Dom.element ->
+  string ->
+  (Dom.event -> unit) ->
+  (_[@mel.as {json|true|json}]) ->
+  unit = "addEventListener"
+[@@mel.send]
+
+external stop_propagation : Dom.event -> unit = "stopPropagation" [@@mel.send]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* React Aria's live announcer: an assertive log, out of sight, made once a
+   message is first announced, in which a message stays seven seconds, as
+   React Aria's does. A message is an element named by the ids given, which a
+   reader reads as the element they name. *)
+let log = ref None
+
+let announce labelled_by =
+  let region =
+    match !log with
+    | Some region when connected region -> region
+    | Some _ | None ->
+        let hidden = create_element "div" in
+        set_attribute hidden "data-live-announcer" "true";
+        set_attribute hidden "style"
+          "border: 0; clip: rect(0 0 0 0); clip-path: inset(50%); \
+           height:            1px; margin: -1px; overflow: hidden; padding: 0; \
+           position:            absolute; width: 1px; white-space: nowrap";
+        let region = create_element "div" in
+        set_attribute region "role" "log";
+        set_attribute region "aria-live" "assertive";
+        set_attribute region "aria-relevant" "additions";
+        append hidden region;
+        append body hidden;
+        log := Some region;
+        region
+  in
+  let message = create_element "div" in
+  set_attribute message "role" "img";
+  set_attribute message "aria-labelledby" labelled_by;
+  append region message;
+  ignore
+    (Js.Global.setTimeout ~f:(fun () -> remove message) 7000
+      : Js.Global.timeoutId)
 
 let%component make
     ?(variant :
@@ -48,6 +110,7 @@ let%component make
        | `danger_soft ]
        option) ?(size : [ `sm | `md | `lg ] option) ?(full_width : bool option)
     ?(is_icon_only : bool = false) ?(is_disabled : bool option)
+    ?(is_pending : bool = false) ?(id : string option)
     ?(slot : [ `trigger | `close ] option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
@@ -101,7 +164,43 @@ let%component make
       | Some t -> t.component
       | None -> Kobalte.Root.component
   end in
-  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  let pending () = is_pending () in
+  (* Its id names it with its spinner, and is what an announcement reads: the
+     id it is given, else the one its element has, a trigger's, else its
+     own. *)
+  let own_id =
+    match S.untrack id with
+    | Some given -> given
+    | None -> S.create_unique_id ()
+  in
+  let element = ref None in
+  let named_by () =
+    match !element with
+    | Some e when not (String.equal (element_id e) "") -> element_id e
+    | Some _ | None -> own_id
+  in
+  let progress_id = S.create_unique_id () in
+  let labelled_by () =
+    match aria_label () with
+    | Some _ when pending () -> Some (named_by () ^ " " ^ progress_id)
+    | Some _ | None -> None
+  in
+  let i =
+    Interaction.create
+      ~disabled:(fun[@u] () -> is_disabled ())
+      ~no_hover:(fun[@u] () -> pending ())
+      ()
+  in
+  (* A reader is told as it comes to be pending, or stops, while it has the
+     focus, as React Aria tells it. *)
+  S.create_computed_from ~init:(S.untrack pending) (fun was ->
+      let now = pending () in
+      if Interaction.focused i && not (Bool.equal was now) then
+        announce
+          (match S.untrack labelled_by with
+          | Some ids -> ids
+          | None -> named_by ());
+      now);
   <Root
     class_=(fun () ->
              Styles.Button.classes
@@ -110,6 +209,13 @@ let%component make
                   ?class_:(class_ ()) ()))
     disabled=(fun () -> is_disabled ())
     ?aria_label
+    ?id=(fun () ->
+          match (id (), trigger) with
+          | Some given, _ -> Some given
+          | None, None -> Some own_id
+          | None, Some _ -> None)
+    ?aria_labelledby=labelled_by
+    ?aria_disabled=(fun () -> if pending () then Some true else None)
     ?aria_controls=(fun () ->
                      Option.bind trigger (fun (t : trigger) -> t.controls))
     ?aria_describedby=(fun () ->
@@ -117,6 +223,17 @@ let%component make
                             t.described_by))
     ref=(fun b ->
           Interaction.watch i b;
+          (let e = as_element b in
+           element := Some e;
+           if String.equal (element_id e) "" then set_element_id e own_id;
+           (* While pending, a press reaches nothing it would do: the
+              button's handlers nor a trigger's, as React Aria takes them
+              away; its focus and hover stay. *)
+           on_capture e "click" (fun ev ->
+               if S.untrack pending then begin
+                 stop_propagation ev;
+                 prevent_default ev
+               end));
           match Option.bind trigger (fun (t : trigger) -> t.element) with
           | Some made -> made (as_element b)
           | None -> ())
@@ -128,21 +245,29 @@ let%component make
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
     data_pressed=(fun () ->
                    Solidtype.Jsx.flag
-                     (Interaction.pressed i
-                     ||
-                     match
-                       Option.bind trigger (fun (t : trigger) -> t.pressed)
-                     with
-                     | Some shown -> shown ()
-                     | None -> false))
+                     ((not (pending ()))
+                     && (Interaction.pressed i
+                        ||
+                        match
+                          Option.bind trigger (fun (t : trigger) -> t.pressed)
+                        with
+                        | Some shown -> shown ()
+                        | None -> false)))
     data_focused=(fun () -> Solidtype.Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () ->
                          Solidtype.Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Solidtype.Jsx.flag (Interaction.disabled i))
-    type_=(fun () -> type_ ())
+    data_pending=(fun () -> Solidtype.Jsx.flag (pending ()))
+                 (* A pending submit button submits nothing, Enter in a field included. *)
+    type_=(fun () ->
+            match type_ () with
+            | `submit when pending () -> `button
+            | (`submit | `reset | `button | `menu) as t -> t)
     on_click=(fun e ->
                ignore (on_click e : unit option);
                Option.iter (fun close -> close ()) closes)
     props=(Props.others props)>
-    (fun () -> children ())
+    <Spinner.Progress.Provider value=(fun () -> progress_id)>
+      (fun () -> children ())
+    </Spinner.Progress.Provider>
   </Root>

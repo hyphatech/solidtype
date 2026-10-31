@@ -7,7 +7,28 @@
       <Spinner color=`current size=`sm />
     ]}
 
+    Inside a part that gives it one, {!Progress}, it takes its id, which names
+    the part: a pending {!Button} is named by its spinner too.
+
     A spinner has no behaviour, so no Kobalte component underlies it. *)
+
+(** The id a part above gives the spinners inside it, as React Aria's
+    ProgressBarContext gives a pending button's. *)
+module Progress : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:string Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Solidtype.Jsx.component
+  end
+
+  val use : unit -> string option
+end
 
 module Props : sig
   type t

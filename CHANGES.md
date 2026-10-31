@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Button`: `is_pending`, as React Aria's: focusable but
+  pressed by nothing, its click and a trigger's reaching nothing, a submit
+  button submitting nothing, `aria-disabled` and `data-pending`, and
+  announced as it comes to be pending or stops while it has the focus; a
+  `Spinner` inside it names it beside its `aria_label`, by
+  `Solidtype_heroui.Spinner.Progress`, an id the spinner takes. `id`, which
+  names it so. HeroUI's Loading and Loading State examples.
+
 - `Solidtype_headless.Color_swatch` and `Solidtype_headless.Color_area`:
   Kobalte's, fixed, for any style to dress. A swatch and an area's thumb,
   `--kb-color-current`, write a colour less than opaque as `rgba`, where
