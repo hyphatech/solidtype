@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_headless.Table`, and so `Solidtype_heroui.Table`: a column, or
+  a cell, added between two or taken away, by a `For` or a `Show`, moves
+  those after it, its `aria-colindex`, its cells' column and the column that
+  names each row with it, where it was numbered last and the others kept
+  their numbers; a column's and a cell's `ref` is called beside the
+  table's own.
+
 - `Solidtype.Jsx.Token`: a value that stands in an element's place among a
   component's children, never rendered, read by the component that
   resolves them in their order on the page, as Solid's `Match` stands among

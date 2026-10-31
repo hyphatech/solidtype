@@ -195,6 +195,63 @@ let () =
             | None -> cell
           in
           E.(expect (H.attribute td "colspan") |> toEqual (Some "3")));
+      Jest.test "places a column added between two, and its cells, by the page"
+        (fun () ->
+          let roles, set_roles = S.create_signal false in
+          H.render (fun () ->
+              <Table.Root aria_label="Team members">
+                <Table.Header>
+                  <Solidtype.Show when_=(fun () -> S.get roles)>
+                    <Table.Column>"Role"</Table.Column>
+                  </Solidtype.Show>
+                  <Table.Column is_row_header=true>"Name"</Table.Column>
+                  <Table.Column>"Actions"</Table.Column>
+                </Table.Header>
+                <Table.Body>
+                  <Table.Row id="1">
+                    <Solidtype.Show when_=(fun () -> S.get roles)>
+                      <Table.Cell>"CEO"</Table.Cell>
+                    </Solidtype.Show>
+                    <Table.Cell>"Kate Moore"</Table.Cell>
+                    <Table.Cell>"Edit"</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              </Table.Root>);
+          let placed () =
+            ( Array.map
+                (fun c ->
+                  ( H.text c,
+                    Option.value (H.attribute c "aria-colindex") ~default:"" ))
+                (H.all_by_role "columnheader"),
+              Array.map
+                (fun c ->
+                  ( H.text c,
+                    Option.value (H.attribute c "role") ~default:"",
+                    Option.value (H.attribute c "data-column-index") ~default:""
+                  ))
+                (Array.append
+                   (H.all_by_role "rowheader")
+                   (H.all_by_role "gridcell")) )
+          in
+          let before = placed () in
+          S.set set_roles true;
+          let added = placed () in
+          S.set set_roles false;
+          E.(
+            expect (before, added, placed ())
+            |> toEqual
+                 ( ( [| ("Name", "1"); ("Actions", "2") |],
+                     [|
+                       ("Kate Moore", "rowheader", "0");
+                       ("Edit", "gridcell", "1");
+                     |] ),
+                   ( [| ("Role", "1"); ("Name", "2"); ("Actions", "3") |],
+                     [|
+                       ("Kate Moore", "rowheader", "1");
+                       ("CEO", "gridcell", "0");
+                       ("Edit", "gridcell", "2");
+                     |] ),
+                   before )));
       Jest.testPromise "has no violation axe finds" (fun () ->
           team ~mode:`multiple ();
           let* found = H.accessibility_violations () in

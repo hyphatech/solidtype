@@ -52,6 +52,51 @@ let in_control e =
         [role=button]")
   <> None
 
+(* Columns, or a row's cells, each placed in order: by the order they were
+   made until it is on the page -- the server's only order, which the
+   browser's agrees with as it hydrates -- then by where it is, so one added
+   between two, or one gone, moves those after it. *)
+type placing = {
+  made : int ref;
+  on_page : Dom.htmlTableCellElement list S.accessor;
+  set_on_page : Dom.htmlTableCellElement list S.setter;
+  alive : int S.accessor;
+  set_alive : int S.setter;
+}
+
+let placing () =
+  let on_page, set_on_page = S.create_signal [] in
+  let alive, set_alive = S.create_signal 0 in
+  { made = ref 0; on_page; set_on_page; alive; set_alive }
+
+(* Where a part made now is, given what will be its element. *)
+let place p element =
+  let made = !(p.made) in
+  incr p.made;
+  S.update p.set_alive succ;
+  let placed = ref None in
+  S.on_mount (fun () ->
+      Option.iter
+        (fun e ->
+          placed := Some e;
+          S.update p.set_on_page (fun l -> e :: l))
+        (S.get element));
+  S.on_cleanup (fun () ->
+      S.update p.set_alive pred;
+      Option.iter
+        (fun e -> S.update p.set_on_page (List.filter (fun o -> o != e)))
+        !placed);
+  fun () ->
+    let on_page = S.get p.on_page in
+    match !placed with
+    | Some e ->
+        List.length
+          (List.filter (fun o -> o != e && position e o land 2 <> 0) on_page)
+    | None -> made
+
+(* How many there are. *)
+let count p () = S.get p.alive
+
 (* A row as the table keeps it: its key, and its element, which says where it
    is on the page. *)
 type row = { key : string; element : Dom.htmlTableRowElement }
@@ -83,9 +128,8 @@ type table = {
   remove : string -> unit;
   manager : Manager.t S.accessor;
   row_header : unit -> int;
-  set_row_header : int -> unit;
-  next_column : unit -> int;
-  columns : unit -> int;
+  set_row_header : (unit -> int) option -> unit;
+  columns : placing;
 }
 
 module Table_context = Solidtype.Context.Make_optional (struct
@@ -99,9 +143,9 @@ let in_table part =
 
 let use_context () = (in_table "Table.use_context").context
 
-(* What a row's cells read of it: the column the next is in, and the id of the
-   one that names the row. *)
-type row_cells = { next_cell : unit -> int; header_id : string }
+(* What a row's cells read of it: where they are, and the id of the one that
+   names the row. *)
+type row_cells = { cells : placing; header_id : string }
 
 module Row_context = Solidtype.Context.Make_optional (struct
   type t = row_cells
@@ -331,8 +375,7 @@ module Root = struct
            ~selection_manager:(Either.right manager) ())
         element ()
     in
-    let row_header, set_row_header = S.create_signal 0 in
-    let columns, set_columns = S.create_signal 0 in
+    let row_header, set_row_header = S.create_signal None in
     let m () = S.get manager in
     let t =
       {
@@ -366,14 +409,11 @@ module Root = struct
             S.set set_rows
               (List.filter (fun r -> not (String.equal r.key k)) (S.get rows)));
         manager;
-        row_header = (fun () -> S.get row_header);
-        set_row_header = S.set set_row_header;
-        next_column =
+        row_header =
           (fun () ->
-            let n = S.untrack (fun () -> S.get columns) in
-            S.set set_columns (n + 1);
-            n);
-        columns = (fun () -> S.get columns);
+            match S.get row_header with Some index -> index () | None -> 0);
+        set_row_header = S.set set_row_header;
+        columns = placing ();
       }
     in
     (* The arrows across a row and through its cells are the table's, which
@@ -477,6 +517,9 @@ module Column = struct
     external is_row_header : t -> bool option = "isRowHeader" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
 
+    external ref : t -> ((Dom.htmlTableCellElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
     external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
     [@@mel.get]
 
@@ -488,17 +531,27 @@ module Column = struct
   (* The props the column takes for itself; the rest it passes on. *)
   let own =
     [|
-      "id"; "allowsSorting"; "isRowHeader"; "children"; "onClick"; "onKeyDown";
+      "id";
+      "allowsSorting";
+      "isRowHeader";
+      "children";
+      "ref";
+      "onClick";
+      "onKeyDown";
     |]
 
   let make (props : Props.t) =
     let t = in_table "Table.Column" in
-    let index = t.next_column () in
+    let element, set_element = S.create_signal None in
+    let index = place t.columns element in
     let names_rows =
       S.untrack (fun () ->
           Option.value (Props.is_row_header props) ~default:false)
     in
-    if names_rows then t.set_row_header index;
+    if names_rows then begin
+      t.set_row_header (Some index);
+      S.on_cleanup (fun () -> t.set_row_header None)
+    end;
     let key =
       match S.untrack (fun () -> Props.id props) with
       | Some k -> k
@@ -519,7 +572,10 @@ module Column = struct
       <th
         role=`columnheader
         tabindex="-1"
-        aria_colindex=(fun () -> string_of_int (index + 1))
+        aria_colindex=(fun () -> string_of_int (index () + 1))
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
         ?aria_sort=(fun () ->
                      if sortable () then
                        Some
@@ -572,7 +628,8 @@ module Body = struct
         (fun shown ->
           <tr role=`row>
             <td
-              role=`rowheader colspan=(fun () -> string_of_int (t.columns ()))>
+              role=`rowheader
+              colspan=(fun () -> string_of_int (count t.columns ()))>
               (fun () -> Jsx.element (S.get shown))
             </td>
           </tr>)
@@ -646,17 +703,7 @@ module Row = struct
            ~selection_manager:(Either.right t.manager) ~key:(Either.left key) ())
         element
     in
-    let cells = ref 0 in
-    let r =
-      {
-        next_cell =
-          (fun () ->
-            let n = !cells in
-            incr cells;
-            n);
-        header_id = S.create_unique_id ();
-      }
-    in
+    let r = { cells = placing (); header_id = S.create_unique_id () } in
     (* A row joins the list once it is on the page, where its place among the
        others is read. *)
     S.on_mount (fun () ->
@@ -720,6 +767,9 @@ module Cell = struct
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlTableCellElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -729,14 +779,18 @@ module Cell = struct
       | Some r -> r
       | None -> invalid_arg "Table.Cell is used inside a Table.Row"
     in
-    let index = r.next_cell () in
-    let names_row () = index = t.row_header () in
+    let element, set_element = S.create_signal None in
+    let index = place r.cells element in
+    let names_row () = index () = t.row_header () in
     <td
       role=(fun () -> if names_row () then `rowheader else `gridcell)
       ?id=(fun () -> if names_row () then Some r.header_id else None)
       tabindex="-1"
-      data_column_index=(fun () -> Jsx.data (string_of_int index))
-      props=(S.omit props [| "children" |])>
+      data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
+      ref=(fun e ->
+            S.set set_element (Some e);
+            call (Props.ref props) e)
+      props=(S.omit props [| "children"; "ref" |])>
       (fun () -> Props.children props)
     </td>
 
