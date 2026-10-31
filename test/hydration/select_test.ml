@@ -1,7 +1,8 @@
 (* A HeroUI Select, on Kobalte, rendered on the server and hydrated: the value
    it is given is Kobalte's once it hydrates, its options in Kobalte's hidden
-   select and its value no placeholder. Kobalte's list is built as the page
-   hydrates, and options joining it then would never reach it. *)
+   select and its value no placeholder. Its options, which the server's hidden
+   select lacks, are Kobalte's only once the page has hydrated, never looked
+   for among the server's nodes. *)
 
 module Web = Solidtype.Web
 module E = Jest.Expect

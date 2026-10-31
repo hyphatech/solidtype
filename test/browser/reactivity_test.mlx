@@ -22,6 +22,35 @@ module Counted = struct
     <p>(fun () -> Jsx.int (Array.length (S.to_array (S.get resolved))))</p>
 end
 
+(* Words that stand among a component's children, and numbers that stand
+   among them too, which a reader of words leaves out. *)
+module Word = Jsx.Token (struct
+  type t = string
+end)
+
+module Number = Jsx.Token (struct
+  type t = int
+end)
+
+module Say = struct
+  let%component make ~(word : string) () = Word.element (word ())
+end
+
+module Count = struct
+  let%component make ~(n : int) () = Number.element (n ())
+end
+
+module Sentence = struct
+  let%component make ~(children : Jsx.content) () =
+    let resolved = S.children (fun () -> children ()) in
+    <p>
+      (fun () ->
+        Jsx.string
+          (String.concat " "
+             (Array.to_list (Word.read (S.to_array (S.get resolved))))))
+    </p>
+end
+
 module Greeting = struct
   let%component make ~(name : string) () =
     <p>(fun () -> Jsx.string ("Hello, " ^ name ()))</p>
@@ -151,6 +180,23 @@ let () =
         (fun () ->
           T.render (fun () -> <Counted><i /> <i /> <i /></Counted>);
           E.(expect (T.page ()) |> toBe "3"));
+      Jest.test
+        "a token is read in its place among the children, as they change"
+        (fun () ->
+          let middle, set_middle = S.create_signal [| "b" |] in
+          T.render (fun () ->
+              <Sentence>
+                <Say word="a" />
+                <i />
+                <Count n=1 />
+                <Solidtype.For each=(fun () -> S.get middle)>
+                  (fun word _ -> <Say word=(fun () -> word) />)
+                </Solidtype.For>
+                <Say word="d" />
+              </Sentence>);
+          let before = T.page () in
+          S.set set_middle [| "b"; "c" |];
+          E.(expect (before, T.page ()) |> toEqual ("a b d", "a b c d")));
       Jest.testPromise "lazy_ renders the component once it has loaded"
         (fun () ->
           T.render (fun () ->

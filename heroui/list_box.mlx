@@ -25,18 +25,22 @@ and node = (option_, unit) Types.Either.t Types.CollectionNode.t
 type entry =
   | Option of option_
   | Section of {
-      id : int;
       options : unit -> option_ list;
       draw : (option_ -> Jsx.element) -> Jsx.element;
     }
-  | Separator of int * (unit -> Jsx.element)
-  | Loader of int * (unit -> Jsx.element)
+  | Separator of (unit -> Jsx.element)
+  | Loader of (unit -> Jsx.element)
 
-(* How an entry joins what holds it, and leaves it as it is gone. *)
-type holder = { join : entry -> unit; leave : (entry -> bool) -> unit }
+(* Each entry stands in its place among its list's children, so the list
+   reads them in their order on the page, one added between two included. *)
+module Entry = Jsx.Token (struct
+  type t = entry
+end)
 
-module Holder = Solidtype.Context.Make_optional (struct
-  type t = holder
+(* Whether a part is inside a list, which reads it: [true], since Solid takes
+   a context of [()], which is [undefined], for none. *)
+module Within = Solidtype.Context.Make_optional (struct
+  type t = bool
 end)
 
 (* What a list's options read of it: how it selects, which keys are selected
@@ -86,33 +90,17 @@ end)
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
-(* Entries kept in the order they joined: Solid makes them, and mounts them,
-   in their order. An entry joins once it is on the page, as a table's row
-   does: one joining as a prerendered page hydrates is never seen by
-   Kobalte's list, built as the page hydrates, so a select would show its
-   placeholder for the value it was given. *)
-let holding () =
-  let entries, set_entries = S.create_signal [] in
-  ( (fun () -> S.get entries),
-    {
-      join =
-        (fun e ->
-          S.on_mount (fun () -> S.update set_entries (fun l -> l @ [ e ])));
-      leave =
-        (fun gone -> S.update set_entries (List.filter (fun e -> not (gone e))));
-    } )
+(* A list's or a section's entries: its children, made by [made] under the
+   contexts its parts read, resolved once, so the server and the browser see
+   them alike as the page is made, before Kobalte's list is. *)
+let resolving made =
+  let resolved = S.children (fun () -> Jsx.element (made ())) in
+  fun () -> Array.to_list (Entry.read (S.to_array (S.get resolved)))
 
-let joining part =
-  match Holder.use () with
-  | Some h -> h
+let within part =
+  match Within.use () with
+  | Some (_ : bool) -> ()
   | None -> invalid_arg (part ^ " is used inside a List_box")
-
-let count = ref 0
-
-(* An id that tells two sections or separators apart. *)
-let fresh () =
-  incr count;
-  !count
 
 (* Kobalte's item description as the [<span>] HeroUI's Description is. *)
 module As_span = struct
@@ -161,7 +149,7 @@ module Item = struct
       ?(is_disabled : bool = false)
       ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
       ~(children : Jsx.content) () =
-    let h = joining "List_box.Item" in
+    within "List_box.Item";
     let others = Props.others props in
     let key_ = S.untrack id in
     let draw node =
@@ -247,10 +235,7 @@ module Item = struct
         content;
       }
     in
-    h.join (Option option_);
-    S.on_cleanup (fun () ->
-        h.leave (function Option o -> o == option_ | _ -> false));
-    Jsx.nothing
+    Entry.element (Option option_)
 end
 
 module Item_indicator = struct
@@ -295,16 +280,8 @@ module Item_indicator = struct
     </span>
 end
 
-(* A separator joins its list in its place, among the options. *)
-let separator holder =
- fun[@u] drawn ->
-  let id = fresh () in
-  holder.join (Separator (id, drawn));
-  S.on_cleanup (fun () ->
-      holder.leave (function
-        | Separator (i, _) -> i = id
-        | Option _ | Section _ | Loader _ -> false));
-  Jsx.nothing
+(* A separator stands in its place, among the options. *)
+let separator = fun[@u] drawn -> Entry.element (Separator drawn)
 
 external as_element : _ Dom.element_like -> Dom.element = "%identity"
 
@@ -351,7 +328,7 @@ module Load_more_item = struct
   let%component make ?(is_loading : bool = false)
       ?(on_load_more : (unit -> unit) option) ?(scroll_offset : float = 1.)
       ~(children : Jsx.content) () =
-    let h = joining "List_box.Load_more_item" in
+    within "List_box.Load_more_item";
     let others = Props.others props in
     let draw () =
       let sentinel = ref None in
@@ -406,20 +383,37 @@ module Load_more_item = struct
           </Show>;
         |]
     in
-    let id = fresh () in
-    h.join (Loader (id, draw));
-    S.on_cleanup (fun () ->
-        h.leave (function
-          | Loader (i, _) -> i = id
-          | Option _ | Section _ | Separator _ -> false));
-    Jsx.nothing
+    Entry.element (Loader draw)
 end
 
 module Section = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
-    let h = joining "List_box.Section" in
-    let entries, holder = holding () in
+    within "List_box.Section";
     let header, set_header = S.create_signal None in
+    (* A section's header names it, as React Aria's does. *)
+    let header_slot : Header.slot =
+     fun[@u] classes others children ->
+      S.set set_header
+        (Some
+           (fun header_id ->
+             <header
+               id=(fun () -> header_id)
+               class_=(fun () -> classes ())
+               role=`presentation
+               data_slot="header"
+               props=others>
+               (fun () -> children ())
+             </header>));
+      Jsx.nothing
+    in
+    let entries =
+      resolving (fun () ->
+          <Within.Provider value=(fun () -> true)>
+            <Header.Slot.Provider value=(fun () -> header_slot)>
+              (fun () -> children ())
+            </Header.Slot.Provider>
+          </Within.Provider>)
+    in
     let options () =
       List.filter_map
         (function
@@ -446,33 +440,7 @@ module Section = struct
         </For>
       </section>
     in
-    let id = fresh () in
-    h.join (Section { id; options; draw });
-    S.on_cleanup (fun () ->
-        h.leave (function
-          | Section s -> s.id = id
-          | Option _ | Separator _ | Loader _ -> false));
-    (* A section's header names it, as React Aria's does. *)
-    let header_slot : Header.slot =
-     fun[@u] classes others children ->
-      S.set set_header
-        (Some
-           (fun header_id ->
-             <header
-               id=(fun () -> header_id)
-               class_=(fun () -> classes ())
-               role=`presentation
-               data_slot="header"
-               props=others>
-               (fun () -> children ())
-             </header>));
-      Jsx.nothing
-    in
-    <Holder.Provider value=(fun () -> holder)>
-      <Header.Slot.Provider value=(fun () -> header_slot)>
-        (fun () -> children ())
-      </Header.Slot.Provider>
-    </Holder.Provider>
+    Entry.element (Section { options; draw })
 end
 
 (* Kobalte's list as the [<div>] React Aria's list box is, of options alone.
@@ -517,7 +485,17 @@ let%component make ?(aria_label : string option)
     ?(render_empty_state : (unit -> Jsx.element) option)
     ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
     ?(children : Jsx.content option) () =
-  let entries, holder = holding () in
+  let entries =
+    resolving (fun () ->
+        <Within.Provider value=(fun () -> true)>
+          <Separator.Slot.Provider value=(fun () -> separator)>
+            <Separator.Element.Provider value=(fun () -> `div)>
+              (fun () ->
+                Option.value (children ()) ~default:(Jsx.element Jsx.nothing))
+            </Separator.Element.Provider>
+          </Separator.Slot.Provider>
+        </Within.Provider>)
+  in
   let empty, set_empty = S.create_signal false in
   let kept, set_kept = S.create_signal [||] in
   S.create_computed (fun () ->
@@ -565,7 +543,7 @@ let%component make ?(aria_label : string option)
           (fun entry _ ->
             match entry with
             | Option o -> option_ o
-            | Separator (_, drawn) | Loader (_, drawn) -> drawn ()
+            | Separator drawn | Loader drawn -> drawn ()
             | Section s ->
                 <Show
                   when_=(fun () ->
@@ -592,58 +570,40 @@ let%component make ?(aria_label : string option)
     Styles.Listbox.classes
       (Styles.Listbox.options ~variant:(variant ()) ?class_:(class_ ()) ())
   in
-  let entries_made =
-    <Holder.Provider value=(fun () -> holder)>
-      <Separator.Slot.Provider value=(fun () -> separator holder)>
-        <Separator.Element.Provider value=(fun () -> `div)>
-          (fun () ->
-            Option.value (children ()) ~default:(Jsx.element Jsx.nothing))
-        </Separator.Element.Provider>
-      </Separator.Slot.Provider>
-    </Holder.Provider>
-  in
   match Host.use () with
   | Some take ->
-      Jsx.fragment
-        [|
-          entries_made;
-          (take
-             {
-               options;
-               draw;
-               empty = (fun () -> S.get empty);
-               classes;
-               aria_label = (fun () -> aria_label ());
-               others = Props.others props;
-             } [@u]);
-        |]
+      take
+        {
+          options;
+          draw;
+          empty = (fun () -> S.get empty);
+          classes;
+          aria_label = (fun () -> aria_label ());
+          others = Props.others props;
+        } [@u]
   | None ->
-      Jsx.fragment
-        [|
-          entries_made;
-          <As_list
-            as_="div"
-            ?aria_label
-            value=(fun () -> selected ())
-            on_change=(fun keys ->
-                        let keys = set_to_array keys in
-                        S.set set_kept keys;
-                        ignore (on_selection_change keys : unit option))
-            options=(fun () ->
-                      Array.of_list (List.map Types.Either.left (options ())))
-            option_value=(fun o -> o.key)
-            option_text_value=(fun o -> o.text ())
-            option_disabled=(fun o -> o.disabled () || disabled o.key)
-            selection_mode=(fun () -> selection_mode ())
-            virtualized=true
-            aria_orientation=`vertical
-            class_=(fun () -> classes ())
-            data_slot="list-box"
-            data_empty=(fun () -> Jsx.flag (S.get empty))
-            props=(Props.others props)>
-            (fun collection ->
-              <Listing.Provider value=(fun () -> l)>
-                (fun () -> Jsx.element (draw collection))
-              </Listing.Provider>)
-          </As_list>;
-        |]
+      <As_list
+        as_="div"
+        ?aria_label
+        value=(fun () -> selected ())
+        on_change=(fun keys ->
+                    let keys = set_to_array keys in
+                    S.set set_kept keys;
+                    ignore (on_selection_change keys : unit option))
+        options=(fun () ->
+                  Array.of_list (List.map Types.Either.left (options ())))
+        option_value=(fun o -> o.key)
+        option_text_value=(fun o -> o.text ())
+        option_disabled=(fun o -> o.disabled () || disabled o.key)
+        selection_mode=(fun () -> selection_mode ())
+        virtualized=true
+        aria_orientation=`vertical
+        class_=(fun () -> classes ())
+        data_slot="list-box"
+        data_empty=(fun () -> Jsx.flag (S.get empty))
+        props=(Props.others props)>
+        (fun collection ->
+          <Listing.Provider value=(fun () -> l)>
+            (fun () -> Jsx.element (draw collection))
+          </Listing.Provider>)
+      </As_list>

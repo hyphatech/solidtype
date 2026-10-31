@@ -28,6 +28,36 @@ external fragment : element array -> element = "%identity"
     given, as JSX's [<>...</>] is: Solid renders an array of elements in order,
     as one. *)
 
+(** A value that stands in an element's place among a component's children,
+    never rendered, as Solid's [Match] stands among a [Switch]'s: the component
+    resolves its children, {!Solid.children}, and reads the values among them in
+    their order on the page, whatever made them -- a [For], a [Show] -- and
+    again as they change.
+
+    {[
+      module Entry = Jsx.Token (struct
+        type t = entry
+      end)
+
+      (* in a part *)
+      Entry.element (Option o)
+
+      (* in the component that holds them *)
+      let resolved = Solid.children (fun () -> children ()) in
+      let entries () = Entry.read (Solid.to_array (Solid.get resolved))
+    ]} *)
+module Token (T : sig
+  type t
+end) : sig
+  val element : T.t -> element
+  (** [element v] stands for [v]. It is given only to a component that reads it:
+      a page it reached would show an object. *)
+
+  val read : element array -> T.t array
+  (** The values this module's {!val-element} made, in order, the others left
+      out. *)
+end
+
 type data
 (** A [data-] attribute's value, on an element or a component: present, or
     absent, as React Aria writes a state, ["true"] or no attribute.

@@ -19,10 +19,10 @@
     [selection_mode=`none], Enter or a press calls [on_action] with the option's
     [id].
 
-    Its options, {!Section}s and [Separator]s join the list as they are made, in
-    their order, and the list draws them: a [Header] inside a section names it,
-    a [Description] inside an option describes it, and a separator is a [<div>],
-    as React Aria's is.
+    Its options, {!Section}s and [Separator]s are its children, drawn by the
+    list in their order on the page, as a [For] or a [Show] among them changes:
+    a [Header] inside a section names it, a [Description] inside an option
+    describes it, and a separator is a [<div>], as React Aria's is.
 
     A part is used inside a [List_box], an indicator inside an {!Item}:
     elsewhere it raises [Invalid_argument] as it is made. *)

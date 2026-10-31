@@ -252,4 +252,24 @@ let () =
             expect (while_loading, shown ())
             |> toEqual
                  ( [| "option bulbasaur"; "DIV "; "option Loading more..." |],
-                   [| "option bulbasaur"; "DIV " |] ))))
+                   [| "option bulbasaur"; "DIV " |] )));
+      Jest.test "keeps its options in their order, one added between two"
+        (fun () ->
+          let names, set_names =
+            Solidtype.Solid.create_signal [| "bulbasaur"; "squirtle" |]
+          in
+          T.render (fun () ->
+              <List_box aria_label="Pokemon">
+                <Solidtype.For each=(fun () -> Solidtype.Solid.get names)>
+                  (fun name _ ->
+                    <List_box.Item id=(fun () -> name)>
+                      (fun () -> Solidtype.Jsx.string name)
+                    </List_box.Item>)
+                </Solidtype.For>
+              </List_box>);
+          let shown () = all "[role=option]" |> Array.map text in
+          Solidtype.Solid.set set_names
+            [| "bulbasaur"; "charmander"; "squirtle" |];
+          E.(
+            expect (shown ())
+            |> toEqual [| "bulbasaur"; "charmander"; "squirtle" |])))

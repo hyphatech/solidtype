@@ -365,12 +365,15 @@ let%component make ?(placeholder : string = "Select an item")
     }
   in
   let i = Interaction.create () in
+  (* Its list box is taken once on the page: Kobalte's root is made before it,
+     so on the server its hidden select holds no option, and one given as the
+     page hydrates would be looked for among the server's nodes. *)
   let parts () =
     <Context.Provider value=(fun () -> s)>
       <List_box.Host.Provider
         value=(fun () ->
                 fun[@u] h ->
-                 S.set set_hosted (Some h);
+                 S.on_mount (fun () -> S.set set_hosted (Some h));
                  S.on_cleanup (fun () -> S.set set_hosted None);
                  Jsx.nothing)>
         <List_box.Listing.Provider value=(fun () -> listing)>
