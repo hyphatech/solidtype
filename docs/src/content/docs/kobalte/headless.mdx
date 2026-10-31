@@ -1,6 +1,6 @@
 ---
-title: Components Kobalte lacks
-description: Headless components made as Kobalte makes its own, of its hooks.
+title: Headless components
+description: Components Kobalte lacks, made as Kobalte makes its own, of its hooks, and Kobalte's own, fixed.
 ---
 
 import Example from "@components/Example.astro";
@@ -55,3 +55,16 @@ control inside a row is the control's. A column that `allows_sorting` is
 rows are selected, each row's state by its key, and selecting all or none.
 `Table.use_column_context ()` is the column a part is in: which way it is
 sorted.
+
+## Kobalte's own, fixed
+
+Where one of Kobalte's components has a bug, `solidtype-headless` holds it
+fixed, under a module of its own name: each part it fixes wraps Kobalte's and
+takes Kobalte's props, and its other parts are Kobalte's own, so a style names
+one module. HeroUI's ports dress these, never Kobalte's.
+
+| Module | Kobalte's bug | Fixed |
+|---|---|---|
+| `Color_swatch` | a colour less than opaque is written for CSS as `rgb(4, 133, 247 / 0.5)`, which no browser reads, so it paints nothing | the background is written as `rgba` |
+| `Color_area` | the root takes `disabled` for itself, so its state never learns it: the thumb stays in the page's order and its inputs enabled | `Root` keeps `disabled` for its parts: `Thumb` is out of the page's order, `HiddenInputX` and `HiddenInputY` disabled, and the root, `Background` and `Thumb` `data-disabled` |
+| `Color_area` | the thumb's `--kb-color-current` is written as the swatch's is | written as `rgba` |

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `Solidtype_headless.Color_swatch` and `Solidtype_headless.Color_area`:
+  Kobalte's, fixed, for any style to dress. A swatch and an area's thumb,
+  `--kb-color-current`, write a colour less than opaque as `rgba`, where
+  Kobalte's `rgb(4, 133, 247 / 0.5)` is read by no browser; a disabled area's
+  thumb is out of the page's order, its inputs disabled, and its root,
+  background and thumb `data-disabled`, where Kobalte's root keeps
+  `disabled` from its state. `Solidtype_heroui.Color_swatch` and
+  `Solidtype_heroui.Color_area` dress them.
+
 - `Solidtype_heroui.Time_field` on a prerendered page shows one colon
   between its parts, where it showed two until it hydrated: the colon
   Kobalte's segment writes of its own is drawn inside a hidden span, on the

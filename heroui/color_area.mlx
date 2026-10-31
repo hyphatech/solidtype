@@ -1,6 +1,6 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
-module Kobalte = Solidtype_kobalte.ColorArea
+module Headless = Solidtype_headless.Color_area
 module Color = Solidtype_kobalte.Types.Color
 module Area = Solidtype_kobalte.Types.ColorAreaContextValue
 module State = Solidtype_kobalte.Types.ColorAreaState
@@ -16,8 +16,7 @@ type channel =
   | `alpha ]
 
 (* What the thumb reads of its area: its classes, and whether it is disabled,
-   which Kobalte's state never learns: its root keeps [disabled] from the form
-   control it makes. *)
+   for HeroUI's state. *)
 type area = { slots : unit -> Styles.ColorArea.slots; disabled : unit -> bool }
 
 module Area_context = Solidtype.Context.Make_optional (struct
@@ -27,9 +26,7 @@ end)
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
-(* The thumb's colour as HeroUI's styles read it. Kobalte writes a colour less
-   than opaque for CSS as rgb(4, 133, 247 / 0.5), which no browser reads, so it
-   is written as rgba. *)
+(* The thumb's colour as HeroUI's styles read it, a variable of their own. *)
 let painted color style =
   "--color-area-thumb-color: "
   ^ Color.to_string color ~format:`rgba ()
@@ -42,14 +39,12 @@ module Thumb = struct
       | Some a -> a
       | None -> invalid_arg "Color_area.Thumb is used inside a Color_area"
     in
-    let area = Kobalte.use_color_area_context () in
+    let area = Headless.use_color_area_context () in
     let state = Area.state area in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
-    (* A disabled area's thumb is out of the page's order, and its inputs
-       disabled; HeroUI's disabled style stops the pointer. *)
-    <Kobalte.Thumb
+    (* HeroUI's disabled style stops the pointer. *)
+    <Headless.Thumb
       ref=(fun e -> Interaction.watch i e)
-      ?tab_index=(fun () -> if disabled () then Some "-1" else None)
       class_=(fun () -> after (Styles.ColorArea.thumb (slots ())) (class_ ()))
       style=(fun () -> painted (Area.get_display_color area ()) (style ()))
       data_slot="color-area-thumb"
@@ -57,9 +52,8 @@ module Thumb = struct
       data_dragging=(fun () -> Jsx.flag (S.get (State.is_dragging state)))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       props=(Props.others props)>
-      <Kobalte.HiddenInputX disabled=(fun () -> disabled ()) />
-      <Kobalte.HiddenInputY disabled=(fun () -> disabled ()) />
-    </Kobalte.Thumb>
+      <Headless.HiddenInputX /> <Headless.HiddenInputY />
+    </Headless.Thumb>
 end
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)
@@ -75,7 +69,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
   in
   let a = { slots; disabled = (fun () -> is_disabled ()) } in
   <Area_context.Provider value=(fun () -> a)>
-    <Kobalte.Root
+    <Headless.Root
       ?value
       ?default_value
       on_change=(fun c -> ignore (on_change c : unit option))
@@ -93,10 +87,10 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       (* React Aria's area is its own gradient, where Kobalte's draws it on a
          background of its own: it fills the area, rounded and shadowed as the
          area is, its inset edge over the gradient. *)
-      <Kobalte.Background
+      <Headless.Background
         style="position: absolute; inset: 0; border-radius: inherit; \
                box-shadow: inherit">
         (fun () -> children ())
-      </Kobalte.Background>
-    </Kobalte.Root>
+      </Headless.Background>
+    </Headless.Root>
   </Area_context.Provider>

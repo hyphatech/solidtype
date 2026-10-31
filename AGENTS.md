@@ -9,7 +9,8 @@ library bound is an opam package of its own: `solidtype` binds Solid,
 `solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts,
 `solidtype-internationalized-date` the dates HeroUI's date components take;
 `solidtype-headless` holds the components Kobalte lacks, made as Kobalte
-makes its own, of its hooks, with no style; and `solidtype-heroui` is a
+makes its own, of its hooks, with no style, and Kobalte's own where they
+need a fix; and `solidtype-heroui` is a
 maintained port of HeroUI's components onto Kobalte's and those, since
 HeroUI's are React's. This file is for anyone changing it, human or agent. Users start at [README.md](README.md).
 
@@ -59,9 +60,13 @@ kobalte/             solidtype-kobalte: Kobalte's components part by part,
 headless/            solidtype-headless: the components Kobalte lacks, one
                      module each, made of Kobalte's hooks: roles, keys and
                      state, no style, every attribute of a part's element
-                     taken and passed on
+                     taken and passed on; and Kobalte's own where they need
+                     a fix, each fixed part Kobalte's beneath, the others
+                     Kobalte's as they are
   table              a grid of rows and cells: Kobalte's list of rows,
                      their selection, and the keys through their cells
+  color_swatch       Kobalte's, a colour less than opaque one a browser
+  color_area         reads, and an area disabled whole
 rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
                      rhp's declarations whole: solidtype_rhp, and the types
                      it names, types
@@ -212,7 +217,8 @@ test/hydration/      an island, an rhp chart and a HeroUI select on Kobalte,
 test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
                      twins/, the same checks and an axe scan on both
 test/headless/       each headless component as a caller meets it: its roles,
-                     keys and state, and an axe scan
+                     keys and state, and an axe scan; each of Kobalte's
+                     fixed, failing on Kobalte's own
 test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      by vitest, and its state beside the same component in
                      React, its twin in twins/; and the variant functions,
@@ -464,8 +470,14 @@ break.
   classes, `data-slot`, React Aria's state, `"true"`, and HeroUI's own parts.
   Why: behaviour and accessibility are the component's whoever dresses it,
   tested once, and a port that mixes them with a style cannot be read for
-  either. Test: `test/headless/`, each component as a caller meets it, and
-  its port's test against React's.
+  either. A bug of Kobalte's own component is fixed so too, in a module of
+  `solidtype-headless` named for it, never in a port: its fixed parts wrap
+  Kobalte's and take Kobalte's props, `include` its `Props`, and its other
+  parts are Kobalte's own, so a style names one module. A port's own
+  difference from Kobalte -- HeroUI's literals beside a time field's segments
+  -- stays the port's. Test: `test/headless/`, each component as a caller
+  meets it, a fix failing on Kobalte's own, and its port's test against
+  React's.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;

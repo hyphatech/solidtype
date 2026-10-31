@@ -1,0 +1,94 @@
+(* Kobalte's own components where they need a fix, as a caller meets them: a
+   swatch and an area's thumb whose colour a browser reads, less than opaque
+   too; a disabled area out of the page's order, its inputs disabled and its
+   parts marked so; and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_swatch = Solidtype_headless.Color_swatch
+module Color_area = Solidtype_headless.Color_area
+module Colors = Solidtype_kobalte.Colors
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+type style
+
+external style : Dom.element -> style = "style" [@@mel.get]
+external background_color : style -> string = "backgroundColor" [@@mel.get]
+external property : style -> string -> string = "getPropertyValue" [@@mel.send]
+
+external query : string -> Dom.element = "querySelector"
+[@@mel.scope "document"]
+
+external query_all : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+external disabled : Dom.element -> bool = "disabled" [@@mel.get]
+
+let half = "rgba(4, 133, 247, 0.5)"
+
+let area ~is_disabled =
+  H.render (fun () ->
+      <Color_area.Root
+        aria_label="Colour"
+        default_value=(fun () -> Colors.parse_color half)
+        disabled=(fun () -> is_disabled)>
+        <Color_area.Background>
+          <Color_area.Thumb>
+            <Color_area.HiddenInputX /> <Color_area.HiddenInputY />
+          </Color_area.Thumb>
+        </Color_area.Background>
+      </Color_area.Root>)
+
+(* What a disabled area shows of it, part by part. *)
+let held () =
+  let thumb = query "[role=presentation]" in
+  let marked selector = H.attribute (query selector) "data-disabled" in
+  ( H.attribute thumb "tabindex",
+    Array.map disabled (Js.Array.from (query_all "input")),
+    ( marked "[role=group]",
+      marked "[role=group] > div",
+      marked "[role=presentation]" ) )
+
+let () =
+  Jest.describe "Kobalte's components, fixed" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "a swatch paints a colour less than opaque" (fun () ->
+          H.render (fun () ->
+              <Color_swatch
+                value=(fun () -> Colors.parse_color half)
+                aria_label="Half blue"
+                data_testid="swatch"
+              />);
+          E.(
+            expect (background_color (style (query "[data-testid=swatch]")))
+            |> toBe half));
+      Jest.test "an area's thumb writes its colour, less than opaque" (fun () ->
+          area ~is_disabled:false;
+          E.(
+            expect
+              (property
+                 (style (query "[role=presentation]"))
+                 "--kb-color-current")
+            |> toBe half));
+      Jest.test "an area enabled is in the page's order" (fun () ->
+          area ~is_disabled:false;
+          E.(
+            expect (held ())
+            |> toEqual (Some "0", [| false; false |], (None, None, None))));
+      Jest.test "an area disabled is out of it, its inputs disabled" (fun () ->
+          area ~is_disabled:true;
+          E.(
+            expect (held ())
+            |> toEqual (Some "-1", [| true; true |], (Some "", Some "", Some ""))));
+      Jest.testPromise "a swatch and an area have no violation axe finds"
+        (fun () ->
+          area ~is_disabled:true;
+          H.render (fun () ->
+              <Color_swatch
+                value=(fun () -> Colors.parse_color half) aria_label="Half blue"
+              />);
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

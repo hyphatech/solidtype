@@ -1,19 +1,18 @@
-module Kobalte = Solidtype_kobalte.ColorSwatch
+module Headless = Solidtype_headless.Color_swatch
 module Color = Solidtype_kobalte.Types.Color
 
-(* HeroUI's styles paint the colour over a checkerboard. Kobalte writes a
-   colour less than opaque for CSS as rgb(4, 133, 247 / 0.5), which no browser
-   reads, so its background too is written as rgba. *)
+(* HeroUI's styles paint the colour over a checkerboard, read from a variable
+   of their own. *)
 let painted color style =
-  let css = Color.to_string color ~format:`rgba () in
-  "--color-swatch-current: " ^ css ^ "; background-color: " ^ css
+  "--color-swatch-current: "
+  ^ Color.to_string color ~format:`rgba ()
   ^ match style with Some s -> "; " ^ s | None -> ""
 
 let%component make ~(color : Color.t) ?(color_name : string option)
     ?(aria_label : string option) ?(shape : [ `circle | `square ] option)
     ?(size : [ `xs | `sm | `md | `lg | `xl ] option) ?(class_ : string option)
     ?(style : string option) () =
-  <Kobalte.Root
+  <Headless
     value=(fun () -> color ())
     ?color_name
     ?aria_label

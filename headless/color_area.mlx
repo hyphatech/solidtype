@@ -1,0 +1,128 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.ColorArea
+module Color = Solidtype_kobalte.Types.Color
+module Area = Solidtype_kobalte.Types.ColorAreaContextValue
+module State = Solidtype_kobalte.Types.ColorAreaState
+
+(* Whether the area is disabled, which Kobalte's state never learns: its root
+   takes [disabled] for itself before it makes the form control its parts
+   read. *)
+module Disabled = Solidtype.Context.Make (struct
+  type t = unit -> bool
+
+  let default () = false
+end)
+
+(* Kobalte's state, present and empty. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+(* A style after one of the part's own, as Kobalte combines them. *)
+let after own = function Some s -> own ^ "; " ^ s | None -> own
+
+module Root = struct
+  module Props = struct
+    include Kobalte.Root.Props
+
+    type t
+
+    external disabled : t -> bool option = "disabled" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let disabled () = Option.value (Props.disabled props) ~default:false in
+    <Disabled.Provider value=(fun () -> disabled)>
+      <Kobalte.Root
+        data_disabled=(fun () -> state (disabled ())) props=(S.omit props [||])
+      />
+    </Disabled.Provider>
+
+  let component = Jsx.component make
+end
+
+module Background = struct
+  module Props = struct
+    include Kobalte.Background.Props
+
+    type t
+  end
+
+  let make (props : Props.t) =
+    let disabled = Disabled.use () in
+    <Kobalte.Background
+      data_disabled=(fun () -> state (disabled ())) props=(S.omit props [||])
+    />
+
+  let component = Jsx.component make
+end
+
+module Thumb = struct
+  module Props = struct
+    include Kobalte.Thumb.Props
+
+    type t
+
+    external style : t -> string option = "style" [@@mel.get]
+  end
+
+  (* A disabled area's thumb is out of the page's order; and its colour, which
+     Kobalte writes for CSS as rgb(4, 133, 247 / 0.5) where it is less than
+     opaque, is written as rgba. *)
+  let make (props : Props.t) =
+    let disabled = Disabled.use () in
+    let area = Kobalte.use_color_area_context () in
+    <Kobalte.Thumb
+      ?tab_index=(fun () -> if disabled () then Some "-1" else None)
+      style=(fun () ->
+              after
+                ("--kb-color-current: "
+                ^ Color.to_string
+                    (S.get (State.value (Area.state area)))
+                    ~format:`rgba ())
+                (Props.style props))
+      data_disabled=(fun () -> state (disabled ()))
+      props=(S.omit props [| "style" |])
+    />
+
+  let component = Jsx.component make
+end
+
+(* A disabled area's inputs are disabled, as its form control would make
+   them. *)
+module HiddenInputX = struct
+  module Props = struct
+    include Kobalte.HiddenInputX.Props
+
+    type t
+  end
+
+  let make (props : Props.t) =
+    let disabled = Disabled.use () in
+    <Kobalte.HiddenInputX
+      disabled=(fun () -> disabled ()) props=(S.omit props [||])
+    />
+
+  let component = Jsx.component make
+end
+
+module HiddenInputY = struct
+  module Props = struct
+    include Kobalte.HiddenInputY.Props
+
+    type t
+  end
+
+  let make (props : Props.t) =
+    let disabled = Disabled.use () in
+    <Kobalte.HiddenInputY
+      disabled=(fun () -> disabled ()) props=(S.omit props [||])
+    />
+
+  let component = Jsx.component make
+end
+
+module Label = Kobalte.Label
+module Description = Kobalte.Description
+module ErrorMessage = Kobalte.ErrorMessage
+
+let use_color_area_context = Kobalte.use_color_area_context

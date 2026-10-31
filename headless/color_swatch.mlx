@@ -1,0 +1,28 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.ColorSwatch
+module Color = Solidtype_kobalte.Types.Color
+
+module Props = struct
+  include Kobalte.Root.Props
+
+  type t
+
+  external value : t -> Color.t = "value" [@@mel.get]
+  external style : t -> string option = "style" [@@mel.get]
+end
+
+(* Kobalte writes a colour less than opaque for CSS as rgb(4, 133, 247 / 0.5),
+   which no browser reads: the background is written as rgba, before the
+   caller's style, which wins. *)
+let make (props : Props.t) =
+  <Kobalte.Root
+    value=(fun () -> Props.value props)
+    style=(fun () ->
+            "background-color: "
+            ^ Color.to_string (Props.value props) ~format:`rgba ()
+            ^ match Props.style props with Some s -> "; " ^ s | None -> "")
+    props=(S.omit props [| "value"; "style" |])
+  />
+
+let component = Jsx.component make
