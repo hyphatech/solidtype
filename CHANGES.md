@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_headless.Virtualizer`, React Aria's Virtualizer, behaviour alone:
+  what `Solidtype_heroui.Virtualizer` was, which is now it, unchanged.
+
 - `Solidtype_heroui.Table`'s expandable rows, HeroUI's: given `tree_column`,
   the table is a tree grid whose rows hold the rows written inside them, drawn
   while `expanded_keys`, or `default_expanded_keys`, say, and

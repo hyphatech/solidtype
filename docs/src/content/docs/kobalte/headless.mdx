@@ -65,6 +65,16 @@ on one, which Solid reads inside it.
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index`, `data-tree-column` |
 | `Table.Load_more` | an inert `<tr>` of no height holding the sentinel, and while loading a `<tr role="row">` across every column | `is_loading`, `on_load_more`, `scroll_offset`; its attributes are the loading row's |
 
+## Virtualizer
+
+`Solidtype_headless.Virtualizer` is React Aria's Virtualizer: around a
+collection that reads it, it has the collection draw only the entries in view
+of what scrolls them, in a block the size of them all, each placed by its
+layout, `Virtualizer.list_layout`, React Aria's `ListLayout`. A collection
+reads it by `Virtualizer.use ()` and places its entries by
+`Virtualizer.window`. HeroUI's list box, select, combo box and autocomplete
+read it, as `Solidtype_heroui.Virtualizer`.
+
 ## Load_more_sentinel
 
 `Solidtype_headless.Load_more_sentinel` is what asks a list for more as its end

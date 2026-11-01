@@ -69,6 +69,8 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      React Stately lays them out, and rows that hold rows,
                      each row's cells and rows tokens it draws once read
   load_more_sentinel what asks a list for more as its end comes into view
+  virtualizer        React Aria's Virtualizer: a collection draws the entries
+                     in view, each placed by a layout
   color_swatch       Kobalte's, a colour less than opaque one a browser
   color_area         reads, and an area disabled whole
 rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
