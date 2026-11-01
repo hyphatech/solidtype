@@ -29,7 +29,9 @@
     Page Down and typing. Right enters a row's first cell and moves along it,
     and from its last back to the row; Left the other way, from a row to its
     last cell; Up and Down from a cell reach the cell of its column in the row
-    above or below, the header's included.
+    above or below, the header's included. A cell given focus, by a press or by
+    code, keeps it, and from a cell an arrow, Home and End move among cells
+    alone, where they reach none moving nothing.
 
     Rows are selected as the root's [selection_mode] says, by Kobalte's list:
     pressing a row, Space or Enter toggles it, or with [selection_behavior]

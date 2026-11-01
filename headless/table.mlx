@@ -417,24 +417,33 @@ module Root = struct
       }
     in
     (* The arrows across a row and through its cells are the table's, which
-       Kobalte's list of rows does not know; the rest are the list's. *)
+       Kobalte's list of rows does not know; the rest are the list's. From a
+       cell, an arrow, Home and End are the grid's even where they reach
+       nothing, as an accessible grid's are, or the list would move a row. *)
     let on_key_down e =
       call (Props.on_key_down props) e;
       let moved =
         match (Js.Null.toOption active, S.get element) with
         | Some focused, Some table -> (
             match role focused with
-            | Some ("gridcell" | "rowheader" | "columnheader") ->
-                from_cell table focused (key e)
-            | Some "row" -> from_row focused (key e)
-            | Some _ | None -> None)
-        | _ -> None
+            | Some ("gridcell" | "rowheader" | "columnheader") -> (
+                match key e with
+                | "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Home"
+                | "End" ->
+                    `grid (from_cell table focused (key e))
+                | _ -> `list)
+            | Some "row" -> (
+                match from_row focused (key e) with
+                | Some target -> `grid (Some target)
+                | None -> `list)
+            | Some _ | None -> `list)
+        | _ -> `list
       in
       match moved with
-      | Some target ->
+      | `grid target ->
           prevent_default e;
-          focus target
-      | None -> Selectable_list.on_key_down list e
+          Option.iter focus target
+      | `list -> Selectable_list.on_key_down list e
     in
     <Table_context.Provider value=(fun () -> t)>
       <table
@@ -453,7 +462,14 @@ module Root = struct
                         Selectable_list.on_mouse_down list e)
         on_focus_in=(fun e ->
                       call (Props.on_focus_in props) e;
-                      Selectable_list.on_focus_in list e)
+                      (* Kobalte's list, focused from outside, moves focus to
+                         a row of its choosing, and a row whose key it is
+                         given focuses itself: focus given a cell stays there,
+                         the list only told it has focus. *)
+                      match role (event_target e) with
+                      | Some ("gridcell" | "rowheader" | "columnheader") ->
+                          Manager.set_focused (m ()) true
+                      | Some _ | None -> Selectable_list.on_focus_in list e)
         on_focus_out=(fun e ->
                        call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)

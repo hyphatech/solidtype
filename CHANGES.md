@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `Solidtype_headless.Table`, and so `Solidtype_heroui.Table`: a cell given
+  focus, by a press or by code, keeps it, and an arrow that reaches no cell --
+  down from the last row, up from the header, past a header's ends -- moves
+  nothing, as React Aria's grid does, where Kobalte's list of rows took the
+  focus to a row of its own choosing.
+
 - `Solidtype_heroui.Virtualizer`, React Aria's: around a `List_box`, alone or
   in a `Select`, a `Combo_box` or an `Autocomplete`, it draws only the entries
   in view of what scrolls the list, each placed by

@@ -135,6 +135,28 @@ let () =
                      "row:Sara JohnsonCMOEdit Sara Johnson";
                    |]));
       Jest.testPromise
+        "keeps focus on a cell given it, and where an arrow reaches no cell"
+        (fun () ->
+          team ();
+          let user = H.setup () in
+          let after start k =
+            H.focus (H.by_text start);
+            let* () = H.keyboard user k in
+            Js.Promise.resolve (where ())
+          in
+          let* below_last = after "CMO" "{ArrowDown}" in
+          let* above_header = after "Role" "{ArrowUp}" in
+          let* before_header = after "Name" "{ArrowLeft}" in
+          let* after_header = after "Actions" "{ArrowRight}" in
+          Js.Promise.resolve
+            E.(
+              expect (below_last, above_header, before_header, after_header)
+              |> toEqual
+                   ( "gridcell:CMO",
+                     "columnheader:Role",
+                     "columnheader:Name",
+                     "columnheader:Actions" )));
+      Jest.testPromise
         "selects rows, writing their state as Kobalte writes it, a disabled \
          row left out" (fun () ->
           let told = ref [||] in
@@ -180,12 +202,7 @@ let () =
           Js.Promise.resolve
             E.(
               expect (!got_table, !clicked, !keys, !told, where ())
-              |> toEqual
-                   ( true,
-                     1,
-                     1,
-                     [| "2" |],
-                     "row:Sara JohnsonCMOEdit Sara Johnson" )));
+              |> toEqual (true, 1, 1, [| "2" |], "rowheader:Sara Johnson")));
       Jest.test "shows its empty state across every column" (fun () ->
           team ~members:[||] ();
           let cell = H.by_text "No members" in
