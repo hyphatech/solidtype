@@ -1,0 +1,106 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Chip = Solidtype_heroui.Chip
+module Table = Solidtype_heroui.Table
+
+type user = {
+  id : string;
+  name : string;
+  role : string;
+  status : string;
+  color : [ `accent | `danger | `default | `success | `warning ];
+  email : string;
+}
+
+let users =
+  [|
+    {
+      id = "1";
+      name = "Kate Moore";
+      role = "CEO";
+      status = "Active";
+      color = `success;
+      email = "kate@acme.com";
+    };
+    {
+      id = "2";
+      name = "John Smith";
+      role = "CTO";
+      status = "Active";
+      color = `success;
+      email = "john@acme.com";
+    };
+    {
+      id = "3";
+      name = "Sara Johnson";
+      role = "CMO";
+      status = "On Leave";
+      color = `warning;
+      email = "sara@acme.com";
+    };
+    {
+      id = "4";
+      name = "Michael Brown";
+      role = "CFO";
+      status = "Active";
+      color = `success;
+      email = "michael@acme.com";
+    };
+    {
+      id = "5";
+      name = "Emily Davis";
+      role = "Product Manager";
+      status = "Inactive";
+      color = `danger;
+      email = "emily@acme.com";
+    };
+  |]
+
+let make () =
+  <Table>
+    <Table.Resizable_container>
+      <Table.Content
+        aria_label="Table with resizable columns" class_="min-w-[700px]">
+        <Table.Header>
+          <Table.Column
+            is_row_header=true
+            default_width=(fun () -> Table.Fraction 1.)
+            id="name"
+            min_width=160.>
+            "Name" <Table.Column_resizer />
+          </Table.Column>
+          <Table.Column
+            default_width=(fun () -> Table.Fraction 1.) id="role" min_width=220.>
+            "Role" <Table.Column_resizer />
+          </Table.Column>
+          <Table.Column
+            default_width=(fun () -> Table.Fraction 1.)
+            id="status"
+            min_width=100.>
+            "Status" <Table.Column_resizer />
+          </Table.Column>
+          <Table.Column
+            default_width=(fun () -> Table.Fraction 1.)
+            id="email"
+            min_width=200.>
+            "Email"
+          </Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> users)>
+            (fun user _ ->
+              <Table.Row id=(fun () -> user.id)>
+                <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
+                <Table.Cell>
+                  <Chip color=(fun () -> user.color) size=`sm variant=`soft>
+                    (fun () -> Jsx.string user.status)
+                  </Chip>
+                </Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Resizable_container>
+  </Table>

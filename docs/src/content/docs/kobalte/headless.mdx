@@ -41,15 +41,20 @@ control inside a row is the control's. A column that `allows_sorting` is
 `aria-sort`, and pressed, or given Enter or Space, asks for its sort. A cell
 given focus keeps it, and an arrow that reaches no cell moves nothing.
 `Table.Load_more`, after the body's last row, asks for more rows as it comes
-into view of what scrolls the table, never while they load.
+into view of what scrolls the table, never while they load. In a
+`Table.Resizable_container` the columns are laid out at a fixed width, as each
+column's `width` or `default_width` asks, and a `Table.Column_resizer` resizes
+its column, dragged, or reached by Tab and stepped by the keys.
 
 <Example code={ExTableCode} title="headless_table.mlx"><ExTable.make client:visible /></Example>
 
 | Part | Element | What it adds |
 |---|---|---|
+| `Table.Resizable_container` | `<div>` | the width the columns share; `on_resize_start`, `on_resize`, `on_resize_end` |
 | `Table.Root` | `<table role="grid">` | the list of rows, their selection: `selection_mode`, `selection_behavior`, `selected_keys`, `default_selected_keys`, `on_selection_change`, `disabled_keys`, `disallow_empty_selection`; its sort: `sort_descriptor`, `on_sort_change` |
 | `Table.Header` | `<thead>` and its `<tr>` | |
-| `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `id`, the column a sort names; `allows_sorting`, `aria-sort`; `is_row_header`, whose cells name their rows |
+| `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `id`, the column a sort names; `allows_sorting`, `aria-sort`; `is_row_header`, whose cells name their rows; `width`, `default_width`, `min_width`, `max_width`, `data-resizing` |
+| `Table.Column_resizer` | `<div role="presentation">` and a range `<input>` | `data-resizing`, `data-resizable-direction`; the input named `aria_label` and by its column |
 | `Table.Body` | `<tbody>` | `empty_state`, a row across every column while it has none |
 | `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled` |
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index` |

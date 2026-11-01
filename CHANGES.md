@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Table.Resizable_container` and `Table.Column_resizer`,
+  HeroUI's: the columns laid out at a fixed width, each as its `width`, or
+  `default_width` until resized, asks, `Pixels`, a `Percent` or a `Fraction`,
+  within `min_width` and `max_width`, as React Stately lays them out; a
+  resizer dragged, or reached by Tab from its column's header and stepped by
+  its keys, and `on_resize_start`, `on_resize` and `on_resize_end` told every
+  column's size. HeroUI's Column Resizing example.
+  `Solidtype_headless.Table.Resizable_container` and `Table.Column_resizer`
+  beneath them, and `Table.context`'s `resizing_column`.
+
 - `Solidtype_heroui.Table.Load_more` and `Table.Load_more_content`, HeroUI's:
   at the end of a table's body, more rows are asked for as it scrolls into
   view, `on_load_more`, `scroll_offset`, and while `is_loading` a row across

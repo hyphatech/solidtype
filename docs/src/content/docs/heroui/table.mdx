@@ -10,6 +10,8 @@ import * as ExSecondary from "@islands/table_secondary.jsx";
 import ExSecondaryCode from "@islands/table_secondary.mlx?raw";
 import * as ExAsyncLoading from "@islands/table_async_loading.jsx";
 import ExAsyncLoadingCode from "@islands/table_async_loading.mlx?raw";
+import * as ExColumnResizing from "@islands/table_column_resizing.jsx";
+import ExColumnResizingCode from "@islands/table_column_resizing.mlx?raw";
 import * as ExSorting from "@islands/table_sorting.jsx";
 import ExSortingCode from "@islands/table_sorting.mlx?raw";
 import * as ExCustomCells from "@islands/table_custom_cells.jsx";
@@ -40,8 +42,9 @@ Its rows are selected by Kobalte's list, one or many, by a press, Space or
 Enter, or a `Checkbox` of `slot=`selection` in a row, and all of them by one
 in the header. A column that allows sorting is pressed, or given Enter or Space, to be
 sorted by. `Table.Load_more` loads more rows as the table's end scrolls into
-view. Resizing columns, expandable rows and virtualization are being ported,
-each in a stage of its own; their examples are added with them.
+view. In a `Table.Resizable_container`, a `Table.Column_resizer` resizes its
+column. Expandable rows and virtualization are being ported, each in a stage
+of its own; their examples are added with them.
 
 ## Usage
 
@@ -111,6 +114,21 @@ the column's render function.
 
 <Example code={ExPaginationCode} title="table_pagination.mlx"><ExPagination.make client:visible /></Example>
 
+### Column Resizing
+
+`Table.Resizable_container` in place of `Table.Scroll_container` lays the
+columns out at a fixed width, each as its `width`, or `default_width` until it
+is resized, says: `Pixels`, a `Percent` of the table's width, or a `Fraction`
+of what the others leave, never narrower than `min_width`, 75 pixels by
+default, nor wider than `max_width`. A `Table.Column_resizer` in a column is
+dragged, or reached by Tab from the column's header, where its arrows resize
+the column by 10 pixels and Enter begins a resize the arrows go on with, which
+Enter, Escape, Space, Tab or leaving it ends. `on_resize_start`, `on_resize`
+and `on_resize_end` on the container are told every column's size by its
+`id`.
+
+<Example code={ExColumnResizingCode} title="table_column_resizing.mlx"><ExColumnResizing.make client:visible /></Example>
+
 ### Empty State
 
 `render_empty_state` on `Table.Body` is drawn while it has no row, across
@@ -148,7 +166,8 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
   `.table__column`, `.table__body`, `.table__row`, `.table__cell`,
   `.table__footer`, `.table__sortable-column-header`,
   `.table__sortable-column-indicator`, `.table__load-more`,
-  `.table__load-more-content`
+  `.table__load-more-content`, `.table__resizable-container`,
+  `.table__column-resizer`
 
 ### Interactive States
 
@@ -157,6 +176,8 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
 - a column: `[data-allows-sorting="true"]`, `[data-hovered="true"]`,
   `[data-focus-visible="true"]`
 - a sortable header and its indicator: `[data-direction]`
+- a column resizer: `[data-hovered="true"]`, `[data-resizing="true"]`,
+  `[data-focus-visible="true"]`, `[data-resizable-direction]`
 - a cell: `[data-focus-visible="true"]`
 
 ## API Reference
@@ -205,6 +226,10 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | `id` | `id` | `string` | one of its own | The column a sort names |
 | `allowsSorting` | `allows_sorting` | `bool` | `false` | Whether pressing it sorts by it |
 | `isRowHeader` | `is_row_header` | `bool` | `false` | Whether its cells name their rows |
+| `width` | `width` | `Table.column_size` | | Its width, controlled, in a resizable table |
+| `defaultWidth` | `default_width` | `Table.column_size` | `Fraction 1.` | Its width until it is resized |
+| `minWidth` | `min_width` | `float` | `75.` | How narrow it may be, in pixels |
+| `maxWidth` | `max_width` | `float` | | How wide it may be, in pixels |
 | `children` | `children` | | | Its label; HeroUI's render function of its sort direction is `Table.Sortable_column_header`'s reading of it |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
@@ -236,6 +261,22 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.ResizableContainer
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `onResizeStart` | `on_resize_start` | `(string * Table.column_size) array -> unit` | | Called as a resize begins, with every column's size |
+| `onResize` | `on_resize` | `(string * Table.column_size) array -> unit` | | Called at each step of a resize |
+| `onResizeEnd` | `on_resize_end` | `(string * Table.column_size) array -> unit` | | Called as a resize ends |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.ColumnResizer
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `aria-label` | `aria_label` | `string` | `"Resizer"` | Its input's name, beside its column's |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.LoadMore

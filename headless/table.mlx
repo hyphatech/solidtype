@@ -117,10 +117,154 @@ type context = {
   is_empty : unit -> bool;
   select_all : unit -> unit;
   clear_selection : unit -> unit;
+  resizing_column : unit -> string option;
+}
+
+type column_size = Pixels of float | Percent of float | Fraction of float
+
+(* A column as a resizable table lays it out: how wide it asks to be, and
+   within what. *)
+type flex_item = {
+  base : float;
+  flex : float;
+  min : float;
+  max : float;
+  mutable frozen : bool;
+  mutable target : float;
+  mutable violation : float;
+}
+
+let sign x = if x > 0. then 1 else if x < 0. then -1 else 0
+
+(* JavaScript's Math.round, which rounds a half up. *)
+let round x = Float.floor (x +. 0.5)
+
+(* Each column's width in pixels, as React Stately lays a resizable table's
+   columns out: CSS's flex algorithm (CSS Flexible Box Layout, 9.7), every
+   basis zero and always growing, fixed sizes and percentages frozen at once,
+   then rounded so the widths add up to the table's. *)
+let column_widths ~available (columns : (column_size * float * float) array) =
+  let whole = Float.floor available in
+  let items =
+    Array.map
+      (fun (size, min, max) ->
+        let fixed width =
+          let clamped = Float.max min (Float.min width max) in
+          {
+            base = width;
+            flex = 0.;
+            min;
+            max;
+            frozen = true;
+            target = clamped;
+            violation = 0.;
+          }
+        in
+        match size with
+        | Pixels p -> fixed p
+        | Percent p -> fixed (whole *. p /. 100.)
+        | Fraction f when f <= 0. -> fixed 0.
+        | Fraction f ->
+            {
+              base = 0.;
+              flex = f;
+              min;
+              max;
+              frozen = false;
+              target = 0.;
+              violation = 0.;
+            })
+      columns
+  in
+  let unfrozen () = Array.exists (fun i -> not i.frozen) items in
+  while unfrozen () do
+    let used = ref 0. and factors = ref 0. in
+    Array.iter
+      (fun i ->
+        if i.frozen then used := !used +. i.target
+        else begin
+          used := !used +. i.base;
+          factors := !factors +. i.flex
+        end)
+      items;
+    let free = whole -. !used in
+    if free > 0. then
+      Array.iter
+        (fun i ->
+          if not i.frozen then i.target <- i.base +. (i.flex /. !factors *. free))
+        items;
+    let total = ref 0. in
+    Array.iter
+      (fun i ->
+        i.violation <- 0.;
+        if not i.frozen then begin
+          let clamped = Float.max i.min (Float.min i.target i.max) in
+          i.violation <- clamped -. i.target;
+          i.target <- clamped;
+          total := !total +. i.violation
+        end)
+      items;
+    Array.iter
+      (fun i ->
+        if Float.equal !total 0. || sign !total = sign i.violation then
+          i.frozen <- true)
+      items
+  done;
+  let exact = ref 0. and rounded = ref 0. in
+  let widths =
+    Array.map
+      (fun i ->
+        let width = round (i.target +. !exact) -. !rounded in
+        exact := !exact +. i.target;
+        rounded := !rounded +. width;
+        width)
+      items
+  in
+  let n = Array.length widths in
+  if n > 0 && available > whole then
+    widths.(n - 1) <- widths.(n - 1) +. (available -. whole);
+  widths
+
+(* What a resizable container tells the table inside it: how wide it is, and
+   whom a resize is told. *)
+type container = {
+  width : unit -> float;
+  on_resize_start : (string * column_size) array -> unit;
+  on_resize : (string * column_size) array -> unit;
+  on_resize_end : (string * column_size) array -> unit;
+}
+
+module Container_context = Solidtype.Context.Make_optional (struct
+  type t = container
+end)
+
+(* A column as the table lays it out: its key, its element, which says where
+   it is, and the sizes it asks for. *)
+type column_spec = {
+  column_key : string;
+  header : Dom.htmlTableCellElement;
+  width : unit -> column_size option;
+  default_width : column_size option;
+  min_width : unit -> float option;
+  max_width : unit -> float option;
+}
+
+(* What the parts of a resizable table read of its layout, and how a resize
+   changes it. *)
+type sizing = {
+  width_of : string -> float;
+  min_of : string -> float;
+  max_of : string -> float;
+  resizing : unit -> string option;
+  set_resizing : string option -> unit;
+  resize_to : string -> float -> (string * column_size) array;
+      (** A column given a width: every column's size after it. *)
+  told : container;
 }
 
 (* What the parts read of their table beside what a style reads: its rows in
-   the page's order, Kobalte's selection of them, and its columns. *)
+   the page's order, Kobalte's selection of them, its columns, and their
+   layout where it is resizable. *)
 type table = {
   context : context;
   rows : unit -> row list;
@@ -130,6 +274,9 @@ type table = {
   row_header : unit -> int;
   set_row_header : (unit -> int) option -> unit;
   columns : placing;
+  add_column : column_spec -> unit;
+  remove_column : string -> unit;
+  sizing : sizing option;
 }
 
 module Table_context = Solidtype.Context.Make_optional (struct
@@ -152,6 +299,9 @@ module Row_context = Solidtype.Context.Make_optional (struct
 end)
 
 let role e = Js.Null.toOption (attribute e "role")
+
+let has_role e name =
+  match role e with Some r -> String.equal r name | None -> false
 
 (* A row's cells, in order: a header's columns, or a body row's cells. *)
 let cells row =
@@ -217,6 +367,16 @@ let from_row row k =
   | "ArrowLeft" when last >= 0 -> Some along.(last)
   | _ -> None
 
+(* What a column may be at most: JavaScript's Number.MAX_SAFE_INTEGER, as a
+   range's [max] reads it. *)
+let max_safe = 9007199254740991.
+
+external shift_key : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+
+external query_in : _ Dom.element_like -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
 let tabindex = function Some i -> Js.Float.toString i | None -> "-1"
 
 (* Kobalte's state, an attribute present and empty, or none. *)
@@ -225,6 +385,121 @@ let state on = if on then Jsx.data "" else Jsx.flag false
 (* A handler or a ref the caller gave, called beside the part's own, as
    Kobalte's parts call theirs. *)
 let call f x = match f with Some f -> f x [@u] | None -> ()
+
+external client_width : _ Dom.element_like -> float = "clientWidth" [@@mel.get]
+
+external same : _ Dom.element_like -> _ Dom.element_like -> bool = "isSameNode"
+[@@mel.send]
+
+type style
+
+external computed : _ Dom.element_like -> style = "getComputedStyle"
+[@@mel.scope "window"]
+
+external overflow : style -> string = "overflow" [@@mel.get]
+external overflow_x : style -> string = "overflowX" [@@mel.get]
+external overflow_y : style -> string = "overflowY" [@@mel.get]
+external cursor : style -> string = "cursor" [@@mel.get]
+
+let scrolls e =
+  let style = computed e in
+  List.exists
+    (fun o -> String.equal o "auto" || String.equal o "scroll")
+    [ overflow style; overflow_x style; overflow_y style ]
+
+type resize_observer
+
+external resize_observer : ((unit -> unit)[@mel.uncurry]) -> resize_observer
+  = "ResizeObserver"
+[@@mel.new]
+
+external watch_size : resize_observer -> _ Dom.element_like -> unit = "observe"
+[@@mel.send]
+
+external stop_watching : resize_observer -> unit = "disconnect" [@@mel.send]
+
+module Resizable_container = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?on_resize_start:((string * column_size) array -> unit) ->
+      ?on_resize:((string * column_size) array -> unit) ->
+      ?on_resize_end:((string * column_size) array -> unit) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external on_resize_start :
+      t -> (((string * column_size) array -> unit)[@u]) option = "onResizeStart"
+    [@@mel.get]
+
+    external on_resize :
+      t -> (((string * column_size) array -> unit)[@u]) option = "onResize"
+    [@@mel.get]
+
+    external on_resize_end :
+      t -> (((string * column_size) array -> unit)[@u]) option = "onResizeEnd"
+    [@@mel.get]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let width, set_width = S.create_signal 0. in
+    let container = ref None in
+    (* What is measured is what scrolls the table: the first element from the
+       table up that scrolls, else the container, as React Aria measures it,
+       since a scrollbar takes from the width. *)
+    S.on_mount (fun () ->
+        Option.iter
+          (fun (c : Dom.htmlDivElement) ->
+            let rec up e =
+              if same e c || scrolls e then e
+              else
+                match Js.Null.toOption (parent e) with
+                | Some p -> up p
+                | None -> e
+            in
+            let watch measured =
+              let measure () = S.set set_width (client_width measured) in
+              measure ();
+              let o = resize_observer measure in
+              watch_size o measured;
+              S.on_cleanup (fun () -> stop_watching o)
+            in
+            match Js.Null.toOption (query_in c "table") with
+            | Some table -> watch (up table)
+            | None -> watch c)
+          !container);
+    let told =
+      {
+        width = (fun () -> S.get width);
+        on_resize_start =
+          (fun sizes -> call (Props.on_resize_start props) sizes);
+        on_resize = (fun sizes -> call (Props.on_resize props) sizes);
+        on_resize_end = (fun sizes -> call (Props.on_resize_end props) sizes);
+      }
+    in
+    <Container_context.Provider value=(fun () -> told)>
+      <div
+        ref=(fun e ->
+              container := Some e;
+              call (Props.ref props) e)
+        props=(S.omit props
+                 [|
+                   "onResizeStart"; "onResize"; "onResizeEnd"; "children"; "ref";
+                 |])>
+        (fun () -> Props.children props)
+      </div>
+    </Container_context.Provider>
+
+  let component = Jsx.component make
+end
 
 module Root = struct
   module Props = struct
@@ -382,6 +657,106 @@ module Root = struct
     in
     let row_header, set_row_header = S.create_signal None in
     let m () = S.get manager in
+    let specs, set_specs = S.create_signal [] in
+    let ordered_columns () =
+      List.sort
+        (fun a b -> if position a.header b.header land 4 <> 0 then -1 else 1)
+        (S.get specs)
+    in
+    let sizing =
+      Option.map
+        (fun (told : container) ->
+          let kept, set_kept = S.create_signal [] in
+          let resizing, set_resizing = S.create_signal None in
+          let kept_size key =
+            List.find_map
+              (fun (k, size) -> if String.equal k key then Some size else None)
+              (S.get kept)
+          in
+          let asked c =
+            match c.width () with
+            | Some w -> w
+            | None -> (
+                match kept_size c.column_key with
+                | Some w -> w
+                | None -> Option.value c.default_width ~default:(Fraction 1.))
+          in
+          let narrowest c = Option.value (c.min_width ()) ~default:75. in
+          let widest c = Option.value (c.max_width ()) ~default:max_safe in
+          let layout =
+            S.create_memo (fun () ->
+                let columns = Array.of_list (ordered_columns ()) in
+                let widths =
+                  column_widths ~available:(told.width ())
+                    (Array.map
+                       (fun c -> (asked c, narrowest c, widest c))
+                       columns)
+                in
+                Array.mapi
+                  (fun i c -> (c.column_key, widths.(i), narrowest c, widest c))
+                  columns)
+          in
+          let laid key =
+            Array.find_opt
+              (fun (k, _, _, _) -> String.equal k key)
+              (S.get layout)
+          in
+          let width_of key =
+            match laid key with Some (_, w, _, _) -> w | None -> 0.
+          in
+          let min_of key =
+            match laid key with Some (_, _, w, _) -> w | None -> 0.
+          in
+          let max_of key =
+            match laid key with Some (_, _, _, w) -> w | None -> max_safe
+          in
+          (* As React Stately resizes: the columns before it keep the pixels
+             they have, and those after it the sizes they ask for. *)
+          let resize_to key wanted =
+            let width =
+              Float.max (min_of key)
+                (Float.min (max_of key) (Float.floor wanted))
+            in
+            let before = ref true in
+            let sizes =
+              Array.of_list
+                (List.map
+                   (fun c ->
+                     if String.equal c.column_key key then begin
+                       before := false;
+                       (key, Pixels width)
+                     end
+                     else if !before then
+                       (c.column_key, Pixels (width_of c.column_key))
+                     else (c.column_key, asked c))
+                   (ordered_columns ()))
+            in
+            S.set set_kept
+              ((key, Pixels wanted)
+              :: List.filter_map
+                   (fun c ->
+                     match c.width () with
+                     | Some _ -> None
+                     | None ->
+                         Array.find_opt
+                           (fun (k, _) -> String.equal k c.column_key)
+                           sizes)
+                   (List.filter
+                      (fun c -> not (String.equal c.column_key key))
+                      (ordered_columns ())));
+            sizes
+          in
+          {
+            width_of;
+            min_of;
+            max_of;
+            resizing = (fun () -> S.get resizing);
+            set_resizing = S.set set_resizing;
+            resize_to;
+            told;
+          })
+        (Container_context.use ())
+    in
     let t =
       {
         context =
@@ -406,6 +781,9 @@ module Root = struct
             is_empty = (fun () -> S.get (Manager.is_empty (m ())));
             select_all = (fun () -> Manager.select_all (m ()) ());
             clear_selection = (fun () -> Manager.clear_selection (m ()) ());
+            resizing_column =
+              (fun () ->
+                match sizing with Some s -> s.resizing () | None -> None);
           };
         rows = ordered;
         add = (fun r -> S.set set_rows (r :: S.get rows));
@@ -419,6 +797,14 @@ module Root = struct
             match S.get row_header with Some index -> index () | None -> 0);
         set_row_header = S.set set_row_header;
         columns = placing ();
+        add_column = (fun c -> S.set set_specs (c :: S.get specs));
+        remove_column =
+          (fun k ->
+            S.set set_specs
+              (List.filter
+                 (fun c -> not (String.equal c.column_key k))
+                 (S.get specs)));
+        sizing;
       }
     in
     (* The arrows across a row and through its cells are the table's, which
@@ -427,8 +813,23 @@ module Root = struct
        nothing, as an accessible grid's are, or the list would move a row. *)
     let on_key_down e =
       call (Props.on_key_down props) e;
+      let resizing =
+        match sizing with
+        | Some s -> Option.is_some (s.resizing ())
+        | None -> false
+      in
       let moved =
         match (Js.Null.toOption active, S.get element) with
+        | _ when resizing -> `own
+        (* Tab from a column's header reaches its resizer, as the page's
+           order has it, where the list would leave the table. *)
+        | Some focused, Some _
+          when String.equal (key e) "Tab"
+               && (not (shift_key e))
+               && has_role focused "columnheader"
+               && Option.is_some (Js.Null.toOption (query_in focused "input"))
+          ->
+            `own
         | Some focused, Some table -> (
             match role focused with
             | Some ("gridcell" | "rowheader" | "columnheader") -> (
@@ -448,6 +849,7 @@ module Root = struct
       | `grid target ->
           prevent_default e;
           Option.iter focus target
+      | `own -> ()
       | `list -> Selectable_list.on_key_down list e
     in
     <Table_context.Provider value=(fun () -> t)>
@@ -461,6 +863,10 @@ module Root = struct
                                 | `multiple -> Some true
                                 | `single | `none -> None)
         tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
+        ?style=(fun () ->
+                 match sizing with
+                 | Some _ -> Some "table-layout: fixed; width: min-content;"
+                 | None -> None)
         on_key_down
         on_mouse_down=(fun e ->
                         call (Props.on_mouse_down props) e;
@@ -469,12 +875,17 @@ module Root = struct
                       call (Props.on_focus_in props) e;
                       (* Kobalte's list, focused from outside, moves focus to
                          a row of its choosing, and a row whose key it is
-                         given focuses itself: focus given a cell stays there,
-                         the list only told it has focus. *)
-                      match role (event_target e) with
-                      | Some ("gridcell" | "rowheader" | "columnheader") ->
-                          Manager.set_focused (m ()) true
-                      | Some _ | None -> Selectable_list.on_focus_in list e)
+                         given focuses itself: focus given a cell, or a
+                         part inside one, a resizer's input, stays there, the
+                         list only told it has focus. *)
+                      match
+                        Js.Null.toOption
+                          (closest (event_target e)
+                             "[role=gridcell], [role=rowheader], \
+                              [role=columnheader]")
+                      with
+                      | Some _ -> Manager.set_focused (m ()) true
+                      | None -> Selectable_list.on_focus_in list e)
         on_focus_out=(fun e ->
                        call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
@@ -508,11 +919,22 @@ module Header = struct
   let component = Jsx.component make
 end
 
-(* What a part inside a column reads of it: how it is sorted. *)
-type column = { direction : unit -> [ `ascending | `descending ] option }
+(* What a part inside a column reads of it: how it is sorted, and whether it
+   is being resized. *)
+type column = {
+  direction : unit -> [ `ascending | `descending ] option;
+  resizing : unit -> bool;
+}
 
 module Column_context = Solidtype.Context.Make_optional (struct
   type t = column
+end)
+
+(* What a resizer reads of its column: its key, and the id that names it. *)
+type resized = { resized_key : string; header_id : string }
+
+module Resized_context = Solidtype.Context.Make_optional (struct
+  type t = resized
 end)
 
 let use_column_context () =
@@ -528,6 +950,10 @@ module Column = struct
       ?id:string Solidtype.Check.value ->
       ?allows_sorting:bool Solidtype.Check.value ->
       ?is_row_header:bool Solidtype.Check.value ->
+      ?width:column_size Solidtype.Check.value ->
+      ?default_width:column_size Solidtype.Check.value ->
+      ?min_width:float Solidtype.Check.value ->
+      ?max_width:float Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check = "check"
@@ -536,6 +962,13 @@ module Column = struct
     external id : t -> string option = "id" [@@mel.get]
     external allows_sorting : t -> bool option = "allowsSorting" [@@mel.get]
     external is_row_header : t -> bool option = "isRowHeader" [@@mel.get]
+    external width : t -> column_size option = "width" [@@mel.get]
+
+    external default_width : t -> column_size option = "defaultWidth"
+    [@@mel.get]
+
+    external min_width : t -> float option = "minWidth" [@@mel.get]
+    external max_width : t -> float option = "maxWidth" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlTableCellElement -> unit)[@u]) option = "ref"
@@ -555,6 +988,10 @@ module Column = struct
       "id";
       "allowsSorting";
       "isRowHeader";
+      "width";
+      "defaultWidth";
+      "minWidth";
+      "maxWidth";
       "children";
       "ref";
       "onClick";
@@ -589,35 +1026,73 @@ module Column = struct
     (* A sortable column is pressed, by a pointer, Enter or Space, to be
        sorted by. *)
     let press () = if sortable () then t.context.sort_by key in
-    <Column_context.Provider value=(fun () -> { direction })>
-      <th
-        role=`columnheader
-        tabindex="-1"
-        aria_colindex=(fun () -> string_of_int (index () + 1))
-        ref=(fun e ->
-              S.set set_element (Some e);
-              call (Props.ref props) e)
-        ?aria_sort=(fun () ->
-                     if sortable () then
-                       Some
-                         (match direction () with
-                         | Some `ascending -> `ascending
-                         | Some `descending -> `descending
-                         | None -> `none)
-                     else None)
-        on_click=(fun e ->
-                   call (Props.on_click props) e;
-                   press ())
-        on_key_down=(fun e ->
-                      call (Props.on_key_down props) e;
-                      match key_name e with
-                      | ("Enter" | " ") when sortable () ->
-                          prevent_default e;
-                          press ()
-                      | _ -> ())
-        props=(S.omit props own)>
-        (fun () -> Props.children props)
-      </th>
+    let header_id = S.create_unique_id () in
+    (* A resizable table lays its columns out once they are on the page. *)
+    S.on_mount (fun () ->
+        Option.iter
+          (fun header ->
+            t.add_column
+              {
+                column_key = key;
+                header;
+                width = (fun () -> Props.width props);
+                default_width = S.untrack (fun () -> Props.default_width props);
+                min_width = (fun () -> Props.min_width props);
+                max_width = (fun () -> Props.max_width props);
+              })
+          (S.get element));
+    S.on_cleanup (fun () -> t.remove_column key);
+    let resizing () =
+      match t.sizing with
+      | Some s -> (
+          match s.resizing () with
+          | Some k -> String.equal k key
+          | None -> false)
+      | None -> false
+    in
+    <Column_context.Provider value=(fun () -> { direction; resizing })>
+      <Resized_context.Provider
+        value=(fun () -> { resized_key = key; header_id })>
+        <th
+          role=`columnheader
+          id=(fun () -> header_id)
+          tabindex="-1"
+          aria_colindex=(fun () -> string_of_int (index () + 1))
+          ?style=(fun () ->
+                   Option.map
+                     (fun s ->
+                       "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
+                     t.sizing)
+          data_resizing=(fun () -> state (resizing ()))
+          ref=(fun e ->
+                S.set set_element (Some e);
+                call (Props.ref props) e)
+          ?aria_sort=(fun () ->
+                       if sortable () then
+                         Some
+                           (match direction () with
+                           | Some `ascending -> `ascending
+                           | Some `descending -> `descending
+                           | None -> `none)
+                       else None)
+          on_click=(fun e ->
+                     call (Props.on_click props) e;
+                     press ())
+          on_key_down=(fun e ->
+                        call (Props.on_key_down props) e;
+                        (* A key in a part inside it, a resizer's, is the
+                         part's. *)
+                        match key_name e with
+                        | ("Enter" | " ")
+                          when sortable ()
+                               && has_role (event_target e) "columnheader" ->
+                            prevent_default e;
+                            press ()
+                        | _ -> ())
+          props=(S.omit props own)>
+          (fun () -> Props.children props)
+        </th>
+      </Resized_context.Provider>
     </Column_context.Provider>
 
   let component = Jsx.component make
@@ -874,6 +1349,286 @@ module Load_more = struct
           </tr>
         </Show>;
       |]
+
+  let component = Jsx.component make
+end
+
+external stop_propagation : _ Dom.event_like -> unit = "stopPropagation"
+[@@mel.send]
+
+external prevent : _ Dom.event_like -> unit = "preventDefault" [@@mel.send]
+external client_x : Dom.pointerEvent -> float = "clientX" [@@mel.get]
+external button : Dom.pointerEvent -> int = "button" [@@mel.get]
+external pointer_id : Dom.pointerEvent -> int = "pointerId" [@@mel.get]
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+external ctrl_key : Dom.pointerEvent -> bool = "ctrlKey" [@@mel.get]
+external alt_key : Dom.pointerEvent -> bool = "altKey" [@@mel.get]
+external meta_key : Dom.pointerEvent -> bool = "metaKey" [@@mel.get]
+external pointer_shift : Dom.pointerEvent -> bool = "shiftKey" [@@mel.get]
+
+external capture : Dom.htmlDivElement -> int -> unit = "setPointerCapture"
+[@@mel.send]
+
+external input_value : Dom.htmlInputElement -> string = "value" [@@mel.get]
+
+type inline_style
+
+external inline_style : Dom.htmlDivElement -> inline_style = "style" [@@mel.get]
+external user_select : inline_style -> string = "userSelect" [@@mel.get]
+
+external set_user_select : inline_style -> string -> unit = "userSelect"
+[@@mel.set]
+
+external focus_input : Dom.htmlInputElement -> unit = "focus" [@@mel.send]
+
+(* What a visually hidden element is styled, as React Aria's VisuallyHidden
+   is: read by a reader, drawn nowhere. *)
+let visually_hidden =
+  "border: 0px; clip: rect(0px, 0px, 0px, 0px); clip-path: inset(50%); height: \
+   1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
+   width: 1px; white-space: nowrap;"
+
+module Column_resizer = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external aria_label : t -> string option = "aria-label" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_move : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerMove"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+  end
+
+  let own =
+    [|
+      "aria-label";
+      "children";
+      "ref";
+      "onPointerDown";
+      "onPointerMove";
+      "onPointerUp";
+      "onClick";
+    |]
+
+  let make (props : Props.t) =
+    let t = in_table "Table.Column_resizer" in
+    let s =
+      match t.sizing with
+      | Some s -> s
+      | None ->
+          invalid_arg
+            "Table.Column_resizer is used inside a Table.Resizable_container"
+    in
+    let c =
+      match Resized_context.use () with
+      | Some c -> c
+      | None -> invalid_arg "Table.Column_resizer is used inside a Table.Column"
+    in
+    let key = c.resized_key in
+    let input_id = S.create_unique_id () in
+    let input = ref None in
+    let handle = ref None in
+    let editing () =
+      match s.resizing () with Some k -> String.equal k key | None -> false
+    in
+    (* A resize begun, and the sizes it last made, which its end is told. *)
+    let started = ref false in
+    let last = ref None in
+    let start () =
+      if not !started then begin
+        let sizes = s.resize_to key (s.width_of key) in
+        last := Some sizes;
+        s.set_resizing (Some key);
+        s.told.on_resize_start sizes
+      end;
+      started := true
+    in
+    let resize width =
+      let sizes = s.resize_to key width in
+      s.told.on_resize sizes;
+      last := Some sizes
+    in
+    let finish () =
+      if !started then begin
+        let sizes =
+          match !last with
+          | Some sizes -> sizes
+          | None -> s.resize_to key (s.width_of key)
+        in
+        s.set_resizing None;
+        s.told.on_resize_end sizes;
+        started := false
+      end;
+      last := None
+    in
+    (* A key's step, and a reader's, is 10 pixels, as React Aria's is. *)
+    let step by = resize (s.width_of key +. by) in
+    let dragging = ref None in
+    let mouse_cursor, set_mouse_cursor = S.create_signal None in
+    let direction () =
+      let width = s.width_of key in
+      if s.min_of key >= width then "left"
+      else if s.max_of key <= width then "right"
+      else "both"
+    in
+    let whole x = Js.Float.toString (Float.floor x) in
+    (* No text is selected while the handle is pressed, and none by the
+       click that ends it: its selection comes back 300 milliseconds later, as
+       React Aria's press gives it back. *)
+    let selection = ref None in
+    let unselectable h =
+      let style = inline_style h in
+      if Option.is_none !selection then selection := Some (user_select style);
+      set_user_select style "none"
+    in
+    let selectable h =
+      ignore
+        (Js.Global.setTimeout
+           ~f:(fun () ->
+             Option.iter (set_user_select (inline_style h)) !selection;
+             selection := None)
+           300
+          : Js.Global.timeoutId)
+    in
+    let stop_drag () =
+      if Option.is_some !dragging then begin
+        dragging := None;
+        S.set set_mouse_cursor None;
+        Option.iter selectable !handle;
+        finish ()
+      end
+    in
+    <div
+      role=`presentation
+      ref=(fun e ->
+            handle := Some e;
+            call (Props.ref props) e)
+      style="touch-action: none;"
+      data_resizing=(fun () -> state (editing ()))
+      data_resizable_direction=(fun () -> Jsx.data (direction ()))
+      on_pointer_down=(fun e ->
+                        call (Props.on_pointer_down props) e;
+                        if
+                          button e = 0
+                          && not
+                               (ctrl_key e || alt_key e || meta_key e
+                              || pointer_shift e)
+                        then begin
+                          (* Focus goes to the resizer's input, never the
+                             column's header. *)
+                          prevent e;
+                          Option.iter (fun i -> focus_input i) !input;
+                          start ();
+                          Option.iter
+                            (fun h ->
+                              capture h (pointer_id e);
+                              unselectable h)
+                            !handle;
+                          dragging :=
+                            Some (client_x e, s.width_of key, pointer_type e)
+                        end)
+      on_pointer_move=(fun e ->
+                        call (Props.on_pointer_move props) e;
+                        match !dragging with
+                        | Some (from, width, kind) ->
+                            (* A mouse's drag holds its cursor over the page. *)
+                            if
+                              String.equal kind "mouse"
+                              && Option.is_none (S.get mouse_cursor)
+                            then
+                              Option.iter
+                                (fun h ->
+                                  S.set set_mouse_cursor
+                                    (Some (cursor (computed h))))
+                                !handle;
+                            resize (width +. client_x e -. from)
+                        | None -> ())
+      on_pointer_up=(fun e ->
+                      call (Props.on_pointer_up props) e;
+                      stop_drag ())
+      on_pointer_cancel=(fun _ -> stop_drag ())
+      on_click=(fun e ->
+                 call (Props.on_click props) e;
+                 (* A press on the resizer is never its column's. *)
+                 stop_propagation e)
+      props=(S.omit props own)>
+      (fun () -> Props.children props)
+      <input
+        ref=(fun e -> input := Some e)
+        id=(fun () -> input_id)
+        type_="range"
+        aria_label=(fun () ->
+                     Option.value (Props.aria_label props) ~default:"Resizer")
+        aria_orientation=`horizontal
+        aria_labelledby=(fun () -> input_id ^ " " ^ c.header_id)
+        aria_valuetext=(fun () -> whole (s.width_of key) ^ " pixels")
+        min=(fun () -> whole (s.min_of key))
+        max=(fun () -> whole (s.max_of key))
+        value=(fun () -> whole (s.width_of key))
+        style=visually_hidden
+        on_key_down=(fun e ->
+                      let own () =
+                        prevent e;
+                        stop_propagation e
+                      in
+                      match key_name e with
+                      | "Enter" ->
+                          own ();
+                          if editing () then finish () else start ()
+                      | ("Escape" | " ") when editing () ->
+                          own ();
+                          finish ()
+                      | "Tab" when editing () -> finish ()
+                      | "ArrowRight" | "ArrowUp" | "End" | "PageUp" ->
+                          own ();
+                          step 10.
+                      | "ArrowLeft" | "ArrowDown" | "Home" | "PageDown" ->
+                          own ();
+                          step (-10.)
+                      | _ -> ())
+        on_input=(fun _ ->
+                   (* A reader's step, up or down. *)
+                   match !input with
+                   | Some i
+                     when Js.Float.fromString (input_value i) > s.width_of key
+                     ->
+                       step 10.
+                   | Some _ | None -> step (-10.))
+        on_blur=(fun _ -> finish ())
+      />
+      <Show.Some some=(fun () -> S.get mouse_cursor)>
+        (fun shown ->
+          <Solidtype.Portal>
+            <div
+              style=(fun () ->
+                      "position: fixed; top: 0px; left: 0px; bottom: 0px; \
+                       right: 0px; cursor: " ^ S.get shown ^ ";")
+              data_testid="cursor-overlay"
+            />
+          </Solidtype.Portal>)
+      </Show.Some>
+    </div>
 
   let component = Jsx.component make
 end

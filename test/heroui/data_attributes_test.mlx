@@ -408,6 +408,24 @@ let () =
                   </Table.Scroll_container>
                   <Table.Footer data_testid="Table.Footer">"1"</Table.Footer>
                 </Table>
+                <Table>
+                  <Table.Resizable_container
+                    data_testid="Table.Resizable_container">
+                    <Table.Content aria_label="Resizable">
+                      <Table.Header>
+                        <Table.Column id="name" is_row_header=true>
+                          "Name"
+                          <Table.Column_resizer
+                            data_testid="Table.Column_resizer"
+                          />
+                        </Table.Column>
+                      </Table.Header>
+                      <Table.Body>
+                        <Table.Row><Table.Cell>"Kate"</Table.Cell></Table.Row>
+                      </Table.Body>
+                    </Table.Content>
+                  </Table.Resizable_container>
+                </Table>
                 <Kbd data_testid="Kbd">
                   <Kbd.Abbr data_testid="Kbd.Abbr" key_value=`command />
                   <Kbd.Content data_testid="Kbd.Content">"K"</Kbd.Content>
@@ -658,6 +676,9 @@ let () =
                    ("Table.Row", "[data-slot=table-row]");
                    ("Table.Cell", "[data-slot=table-cell]");
                    ("Table.Load_more", "[data-slot=table-load-more]");
+                   ( "Table.Resizable_container",
+                     "[data-slot=table-resizable-container]" );
+                   ("Table.Column_resizer", "[data-slot=table-column-resizer]");
                    ( "Table.Load_more_content",
                      "[data-slot=table-load-more-content]" );
                    ("Table.Footer", "[data-slot=table-footer]");

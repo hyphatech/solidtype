@@ -13,6 +13,15 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 };
+// Nor a width: an element is as wide as a test says by its
+// data-client-width, as a table's resizable container measures itself, and
+// else none, as jsdom has it.
+Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+  configurable: true,
+  get(this: HTMLElement) {
+    return Number(this.getAttribute("data-client-width") ?? 0);
+  },
+});
 // Nor an IntersectionObserver, by which a load-more sentinel sees it is in
 // view: one that reports nothing stands in, as for a list scrolled nowhere,
 // until a test brings an element into view by its static `intersect`, as a

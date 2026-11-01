@@ -52,6 +52,13 @@ type sort_descriptor = {
 (** How a table is sorted: by the column whose [id] is [column], one way or the
     other. *)
 
+(** How wide a column is, in a {!Resizable_container}. *)
+type column_size =
+  | Pixels of float
+  | Percent of float  (** Of the width the table is given. *)
+  | Fraction of float
+      (** A share of what the other columns leave, as CSS's [fr] is. *)
+
 type context = {
   selection_mode : unit -> [ `none | `single | `multiple ];
   sort : unit -> sort_descriptor option;
@@ -64,6 +71,8 @@ type context = {
   is_empty : unit -> bool;  (** Whether no row is selected. *)
   select_all : unit -> unit;
   clear_selection : unit -> unit;
+  resizing_column : unit -> string option;
+      (** The [id] of the column being resized, in a {!Resizable_container}. *)
 }
 (** What a table's parts, and a style over them, read of it: how it is sorted
     and its rows are selected, and each row's state by its key. *)
@@ -71,12 +80,41 @@ type context = {
 val use_context : unit -> context
 (** The table above; outside a {!Root} it raises [Invalid_argument]. *)
 
-type column = { direction : unit -> [ `ascending | `descending ] option }
+type column = {
+  direction : unit -> [ `ascending | `descending ] option;
+  resizing : unit -> bool;  (** Whether it is being resized. *)
+}
 (** What a part inside a {!Column} reads of it: which way it is sorted, if it
-    is. *)
+    is, and whether it is being resized. *)
 
 val use_column_context : unit -> column
 (** The column above; outside a {!Column} it raises [Invalid_argument]. *)
+
+(** A [<div>] whose width the columns of the table inside it share, and which
+    lets a {!Column_resizer} resize them, as React Aria's
+    [ResizableTableContainer] does: the table is laid out at a fixed width, each
+    column as its [width], or [default_width] until it is resized, says, by
+    CSS's flex algorithm, never narrower than its [min_width], 75 pixels by
+    default, nor wider than its [max_width]. A resize calls [on_resize_start],
+    then [on_resize] at each step and [on_resize_end], each with every column's
+    size by its [id]: those before it in pixels as they are, it its new width,
+    and those after it as their own. *)
+module Resizable_container : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?on_resize_start:((string * column_size) array -> unit) ->
+      ?on_resize:((string * column_size) array -> unit) ->
+      ?on_resize_end:((string * column_size) array -> unit) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
 
 (** The [<table role="grid">], [aria-multiselectable] while many rows may be
     selected. It is sorted as [sort_descriptor] says, its rows' order the
@@ -130,7 +168,9 @@ end
     focused by the keys, its [id] the column a sort names. The column whose
     [is_row_header] names each row, its cells [rowheader]s. One that
     [allows_sorting] is [aria-sort], and pressed by a pointer, Enter or Space to
-    be sorted by. *)
+    be sorted by. In a {!Resizable_container} it is as wide as [width] says,
+    controlled, else [default_width] until it is resized, and [data-resizing]
+    while it is. *)
 module Column : sig
   module Props : sig
     type t
@@ -139,6 +179,10 @@ module Column : sig
       ?id:string Solidtype.Check.value ->
       ?allows_sorting:bool Solidtype.Check.value ->
       ?is_row_header:bool Solidtype.Check.value ->
+      ?width:column_size Solidtype.Check.value ->
+      ?default_width:column_size Solidtype.Check.value ->
+      ?min_width:float Solidtype.Check.value ->
+      ?max_width:float Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check
@@ -217,6 +261,32 @@ module Load_more : sig
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
+(** What resizes the {!Column} it is in, as React Aria's [ColumnResizer] does: a
+    [<div role="presentation">] a pointer drags, and inside it a range
+    [<input>], named by [aria_label], "Resizer" by default, and by its column,
+    which Tab reaches from the column's header. Its arrows, Home, End, Page Up
+    and Page Down resize the column by 10 pixels; Enter begins a resize the
+    arrows go on with, and Enter, Escape, Space, Tab or leaving it ends it.
+    While it resizes, it and its column are [data-resizing] and no other key
+    moves focus in the table; [data-resizable-direction] is [left] while the
+    column is as narrow as it may be, [right] while as wide, else [both]. A drag
+    by a mouse holds the resizer's cursor over the whole page until it ends. It
+    is used inside a {!Column} of a table in a {!Resizable_container}: elsewhere
+    it raises [Invalid_argument] as it is made. *)
+module Column_resizer : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

@@ -40,6 +40,13 @@ type sort_descriptor = Solidtype_headless.Table.sort_descriptor = {
 (** How a table is sorted: by the column whose [id] is [column], one way or the
     other; the headless table's. *)
 
+(** How wide a column is, in a {!Resizable_container}; the headless table's. *)
+type column_size = Solidtype_headless.Table.column_size =
+  | Pixels of float
+  | Percent of float  (** Of the width the table is given. *)
+  | Fraction of float
+      (** A share of what the other columns leave, as CSS's [fr] is. *)
+
 (** The [<div>] the table scrolls in, sideways, while the table and its footer
     stay as wide as their container. *)
 module Scroll_container : sig
@@ -47,6 +54,31 @@ module Scroll_container : sig
     type t
 
     val check :
+      ?class_:string Solidtype.Check.value ->
+      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
+(** The [<div>] a table whose columns resize scrolls in, in place of a
+    {!Scroll_container}: the table is laid out at a fixed width, each column as
+    its [width], or [default_width] until it is resized, says, never narrower
+    than its [min_width], 75 pixels by default, nor wider than its [max_width].
+    A resize by a {!Column_resizer} calls [on_resize_start], then [on_resize] at
+    each step and [on_resize_end], each with every column's size by its [id]. *)
+module Resizable_container : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?on_resize_start:((string * column_size) array -> unit) ->
+      ?on_resize:((string * column_size) array -> unit) ->
+      ?on_resize_end:((string * column_size) array -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
@@ -120,8 +152,9 @@ end
 
 (** A column's header, a [<th role="columnheader">], its [id] the column a sort
     names. The column whose [is_row_header] names each row, its cells
-    [rowheader]s. It declares [data-allows-sorting], [data-hovered] and
-    [data-focus-visible]. *)
+    [rowheader]s. In a {!Resizable_container} it is as wide as [width] says,
+    else [default_width] until resized, within [min_width] and [max_width]. It
+    declares [data-allows-sorting], [data-hovered] and [data-focus-visible]. *)
 module Column : sig
   module Props : sig
     type t
@@ -130,8 +163,36 @@ module Column : sig
       ?id:string Solidtype.Check.value ->
       ?allows_sorting:bool Solidtype.Check.value ->
       ?is_row_header:bool Solidtype.Check.value ->
+      ?width:column_size Solidtype.Check.value ->
+      ?default_width:column_size Solidtype.Check.value ->
+      ?min_width:float Solidtype.Check.value ->
+      ?max_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
+(** What resizes the {!Column} it is in, HeroUI's handle on the column's edge: a
+    pointer drags it, and Tab reaches it from the column's header, where its
+    arrows resize the column by 10 pixels and Enter begins a resize they go on
+    with, which Enter, Escape, Space, Tab or leaving it ends. Its input is named
+    [aria_label], "Resizer" by default. It declares [data-hovered],
+    [data-focused], [data-focus-visible], [data-resizing] and
+    [data-resizable-direction]. It is used in a column of a table in a
+    {!Resizable_container}. *)
+module Column_resizer : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?aria_label:string Solidtype.Check.value ->
+      ?class_:string Solidtype.Check.value ->
       ?props:t Solidtype.Solid.rest ->
       unit ->
       unit

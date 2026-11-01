@@ -441,3 +441,173 @@ let () =
                    true,
                    "gridcell:CMO" ))
           |> Js.Promise.resolve))
+
+external query_in : Dom.element -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+external blur : Dom.element -> unit = "blur" [@@mel.send]
+
+(* A column's resizer's input. *)
+let input_of column =
+  match Js.Null.toOption (query_in column "input") with
+  | Some i -> i
+  | None -> Js.Exn.raiseError "no resizer"
+
+type pointer
+
+external pointer :
+  client_x:(float[@mel.as "clientX"]) ->
+  ?button:int ->
+  pointer_id:(int[@mel.as "pointerId"]) ->
+  pointer_type:(string[@mel.as "pointerType"]) ->
+  unit ->
+  pointer = ""
+[@@mel.obj]
+
+external pointer_down : Dom.element -> pointer -> bool = "pointerDown"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external pointer_move : Dom.element -> pointer -> bool = "pointerMove"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external pointer_up : Dom.element -> pointer -> bool = "pointerUp"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+let size_name : Table.column_size -> string = function
+  | Pixels p -> Js.Float.toString p ^ "px"
+  | Percent p -> Js.Float.toString p ^ "%"
+  | Fraction f -> Js.Float.toString f ^ "fr"
+
+let () =
+  Jest.describe "Table, its columns resized" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "lays its columns out in its width, resized by the keys and a pointer"
+        (fun () ->
+          let ended = ref [] in
+          let column ~id ~min name =
+            <Table.Column
+              id=(fun () -> id)
+              is_row_header=(fun () -> String.equal id "name")
+              min_width=(fun () -> min)>
+              (fun () -> Jsx.string name) <Table.Column_resizer />
+            </Table.Column>
+          in
+          H.render (fun () ->
+              <Table.Resizable_container
+                data_client_width="700"
+                on_resize_end=(fun sizes ->
+                                ended :=
+                                  Array.to_list
+                                    (Array.map
+                                       (fun (k, s) -> k ^ ":" ^ size_name s)
+                                       sizes))>
+                <Table.Root aria_label="Resizable">
+                  <Table.Header>
+                    (fun () -> Jsx.element (column ~id:"name" ~min:160. "Name"))
+                    (fun () -> Jsx.element (column ~id:"role" ~min:220. "Role"))
+                    (fun () ->
+                      Jsx.element (column ~id:"status" ~min:100. "Status"))
+                    <Table.Column id="email" min_width=200.>
+                      "Email"
+                    </Table.Column>
+                  </Table.Header>
+                  <Table.Body>
+                    <Table.Row id="1">
+                      <Table.Cell>"Kate Moore"</Table.Cell>
+                      <Table.Cell>"CEO"</Table.Cell>
+                      <Table.Cell>"Active"</Table.Cell>
+                      <Table.Cell>"kate@acme.com"</Table.Cell>
+                    </Table.Row>
+                  </Table.Body>
+                </Table.Root>
+              </Table.Resizable_container>);
+          let widths () =
+            H.all_by_role "columnheader"
+            |> Array.map (fun c ->
+                Option.value (H.attribute c "style") ~default:"")
+          in
+          let resizer n =
+            match
+              Array.to_list (H.all_by_role "columnheader")
+              |> List.filter (fun c -> String.equal (H.text c) n)
+            with
+            | c :: _ -> c
+            | [] -> Js.Exn.raiseError ("no column " ^ n)
+          in
+          let handle n =
+            match Js.Null.toOption (H.parent (input_of (resizer n))) with
+            | Some h -> h
+            | None -> Js.Exn.raiseError "no handle"
+          in
+          let at_rest = widths () in
+          let user = H.setup () in
+          H.focus (resizer "Name");
+          let* () = H.tab user in
+          let on_name () = H.focused == input_of (resizer "Name") in
+          let reached = on_name () in
+          let* () = H.keyboard user "{ArrowRight}" in
+          let stepped = widths () in
+          let* () = H.keyboard user "{Enter}" in
+          let resizing =
+            ( H.attribute (handle "Name") "data-resizing",
+              H.attribute (resizer "Name") "data-resizing" )
+          in
+          let* () = H.keyboard user "{ArrowLeft}{ArrowLeft}{ArrowLeft}" in
+          let* () = H.keyboard user "{Enter}" in
+          let narrowest =
+            ( widths (),
+              H.attribute (handle "Name") "data-resizable-direction",
+              H.attribute (handle "Name") "data-resizing",
+              !ended,
+              on_name () )
+          in
+          (* Focus leaves the table, and a drag brings it back. *)
+          blur H.focused;
+          let role = handle "Role" in
+          let at x =
+            pointer ~client_x:x ~button:0 ~pointer_id:1 ~pointer_type:"mouse" ()
+          in
+          ignore (pointer_down role (at 100.) : bool);
+          ignore (pointer_move role (at 130.) : bool);
+          let dragged = (widths (), H.focused == input_of (resizer "Role")) in
+          ignore (pointer_up role (at 130.) : bool);
+          Js.Promise.resolve
+            E.(
+              expect
+                (at_rest, reached, stepped, resizing, narrowest, dragged, !ended)
+              |> toEqual
+                   ( [|
+                       "width: 160px;";
+                       "width: 220px;";
+                       "width: 120px;";
+                       "width: 200px;";
+                     |],
+                     true,
+                     [|
+                       "width: 170px;";
+                       "width: 220px;";
+                       "width: 110px;";
+                       "width: 200px;";
+                     |],
+                     (Some "", Some ""),
+                     ( [|
+                         "width: 160px;";
+                         "width: 220px;";
+                         "width: 120px;";
+                         "width: 200px;";
+                       |],
+                       Some "left",
+                       None,
+                       [ "name:160px"; "role:1fr"; "status:1fr"; "email:1fr" ],
+                       true ),
+                     ( [|
+                         "width: 160px;";
+                         "width: 250px;";
+                         "width: 100px;";
+                         "width: 200px;";
+                       |],
+                       true ),
+                     [ "name:160px"; "role:250px"; "status:1fr"; "email:1fr" ]
+                   ))))

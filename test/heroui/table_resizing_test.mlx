@@ -1,0 +1,244 @@
+(* HeroUI's Table with its columns resized, beside the same table in React,
+   both measured at the same width: each column's width and state, and each
+   resizer's and its input's, at rest, resized by the keys and dragged. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+module Twin = struct
+  external render : ((string array -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/TableResizing.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableResizing.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableResizing.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+
+type pointer
+
+external pointer :
+  client_x:(float[@mel.as "clientX"]) ->
+  page_x:(float[@mel.as "pageX"]) ->
+  button:int ->
+  pointer_id:(int[@mel.as "pointerId"]) ->
+  pointer_type:(string[@mel.as "pointerType"]) ->
+  unit ->
+  pointer = ""
+[@@mel.obj]
+
+external pointer_down : Dom.element -> pointer -> bool = "pointerDown"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external pointer_move : Dom.element -> pointer -> bool = "pointerMove"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external pointer_up : Dom.element -> pointer -> bool = "pointerUp"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
+
+external value : Dom.element -> string = "value" [@@mel.get]
+
+(* What HeroUI's styles read and a reader reaches of each part. Ids, and the
+   attributes each framework writes for itself, are left out: an input's
+   value, which React writes as an attribute and Solid sets, is read as the
+   input has it. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "style";
+    "data-resizing";
+    "data-resizable-direction";
+    "data-hovered";
+    "data-focused";
+    "aria-label";
+    "aria-orientation";
+    "aria-valuetext";
+    "min";
+    "max";
+    "type";
+  ]
+
+let shown host =
+  Js.Array.from
+    (query_all host
+       "[data-slot=table-resizable-container], table, [role=columnheader], \
+        [data-slot=table-column-resizer], [data-slot=table-column-resizer] \
+        input")
+  |> Array.map (fun e ->
+      String.concat " "
+        (tag_name e
+         :: List.filter_map
+              (fun name ->
+                match T.attribute e name with
+                | Some "" | None -> None
+                (* A style however a framework spaces and ends it. jsdom drops
+                  React's touch-action, which it reads as no property it
+                  knows, and writes a clip set as text in full; a browser
+                  keeps both alike. *)
+                | Some v when String.equal name "style" -> (
+                    let squeezed =
+                      String.concat ""
+                        (String.split_on_char ' '
+                           (String.concat "" (String.split_on_char ';' v)))
+                    in
+                    let squeezed =
+                      Js.String.replace ~search:"touch-action:none"
+                        ~replacement:"" squeezed
+                      |> Js.String.replace ~search:"rect(0px,0px,0px,0px)"
+                           ~replacement:"rect(0px)"
+                    in
+                    match squeezed with "" -> None | v -> Some (name ^ "=" ^ v))
+                | Some v -> Some (name ^ "=" ^ v))
+              state
+        @ match tag_name e with "INPUT" -> [ "value=" ^ value e ] | _ -> []))
+
+let column host name =
+  match
+    Js.Array.from (query_all host "[role=columnheader]")
+    |> Array.to_list
+    |> List.filter (fun c -> String.equal (text c) name)
+  with
+  | c :: _ -> c
+  | [] -> Js.Exn.raiseError ("no column " ^ name)
+
+let handle host name =
+  match
+    Js.Array.from
+      (query_all (column host name) "[data-slot=table-column-resizer]")
+  with
+  | [| h |] -> h
+  | _ -> Js.Exn.raiseError ("no resizer in " ^ name)
+
+(* The table at rest, its first resizer reached by Tab, a resize begun by
+   Enter, stepped wider, then narrower than it may be, and ended, and the
+   second column dragged wider. An arrow before Enter resizes by the range's
+   own step, which jsdom's input takes no key for, so React's does nothing
+   here: the headless table's test holds the port's. *)
+let walk ~step host ended =
+  let user = T.setup () in
+  let seen = ref [ ("rest", shown host, !ended) ] in
+  let after name action =
+    let* () = step action in
+    seen := (name, shown host, !ended) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () =
+    after "tab" (fun () ->
+        focus (column host "Name");
+        T.tab user)
+  in
+  let* () = after "enter" (fun () -> T.keyboard user "{Enter}") in
+  let* () = after "right" (fun () -> T.keyboard user "{ArrowRight}") in
+  let* () =
+    after "left" (fun () -> T.keyboard user "{ArrowLeft}{ArrowLeft}{ArrowLeft}")
+  in
+  let* () = after "end" (fun () -> T.keyboard user "{Enter}") in
+  let at x =
+    pointer ~client_x:x ~page_x:x ~button:0 ~pointer_id:1 ~pointer_type:"mouse"
+      ()
+  in
+  let* () =
+    after "down" (fun () ->
+        ignore (pointer_down (handle host "Role") (at 100.) : bool);
+        Js.Promise.resolve ())
+  in
+  let* () =
+    after "drag" (fun () ->
+        ignore (pointer_move (handle host "Role") (at 130.) : bool);
+        Js.Promise.resolve ())
+  in
+  let* () =
+    after "up" (fun () ->
+        ignore (pointer_up (handle host "Role") (at 130.) : bool);
+        Js.Promise.resolve ())
+  in
+  Js.Promise.resolve
+    (Array.of_list
+       (List.rev_map
+          (fun (name, parts, told) -> (name, parts, told, tag_name active))
+          !seen))
+
+let resizable name ~id ~min =
+  <Table.Column
+    is_row_header=(fun () -> String.equal id "name")
+    default_width=(fun () -> Table.Fraction 1.)
+    id=(fun () -> id)
+    min_width=(fun () -> min)>
+    (fun () -> Jsx.string name) <Table.Column_resizer />
+  </Table.Column>
+
+let () =
+  Jest.describe "Table, its columns resized" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is resized by the keys and a drag, as React's is"
+        (fun () ->
+          let ended = ref [||] in
+          T.render (fun () ->
+              <Table>
+                <Table.Resizable_container
+                  data_client_width="700"
+                  on_resize_end=(fun sizes ->
+                                  ended :=
+                                    Array.map
+                                      (fun (k, (s : Table.column_size)) ->
+                                        k ^ ":"
+                                        ^
+                                        match s with
+                                        | Pixels p -> Js.Float.toString p ^ "px"
+                                        | Percent p -> Js.Float.toString p ^ "%"
+                                        | Fraction f ->
+                                            Js.Float.toString f ^ "fr")
+                                      sizes)>
+                  <Table.Content
+                    aria_label="Table with resizable columns"
+                    class_="min-w-[700px]">
+                    <Table.Header>
+                      (fun () ->
+                        Jsx.element (resizable "Name" ~id:"name" ~min:160.))
+                      (fun () ->
+                        Jsx.element (resizable "Role" ~id:"role" ~min:220.))
+                      (fun () ->
+                        Jsx.element (resizable "Status" ~id:"status" ~min:100.))
+                      <Table.Column
+                        default_width=(fun () -> Table.Fraction 1.)
+                        id="email"
+                        min_width=200.>
+                        "Email"
+                      </Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <Table.Row id="1">
+                        <Table.Cell>"Kate Moore"</Table.Cell>
+                        <Table.Cell>"CEO"</Table.Cell>
+                        <Table.Cell>"Active"</Table.Cell>
+                        <Table.Cell>"kate@acme.com"</Table.Cell>
+                      </Table.Row>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Resizable_container>
+              </Table>);
+          let* solidtype = walk ~step:(fun action -> action ()) T.body ended in
+          T.cleanup ();
+          let ended' = ref [||] in
+          let host = Twin.render (fun sizes -> ended' := sizes) in
+          let* react = walk ~step:Twin.step host ended' in
+          Twin.cleanup ();
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

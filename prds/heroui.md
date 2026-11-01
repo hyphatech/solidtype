@@ -483,8 +483,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   its column's direction
 - [x] Table's loading more, the headless `Load_more` on a sentinel
   `List_box` shares, and HeroUI's `Load_more` and `Load_more_content`
-- [ ] Table's column resizing, expandable rows and virtualization, a stage
-  each
+- [x] Table's column resizing, the headless `Resizable_container` and
+  `Column_resizer`, React Stately's layout ported, and HeroUI's
+- [ ] Table's expandable rows and virtualization, a stage each
 - [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
   DatePicker, DateRangePicker
 
