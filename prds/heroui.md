@@ -481,8 +481,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   `slot=`selection`
 - [x] Table's sorting, the headless column's, its HeroUI header reading
   its column's direction
-- [ ] Table's loading more, column resizing, expandable rows and
-  virtualization, a stage each
+- [x] Table's loading more, the headless `Load_more` on a sentinel
+  `List_box` shares, and HeroUI's `Load_more` and `Load_more_content`
+- [ ] Table's column resizing, expandable rows and virtualization, a stage
+  each
 - [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
   DatePicker, DateRangePicker
 

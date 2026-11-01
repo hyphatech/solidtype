@@ -1,0 +1,227 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Chip = Solidtype_heroui.Chip
+module Spinner = Solidtype_heroui.Spinner
+module Table = Solidtype_heroui.Table
+
+type user = {
+  id : int;
+  name : string;
+  role : string;
+  status : string;
+  email : string;
+}
+
+let status_color = function
+  | "Active" -> `success
+  | "Inactive" -> `danger
+  | _ -> `warning
+
+let all_users =
+  [|
+    {
+      email = "kate@acme.com";
+      id = 1;
+      name = "Kate Moore";
+      role = "CEO";
+      status = "Active";
+    };
+    {
+      email = "john@acme.com";
+      id = 2;
+      name = "John Smith";
+      role = "CTO";
+      status = "Active";
+    };
+    {
+      email = "sara@acme.com";
+      id = 3;
+      name = "Sara Johnson";
+      role = "CMO";
+      status = "On Leave";
+    };
+    {
+      email = "michael@acme.com";
+      id = 4;
+      name = "Michael Brown";
+      role = "CFO";
+      status = "Active";
+    };
+    {
+      email = "emily@acme.com";
+      id = 5;
+      name = "Emily Davis";
+      role = "Product Manager";
+      status = "Inactive";
+    };
+    {
+      email = "davis@acme.com";
+      id = 6;
+      name = "Davis Wilson";
+      role = "Lead Designer";
+      status = "Active";
+    };
+    {
+      email = "olivia@acme.com";
+      id = 7;
+      name = "Olivia Martinez";
+      role = "Frontend Engineer";
+      status = "Active";
+    };
+    {
+      email = "james@acme.com";
+      id = 8;
+      name = "James Taylor";
+      role = "Backend Engineer";
+      status = "Active";
+    };
+    {
+      email = "sophia@acme.com";
+      id = 9;
+      name = "Sophia Anderson";
+      role = "QA Engineer";
+      status = "On Leave";
+    };
+    {
+      email = "liam@acme.com";
+      id = 10;
+      name = "Liam Thomas";
+      role = "DevOps Engineer";
+      status = "Active";
+    };
+    {
+      email = "lucas@acme.com";
+      id = 11;
+      name = "Lucas Martinez";
+      role = "Product Manager";
+      status = "Active";
+    };
+    {
+      email = "emma@acme.com";
+      id = 12;
+      name = "Emma Johnson";
+      role = "Frontend Engineer";
+      status = "Active";
+    };
+    {
+      email = "noah@acme.com";
+      id = 13;
+      name = "Noah Davis";
+      role = "Backend Engineer";
+      status = "Active";
+    };
+    {
+      email = "ava@acme.com";
+      id = 14;
+      name = "Ava Wilson";
+      role = "Lead Designer";
+      status = "Active";
+    };
+    {
+      email = "oliver@acme.com";
+      id = 15;
+      name = "Oliver Martinez";
+      role = "Frontend Engineer";
+      status = "Active";
+    };
+    {
+      email = "isabella@acme.com";
+      id = 16;
+      name = "Isabella Johnson";
+      role = "Backend Engineer";
+      status = "Active";
+    };
+    {
+      email = "mia@acme.com";
+      id = 17;
+      name = "Mia Davis";
+      role = "Lead Designer";
+      status = "Active";
+    };
+    {
+      email = "william@acme.com";
+      id = 18;
+      name = "William Wilson";
+      role = "Frontend Engineer";
+      status = "Active";
+    };
+  |]
+
+let items_per_page = 6
+
+(* How long the fetch it stands in for takes. *)
+let load_ms = 1500
+
+let columns =
+  [|
+    ("name", "Name"); ("role", "Role"); ("status", "Status"); ("email", "Email");
+  |]
+
+let make () =
+  let count, set_count = S.create_signal items_per_page in
+  let loading, set_loading = S.create_signal false in
+  let has_more () = S.get count < Array.length all_users in
+  let timer = ref None in
+  S.on_cleanup (fun () -> Option.iter Js.Global.clearTimeout !timer);
+  (* The table asks for more only while it is not loading. *)
+  let load_more () =
+    if has_more () then begin
+      S.set set_loading true;
+      timer :=
+        Some
+          (Js.Global.setTimeout
+             ~f:(fun () ->
+               S.batch (fun () ->
+                   S.set set_count
+                     (min (Array.length all_users)
+                        (S.get count + items_per_page));
+                   S.set set_loading false))
+             load_ms)
+    end
+  in
+  <Table>
+    <Table.Scroll_container class_="h-[280px] overflow-y-auto">
+      <Table.Content aria_label="Async loading table" class_="min-w-[600px]">
+        <Table.Header class_="sticky top-0 z-10 bg-surface-secondary">
+          <For each=(fun () -> columns)>
+            (fun (id, name) _ ->
+              <Table.Column
+                id=(fun () -> id)
+                is_row_header=(fun () -> String.equal id "name")>
+                (fun () -> Jsx.string name)
+              </Table.Column>)
+          </For>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> Array.sub all_users 0 (S.get count))>
+            (fun user _ ->
+              <Table.Row id=(fun () -> string_of_int user.id)>
+                <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
+                <Table.Cell>
+                  <Chip
+                    color=(fun () -> status_color user.status)
+                    size=`sm
+                    variant=`soft>
+                    (fun () -> Jsx.string user.status)
+                  </Chip>
+                </Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+              </Table.Row>)
+          </For>
+          <Show when_=(fun () -> has_more ())>
+            <Table.Load_more
+              is_loading=(fun () -> S.get loading)
+              scroll_offset=0.
+              on_load_more=load_more>
+              <Table.Load_more_content>
+                <Spinner size=`md />
+              </Table.Load_more_content>
+            </Table.Load_more>
+          </Show>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

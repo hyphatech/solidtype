@@ -1,0 +1,121 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+external parent : _ Dom.element_like -> Dom.element Js.null = "parentElement"
+[@@mel.get]
+
+type style
+
+external computed : Dom.element -> style = "getComputedStyle"
+[@@mel.scope "window"]
+
+external overflow_y : style -> string = "overflowY" [@@mel.get]
+
+(* The nearest element above that scrolls its content: the root an observer
+   measures the view by, as React Aria's [getScrollParent] finds it. *)
+let scrolling e =
+  let rec up above =
+    match Js.Null.toOption above with
+    | None -> None
+    | Some p -> (
+        match overflow_y (computed p) with
+        | "auto" | "scroll" -> Some p
+        | _ -> up (parent p))
+  in
+  up (parent e)
+
+type observer
+type observing
+type intersection
+
+external observing :
+  root:Dom.element Js.null ->
+  root_margin:(string[@mel.as "rootMargin"]) ->
+  unit ->
+  observing = ""
+[@@mel.obj]
+
+external observer :
+  ((intersection array -> unit)[@mel.uncurry]) -> observing -> observer
+  = "IntersectionObserver"
+[@@mel.new]
+
+external observe : observer -> _ Dom.element_like -> unit = "observe"
+[@@mel.send]
+
+external disconnect : observer -> unit = "disconnect" [@@mel.send]
+external intersecting : intersection -> bool = "isIntersecting" [@@mel.get]
+
+module Props = struct
+  type t
+
+  external check :
+    ?is_loading:bool Solidtype.Check.value ->
+    ?on_load_more:(unit -> unit) ->
+    ?scroll_offset:float Solidtype.Check.value ->
+    ?props:'spread Solidtype.Solid.rest ->
+    (unit -> unit) Solidtype.Html.Div.check = "check"
+  [@@mel.module "vite-plugin-solidtype/markers"]
+
+  external is_loading : t -> bool option = "isLoading" [@@mel.get]
+
+  external on_load_more : t -> ((unit -> unit)[@u]) option = "onLoadMore"
+  [@@mel.get]
+
+  external scroll_offset : t -> float option = "scrollOffset" [@@mel.get]
+
+  external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+  [@@mel.get]
+end
+
+let make (props : Props.t) =
+  let is_loading () = Option.value (Props.is_loading props) ~default:false in
+  let sentinel = ref None in
+  let watching = ref None in
+  let stop () =
+    Option.iter disconnect !watching;
+    watching := None
+  in
+  (* An observer measures by a margin fixed as it is made, and tells only of
+     a change, so one is made anew as loading ends: a sentinel still in view
+     then asks again. *)
+  let watch () =
+    stop ();
+    Option.iter
+      (fun e ->
+        let margin =
+          Js.Float.toString
+            (100. *. Option.value (Props.scroll_offset props) ~default:1.)
+          ^ "%"
+        in
+        let o =
+          observer
+            (fun entries ->
+              if Array.exists intersecting entries && not (S.untrack is_loading)
+              then
+                match Props.on_load_more props with
+                | Some f -> f () [@u]
+                | None -> ())
+            (observing
+               ~root:(Js.Null.fromOption (scrolling e))
+               ~root_margin:("0px " ^ margin ^ " " ^ margin ^ " " ^ margin)
+               ())
+        in
+        observe o e;
+        watching := Some o)
+      !sentinel
+  in
+  S.on_mount watch;
+  S.create_computed_from ~init:false (fun was ->
+      let now = is_loading () in
+      if was && not now then watch ();
+      now);
+  S.on_cleanup stop;
+  <div
+    ref=(fun e ->
+          sentinel := Some e;
+          match Props.ref props with Some f -> f e [@u] | None -> ())
+    props=(S.omit props [| "isLoading"; "onLoadMore"; "scrollOffset"; "ref" |])
+  />
+
+let component = Jsx.component make

@@ -222,6 +222,48 @@ module Cell : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+(** What loads more rows, at the end of a {!Body}, as HeroUI's [Table.LoadMore]
+    does: a sentinel that calls [on_load_more] as it comes within
+    [scroll_offset] heights of the view of what scrolls the table, 1 by default,
+    and again as loading ends with it still in view, never while [is_loading];
+    and while [is_loading], a row across every column holding its children, a
+    {!Load_more_content}, which no key reaches. *)
+module Load_more : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?is_loading:bool Solidtype.Check.value ->
+      ?on_load_more:(unit -> unit) ->
+      ?scroll_offset:float Solidtype.Check.value ->
+      ?class_:string Solidtype.Check.value ->
+      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
+(** What a loading row shows, a [<div>] centred in it: a {!Spinner}, say. *)
+module Load_more_content : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?class_:string Solidtype.Check.value ->
+      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?props:t Solidtype.Solid.rest ->
+      unit ->
+      unit
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
 (** What follows the table, inside its frame: a [<div>]. *)
 module Footer : sig
   module Props : sig

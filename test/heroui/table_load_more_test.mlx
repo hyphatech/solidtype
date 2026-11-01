@@ -1,0 +1,173 @@
+(* HeroUI's Table loading more rows, beside the same table in React: the
+   sentinel's row, the loading row and its content, each part's classes and
+   state, as the sentinel comes into view, while loading, and once loaded. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Table = Solidtype_heroui.Table
+module Spinner = Solidtype_heroui.Spinner
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+module Twin = struct
+  external render : ((unit -> unit)[@mel.uncurry]) -> Dom.element = "render"
+  [@@mel.module "./twins/TableLoadMore.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableLoadMore.tsx"]
+
+  external finish : unit -> unit = "finish"
+  [@@mel.module "./twins/TableLoadMore.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableLoadMore.tsx"]
+end
+
+(* The stand-in observer's own: brings an element into view, as a scroll to
+   it would. *)
+external intersect : Dom.element -> unit = "intersect"
+[@@mel.scope "IntersectionObserver"]
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+
+let names =
+  [|
+    "Kate Moore";
+    "John Smith";
+    "Sara Johnson";
+    "Michael Brown";
+    "Emily Davis";
+    "Davis Wilson";
+  |]
+
+(* What HeroUI's styles read of a part and what a reader reaches. The
+   sentinel's row is [inert], which Solid sets as a property and jsdom keeps
+   off its attributes, and React Aria gives its loading row an [aria-level],
+   which only a tree grid's row has: both are left out. *)
+let state =
+  [
+    "data-slot"; "class"; "role"; "colspan"; "data-level"; "style"; "aria-label";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[data-slot], [role], tr, tr > td > div")
+  |> Array.map (fun e ->
+      String.concat " "
+        (tag_name e
+        :: List.filter_map
+             (fun name ->
+               match T.attribute e name with
+               | Some "" | None -> None
+               (* A style however a framework spaces and ends it. *)
+               | Some v when String.equal name "style" ->
+                   Some
+                     (name ^ "="
+                     ^ String.concat ""
+                         (String.split_on_char ' '
+                            (String.concat "" (String.split_on_char ';' v))))
+               | Some v -> Some (name ^ "=" ^ v))
+             state))
+
+let sentinel host =
+  match
+    Js.Null.toOption
+      (query host "[data-slot=table-body] > tr:not([role]) > td > div")
+  with
+  | Some e -> e
+  | None -> Js.Exn.raiseError "no sentinel"
+
+(* The table at rest, its sentinel brought into view, again while it loads,
+   and once loaded. *)
+let walk ~step ~finish host told =
+  let at_rest = shown host in
+  let* () =
+    step (fun () ->
+        intersect (sentinel host);
+        Js.Promise.resolve ())
+  in
+  let loading = shown host in
+  let* () =
+    step (fun () ->
+        intersect (sentinel host);
+        Js.Promise.resolve ())
+  in
+  let asked_while_loading = !told in
+  finish ();
+  Js.Promise.resolve (at_rest, loading, asked_while_loading, shown host)
+
+let () =
+  Jest.describe "Table, loading more" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "loads more as its end comes into view, as React's does"
+        (fun () ->
+          let told = ref 0 in
+          let count, set_count = S.create_signal 3 in
+          let loading, set_loading = S.create_signal false in
+          T.render (fun () ->
+              <Table>
+                <Table.Scroll_container class_="h-[280px] overflow-y-auto">
+                  <Table.Content aria_label="Async loading table">
+                    <Table.Header>
+                      <Table.Column is_row_header=true>"Name"</Table.Column>
+                      <Table.Column>"Role"</Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <For each=(fun () -> Array.sub names 0 (S.get count))>
+                        (fun name _ ->
+                          <Table.Row id=(fun () -> name)>
+                            <Table.Cell>(fun () -> Jsx.string name)</Table.Cell>
+                            <Table.Cell>"Engineer"</Table.Cell>
+                          </Table.Row>)
+                      </For>
+                      <Show when_=(fun () -> S.get count < Array.length names)>
+                        <Table.Load_more
+                          is_loading=(fun () -> S.get loading)
+                          scroll_offset=0.
+                          on_load_more=(fun _ ->
+                                         incr told;
+                                         S.set set_loading true)>
+                          <Table.Load_more_content>
+                            <Spinner size=`md />
+                          </Table.Load_more_content>
+                        </Table.Load_more>
+                      </Show>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Scroll_container>
+              </Table>);
+          let* solidtype =
+            walk
+              ~step:(fun action -> action ())
+              ~finish:(fun () ->
+                S.batch (fun () ->
+                    S.set set_count 6;
+                    S.set set_loading false))
+              T.body told
+          in
+          T.cleanup ();
+          let told' = ref 0 in
+          let host = Twin.render (fun () -> incr told') in
+          let* react = walk ~step:Twin.step ~finish:Twin.finish host told' in
+          Twin.cleanup ();
+          (* React Aria asks again while loading, which HeroUI's example
+             guards against by a ref of its own; the port asks only once
+             loading ends, so its count is held apart. *)
+          let parts (at_rest, loading, _, loaded) =
+            (at_rest, loading, loaded)
+          in
+          let asked (_, _, n, _) = n in
+          Js.Promise.resolve
+            E.(
+              expect (parts solidtype, asked solidtype, asked react)
+              |> toEqual (parts react, 1, 2))))

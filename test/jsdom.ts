@@ -13,13 +13,41 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 };
-// Nor an IntersectionObserver, by which a list box's load-more sentinel
-// sees it is in view: one that never reports stands in, as for a list
-// scrolled nowhere.
+// Nor an IntersectionObserver, by which a load-more sentinel sees it is in
+// view: one that reports nothing stands in, as for a list scrolled nowhere,
+// until a test brings an element into view by its static `intersect`, as a
+// scroll to it would, which tells every observer watching it.
+const observing = new Set<{
+  targets: Set<Element>;
+  report: (entries: IntersectionObserverEntry[]) => void;
+}>();
 globalThis.IntersectionObserver ??= class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  static intersect(target: Element) {
+    for (const o of observing)
+      if (o.targets.has(target))
+        o.report([{ isIntersecting: true, target } as IntersectionObserverEntry]);
+  }
+  #watching: {
+    targets: Set<Element>;
+    report: (entries: IntersectionObserverEntry[]) => void;
+  };
+  constructor(report: IntersectionObserverCallback) {
+    this.#watching = {
+      targets: new Set(),
+      report: (entries) => report(entries, this as unknown as IntersectionObserver),
+    };
+  }
+  observe(target: Element) {
+    this.#watching.targets.add(target);
+    observing.add(this.#watching);
+  }
+  unobserve(target: Element) {
+    this.#watching.targets.delete(target);
+  }
+  disconnect() {
+    this.#watching.targets.clear();
+    observing.delete(this.#watching);
+  }
   takeRecords() {
     return [];
   }

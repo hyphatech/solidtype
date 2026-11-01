@@ -198,3 +198,27 @@ module Cell : sig
   val make : Props.t -> Solidtype.Jsx.element
   val component : Props.t Solidtype.Jsx.component
 end
+
+(** What loads more rows, after a {!Body}'s last, as React Aria's
+    [TableLoadMoreItem] does: a row of no height, out of the page's reach,
+    holding a {!Load_more_sentinel}, which calls [on_load_more] as it comes
+    within [scroll_offset] heights of the view of what scrolls the table, 1 by
+    default, and again as loading ends with it still in view; and while
+    [is_loading], a row of one cell across every column, its children, which no
+    key reaches. The attributes it is given are the loading row's. *)
+module Load_more : sig
+  module Props : sig
+    type t
+
+    val check :
+      ?is_loading:bool Solidtype.Check.value ->
+      ?on_load_more:(unit -> unit) ->
+      ?scroll_offset:float Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Tr.check
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end

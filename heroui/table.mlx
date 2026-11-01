@@ -252,6 +252,38 @@ module Cell = struct
     </Headless.Cell>
 end
 
+(* What loads more rows: HeroUI's classes on the loading row, and React
+   Aria's level, which HeroUI's styles read of a row. *)
+module Load_more = struct
+  let%component make ?(is_loading : bool option)
+      ?(on_load_more : (unit -> unit) option) ?(scroll_offset : float option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_table "Table.Load_more" in
+    <Headless.Load_more
+      ?is_loading
+      on_load_more=(fun _ -> ignore (on_load_more () : unit option))
+      ?scroll_offset
+      style="--table-row-level: 1"
+      class_=(fun () -> after (Styles.Table.load_more (slots ())) (class_ ()))
+      data_slot="table-load-more"
+      data_level="1"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Headless.Load_more>
+end
+
+module Load_more_content = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_table "Table.Load_more_content" in
+    <div
+      class_=(fun () ->
+               after (Styles.Table.load_more_content (slots ())) (class_ ()))
+      data_slot="table-load-more-content"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
 module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Footer" in

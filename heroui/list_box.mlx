@@ -293,45 +293,6 @@ external query_in : Dom.element -> string -> Dom.element Js.null
 
 external css_escape : string -> string = "escape" [@@mel.scope "CSS"]
 
-(* Where it scrolls: the nearest element above that scrolls its content. *)
-external parent : Dom.element -> Dom.element Js.null = "parentElement"
-[@@mel.get]
-
-type style
-
-external computed : Dom.element -> style = "getComputedStyle"
-[@@mel.scope "window"]
-
-external overflow_y : style -> string = "overflowY" [@@mel.get]
-
-let rec scrolling e =
-  match Js.Null.toOption (parent e) with
-  | None -> None
-  | Some p -> (
-      match overflow_y (computed p) with
-      | "auto" | "scroll" -> Some p
-      | _ -> scrolling p)
-
-type observer
-type observing
-type intersection
-
-external observing :
-  root:Dom.element Js.null ->
-  root_margin:(string[@mel.as "rootMargin"]) ->
-  unit ->
-  observing = ""
-[@@mel.obj]
-
-external observer :
-  ((intersection array -> unit)[@mel.uncurry]) -> observing -> observer
-  = "IntersectionObserver"
-[@@mel.new]
-
-external observe : observer -> Dom.element -> unit = "observe" [@@mel.send]
-external disconnect : observer -> unit = "disconnect" [@@mel.send]
-external intersecting : intersection -> bool = "isIntersecting" [@@mel.get]
-
 module Load_more_item = struct
   let%component make ?(is_loading : bool = false)
       ?(on_load_more : (unit -> unit) option) ?(scroll_offset : float = 1.)
@@ -339,48 +300,14 @@ module Load_more_item = struct
     within "List_box.Load_more_item";
     let others = Props.others props in
     let draw () =
-      let sentinel = ref None in
-      let watching = ref None in
-      let stop () =
-        Option.iter disconnect !watching;
-        watching := None
-      in
-      (* React Aria's sentinel: as it comes within [scroll_offset] heights
-         of the list's view, more is asked for, and again once loading ends
-         with it still in view. *)
-      let watch () =
-        stop ();
-        Option.iter
-          (fun e ->
-            let margin = Js.Float.toString (100. *. scroll_offset ()) ^ "%" in
-            let o =
-              observer
-                (fun entries ->
-                  if
-                    Array.exists intersecting entries
-                    && not (S.untrack is_loading)
-                  then ignore (on_load_more () : unit option))
-                (observing
-                   ~root:(Js.Null.fromOption (scrolling e))
-                   ~root_margin:("0px " ^ margin ^ " " ^ margin ^ " " ^ margin)
-                   ())
-            in
-            observe o e;
-            watching := Some o)
-          !sentinel
-      in
-      S.on_mount watch;
-      S.create_computed_from ~init:false (fun was ->
-          let now = is_loading () in
-          if was && not now then watch ();
-          now);
-      S.on_cleanup stop;
       Jsx.fragment
         [|
           <div style="position: relative; width: 0px; height: 0px;" inert=true>
-            <div
+            <Solidtype_headless.Load_more_sentinel
+              is_loading=(fun () -> is_loading ())
+              on_load_more=(fun _ -> ignore (on_load_more () : unit option))
+              scroll_offset=(fun () -> scroll_offset ())
               style="position: absolute; height: 1px; width: 1px;"
-              ref=(fun e -> sentinel := Some (as_element e))
               data_testid="loadMoreSentinel"
             />
           </div>;

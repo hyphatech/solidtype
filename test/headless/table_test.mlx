@@ -359,3 +359,85 @@ let () =
                        ("", "Actions");
                      |],
                      [| "name-"; "role+"; "role-" |] ))))
+
+(* The stand-in observer's own: brings an element into view, as a scroll to
+   it would. *)
+external intersect : Dom.element -> unit = "intersect"
+[@@mel.scope "IntersectionObserver"]
+
+external query : string -> Dom.element Js.null = "querySelector"
+[@@mel.scope "document"]
+
+let found selector =
+  match Js.Null.toOption (query selector) with
+  | Some e -> e
+  | None -> Js.Exn.raiseError ("nothing is " ^ selector)
+
+let () =
+  Jest.describe "Table, loading more" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "asks for more as its end comes into view, never while loading"
+        (fun () ->
+          let asked = ref 0 in
+          let loading, set_loading = S.create_signal false in
+          H.render (fun () ->
+              <Table.Root aria_label="Team members">
+                <Table.Header>
+                  <Table.Column is_row_header=true>"Name"</Table.Column>
+                  <Table.Column>"Role"</Table.Column>
+                </Table.Header>
+                <Table.Body>
+                  <For each=(fun () -> members)>
+                    (fun m _ ->
+                      <Table.Row id=(fun () -> m.id)>
+                        <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
+                        <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                      </Table.Row>)
+                  </For>
+                  <Table.Load_more
+                    is_loading=(fun () -> S.get loading)
+                    on_load_more=(fun _ -> incr asked)
+                    class_="loader">
+                    <span>"Loading more"</span>
+                  </Table.Load_more>
+                </Table.Body>
+              </Table.Root>);
+          let sentinel () = found "tbody > tr:not([role]) > td > div" in
+          intersect (sentinel ());
+          let at_end = !asked in
+          S.set set_loading true;
+          let loader = found "tr.loader" in
+          let cell = found "tr.loader > td" in
+          let shown =
+            ( H.attribute loader "role",
+              H.attribute cell "role",
+              H.attribute cell "colspan",
+              H.text cell )
+          in
+          intersect (sentinel ());
+          let while_loading = !asked in
+          let* found_while_loading = H.accessibility_violations () in
+          S.set set_loading false;
+          intersect (sentinel ());
+          let user = H.setup () in
+          H.focus (H.by_text "CMO");
+          let* () = H.keyboard user "{ArrowDown}" in
+          E.(
+            expect
+              ( at_end,
+                shown,
+                while_loading,
+                found_while_loading,
+                !asked,
+                Option.is_none (Js.Null.toOption (query "tr.loader")),
+                where () )
+            |> toEqual
+                 ( 1,
+                   (Some "row", Some "rowheader", Some "2", "Loading more"),
+                   1,
+                   [||],
+                   2,
+                   true,
+                   "gridcell:CMO" ))
+          |> Js.Promise.resolve))

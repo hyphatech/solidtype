@@ -57,7 +57,8 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
 
 - [`Solidtype_headless`](/solidtype/reference/solidtype-headless/Solidtype_headless/index.html)
   -- the components Kobalte lacks, one module each:
-  [`Table`](/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html);
+  [`Table`](/solidtype/reference/solidtype-headless/Solidtype_headless/Table/index.html),
+  [`Load_more_sentinel`](/solidtype/reference/solidtype-headless/Solidtype_headless/Load_more_sentinel/index.html);
   and Kobalte's own, fixed:
   [`Color_area`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_area/index.html),
   [`Color_swatch`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_swatch/index.html).

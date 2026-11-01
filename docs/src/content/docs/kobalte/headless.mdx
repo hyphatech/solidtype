@@ -38,7 +38,10 @@ row's cells, and Up and Down between a cell and the one above or below it.
 Its rows are selected as `selection_mode` says, by a press, Space or Enter,
 Shift and the platform's key extending and adding; a press that begins in a
 control inside a row is the control's. A column that `allows_sorting` is
-`aria-sort`, and pressed, or given Enter or Space, asks for its sort.
+`aria-sort`, and pressed, or given Enter or Space, asks for its sort. A cell
+given focus keeps it, and an arrow that reaches no cell moves nothing.
+`Table.Load_more`, after the body's last row, asks for more rows as it comes
+into view of what scrolls the table, never while they load.
 
 <Example code={ExTableCode} title="headless_table.mlx"><ExTable.make client:visible /></Example>
 
@@ -50,6 +53,16 @@ control inside a row is the control's. A column that `allows_sorting` is
 | `Table.Body` | `<tbody>` | `empty_state`, a row across every column while it has none |
 | `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled` |
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index` |
+| `Table.Load_more` | an inert `<tr>` of no height holding the sentinel, and while loading a `<tr role="row">` across every column | `is_loading`, `on_load_more`, `scroll_offset`; its attributes are the loading row's |
+
+## Load_more_sentinel
+
+`Solidtype_headless.Load_more_sentinel` is what asks a list for more as its end
+comes into view, as React Aria's `useLoadMoreSentinel` does: a `<div>` placed
+after the list's last entry, which calls `on_load_more` as it comes within
+`scroll_offset` heights of the view of what scrolls it, and again as loading
+ends with it still in view, never while `is_loading`. `Table.Load_more` and
+HeroUI's `List_box.Load_more_item` place one each.
 
 `Table.use_context ()` is the table a part is in: how it is sorted and its
 rows are selected, each row's state by its key, and selecting all or none.

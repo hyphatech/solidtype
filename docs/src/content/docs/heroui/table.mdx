@@ -8,6 +8,8 @@ import * as ExUsage from "@islands/table_usage.jsx";
 import ExUsageCode from "@islands/table_usage.mlx?raw";
 import * as ExSecondary from "@islands/table_secondary.jsx";
 import ExSecondaryCode from "@islands/table_secondary.mlx?raw";
+import * as ExAsyncLoading from "@islands/table_async_loading.jsx";
+import ExAsyncLoadingCode from "@islands/table_async_loading.mlx?raw";
 import * as ExSorting from "@islands/table_sorting.jsx";
 import ExSortingCode from "@islands/table_sorting.mlx?raw";
 import * as ExCustomCells from "@islands/table_custom_cells.jsx";
@@ -37,9 +39,9 @@ body's `items` and a render function; columns and cells given by data are a
 Its rows are selected by Kobalte's list, one or many, by a press, Space or
 Enter, or a `Checkbox` of `slot=`selection` in a row, and all of them by one
 in the header. A column that allows sorting is pressed, or given Enter or Space, to be
-sorted by. Loading more as the table scrolls, resizing columns, expandable
-rows and virtualization are being ported, each in a stage of its own; their
-examples are added with them.
+sorted by. `Table.Load_more` loads more rows as the table's end scrolls into
+view. Resizing columns, expandable rows and virtualization are being ported,
+each in a stage of its own; their examples are added with them.
 
 ## Usage
 
@@ -74,6 +76,17 @@ HeroUI's examples.
 ### Secondary Variant
 
 <Example code={ExSecondaryCode} title="table_secondary.mlx"><ExSecondary.make client:visible /></Example>
+
+### Async Loading
+
+`Table.Load_more` at the end of `Table.Body` calls `on_load_more` as it comes
+within `scroll_offset` heights of the view of what scrolls the table, and
+again as loading ends with it still in view; while `is_loading` it draws a row
+across every column holding its `Table.Load_more_content`. It never asks while
+loading, so the application keeps no guard of its own, where HeroUI's example
+keeps one in a ref, since React Aria asks again while the rows load.
+
+<Example code={ExAsyncLoadingCode} title="table_async_loading.mlx"><ExAsyncLoading.make client:visible /></Example>
 
 ### Sorting
 
@@ -134,7 +147,8 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
 - `.table__scroll-container`, `.table__content`, `.table__header`,
   `.table__column`, `.table__body`, `.table__row`, `.table__cell`,
   `.table__footer`, `.table__sortable-column-header`,
-  `.table__sortable-column-indicator`
+  `.table__sortable-column-indicator`, `.table__load-more`,
+  `.table__load-more-content`
 
 ### Interactive States
 
@@ -223,6 +237,19 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
 | `className` | `class_` | `string` | | Added after HeroUI's class |
+
+### Table.LoadMore
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `isLoading` | `is_loading` | `bool` | `false` | Whether more rows are loading, its row drawn while they are |
+| `onLoadMore` | `on_load_more` | `unit -> unit` | | Called as its sentinel comes into view, never while loading |
+| `scrollOffset` | `scroll_offset` | `float` | `1.` | How many heights of the view before the end it asks |
+| `className` | `class_` | `string` | | Added after HeroUI's class, on the loading row |
+
+### Table.LoadMoreContent
+
+It takes `class_`, added after HeroUI's class, and its `children`.
 
 ## Beside React
 

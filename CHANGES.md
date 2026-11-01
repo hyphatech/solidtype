@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Table.Load_more` and `Table.Load_more_content`, HeroUI's:
+  at the end of a table's body, more rows are asked for as it scrolls into
+  view, `on_load_more`, `scroll_offset`, and while `is_loading` a row across
+  every column shows its content. It never asks while loading, where React
+  Aria's does and HeroUI's example guards against it. HeroUI's Async Loading
+  example. `Solidtype_headless.Table.Load_more` beneath it, and
+  `Solidtype_headless.Load_more_sentinel`, what asks, which
+  `Solidtype_heroui.List_box.Load_more_item` now places too.
+
 - `Solidtype_headless.Table`, and so `Solidtype_heroui.Table`: a cell given
   focus, by a press or by code, keeps it, and an arrow that reaches no cell --
   down from the last row, up from the header, past a header's ends -- moves

@@ -180,7 +180,12 @@ let from_cell table cell k =
       let i = Option.value (index_of cell along) ~default:0 in
       let body_row = Js.Null.toOption (attribute row "data-key") <> None in
       let vertical step =
-        let rows = Js.Array.from (query_all table "tr[role=row]") in
+        (* The header's row and the body's, never a row no key reaches: an
+           empty state's or a loader's. *)
+        let rows =
+          Js.Array.from
+            (query_all table "thead > tr[role=row], tr[role=row][data-key]")
+        in
         match index_of row rows with
         | Some r when r + step >= 0 && r + step < Array.length rows ->
             let next = cells rows.(r + step) in
@@ -809,6 +814,66 @@ module Cell = struct
       props=(S.omit props [| "children"; "ref" |])>
       (fun () -> Props.children props)
     </td>
+
+  let component = Jsx.component make
+end
+
+module Load_more = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?is_loading:bool Solidtype.Check.value ->
+      ?on_load_more:(unit -> unit) ->
+      ?scroll_offset:float Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Tr.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external is_loading : t -> bool option = "isLoading" [@@mel.get]
+
+    external on_load_more : t -> ((unit -> unit)[@u]) option = "onLoadMore"
+    [@@mel.get]
+
+    external scroll_offset : t -> float option = "scrollOffset" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let t = in_table "Table.Load_more" in
+    let is_loading () = Option.value (Props.is_loading props) ~default:false in
+    (* The sentinel's row has no height and is out of the page's reach, so it
+       moves nothing and nothing reaches it; the loading row joins no list, so
+       no key reaches it either. *)
+    Jsx.fragment
+      [|
+        <tr style="height: 0px;" inert=true>
+          <td style="padding: 0px; border: 0px;">
+            <Load_more_sentinel
+              is_loading=(fun () -> is_loading ())
+              on_load_more=(fun _ ->
+                             match Props.on_load_more props with
+                             | Some f -> f () [@u]
+                             | None -> ())
+              ?scroll_offset=(fun () -> Props.scroll_offset props)
+              style="position: relative; height: 1px; width: 1px;"
+            />
+          </td>
+        </tr>;
+        <Show when_=(fun () -> is_loading ())>
+          <tr
+            role=`row
+            props=(S.omit props
+                     [| "isLoading"; "onLoadMore"; "scrollOffset"; "children" |])>
+            <td
+              role=`rowheader
+              colspan=(fun () -> string_of_int (count t.columns ()))>
+              (fun () -> Props.children props)
+            </td>
+          </tr>
+        </Show>;
+      |]
 
   let component = Jsx.component make
 end

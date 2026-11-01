@@ -395,6 +395,14 @@ let () =
                             "Kate"
                           </Table.Cell>
                         </Table.Row>
+                        <Table.Load_more
+                          data_testid="Table.Load_more"
+                          is_loading=(fun () -> true)>
+                          <Table.Load_more_content
+                            data_testid="Table.Load_more_content">
+                            "Loading"
+                          </Table.Load_more_content>
+                        </Table.Load_more>
                       </Table.Body>
                     </Table.Content>
                   </Table.Scroll_container>
@@ -649,6 +657,9 @@ let () =
                    ("Table.Body", "[data-slot=table-body]");
                    ("Table.Row", "[data-slot=table-row]");
                    ("Table.Cell", "[data-slot=table-cell]");
+                   ("Table.Load_more", "[data-slot=table-load-more]");
+                   ( "Table.Load_more_content",
+                     "[data-slot=table-load-more-content]" );
                    ("Table.Footer", "[data-slot=table-footer]");
                    ("Kbd", "kbd");
                    ("Kbd.Abbr", "abbr");
