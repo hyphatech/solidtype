@@ -25,6 +25,18 @@ module Close = Solidtype.Context.Make_optional (struct
   type t = unit -> unit
 end)
 
+type chevron = {
+  toggle : unit -> unit;
+  focus_row : unit -> unit;
+  labelled_by : string;
+}
+
+(* What a button with slot=`chevron expands and collapses: the row it is in,
+   as React Aria's chevron slot gives it. *)
+module Chevron = Solidtype.Context.Make_optional (struct
+  type t = chevron
+end)
+
 let no_trigger =
   {
     component = Kobalte.Root.component;
@@ -111,7 +123,7 @@ let%component make
        option) ?(size : [ `sm | `md | `lg ] option) ?(full_width : bool option)
     ?(is_icon_only : bool = false) ?(is_disabled : bool option)
     ?(is_pending : bool = false) ?(id : string option)
-    ?(slot : [ `trigger | `close ] option)
+    ?(slot : [ `trigger | `close | `chevron ] option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
     ~(children : Solidtype.Jsx.content) () =
@@ -134,13 +146,19 @@ let%component make
   let trigger =
     match (slot (), Trigger.use ()) with
     | Some `trigger, t -> t
-    | (None | Some `close), Some t when not t.needs_slot -> Some t
-    | (None | Some `close), (Some _ | None) -> None
+    | (None | Some `close | Some `chevron), Some t when not t.needs_slot ->
+        Some t
+    | (None | Some `close | Some `chevron), (Some _ | None) -> None
   in
   let closes =
     match slot () with
     | Some `close -> Close.use ()
-    | Some `trigger | None -> None
+    | Some (`trigger | `chevron) | None -> None
+  in
+  let chevron =
+    match slot () with
+    | Some `chevron -> Chevron.use ()
+    | Some (`trigger | `close) | None -> None
   in
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -181,9 +199,10 @@ let%component make
   in
   let progress_id = S.create_unique_id () in
   let labelled_by () =
-    match aria_label () with
-    | Some _ when pending () -> Some (named_by () ^ " " ^ progress_id)
-    | Some _ | None -> None
+    match (aria_label (), chevron) with
+    | Some _, _ when pending () -> Some (named_by () ^ " " ^ progress_id)
+    | Some _, Some c -> Some (named_by () ^ " " ^ c.labelled_by)
+    | Some _, None | None, _ -> None
   in
   let i =
     Interaction.create
@@ -239,8 +258,17 @@ let%component make
           | None -> ())
     ?slot=(fun () ->
             Option.map
-              (function `trigger -> "trigger" | `close -> "close")
+              (function
+                | `trigger -> "trigger"
+                | `close -> "close"
+                | `chevron -> "chevron")
               (slot ()))
+    ?tabindex=(fun () -> Option.map (fun _ -> "-1") chevron)
+    on_focus=(fun _ ->
+               (* A chevron's press is its row's, which takes the focus, as
+                  React Aria's does: from the button the pointer focused, so
+                  the row shows no ring a key's focus would. *)
+               Option.iter (fun c -> c.focus_row ()) chevron)
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
     data_pressed=(fun () ->
@@ -265,7 +293,8 @@ let%component make
             | (`submit | `reset | `button | `menu) as t -> t)
     on_click=(fun e ->
                ignore (on_click e : unit option);
-               Option.iter (fun close -> close ()) closes)
+               Option.iter (fun close -> close ()) closes;
+               Option.iter (fun c -> c.toggle ()) chevron)
     props=(Props.others props)>
     <Spinner.Progress.Provider value=(fun () -> progress_id)>
       (fun () -> children ())

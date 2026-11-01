@@ -12,6 +12,8 @@ import * as ExAsyncLoading from "@islands/table_async_loading.jsx";
 import ExAsyncLoadingCode from "@islands/table_async_loading.mlx?raw";
 import * as ExColumnResizing from "@islands/table_column_resizing.jsx";
 import ExColumnResizingCode from "@islands/table_column_resizing.mlx?raw";
+import * as ExExpandableRows from "@islands/table_expandable_rows.jsx";
+import ExExpandableRowsCode from "@islands/table_expandable_rows.mlx?raw";
 import * as ExSorting from "@islands/table_sorting.jsx";
 import ExSortingCode from "@islands/table_sorting.mlx?raw";
 import * as ExCustomCells from "@islands/table_custom_cells.jsx";
@@ -43,8 +45,9 @@ Enter, or a `Checkbox` of `slot=`selection` in a row, and all of them by one
 in the header. A column that allows sorting is pressed, or given Enter or Space, to be
 sorted by. `Table.Load_more` loads more rows as the table's end scrolls into
 view. In a `Table.Resizable_container`, a `Table.Column_resizer` resizes its
-column. Expandable rows and virtualization are being ported, each in a stage
-of its own; their examples are added with them.
+column. Given a `tree_column`, rows hold rows, expanded and collapsed by a
+chevron or the arrow keys. Virtualization is being ported, in a stage of its
+own; its example is added with it.
 
 ## Usage
 
@@ -107,6 +110,22 @@ the column's render function.
 `slot=`selection` stands for its row, and in the header for every row.
 
 <Example code={ExSelectionCode} title="table_selection.mlx"><ExSelection.make client:visible /></Example>
+
+### Expandable Rows
+
+`tree_column` on `Table.Content`, the `id` of a column, makes the table a tree
+grid: a `Table.Row` written inside another, among its cells, is drawn after it
+while it is expanded, a level deeper, its tree column's cell indented by
+HeroUI's styles. `expanded_keys`, or `default_expanded_keys`, and
+`on_expanded_change` say which rows are expanded. A `Button` of
+`slot=`chevron` in a row expands and collapses it; the arrow forward on a row
+expands it, the arrow back collapses it, then reaches the row it is in.
+`Table.use_row_context` and `Table.use_cell_context`, read in a cell, are
+what HeroUI's cell's render function is given: whether its row holds rows and
+is expanded, and whether it is in the tree column. A context is read as the
+cell is drawn, and kept, so a handler reads the row it was drawn in.
+
+<Example code={ExExpandableRowsCode} title="table_expandable_rows.mlx"><ExExpandableRows.make client:visible /></Example>
 
 ### Pagination
 
@@ -178,7 +197,10 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
 - a sortable header and its indicator: `[data-direction]`
 - a column resizer: `[data-hovered="true"]`, `[data-resizing="true"]`,
   `[data-focus-visible="true"]`, `[data-resizable-direction]`
-- a cell: `[data-focus-visible="true"]`
+- a cell: `[data-focus-visible="true"]`, `[data-tree-column="true"]`,
+  `[data-level]`, `[data-expanded="true"]`, `[data-has-child-items="true"]`
+- a row of a tree: `[data-level]`, `[data-expanded="true"]`,
+  `[data-has-child-items="true"]`, and its `--table-row-level`
 
 ## API Reference
 
@@ -210,6 +232,10 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | `disallowEmptySelection` | `disallow_empty_selection` | `bool` | `false` | Whether one row stays selected |
 | `sortDescriptor` | `sort_descriptor` | `Table.sort_descriptor` | | The column it is sorted by, and which way |
 | `onSortChange` | `on_sort_change` | `Table.sort_descriptor -> unit` | | Called with the sort a column's press asks for |
+| `treeColumn` | `tree_column` | `string` | | The `id` of the column whose cells hold a tree's chevrons |
+| `expandedKeys` | `expanded_keys` | `string array` | | Its rows' keys expanded, controlled |
+| `defaultExpandedKeys` | `default_expanded_keys` | `string array` | | Its rows' keys expanded at first, kept by itself |
+| `onExpandedChange` | `on_expanded_change` | `string array -> unit` | | Called with the keys expanded |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Header

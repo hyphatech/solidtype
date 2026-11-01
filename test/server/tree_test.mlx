@@ -1,0 +1,66 @@
+(* A table's tree as the server writes it: each row's place among those beside
+   it, the rows an expanded row holds, and its tree column's cells, in the HTML
+   a page is prerendered with, as the browser draws them. *)
+
+module Server = Solidtype.Server
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+
+type file = { id : string; title : string; files : file array }
+
+let files =
+  [|
+    {
+      id = "1";
+      title = "Documents";
+      files = [| { id = "2"; title = "Project"; files = [||] } |];
+    };
+    {
+      id = "5";
+      title = "Photos";
+      files = [| { id = "6"; title = "Image 1"; files = [||] } |];
+    };
+  |]
+
+let rec row f =
+  <Table.Row id=(fun () -> f.id)>
+    <Table.Cell>(fun () -> Jsx.string f.title)</Table.Cell>
+    <For each=(fun () -> f.files)>(fun f _ -> row f)</For>
+  </Table.Row>
+
+let page () =
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content
+        aria_label="Files"
+        tree_column="name"
+        default_expanded_keys=(fun () -> [| "1" |])>
+        <Table.Header>
+          <Table.Column id="name" is_row_header=true>"Name"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> files)>(fun f _ -> row f)</For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>
+
+(* How many times [part] is in [s]. *)
+let count part s = Array.length (Js.String.split ~sep:part s) - 1
+
+let () =
+  Jest.describe "A table's tree on the server" (fun () ->
+      Jest.test "is placed and drawn as in the browser" (fun () ->
+          let html = Server.render_to_string page in
+          E.(
+            expect
+              ( count {js|role="treegrid"|js} html,
+                count {js|aria-setsize="2"|js} html,
+                count {js|aria-posinset="2"|js} html,
+                count {js|aria-setsize="1"|js} html,
+                count {js|Project|js} html,
+                count {js|Image 1|js} html,
+                count {js|data-tree-column="true"|js} html )
+            |> toEqual (1, 2, 1, 1, 1, 0, 3))))

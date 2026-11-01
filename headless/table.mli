@@ -73,12 +73,45 @@ type context = {
   clear_selection : unit -> unit;
   resizing_column : unit -> string option;
       (** The [id] of the column being resized, in a {!Resizable_container}. *)
+  tree_column : unit -> string option;
+      (** The [id] of the column whose cells hold a tree's chevrons. *)
+  is_expanded : string -> bool;  (** Whether a row's rows are shown. *)
+  toggle_expanded : string -> unit;
 }
 (** What a table's parts, and a style over them, read of it: how it is sorted
     and its rows are selected, and each row's state by its key. *)
 
 val use_context : unit -> context
 (** The table above; outside a {!Root} it raises [Invalid_argument]. *)
+
+type row = {
+  key : string;
+  level : int;  (** 1 in the body, and one more in each row it is inside. *)
+  has_child_items : unit -> bool;  (** Whether it holds rows. *)
+  is_expanded : unit -> bool;
+  is_selected : unit -> bool;
+  is_disabled : unit -> bool;
+  toggle_expanded : unit -> unit;
+  focus : unit -> unit;  (** Gives it the focus, as a press of it does. *)
+  header_id : string;  (** The id of the cell that names it. *)
+}
+(** What a part inside a {!Row} reads of it, and a style's attribute on it. *)
+
+val use_row_context : unit -> row
+(** The row above, read by a part inside it, or by a style's attribute on it,
+    which Solid reads inside the row; outside a {!Row} it raises
+    [Invalid_argument]. *)
+
+type cell = {
+  is_tree_column : unit -> bool;
+      (** Whether it is in the table's tree column. *)
+  column_index : unit -> int;
+}
+(** What a part inside a {!Cell} reads of it, and a style's attribute on it. *)
+
+val use_cell_context : unit -> cell
+(** The cell above, read as {!use_row_context} is; outside a {!Cell} it raises
+    [Invalid_argument]. *)
 
 type column = {
   direction : unit -> [ `ascending | `descending ] option;
@@ -124,7 +157,17 @@ end
     keeps, [default_selected_keys] at first; each change calls
     [on_selection_change] with them, all of them for every row but a disabled
     one. A row whose key [disabled_keys] holds is disabled, and
-    [disallow_empty_selection] keeps one selected. *)
+    [disallow_empty_selection] keeps one selected.
+
+    Given [tree_column], it is a [treegrid] whose rows hold rows: a {!Row}
+    inside another is drawn after it while it is expanded, its [aria-level] one
+    more, each row [aria-posinset] and [aria-setsize] among those beside it, and
+    one that holds rows [aria-expanded]. Its keys expanded are [expanded_keys]
+    while it is given them, else those it keeps, [default_expanded_keys] at
+    first; each change calls [on_expanded_change] with them. The arrow forward
+    on a row that holds rows expands it, the arrow back collapses it, and on a
+    collapsed one reaches the row it is inside, as an accessible tree grid's
+    keys do. *)
 module Root : sig
   module Props : sig
     type t
@@ -139,6 +182,10 @@ module Root : sig
       ?disallow_empty_selection:bool Solidtype.Check.value ->
       ?sort_descriptor:sort_descriptor Solidtype.Check.value ->
       ?on_sort_change:(sort_descriptor -> unit) ->
+      ?tree_column:string Solidtype.Check.value ->
+      ?expanded_keys:string array Solidtype.Check.value ->
+      ?default_expanded_keys:string array Solidtype.Check.value ->
+      ?on_expanded_change:(string array -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check
@@ -211,7 +258,9 @@ end
 
 (** A row, a [<tr role="row">] of Kobalte's list, [data-key] its [id], which is
     its key in a selection, named by its row header's cell. A row joins the list
-    once it is on the page, ordered as the page has it. *)
+    once it is on the page, ordered as the page has it. Its children are its
+    cells, and in a tree the rows it holds, drawn after it while it is expanded,
+    and [data-expanded] while it is. *)
 module Row : sig
   module Props : sig
     type t
@@ -228,7 +277,8 @@ module Row : sig
 end
 
 (** A cell, a [<td>], a [gridcell], or a [rowheader] in the row header's column,
-    focused by the keys, [data-column-index] its column. *)
+    focused by the keys, [data-column-index] its column, [data-tree-column] in a
+    tree's. *)
 module Cell : sig
   module Props : sig
     type t

@@ -32,7 +32,11 @@
 
     Given [slot=`close], a button closes the dialog it is in, as React Aria's
     close slot does, besides calling its [on_click]: inside a {!Modal}'s dialog.
-*)
+
+    Given [slot=`chevron], a button expands and collapses the row of a {!Table}
+    it is in, as React Aria's chevron slot does: out of the page's order, its
+    press giving the row the focus, and named by its [aria_label] and the row's
+    name. *)
 
 type trigger = {
   component : unit Solidtype.Jsx.component;
@@ -61,6 +65,30 @@ type trigger = {
 val no_trigger : trigger
 (** What a part gives the buttons inside it to make them buttons again: an
     overlay's content, inside an overlay that makes every button its trigger. *)
+
+type chevron = {
+  toggle : unit -> unit;  (** Expands the row, or collapses it. *)
+  focus_row : unit -> unit;
+      (** Gives the row the focus, which the button takes from a press. *)
+  labelled_by : string;  (** The id of what names the row. *)
+}
+(** What a row of a table gives a button inside it with [slot=`chevron]. *)
+
+module Chevron : sig
+  module Provider : sig
+    module Props : sig
+      val check :
+        value:chevron Solidtype.Check.value ->
+        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        unit ->
+        unit
+    end
+
+    val component : unit Solidtype.Jsx.component
+  end
+
+  val use : unit -> chevron option
+end
 
 (** What closes the dialog a part is, which it gives a button inside it with
     [slot=`close]. *)
@@ -116,7 +144,7 @@ module Props : sig
     ?is_disabled:bool Solidtype.Check.value ->
     ?is_pending:bool Solidtype.Check.value ->
     ?id:string Solidtype.Check.value ->
-    ?slot:[ `trigger | `close ] Solidtype.Check.value ->
+    ?slot:[ `trigger | `close | `chevron ] Solidtype.Check.value ->
     ?type_:Solidtype.Html.Button.type_ Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->

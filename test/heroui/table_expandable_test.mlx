@@ -1,0 +1,283 @@
+(* HeroUI's Table with expandable rows, beside the same table in React: each
+   row's and cell's place in the tree and state, and each chevron, at rest, as
+   the keys expand, collapse and climb it, and as a chevron is pressed. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+module Twin = struct
+  external render : ((string array -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/TableExpandable.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableExpandable.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableExpandable.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+
+type file = {
+  id : string;
+  title : string;
+  kind : string;
+  date : string;
+  files : file array;
+}
+
+let data =
+  [|
+    {
+      id = "1";
+      title = "Documents";
+      kind = "Directory";
+      date = "10/20/2025";
+      files =
+        [|
+          {
+            id = "2";
+            title = "Project";
+            kind = "Directory";
+            date = "8/2/2025";
+            files =
+              [|
+                {
+                  id = "3";
+                  title = "Weekly Report";
+                  kind = "File";
+                  date = "7/10/2025";
+                  files = [||];
+                };
+                {
+                  id = "4";
+                  title = "Budget";
+                  kind = "File";
+                  date = "8/20/2025";
+                  files = [||];
+                };
+              |];
+          };
+        |];
+    };
+    {
+      id = "5";
+      title = "Photos";
+      kind = "Directory";
+      date = "2/3/2026";
+      files =
+        [|
+          {
+            id = "6";
+            title = "Image 1";
+            kind = "File";
+            date = "1/23/2026";
+            files = [||];
+          };
+          {
+            id = "7";
+            title = "Image 2";
+            kind = "File";
+            date = "2/3/2026";
+            files = [||];
+          };
+        |];
+    };
+  |]
+
+(* A row, its chevron in its tree column while it holds rows, as HeroUI's
+   example draws it from its cell's render function. *)
+let rec row f =
+  <Table.Row id=(fun () -> f.id)>
+    <Table.Cell>
+      (fun () ->
+        let r = Table.use_row_context () in
+        let c = Table.use_cell_context () in
+        Jsx.element
+          <span class_="flex items-center gap-1">
+            <Show when_=(fun () -> r.has_child_items () && c.is_tree_column ())>
+              <Button
+                is_icon_only=true
+                aria_label="Toggle row"
+                is_disabled=(fun () -> r.is_disabled ())
+                size=`sm
+                slot=`chevron
+                variant=`ghost>
+                <svg aria_hidden=true />
+              </Button>
+            </Show>
+            <span>(fun () -> Jsx.string f.title)</span>
+          </span>)
+    </Table.Cell>
+    <Table.Cell>(fun () -> Jsx.string f.kind)</Table.Cell>
+    <Table.Cell>(fun () -> Jsx.string f.date)</Table.Cell>
+    <For each=(fun () -> f.files)>(fun f _ -> row f)</For>
+  </Table.Row>
+
+(* What HeroUI's styles read and a reader reaches of each part. Ids, and what
+   each framework writes for itself -- React Aria's data-react-aria-prevent-focus,
+   its focus-within marks -- are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "role";
+    "style";
+    "tabindex";
+    "slot";
+    "aria-label";
+    "aria-expanded";
+    "aria-level";
+    "aria-posinset";
+    "aria-setsize";
+    "data-expanded";
+    "data-has-child-items";
+    "data-level";
+    "data-tree-column";
+    "data-column-index";
+  ]
+
+let shown host =
+  Js.Array.from
+    (query_all host
+       "table, [data-slot=table-row], [data-slot=table-cell], \
+        [data-slot=button]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (tag_name e
+         ::
+         (match T.attribute e "data-slot" with
+         | Some "table-row" ->
+             [
+               "data-key=" ^ Option.value (T.attribute e "data-key") ~default:"";
+             ]
+         | Some _ | None -> [])
+        @ List.filter_map
+            (fun name ->
+              match T.attribute e name with
+              | Some "" | None -> None
+              (* tabindex is a focus's, which each framework moves its own
+                  way between the rows; a button's is its own. *)
+              | Some _
+                when String.equal name "tabindex"
+                     && not (String.equal (tag_name e) "BUTTON") ->
+                  None
+              | Some v when String.equal name "style" ->
+                  Some
+                    (name ^ "="
+                    ^ String.concat ""
+                        (String.split_on_char ' '
+                           (String.concat "" (String.split_on_char ';' v))))
+              | Some v -> Some (name ^ "=" ^ v))
+            state))
+
+(* Where focus is: a row by its key, else an element by its text; a cell's
+   key is React Aria's own. *)
+let where () =
+  tag_name active ^ ":"
+  ^
+  match tag_name active with
+  | "TR" -> Option.value (T.attribute active "data-key") ~default:""
+  | _ -> text active
+
+let chevron host title =
+  match
+    Js.Array.from (query_all host "[data-slot=table-row]")
+    |> Array.to_list
+    |> List.filter (fun r -> Js.String.includes ~search:title (text r))
+  with
+  | r :: _ -> (
+      match Js.Array.from (query_all r "button") with
+      | [| b |] -> b
+      | _ -> Js.Exn.raiseError ("no chevron in " ^ title))
+  | [] -> Js.Exn.raiseError ("no row of " ^ title)
+
+(* The table at rest; tabbed into and walked by the keys; then Photos'
+   chevron pressed. *)
+let walk ~step host told =
+  let user = T.setup () in
+  let at_rest = shown host in
+  let* () = step (fun () -> T.tab user) in
+  let seen = ref [ "tab " ^ where () ] in
+  let rec go = function
+    | [] -> Js.Promise.resolve ()
+    | k :: rest ->
+        let* () = step (fun () -> T.keyboard user k) in
+        seen :=
+          (k ^ " " ^ where () ^ " " ^ String.concat "," (Array.to_list !told))
+          :: !seen;
+        go rest
+  in
+  let* () =
+    go
+      [
+        "{ArrowDown}";
+        "{ArrowRight}";
+        "{ArrowRight}";
+        "{ArrowLeft}";
+        "{ArrowLeft}";
+        "{ArrowLeft}";
+        "{ArrowLeft}";
+        "{ArrowLeft}";
+        "{ArrowRight}";
+      ]
+  in
+  let* () = step (fun () -> T.click user (chevron host "Photos")) in
+  Js.Promise.resolve
+    (at_rest, Array.of_list (List.rev !seen), shown host, where (), !told)
+
+let () =
+  Jest.describe "Table, its rows expanded" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is a tree walked and expanded, as React's is" (fun () ->
+          let told = ref [||] in
+          let expanded, set_expanded = S.create_signal [| "1" |] in
+          T.render (fun () ->
+              <Table>
+                <Table.Scroll_container>
+                  <Table.Content
+                    aria_label="Files"
+                    class_="min-w-[520px]"
+                    expanded_keys=(fun () -> S.get expanded)
+                    tree_column="name"
+                    on_expanded_change=(fun keys ->
+                                         told :=
+                                           Array.of_list
+                                             (List.sort String.compare
+                                                (Array.to_list keys));
+                                         S.set set_expanded keys)>
+                    <Table.Header>
+                      <Table.Column is_row_header=true id="name">
+                        "Name"
+                      </Table.Column>
+                      <Table.Column id="type">"Type"</Table.Column>
+                      <Table.Column id="date">"Date Modified"</Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <For each=(fun () -> data)>(fun f _ -> row f)</For>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Scroll_container>
+              </Table>);
+          let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+          T.cleanup ();
+          let told' = ref [||] in
+          let host = Twin.render (fun keys -> told' := keys) in
+          let* react = walk ~step:Twin.step host told' in
+          Twin.cleanup ();
+          Js.Promise.resolve E.(expect solidtype |> toEqual react)))

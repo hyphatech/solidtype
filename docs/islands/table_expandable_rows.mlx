@@ -1,0 +1,135 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Table = Solidtype_heroui.Table
+
+type file = {
+  id : string;
+  title : string;
+  kind : string;
+  date : string;
+  children : file array;
+}
+
+let data =
+  [|
+    {
+      id = "1";
+      title = "Documents";
+      kind = "Directory";
+      date = "10/20/2025";
+      children =
+        [|
+          {
+            id = "2";
+            title = "Project";
+            kind = "Directory";
+            date = "8/2/2025";
+            children =
+              [|
+                {
+                  id = "3";
+                  title = "Weekly Report";
+                  kind = "File";
+                  date = "7/10/2025";
+                  children = [||];
+                };
+                {
+                  id = "4";
+                  title = "Budget";
+                  kind = "File";
+                  date = "8/20/2025";
+                  children = [||];
+                };
+              |];
+          };
+        |];
+    };
+    {
+      id = "5";
+      title = "Photos";
+      kind = "Directory";
+      date = "2/3/2026";
+      children =
+        [|
+          {
+            id = "6";
+            title = "Image 1";
+            kind = "File";
+            date = "1/23/2026";
+            children = [||];
+          };
+          {
+            id = "7";
+            title = "Image 2";
+            kind = "File";
+            date = "2/3/2026";
+            children = [||];
+          };
+        |];
+    };
+  |]
+
+(* A row, and the rows it holds written inside it; its chevron in the tree
+   column while it holds rows, turned while it is expanded, as HeroUI's
+   example draws it from its cell's render function. *)
+let rec expandable_row item =
+  <Table.Row id=(fun () -> item.id)>
+    <Table.Cell>
+      (fun () ->
+        let row = Table.use_row_context () in
+        let cell = Table.use_cell_context () in
+        Jsx.element
+          <span class_="flex items-center gap-1">
+            <Show
+              when_=(fun () -> row.has_child_items () && cell.is_tree_column ())>
+              <Button
+                is_icon_only=true
+                aria_label="Toggle row"
+                is_disabled=(fun () -> row.is_disabled ())
+                size=`sm
+                slot=`chevron
+                variant=`ghost>
+                <Gravity.Chevron_right
+                  class_=(fun () ->
+                             "size-4 text-muted transition-transform \
+                              duration-150 "
+                             ^
+                             if row.is_expanded () then "rotate-90"
+                             else "rtl:rotate-180")
+                />
+              </Button>
+            </Show>
+            <span>(fun () -> Jsx.string item.title)</span>
+          </span>)
+    </Table.Cell>
+    <Table.Cell>(fun () -> Jsx.string item.kind)</Table.Cell>
+    <Table.Cell>(fun () -> Jsx.string item.date)</Table.Cell>
+    <For each=(fun () -> item.children)>
+      (fun child _ -> expandable_row child)
+    </For>
+  </Table.Row>
+
+let make () =
+  let expanded, set_expanded = S.create_signal [| "1" |] in
+  <Table>
+    <Table.Scroll_container>
+      <Table.Content
+        aria_label="Files"
+        class_="min-w-[520px]"
+        expanded_keys=(fun () -> S.get expanded)
+        tree_column="name"
+        on_expanded_change=(fun keys -> S.set set_expanded keys)>
+        <Table.Header>
+          <Table.Column is_row_header=true id="name">"Name"</Table.Column>
+          <Table.Column id="type">"Type"</Table.Column>
+          <Table.Column id="date">"Date Modified"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> data)>(fun item _ -> expandable_row item)</For>
+        </Table.Body>
+      </Table.Content>
+    </Table.Scroll_container>
+  </Table>

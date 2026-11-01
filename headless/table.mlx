@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
+module For = Solidtype.For
 module Selection = Solidtype_kobalte.Selection
 module Types = Solidtype_kobalte.Types
 module Either = Types.Either
@@ -56,10 +57,10 @@ let in_control e =
    made until it is on the page -- the server's only order, which the
    browser's agrees with as it hydrates -- then by where it is, so one added
    between two, or one gone, moves those after it. *)
-type placing = {
+type 'element placing = {
   made : int ref;
-  on_page : Dom.htmlTableCellElement list S.accessor;
-  set_on_page : Dom.htmlTableCellElement list S.setter;
+  on_page : 'element list S.accessor;
+  set_on_page : 'element list S.setter;
   alive : int S.accessor;
   set_alive : int S.setter;
 }
@@ -97,9 +98,28 @@ let place p element =
 (* How many there are. *)
 let count p () = S.get p.alive
 
-(* A row as the table keeps it: its key, and its element, which says where it
-   is on the page. *)
-type row = { key : string; element : Dom.htmlTableRowElement }
+type row = {
+  key : string;
+  level : int;
+  has_child_items : unit -> bool;
+  is_expanded : unit -> bool;
+  is_selected : unit -> bool;
+  is_disabled : unit -> bool;
+  toggle_expanded : unit -> unit;
+  focus : unit -> unit;
+  header_id : string;
+}
+
+type cell = { is_tree_column : unit -> bool; column_index : unit -> int }
+
+(* A row as the table keeps it: its key, its element, which says where it is
+   on the page, and where it is in the tree. *)
+type listed = {
+  key : string;
+  element : Dom.htmlTableRowElement;
+  parent : string option;
+  has_children : unit -> bool;
+}
 
 type sort_descriptor = {
   column : string;
@@ -118,6 +138,9 @@ type context = {
   select_all : unit -> unit;
   clear_selection : unit -> unit;
   resizing_column : unit -> string option;
+  tree_column : unit -> string option;
+  is_expanded : string -> bool;
+  toggle_expanded : string -> unit;
 }
 
 type column_size = Pixels of float | Percent of float | Fraction of float
@@ -267,13 +290,15 @@ type sizing = {
    layout where it is resizable. *)
 type table = {
   context : context;
-  rows : unit -> row list;
-  add : row -> unit;
+  rows : unit -> listed list;
+  add : listed -> unit;
   remove : string -> unit;
   manager : Manager.t S.accessor;
   row_header : unit -> int;
   set_row_header : (unit -> int) option -> unit;
-  columns : placing;
+  tree_index : unit -> int option;
+  set_tree_index : (unit -> int) option -> unit;
+  columns : Dom.htmlTableCellElement placing;
   add_column : column_spec -> unit;
   remove_column : string -> unit;
   sizing : sizing option;
@@ -290,12 +315,47 @@ let in_table part =
 
 let use_context () = (in_table "Table.use_context").context
 
-(* What a row's cells read of it: where they are, and the id of the one that
-   names the row. *)
-type row_cells = { cells : placing; header_id : string }
+(* What a row's cells, and the rows nested in it, read of it: where its cells
+   are, and its state. *)
+type row_cells = { cells : Dom.htmlTableCellElement placing; state : row }
 
 module Row_context = Solidtype.Context.Make_optional (struct
   type t = row_cells
+end)
+
+let use_row_context () =
+  match Row_context.use () with
+  | Some r -> r.state
+  | None -> invalid_arg "Table.use_row_context is used inside a Table.Row"
+
+module Cell_context = Solidtype.Context.Make_optional (struct
+  type t = cell
+end)
+
+let use_cell_context () =
+  match Cell_context.use () with
+  | Some c -> c
+  | None -> invalid_arg "Table.use_cell_context is used inside a Table.Cell"
+
+(* A row, drawn by what holds it once that has read all it holds: by the body,
+   or by the row it is in, after it, while that row is expanded, since a
+   [<tr>] cannot hold one. Its place among those beside it is then known, on
+   the server as in the browser. *)
+type nested = {
+  draw : position:int S.accessor -> size:(unit -> int) -> Jsx.element;
+}
+
+module Nested = Jsx.Token (struct
+  type t = nested
+end)
+
+(* A row's cell, drawn by its row once the row has read all it holds: whether
+   it holds rows is then known to each cell, on the server as in the
+   browser. *)
+type drawn_cell = { draw_cell : unit -> Jsx.element }
+
+module Cells = Jsx.Token (struct
+  type t = drawn_cell
 end)
 
 let role e = Js.Null.toOption (attribute e "role")
@@ -372,6 +432,7 @@ let from_row row k =
 let max_safe = 9007199254740991.
 
 external shift_key : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external focus_row : Dom.htmlTableRowElement -> unit = "focus" [@@mel.send]
 
 external query_in : _ Dom.element_like -> string -> Dom.element Js.null
   = "querySelector"
@@ -515,6 +576,10 @@ module Root = struct
       ?disallow_empty_selection:bool Solidtype.Check.value ->
       ?sort_descriptor:sort_descriptor Solidtype.Check.value ->
       ?on_sort_change:(sort_descriptor -> unit) ->
+      ?tree_column:string Solidtype.Check.value ->
+      ?expanded_keys:string array Solidtype.Check.value ->
+      ?default_expanded_keys:string array Solidtype.Check.value ->
+      ?on_expanded_change:(string array -> unit) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check = "check"
@@ -553,6 +618,19 @@ module Root = struct
       = "onSortChange"
     [@@mel.get]
 
+    external tree_column : t -> string option = "treeColumn" [@@mel.get]
+
+    external expanded_keys : t -> string array option = "expandedKeys"
+    [@@mel.get]
+
+    external default_expanded_keys : t -> string array option
+      = "defaultExpandedKeys"
+    [@@mel.get]
+
+    external on_expanded_change : t -> ((string array -> unit)[@u]) option
+      = "onExpandedChange"
+    [@@mel.get]
+
     external children : t -> Jsx.content = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlTableElement -> unit)[@u]) option = "ref"
@@ -587,6 +665,10 @@ module Root = struct
       "disallowEmptySelection";
       "sortDescriptor";
       "onSortChange";
+      "treeColumn";
+      "expandedKeys";
+      "defaultExpandedKeys";
+      "onExpandedChange";
       "children";
       "ref";
       "onKeyDown";
@@ -656,7 +738,32 @@ module Root = struct
         element ()
     in
     let row_header, set_row_header = S.create_signal None in
+    let tree_index, set_tree_index = S.create_signal None in
     let m () = S.get manager in
+    (* Its rows' keys expanded: [expanded_keys] while it is given them, else
+       those it keeps. *)
+    let kept_expanded, set_kept_expanded =
+      S.create_signal
+        (S.untrack (fun () ->
+             Option.value (Props.default_expanded_keys props) ~default:[||]))
+    in
+    let expanded_keys () =
+      match Props.expanded_keys props with
+      | Some keys -> keys
+      | None -> S.get kept_expanded
+    in
+    let is_expanded k = Array.exists (String.equal k) (expanded_keys ()) in
+    let toggle_expanded k =
+      let now = expanded_keys () in
+      let next =
+        if Array.exists (String.equal k) now then
+          Js.Array.filter ~f:(fun o -> not (String.equal o k)) now
+        else Array.append now [| k |]
+      in
+      S.set set_kept_expanded next;
+      call (Props.on_expanded_change props) next
+    in
+    let tree () = Option.is_some (Props.tree_column props) in
     let specs, set_specs = S.create_signal [] in
     let ordered_columns () =
       List.sort
@@ -784,6 +891,9 @@ module Root = struct
             resizing_column =
               (fun () ->
                 match sizing with Some s -> s.resizing () | None -> None);
+            tree_column = (fun () -> Props.tree_column props);
+            is_expanded;
+            toggle_expanded;
           };
         rows = ordered;
         add = (fun r -> S.set set_rows (r :: S.get rows));
@@ -796,6 +906,12 @@ module Root = struct
           (fun () ->
             match S.get row_header with Some index -> index () | None -> 0);
         set_row_header = S.set set_row_header;
+        tree_index =
+          (fun () ->
+            match S.get tree_index with
+            | Some index -> Some (index ())
+            | None -> None);
+        set_tree_index = S.set set_tree_index;
         columns = placing ();
         add_column = (fun c -> S.set set_specs (c :: S.get specs));
         remove_column =
@@ -839,9 +955,37 @@ module Root = struct
                     `grid (from_cell table focused (key e))
                 | _ -> `list)
             | Some "row" -> (
-                match from_row focused (key e) with
-                | Some target -> `grid (Some target)
-                | None -> `list)
+                (* A row of a tree is expanded by the arrow forward and
+                   collapsed by the arrow back, which then reaches the row it
+                   is in, as an accessible tree grid's is. *)
+                let listed =
+                  if tree () then
+                    List.find_opt
+                      (fun (r : listed) -> same r.element focused)
+                      (t.rows ())
+                  else None
+                in
+                match (listed, key e) with
+                | Some r, "ArrowRight"
+                  when r.has_children () && not (is_expanded r.key) ->
+                    toggle_expanded r.key;
+                    `grid None
+                | Some r, "ArrowLeft"
+                  when r.has_children () && is_expanded r.key ->
+                    toggle_expanded r.key;
+                    `grid None
+                | Some { parent = Some above; _ }, "ArrowLeft" -> (
+                    match
+                      List.find_opt
+                        (fun (r : listed) -> String.equal r.key above)
+                        (t.rows ())
+                    with
+                    | Some r -> `row r.element
+                    | None -> `grid None)
+                | _ -> (
+                    match from_row focused (key e) with
+                    | Some target -> `grid (Some target)
+                    | None -> `list))
             | Some _ | None -> `list)
         | _ -> `list
       in
@@ -849,12 +993,15 @@ module Root = struct
       | `grid target ->
           prevent_default e;
           Option.iter focus target
+      | `row target ->
+          prevent_default e;
+          focus_row target
       | `own -> ()
       | `list -> Selectable_list.on_key_down list e
     in
     <Table_context.Provider value=(fun () -> t)>
       <table
-        role=`grid
+        role=(fun () -> if tree () then `treegrid else `grid)
         ref=(fun e ->
               S.set set_element (Some e);
               call (Props.ref props) e)
@@ -1015,6 +1162,11 @@ module Column = struct
       | Some k -> k
       | None -> S.create_unique_id ()
     in
+    (match S.untrack t.context.tree_column with
+    | Some column when String.equal column key ->
+        t.set_tree_index (Some index);
+        S.on_cleanup (fun () -> t.set_tree_index None)
+    | Some _ | None -> ());
     let sortable () =
       Option.value (Props.allows_sorting props) ~default:false
     in
@@ -1118,8 +1270,16 @@ module Body = struct
     let empty () =
       match t.rows () with [] -> Props.empty_state props | _ :: _ -> None
     in
+    (* Its rows read first, then drawn, each knowing its place among them. *)
+    let resolved = S.children (fun () -> Props.children props) in
+    let all () = S.to_array (S.get resolved) in
+    let rows = S.create_memo (fun () -> Nested.read (all ())) in
     <tbody role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
-      (fun () -> Props.children props)
+      <For each=(fun () -> S.get rows)>
+        (fun n position ->
+          n.draw ~position ~size:(fun () -> Array.length (S.get rows)))
+      </For>
+      (fun () -> Jsx.element (Jsx.fragment (Nested.others (all ()))))
       <Show.Some some=(fun () -> empty ())>
         (fun shown ->
           <tr role=`row>
@@ -1189,9 +1349,10 @@ module Row = struct
       "onFocus";
     |]
 
-  let make (props : Props.t) =
-    let t = in_table "Table.Row" in
+  let draw t ~(parent : row_cells option) ~position ~size (props : Props.t) =
     let key = S.untrack (fun () -> Props.id props) in
+    let level = match parent with Some p -> p.state.level + 1 | None -> 1 in
+    let parent_key = Option.map (fun (p : row_cells) -> p.state.key) parent in
     let element, set_element = S.create_signal None in
     let item =
       Selection.create_selectable_item
@@ -1199,55 +1360,144 @@ module Row = struct
            ~selection_manager:(Either.right t.manager) ~key:(Either.left key) ())
         element
     in
-    let r = { cells = placing (); header_id = S.create_unique_id () } in
+    (* Its rows, among its children, once they are read. *)
+    let nested = ref (fun () -> [||]) in
+    let has_child_items () = Array.length (!nested ()) > 0 in
+    let expanded () = t.context.is_expanded key in
+    let selected () = t.context.is_selected key in
+    let disabled () = t.context.is_disabled key in
+    let header_id = S.create_unique_id () in
+    let r =
+      {
+        cells = placing ();
+        state =
+          {
+            key;
+            level;
+            has_child_items;
+            is_expanded = expanded;
+            is_selected = selected;
+            is_disabled = disabled;
+            toggle_expanded = (fun () -> t.context.toggle_expanded key);
+            focus = (fun () -> Option.iter focus_row (S.get element));
+            header_id;
+          };
+      }
+    in
     (* A row joins the list once it is on the page, where its place among the
        others is read. *)
     S.on_mount (fun () ->
-        Option.iter (fun e -> t.add { key; element = e }) (S.get element));
+        Option.iter
+          (fun e ->
+            t.add
+              {
+                key;
+                element = e;
+                parent = parent_key;
+                has_children = has_child_items;
+              })
+          (S.get element));
     S.on_cleanup (fun () -> t.remove key);
-    let selected () = t.context.is_selected key in
-    let disabled () = t.context.is_disabled key in
+    let tree () = Option.is_some (t.context.tree_column ()) in
+
     (* A press that began in a control is the control's. *)
     let pressed given own e =
       call given e;
       if not (in_control e) then own e
     in
     <Row_context.Provider value=(fun () -> r)>
-      <tr
-        role=`row
-        ref=(fun e ->
-              S.set set_element (Some e);
-              call (Props.ref props) e)
-        tabindex=(fun () -> tabindex (S.get (Selectable_item.tab_index item)))
-        aria_labelledby=(fun () -> r.header_id)
-        ?aria_selected=(fun () ->
-                         match t.context.selection_mode () with
-                         | `none -> None
-                         | `single | `multiple -> Some (selected ()))
-        ?aria_disabled=(fun () -> if disabled () then Some true else None)
-        data_key=(fun () -> Jsx.data key)
-        data_selected=(fun () -> state (selected ()))
-        data_disabled=(fun () -> state (disabled ()))
-        on_pointer_down=(pressed
-                           (Props.on_pointer_down props)
-                           (Selectable_item.on_pointer_down item))
-        on_pointer_up=(pressed
-                         (Props.on_pointer_up props)
-                         (Selectable_item.on_pointer_up item))
-        on_click=(pressed (Props.on_click props)
-                    (Selectable_item.on_click item))
-        on_key_down=(pressed (Props.on_key_down props)
-                       (Selectable_item.on_key_down item))
-        on_mouse_down=(fun e ->
-                        call (Props.on_mouse_down props) e;
-                        Selectable_item.on_mouse_down item e)
-        on_focus=(fun e ->
-                   call (Props.on_focus props) e;
-                   Selectable_item.on_focus item e)
-        props=(S.omit props own)>
-        (fun () -> Props.children props)
-      </tr>
+      (fun () ->
+        (* Its children read inside it: its cells, which it holds, and its
+           rows, which it draws after it while it is expanded. *)
+        let resolved = S.children (fun () -> Props.children props) in
+        let all () = S.to_array (S.get resolved) in
+        let rows = S.create_memo (fun () -> Nested.read (all ())) in
+        (nested := fun () -> S.get rows);
+        Jsx.element
+        @@ Jsx.fragment
+             [|
+               <tr
+                 role=`row
+                 ref=(fun e ->
+                       S.set set_element (Some e);
+                       call (Props.ref props) e)
+                 tabindex=(fun () ->
+                            tabindex (S.get (Selectable_item.tab_index item)))
+                 aria_labelledby=(fun () -> header_id)
+                 ?aria_selected=(fun () ->
+                                  match t.context.selection_mode () with
+                                  | `none -> None
+                                  | `single | `multiple -> Some (selected ()))
+                 ?aria_disabled=(fun () ->
+                                  if disabled () then Some true else None)
+                 ?aria_expanded=(fun () ->
+                                  if tree () && has_child_items () then
+                                    Some (expanded ())
+                                  else None)
+                 ?aria_level=(fun () ->
+                               if tree () then Some (string_of_int level)
+                               else None)
+                 ?aria_posinset=(fun () ->
+                                  if tree () then
+                                    Some (string_of_int (S.get position + 1))
+                                  else None)
+                 ?aria_setsize=(fun () ->
+                                 if tree () then Some (string_of_int (size ()))
+                                 else None)
+                 data_key=(fun () -> Jsx.data key)
+                 data_selected=(fun () -> state (selected ()))
+                 data_disabled=(fun () -> state (disabled ()))
+                 data_expanded=(fun () ->
+                                 state
+                                   (tree () && has_child_items () && expanded ()))
+                 on_pointer_down=(pressed
+                                    (Props.on_pointer_down props)
+                                    (Selectable_item.on_pointer_down item))
+                 on_pointer_up=(pressed
+                                  (Props.on_pointer_up props)
+                                  (Selectable_item.on_pointer_up item))
+                 on_click=(pressed (Props.on_click props)
+                             (Selectable_item.on_click item))
+                 on_key_down=(pressed (Props.on_key_down props)
+                                (Selectable_item.on_key_down item))
+                 on_mouse_down=(fun e ->
+                                 call (Props.on_mouse_down props) e;
+                                 Selectable_item.on_mouse_down item e)
+                 on_focus=(fun e ->
+                            call (Props.on_focus props) e;
+                            Selectable_item.on_focus item e)
+                 props=(S.omit props own)>
+                 <For each=(fun () -> Cells.read (all ()))>
+                   (fun c _ -> c.draw_cell ())
+                 </For>
+               </tr>;
+               <Show when_=(fun () -> expanded ())>
+                 <For each=(fun () -> !nested ())>
+                   (fun n position ->
+                     n.draw ~position ~size:(fun () ->
+                         Array.length (!nested ())))
+                 </For>
+               </Show>;
+             |])
     </Row_context.Provider>
+
+  (* A row is drawn by what holds it, with the contexts of where it was
+     written -- a style's, around it -- and for as long as that draws it. *)
+  let make (props : Props.t) =
+    let t = in_table "Table.Row" in
+    let parent = Row_context.use () in
+    let owner = S.get_owner () in
+    Nested.element
+      {
+        draw =
+          (fun ~position ~size ->
+            let drawn, dispose =
+              S.create_root ?owner (fun dispose ->
+                  (draw t ~parent ~position ~size props, dispose))
+            in
+            S.on_cleanup dispose;
+            drawn);
+      }
 
   let component = Jsx.component make
 end
@@ -1268,6 +1518,29 @@ module Cell = struct
     [@@mel.get]
   end
 
+  let draw t r (props : Props.t) =
+    let element, set_element = S.create_signal None in
+    let index = place r.cells element in
+    let names_row () = index () = t.row_header () in
+    let is_tree_column () =
+      match t.tree_index () with Some i -> index () = i | None -> false
+    in
+    <Cell_context.Provider
+      value=(fun () -> { is_tree_column; column_index = index })>
+      <td
+        role=(fun () -> if names_row () then `rowheader else `gridcell)
+        ?id=(fun () -> if names_row () then Some r.state.header_id else None)
+        tabindex="-1"
+        data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
+        data_tree_column=(fun () -> state (is_tree_column ()))
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
+        props=(S.omit props [| "children"; "ref" |])>
+        (fun () -> Props.children props)
+      </td>
+    </Cell_context.Provider>
+
   let make (props : Props.t) =
     let t = in_table "Table.Cell" in
     let r =
@@ -1275,20 +1548,7 @@ module Cell = struct
       | Some r -> r
       | None -> invalid_arg "Table.Cell is used inside a Table.Row"
     in
-    let element, set_element = S.create_signal None in
-    let index = place r.cells element in
-    let names_row () = index () = t.row_header () in
-    <td
-      role=(fun () -> if names_row () then `rowheader else `gridcell)
-      ?id=(fun () -> if names_row () then Some r.header_id else None)
-      tabindex="-1"
-      data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
-      ref=(fun e ->
-            S.set set_element (Some e);
-            call (Props.ref props) e)
-      props=(S.omit props [| "children"; "ref" |])>
-      (fun () -> Props.children props)
-    </td>
+    Cells.element { draw_cell = (fun () -> draw t r props) }
 
   let component = Jsx.component make
 end

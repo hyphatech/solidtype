@@ -485,7 +485,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
   `List_box` shares, and HeroUI's `Load_more` and `Load_more_content`
 - [x] Table's column resizing, the headless `Resizable_container` and
   `Column_resizer`, React Stately's layout ported, and HeroUI's
-- [ ] Table's expandable rows and virtualization, a stage each
+- [x] Table's expandable rows, a tree grid in the headless table, a row's
+  cells and rows tokens it draws once read, and the chevron slot of HeroUI's
+  button
+- [ ] Table's virtualization
 - [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
   DatePicker, DateRangePicker
 

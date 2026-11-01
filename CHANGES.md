@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Table`'s expandable rows, HeroUI's: given `tree_column`,
+  the table is a tree grid whose rows hold the rows written inside them, drawn
+  while `expanded_keys`, or `default_expanded_keys`, say, and
+  `on_expanded_change` told; a `Button` of `slot=`chevron` expands and
+  collapses its row, and so do the arrow keys on it, the arrow back reaching
+  the row it is in. `Table.use_row_context` and `Table.use_cell_context`, what
+  HeroUI's cell's render function is given. HeroUI's Expandable Rows example.
+  `Solidtype_headless.Table` beneath it, with `use_row_context` and
+  `use_cell_context` for a style's attributes. `Solidtype.Jsx.Token.others`,
+  the elements among a component's children a token module did not make.
+
 - `Solidtype_heroui.Table.Resizable_container` and `Table.Column_resizer`,
   HeroUI's: the columns laid out at a fixed width, each as its `width`, or
   `default_width` until resized, asks, `Pixels`, a `Percent` or a `Fraction`,

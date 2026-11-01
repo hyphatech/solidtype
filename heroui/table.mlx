@@ -33,6 +33,9 @@ let in_table part =
   | Some slots -> slots
   | None -> invalid_arg (part ^ " is used inside a Table")
 
+let use_row_context = Headless.use_row_context
+let use_cell_context = Headless.use_cell_context
+
 module Scroll_container = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Scroll_container" in
@@ -79,6 +82,9 @@ module Content = struct
       ?(disallow_empty_selection : bool option)
       ?(sort_descriptor : sort_descriptor option)
       ?(on_sort_change : (sort_descriptor -> unit) option)
+      ?(tree_column : string option) ?(expanded_keys : string array option)
+      ?(default_expanded_keys : string array option)
+      ?(on_expanded_change : (string array -> unit) option)
       ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
@@ -94,6 +100,11 @@ module Content = struct
       ?disallow_empty_selection
       ?sort_descriptor
       on_sort_change=(fun sort -> ignore (on_sort_change sort : unit option))
+      ?tree_column
+      ?expanded_keys
+      ?default_expanded_keys
+      on_expanded_change=(fun keys ->
+                           ignore (on_expanded_change keys : unit option))
       class_=(fun () -> after (Styles.Table.content (slots ())) (class_ ()))
       data_slot="table-content"
       props=(Props.others props)>
@@ -289,15 +300,23 @@ module Row = struct
       }
     in
     (* HeroUI's styles read React Aria's state, "true" where Kobalte's is
-       present and empty, and its row's level for nested rows. *)
+       present and empty, and its row's level for nested rows, which the
+       headless row gives the attributes it writes. *)
+    let level () = string_of_int (Headless.use_row_context ()).level in
+    let tree_state read = Jsx.flag (read (Headless.use_row_context ())) in
     <Checkbox.Selection.Provider value=(fun () -> one)>
       <Headless.Row
         id=(fun () -> key)
         ref=(fun e -> Interaction.watch i e)
-        style="--table-row-level: 1"
+        style=(fun () -> "--table-row-level: " ^ level ())
         class_=(fun () -> after (Styles.Table.row (slots ())) (class_ ()))
         data_slot="table-row"
-        data_level="1"
+        data_level=(fun () -> Jsx.data (level ()))
+        data_expanded=(fun () ->
+                        tree_state (fun r ->
+                            r.has_child_items () && r.is_expanded ()))
+        data_has_child_items=(fun () ->
+                               tree_state (fun r -> r.has_child_items ()))
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_selected=(fun () -> Jsx.flag (selected ()))
@@ -312,14 +331,35 @@ module Cell = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Cell" in
     let i = Interaction.create () in
+    (* Its row's state and its column's, which the headless cell gives the
+       attributes it writes; and its row's chevron, to a button inside it. *)
+    let row () = Headless.use_row_context () in
     <Headless.Cell
       ref=(fun e -> Interaction.watch i e)
       class_=(fun () -> after (Styles.Table.cell (slots ())) (class_ ()))
       data_slot="table-cell"
-      data_level="1"
+      data_level=(fun () -> Jsx.data (string_of_int (row ()).level))
+      data_expanded=(fun () ->
+                      let r = row () in
+                      Jsx.flag (r.has_child_items () && r.is_expanded ()))
+      data_has_child_items=(fun () -> Jsx.flag ((row ()).has_child_items ()))
+      data_tree_column=(fun () ->
+                         Jsx.flag
+                           ((Headless.use_cell_context ()).is_tree_column ()))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        let r = row () in
+        Jsx.element
+          <Button.Chevron.Provider
+            value=(fun () ->
+                    {
+                      Button.toggle = r.toggle_expanded;
+                      focus_row = r.focus;
+                      labelled_by = r.header_id;
+                    })>
+            (fun () -> children ())
+          </Button.Chevron.Provider>)
     </Headless.Cell>
 end
 

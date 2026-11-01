@@ -47,6 +47,15 @@ type column_size = Solidtype_headless.Table.column_size =
   | Fraction of float
       (** A share of what the other columns leave, as CSS's [fr] is. *)
 
+val use_row_context : unit -> Solidtype_headless.Table.row
+(** The row a part is in -- its level, whether it holds rows and is expanded,
+    selected or disabled -- as HeroUI's cell's render function is given it;
+    outside a {!Row} it raises [Invalid_argument]. *)
+
+val use_cell_context : unit -> Solidtype_headless.Table.cell
+(** The cell a part is in, and whether it is in the tree column; outside a
+    {!Cell} it raises [Invalid_argument]. *)
+
 (** The [<div>] the table scrolls in, sideways, while the table and its footer
     stay as wide as their container. *)
 module Scroll_container : sig
@@ -105,7 +114,15 @@ end
     pressing a column that [allows_sorting], or Enter or Space on it, calls
     [on_sort_change] with it ascending, or turned if it was so sorted. A
     {!Checkbox} of [slot=`selection] in a row stands for its row, and in the
-    {!Header} for every row. *)
+    {!Header} for every row.
+
+    Given [tree_column], the [id] of a column, it is a [treegrid] whose rows
+    hold rows: a {!Row} written inside another is drawn after it while it is
+    expanded, indented a level in the tree column. Its keys expanded are
+    [expanded_keys] while it is given them, else those it keeps,
+    [default_expanded_keys] at first; each change calls [on_expanded_change]
+    with them. A {!Button} of [slot=`chevron] in a row expands and collapses it,
+    as do the arrow forward and back on the row. *)
 module Content : sig
   module Props : sig
     type t
@@ -122,6 +139,10 @@ module Content : sig
       ?disallow_empty_selection:bool Solidtype.Check.value ->
       ?sort_descriptor:sort_descriptor Solidtype.Check.value ->
       ?on_sort_change:(sort_descriptor -> unit) ->
+      ?tree_column:string Solidtype.Check.value ->
+      ?expanded_keys:string array Solidtype.Check.value ->
+      ?default_expanded_keys:string array Solidtype.Check.value ->
+      ?on_expanded_change:(string array -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
@@ -246,8 +267,10 @@ module Body : sig
 end
 
 (** A row, a [<tr role="row">] Kobalte's list focuses, named by its row header's
-    cell, its [id] its key, else one of its own. It declares [data-hovered] and
-    [data-focus-visible]. *)
+    cell, its [id] its key, else one of its own. In a tree, the rows written
+    inside it are drawn after it while it is expanded. It declares
+    [data-hovered], [data-focus-visible], [data-level], [data-expanded] and
+    [data-has-child-items]. *)
 module Row : sig
   module Props : sig
     type t
@@ -266,7 +289,8 @@ module Row : sig
 end
 
 (** A cell, a [<td>], a [gridcell], or a [rowheader] in the row header's column.
-    It declares [data-focus-visible]. *)
+    It declares [data-focus-visible], its row's [data-level], [data-expanded]
+    and [data-has-child-items], and [data-tree-column] in a tree's column. *)
 module Cell : sig
   module Props : sig
     type t

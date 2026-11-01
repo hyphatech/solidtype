@@ -611,3 +611,155 @@ let () =
                        true ),
                      [ "name:160px"; "role:250px"; "status:1fr"; "email:1fr" ]
                    ))))
+
+type file = { file_id : string; title : string; files : file array }
+
+let files =
+  [|
+    {
+      file_id = "1";
+      title = "Documents";
+      files =
+        [|
+          {
+            file_id = "2";
+            title = "Project";
+            files =
+              [|
+                { file_id = "3"; title = "Weekly Report"; files = [||] };
+                { file_id = "4"; title = "Budget"; files = [||] };
+              |];
+          };
+        |];
+    };
+    {
+      file_id = "5";
+      title = "Photos";
+      files =
+        [|
+          { file_id = "6"; title = "Image 1"; files = [||] };
+          { file_id = "7"; title = "Image 2"; files = [||] };
+        |];
+    };
+  |]
+
+let rec file_row f =
+  <Table.Row id=(fun () -> f.file_id)>
+    <Table.Cell>(fun () -> Jsx.string f.title)</Table.Cell>
+    <Table.Cell>"-"</Table.Cell>
+    <For each=(fun () -> f.files)>(fun f _ -> file_row f)</For>
+  </Table.Row>
+
+let tree_grid () =
+  match H.all_by_role "treegrid" with
+  | [| t |] -> t
+  | _ -> Js.Exn.raiseError "no tree grid"
+
+let () =
+  Jest.describe "Table, a tree" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "draws the rows its rows hold while expanded, walked as a tree"
+        (fun () ->
+          let told = ref [||] in
+          H.render (fun () ->
+              <Table.Root
+                aria_label="Files"
+                tree_column="name"
+                default_expanded_keys=(fun () -> [| "1" |])
+                on_expanded_change=(fun keys ->
+                                     told :=
+                                       Array.of_list
+                                         (List.sort String.compare
+                                            (Array.to_list keys)))>
+                <Table.Header>
+                  <Table.Column id="name" is_row_header=true>
+                    "Name"
+                  </Table.Column>
+                  <Table.Column id="type">"Type"</Table.Column>
+                </Table.Header>
+                <Table.Body>
+                  <For each=(fun () -> files)>(fun f _ -> file_row f)</For>
+                </Table.Body>
+              </Table.Root>);
+          let rows () =
+            H.all_by_role "row" |> Array.to_list
+            |> List.filter (fun r -> Option.is_some (H.attribute r "data-key"))
+            |> List.map (fun r ->
+                String.concat " "
+                  (List.filter_map
+                     (fun name ->
+                       Option.map (fun v -> name ^ "=" ^ v) (H.attribute r name))
+                     [
+                       "data-key";
+                       "aria-level";
+                       "aria-posinset";
+                       "aria-setsize";
+                       "aria-expanded";
+                       "data-expanded";
+                     ]))
+            |> Array.of_list
+          in
+          let at_rest = rows () in
+          let tree_cells =
+            H.all_by_role "rowheader"
+            |> Array.map (fun c -> H.attribute c "data-tree-column")
+          in
+          let user = H.setup () in
+          let* () = H.tab user in
+          let seen = ref [] in
+          let rec go = function
+            | [] -> Js.Promise.resolve ()
+            | k :: rest ->
+                let* () = H.keyboard user k in
+                seen := (k ^ " " ^ where ()) :: !seen;
+                go rest
+          in
+          let* () =
+            go
+              [
+                "{ArrowDown}";
+                "{ArrowRight}";
+                "{ArrowRight}";
+                "{ArrowLeft}";
+                "{ArrowLeft}";
+                "{ArrowLeft}";
+                "{ArrowLeft}";
+              ]
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( H.attribute (tree_grid ()) "role",
+                  at_rest,
+                  tree_cells,
+                  Array.of_list (List.rev !seen),
+                  !told,
+                  rows () )
+              |> toEqual
+                   ( Some "treegrid",
+                     [|
+                       "data-key=1 aria-level=1 aria-posinset=1 aria-setsize=2 \
+                        aria-expanded=true data-expanded=";
+                       "data-key=2 aria-level=2 aria-posinset=1 aria-setsize=1 \
+                        aria-expanded=false";
+                       "data-key=5 aria-level=1 aria-posinset=2 aria-setsize=2 \
+                        aria-expanded=false";
+                     |],
+                     [| Some ""; Some ""; Some "" |],
+                     [|
+                       "{ArrowDown} row:Project-";
+                       "{ArrowRight} row:Project-";
+                       "{ArrowRight} rowheader:Project";
+                       "{ArrowLeft} row:Project-";
+                       "{ArrowLeft} row:Project-";
+                       "{ArrowLeft} row:Documents-";
+                       "{ArrowLeft} row:Documents-";
+                     |],
+                     [||],
+                     [|
+                       "data-key=1 aria-level=1 aria-posinset=1 aria-setsize=2 \
+                        aria-expanded=false";
+                       "data-key=5 aria-level=1 aria-posinset=2 aria-setsize=2 \
+                        aria-expanded=false";
+                     |] ))))

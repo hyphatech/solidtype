@@ -44,7 +44,12 @@ given focus keeps it, and an arrow that reaches no cell moves nothing.
 into view of what scrolls the table, never while they load. In a
 `Table.Resizable_container` the columns are laid out at a fixed width, as each
 column's `width` or `default_width` asks, and a `Table.Column_resizer` resizes
-its column, dragged, or reached by Tab and stepped by the keys.
+its column, dragged, or reached by Tab and stepped by the keys. Given a
+`tree_column`, it is a tree grid: a `Table.Row` written among another's cells
+is drawn after it while it is expanded, and the arrows expand, collapse and
+climb it. `Table.use_row_context ()` and `Table.use_cell_context ()` are a
+row's and a cell's state, for a part inside one and for a style's attribute
+on one, which Solid reads inside it.
 
 <Example code={ExTableCode} title="headless_table.mlx"><ExTable.make client:visible /></Example>
 
@@ -56,8 +61,8 @@ its column, dragged, or reached by Tab and stepped by the keys.
 | `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `id`, the column a sort names; `allows_sorting`, `aria-sort`; `is_row_header`, whose cells name their rows; `width`, `default_width`, `min_width`, `max_width`, `data-resizing` |
 | `Table.Column_resizer` | `<div role="presentation">` and a range `<input>` | `data-resizing`, `data-resizable-direction`; the input named `aria_label` and by its column |
 | `Table.Body` | `<tbody>` | `empty_state`, a row across every column while it has none |
-| `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled` |
-| `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index` |
+| `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled`; in a tree `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`, `data-expanded`, and the rows written inside it |
+| `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index`, `data-tree-column` |
 | `Table.Load_more` | an inert `<tr>` of no height holding the sentinel, and while loading a `<tr role="row">` across every column | `is_loading`, `on_load_more`, `scroll_offset`; its attributes are the loading row's |
 
 ## Load_more_sentinel

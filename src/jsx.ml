@@ -52,6 +52,8 @@ struct
 
   let read elements =
     elements |> Js.Array.filter ~f:marked |> Js.Array.map ~f:value_of
+
+  let others elements = Js.Array.filter ~f:(fun e -> not (marked e)) elements
 end
 
 (* A data- attribute's value: a string, or undefined, which Solid writes as

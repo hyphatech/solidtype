@@ -56,6 +56,11 @@ end) : sig
   val read : element array -> T.t array
   (** The values this module's {!val-element} made, in order, the others left
       out. *)
+
+  val others : element array -> element array
+  (** The elements this module's {!val-element} did not make, in order: what a
+      component renders of children that mix them, as a table's row renders its
+      cells and draws its rows after it. *)
 end
 
 type data

@@ -65,8 +65,9 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      Kobalte's as they are
   table              a grid of rows and cells: Kobalte's list of rows,
                      their selection, the keys through their cells, a row
-                     that loads more, and columns laid out and resized as
-                     React Stately lays them out
+                     that loads more, columns laid out and resized as
+                     React Stately lays them out, and rows that hold rows,
+                     each row's cells and rows tokens it draws once read
   load_more_sentinel what asks a list for more as its end comes into view
   color_swatch       Kobalte's, a colour less than opaque one a browser
   color_area         reads, and an area disabled whole
