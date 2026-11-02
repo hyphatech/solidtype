@@ -51,14 +51,14 @@ let settle () =
 (* What one framework writes for itself, which no style of HeroUI's reads:
    Kobalte's own state, present and empty, an [aria-disabled] it writes false,
    and each option's place in the list, which a reader counts in React Aria's;
-   React Aria's collection, layout and orientation; and each framework's ids
+   React Aria's collection; and each framework's ids
    and keys, made its own way. *)
 let framework_only e name =
   match (name, T.attribute e name) with
   | ("data-selected" | "data-highlighted" | "data-disabled"), Some "" -> true
   | "aria-disabled", Some "false" -> true
   | ("aria-posinset" | "aria-setsize"), _ -> true
-  | ("data-collection" | "data-layout" | "data-orientation"), _ -> true
+  | "data-collection", _ -> true
   | ("id" | "style" | "dir" | "data-key"), _ -> true
   | _ -> false
 

@@ -329,6 +329,8 @@ module Popover = struct
                     aria_orientation=`vertical
                     class_=(fun () -> h.classes ())
                     data_slot="list-box"
+                    data_layout="stack"
+                    data_orientation="vertical"
                     data_empty=(fun () -> Jsx.flag (h.empty ()))
                     props=h.others>
                     (fun collection -> h.draw collection)

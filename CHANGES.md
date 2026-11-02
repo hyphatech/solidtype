@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.List_box`, and the list of `Select`, `Combo_box` and
+  `Autocomplete`, write `data-layout="stack"` and `data-orientation="vertical"`
+  as React Aria's list does, for a style that reads them.
+
 - `Solidtype_heroui.Color_swatch_picker`, HeroUI's ColorSwatchPicker: a palette
   of swatches, one chosen by a press, Space or Enter, value controlled or kept
   and told as a colour, its sizes, variants and layouts, disabled swatches,

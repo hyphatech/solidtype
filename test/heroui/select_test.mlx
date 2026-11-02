@@ -72,9 +72,7 @@ let framework_only e name =
       true
   | "aria-disabled", Some "false" -> true
   | ("aria-posinset" | "aria-setsize" | "data-pointer-type"), _ -> true
-  | ("data-collection" | "data-layout" | "data-orientation" | "data-trigger"), _
-    ->
-      true
+  | ("data-collection" | "data-trigger"), _ -> true
   | ("id" | "style" | "dir" | "data-key"), _ -> true
   | "data-focused", _
     when String.equal
