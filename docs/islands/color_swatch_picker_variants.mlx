@@ -1,0 +1,34 @@
+module For = Solidtype.For
+module Color_swatch_picker = Solidtype_heroui.Color_swatch_picker
+module Colors = Solidtype_kobalte.Colors
+
+let colors =
+  [|
+    "#F43F5E"; "#D946EF"; "#8B5CF6"; "#3B82F6"; "#06B6D4"; "#10B981"; "#84CC16";
+  |]
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <div class_="flex flex-col gap-2">
+      <span class_="text-sm text-muted">"Circle (default)"</span>
+      <Color_swatch_picker variant=`circle>
+        <For each=(fun () -> colors)>
+          (fun c _ ->
+            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+              <Color_swatch_picker.Swatch /> <Color_swatch_picker.Indicator />
+            </Color_swatch_picker.Item>)
+        </For>
+      </Color_swatch_picker>
+    </div>
+    <div class_="flex flex-col gap-2">
+      <span class_="text-sm text-muted">"Square"</span>
+      <Color_swatch_picker variant=`square>
+        <For each=(fun () -> colors)>
+          (fun c _ ->
+            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+              <Color_swatch_picker.Swatch /> <Color_swatch_picker.Indicator />
+            </Color_swatch_picker.Item>)
+        </For>
+      </Color_swatch_picker>
+    </div>
+  </div>

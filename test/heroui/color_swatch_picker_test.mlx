@@ -1,0 +1,261 @@
+(* HeroUI's ColorSwatchPicker beside the same picker in React: every part, its
+   classes and state, what names each swatch, where the focus is, and the
+   colour told, as swatches are hovered, pressed, and reached and chosen by the
+   keys, for each size, variant and layout. *)
+
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Picker = Solidtype_heroui.Color_swatch_picker
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  colors:string array ->
+  ?value:string ->
+  ?default_value:(string[@mel.as "defaultValue"]) ->
+  ?size:string ->
+  ?variant:string ->
+  ?layout:string ->
+  ?disabled:int ->
+  ?heart:bool ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/ColorSwatchPicker.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ColorSwatchPicker.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ColorSwatchPicker.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external focused : Dom.element = "activeElement" [@@mel.scope "document"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let colors = [| "#F43F5E"; "#D946EF"; "#8B5CF6"; "#F8FAFC"; "#06B6D4" |]
+
+(* What each framework writes for itself and no style reads: React Aria's
+   collection's markers, its selection mode on each option, and a description
+   it names though none is drawn. What names an option is compared by the part
+   it names; what a reader is told by its words, which Kobalte writes in its own
+   case, Color Swatch and vibrant Red; and a style one declaration at a time. *)
+let left_out =
+  [
+    "data-collection";
+    "data-selection-mode";
+    "aria-describedby";
+    "aria-labelledby";
+    "aria-label";
+    "aria-roledescription";
+    "style";
+  ]
+
+let lower e name =
+  name ^ "="
+  ^ String.lowercase_ascii (Option.value (T.attribute e name) ~default:"")
+
+let declarations e =
+  Option.value (T.attribute e "style") ~default:""
+  |> String.split_on_char ';' |> List.map String.trim
+  |> List.filter (fun d -> String.length d > 0)
+  |> List.map (fun d ->
+      String.concat ":" (List.map String.trim (String.split_on_char ':' d)))
+  |> List.sort String.compare |> String.concat "; "
+
+(* What a reader is told an option is: what names it, or its content's name,
+   its swatch's, as each framework gives it. *)
+let told_as e =
+  let swatch_in e =
+    match Js.Array.from (query_all e "[role=img]") with
+    | [||] -> None
+    | found -> T.attribute found.(0) "aria-label"
+  in
+  match T.attribute e "role" with
+  | Some "option" -> (
+      let name =
+        match T.attribute e "aria-labelledby" with
+        | Some id ->
+            Option.bind
+              (Js.Null.toOption (by_id id))
+              (fun n -> T.attribute n "aria-label")
+        | None -> swatch_in e
+      in
+      match name with
+      | Some n -> " told=" ^ String.lowercase_ascii n
+      | None -> " told=nothing")
+  | Some _ | None -> ""
+
+let shown ?(but = []) host =
+  let parts = Js.Array.from (query_all host "[data-slot]") in
+  let at_focus =
+    match Js.Array.findIndex ~f:(fun e -> e == focused) parts with
+    | -1 -> "body"
+    | i -> string_of_int i
+  in
+  Array.map
+    (fun e ->
+      String.concat " "
+        [
+          tag_name e;
+          T.attributes_but (but @ left_out) e;
+          lower e "aria-label";
+          lower e "aria-roledescription";
+          "style=" ^ declarations e;
+        ]
+      ^ told_as e)
+    parts
+  |> Array.to_list
+  |> List.cons ("focus=" ^ at_focus)
+
+let option host i =
+  let all = Js.Array.from (query_all host "[role=option]") in
+  if i < Array.length all then all.(i) else Js.Exn.raiseError "no option"
+
+let walk ~but ~steps ~step host told =
+  let shown = shown ~but in
+  let user = T.setup () in
+  let seen = ref [ (shown host, !told) ] in
+  let rec go = function
+    | [] -> Js.Promise.resolve ()
+    | s :: rest ->
+        let* () =
+          step (fun () ->
+              match String.split_on_char ':' s with
+              | [ "click"; i ] -> T.click user (option host (int_of_string i))
+              | [ "hover"; i ] -> T.hover user (option host (int_of_string i))
+              | [ "unhover"; i ] ->
+                  T.unhover user (option host (int_of_string i))
+              | [ "tab" ] -> T.tab user
+              | _ -> T.keyboard user s)
+        in
+        seen := (shown host, !told) :: !seen;
+        go rest
+  in
+  let* () = go steps in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let size_name = function
+  | `xs -> "xs"
+  | `sm -> "sm"
+  | `md -> "md"
+  | `lg -> "lg"
+  | `xl -> "xl"
+
+let both ?(but = []) ?value ?default_value ?size ?variant ?layout ?disabled
+    ?(heart = false) ~steps () =
+  let told = ref [] in
+  T.render (fun () ->
+      <Picker
+        ?value=(fun () -> Option.map Colors.parse_color value)
+        ?default_value=(fun () -> Option.map Colors.parse_color default_value)
+        on_change=(fun c -> told := Color.to_string c ~format:`hex () :: !told)
+        ?size=(fun () -> size)
+        ?variant=(fun () -> variant)
+        ?layout=(fun () -> layout)>
+        <For each=(fun () -> colors)>
+          (fun c i ->
+            <Picker.Item
+              color=(fun () -> Colors.parse_color c)
+              is_disabled=(fun () ->
+                            Option.equal Int.equal disabled
+                              (Some (Solidtype.Solid.get i)))>
+              <Picker.Swatch />
+              (fun () ->
+                if heart then
+                  Jsx.element
+                    <Picker.Indicator>
+                      <svg data_heart="" view_box="0 0 16 16" />
+                    </Picker.Indicator>
+                else Jsx.element <Picker.Indicator />)
+            </Picker.Item>)
+        </For>
+      </Picker>);
+  let* solidtype =
+    walk ~but ~steps ~step:(fun action -> action ()) T.body told
+  in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render
+      (props ~colors ?value ?default_value
+         ?size:(Option.map size_name size)
+         ?variant:
+           (Option.map
+              (function `circle -> "circle" | `square -> "square")
+              variant)
+         ?layout:
+           (Option.map (function `grid -> "grid" | `stack -> "stack") layout)
+         ?disabled ~heart ())
+      (fun c -> told' := c :: !told')
+  in
+  let* react = walk ~but ~steps ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Color_swatch_picker" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is chosen by a press and hovered, as React's is"
+        (fun () ->
+          both ~default_value:"#8B5CF6"
+            ~steps:[ "hover:1"; "click:1"; "unhover:1"; "click:1"; "click:4" ]
+            ());
+      Jest.testPromise "is walked and chosen by the keys, as React's is"
+        (fun () ->
+          both ~disabled:3
+            ~steps:
+              [
+                "tab";
+                "{ArrowRight}";
+                "{ArrowRight}";
+                "{ArrowRight}";
+                " ";
+                "{Home}";
+                "{Enter}";
+                "{End}";
+                "{ArrowLeft}";
+              ]
+            ());
+      Jest.testPromise "reaches the chosen swatch by Tab, as React's does"
+        (fun () ->
+          both ~default_value:"#06B6D4" ~steps:[ "tab"; "{ArrowUp}" ] ());
+      Jest.testPromise "keeps the value it is given, as React's does" (fun () ->
+          both ~value:"#F43F5E" ~steps:[ "click:2" ] ());
+      (* HeroUI keeps its layout for its classes alone, so React Aria's list
+         stays a grid under a stack; the port's is a stack, its data-layout
+         and its keys, which the headless test holds. *)
+      Jest.testPromise "draws a stack, as React's does" (fun () ->
+          both ~layout:`stack ~but:[ "data-layout" ] ~steps:[ "tab"; "click:2" ]
+            ());
+      List.iter
+        (fun (size, variant) ->
+          Jest.testPromise
+            ("draws its " ^ size_name size ^ " size, as React's does")
+            (fun () -> both ~size ~variant ~steps:[] ()))
+        [
+          (`xs, `circle);
+          (`sm, `square);
+          (`md, `square);
+          (`lg, `circle);
+          (`xl, `square);
+        ];
+      Jest.testPromise "draws an indicator of its own, as React's does"
+        (fun () -> both ~heart:true ~default_value:"#F8FAFC" ~steps:[] ()))

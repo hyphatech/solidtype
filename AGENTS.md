@@ -68,6 +68,10 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      that loads more, columns laid out and resized as
                      React Stately lays them out, and rows that hold rows,
                      each row's cells and rows tokens it draws once read
+  color_swatch_picker
+                     a listbox of colours, each option named by its
+                     swatch, walked as a grid by where each option is or
+                     as a stack
   load_more_sentinel what asks a list for more as its end comes into view
   virtualizer        React Aria's Virtualizer: a collection draws the entries
                      in view, each placed by a layout

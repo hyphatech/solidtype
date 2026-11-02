@@ -217,6 +217,11 @@ module Hard_drive = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/hard-drive.svg?raw"]
 end)
 
+module Heart_fill = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/heart-fill.svg?raw"]
+end)
+
 module House = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/house.svg?raw"]

@@ -1,0 +1,309 @@
+(* The headless ColorSwatchPicker as a caller meets it: a list of options each
+   named by its swatch, one chosen by a press or the keys and told as a colour,
+   the keys moving through a grid by where each option is on the page and
+   through a stack in order, a disabled option passed over, the caller's
+   attributes, ref and handlers kept, and no violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Picker = Solidtype_headless.Color_swatch_picker
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module I18n = Solidtype_kobalte.I18n
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+let colors =
+  [| "#F43F5E"; "#D946EF"; "#8B5CF6"; "#3B82F6"; "#06B6D4"; "#10B981" |]
+
+let hex c = Color.to_string c ~format:`hex ()
+
+(* Six options, the fourth disabled where asked. *)
+let picker ?value ?default_value ?(layout = `grid) ?(disabled = false)
+    ?(told = ref [||]) ?(on_key_down = fun (_ : Dom.keyboardEvent) -> ())
+    ?(got_ref = ref false) () =
+  H.render (fun () ->
+      <Picker.Root
+        ?value=(fun () -> Option.map Colors.parse_color value)
+        ?default_value=(fun () -> Option.map Colors.parse_color default_value)
+        on_change=(fun c -> told := Array.append !told [| hex c |])
+        layout=(fun () -> layout)
+        class_="swatches"
+        data_testid="picker"
+        ref=(fun _ -> got_ref := true)
+        on_key_down>
+        <For each=(fun () -> colors)>
+          (fun c i ->
+            <Picker.Item
+              color=(fun () -> Colors.parse_color c)
+              is_disabled=(fun () -> disabled && S.get i = 3)>
+              <Picker.Swatch />
+            </Picker.Item>)
+        </For>
+      </Picker.Root>)
+
+let options () = H.all_by_role "option"
+
+(* What a reader is told of an option: the name its swatch gives it. *)
+let name option =
+  match H.attribute option "aria-labelledby" with
+  | Some id -> (
+      match Js.Null.toOption (H.by_id id) with
+      | Some e -> Option.value (H.attribute e "aria-label") ~default:"unnamed"
+      | None -> "missing")
+  | None -> "unlabelled"
+
+let index_of e =
+  let all = options () in
+  let rec find i =
+    if i >= Array.length all then -1
+    else if all.(i) == e then i
+    else find (i + 1)
+  in
+  find 0
+
+let chosen () =
+  Array.to_list (options ())
+  |> List.filter (fun o ->
+      Option.equal String.equal (H.attribute o "aria-selected") (Some "true"))
+  |> List.map index_of |> Array.of_list
+
+type rect
+
+external rect :
+  left:float -> top:float -> width:float -> height:float -> unit -> rect = ""
+[@@mel.obj]
+
+external set_rect : Dom.element -> (unit -> rect) -> unit
+  = "getBoundingClientRect"
+[@@mel.set]
+
+(* The options laid out in rows of three, as a grid wraps them. *)
+let in_rows_of_three () =
+  Array.iteri
+    (fun i o ->
+      set_rect o (fun () ->
+          rect
+            ~left:(Float.of_int (i mod 3 * 40))
+            ~top:(Float.of_int (i / 3 * 40))
+            ~width:32. ~height:32. ()))
+    (options ())
+
+type size
+
+external size : value:float -> unit -> size = "" [@@mel.obj]
+
+external define : Dom.element -> string -> size -> unit = "defineProperty"
+[@@mel.scope "Object"]
+
+(* The options stacked 40 pixels apart in a list that shows 100 of their 240,
+   and scrolls. *)
+let in_a_list_that_scrolls () =
+  let list = (H.all_by_role "listbox").(0) in
+  define list "clientHeight" (size ~value:100. ());
+  define list "scrollHeight" (size ~value:240. ());
+  Array.iteri
+    (fun i o ->
+      set_rect o (fun () ->
+          rect ~left:0. ~top:(Float.of_int (i * 40)) ~width:32. ~height:32. ()))
+    (options ())
+
+let walk user keys =
+  let seen = ref [ index_of H.focused ] in
+  let rec go = function
+    | [] -> Js.Promise.resolve (Array.of_list (List.rev !seen))
+    | k :: rest ->
+        let* () = H.keyboard user k in
+        seen := index_of H.focused :: !seen;
+        go rest
+  in
+  go keys
+
+let () =
+  Jest.describe "ColorSwatchPicker" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "is a list of options, each named by its swatch" (fun () ->
+          picker ~default_value:"#8B5CF6" ();
+          let list = (H.all_by_role "listbox").(0) in
+          E.(
+            expect
+              ( H.attribute list "aria-label",
+                H.attribute list "data-layout",
+                Array.map
+                  (fun o ->
+                    not
+                      (List.exists
+                         (String.equal (name o))
+                         [ "unnamed"; "missing"; "" ]))
+                  (options ()),
+                Array.map (fun o -> H.attribute o "aria-selected") (options ()),
+                Array.map (fun o -> H.attribute o "data-selected") (options ())
+              )
+            |> toEqual
+                 ( Some "Color swatches",
+                   Some "grid",
+                   [| true; true; true; true; true; true |],
+                   [|
+                     Some "false";
+                     Some "false";
+                     Some "true";
+                     Some "false";
+                     Some "false";
+                     Some "false";
+                   |],
+                   [| None; None; Some ""; None; None; None |] )));
+      Jest.testPromise "chooses an option by a press, and tells its colour"
+        (fun () ->
+          let told = ref [||] in
+          picker ~told ();
+          let user = H.setup () in
+          let* () = H.click user (options ()).(1) in
+          let* () = H.click user (options ()).(1) in
+          let* () = H.click user (options ()).(4) in
+          Js.Promise.resolve
+            E.(
+              expect (!told, chosen ())
+              |> toEqual ([| "#D946EF"; "#06B6D4" |], [| 4 |])));
+      Jest.testPromise "reaches the chosen option by Tab, or the first"
+        (fun () ->
+          picker ~default_value:"#3B82F6" ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let chosen_first = index_of H.focused in
+          H.cleanup ();
+          picker ();
+          let* () = H.tab user in
+          Js.Promise.resolve
+            E.(expect (chosen_first, index_of H.focused) |> toEqual (3, 0)));
+      Jest.testPromise "moves through a grid by where each option is" (fun () ->
+          picker ();
+          in_rows_of_three ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen =
+            walk user
+              [
+                "{ArrowRight}";
+                "{ArrowDown}";
+                "{ArrowLeft}";
+                "{ArrowUp}";
+                "{End}";
+                "{ArrowDown}";
+                "{Home}";
+                "{PageDown}";
+                "{PageUp}";
+              ]
+          in
+          Js.Promise.resolve
+            E.(expect seen |> toEqual [| 0; 1; 4; 3; 0; 5; 5; 0; 5; 0 |]));
+      Jest.testPromise "passes over a disabled option" (fun () ->
+          let told = ref [||] in
+          picker ~disabled:true ~told ();
+          in_rows_of_three ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen =
+            walk user [ "{ArrowRight}"; "{ArrowRight}"; "{ArrowRight}" ]
+          in
+          let* () = H.click user (options ()).(3) in
+          let disabled = (options ()).(3) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( seen,
+                  !told,
+                  H.attribute disabled "aria-disabled",
+                  H.attribute disabled "data-disabled" )
+              |> toEqual ([| 0; 1; 2; 4 |], [||], Some "true", Some "")));
+      Jest.testPromise "moves through a stack in order, Up and Down alone"
+        (fun () ->
+          picker ~layout:`stack ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen =
+            walk user
+              [ "{ArrowDown}"; "{ArrowDown}"; "{ArrowRight}"; "{ArrowUp}" ]
+          in
+          Js.Promise.resolve E.(expect seen |> toEqual [| 0; 1; 2; 2; 1 |]));
+      Jest.testPromise "moves a page at a time through a list that scrolls"
+        (fun () ->
+          picker ~layout:`stack ();
+          in_a_list_that_scrolls ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen = walk user [ "{PageDown}"; "{PageDown}"; "{PageUp}" ] in
+          Js.Promise.resolve E.(expect seen |> toEqual [| 0; 2; 4; 2 |]));
+      Jest.testPromise "reads Left and Right as the page's direction does"
+        (fun () ->
+          H.render (fun () ->
+              <I18n.I18nProvider locale="ar">
+                <Picker.Root>
+                  <For each=(fun () -> colors)>
+                    (fun c _ ->
+                      <Picker.Item color=(fun () -> Colors.parse_color c)>
+                        <Picker.Swatch />
+                      </Picker.Item>)
+                  </For>
+                </Picker.Root>
+              </I18n.I18nProvider>);
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen =
+            walk user [ "{ArrowLeft}"; "{ArrowLeft}"; "{ArrowRight}" ]
+          in
+          Js.Promise.resolve E.(expect seen |> toEqual [| 0; 1; 2; 1 |]));
+      Jest.testPromise "chooses the focused option by Space or Enter" (fun () ->
+          let told = ref [||] in
+          picker ~told ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* () = H.keyboard user "{ArrowRight}{ArrowRight}" in
+          let* () = H.keyboard user " " in
+          let* () = H.keyboard user "{ArrowRight}{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (!told, chosen ())
+              |> toEqual ([| "#8B5CF6"; "#3B82F6" |], [| 3 |])));
+      Jest.testPromise "reaches an option by typing its name" (fun () ->
+          picker ();
+          let target = (options ()).(4) in
+          let typed = Js.String.slice ~start:0 ~end_:4 (name target) in
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* () = H.keyboard user typed in
+          Js.Promise.resolve E.(expect (index_of H.focused) |> toEqual 4));
+      Jest.testPromise "keeps its value while it is given one" (fun () ->
+          let told = ref [||] in
+          picker ~value:"#F43F5E" ~told ();
+          let user = H.setup () in
+          let* () = H.click user (options ()).(2) in
+          Js.Promise.resolve
+            E.(expect (!told, chosen ()) |> toEqual ([| "#8B5CF6" |], [| 0 |])));
+      Jest.test "chooses the option of the same colour, whatever its format"
+        (fun () ->
+          picker ~value:"rgb(139, 92, 246)" ();
+          E.(expect (chosen ()) |> toEqual [| 2 |]));
+      Jest.testPromise "keeps the caller's attributes, ref and handlers"
+        (fun () ->
+          let got_ref = ref false in
+          let keys = ref 0 in
+          picker ~got_ref ~on_key_down:(fun _ -> incr keys) ();
+          let list = (H.all_by_role "listbox").(0) in
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* () = H.keyboard user "{ArrowRight}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( H.attribute list "class",
+                  H.attribute list "data-testid",
+                  !got_ref,
+                  !keys,
+                  index_of H.focused )
+              |> toEqual (Some "swatches", Some "picker", true, 1, 1)));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          picker ~default_value:"#8B5CF6" ~disabled:true ();
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

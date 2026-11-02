@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorSlider, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1108,6 +1108,31 @@ type ColorSwatchProps = { shape: "circle" | "square"; size: "xs" | "sm" | "md" |
 // A swatch of HeroUI's blue, as the port's demo shows it.
 export function colorSwatch(host: HTMLElement, props: ColorSwatchProps): void {
   flushSync(() => rootOf(host).render(<ColorSwatch {...props} aria-label="Blue" color="#0485F7" />));
+}
+
+type ColorSwatchPickerProps = {
+  size: "xs" | "sm" | "md" | "lg" | "xl";
+  variant: "circle" | "square";
+  layout: "grid" | "stack";
+};
+
+const swatchColors = ["#F43F5E", "#D946EF", "#8B5CF6", "#3B82F6", "#06B6D4", "#10B981", "#84CC16"];
+
+// HeroUI's seven colours, its purple chosen at first and kept by the picker
+// itself, as the port's demo shows them.
+export function colorSwatchPicker(host: HTMLElement, props: ColorSwatchPickerProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ColorSwatchPicker {...props} defaultValue="#8B5CF6">
+        {swatchColors.map((color) => (
+          <ColorSwatchPicker.Item key={color} color={color}>
+            <ColorSwatchPicker.Swatch />
+            <ColorSwatchPicker.Indicator />
+          </ColorSwatchPicker.Item>
+        ))}
+      </ColorSwatchPicker>,
+    ),
+  );
 }
 
 type ColorAreaProps = { showDots: boolean; isDisabled: boolean };

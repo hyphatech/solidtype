@@ -6,8 +6,11 @@ description: Components Kobalte lacks, made as Kobalte makes its own, of its hoo
 import Example from "@components/Example.astro";
 import * as ExTable from "@islands/headless_table.jsx";
 import ExTableCode from "@islands/headless_table.mlx?raw";
+import * as ExPicker from "@islands/headless_color_swatch_picker.jsx";
+import ExPickerCode from "@islands/headless_color_swatch_picker.mlx?raw";
 
-Kobalte 0.13 has no table, no calendar, no tag group. `solidtype-headless`
+Kobalte 0.13 has no table, no colour swatch picker, no calendar, no tag
+group. `solidtype-headless`
 holds such components, made the way Kobalte makes its own: of Kobalte's
 hooks, bound as `Solidtype_kobalte.Selection`, with no style. Each part is
 the element it names, its roles, keys and state as attributes, state in
@@ -64,6 +67,31 @@ on one, which Solid reads inside it.
 | `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled`; in a tree `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`, `data-expanded`, and the rows written inside it |
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index`, `data-tree-column` |
 | `Table.Load_more` | an inert `<tr>` of no height holding the sentinel, and while loading a `<tr role="row">` across every column | `is_loading`, `on_load_more`, `scroll_offset`; its attributes are the loading row's |
+
+## Color_swatch_picker
+
+`Solidtype_headless.Color_swatch_picker` is a `<div role="listbox">` of
+colours, a list of Kobalte's, each `<div role="option">` named by the
+`Color_swatch_picker.Swatch` inside it, a swatch as `Color_swatch` paints one.
+Tab reaches the chosen option, or the first. In a `` `grid ``, its
+`layout` by default, Left and Right move to the option before and after, as
+the page's direction reads them, and Up and Down to the one above and below in
+its column, found by where each is on the page; in a `` `stack ``, Up and
+Down move in order. Home and End reach the ends, Page Up and Page Down too
+unless the list scrolls, then a page at a time, and typing the start of a
+colour's name reaches the option of that name. A disabled option is passed
+over. A press, Space or Enter chooses an option, and `on_change` is told its
+colour. Its value is an option's when the two are one colour, compared as a
+hex with its alpha. `Color_swatch_picker.use_item_context ()` is an option's
+colour and state, for a part inside one and for a style's attribute on one.
+
+<Example code={ExPickerCode} title="headless_color_swatch_picker.mlx"><ExPicker.make client:visible /></Example>
+
+| Part | Element | What it adds |
+|---|---|---|
+| `Color_swatch_picker.Root` | `<div role="listbox">` | `value`, `default_value`, `on_change`; `layout`, `data-layout`; named "Color swatches" unless given `aria_label` or `aria_labelledby` |
+| `Color_swatch_picker.Item` | `<div role="option">` | `color`; `is_disabled`; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled` |
+| `Color_swatch_picker.Swatch` | `<div role="img">` | its item's colour and name; `color_name` |
 
 ## Virtualizer
 

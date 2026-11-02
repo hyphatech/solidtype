@@ -1,0 +1,37 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Picker = Solidtype_headless.Color_swatch_picker
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let colors = [| "#F43F5E"; "#8B5CF6"; "#3B82F6"; "#10B981"; "#F59E0B" |]
+
+(* The picker's state, dressed by its attributes: a chosen option is
+   [data-selected], a focused one takes the browser's focus. *)
+let option_class =
+  "size-8 rounded-full p-1 outline-none data-[selected]:ring-2 \
+   data-[selected]:ring-gray-400 focus-visible:ring-2 \
+   focus-visible:ring-blue-500"
+
+let make () =
+  let chosen, set_chosen = S.create_signal (Colors.parse_color "#8B5CF6") in
+  <div class_="flex flex-col gap-3">
+    <Picker.Root
+      class_="flex gap-2"
+      value=(fun () -> S.get chosen)
+      on_change=(S.set set_chosen)>
+      <For each=(fun () -> colors)>
+        (fun c _ ->
+          <Picker.Item
+            class_=(fun () -> option_class)
+            color=(fun () -> Colors.parse_color c)>
+            <Picker.Swatch class_="size-full rounded-full" />
+          </Picker.Item>)
+      </For>
+    </Picker.Root>
+    <p class_="text-sm">
+      "Chosen: "
+      (fun () -> Jsx.string (Color.to_string (S.get chosen) ~format:`hex ()))
+    </p>
+  </div>

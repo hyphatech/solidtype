@@ -1,0 +1,68 @@
+module S = Solidtype.Solid
+module For = Solidtype.For
+module Color_swatch_picker = Solidtype_heroui.Color_swatch_picker
+module Colors = Solidtype_kobalte.Colors
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let sizes =
+  [| (`xs, "xs"); (`sm, "sm"); (`md, "md"); (`lg, "lg"); (`xl, "xl") |]
+
+let variants = [| (`circle, "circle"); (`square, "square") |]
+let layouts = [| (`grid, "grid"); (`stack, "stack") |]
+
+let colors =
+  [|
+    "#F43F5E"; "#D946EF"; "#8B5CF6"; "#3B82F6"; "#06B6D4"; "#10B981"; "#84CC16";
+  |]
+
+let make () =
+  let size, set_size = S.create_signal (`md, "md") in
+  let variant, set_variant = S.create_signal (`circle, "circle") in
+  let layout, set_layout = S.create_signal (`grid, "grid") in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="layout"
+        choices=(fun () -> layouts)
+        picked=(fun () -> S.get layout)
+        on_pick=(Controls.choose layouts set_layout)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=color-swatch-picker]"
+      solidtype=(<Color_swatch_picker
+                   default_value=(fun () -> Colors.parse_color "#8B5CF6")
+                   size=(fun () -> fst (S.get size))
+                   variant=(fun () -> fst (S.get variant))
+                   layout=(fun () -> fst (S.get layout))>
+                   <For each=(fun () -> colors)>
+                     (fun c _ ->
+                       <Color_swatch_picker.Item
+                         color=(fun () -> Colors.parse_color c)>
+                         <Color_swatch_picker.Swatch />
+                         <Color_swatch_picker.Indicator />
+                       </Color_swatch_picker.Item>)
+                   </For>
+                 </Color_swatch_picker>)
+      react=(fun host ->
+              Heroui_react.color_swatch_picker host
+                (Heroui_react.color_swatch_picker_props
+                   ~size:(snd (S.get size))
+                   ~variant:(snd (S.get variant))
+                   ~layout:(snd (S.get layout))
+                   ()))
+    />
+  </section>

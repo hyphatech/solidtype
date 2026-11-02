@@ -60,7 +60,9 @@ let rows solidtype react =
 (* What each framework writes for itself and no style reads: Solid's
    hydration key, React Aria's markers and the id it generates. *)
 let internal = function
-  | "data-hk" | "data-rac" | "data-react-aria-pressable" | "id" -> true
+  | "data-hk" | "data-rac" | "data-react-aria-pressable" | "data-collection"
+  | "id" ->
+      true
   | _ -> false
 
 (* A class is a set of words, whatever their order and spacing. *)

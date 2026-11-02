@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Color_swatch_picker`, HeroUI's ColorSwatchPicker: a palette
+  of swatches, one chosen by a press, Space or Enter, value controlled or kept
+  and told as a colour, its sizes, variants and layouts, disabled swatches,
+  and HeroUI's checkmark, black over a light colour, or an indicator given.
+  HeroUI's examples. `Solidtype_headless.Color_swatch_picker` beneath it,
+  which Kobalte lacks, made of Kobalte's list hooks: a listbox of options each
+  named by its swatch, walked in a grid by where each option is, Left and Right
+  as the page's direction reads them, or in a stack by Up and Down, a disabled
+  option passed over, and reached by typing a colour's name.
+
 - `Solidtype_heroui.Number_field` takes `is_wheel_disabled`, HeroUI's
   `isWheelDisabled`; and its wheel, and `Color_field`'s on a channel, turn as
   React Aria's: down steps up, and a field read-only, a turn mostly sideways

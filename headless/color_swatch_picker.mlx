@@ -1,0 +1,592 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Selection = Solidtype_kobalte.Selection
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+module Either = Types.Either
+module Color = Types.Color
+module Delegate = Types.KeyboardDelegate
+module List_state = Types.ListState
+module Selectable_list = Types.Selection_CreateSelectableList
+module Selectable_item = Types.Selection_CreateSelectableItem
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external attribute : _ Dom.element_like -> string -> string Js.null
+  = "getAttribute"
+[@@mel.send]
+
+(* Whether [other] follows [e] on the page, by DOM's bit for it. *)
+external position : _ Dom.element_like -> _ Dom.element_like -> int
+  = "compareDocumentPosition"
+[@@mel.send]
+
+type rect
+
+external bounds : _ Dom.element_like -> rect = "getBoundingClientRect"
+[@@mel.send]
+
+external left : rect -> float = "left" [@@mel.get]
+external top : rect -> float = "top" [@@mel.get]
+external height : rect -> float = "height" [@@mel.get]
+
+external scroll_height : _ Dom.element_like -> float = "scrollHeight"
+[@@mel.get]
+
+external client_height : _ Dom.element_like -> float = "clientHeight"
+[@@mel.get]
+
+external scroll_top : _ Dom.element_like -> float = "scrollTop" [@@mel.get]
+
+(* A handler or a ref the caller gave, called beside the part's own, as
+   Kobalte's parts call theirs. *)
+let call f x = match f with Some f -> f x [@u] | None -> ()
+let tabindex = function Some i -> Js.Float.toString i | None -> "-1"
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+(* An option's key: its colour as a hex with its alpha, so two writings of one
+   colour are one option. *)
+let key_of c = Color.to_string c ~format:`hexa ()
+
+type item = {
+  color : unit -> Color.t;
+  is_selected : unit -> bool;
+  is_disabled : unit -> bool;
+}
+
+(* An option as the list keeps it: its key, its colour, its element, which says
+   where it is on the page, and the id of the swatch that names it. *)
+type listed = {
+  key : unit -> string;
+  color : unit -> Color.t;
+  element : Dom.htmlDivElement;
+  disabled : unit -> bool;
+  label_id : string;
+}
+
+type picker = {
+  manager : Types.MultipleSelectionManager.t S.accessor;
+  chosen : unit -> string option;
+  add : listed -> unit;
+  remove : Dom.htmlDivElement -> unit;
+}
+
+module Picker_context = Solidtype.Context.Make_optional (struct
+  type t = picker
+end)
+
+type in_item = { state : item; label_id : string }
+
+module Item_context = Solidtype.Context.Make_optional (struct
+  type t = in_item
+end)
+
+let in_picker part =
+  match Picker_context.use () with
+  | Some p -> p
+  | None -> invalid_arg (part ^ " is used inside a Color_swatch_picker.Root")
+
+let in_item part =
+  match Item_context.use () with
+  | Some i -> i
+  | None -> invalid_arg (part ^ " is used inside a Color_swatch_picker.Item")
+
+let use_item_context () = (in_item "Color_swatch_picker.use_item_context").state
+
+(* What a reader is told of an option, and what typing its start reaches: the
+   name its swatch gives it. *)
+let name (i : listed) =
+  match Js.Null.toOption (by_id i.label_id) with
+  | Some e ->
+      Option.value (Js.Null.toOption (attribute e "aria-label")) ~default:""
+  | None -> ""
+
+(* Where the keys move among the options, as an accessible list's keys move:
+   in order through a stack, and through a grid by where each option is, the
+   one above or below being the nearest in its column, as React Aria's grid
+   list finds it. A disabled option is passed over. *)
+let delegate ~(options : unit -> listed array) ~layout ~direction ~collator
+    ~list =
+  let index k =
+    let all = options () in
+    let rec find i =
+      if i >= Array.length all then None
+      else if String.equal (all.(i).key ()) k then Some i
+      else find (i + 1)
+    in
+    find 0
+  in
+  (* The first option from [i] on, by [step], that is not disabled. *)
+  let rec usable i step =
+    let all = options () in
+    if i < 0 || i >= Array.length all then None
+    else if all.(i).disabled () then usable (i + step) step
+    else Some all.(i)
+  in
+  let after k =
+    Option.bind (index k) (fun i ->
+        Option.map (fun o -> o.key ()) (usable (i + 1) 1))
+  in
+  let before k =
+    Option.bind (index k) (fun i ->
+        Option.map (fun o -> o.key ()) (usable (i - 1) (-1)))
+  in
+  let first () = Option.map (fun o -> o.key ()) (usable 0 1) in
+  let last () =
+    Option.map (fun o -> o.key ()) (usable (Array.length (options ()) - 1) (-1))
+  in
+  let rect k =
+    Option.map (fun i -> bounds (options ()).(i).element) (index k)
+  in
+  (* The next option by [next] in another row, in the same column. *)
+  let in_column k next =
+    match rect k with
+    | None -> None
+    | Some from ->
+        let rec go k =
+          match next k with
+          | None -> None
+          | Some n -> (
+              match rect n with
+              | Some r
+                when Float.equal (left r) (left from)
+                     && not (Float.equal (top r) (top from)) ->
+                  Some n
+              | Some _ | None -> go n)
+        in
+        go k
+  in
+  let below k =
+    match layout () with `grid -> in_column k after | `stack -> after k
+  in
+  let above k =
+    match layout () with `grid -> in_column k before | `stack -> before k
+  in
+  (* A page at a time while the list scrolls, else to its end. *)
+  let page k ~down =
+    match (list (), rect k) with
+    | Some l, Some r when scroll_height l > client_height l ->
+        let origin = top (bounds l) -. scroll_top l in
+        let y o = top o -. origin in
+        let step = if down then below else above in
+        let past o =
+          if down then y o >= y r -. height r +. client_height l
+          else y o <= y r +. height r -. client_height l
+        in
+        let rec go k =
+          match step k with
+          | None -> Some k
+          | Some n -> (
+              match rect n with Some o when past o -> Some n | _ -> go n)
+        in
+        go k
+    | _ -> if down then last () else first ()
+  in
+  let search typed from =
+    let n = String.length typed in
+    let matches k =
+      match index k with
+      | Some i ->
+          let text = name (options ()).(i) in
+          String.length text >= n
+          && Float.equal
+               (Types.Collator.compare (S.get collator)
+                  (Js.String.slice ~start:0 ~end_:n text)
+                  typed)
+               0.
+      | None -> false
+    in
+    let rec go = function
+      | None -> None
+      | Some k when matches k -> Some k
+      | Some k -> go (after k)
+    in
+    go (match from with Some k -> Some k | None -> first ())
+  in
+  let across ~right k =
+    match direction () with
+    | `ltr -> if right then after k else before k
+    | `rtl -> if right then before k else after k
+  in
+  match layout () with
+  | `grid ->
+      Delegate.make ~get_key_below:below ~get_key_above:above
+        ~get_key_left_of:(across ~right:false)
+        ~get_key_right_of:(across ~right:true)
+        ~get_key_page_below:(page ~down:true)
+        ~get_key_page_above:(page ~down:false)
+        ~get_first_key:(fun _ _ -> first ())
+        ~get_last_key:(fun _ _ -> last ())
+        ~get_key_for_search:search ()
+  | `stack ->
+      Delegate.make ~get_key_below:below ~get_key_above:above
+        ~get_key_page_below:(page ~down:true)
+        ~get_key_page_above:(page ~down:false)
+        ~get_first_key:(fun _ _ -> first ())
+        ~get_last_key:(fun _ _ -> last ())
+        ~get_key_for_search:search ()
+
+module Root = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?value:Color.t Solidtype.Check.value ->
+      ?default_value:Color.t Solidtype.Check.value ->
+      ?on_change:(Color.t -> unit) ->
+      ?layout:[ `grid | `stack ] Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> Color.t option = "value" [@@mel.get]
+    external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((Color.t -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external layout : t -> [ `grid | `stack ] option = "layout" [@@mel.get]
+    external aria_label : t -> string option = "aria-label" [@@mel.get]
+
+    external aria_labelledby : t -> string option = "aria-labelledby"
+    [@@mel.get]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusIn"
+    [@@mel.get]
+
+    external on_focus_out : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusOut"
+    [@@mel.get]
+  end
+
+  (* The props the list takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "value";
+      "defaultValue";
+      "onChange";
+      "layout";
+      "aria-label";
+      "children";
+      "ref";
+      "onKeyDown";
+      "onMouseDown";
+      "onFocusIn";
+      "onFocusOut";
+    |]
+
+  let make (props : Props.t) =
+    let layout () = Option.value (Props.layout props) ~default:`grid in
+    let listed, set_listed = S.create_signal [] in
+    let options =
+      S.create_memo (fun () ->
+          Array.of_list
+            (List.sort
+               (fun a b ->
+                 if position a.element b.element land 4 <> 0 then -1 else 1)
+               (S.get listed)))
+    in
+    let keys =
+      S.create_memo (fun () -> Array.map (fun o -> o.key ()) (S.get options))
+    in
+    let find k =
+      Array.find_opt (fun o -> String.equal (o.key ()) k) (S.get options)
+    in
+    let kept, set_kept =
+      S.create_signal (S.untrack (fun () -> Props.default_value props))
+    in
+    let current () =
+      match Props.value props with Some c -> Some c | None -> S.get kept
+    in
+    let chosen () = Option.map key_of (current ()) in
+    let choose k =
+      match find k with
+      | Some o when not (Option.equal String.equal (chosen ()) (Some k)) ->
+          let c = o.color () in
+          S.set set_kept (Some c);
+          call (Props.on_change props) c
+      | Some _ | None -> ()
+    in
+    let state =
+      Selection.create_list_state
+        (Types.CreateListStateProps.make ~data_source:(Either.right keys)
+           ~get_key:(Either.left Fun.id)
+           ~get_text_value:
+             (Either.left (fun k ->
+                  match find k with Some o -> name o | None -> ""))
+           ~get_disabled:
+             (Either.left (fun k ->
+                  match find k with Some o -> o.disabled () | None -> false))
+           ~selection_mode:(Either.left `single)
+           ~disallow_empty_selection:(Either.left true)
+           ~selected_keys:
+             (Either.right
+                (S.create_memo (fun () ->
+                     Some
+                       (match chosen () with Some k -> [| k |] | None -> [||]))))
+           ~on_selection_change:(fun keys ->
+             match Js.Set.toArray keys with [| k |] -> choose k | _ -> ())
+           ())
+    in
+    let manager =
+      S.create_memo (fun () ->
+          Types.SelectionManager.to_multiple_selection_manager
+            (S.get (List_state.selection_manager state)))
+    in
+    let element, set_element = S.create_signal None in
+    let locale = I18n.use_locale () in
+    let collator =
+      I18n.create_collator
+        ~options:
+          (Types.CollatorOptions.make ~usage:`search ~sensitivity:`base ())
+        ()
+    in
+    let keyboard =
+      S.create_memo (fun () ->
+          Some
+            (delegate
+               ~options:(fun () -> S.get options)
+               ~layout
+               ~direction:(Types.I18n_UseLocale.direction locale)
+               ~collator
+               ~list:(fun () -> S.get element)))
+    in
+    let list =
+      Selection.create_selectable_list
+        (Types.CreateSelectableListProps.make
+           ~collection:(List_state.collection state)
+           ~selection_manager:(Either.right manager)
+           ~keyboard_delegate:(Either.right keyboard) ())
+        element ()
+    in
+    let picker =
+      {
+        manager;
+        chosen;
+        add = (fun o -> S.update set_listed (fun l -> o :: l));
+        remove =
+          (fun e -> S.update set_listed (List.filter (fun o -> o.element != e)));
+      }
+    in
+    <Picker_context.Provider value=(fun () -> picker)>
+      <div
+        role=`listbox
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
+        ?aria_label=(fun () ->
+                      match
+                        (Props.aria_label props, Props.aria_labelledby props)
+                      with
+                      | Some l, _ -> Some l
+                      | None, Some _ -> None
+                      | None, None -> Some "Color swatches")
+        aria_orientation=`vertical
+        tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
+        data_layout=(fun () ->
+                      Jsx.data
+                        (match layout () with
+                        | `grid -> "grid"
+                        | `stack -> "stack"))
+        data_orientation="vertical"
+        on_key_down=(fun e ->
+                      call (Props.on_key_down props) e;
+                      Selectable_list.on_key_down list e)
+        on_mouse_down=(fun e ->
+                        call (Props.on_mouse_down props) e;
+                        Selectable_list.on_mouse_down list e)
+        on_focus_in=(fun e ->
+                      call (Props.on_focus_in props) e;
+                      Selectable_list.on_focus_in list e)
+        on_focus_out=(fun e ->
+                       call (Props.on_focus_out props) e;
+                       Selectable_list.on_focus_out list e)
+        props=(S.omit props own)>
+        (fun () -> Props.children props)
+      </div>
+    </Picker_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Item = struct
+  module Props = struct
+    type t
+
+    external check :
+      color:Color.t Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external color : t -> Color.t = "color" [@@mel.get]
+    external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus : t -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+    [@@mel.get]
+  end
+
+  (* The props the option takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "color";
+      "isDisabled";
+      "children";
+      "ref";
+      "onPointerDown";
+      "onPointerUp";
+      "onClick";
+      "onKeyDown";
+      "onMouseDown";
+      "onFocus";
+    |]
+
+  let make (props : Props.t) =
+    let p = in_picker "Color_swatch_picker.Item" in
+    let color () = Props.color props in
+    let key = S.create_memo (fun () -> key_of (color ())) in
+    let disabled () = Option.value (Props.is_disabled props) ~default:false in
+    let selected () =
+      Option.equal String.equal (p.chosen ()) (Some (S.get key))
+    in
+    let label_id = S.create_unique_id () in
+    let element, set_element = S.create_signal None in
+    let item =
+      Selection.create_selectable_item
+        (Types.CreateSelectableItemProps.make
+           ~selection_manager:(Either.right p.manager) ~key:(Either.right key)
+           ~disabled:
+             (Either.right (S.create_memo (fun () -> Some (disabled ()))))
+           ())
+        element
+    in
+    (* An option joins the list once it is on the page, where its place among
+       the others is read. *)
+    S.on_mount (fun () ->
+        Option.iter
+          (fun e ->
+            p.add
+              {
+                key = (fun () -> S.get key);
+                color;
+                element = e;
+                disabled;
+                label_id;
+              };
+            S.on_cleanup (fun () -> p.remove e))
+          (S.get element));
+    let it =
+      {
+        state = { color; is_selected = selected; is_disabled = disabled };
+        label_id;
+      }
+    in
+    <Item_context.Provider value=(fun () -> it)>
+      <div
+        role=`option
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
+        ?tabindex=(fun () ->
+                    if disabled () then None
+                    else
+                      Some (tabindex (S.get (Selectable_item.tab_index item))))
+        aria_selected=(fun () -> selected ())
+        ?aria_disabled=(fun () -> if disabled () then Some true else None)
+        aria_labelledby=label_id
+        data_key=(fun () -> Jsx.data (S.get key))
+        data_selected=(fun () -> state (selected ()))
+        data_disabled=(fun () -> state (disabled ()))
+        on_pointer_down=(fun e ->
+                          call (Props.on_pointer_down props) e;
+                          Selectable_item.on_pointer_down item e)
+        on_pointer_up=(fun e ->
+                        call (Props.on_pointer_up props) e;
+                        Selectable_item.on_pointer_up item e)
+        on_click=(fun e ->
+                   call (Props.on_click props) e;
+                   Selectable_item.on_click item e)
+        on_key_down=(fun e ->
+                      call (Props.on_key_down props) e;
+                      Selectable_item.on_key_down item e)
+        on_mouse_down=(fun e ->
+                        call (Props.on_mouse_down props) e;
+                        Selectable_item.on_mouse_down item e)
+        on_focus=(fun e ->
+                   call (Props.on_focus props) e;
+                   Selectable_item.on_focus item e)
+        props=(S.omit props own)>
+        (fun () -> Props.children props)
+      </div>
+    </Item_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Swatch = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?color_name:string Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  (* Its id is the one its option's aria-labelledby names, so a caller's is
+     left out. *)
+  let make (props : Props.t) =
+    let it = in_item "Color_swatch_picker.Swatch" in
+    let label_id = it.label_id in
+    <Color_swatch
+      value=(fun () -> it.state.color ())
+      id=(fun () -> label_id)
+      props=(S.omit props [| "id" |])
+    />
+
+  let component = Jsx.component make
+end
