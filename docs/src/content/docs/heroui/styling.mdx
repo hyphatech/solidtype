@@ -1,0 +1,90 @@
+---
+title: Styling
+description: A port's classes, its state and its motion, styled as HeroUI's are.
+---
+
+import Example from "@components/Example.astro";
+import * as Tailwind from "@islands/button_tailwind.jsx";
+import tailwind from "@islands/button_tailwind.mlx?raw";
+import * as State from "@islands/styling_state.jsx";
+import state from "@islands/styling_state.mlx?raw";
+
+A port is styled as HeroUI's [Styling](https://heroui.com/docs/react/getting-started/styling)
+page styles HeroUI's: by classes, by the state it writes, and by HeroUI's own
+classes overridden in CSS. React's `className` is `class_`.
+
+## Classes
+
+Every part takes `class_`, added after HeroUI's. HeroUI's classes are in
+Tailwind's `components` layer, so a utility given wins over them:
+
+<Example code={tailwind} title="button_tailwind.mlx"><Tailwind.make client:visible /></Example>
+
+A part's class is reactive, as any prop: `class_=(fun () -> ...)` changes
+with what it reads. CSS Modules and any other library that gives a class
+string work the same way.
+
+## State
+
+A port writes the state HeroUI's styles read, as React Aria writes it on
+HeroUI's own: `data-hovered`, `data-pressed`, `data-focused`,
+`data-focus-visible`, `data-disabled`, each `"true"` or absent, and each
+component's own, `data-selected`, `data-invalid`, listed on its HeroUI page.
+Tailwind's data variants read it:
+
+<Example code={state} title="styling_state.mlx"><State.make client:visible /></Example>
+
+```css
+.button[data-pressed="true"] {
+  transform: scale(0.97);
+}
+```
+
+The part beneath is Kobalte's, which writes its own state too, present and
+empty: `data-expanded`, `data-checked`.
+
+HeroUI's render props -- a class or children given as a function of
+`isPressed`, `isSelected` -- are the state attributes above, or a read of
+what you give the port: a controlled `is_selected` is yours to read.
+
+## HeroUI's classes
+
+A port's elements carry HeroUI's [BEM](https://getbem.com/) classes --
+`.button`, `.button--primary`, `.accordion__trigger` -- so a rule on one
+restyles every port that draws it:
+
+```css
+@layer components {
+  .button {
+    @apply font-semibold tracking-wide;
+  }
+  .accordion__trigger {
+    @apply text-lg;
+  }
+}
+```
+
+Each component's HeroUI page lists its classes.
+
+## Motion
+
+A port's transitions are HeroUI's CSS. An overlay -- a popover, a tooltip, a
+modal -- stays on the page while its exit runs, marked `data-entering` then
+`data-exiting` as React Aria marks HeroUI's, so a rule on either changes how
+it comes and goes:
+
+```css
+.popover[data-entering] {
+  animation-duration: 400ms;
+}
+```
+
+Tailwind's `animate-*` and `transition-*` utilities go in `class_`. HeroUI's
+`motion-reduce:` variant turns its motion off for `prefers-reduced-motion`
+and under `data-reduce-motion="true"`.
+
+## Not yet
+
+- **`style` and an element's other attributes on a part.** A part takes
+  `class_`, its own props and `data_` attributes; React's takes any of its
+  element's. Set a variable or an inline style on an element around it.

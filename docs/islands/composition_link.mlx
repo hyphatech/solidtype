@@ -1,0 +1,12 @@
+module Styles = Solidtype_heroui.Styles
+
+(* A button's look on a link: HeroUI's variant function, or its classes as
+   they are. *)
+let make () =
+  let primary =
+    Styles.Button.classes (Styles.Button.options ~variant:`primary ())
+  in
+  <div class_="flex gap-3">
+    <a href="#composition" class_=primary>"Variant function"</a>
+    <a href="#composition" class_="button button--tertiary">"BEM classes"</a>
+  </div>

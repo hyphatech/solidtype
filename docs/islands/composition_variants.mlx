@@ -1,0 +1,22 @@
+module Jsx = Solidtype.Jsx
+module Button = Solidtype_heroui.Button
+
+(* A button of one's own: a variant HeroUI's has not, as classes given to
+   HeroUI's, which its own variant function merges over its own. *)
+module Pill_button = struct
+  let%component make ?(radius : [ `full | `sm ] = `full)
+      ~(children : Jsx.content) () =
+    <Button
+      class_=(fun () ->
+               match radius () with
+               | `full -> "rounded-full font-semibold shadow-md"
+               | `sm -> "rounded-sm font-semibold shadow-md")>
+      (fun () -> children ())
+    </Button>
+end
+
+let make () =
+  <div class_="flex gap-3">
+    <Pill_button>"Full"</Pill_button>
+    <Pill_button radius=`sm>"Small"</Pill_button>
+  </div>

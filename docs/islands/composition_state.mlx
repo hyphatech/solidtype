@@ -1,0 +1,16 @@
+module Jsx = Solidtype.Jsx
+module Interaction = Solidtype_heroui.Interaction
+
+(* An element no port renders, given HeroUI's classes and the state its styles
+   read, as a port declares it. *)
+let make () =
+  let i = Interaction.create () in
+  <a
+    href="#composition"
+    class_="button button--secondary"
+    ref=(fun e -> Interaction.watch i e)
+    data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+    data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+    data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))>
+    "A link, pressed as a button"
+  </a>

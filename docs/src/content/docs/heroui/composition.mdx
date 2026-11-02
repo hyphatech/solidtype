@@ -1,0 +1,68 @@
+---
+title: Composition
+description: A port's parts, and HeroUI's look on elements no port renders.
+---
+
+import Example from "@components/Example.astro";
+import * as Link from "@islands/composition_link.jsx";
+import link from "@islands/composition_link.mlx?raw";
+import * as Variants from "@islands/composition_variants.jsx";
+import variants from "@islands/composition_variants.mlx?raw";
+import * as State from "@islands/composition_state.jsx";
+import state from "@islands/composition_state.mlx?raw";
+
+What HeroUI's [Composition](https://heroui.com/docs/react/getting-started/composition)
+page does in React, in OCaml.
+
+## Parts
+
+A component is a module and its parts are modules inside it, as HeroUI's
+compound pattern has them: `<Alert>` is HeroUI's `<Alert>` or
+`<Alert.Root>`, and `<Alert.Title>` its `<Alert.Title>`.
+
+```ocaml
+module Alert = Solidtype_heroui.Alert
+
+let saved () =
+  <Alert status=`success>
+    <Alert.Indicator />
+    <Alert.Content>
+      <Alert.Title>"Saved"</Alert.Title>
+      <Alert.Description>"Your changes have been saved."</Alert.Description>
+    </Alert.Content>
+  </Alert>
+```
+
+## HeroUI's look on any element
+
+`Solidtype_heroui.Styles` is HeroUI's variant functions, one module each:
+`buttonVariants` is `Styles.Button`, its variants the optional arguments of
+`options`, and `classes` the class string; a component of several parts has
+`slots`, and a function per part. HeroUI's BEM classes work as they are:
+
+<Example code={link} title="composition_link.mlx"><Link.make client:visible /></Example>
+
+A class built by a call is bound to a name first, since an attribute that is
+a call is a thunk.
+
+Such an element has HeroUI's look at rest and its `:hover` and `:active`
+rules, but none of the state a port writes. `Solidtype_heroui.Interaction`
+writes it on any element, React Aria's hover, press and focus, as a port
+does -- on a plain link here, or on a part of Kobalte's in HeroUI's classes,
+whose own state HeroUI's styles do not read:
+
+<Example code={state} title="composition_state.mlx"><State.make client:visible /></Example>
+
+## Custom variants
+
+A component of your own wraps a port and gives it classes, where React's
+would extend HeroUI's with `tv`. They come after HeroUI's, and a utility
+wins over HeroUI's classes, which are in Tailwind's `components` layer:
+
+<Example code={variants} title="composition_variants.mlx"><Variants.make client:visible /></Example>
+
+## Not yet
+
+- **A custom element, HeroUI's `render`.** A part draws its own element; a
+  router's link or an animated one cannot take its place. Kobalte's own
+  parts do this with `as`, which the binding leaves out.

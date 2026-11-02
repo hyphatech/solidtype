@@ -1,0 +1,81 @@
+---
+title: Theming
+description: HeroUI's themes, colours and dark mode, as a port takes them.
+---
+
+import Example from "@components/Example.astro";
+import * as Accent from "@islands/theming_accent.jsx";
+import accent from "@islands/theming_accent.mlx?raw";
+
+A port's classes are HeroUI's own, from `@heroui/styles`, and so are its
+themes: CSS variables and Tailwind's theme, nothing in OCaml. Everything on
+HeroUI's [Theming](https://heroui.com/docs/react/getting-started/theming) and
+[Colors](https://heroui.com/docs/react/getting-started/colors) pages holds
+here as written; this page is what an application on solidtype adds to them.
+
+## Setup
+
+```css
+/* app.css */
+@import "tailwindcss";
+@import "@heroui/styles";
+
+/* Your own .mlx, where your classes are written whole. */
+@source "./src";
+/* Segment, TrendChip and TextShimmer, whose look is Tailwind's utilities:
+   solidtype-heroui as Melange compiled it, under your melange.emit target. */
+@source "../_build/default/app/output/node_modules/solidtype-heroui";
+```
+
+Tailwind finds a class only where it is written whole, so a class is a
+literal in the `.mlx`, never a string built from pieces. Importing HeroUI's
+pieces one by one works as on HeroUI's page; this site imports only the
+ported components' stylesheets.
+
+## Light and dark
+
+HeroUI's light theme is the page's own, `:root`; its dark theme is under
+`.dark` or `data-theme="dark"`, on `<html>` or any element above a
+component. Nothing chooses it for you, so set it before the page paints:
+
+```html
+<script>
+  if (matchMedia("(prefers-color-scheme: dark)").matches)
+    document.documentElement.classList.add("dark");
+</script>
+```
+
+A switch changes the same class. A theme of your own is a pair of blocks,
+`[data-theme="ocean"]` and `[data-theme="ocean-dark"]`, imported into the
+`theme` layer as HeroUI's page shows.
+
+## Colours
+
+Every colour is a variable, a background named for its role, `--accent`,
+and the text on it, `--accent-foreground`; Tailwind's `bg-accent` and
+`text-accent-foreground` read them. Set one on `:root`, or in a theme's
+block, to change it everywhere: HeroUI derives its hover and soft shades,
+`--accent-hover` and `--accent-soft-foreground`, from it there. Set on an
+element, it reaches only what reads it directly -- the primary button here,
+not the secondary's soft shade:
+
+<Example code={accent} title="theming_accent.mlx"><Accent.make client:visible /></Example>
+
+A colour of your own is declared in both themes and given to Tailwind by
+`@theme inline`, as HeroUI's page shows; then `bg-info` is a class like any
+other.
+
+## Scrollbars, palette and motion
+
+HeroUI's switches are data attributes, on `<html>` or on a part, which
+takes any `data_` attribute and passes it to its element:
+
+| Attribute | Does |
+|---|---|
+| `data-scrollbar="default"`, `"none"`, `"thin"` | the browser's scrollbars, none, or HeroUI's |
+| `data-vibrant-palette="true"` | soft colours closer to the raw colour |
+| `data-reduce-motion="true"` | no transitions, as `prefers-reduced-motion` gives |
+
+```ocaml
+<List_box data_scrollbar="none" ...>
+```

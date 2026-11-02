@@ -1,0 +1,11 @@
+module Button = Solidtype_heroui.Button
+
+(* A port writes the state HeroUI's styles read, so Tailwind's data- variants
+   style it as they style HeroUI's in React. *)
+let make () =
+  <Button
+    variant=`secondary
+    class_="data-[hovered=true]:bg-accent-soft data-[pressed=true]:bg-accent \
+            data-[pressed=true]:text-accent-foreground">
+    "Press me"
+  </Button>

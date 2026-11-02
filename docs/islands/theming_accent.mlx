@@ -1,0 +1,11 @@
+module Button = Solidtype_heroui.Button
+
+(* HeroUI's colours are CSS variables: one set on an element holds for every
+   component inside it. *)
+let make () =
+  <div
+    class_="flex gap-3"
+    style="--accent: oklch(0.55 0.2 300); --accent-foreground: oklch(0.99 0 0)">
+    <Button>"Purple accent"</Button>
+    <Button variant=`secondary>"Secondary"</Button>
+  </div>
