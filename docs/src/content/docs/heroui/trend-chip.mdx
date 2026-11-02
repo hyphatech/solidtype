@@ -1,0 +1,103 @@
+---
+title: TrendChip
+description: A chip that shows a change, its arrow and colour from its trend.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/trend_chip_usage.jsx";
+import UsageCode from "@islands/trend_chip_usage.mlx?raw";
+import * as CustomIndicator from "@islands/trend_chip_custom_indicator.jsx";
+import CustomIndicatorCode from "@islands/trend_chip_custom_indicator.mlx?raw";
+import * as PrefixAndSuffix from "@islands/trend_chip_prefix_and_suffix.jsx";
+import PrefixAndSuffixCode from "@islands/trend_chip_prefix_and_suffix.mlx?raw";
+import * as Sizes from "@islands/trend_chip_sizes.jsx";
+import SizesCode from "@islands/trend_chip_sizes.mlx?raw";
+import * as TabularNums from "@islands/trend_chip_tabular_nums.jsx";
+import TabularNumsCode from "@islands/trend_chip_tabular_nums.mlx?raw";
+import * as Variants from "@islands/trend_chip_variants.jsx";
+import VariantsCode from "@islands/trend_chip_variants.mlx?raw";
+
+A [Chip](/solidtype/heroui/chip/) that shows a change: up is success, down
+danger, neutral the default colour. A clean reimplementation of HeroUI Pro's
+[TrendChip](https://heroui.pro/docs/react/components/trend-chip). Its
+classes need the `@source` [Segment](/solidtype/heroui/segment/#setup)
+describes.
+
+## Usage
+
+<Example code={UsageCode} title="trend_chip_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Trend_chip trend=`up>
+  <Trend_chip.Indicator />
+  <Trend_chip.Prefix>"+"</Trend_chip.Prefix>
+  "3.3%"
+  <Trend_chip.Suffix>"MoM"</Trend_chip.Suffix>
+</Trend_chip>
+```
+
+## Examples
+
+### Custom Indicator
+
+<Example code={CustomIndicatorCode} title="trend_chip_custom_indicator.mlx"><CustomIndicator.make client:visible /></Example>
+
+### Prefix And Suffix
+
+<Example code={PrefixAndSuffixCode} title="trend_chip_prefix_and_suffix.mlx"><PrefixAndSuffix.make client:visible /></Example>
+
+### Sizes
+
+<Example code={SizesCode} title="trend_chip_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Tabular Nums
+
+The value is drawn in tabular figures, so changes line up.
+
+<Example code={TabularNumsCode} title="trend_chip_tabular_nums.mlx"><TabularNums.make client:visible /></Example>
+
+### Variants
+
+<Example code={VariantsCode} title="trend_chip_variants.mlx"><Variants.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.trend-chip`, and its sizes `.trend-chip--sm`, `.trend-chip--md`, `.trend-chip--lg`
+- `.trend-chip__indicator`
+- `.trend-chip__value`
+- `.trend-chip__prefix`
+- `.trend-chip__suffix`
+
+### Data Attributes
+
+- `[data-trend="up"]`, `[data-trend="down"]`, `[data-trend="neutral"]`
+
+## API Reference
+
+### TrendChip
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `trend` | `trend` | `` [ `up \| `down \| `neutral ] `` | `` `up `` | Its arrow and colour |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `sm `` | Its size |
+| `variant` | `variant` | `` [ `primary \| `secondary \| `soft \| `tertiary ] `` | `` `soft `` | Its look |
+| `className` | `class_` | `string` | | Added after its own classes |
+| `children` | `children` | elements | | The value, and its parts |
+
+### TrendChip.Indicator
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `children` | `children` | elements | An icon in place of the arrow |
+| `className` | `class_` | `string` | Added after its own classes |
+
+### TrendChip.Prefix, TrendChip.Suffix
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `children` | `children` | elements | Their text |
+| `className` | `class_` | `string` | Added after their own classes |

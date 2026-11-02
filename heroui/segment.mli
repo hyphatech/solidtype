@@ -1,10 +1,6 @@
-(** A segmented control in HeroUI Pro's shape: a few options side by side, one
-    always selected, its indicator sliding to the option chosen. Pro's is
-    licensed, so this is not a port of it but the same component made here, on
-    Kobalte's segmented control, in HeroUI's free design: its look is Tailwind
-    on HeroUI's tokens, which an application's Tailwind finds by an [@source] of
-    this library, and Pro's class names, [segment__item] and the rest, are on
-    its parts for a stylesheet that names them.
+(** A segmented control: a few options, one always selected, its indicator
+    sliding to the option chosen. A clean reimplementation of HeroUI Pro's, on
+    Kobalte's segmented control.
 
     {[
       <Segment aria_label="Billing" default_selected_key="monthly">
@@ -13,13 +9,8 @@
       </Segment>
     ]}
 
-    It is Kobalte's: a [radiogroup] of radios, each option a [<label>] around
-    its radio, which Tab reaches as one and the arrow keys move the selection
-    through, passing over a disabled option. Pro's, on React Aria's toggle
-    button group, moves the focus with the arrows and selects with Space; both
-    are accessible, and this keeps Kobalte's. The indicator is drawn in the
-    selected option, so a page prerendered shows it, and slides there from the
-    option left. *)
+    A [radiogroup] of radios: Tab reaches it once, and the arrow keys move the
+    selection, passing over a disabled option. *)
 
 type size = [ `sm | `md | `lg ]
 type variant = [ `default | `ghost ]

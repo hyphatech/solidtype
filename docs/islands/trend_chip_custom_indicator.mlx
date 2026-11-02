@@ -1,0 +1,22 @@
+module Trend_chip = Solidtype_heroui.Trend_chip
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Trend_chip>
+      <Trend_chip.Indicator><Gravity.Arrow_up_right /></Trend_chip.Indicator>
+      "+3.3%"
+    </Trend_chip>
+    <Trend_chip trend=`down>
+      <Trend_chip.Indicator><Gravity.Arrow_down_right /></Trend_chip.Indicator>
+      "-2.1%"
+    </Trend_chip>
+    <Trend_chip>
+      <Trend_chip.Indicator>
+        <Gravity.Chart_line_arrow_up />
+      </Trend_chip.Indicator>
+      "+12.5%"
+    </Trend_chip>
+    <Trend_chip trend=`neutral>
+      <Trend_chip.Indicator><Gravity.Equal /></Trend_chip.Indicator> "0.0%"
+    </Trend_chip>
+  </div>

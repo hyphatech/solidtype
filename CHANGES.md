@@ -2,14 +2,12 @@
 
 ## Unreleased
 
-- `Solidtype_heroui.Segment`, a segmented control in HeroUI Pro's shape: a
-  few options, one always selected, controlled or kept, its indicator sliding
-  to the option chosen; default and ghost, three sizes, disabled whole or by
-  option, separators, and `Segment.Item.is_selected` for what an option shows
-  while selected. Pro is licensed, so it is made here on Kobalte's segmented
-  control, in HeroUI's free design, not ported; its look is Tailwind's own
-  utilities on HeroUI's tokens, so an application's Tailwind needs an
-  `@source` of `solidtype-heroui` as Melange compiled it.
+- `Solidtype_heroui.Trend_chip`, a clean reimplementation of HeroUI Pro's
+  TrendChip.
+
+- `Solidtype_heroui.Segment`, a clean reimplementation of HeroUI Pro's
+  segmented control. Its classes are Tailwind utilities, so an application's
+  Tailwind needs an `@source` of the compiled `solidtype-heroui`.
 
 - `Solidtype_heroui.Styles.cn`, HeroUI's merge of class strings, the one its
   variant functions merge a `class` by.

@@ -58,6 +58,7 @@ module Radio_group = H.Radio_group
 module Scroll_shadow = H.Scroll_shadow
 module Search_field = H.Search_field
 module Segment = H.Segment
+module Trend_chip = H.Trend_chip
 module Separator = H.Separator
 module Skeleton = H.Skeleton
 module Slider = H.Slider
@@ -567,6 +568,16 @@ let () =
                     <Segment.Separator data_testid="Segment.Separator" /> "Year"
                   </Segment.Item>
                 </Segment>
+                <Trend_chip data_testid="Trend_chip">
+                  <Trend_chip.Indicator data_testid="Trend_chip.Indicator" />
+                  <Trend_chip.Prefix data_testid="Trend_chip.Prefix">
+                    "+"
+                  </Trend_chip.Prefix>
+                  "3%"
+                  <Trend_chip.Suffix data_testid="Trend_chip.Suffix">
+                    "MoM"
+                  </Trend_chip.Suffix>
+                </Trend_chip>
                 <Separator data_testid="Separator" />
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
@@ -789,6 +800,10 @@ let () =
                    ("Segment", "[data-slot=segment]");
                    ("Segment.Item", "[data-slot=segment-item]");
                    ("Segment.Separator", "[data-slot=segment-separator]");
+                   ("Trend_chip", "[data-trend]");
+                   ("Trend_chip.Indicator", "[data-slot=trend-chip-indicator]");
+                   ("Trend_chip.Prefix", "[data-slot=trend-chip-prefix]");
+                   ("Trend_chip.Suffix", "[data-slot=trend-chip-suffix]");
                    ("Button.trigger", "[data-slot=button][aria-expanded]");
                    ("Toggle_button", "[data-slot=toggle-button]");
                    ("Toggle_button_group", "[data-slot=toggle-button-group]");

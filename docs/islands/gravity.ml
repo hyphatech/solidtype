@@ -2,6 +2,11 @@
    component from the SVG file the package ships, named as the package's React
    icon is: ChevronDown is Chevron_down. *)
 
+module Arrow_down_right = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/arrow-down-right.svg?raw"]
+end)
+
 module Arrow_left = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/arrow-left.svg?raw"]
@@ -25,6 +30,11 @@ end)
 module Arrow_up_from_line = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/arrow-up-from-line.svg?raw"]
+end)
+
+module Arrow_up_right = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/arrow-up-right.svg?raw"]
 end)
 
 module Arrow_up_right_from_square = Icon.Make (struct
@@ -65,6 +75,11 @@ end)
 module Chart_column = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/chart-column.svg?raw"]
+end)
+
+module Chart_line_arrow_up = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/chart-line-arrow-up.svg?raw"]
 end)
 
 module Check = Icon.Make (struct
@@ -190,6 +205,11 @@ end)
 module Envelope = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/envelope.svg?raw"]
+end)
+
+module Equal = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/equal.svg?raw"]
 end)
 
 module Eye = Icon.Make (struct

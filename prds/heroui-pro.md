@@ -1,6 +1,6 @@
 # Components in HeroUI Pro's shape
 
-**Status: Accepted** — Segment, TrendChip and TextShimmer, reimplemented on Kobalte in HeroUI's free design, their pages without a React demo; Segment has landed.
+**Status: Accepted** — Segment, TrendChip and TextShimmer, reimplemented on Kobalte in HeroUI's free design, their pages without a React demo; Segment and TrendChip have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -145,7 +145,7 @@ follows, as an rhp page links to rhp's.
 
 - [x] Segment: on Kobalte's segmented control, in HeroUI's look, every
   example on Pro's page, its documentation page and the docs' `@source`
-- [ ] TrendChip, every example on Pro's page
+- [x] TrendChip, every example on Pro's page
 - [ ] TextShimmer, every example on Pro's page
 
 ## Verification

@@ -1,0 +1,166 @@
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+
+type trend = [ `up | `down | `neutral ]
+type size = [ `sm | `md | `lg ]
+type variant = [ `primary | `secondary | `soft | `tertiary ]
+
+(* A part, drawn by the chip where it belongs, whatever its place among the
+   chip's children; an indicator is given the trend and its size class. *)
+type part =
+  | Prefix of (unit -> Jsx.element)
+  | Suffix of (unit -> Jsx.element)
+  | Indicator of (trend -> string -> Jsx.element)
+
+module Part = Jsx.Token (struct
+  type t = part
+end)
+
+(* A class added after the chip's own and merged with them. *)
+let after base = function
+  | Some c ->
+      Option.value (Js.Undefined.toOption (Styles.cn base c)) ~default:""
+  | None -> base
+
+(* Each arrow on a 24-unit grid: a stem and a head. *)
+let arrow = function
+  | `up -> Some "M12 19V5M7 10l5-5 5 5"
+  | `down -> Some "M12 5v14M7 14l5 5 5-5"
+  | `neutral -> None
+
+let size_class = function
+  | `sm -> "size-3"
+  | `md -> "size-3.5"
+  | `lg -> "size-4"
+
+(* The chip's own arrow, none for a neutral trend, given the rest of an
+   indicator's props where one is given without an icon. *)
+let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend size =
+  match arrow trend with
+  | Some d ->
+      <svg
+        aria_hidden=true
+        class_=(fun () ->
+                 after ("trend-chip__indicator shrink-0 " ^ size) class_)
+        data_slot="trend-chip-indicator"
+        fill="none"
+        stroke="currentColor"
+        stroke_linecap="round"
+        stroke_linejoin="round"
+        stroke_width="2"
+        view_box="0 0 24 24"
+        props=others>
+        <path d=(fun () -> d) />
+      </svg>
+  | None -> Jsx.nothing
+
+module Prefix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    Part.element
+      (Prefix
+         (fun () ->
+           <span
+             class_=(fun () -> after "trend-chip__prefix" (class_ ()))
+             data_slot="trend-chip-prefix"
+             props=(Props.others props)>
+             (fun () -> children ())
+           </span>))
+end
+
+module Suffix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    Part.element
+      (Suffix
+         (fun () ->
+           <span
+             class_=(fun () ->
+                      after "trend-chip__suffix text-muted" (class_ ()))
+             data_slot="trend-chip-suffix"
+             props=(Props.others props)>
+             (fun () -> children ())
+           </span>))
+end
+
+module Indicator = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    Part.element
+      (Indicator
+         (fun trend size ->
+           match children () with
+           | Some icon ->
+               <span
+                 aria_hidden=true
+                 class_=(fun () ->
+                          after
+                            ("trend-chip__indicator inline-flex shrink-0 \
+                              *:size-full " ^ size)
+                            (class_ ()))
+                 data_slot="trend-chip-indicator"
+                 props=(Props.others props)>
+                 (fun () -> icon)
+               </span>
+           | None ->
+               own_arrow ?class_:(class_ ()) ~others:(Props.others props) trend
+                 size))
+end
+
+let%component make ?(trend : trend = `up) ?(size : size = `sm)
+    ?(variant : variant = `soft) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  let resolved = S.children (fun () -> children ()) in
+  let all () = S.to_array (S.get resolved) in
+  let parts () = Array.to_list (Part.read (all ())) in
+  let drawn f =
+    Jsx.element (Jsx.fragment (Array.of_list (List.filter_map f (parts ()))))
+  in
+  let indicator () =
+    let in_size = size_class (size ()) in
+    match
+      List.find_map
+        (function Indicator i -> Some i | Prefix _ | Suffix _ -> None)
+        (parts ())
+    with
+    | Some i -> i (trend ()) in_size
+    | None -> own_arrow (trend ()) in_size
+  in
+  <Chip
+    color=(fun () ->
+            match trend () with
+            | `up -> `success
+            | `down -> `danger
+            | `neutral -> `default)
+    size=(fun () -> size ())
+    variant=(fun () -> variant ())
+    class_=(fun () ->
+             after
+               (match size () with
+               | `sm -> "trend-chip trend-chip--sm"
+               | `md -> "trend-chip trend-chip--md"
+               | `lg -> "trend-chip trend-chip--lg")
+               (class_ ()))
+    data_trend=(fun () ->
+                 Jsx.data
+                   (match trend () with
+                   | `up -> "up"
+                   | `down -> "down"
+                   | `neutral -> "neutral"))
+    props=(Props.others props)>
+    (fun () -> Jsx.element (indicator ()))
+    <Chip.Label>
+      (fun () ->
+        drawn (function
+          | Prefix p -> Some (p ())
+          | Suffix _ | Indicator _ -> None))
+      " "
+      <span
+        class_="trend-chip__value tabular-nums" data_slot="trend-chip-value">
+        (fun () -> Jsx.element (Jsx.fragment (Part.others (all ()))))
+      </span>
+      " "
+      (fun () ->
+        drawn (function
+          | Suffix s -> Some (s ())
+          | Prefix _ | Indicator _ -> None))
+    </Chip.Label>
+  </Chip>

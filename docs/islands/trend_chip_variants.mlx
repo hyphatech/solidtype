@@ -1,0 +1,29 @@
+module For = Solidtype.For
+module Trend_chip = Solidtype_heroui.Trend_chip
+
+let variants =
+  [|
+    (`primary, "primary");
+    (`secondary, "secondary");
+    (`tertiary, "tertiary");
+    (`soft, "soft");
+  |]
+
+let make () =
+  <div class_="flex flex-col gap-3">
+    <For each=(fun () -> variants)>
+      (fun (variant, name) _ ->
+        <div class_="flex items-center gap-3">
+          <span class_="w-20 text-xs text-muted">
+            (fun () -> Solidtype.Jsx.string name)
+          </span>
+          <Trend_chip variant=(fun () -> variant)>"+3.3%"</Trend_chip>
+          <Trend_chip variant=(fun () -> variant) trend=`down>
+            "-2.1%"
+          </Trend_chip>
+          <Trend_chip variant=(fun () -> variant) trend=`neutral>
+            "0.0%"
+          </Trend_chip>
+        </div>)
+    </For>
+  </div>

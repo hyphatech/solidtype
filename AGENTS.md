@@ -117,8 +117,8 @@ heroui/              solidtype-heroui: HeroUI's components ported onto
   selection_indicator
                      what a tab's and a segment's indicator share: drawn in
                      the selected item, it starts where the last one was
-  segment            a component in HeroUI Pro's shape, made here, not
-                     ported: its look Tailwind on HeroUI's tokens
+  segment trend_chip components in HeroUI Pro's shape, made here, not
+                     ported: their look Tailwind on HeroUI's tokens
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte

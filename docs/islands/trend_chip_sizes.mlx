@@ -1,0 +1,8 @@
+module Trend_chip = Solidtype_heroui.Trend_chip
+
+let make () =
+  <div class_="flex items-center gap-3">
+    <Trend_chip size=`sm>"+3.3%"</Trend_chip>
+    <Trend_chip size=`md>"+3.3%"</Trend_chip>
+    <Trend_chip size=`lg>"+3.3%"</Trend_chip>
+  </div>
