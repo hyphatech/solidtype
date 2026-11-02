@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Checkbox_group` is named by its label and described by its
+  description in a page rendered on the server, and once it hydrates, where it
+  wrote neither, since it made its element before its label.
+
 - `Solidtype_heroui.List_box`, and the list of `Select`, `Combo_box` and
   `Autocomplete`, write `data-layout="stack"` and `data-orientation="vertical"`
   as React Aria's list does, for a style that reads them.

@@ -1,0 +1,19 @@
+(* A HeroUI CheckboxGroup with a label and a description: the group named by
+   the one and described by the other, as the server writes it and once it
+   hydrates. *)
+
+module Checkbox = Solidtype_heroui.Checkbox
+module Checkbox_group = Solidtype_heroui.Checkbox_group
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+
+let make () =
+  <Checkbox_group name="interests">
+    <Label>"Interests"</Label>
+    <Description>"Choose any"</Description>
+    <Checkbox value="coding">
+      <Checkbox.Content>
+        <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control> "Coding"
+      </Checkbox.Content>
+    </Checkbox>
+  </Checkbox_group>

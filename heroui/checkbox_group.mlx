@@ -88,30 +88,37 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       described_by;
     }
   in
+  (* Its children are read before its element is made, the label and the
+     description among them, so the element names them on the server as in the
+     browser. *)
   <Context.Provider value=(fun () -> g)>
-    <div
-      role=`group
-      ?aria_labelledby=(fun () -> labelled_by ())
-      ?aria_describedby=(fun () -> described_by ())
-      ?aria_disabled=(fun () -> if disabled () then Some true else None)
-      class_=(fun () ->
-               Styles.CheckboxGroup.classes
-                 (Styles.CheckboxGroup.options ?variant:(variant ())
-                    ?class_:(class_ ()) ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
-      data_slot="checkbox-group"
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (invalid ()))
-      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))
-      props=(Props.others props)>
-      <Label.Slot.Provider value=(fun () -> label)>
-        <Description.Slot.Provider value=(fun () -> description)>
-          (fun () -> children ())
-        </Description.Slot.Provider>
-      </Label.Slot.Provider>
-    </div>
+    <Label.Slot.Provider value=(fun () -> label)>
+      <Description.Slot.Provider value=(fun () -> description)>
+        (fun () ->
+          let resolved = S.children (fun () -> children ()) in
+          Jsx.element
+            <div
+              role=`group
+              ?aria_labelledby=(fun () -> labelled_by ())
+              ?aria_describedby=(fun () -> described_by ())
+              ?aria_disabled=(fun () -> if disabled () then Some true else None)
+              class_=(fun () ->
+                       Styles.CheckboxGroup.classes
+                         (Styles.CheckboxGroup.options ?variant:(variant ())
+                            ?class_:(class_ ()) ()))
+              ref=(fun e -> in_form.root e)
+              on_focus_out=(Field.on_leave (fun e ->
+                                in_form.left ();
+                                on_blur e))
+              data_slot="checkbox-group"
+              data_disabled=(fun () -> Jsx.flag (disabled ()))
+              data_invalid=(fun () -> Jsx.flag (invalid ()))
+              data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+              data_required=(fun () -> Jsx.flag (is_required ()))
+              props=(Props.others props)>
+              (fun () ->
+                Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
+            </div>)
+      </Description.Slot.Provider>
+    </Label.Slot.Provider>
   </Context.Provider>
