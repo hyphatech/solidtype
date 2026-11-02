@@ -96,6 +96,12 @@
 @import "@heroui/styles/components/color-swatch.css" layer(components);
 @import "@heroui/styles/components/color-swatch-picker.css" layer(components);
 @import "@heroui/styles/components/table.css" layer(components);
+/* The components HeroUI ships no stylesheet for, whose stylesheets
+   solidtype-heroui ships beside its JavaScript, where Melange's output puts
+   them. */
+@import "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui/segment.css" layer(components);
+@import "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui/trend-chip.css" layer(components);
+@import "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui/text-shimmer.css" layer(components);
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's
@@ -130,9 +136,5 @@
   color: var(--foreground);
 }
 
-/* Tailwind reads the demos' classes from their .mlx sources, and the
-   classes of the components in HeroUI Pro's shape, which are Tailwind's own,
-   from the library as Melange compiled it, as an application's Tailwind
-   does. */
+/* Tailwind reads the demos' classes from their .mlx sources. */
 @source "../../islands";
-@source "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui";

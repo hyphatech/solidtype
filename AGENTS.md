@@ -118,8 +118,8 @@ heroui/              solidtype-heroui: HeroUI's components ported onto
                      what a tab's and a segment's indicator share: drawn in
                      the selected item, it starts where the last one was
   segment trend_chip text_shimmer
-                     components in HeroUI Pro's shape, made here, not
-                     ported: their look Tailwind on HeroUI's tokens
+                     components HeroUI ships no stylesheet for, made as
+                     every port is: their look a stylesheet each
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte
@@ -186,8 +186,8 @@ ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
   rhp_names
-  html_attributes    each element's attribute names, which a component
-                     given its element reads its check from, generated
+  html_attributes    each element's attributes, and which are handlers,
+                     which a component given its element takes, generated
 vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   src/index          the plugin Vite runs: a .jsx module's markers rewritten
   src/rewrite        the markers rewritten into Solid's JSX
@@ -505,18 +505,21 @@ break.
   -- stays the port's. Test: `test/headless/`, each component as a caller
   meets it, a fix failing on Kobalte's own, and its port's test against
   React's.
-- **A component in HeroUI Pro's shape is made here, never ported.** Pro is
-  licensed and forbids publishing any part of its source, so nothing of
-  `@heroui-pro/react` is installed, imported, copied or generated from: its
-  props and parts are Pro's documented ones, its look is measured from Pro's
-  public demos and written as Tailwind's utilities on HeroUI's tokens, a
-  caller's class merged over them by `Styles.cn`, and Pro's class names are
-  on its parts. It has no twin: its test is a caller's, with axe, and its
-  page shows it alone and links to Pro's. An application's Tailwind reads
-  its utilities by an `@source` of `solidtype-heroui` as Melange compiled it,
-  as `docs/src/styles/heroui.css` does. Why: this repository, its CI and its
-  site are public. Symptom: `rg -n heroui-pro` finds anything but a link to
-  Pro's documentation or a sentence about it.
+- **A component HeroUI ships no stylesheet for has one of its own.** It is
+  made as every port is, from scratch on Solid and Kobalte with HeroUI's
+  look and feel as the reference -- a segmented control, a trend chip, a
+  text shimmer, widgets most kits have -- its props named as HeroUI names
+  its own; its look is Tailwind on HeroUI's tokens in a stylesheet of its own,
+  `heroui/<name>.css`, rules for its BEM classes, as HeroUI writes its
+  components' CSS. The library ships it beside its JavaScript, and an
+  application imports it into the `components` layer, as
+  `docs/src/styles/heroui.css` does; its parts carry their classes alone,
+  a caller's class after them. It has no twin: its test is a caller's, its
+  classes pinned, with axe. Nothing of a licensed kit is installed, imported
+  or copied. Why: every component is restyled alike, by a rule for its
+  class, which a utility on the element would beat; and this repository,
+  its CI and its site are public. Symptom: a utility in a part's class
+  string, or `rg -n heroui-pro` finding anything.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;

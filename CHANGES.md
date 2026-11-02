@@ -1,5 +1,18 @@
 # Changes
 
+## Unreleased
+
+- A component given its element, `let%component ... [@@element button]`,
+  takes that element's attributes after its own props and passes them on,
+  its own props taking the place of the element's of the same name.
+
+- `Segment`, `Trend_chip` and `Text_shimmer` have their look in stylesheets
+  of their own, `segment.css`, `trend-chip.css` and `text-shimmer.css`,
+  which `solidtype-heroui` ships beside its JavaScript; a rule for a part's
+  class restyles it, as it does any other port. Breaking: an application
+  imports the three into its `components` layer, as the Theming page shows,
+  in place of the `@source` of the compiled library.
+
 ## 0.5.0 (2026-11-02)
 
 - `Solidtype_heroui.Text_shimmer`, a clean reimplementation of HeroUI Pro's

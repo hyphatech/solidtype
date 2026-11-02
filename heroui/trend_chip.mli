@@ -1,6 +1,5 @@
 (** A chip that shows a change: HeroUI's {!Chip}, coloured by its [trend], with
-    an arrow and its value in tabular figures. A clean reimplementation of
-    HeroUI Pro's.
+    an arrow and its value in tabular figures, its look trend-chip.css's.
 
     {[
       <Trend_chip trend=`down>

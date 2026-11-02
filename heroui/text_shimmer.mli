@@ -1,5 +1,5 @@
 (** Text with a highlight sweeping across it, for a label of work under way:
-    ["Thinking..."]. A clean reimplementation of HeroUI Pro's TextShimmer.
+    ["Thinking..."], its look text-shimmer.css's.
 
     {[
       <Text_shimmer>"Thinking..."</Text_shimmer>

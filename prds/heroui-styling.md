@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stage 1 has landed.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stages 1 and 2 have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -28,8 +28,8 @@ switches and motion apply unchanged. What falls short is what a part takes:
 - **Nothing switches the theme.** HeroUI's `useTheme` keeps the choice --
   light, dark, system, or a theme of the application's own -- and writes it
   on `<html>`; an application here writes its own script.
-- **The components in HeroUI Pro's shape cannot be restyled by their
-  class.** HeroUI's look is a stylesheet of BEM rules in Tailwind's
+- **The components HeroUI ships no stylesheet for cannot be restyled by
+  their class.** HeroUI's look is a stylesheet of BEM rules in Tailwind's
   `components` layer, and an application restyles a component by writing
   its own rule for the class, `.radio { ... }`. `Segment`, `Trend_chip` and
   `Text_shimmer` write their look on the element as utilities beside the
@@ -182,7 +182,7 @@ application, as HeroUI says of its own.
 
 Rejected: **a theme context** -- the state is `<html>`'s, one per page.
 
-### A Pro-shaped component's look, a stylesheet
+### A component made here: its look, a stylesheet
 
 `Segment`, `Trend_chip` and `Text_shimmer` each move their utilities into a
 stylesheet of rules for their BEM classes, `heroui/segment.css` and the
@@ -209,13 +209,14 @@ class, which restyles every instance at once.
   HeroUI's parts take every DOM prop, and an attribute a port refuses is
   one an application cannot set. Test: `test/heroui/attributes_test.mlx`,
   every part given a style, a title, a handler and a `ref`.
-- **A component in HeroUI Pro's shape has its look in a stylesheet**
-  (revises "A component in HeroUI Pro's shape is made here", which writes
+- **A component HeroUI ships no stylesheet for has one of its own**
+  (revises the rule for those components, which writes
   its look as utilities on its parts): rules for its BEM classes, in
   `heroui/<name>.css`, imported into the `components` layer. Why: every
   component is restyled alike, by a rule for its class, which a utility on
-  the element would beat. Test: a test that a rule for each Pro-shaped
-  part's class, in the `components` layer, changes its computed style.
+  the element would beat. Test: each such part's test pins its classes,
+  its BEM classes alone, and the documentation's build compiles each
+  stylesheet.
 - **A part takes `as_`, Kobalte's `as`** (revises "Kobalte's building
   blocks ... polymorphic ... are not bound"). Why: HeroUI's `render`, a
   router's link in a link's place. Test: each port's `as_` in its test.
@@ -226,7 +227,7 @@ class, which restyles every instance at once.
   `generate/html.ts`; `test/ppx` for the check, `test/does_not_compile.t`
   for an attribute the element lacks, an own prop shadowing the element's,
   and an unknown element.
-- [ ] 2. `Segment`, `Trend_chip` and `Text_shimmer`'s look in stylesheets,
+- [x] 2. `Segment`, `Trend_chip` and `Text_shimmer`'s look in stylesheets,
   shipped and imported into the `components` layer; the Theming page's
   `@source` of the library goes.
 - [ ] 3. Every port's part given its element, handlers composed,

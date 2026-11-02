@@ -1,9 +1,8 @@
-(* A trend chip as a caller meets it, since HeroUI Pro's is licensed and has
-   no twin here: HeroUI's chip coloured by its trend, its arrow drawn for up
+(* A trend chip as a caller meets it, since it has no twin: HeroUI's chip coloured by its trend, its arrow drawn for up
    and down and hidden from a reader, its own indicator drawn for any trend,
    its prefix, value and suffix laid out in the label whatever order they are
-   given in, Pro's class names for each size and variant, a class given
-   merged over its own, and no violation axe finds. *)
+   given in, its classes alone for each size and variant, its look its
+   stylesheet's, a class given after its own, and no violation axe finds. *)
 
 module Trend_chip = Solidtype_heroui.Trend_chip
 module E = Jest.Expect
@@ -28,6 +27,8 @@ let within e selector = Js.Array.from (query_all_in e selector)
 let chips () = all "[data-slot=chip]"
 
 (* By its attribute, since an svg's className is no string. *)
+let classes e = T.attribute e "class"
+
 let has e classes =
   let own =
     String.split_on_char ' ' (Option.value (T.attribute e "class") ~default:"")
@@ -82,11 +83,12 @@ let () =
               |> Array.map (fun c ->
                   within c "[data-slot=trend-chip-indicator]"
                   |> Array.map (fun i ->
-                      ( T.attribute i "aria-hidden",
-                        has i [ "trend-chip__indicator"; "size-3" ] ))))
+                      (T.attribute i "aria-hidden", classes i))))
             |> toEqual
                  [|
-                   [| (Some "true", true) |]; [| (Some "true", true) |]; [||];
+                   [| (Some "true", Some "trend-chip__indicator") |];
+                   [| (Some "true", Some "trend-chip__indicator") |];
+                   [||];
                  |]));
       Jest.test
         "lays out its prefix, value and suffix in the label, whatever their \
@@ -108,8 +110,8 @@ let () =
           E.(
             expect
               ( slots,
-                has value [ "trend-chip__value"; "tabular-nums" ],
-                has suffix [ "trend-chip__suffix"; "text-muted" ],
+                classes value,
+                classes suffix,
                 Array.length
                   (all "[data-slot=chip] > [data-slot=trend-chip-indicator]") )
             |> toEqual
@@ -118,8 +120,8 @@ let () =
                      (Some "trend-chip-value", "3.3%");
                      (Some "trend-chip-suffix", "MoM");
                    |],
-                   true,
-                   true,
+                   Some "trend-chip__value",
+                   Some "trend-chip__suffix",
                    1 )));
       Jest.test "draws an indicator given, around its icon, for any trend"
         (fun () ->
@@ -134,16 +136,20 @@ let () =
           E.(
             expect
               ( Array.length indicators,
-                Array.map
-                  (fun i -> has i [ "trend-chip__indicator"; "size-4" ])
-                  indicators,
+                Array.map classes indicators,
                 Array.map
                   (fun i -> Array.length (within i "[data-testid=icon]"))
                   indicators,
                 has (chips ()).(0) [ "chip--lg"; "trend-chip--lg" ] )
-            |> toEqual (1, [| true |], [| 1 |], true)));
+            |> toEqual
+                 ( 1,
+                   [|
+                     Some "trend-chip__indicator trend-chip__indicator--icon";
+                   |],
+                   [| 1 |],
+                   true )));
       Jest.test
-        "takes HeroUI's chip variants, and merges a class given over its own"
+        "takes HeroUI's chip variants, and puts a class given after its own"
         (fun () ->
           T.render (fun () ->
               <Trend_chip variant=`primary size=`md class_="px-6">
@@ -155,9 +161,9 @@ let () =
             expect
               ( has chip
                   [ "chip--primary"; "chip--md"; "trend-chip--md"; "px-6" ],
-                has indicator [ "size-3.5" ],
+                classes indicator,
                 T.attribute indicator "aria-hidden" )
-            |> toEqual (true, true, Some "true")));
+            |> toEqual (true, Some "trend-chip__indicator", Some "true")));
       Jest.testPromise "has no violation axe finds" (fun () ->
           T.render (fun () ->
               <div>

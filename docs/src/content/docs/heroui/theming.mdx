@@ -20,11 +20,15 @@ here as written; this page is what an application on solidtype adds to them.
 @import "tailwindcss";
 @import "@heroui/styles";
 
+/* Segment, TrendChip and TextShimmer, for which HeroUI ships no CSS, whose
+   stylesheets solidtype-heroui ships beside its JavaScript, under your
+   melange.emit target. */
+@import "../_build/default/app/output/node_modules/solidtype-heroui/segment.css" layer(components);
+@import "../_build/default/app/output/node_modules/solidtype-heroui/trend-chip.css" layer(components);
+@import "../_build/default/app/output/node_modules/solidtype-heroui/text-shimmer.css" layer(components);
+
 /* Your own .mlx, where your classes are written whole. */
 @source "./src";
-/* Segment, TrendChip and TextShimmer, whose look is Tailwind's utilities:
-   solidtype-heroui as Melange compiled it, under your melange.emit target. */
-@source "../_build/default/app/output/node_modules/solidtype-heroui";
 ```
 
 Tailwind finds a class only where it is written whole, so a class is a

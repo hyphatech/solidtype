@@ -26,25 +26,12 @@ external animate : _ Dom.element_like -> keyframe array -> options -> animation
 
 external cancel : animation -> unit = "cancel" [@@mel.send]
 
-(* A class added after the shimmer's own and merged with them. *)
-let after base = function
-  | Some c ->
-      Option.value (Js.Undefined.toOption (Styles.cn base c)) ~default:""
-  | None -> base
+(* A class added after the shimmer's own, as React's className is: its look is
+   text-shimmer.css's, in the components layer, which a utility given wins
+   over. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
 
-(* The band, three times the text's width so a position from 100% to 0%
-   carries its peak from half a width before the text to half after it, as
-   Pro's travels; 4ch of falloff on each side, measured from Pro's demo. Its
-   colour is the text's own: the copy hides its glyphs by their fill, never
-   by its colour, which the band is drawn in. *)
-let highlight_class =
-  "text-shimmer__highlight pointer-events-none absolute inset-0 block \
-   select-none [-webkit-text-fill-color:transparent] bg-clip-text bg-no-repeat \
-   bg-size-[300%_100%] \
-   bg-[linear-gradient(90deg,transparent_calc(50%-4ch),currentColor_50%,transparent_calc(50%+4ch))] \
-   motion-reduce:hidden"
-
-(* 2.5 seconds a sweep, eased, without end, as Pro's demo runs. *)
+(* 2.5 seconds a sweep, eased, without end. *)
 let sweep e =
   animate e
     [|
@@ -57,20 +44,16 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
   let running = ref None in
   S.on_cleanup (fun () -> Option.iter cancel !running);
   <span
-    class_=(fun () ->
-             after "text-shimmer relative inline-block w-fit" (class_ ()))
+    class_=(fun () -> after "text-shimmer" (class_ ()))
     data_slot="text-shimmer"
     props=(Props.others props)>
-    <span
-      class_="text-shimmer__text block text-current/45 \
-              motion-reduce:text-current"
-      data_slot="text-shimmer-text">
+    <span class_="text-shimmer__text" data_slot="text-shimmer-text">
       (fun () -> children ())
     </span>
     <span
       aria_hidden=true
       inert=(Jsx.bool true)
-      class_=highlight_class
+      class_="text-shimmer__highlight"
       data_slot="text-shimmer-highlight"
       ref=(fun e ->
             match Js.Undefined.toOption (animate_method e) with

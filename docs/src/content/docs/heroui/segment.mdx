@@ -1,6 +1,6 @@
 ---
 title: Segment
-description: A segmented control in HeroUI Pro's shape, for a few options of which one is selected.
+description: A segmented control, for a few options of which one is selected.
 ---
 
 import Example from "@components/Example.astro";
@@ -27,22 +27,10 @@ import WithIconsCode from "@islands/segment_with_icons.mlx?raw";
 import * as IconExpand from "@islands/segment_icon_expand.jsx";
 import IconExpandCode from "@islands/segment_icon_expand.mlx?raw";
 
-A segmented control: a few options, one always selected. A clean
-reimplementation of HeroUI Pro's
-[Segment](https://heroui.pro/docs/react/components/segment) on Kobalte's
-segmented control, so the arrow keys move the selection, as in a radio group.
-
-## Setup
-
-Its classes are Tailwind utilities, so point your Tailwind at the compiled
-library:
-
-```css
-@source "../_build/default/app/out/node_modules/solidtype-heroui";
-```
-
-The path is the `melange.emit`'s target, then
-`node_modules/solidtype-heroui`.
+A segmented control: a few options, one always selected, on Kobalte's
+segmented control in HeroUI's look, so the arrow keys move the selection,
+as in a radio group. Its look is a stylesheet the library ships, imported as
+[Theming](/solidtype/heroui/theming/#setup) shows.
 
 ## Usage
 
@@ -107,7 +95,7 @@ An option of an icon alone is named by its `aria_label`.
 ### Icon Expand
 
 `Segment.Item.is_selected ()`, read as a component inside an option is made,
-says whether that option is selected, as Pro's render props do: here each
+says whether that option is selected, as a render prop would: here each
 label shows only in the selected option.
 
 <Example code={IconExpandCode} title="segment_icon_expand.mlx"><IconExpand.make client:visible /></Example>
@@ -136,7 +124,7 @@ And on `.segment`, `[data-disabled="true"]` while it is disabled.
 
 ## API Reference
 
-Each prop beside the name Pro's React component gives it.
+Each prop beside the name a HeroUI component in React would give it.
 
 ### Segment
 

@@ -1,8 +1,7 @@
-(* A segment as a caller meets it, since HeroUI Pro's is licensed and has no
-   twin here: a radio group of radios each named by its option, one selected
+(* A segment as a caller meets it, since it has no twin: a radio group of radios each named by its option, one selected
    and told as it changes, by a press or the arrow keys, controlled or kept,
    disabled whole or by option; the indicator drawn in the selected option;
-   Pro's class names for each variant and size; an option's state as React
+   its classes alone for each variant and size, its look its stylesheet's; an option's state as React
    Aria writes it, and its selection read by what is inside it; and no
    violation axe finds. *)
 
@@ -93,8 +92,8 @@ let segment ?selected_key ?default_selected_key ?(told = ref [||])
         </Segment.Item>
       </Segment>)
 
-(* An option's content that shows whether its option is selected, read as
-   Pro's render props give it. *)
+(* An option's content that shows whether its option is selected, read as a
+   render prop would give it. *)
 module Shown = struct
   let%component make () =
     let selected = Segment.Item.is_selected () in
@@ -211,44 +210,38 @@ let () =
                      Some "true",
                      [||],
                      [ "dashboard" ] )));
-      Jest.test "names each part by Pro's classes, for its variant and size"
-        (fun () ->
+      Jest.test
+        "names each part by its classes alone, for its variant and size, its \
+         look its stylesheet's" (fun () ->
           segment ~default_selected_key:"dashboard" ~variant:`ghost ~size:`sm
             ~class_:"mine" ();
-          let has e classes =
-            let own = String.split_on_char ' ' (T.class_name e) in
-            List.for_all (fun c -> List.exists (String.equal c) own) classes
-          in
           let indicator = (all "[data-slot=segment-indicator]").(0) in
           let separator = (all "[data-slot=segment-separator]").(0) in
           E.(
             expect
-              ( has (T.by_role "radiogroup")
-                  [ "segment"; "segment--sm"; "segment--ghost"; "mine" ],
-                has (item "Reports")
-                  [
-                    "segment__item"; "segment__item--sm"; "segment__item--ghost";
-                  ],
-                has indicator
-                  [ "segment__indicator"; "segment__indicator--ghost" ],
-                has separator [ "segment__separator" ],
+              ( T.class_name (T.by_role "radiogroup"),
+                T.class_name (item "Reports"),
+                T.class_name indicator,
+                T.class_name separator,
                 T.attribute separator "aria-hidden" )
-            |> toEqual (true, true, true, true, Some "true")));
-      Jest.test "lets a class given win over its own of the same property"
-        (fun () ->
+            |> toEqual
+                 ( "segment segment--sm segment--ghost mine",
+                   "segment__item segment__item--sm segment__item--ghost",
+                   "segment__indicator segment__indicator--ghost",
+                   "segment__separator",
+                   Some "true" )));
+      Jest.test "puts a class given after its own" (fun () ->
           T.render (fun () ->
               <Segment
                 default_selected_key="one" aria_label="Merged" class_="h-20">
                 <Segment.Item id="one" class_="gap-0">"One"</Segment.Item>
               </Segment>);
-          let own e = String.split_on_char ' ' (T.class_name e) in
           E.(
             expect
-              ( own (T.by_role "radiogroup")
-                |> List.filter (fun c -> String.starts_with ~prefix:"h-" c),
-                own (item "One")
-                |> List.filter (fun c -> String.starts_with ~prefix:"gap-" c) )
-            |> toEqual ([ "h-20" ], [ "gap-0" ])));
+              (T.class_name (T.by_role "radiogroup"), T.class_name (item "One"))
+            |> toEqual
+                 ( "segment segment--md h-20",
+                   "segment__item segment__item--md gap-0" )));
       Jest.testPromise "declares an option's state as React Aria writes it"
         (fun () ->
           segment ~default_selected_key:"dashboard" ();

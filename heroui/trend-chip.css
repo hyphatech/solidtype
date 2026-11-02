@@ -1,0 +1,33 @@
+/* TrendChip: HeroUI's chip, whose look is HeroUI's chip.css, and its own
+   parts, which HeroUI ships no stylesheet for, written as HeroUI writes its
+   components' CSS, so an application imports it into the components layer
+   and restyles a part by a rule for its class. */
+
+.trend-chip__indicator {
+  @apply shrink-0;
+}
+
+/* An icon given, which the indicator sizes. */
+.trend-chip__indicator--icon {
+  @apply inline-flex *:size-full;
+}
+
+.trend-chip--sm .trend-chip__indicator {
+  @apply size-3;
+}
+
+.trend-chip--md .trend-chip__indicator {
+  @apply size-3.5;
+}
+
+.trend-chip--lg .trend-chip__indicator {
+  @apply size-4;
+}
+
+.trend-chip__value {
+  @apply tabular-nums;
+}
+
+.trend-chip__suffix {
+  @apply text-muted;
+}

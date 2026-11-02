@@ -6,21 +6,19 @@ type size = [ `sm | `md | `lg ]
 type variant = [ `primary | `secondary | `soft | `tertiary ]
 
 (* A part, drawn by the chip where it belongs, whatever its place among the
-   chip's children; an indicator is given the trend and its size class. *)
+   chip's children; an indicator is given the trend. *)
 type part =
   | Prefix of (unit -> Jsx.element)
   | Suffix of (unit -> Jsx.element)
-  | Indicator of (trend -> string -> Jsx.element)
+  | Indicator of (trend -> Jsx.element)
 
 module Part = Jsx.Token (struct
   type t = part
 end)
 
-(* A class added after the chip's own and merged with them. *)
-let after base = function
-  | Some c ->
-      Option.value (Js.Undefined.toOption (Styles.cn base c)) ~default:""
-  | None -> base
+(* A class added after the chip's own, as React's className is: its look is
+   trend-chip.css's, in the components layer, which a utility given wins over. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
 
 (* Each arrow on a 24-unit grid: a stem and a head. *)
 let arrow = function
@@ -28,20 +26,14 @@ let arrow = function
   | `down -> Some "M12 5v14M7 14l5 5 5-5"
   | `neutral -> None
 
-let size_class = function
-  | `sm -> "size-3"
-  | `md -> "size-3.5"
-  | `lg -> "size-4"
-
 (* The chip's own arrow, none for a neutral trend, given the rest of an
    indicator's props where one is given without an icon. *)
-let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend size =
+let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend =
   match arrow trend with
   | Some d ->
       <svg
         aria_hidden=true
-        class_=(fun () ->
-                 after ("trend-chip__indicator shrink-0 " ^ size) class_)
+        class_=(fun () -> after "trend-chip__indicator" class_)
         data_slot="trend-chip-indicator"
         fill="none"
         stroke="currentColor"
@@ -73,8 +65,7 @@ module Suffix = struct
       (Suffix
          (fun () ->
            <span
-             class_=(fun () ->
-                      after "trend-chip__suffix text-muted" (class_ ()))
+             class_=(fun () -> after "trend-chip__suffix" (class_ ()))
              data_slot="trend-chip-suffix"
              props=(Props.others props)>
              (fun () -> children ())
@@ -86,23 +77,21 @@ module Indicator = struct
       () =
     Part.element
       (Indicator
-         (fun trend size ->
+         (fun trend ->
            match children () with
            | Some icon ->
                <span
                  aria_hidden=true
                  class_=(fun () ->
                           after
-                            ("trend-chip__indicator inline-flex shrink-0 \
-                              *:size-full " ^ size)
+                            "trend-chip__indicator trend-chip__indicator--icon"
                             (class_ ()))
                  data_slot="trend-chip-indicator"
                  props=(Props.others props)>
                  (fun () -> icon)
                </span>
            | None ->
-               own_arrow ?class_:(class_ ()) ~others:(Props.others props) trend
-                 size))
+               own_arrow ?class_:(class_ ()) ~others:(Props.others props) trend))
 end
 
 let%component make ?(trend : trend = `up) ?(size : size = `sm)
@@ -115,14 +104,13 @@ let%component make ?(trend : trend = `up) ?(size : size = `sm)
     Jsx.element (Jsx.fragment (Array.of_list (List.filter_map f (parts ()))))
   in
   let indicator () =
-    let in_size = size_class (size ()) in
     match
       List.find_map
         (function Indicator i -> Some i | Prefix _ | Suffix _ -> None)
         (parts ())
     with
-    | Some i -> i (trend ()) in_size
-    | None -> own_arrow (trend ()) in_size
+    | Some i -> i (trend ())
+    | None -> own_arrow (trend ())
   in
   <Chip
     color=(fun () ->
@@ -153,8 +141,7 @@ let%component make ?(trend : trend = `up) ?(size : size = `sm)
           | Prefix p -> Some (p ())
           | Suffix _ | Indicator _ -> None))
       " "
-      <span
-        class_="trend-chip__value tabular-nums" data_slot="trend-chip-value">
+      <span class_="trend-chip__value" data_slot="trend-chip-value">
         (fun () -> Jsx.element (Jsx.fragment (Part.others (all ()))))
       </span>
       " "

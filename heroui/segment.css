@@ -1,0 +1,72 @@
+/* Segment, in HeroUI's look, which ships no stylesheet for it: Tailwind on
+   HeroUI's tokens, written as HeroUI writes its components' CSS, so an
+   application imports it into the components layer and restyles a part by a
+   rule for its class. */
+
+.segment {
+  @apply relative isolate inline-flex w-fit items-center rounded-[calc(var(--radius)*2.5)] bg-default;
+}
+
+.segment--sm {
+  @apply h-8 p-0.5;
+}
+
+.segment--md {
+  @apply h-10 p-1;
+}
+
+.segment--lg {
+  @apply h-12 p-1;
+}
+
+.segment--ghost {
+  @apply bg-transparent p-0;
+
+  &.segment--sm {
+    @apply h-7;
+  }
+
+  &.segment--md {
+    @apply h-8;
+  }
+
+  &.segment--lg {
+    @apply h-10;
+  }
+}
+
+.segment__item {
+  @apply relative z-1 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-3xl font-medium whitespace-nowrap text-muted outline-none transition-[color,background-color,box-shadow,opacity] duration-150 ease-smooth data-[focus-visible=true]:status-focused not-data-[selected=true]:data-[hovered=true]:opacity-70 data-[disabled=true]:cursor-(--cursor-disabled) data-[disabled=true]:opacity-(--disabled-opacity) data-[selected=true]:text-segment-foreground motion-reduce:transition-none;
+}
+
+.segment__item--sm {
+  @apply h-7 px-2.5 text-xs;
+}
+
+.segment__item--md {
+  @apply h-8 px-4 text-sm;
+}
+
+.segment__item--lg {
+  @apply h-10 px-5 text-sm;
+}
+
+.segment__item--ghost {
+  @apply data-[selected=true]:text-accent-foreground;
+}
+
+.segment__indicator {
+  @apply absolute start-0 top-0 -z-1 size-full rounded-3xl bg-segment shadow-surface transition-[translate,width,height] duration-250 ease-out-fluid motion-reduce:transition-none;
+}
+
+.segment__indicator--ghost {
+  @apply bg-accent shadow-none;
+}
+
+/* Hidden in the selected option, in the option after it, whose start edge it
+   shares -- Kobalte marks the selected option's own element, a sibling of the
+   next one's, [data-checked] -- and in the first option, whose start edge is
+   the track's. */
+.segment__separator {
+  @apply absolute start-0 top-1/4 h-1/2 w-px rounded-sm bg-muted/25 transition-opacity duration-150 ease-smooth in-data-[selected=true]:opacity-0 [[data-checked]+*_&]:opacity-0 [:first-child>*>&]:opacity-0 motion-reduce:transition-none;
+}

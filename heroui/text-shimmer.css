@@ -1,0 +1,20 @@
+/* TextShimmer, in HeroUI's look, which ships no stylesheet for it: written as
+   HeroUI writes its components' CSS, so an application imports it into the
+   components layer and restyles a part by a rule for its class. */
+
+.text-shimmer {
+  @apply relative inline-block w-fit;
+}
+
+.text-shimmer__text {
+  @apply block text-current/45 motion-reduce:text-current;
+}
+
+/* The band, three times the text's width so a position from 100% to 0%
+   carries its peak from half a width before the text to half after it, with
+   4ch of falloff on each side. Its colour is the text's own: the copy hides
+   its glyphs by their fill, never by its colour, which the band is drawn
+   in. */
+.text-shimmer__highlight {
+  @apply pointer-events-none absolute inset-0 block select-none [-webkit-text-fill-color:transparent] bg-clip-text bg-no-repeat bg-size-[300%_100%] bg-[linear-gradient(90deg,transparent_calc(50%-4ch),currentColor_50%,transparent_calc(50%+4ch))] motion-reduce:hidden;
+}

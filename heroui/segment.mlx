@@ -25,70 +25,28 @@ module Item_context = Solidtype.Context.Make_optional (struct
   type t = item
 end)
 
-(* A class added after the segment's own and merged with them, as a variant
-   function merges React's className: a caller's utility wins over one of the
-   segment's that sets the same property. *)
-let after base = function
-  | Some c ->
-      Option.value (Js.Undefined.toOption (Styles.cn base c)) ~default:""
-  | None -> base
+(* A class added after the segment's own, as React's className is: its look is
+   segment.css's, in the components layer, which a utility given wins over. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
 
-(* Each part's look, measured from Pro's demo and written as Tailwind on
-   HeroUI's tokens: every class is spelt whole, as Tailwind finds a class only
-   as it is written, and each size and variant sets its own, since two
-   utilities of one property are ordered by the stylesheet, never by the
-   attribute. *)
+(* Each part's classes; its look is segment.css's. *)
 let root_classes variant size =
-  "segment relative isolate inline-flex w-fit items-center \
-   rounded-[calc(var(--radius)*2.5)] "
-  ^
-  match (variant, size) with
-  | `default, `sm -> "segment--sm h-8 bg-default p-0.5"
-  | `default, `md -> "segment--md h-10 bg-default p-1"
-  | `default, `lg -> "segment--lg h-12 bg-default p-1"
-  | `ghost, `sm -> "segment--sm segment--ghost h-7"
-  | `ghost, `md -> "segment--md segment--ghost h-8"
-  | `ghost, `lg -> "segment--lg segment--ghost h-10"
+  (match size with
+    | `sm -> "segment segment--sm"
+    | `md -> "segment segment--md"
+    | `lg -> "segment segment--lg")
+  ^ match variant with `default -> "" | `ghost -> " segment--ghost"
 
 let item_classes variant size =
-  "segment__item relative z-1 inline-flex cursor-pointer items-center \
-   justify-center gap-1.5 rounded-3xl font-medium whitespace-nowrap text-muted \
-   outline-none transition-[color,background-color,box-shadow,opacity] \
-   duration-150 ease-smooth data-[focus-visible=true]:status-focused \
-   not-data-[selected=true]:data-[hovered=true]:opacity-70 \
-   data-[disabled=true]:cursor-(--cursor-disabled) \
-   data-[disabled=true]:opacity-(--disabled-opacity) \
-   motion-reduce:transition-none "
-  ^ (match size with
-    | `sm -> "segment__item--sm h-7 px-2.5 text-xs"
-    | `md -> "segment__item--md h-8 px-4 text-sm"
-    | `lg -> "segment__item--lg h-10 px-5 text-sm")
-  ^
-  match variant with
-  | `default -> " data-[selected=true]:text-segment-foreground"
-  | `ghost ->
-      " segment__item--ghost data-[selected=true]:text-accent-foreground"
+  (match size with
+    | `sm -> "segment__item segment__item--sm"
+    | `md -> "segment__item segment__item--md"
+    | `lg -> "segment__item segment__item--lg")
+  ^ match variant with `default -> "" | `ghost -> " segment__item--ghost"
 
 let indicator_classes = function
-  | `default ->
-      "segment__indicator absolute start-0 top-0 -z-1 size-full rounded-3xl \
-       bg-segment shadow-surface transition-[translate,width,height] \
-       duration-250 ease-out-fluid motion-reduce:transition-none"
-  | `ghost ->
-      "segment__indicator segment__indicator--ghost absolute start-0 top-0 \
-       -z-1 size-full rounded-3xl bg-accent \
-       transition-[translate,width,height] duration-250 ease-out-fluid \
-       motion-reduce:transition-none"
-
-(* Hidden in the selected option, in the option after it, whose start edge
-   it shares -- Kobalte marks the selected option's own element, a sibling of
-   the next one's, [data-checked] -- and in the first option, whose start edge
-   is the track's. *)
-let separator_classes =
-  "segment__separator absolute start-0 top-1/4 h-1/2 w-px rounded-sm \
-   bg-muted/25 transition-opacity duration-150 ease-smooth \
-   in-data-[selected=true]:opacity-0 [[data-checked]+*_&]:opacity-0 \
-   [:first-child>*>&]:opacity-0 motion-reduce:transition-none"
+  | `default -> "segment__indicator"
+  | `ghost -> "segment__indicator segment__indicator--ghost"
 
 let within part =
   match Context.use () with
@@ -165,7 +123,7 @@ module Separator = struct
     let (_ : segment) = within "Segment.Separator" in
     <span
       aria_hidden=true
-      class_=(fun () -> after separator_classes (class_ ()))
+      class_=(fun () -> after "segment__separator" (class_ ()))
       data_slot="segment-separator"
       props=(Props.others props)
     />

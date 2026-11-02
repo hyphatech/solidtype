@@ -1,6 +1,6 @@
 (** A segmented control: a few options, one always selected, its indicator
-    sliding to the option chosen. A clean reimplementation of HeroUI Pro's, on
-    Kobalte's segmented control.
+    sliding to the option chosen, on Kobalte's segmented control, its look
+    segment.css's.
 
     {[
       <Segment aria_label="Billing" default_selected_key="monthly">
@@ -39,14 +39,14 @@ module Item : sig
 
   val is_selected : unit -> unit -> bool
   (** [is_selected ()], called as a component inside an option is made, reads
-      whether that option is selected, where it is shown: what Pro's render
-      props give an option's children, to show an option's label only while it
-      is selected. It raises [Invalid_argument] outside a [Segment.Item]. *)
+      whether that option is selected, where it is shown, as a render prop would
+      give an option's children: to show an option's label only while it is
+      selected. It raises [Invalid_argument] outside a [Segment.Item]. *)
 end
 
 (** A line at an option's start edge, hidden beside the selected option: a
     [<span>], placed in an option before its label. The first option's is hidden
-    too, where Pro's draws a line at the track's edge. *)
+    too, where a line would sit at the track's edge. *)
 module Separator : sig
   module Props : sig
     type t
