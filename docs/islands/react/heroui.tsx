@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorSlider, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorSlider, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1140,6 +1140,31 @@ export function colorSlider(host: HTMLElement, props: ColorSliderProps): void {
           <ColorSlider.Thumb />
         </ColorSlider.Track>
       </ColorSlider>,
+    ),
+  );
+}
+
+type ColorFieldProps = {
+  variant: "primary" | "secondary";
+  isDisabled: boolean;
+  isInvalid: boolean;
+};
+
+export function colorField(host: HTMLElement, props: ColorFieldProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ColorField
+        className="w-[280px]"
+        defaultValue="#0485F7"
+        isDisabled={props.isDisabled}
+        isInvalid={props.isInvalid}
+        name="color"
+      >
+        <Label>Color</Label>
+        <ColorField.Group variant={props.variant}>
+          <ColorField.Input />
+        </ColorField.Group>
+      </ColorField>,
     ),
   );
 }

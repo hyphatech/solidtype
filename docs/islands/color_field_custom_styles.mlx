@@ -1,0 +1,38 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+(* A swatch of no colour, where HeroUI's is given none. *)
+let shown c = Option.value c ~default:(Colors.parse_color "rgba(0, 0, 0, 0)")
+
+let make () =
+  let color, set_color =
+    S.create_signal (Some (Colors.parse_color "#6366F1"))
+  in
+  <Color_field
+    class_="w-full max-w-xs gap-1.5"
+    name="accent-color"
+    value=(fun () -> Js.Nullable.fromOption (S.get color))
+    on_change=(S.set set_color)>
+    <Label class_="font-medium text-foreground">"Accent color"</Label>
+    <Description>"Applied to buttons, links, and focus rings."</Description>
+    <Color_field.Group
+      class_="rounded-xl bg-default shadow-none focus-within:ring-2 \
+              focus-within:ring-accent/15"
+      variant=`secondary>
+      <Color_field.Prefix>
+        <Color_swatch
+          class_="rounded-md" color=(fun () -> shown (S.get color)) size=`xs
+        />
+      </Color_field.Prefix>
+      <Color_field.Input
+        class_="font-mono text-sm text-foreground placeholder:text-muted"
+      />
+    </Color_field.Group>
+  </Color_field>

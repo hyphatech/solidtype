@@ -1,0 +1,108 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.ColorChannelField
+module Number_field = Solidtype_kobalte.NumberField
+module Field_context = Solidtype_kobalte.Types.NumberFieldContextValue
+module Color = Solidtype_kobalte.Types.Color
+
+module Root = struct
+  module Props = struct
+    include Kobalte.Root.Props
+
+    type t
+
+    external channel :
+      t ->
+      [ `hue
+      | `saturation
+      | `brightness
+      | `lightness
+      | `red
+      | `green
+      | `blue
+      | `alpha ] = "channel"
+    [@@mel.get]
+
+    external value : t -> Color.t option = "value" [@@mel.get]
+    external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((Color.t -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    (* Its colour, kept here: [value] while it is given one, else the one it
+       keeps. *)
+    let kept, set_kept =
+      S.create_signal (S.untrack (fun () -> Props.default_value props))
+    in
+    let current () =
+      match Props.value props with Some c -> Some c | None -> S.get kept
+    in
+    (* Kobalte's field tells its own colour as it mounts, in its own space,
+       where nothing changed: only a colour other than this one, read in the
+       same space, is a change. *)
+    let changed c =
+      let css c = Color.to_string c ~format:`css () in
+      let same =
+        match S.untrack current with
+        | Some now -> (
+            match
+              Color.to_format_opt now
+                (Color.get_color_space c ()
+                  :> [ `rgb
+                     | `hsl
+                     | `hsb
+                     | `hex
+                     | `hexa
+                     | `rgba
+                     | `hsla
+                     | `hsba ])
+            with
+            | Some now -> String.equal (css now) (css c)
+            | None -> false)
+        | None -> false
+      in
+      if not same then begin
+        S.set set_kept (Some c);
+        match Props.on_change props with Some f -> f c [@u] | None -> ()
+      end
+    in
+    <Kobalte.Root
+      channel=(fun () -> Props.channel props)
+      ?value=(fun () -> current ())
+      on_change=changed
+      props=(S.omit props [| "channel"; "value"; "defaultValue"; "onChange" |])
+    />
+
+  let component = Jsx.component make
+end
+
+module Input = struct
+  module Props = struct
+    include Kobalte.Input.Props
+
+    type t
+  end
+
+  let make (props : Props.t) =
+    (* Kobalte's channel field is its number field, whose input tells its
+       value now as the text it shows once the value changes. *)
+    let field = Number_field.use_number_field_context () in
+    <Kobalte.Input
+      ?aria_valuenow=(fun () ->
+                       let v = S.get (Field_context.raw_value field) in
+                       if Float.is_nan v then None
+                       else Some (Js.Float.toString v))
+      props=(S.omit props [||])
+    />
+
+  let component = Jsx.component make
+end
+
+module Label = Kobalte.Label
+module Description = Kobalte.Description
+module ErrorMessage = Kobalte.ErrorMessage
+module HiddenInput = Kobalte.HiddenInput
+module IncrementTrigger = Kobalte.IncrementTrigger
+module DecrementTrigger = Kobalte.DecrementTrigger

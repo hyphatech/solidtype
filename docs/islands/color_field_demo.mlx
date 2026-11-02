@@ -1,0 +1,53 @@
+module S = Solidtype.Solid
+module Color_field = Solidtype_heroui.Color_field
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let variants = [| (`primary, "primary"); (`secondary, "secondary") |]
+
+let make () =
+  let variant, set_variant = S.create_signal (`primary, "primary") in
+  let is_disabled, set_is_disabled = S.create_signal false in
+  let is_invalid, set_is_invalid = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get is_disabled)
+        on_toggle=(S.set set_is_disabled)
+      />
+      <Toggle
+        label="invalid"
+        on=(fun () -> S.get is_invalid)
+        on_toggle=(S.set set_is_invalid)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Color_field
+                   class_="w-[280px]"
+                   default_value=(fun () -> Colors.parse_color "#0485F7")
+                   name="color"
+                   is_disabled=(fun () -> S.get is_disabled)
+                   is_invalid=(fun () -> S.get is_invalid)>
+                   <Label>"Color"</Label>
+                   <Color_field.Group variant=(fun () -> fst (S.get variant))>
+                     <Color_field.Input />
+                   </Color_field.Group>
+                 </Color_field>)
+      react=(fun host ->
+              Heroui_react.color_field host
+                (Heroui_react.color_field_props
+                   ~variant:(snd (S.get variant))
+                   ~is_disabled:(S.get is_disabled)
+                   ~is_invalid:(S.get is_invalid) ()))
+    />
+  </section>

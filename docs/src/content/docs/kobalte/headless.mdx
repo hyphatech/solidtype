@@ -108,3 +108,9 @@ one module. HeroUI's ports dress these, never Kobalte's.
 | `Color_slider` | its thumb's value capitalizes the colour's name mid-phrase, `0°, Red` | in lower case, `0°, red`, as React Aria tells it |
 | `Color_slider` | `on_change` is told at a channel's end, where nothing moved | told only a colour other than the slider's |
 | `Color_slider` | its element has a `pagesize` attribute, from the channel's range spread on the slider | none |
+| `Color_field` | its value is the text typed, told at every key | a colour, as its channel field's is, told once committed and only where it changed |
+| `Color_field` | Enter commits nothing: what is typed is committed only as focus leaves | Enter commits it, as leaving does |
+| `Color_field` | no key steps the hex, the field a text box | the arrows and Page Up and Page Down step it by one, Home and End take it to `#000000` and `#FFFFFF`, as React Aria's do |
+| `Color_field` | the wheel does nothing | it steps the hex while the input has the focus, unless `change_on_wheel` is `false` |
+| `Color_channel_field` | its input's `aria-valuenow` is the text it shows once the value changes, `301°` | the channel's number, `301` |
+| `Color_channel_field` | `on_change` is told the field's own colour as it mounts | told only a colour other than its own |

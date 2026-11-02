@@ -1,0 +1,66 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module Button = Solidtype_heroui.Button
+module Form = Solidtype_heroui.Form
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* A swatch of no colour, where HeroUI's is given none. *)
+let shown c = Option.value c ~default:(Colors.parse_color "rgba(0, 0, 0, 0)")
+
+(* How long the save it stands in for takes. *)
+let save_ms = 1500
+
+let make () =
+  let value, set_value = S.create_signal None in
+  let submitting, set_submitting = S.create_signal false in
+  let timer = ref None in
+  S.on_cleanup (fun () -> Option.iter Js.Global.clearTimeout !timer);
+  <Form
+    class_="flex w-[280px] flex-col gap-4"
+    on_submit=(fun e ->
+                prevent_default e;
+                match S.get value with
+                | None -> ()
+                | Some _ ->
+                    S.set set_submitting true;
+                    timer :=
+                      Some
+                        (Js.Global.setTimeout
+                           ~f:(fun () ->
+                             S.set set_value None;
+                             S.set set_submitting false)
+                           save_ms))>
+    <Color_field
+      full_width=true
+      is_required=true
+      class_="w-full"
+      name="brand-color"
+      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      on_change=(S.set set_value)>
+      <Label>"Brand Color"</Label>
+      <Color_field.Group>
+        <Color_field.Prefix>
+          <Color_swatch color=(fun () -> shown (S.get value)) size=`xs />
+        </Color_field.Prefix>
+        <Color_field.Input placeholder="#000000" />
+      </Color_field.Group>
+      <Description>"Choose your brand's primary color"</Description>
+    </Color_field>
+    <Button
+      class_="w-full"
+      is_disabled=(fun () -> Option.is_none (S.get value))
+      is_pending=(fun () -> S.get submitting)
+      type_=`submit
+      variant=`primary>
+      (fun () ->
+        Jsx.string (if S.get submitting then "Saving..." else "Save Color"))
+    </Button>
+  </Form>

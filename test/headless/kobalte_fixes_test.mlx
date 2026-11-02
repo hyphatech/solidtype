@@ -169,3 +169,136 @@ let () =
                        Some {js|36°, orange|js},
                        Some {js|0°, Red|js},
                        Some "15" ) ))))
+
+module Color_channel_field = Solidtype_headless.Color_channel_field
+module Kobalte_channel_field = Solidtype_kobalte.ColorChannelField
+
+(* How many colours a hue field, the fixed one or Kobalte's own, tells as it
+   mounts, and what its input tells a reader of its value after a step up. *)
+let stepped ~fixed =
+  let value () = Colors.parse_color "hsl(300, 100%, 25%)" in
+  let told = ref 0 in
+  let on_change _ = incr told in
+  H.render (fun () ->
+      if fixed then
+        <Color_channel_field.Root
+          aria_label="Hue"
+          channel=(fun () -> `hue)
+          default_value=(fun () -> value ())
+          on_change>
+          <Color_channel_field.Input />
+        </Color_channel_field.Root>
+      else
+        <Kobalte_channel_field.Root
+          aria_label="Hue"
+          channel=(fun () -> `hue)
+          default_value=(fun () -> value ())
+          on_change>
+          <Kobalte_channel_field.Input />
+        </Kobalte_channel_field.Root>);
+  let at_mount = !told in
+  let input = query "[role=spinbutton]" in
+  let user = H.setup () in
+  H.focus input;
+  let* () = H.keyboard user "{ArrowUp}" in
+  Js.Promise.resolve
+    ( at_mount,
+      H.attribute input "aria-valuenow",
+      H.attribute input "aria-valuetext" )
+
+let () =
+  Jest.describe "Kobalte's colour channel field, fixed" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "tells no change as it mounts, and its value now as a number" (fun () ->
+          let* fixed = stepped ~fixed:true in
+          H.cleanup ();
+          let* own = stepped ~fixed:false in
+          Js.Promise.resolve
+            E.(
+              expect (fixed, own)
+              |> toEqual
+                   ( (0, Some "301", Some {js|301°|js}),
+                     (1, Some {js|301°|js}, Some {js|301°|js}) ))))
+
+module Color_field = Solidtype_headless.Color_field
+module Kobalte_field = Solidtype_kobalte.ColorField
+
+type wheel_init
+
+external wheel_init :
+  delta_y:(float[@mel.as "deltaY"]) ->
+  bubbles:bool ->
+  cancelable:bool ->
+  unit ->
+  wheel_init = ""
+[@@mel.obj]
+
+external wheel_event : (_[@mel.as "wheel"]) -> wheel_init -> Dom.event
+  = "WheelEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
+[@@mel.send]
+
+external value_of : Dom.element -> string = "value" [@@mel.get]
+
+(* What a hex field's input shows, and the colours it tells, after a step up,
+   End, Home, a hex typed and Enter, and a turn of the wheel down. *)
+let hex_steps ~fixed =
+  let told = ref [] in
+  H.render (fun () ->
+      if fixed then
+        <Color_field.Root
+          aria_label="Colour"
+          default_value=(fun () -> Colors.parse_color "#0485F7")
+          on_change=(fun c ->
+                      told :=
+                        (match c with
+                        | Some c -> Color.to_string c ~format:`hex ()
+                        | None -> "(none)")
+                        :: !told)>
+          <Color_field.Input />
+        </Color_field.Root>
+      else
+        <Kobalte_field.Root aria_label="Colour" default_value="#0485F7">
+          <Kobalte_field.Input />
+        </Kobalte_field.Root>);
+  let input = query "input" in
+  let user = H.setup () in
+  H.focus input;
+  let shown = ref [] in
+  let press k =
+    let* () = H.keyboard user k in
+    shown := value_of input :: !shown;
+    Js.Promise.resolve ()
+  in
+  let* () = press "{ArrowUp}" in
+  let* () = press "{End}" in
+  let* () = press "{Home}" in
+  let* () = press "{Control>}a{/Control}ff0000{Enter}" in
+  ignore
+    (dispatch input
+       (wheel_event (wheel_init ~delta_y:1. ~bubbles:true ~cancelable:true ()))
+      : bool);
+  shown := value_of input :: !shown;
+  Js.Promise.resolve (List.rev !shown, List.rev !told)
+
+let () =
+  Jest.describe "Kobalte's colour field, fixed" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "commits on Enter, and steps by the keys and the wheel"
+        (fun () ->
+          let* fixed = hex_steps ~fixed:true in
+          H.cleanup ();
+          let* own = hex_steps ~fixed:false in
+          let steps =
+            [ "#0485F8"; "#FFFFFF"; "#000000"; "#FF0000"; "#FF0001" ]
+          in
+          Js.Promise.resolve
+            E.(
+              expect (fixed, own)
+              |> toEqual
+                   ( (steps, steps),
+                     ( [ "#0485F7"; "#0485F7"; "#0485F7"; "ff0000"; "ff0000" ],
+                       [] ) ))))

@@ -1,0 +1,236 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.ColorField
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external ctrl_key : Dom.keyboardEvent -> bool = "ctrlKey" [@@mel.get]
+external meta_key : Dom.keyboardEvent -> bool = "metaKey" [@@mel.get]
+external shift_key : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external alt_key : Dom.keyboardEvent -> bool = "altKey" [@@mel.get]
+external is_composing : Dom.keyboardEvent -> bool = "isComposing" [@@mel.get]
+external prevent : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+external wheel_ctrl_key : Dom.wheelEvent -> bool = "ctrlKey" [@@mel.get]
+external delta_x : Dom.wheelEvent -> float = "deltaX" [@@mel.get]
+external delta_y : Dom.wheelEvent -> float = "deltaY" [@@mel.get]
+
+external current_target : Dom.wheelEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external prevent_wheel : Dom.wheelEvent -> unit = "preventDefault" [@@mel.send]
+external stop_wheel : Dom.wheelEvent -> unit = "stopPropagation" [@@mel.send]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+(* What a field's input does to it: commit what is typed, step the hex by a
+   number, take it to a hex, and whether keys and the wheel may. *)
+type field = {
+  commit : unit -> unit;
+  step : int -> unit;
+  go_to : int -> unit;
+  editable : unit -> bool;
+  wheel : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = field
+end)
+
+(* The hex of white, as a number, the end the keys step to. *)
+let white = 0xFFFFFF
+let hex c = Color.to_string c ~format:`hex ()
+
+let hex_of_int n =
+  let digits = "0123456789ABCDEF" in
+  "#" ^ String.init 6 (fun i -> digits.[(n lsr (4 * (5 - i))) land 15])
+
+(* A hex typed, with or without its [#]. *)
+let parse typed =
+  Colors.parse_color_opt
+    (if String.starts_with ~prefix:"#" typed then typed else "#" ^ typed)
+
+let same a b =
+  match (a, b) with
+  | Some a, Some b -> String.equal (hex a) (hex b)
+  | None, None -> true
+  | Some _, None | None, Some _ -> false
+
+module Root = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?value:Color.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:Color.t Solidtype.Check.value ->
+      ?on_change:(Color.t option -> unit) ->
+      ?change_on_wheel:bool Solidtype.Check.value ->
+      ?id:string Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+      ?required:bool Solidtype.Check.value ->
+      ?disabled:bool Solidtype.Check.value ->
+      ?read_only:bool Solidtype.Check.value ->
+      ?props:t Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external value : t -> Color.t Js.Nullable.t option = "value" [@@mel.get]
+    external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((Color.t option -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external change_on_wheel : t -> bool option = "changeOnWheel" [@@mel.get]
+    external disabled : t -> bool option = "disabled" [@@mel.get]
+    external read_only : t -> bool option = "readOnly" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    (* Its colour: [value] while it is given one, else the one it keeps. *)
+    let kept, set_kept =
+      S.create_signal (S.untrack (fun () -> Props.default_value props))
+    in
+    let colour () =
+      match Props.value props with
+      | Some v -> Js.Nullable.toOption v
+      | None -> S.get kept
+    in
+    let set c =
+      if not (same c (S.untrack colour)) then begin
+        S.set set_kept c;
+        match Props.on_change props with Some f -> f c [@u] | None -> ()
+      end
+    in
+    (* Kobalte's field keeps the text typed: its colour's hex until a key
+       changes it, and again once it is committed. *)
+    let shown () = match colour () with Some c -> hex c | None -> "" in
+    let text, set_text = S.create_signal (S.untrack shown) in
+    S.create_computed (fun () -> S.set set_text (shown ()));
+    let commit () =
+      let typed = S.untrack (fun () -> S.get text) in
+      (if String.equal typed "" then set None
+       else match parse typed with Some c -> set (Some c) | None -> ());
+      S.set set_text (S.untrack shown)
+    in
+    let go_to n =
+      (match
+         Colors.parse_color_opt (hex_of_int (Int.max 0 (Int.min white n)))
+       with
+      | Some c -> set (Some c)
+      | None -> ());
+      S.set set_text (S.untrack shown)
+    in
+    (* A step is from what is typed, or black where that is no colour, as
+       React Aria steps it. *)
+    let step by =
+      let from =
+        match parse (S.untrack (fun () -> S.get text)) with
+        | Some c -> int_of_float (Color.to_hex_int c ())
+        | None -> 0
+      in
+      go_to (from + by)
+    in
+    let editable () =
+      not
+        (Option.value (Props.disabled props) ~default:false
+        || Option.value (Props.read_only props) ~default:false)
+    in
+    let wheel () =
+      Option.value (Props.change_on_wheel props) ~default:true && editable ()
+    in
+    let field = { commit; step; go_to; editable; wheel } in
+    <Context.Provider value=(fun () -> field)>
+      <Kobalte.Root
+        value=(fun () -> S.get text)
+        on_change=(S.set set_text)
+        props=(S.omit props
+                 [| "value"; "defaultValue"; "onChange"; "changeOnWheel" |])
+      />
+    </Context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Input = struct
+  module Props = struct
+    include Kobalte.Input.Props
+
+    type t
+
+    external on_blur : t -> ((Dom.focusEvent -> unit)[@u]) option = "onBlur"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_wheel : t -> ((Dom.wheelEvent -> unit)[@u]) option = "onWheel"
+    [@@mel.get]
+  end
+
+  let call f e = match f with Some f -> f e [@u] | None -> ()
+
+  let make (props : Props.t) =
+    let f =
+      match Context.use () with
+      | Some f -> f
+      | None ->
+          invalid_arg "Color_field.Input is used inside a Color_field.Root"
+    in
+    (* The keys React Aria's spin button reads, but on a field of text, which
+       a modifier leaves to the text. *)
+    let keyed e =
+      match key e with
+      | "Enter" -> if f.editable () then f.commit ()
+      | k
+        when f.editable ()
+             && not
+                  (ctrl_key e || meta_key e || shift_key e || alt_key e
+                 || is_composing e) -> (
+          let act g =
+            prevent e;
+            g ()
+          in
+          match k with
+          | "ArrowUp" | "PageUp" -> act (fun () -> f.step 1)
+          | "ArrowDown" | "PageDown" -> act (fun () -> f.step (-1))
+          | "Home" -> act (fun () -> f.go_to 0)
+          | "End" -> act (fun () -> f.go_to white)
+          | _ -> ())
+      | _ -> ()
+    in
+    (* A wheel steps only the input that has the focus, so a page scrolled
+       past it is left alone. *)
+    let wheeled e =
+      let focused =
+        match Js.Null.toOption active with
+        | Some a -> a == current_target e
+        | None -> false
+      in
+      if f.wheel () && focused && not (wheel_ctrl_key e) then begin
+        prevent_wheel e;
+        stop_wheel e;
+        let dx = delta_x e and dy = delta_y e in
+        if Float.abs dy > Float.abs dx then f.step (if dy > 0. then 1 else -1)
+      end
+    in
+    <Kobalte.Input
+      on_blur=(fun e ->
+                f.commit ();
+                call (Props.on_blur props) e)
+      on_key_down=(fun e ->
+                    keyed e;
+                    call (Props.on_key_down props) e)
+      on_wheel=(fun e ->
+                 wheeled e;
+                 call (Props.on_wheel props) e)
+      props=(S.omit props [| "onBlur"; "onKeyDown"; "onWheel" |])
+    />
+
+  let component = Jsx.component make
+end
+
+module Label = Kobalte.Label
+module Description = Kobalte.Description
+module ErrorMessage = Kobalte.ErrorMessage

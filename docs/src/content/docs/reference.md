@@ -62,6 +62,8 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
   [`Virtualizer`](/solidtype/reference/solidtype-headless/Solidtype_headless/Virtualizer/index.html);
   and Kobalte's own, fixed:
   [`Color_area`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_area/index.html),
+  [`Color_channel_field`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_channel_field/index.html),
+  [`Color_field`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_field/index.html),
   [`Color_slider`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_slider/index.html),
   [`Color_swatch`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_swatch/index.html).
 

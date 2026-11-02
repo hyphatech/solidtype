@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Color_field`, HeroUI's ColorField on Kobalte's: a hex
+  typed and committed as React Aria commits it, on blur and by Enter, or one
+  channel of a colour in a colour space; stepped by the arrow keys, Page Up and
+  Page Down, Home and End, and the wheel unless `is_wheel_disabled`; value
+  controlled or kept, the group's variants, full width, a prefix and a suffix,
+  required, invalid, disabled, read-only, its label, description and error, a
+  form's field. HeroUI's examples. `Solidtype_headless.Color_field` beneath
+  it, Kobalte's fixed: its value a colour, told once committed and only where
+  it changed, Enter committing, and the keys and the wheel stepping its hex;
+  and `Solidtype_headless.Color_channel_field`, its input's `aria-valuenow`
+  the channel's number and `on_change` told only a change.
+
 - `Solidtype_heroui.Color_slider`, HeroUI's ColorSlider on Kobalte's: one
   channel of a colour along a track of its range, over a checkerboard, its ends
   capped, horizontal or vertical, value controlled or kept, a channel asked of

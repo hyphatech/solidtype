@@ -1,0 +1,67 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  let color, set_color =
+    S.create_signal (Some (Colors.parse_color "#7F007F"))
+  in
+  let channel ~channel ~name ~label ~suffix =
+    <Color_field
+      channel=(fun () -> channel)
+      class_="w-[100px]"
+      color_space=`hsl
+      name=(fun () -> name)
+      value=(fun () -> Js.Nullable.fromOption (S.get color))
+      on_change=(S.set set_color)>
+      <Label>(fun () -> Jsx.string label)</Label>
+      <Color_field.Group>
+        <Color_field.Input class_="min-w-0" />
+        (fun () ->
+          if suffix then
+            Jsx.element
+              <Color_field.Suffix>
+                <span class_="text-sm text-muted">"%"</span>
+              </Color_field.Suffix>
+          else Jsx.string "")
+      </Color_field.Group>
+    </Color_field>
+  in
+  <div class_="flex flex-col gap-4">
+    <p class_="text-sm text-muted">"Edit individual HSL channels:"</p>
+    <div class_="flex gap-4">
+      (fun () ->
+        Jsx.element
+          (channel ~channel:`hue ~name:"hue" ~label:"Hue" ~suffix:false))
+      (fun () ->
+        Jsx.element
+          (channel ~channel:`saturation ~name:"saturation" ~label:"Saturation"
+             ~suffix:true))
+      (fun () ->
+        Jsx.element
+          (channel ~channel:`lightness ~name:"lightness" ~label:"Lightness"
+             ~suffix:true))
+    </div>
+    <div class_="flex items-center gap-2">
+      <Color_swatch
+        color=(fun () ->
+                Option.value (S.get color)
+                  ~default:(Colors.parse_color "rgba(0, 0, 0, 0)"))
+        size=`md
+      />
+      <span class_="text-sm">
+        "Current: "
+        (fun () ->
+          Jsx.string
+            (match S.get color with
+            | Some c -> Color.to_string c ~format:`hex ()
+            | None -> "(empty)"))
+      </span>
+    </div>
+  </div>

@@ -654,6 +654,20 @@ external color_slider : Dom.htmlDivElement -> color_slider_props -> unit
   = "colorSlider"
 [@@mel.module "./react/heroui.tsx"]
 
+type color_field_props
+
+external color_field_props :
+  variant:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  is_invalid:(bool[@mel.as "isInvalid"]) ->
+  unit ->
+  color_field_props = ""
+[@@mel.obj]
+
+external color_field : Dom.htmlDivElement -> color_field_props -> unit
+  = "colorField"
+[@@mel.module "./react/heroui.tsx"]
+
 type table_props
 
 external table_props : variant:string -> unit -> table_props = "" [@@mel.obj]

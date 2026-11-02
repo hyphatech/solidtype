@@ -1,0 +1,276 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Hex = Solidtype_headless.Color_field
+module Channel = Solidtype_headless.Color_channel_field
+module Color = Solidtype_kobalte.Types.Color
+
+type channel =
+  [ `hue
+  | `saturation
+  | `brightness
+  | `lightness
+  | `red
+  | `green
+  | `blue
+  | `alpha ]
+
+external query : Dom.htmlDivElement -> string -> Dom.htmlElement Js.null
+  = "querySelector"
+[@@mel.send]
+
+external focus : Dom.htmlElement -> unit = "focus" [@@mel.send]
+external target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+
+external contains : Dom.htmlElement -> Dom.element -> bool = "contains"
+[@@mel.send]
+
+(* What a field's parts read of it: its kind and its state. *)
+type field = {
+  by_channel : bool;
+  disabled : unit -> bool;
+  invalid : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = field
+end)
+
+let within part =
+  match Context.use () with
+  | Some f -> f
+  | None -> invalid_arg (part ^ " is used inside a Color_field")
+
+(* A group's classes, which its parts read. *)
+module Group_context = Solidtype.Context.Make_optional (struct
+  type t = unit -> Styles.ColorInputGroup.slots
+end)
+
+let in_group part =
+  match Group_context.use () with
+  | Some slots -> slots
+  | None -> invalid_arg (part ^ " is used inside a Color_field.Group")
+
+(* A channel's name, as React Aria writes it in [data-channel]. *)
+let channel_name : channel -> string = function
+  | `hue -> "hue"
+  | `saturation -> "saturation"
+  | `brightness -> "brightness"
+  | `lightness -> "lightness"
+  | `red -> "red"
+  | `green -> "green"
+  | `blue -> "blue"
+  | `alpha -> "alpha"
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Hex_parts = Field.Slots (struct
+  let label = Hex.Label.component
+  let description = Hex.Description.component
+  let error = Hex.ErrorMessage.component
+end)
+
+module Channel_parts = Field.Slots (struct
+  let label = Channel.Label.component
+  let description = Channel.Description.component
+  let error = Channel.ErrorMessage.component
+end)
+
+module Prefix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_group "Color_field.Prefix" in
+    <div
+      class_=(fun () ->
+               after (Styles.ColorInputGroup.prefix (slots ())) (class_ ()))
+      data_slot="color-input-group-prefix"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Suffix = struct
+  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+    let slots = in_group "Color_field.Suffix" in
+    <div
+      class_=(fun () ->
+               after (Styles.ColorInputGroup.suffix (slots ())) (class_ ()))
+      data_slot="color-input-group-suffix"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </div>
+end
+
+module Input = struct
+  let%component make ?(placeholder : string option) ?(class_ : string option) ()
+      =
+    let f = within "Color_field.Input" in
+    let slots = in_group "Color_field.Input" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let classes () =
+      after (Styles.ColorInputGroup.input (slots ())) (class_ ())
+    in
+    if f.by_channel then
+      <Channel.Input
+        ?placeholder
+        class_=(fun () -> classes ())
+        ref=(fun e -> Interaction.watch i e)
+        data_slot="color-input-group-input"
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        props=(Props.others props) />
+    else
+      (* React Aria names a hex field's input a text box, as it is. *)
+      <Hex.Input
+        role=`textbox
+        ?placeholder
+        class_=(fun () -> classes ())
+        ref=(fun e -> Interaction.watch i e)
+        data_slot="color-input-group-input"
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        props=(Props.others props) />
+end
+
+module Group = struct
+  let%component make ?(variant : [ `primary | `secondary ] option)
+      ?(full_width : bool option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let f = within "Color_field.Group" in
+    let slots () =
+      Styles.ColorInputGroup.slots
+        (Styles.ColorInputGroup.options ?full_width:(full_width ())
+           ?variant:(variant ()) ())
+    in
+    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let element = ref None in
+    (* A press on the group but on its input gives the input the focus. *)
+    let clicked e =
+      match !element with
+      | Some group -> (
+          match Js.Null.toOption (query group "input") with
+          | Some input when not (contains input (target e)) -> focus input
+          | Some _ | None -> ())
+      | None -> ()
+    in
+    <Group_context.Provider value=(fun () -> slots)>
+      (* In a field, the field is the group, as React Aria's is. *)
+      <div
+        role=`presentation
+        ref=(fun e ->
+              element := Some e;
+              Interaction.watch i e)
+        on_click=clicked
+        class_=(fun () ->
+                 after (Styles.ColorInputGroup.base (slots ())) (class_ ()))
+        data_slot="color-input-group"
+        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+        data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
+        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        props=(Props.others props)>
+        (fun () -> children ())
+      </div>
+    </Group_context.Provider>
+end
+
+let%component make ?(value : Color.t Js.Nullable.t option)
+    ?(default_value : Color.t option)
+    ?(on_change : (Color.t option -> unit) option) ?(channel : channel option)
+    ?(color_space : [ `rgb | `hsl | `hsb ] option) ?(full_width : bool option)
+    ?(is_required : bool = false) ?(is_invalid : bool = false)
+    ?(is_disabled : bool option) ?(is_read_only : bool = false)
+    ?(is_wheel_disabled : bool = false) ?(name : string option)
+    ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let in_fieldset = Fieldset.disabled () in
+  let disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
+  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
+  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  (* A change is a form's too, which clears the error it showed. *)
+  let changed c =
+    in_form.changed ();
+    ignore (on_change c : unit option)
+  in
+  let by_channel = Option.is_some (S.untrack channel) in
+  let f = { by_channel; disabled; invalid } in
+  let classes () =
+    Styles.ColorField.classes
+      (Styles.ColorField.options ?full_width:(full_width ()) ?class_:(class_ ())
+         ())
+  in
+  let leave =
+    Field.on_leave (fun e ->
+        in_form.left ();
+        on_blur e)
+  in
+  <Context.Provider value=(fun () -> f)>
+    (fun () ->
+      match S.untrack channel with
+      | Some ch ->
+          Jsx.element
+            <Channel.Root
+              channel=(fun () -> ch)
+              ?color_space
+              ?value=(fun () -> Option.bind (value ()) Js.Nullable.toOption)
+              ?default_value
+              on_change=(fun c -> changed (Some c))
+              change_on_wheel=(fun () -> not (is_wheel_disabled ()))
+              validation_state=(fun () ->
+                                 if invalid () then `invalid else `valid)
+              required=(fun () -> is_required ())
+              disabled=(fun () -> disabled ())
+              read_only=(fun () -> is_read_only ())
+              ?name
+              ?aria_label
+              class_=(fun () -> classes ())
+              ref=(fun e -> in_form.root e)
+              on_focus_out=leave
+              data_slot="color-field"
+              data_channel=(fun () -> Jsx.data (channel_name ch))
+              data_required=(fun () -> Jsx.flag (is_required ()))
+              data_invalid=(fun () -> Jsx.flag (invalid ()))
+              data_disabled=(fun () -> Jsx.flag (disabled ()))
+              data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+              props=(Props.others props)>
+              <Field_error.Message.Provider value=(fun () -> in_form.error)>
+                <Channel_parts>(fun () -> children ())</Channel_parts>
+              </Field_error.Message.Provider>
+            </Channel.Root>
+      | None ->
+          Jsx.element
+            <Hex.Root
+              ?value
+              ?default_value
+              on_change=changed
+              change_on_wheel=(fun () -> not (is_wheel_disabled ()))
+              validation_state=(fun () ->
+                                 if invalid () then `invalid else `valid)
+              required=(fun () -> is_required ())
+              disabled=(fun () -> disabled ())
+              read_only=(fun () -> is_read_only ())
+              ?name
+              ?aria_label
+              class_=(fun () -> classes ())
+              ref=(fun e -> in_form.root e)
+              on_focus_out=leave
+              data_slot="color-field"
+              data_channel="hex"
+              data_required=(fun () -> Jsx.flag (is_required ()))
+              data_invalid=(fun () -> Jsx.flag (invalid ()))
+              data_disabled=(fun () -> Jsx.flag (disabled ()))
+              data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+              props=(Props.others props)>
+              <Field_error.Message.Provider value=(fun () -> in_form.error)>
+                <Hex_parts>(fun () -> children ())</Hex_parts>
+              </Field_error.Message.Provider>
+            </Hex.Root>)
+  </Context.Provider>

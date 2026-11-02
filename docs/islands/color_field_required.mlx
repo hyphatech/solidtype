@@ -1,0 +1,26 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Color_field class_="w-[280px]" name="color" is_required=true>
+      <Label>"Brand Color"</Label>
+      <Color_field.Group>
+        <Color_field.Input placeholder="#000000" />
+      </Color_field.Group>
+    </Color_field>
+    <Color_field class_="w-[280px]" name="theme-color" is_required=true>
+      <Label>"Theme Color"</Label>
+      <Color_field.Group>
+        <Color_field.Input placeholder="#000000" />
+      </Color_field.Group>
+      <Description>"Required field"</Description>
+    </Color_field>
+  </div>

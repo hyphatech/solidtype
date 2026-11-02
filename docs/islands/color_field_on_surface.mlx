@@ -1,0 +1,22 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module Surface = Solidtype_heroui.Surface
+
+let make () =
+  <Surface class_="w-[320px] p-4">
+    <Color_field
+      default_value=(fun () -> Colors.parse_color "#3B82F6") name="color">
+      <Label>"Theme Color"</Label>
+      <Color_field.Group variant=`secondary>
+        <Color_field.Input />
+      </Color_field.Group>
+      <Description>"Select your theme color"</Description>
+    </Color_field>
+  </Surface>

@@ -41,6 +41,7 @@ module Table = H.Table
 module Color_swatch = H.Color_swatch
 module Color_area = H.Color_area
 module Color_slider = H.Color_slider
+module Color_field = H.Color_field
 module Label = H.Label
 module Link = H.Link
 module Select = H.Select
@@ -370,6 +371,21 @@ let () =
                                   Solidtype_kobalte.Colors.parse_color "#0485F7")>
                   <Color_area.Thumb data_testid="Color_area.Thumb" />
                 </Color_area>
+                <Color_field
+                  data_testid="Color_field"
+                  aria_label="Colour"
+                  default_value=(fun () ->
+                                  Solidtype_kobalte.Colors.parse_color "#0485F7")>
+                  <Color_field.Group data_testid="Color_field.Group">
+                    <Color_field.Prefix data_testid="Color_field.Prefix">
+                      "#"
+                    </Color_field.Prefix>
+                    <Color_field.Input data_testid="Color_field.Input" />
+                    <Color_field.Suffix data_testid="Color_field.Suffix">
+                      "hex"
+                    </Color_field.Suffix>
+                  </Color_field.Group>
+                </Color_field>
                 <Color_slider
                   data_testid="Color_slider"
                   aria_label="Hue"
@@ -676,6 +692,11 @@ let () =
                    ("Empty_state", "[data-slot=empty-state]");
                    ("Color_area", "[data-slot=color-area]");
                    ("Color_area.Thumb", "[data-slot=color-area-thumb]");
+                   ("Color_field", "[data-slot=color-field]");
+                   ("Color_field.Group", "[data-slot=color-input-group]");
+                   ("Color_field.Prefix", "[data-slot=color-input-group-prefix]");
+                   ("Color_field.Input", "[data-slot=color-input-group-input]");
+                   ("Color_field.Suffix", "[data-slot=color-input-group-suffix]");
                    ("Color_slider", "[data-slot=color-slider]");
                    ("Color_slider.Output", "[data-slot=color-slider-output]");
                    ("Color_slider.Track", "[data-slot=color-slider-track]");

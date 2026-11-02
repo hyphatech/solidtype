@@ -1,0 +1,267 @@
+(* HeroUI's ColorField on Kobalte's, beside the same field in React: every
+   part, its classes and state, what its input shows, and the colour told, as
+   a hex is typed and committed, a hex is stepped and a channel is. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  ?channel:string ->
+  ?default_value:(string[@mel.as "defaultValue"]) ->
+  ?placeholder:string ->
+  ?variant:string ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?is_invalid:(bool[@mel.as "isInvalid"]) ->
+  ?is_required:(bool[@mel.as "isRequired"]) ->
+  ?swatch:bool ->
+  ?suffix:string ->
+  ?description:string ->
+  ?error:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/ColorField.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ColorField.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ColorField.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external value_of : Dom.element -> string = "value" [@@mel.get]
+
+(* What HeroUI's styles read and a reader reaches of each part. Ids, and what
+   each framework writes for itself, are left out. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "data-channel";
+    "role";
+    "aria-invalid";
+    "aria-valuenow";
+    "aria-valuetext";
+    "disabled";
+    "readonly";
+    "placeholder";
+    "data-required";
+    "data-invalid";
+    "data-disabled";
+    "data-readonly";
+    "data-focus-within";
+    "data-focused";
+    "data-focus-visible";
+  ]
+
+(* Kobalte's field is a group, which React Aria's is not; and Kobalte's
+   channel input a spin button, React Aria's a text input, each an accessible
+   pattern: the field's role, and the channel input's, are left out, its value
+   compared by what it shows. *)
+let shown host =
+  Js.Array.from (query_all host "[data-slot]")
+  |> Array.map (fun e ->
+      let slot = Option.value (T.attribute e "data-slot") ~default:"" in
+      let channel_input =
+        String.equal slot "color-input-group-input"
+        && not
+             (Option.equal String.equal (T.attribute e "role") (Some "textbox"))
+      in
+      String.concat " "
+        (tag_name e
+        :: List.filter_map
+             (fun name ->
+               match T.attribute e name with
+               | Some "" | None -> None
+               | Some _
+                 when String.equal slot "color-field"
+                      && String.equal name "role" ->
+                   None
+               | Some _
+                 when channel_input
+                      && List.exists (String.equal name)
+                           [ "role"; "aria-valuenow"; "aria-valuetext" ] ->
+                   None
+               | Some v -> Some (name ^ "=" ^ v))
+             state)
+      ^
+      match tag_name e with
+      | "INPUT" ->
+          (* Required, as React Aria's input says it natively and Kobalte's
+             by ARIA, one fact to a reader. *)
+          (if
+             Option.is_some (T.attribute e "required")
+             || Option.equal String.equal
+                  (T.attribute e "aria-required")
+                  (Some "true")
+           then " required"
+           else "")
+          ^ " value=" ^ value_of e
+      | "LABEL" | "SPAN" -> " " ^ text e
+      | _ -> "")
+
+let input host =
+  match Js.Array.from (query_all host "input:not([type=hidden])") with
+  | [||] -> Js.Exn.raiseError "no input"
+  | inputs -> inputs.(0)
+
+let walk ~keys ~step host told =
+  let user = T.setup () in
+  let seen = ref [ (shown host, !told) ] in
+  let rec go = function
+    | [] -> Js.Promise.resolve ()
+    | k :: rest ->
+        let* () =
+          step (fun () ->
+              match k with
+              | "click" -> T.click user (input host)
+              | k -> T.keyboard user k)
+        in
+        seen := (shown host, !told) :: !seen;
+        go rest
+  in
+  let* () = go keys in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ?channel ?default_value ?placeholder ?variant ?(is_disabled = false)
+    ?(is_invalid = false) ?(is_required = false) ?(swatch = false) ?suffix
+    ?description ?error ~keys () =
+  let told = ref "" in
+  T.render (fun () ->
+      <Color_field
+        ?channel=(fun () ->
+                   Option.map
+                     (function
+                       | "saturation" -> `saturation
+                       | "lightness" -> `lightness
+                       | _ -> `hue)
+                     channel)
+        ?color_space=(fun () -> Option.map (fun _ -> `hsl) channel)
+        class_="w-[280px]"
+        ?default_value=(fun () -> Option.map Colors.parse_color default_value)
+        name="color"
+        is_disabled=(fun () -> is_disabled)
+        is_invalid=(fun () -> is_invalid)
+        is_required=(fun () -> is_required)
+        on_change=(fun c ->
+                    told :=
+                      match c with
+                      | Some c -> Color.to_string c ~format:`hex ()
+                      | None -> "(empty)")>
+        <Label>"Color"</Label>
+        <Color_field.Group
+          ?variant=(fun () ->
+                     Option.map
+                       (function "secondary" -> `secondary | _ -> `primary)
+                       variant)>
+          (fun () ->
+            if swatch then
+              Jsx.element
+                <Color_field.Prefix>
+                  <Color_swatch
+                    color=(fun () -> Colors.parse_color "#0485F7") size=`xs
+                  />
+                </Color_field.Prefix>
+            else Jsx.string "")
+          <Color_field.Input ?placeholder=(fun () -> placeholder) />
+          (fun () ->
+            match suffix with
+            | Some s ->
+                Jsx.element
+                  <Color_field.Suffix>
+                    <span class_="text-sm text-muted">
+                      (fun () -> Jsx.string s)
+                    </span>
+                  </Color_field.Suffix>
+            | None -> Jsx.string "")
+        </Color_field.Group>
+        (fun () ->
+          match description with
+          | Some d ->
+              Jsx.element <Description>(fun () -> Jsx.string d)</Description>
+          | None -> Jsx.string "")
+        (fun () ->
+          match error with
+          | Some m ->
+              Jsx.element <Field_error>(fun () -> Jsx.string m)</Field_error>
+          | None -> Jsx.string "")
+      </Color_field>);
+  let* solidtype = walk ~keys ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref "" in
+  let host =
+    Twin.render
+      (props ?channel ?default_value ?placeholder ?variant ~is_disabled
+         ~is_invalid ~is_required ~swatch ?suffix ?description ?error ())
+      (fun c -> told' := c)
+  in
+  let* react = walk ~keys ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Color_field" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "commits a hex typed, as React's does" (fun () ->
+          both ~default_value:"#0485F7" ~swatch:true
+            ~keys:
+              [
+                "click";
+                "{Control>}a{/Control}ff0000";
+                "{Enter}";
+                "{Control>}a{/Control}nope";
+                "{Tab}";
+              ]
+            ());
+      Jest.testPromise "steps a hex by the keys, as React's does" (fun () ->
+          both ~default_value:"#0485F7"
+            ~keys:
+              [
+                "click";
+                "{ArrowUp}";
+                "{PageDown}";
+                "{End}";
+                "{ArrowUp}";
+                "{Home}";
+                "{Control>}a{/Control}{Backspace}";
+                "{ArrowUp}";
+                "{Tab}";
+              ]
+            ());
+      Jest.testPromise "steps a channel, as React's does" (fun () ->
+          both ~channel:"hue" ~default_value:"#7F007F"
+            ~keys:[ "click"; "{ArrowUp}"; "{ArrowUp}"; "{ArrowDown}"; "{Tab}" ]
+            ());
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          both ~default_value:"#0485F7" ~is_disabled:true
+            ~description:"This color field is disabled" ~keys:[] ());
+      Jest.testPromise "is invalid and required, as React's is" (fun () ->
+          both ~placeholder:"#000000" ~is_invalid:true ~is_required:true
+            ~error:"Please enter a valid hex color" ~keys:[] ());
+      Jest.testPromise "is secondary, its channel with a suffix, as React's is"
+        (fun () ->
+          both ~channel:"saturation" ~default_value:"#7F007F"
+            ~variant:"secondary" ~suffix:"%" ~keys:[] ()))

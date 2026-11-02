@@ -72,8 +72,12 @@ headless/            solidtype-headless: the components Kobalte lacks, one
   virtualizer        React Aria's Virtualizer: a collection draws the entries
                      in view, each placed by a layout
   color_swatch       Kobalte's, a colour less than opaque one a browser
-  color_area         reads, an area disabled whole, and a slider paged by
-  color_slider       its colour's page and told only a change
+  color_area         reads, an area disabled whole, a slider paged by its
+  color_slider       colour's page and told only a change, a field of a hex
+  color_field        whose value is a colour, committed by Enter and
+  color_channel_field
+                     stepped by the keys and the wheel, and a channel's
+                     field that tells its number and only a change
 rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
                      rhp's declarations whole: solidtype_rhp, and the types
                      it names, types
