@@ -155,3 +155,37 @@ let blurs ~root render =
   focus outside;
   remove outside;
   !told
+
+type rule
+type rules
+type axe_options
+type results
+type violation
+
+external rule : enabled:bool -> unit -> rule = "" [@@mel.obj]
+
+external rules :
+  color_contrast:(rule[@mel.as "color-contrast"]) ->
+  region:rule ->
+  unit ->
+  rules = ""
+[@@mel.obj]
+
+external axe_options : rules:rules -> unit -> axe_options = "" [@@mel.obj]
+
+external axe_run : Dom.element -> axe_options -> results Js.Promise.t = "run"
+[@@mel.module "axe-core"] [@@mel.scope "default"]
+
+external violations : results -> violation array = "violations" [@@mel.get]
+external violation_id : violation -> string = "id" [@@mel.get]
+
+(* What axe finds wrong with the page, for a port with no twin to be held
+   beside: the rules axe cannot judge without layout, which jsdom has none
+   of, left out -- colour contrast and landmarks. *)
+let accessibility_violations () =
+  let off = rule ~enabled:false () in
+  let* results =
+    axe_run body
+      (axe_options ~rules:(rules ~color_contrast:off ~region:off ()) ())
+  in
+  Js.Promise.resolve (Array.map violation_id (violations results))

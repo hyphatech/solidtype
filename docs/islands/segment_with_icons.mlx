@@ -1,0 +1,13 @@
+module Segment = Solidtype_heroui.Segment
+
+let make () =
+  <Segment aria_label="Section" default_selected_key="dashboard">
+    <Segment.Item id="dashboard">
+      <Gravity.Layout_cells_large /> "Dashboard"
+    </Segment.Item>
+    <Segment.Item id="analytics">
+      <Gravity.Chart_column /> "Analytics"
+    </Segment.Item>
+    <Segment.Item id="team"><Gravity.Persons /> "Team"</Segment.Item>
+    <Segment.Item id="settings"><Gravity.Gear /> "Settings"</Segment.Item>
+  </Segment>

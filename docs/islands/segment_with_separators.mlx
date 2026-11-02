@@ -1,0 +1,13 @@
+module Segment = Solidtype_heroui.Segment
+
+let make () =
+  <Segment aria_label="View" default_selected_key="dashboard">
+    <Segment.Item id="dashboard">
+      <Segment.Separator /> "Dashboard"
+    </Segment.Item>
+    <Segment.Item id="analytics">
+      <Segment.Separator /> "Analytics"
+    </Segment.Item>
+    <Segment.Item id="reports"><Segment.Separator /> "Reports"</Segment.Item>
+    <Segment.Item id="settings"><Segment.Separator /> "Settings"</Segment.Item>
+  </Segment>

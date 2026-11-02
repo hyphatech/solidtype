@@ -1,0 +1,19 @@
+module S = Solidtype.Solid
+module Segment = Solidtype_heroui.Segment
+
+let make () =
+  let selected, set_selected = S.create_signal "analytics" in
+  <div class_="flex flex-col items-start gap-4">
+    <Segment
+      aria_label="View"
+      selected_key=(fun () -> S.get selected)
+      on_selection_change=(fun key -> S.set set_selected key)>
+      <Segment.Item id="dashboard">"Dashboard"</Segment.Item>
+      <Segment.Item id="analytics">"Analytics"</Segment.Item>
+      <Segment.Item id="reports">"Reports"</Segment.Item>
+      <Segment.Item id="settings">"Settings"</Segment.Item>
+    </Segment>
+    <p class_="text-sm text-muted">
+      "Selected: " (fun () -> Solidtype.Jsx.string (S.get selected))
+    </p>
+  </div>

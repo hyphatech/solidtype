@@ -1,0 +1,18 @@
+module For = Solidtype.For
+module Segment = Solidtype_heroui.Segment
+
+let make () =
+  <div class_="flex flex-col items-start gap-6">
+    <For each=(fun () -> [| `sm; `md; `lg |])>
+      (fun size _ ->
+        <Segment
+          size=(fun () -> size)
+          aria_label="View"
+          default_selected_key="dashboard">
+          <Segment.Item id="dashboard">"Dashboard"</Segment.Item>
+          <Segment.Item id="analytics">"Analytics"</Segment.Item>
+          <Segment.Item id="reports">"Reports"</Segment.Item>
+          <Segment.Item id="settings">"Settings"</Segment.Item>
+        </Segment>)
+    </For>
+  </div>

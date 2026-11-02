@@ -62,6 +62,11 @@ module Box = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/box.svg?raw"]
 end)
 
+module Chart_column = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/chart-column.svg?raw"]
+end)
+
 module Check = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/check.svg?raw"]
@@ -152,6 +157,11 @@ module Code_fork = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/code-fork.svg?raw"]
 end)
 
+module Comment = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/comment.svg?raw"]
+end)
+
 module Copy = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/copy.svg?raw"]
@@ -160,6 +170,11 @@ end)
 module Credit_card = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/credit-card.svg?raw"]
+end)
+
+module Display = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/display.svg?raw"]
 end)
 
 module Ellipsis = Icon.Make (struct
@@ -227,6 +242,11 @@ module House = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/house.svg?raw"]
 end)
 
+module Layout_cells_large = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/layout-cells-large.svg?raw"]
+end)
+
 module Link = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/link.svg?raw"]
@@ -260,6 +280,11 @@ end)
 module Minus = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/minus.svg?raw"]
+end)
+
+module Moon = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/moon.svg?raw"]
 end)
 
 module Pencil = Icon.Make (struct
@@ -335,6 +360,11 @@ end)
 module Star = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/star.svg?raw"]
+end)
+
+module Sun = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/sun.svg?raw"]
 end)
 
 module Text_align_center = Icon.Make (struct

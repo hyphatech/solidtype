@@ -57,6 +57,7 @@ module Radio = H.Radio
 module Radio_group = H.Radio_group
 module Scroll_shadow = H.Scroll_shadow
 module Search_field = H.Search_field
+module Segment = H.Segment
 module Separator = H.Separator
 module Skeleton = H.Skeleton
 module Slider = H.Slider
@@ -555,6 +556,17 @@ let () =
                   </Tabs.Panel>
                   <Tabs.Panel id="two">"Second."</Tabs.Panel>
                 </Tabs>
+                <Segment
+                  data_testid="Segment"
+                  aria_label="Period"
+                  default_selected_key="month">
+                  <Segment.Item data_testid="Segment.Item" id="month">
+                    "Month"
+                  </Segment.Item>
+                  <Segment.Item id="year">
+                    <Segment.Separator data_testid="Segment.Separator" /> "Year"
+                  </Segment.Item>
+                </Segment>
                 <Separator data_testid="Separator" />
                 <Skeleton data_testid="Skeleton" />
                 <Spinner data_testid="Spinner" />
@@ -774,6 +786,9 @@ let () =
                    ("Tabs.Indicator", "[data-slot=tabs-indicator]");
                    ("Tabs.Separator", "[data-slot=tabs-separator]");
                    ("Tabs.Panel", "[data-slot=tabs-panel]");
+                   ("Segment", "[data-slot=segment]");
+                   ("Segment.Item", "[data-slot=segment-item]");
+                   ("Segment.Separator", "[data-slot=segment-separator]");
                    ("Button.trigger", "[data-slot=button][aria-expanded]");
                    ("Toggle_button", "[data-slot=toggle-button]");
                    ("Toggle_button_group", "[data-slot=toggle-button-group]");

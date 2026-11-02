@@ -90,11 +90,26 @@ for (const symbol of checker.getExportsOfModule(exported)) {
   src.both(``);
 }
 
+// cn, which the variant functions merge a class by: a component styled here
+// rather than by a variant function merges a caller's class by it too, so the
+// caller's utility wins as it does over HeroUI's own.
+const cn = checker.getExportsOfModule(exported).find((s) => s.name === "cn");
+const cnType = cn && checker.getTypeOfSymbol(cn.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(cn) : cn);
+if (!cnType || cnType.getCallSignatures().length === 0) throw new Error("@heroui/styles exports no cn function");
+src.both(
+  `(** HeroUI's [cn]: [cn a b] is [a]'s classes and [b]'s, a Tailwind utility of`,
+  `    [b] winning over one of [a] that sets the same property, as a variant`,
+  `    function merges its [class]; none where both are empty. *)`,
+  `external cn : string -> string -> string Js.undefined = "cn"`,
+  `[@@mel.module "@heroui/styles"]`,
+  ``,
+);
+
 const file = (lines: string[]) => `(* Each of HeroUI's variant functions, by its component: [options] built
    from its variants, then [classes], its class string, or for a component of
-   several parts [slots], a class string per part. Generated from the
-   declarations of @heroui/styles ${heroui} by generate/heroui.ts; never edited
-   by hand. *)
+   several parts [slots], a class string per part; and [cn], the merge they
+   give a class by. Generated from the declarations of @heroui/styles
+   ${heroui} by generate/heroui.ts; never edited by hand. *)
 
 ${lines.join("\n")}`;
 

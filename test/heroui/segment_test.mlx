@@ -1,0 +1,294 @@
+(* A segment as a caller meets it, since HeroUI Pro's is licensed and has no
+   twin here: a radio group of radios each named by its option, one selected
+   and told as it changes, by a press or the arrow keys, controlled or kept,
+   disabled whole or by option; the indicator drawn in the selected option;
+   Pro's class names for each variant and size; an option's state as React
+   Aria writes it, and its selection read by what is inside it; and no
+   violation axe finds. *)
+
+module S = Solidtype.Solid
+module Segment = Solidtype_heroui.Segment
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external checked : Dom.element -> bool = "checked" [@@mel.get]
+external disabled : Dom.element -> bool = "disabled" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external query_all_js : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+let all selector = Js.Array.from (query_all_js selector)
+let inputs () = all "input[type=radio]"
+
+let chosen () =
+  inputs () |> Array.to_list |> List.filter checked
+  |> List.filter_map (fun i -> T.attribute i "value")
+
+let items () = all "[data-slot=segment-item]"
+
+let item named =
+  match
+    items () |> Array.to_list
+    |> List.find_opt (fun i -> String.equal (String.trim (text i)) named)
+  with
+  | Some i -> i
+  | None -> T.body
+
+(* The option the indicator is drawn in, by its text, or none. *)
+let indicated () =
+  all "[data-slot=segment-indicator]"
+  |> Array.map (fun e ->
+      match Js.Null.toOption (closest e "[data-slot=segment-item]") with
+      | Some i -> String.trim (text i)
+      | None -> "outside an option")
+
+(* What a reader is told an input is: the text of what names it, or its own
+   label. *)
+let name input =
+  match
+    (T.attribute input "aria-label", T.attribute input "aria-labelledby")
+  with
+  | Some label, _ -> label
+  | None, Some ids ->
+      String.split_on_char ' ' ids
+      |> List.filter_map (fun id -> Js.Null.toOption (by_id id))
+      |> List.map (fun e -> String.trim (text e))
+      |> String.concat " "
+  | None, None -> (
+      match Js.Null.toOption (closest input "label") with
+      | Some l -> String.trim (text l)
+      | None -> "unnamed")
+
+let segment ?selected_key ?default_selected_key ?(told = ref [||])
+    ?(is_disabled = false) ?(analytics_disabled = false) ?variant ?size ?class_
+    () =
+  T.render (fun () ->
+      <Segment
+        ?selected_key=(fun () -> Option.map S.get selected_key)
+        ?default_selected_key=(fun () -> default_selected_key)
+        on_selection_change=(fun key -> told := Array.append !told [| key |])
+        is_disabled=(fun () -> is_disabled)
+        ?variant=(fun () -> variant)
+        ?size=(fun () -> size)
+        ?class_=(fun () -> class_)
+        name="view"
+        aria_label="View">
+        <Segment.Item id="dashboard">"Dashboard"</Segment.Item>
+        <Segment.Item id="analytics" is_disabled=(fun () -> analytics_disabled)>
+          <Segment.Separator /> "Analytics"
+        </Segment.Item>
+        <Segment.Item id="reports">
+          <Segment.Separator /> "Reports"
+        </Segment.Item>
+      </Segment>)
+
+(* An option's content that shows whether its option is selected, read as
+   Pro's render props give it. *)
+module Shown = struct
+  let%component make () =
+    let selected = Segment.Item.is_selected () in
+    <span>
+      (fun () -> Solidtype.Jsx.string (if selected () then "on" else "off"))
+    </span>
+end
+
+let () =
+  Jest.describe "Segment" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "is a radio group of radios, each named by its option"
+        (fun () ->
+          segment ~default_selected_key:"dashboard" ();
+          let group = T.by_role "radiogroup" in
+          E.(
+            expect
+              ( T.attribute group "aria-label",
+                T.attribute group "data-slot",
+                inputs () |> Array.map name,
+                inputs () |> Array.map (fun i -> T.attribute i "name"),
+                chosen (),
+                Array.length (items ()),
+                indicated () )
+            |> toEqual
+                 ( Some "View",
+                   Some "segment",
+                   [| "Dashboard"; "Analytics"; "Reports" |],
+                   [| Some "view"; Some "view"; Some "view" |],
+                   [ "dashboard" ],
+                   3,
+                   [| "Dashboard" |] )));
+      Jest.testPromise
+        "selects an option pressed, tells it and draws the indicator in it"
+        (fun () ->
+          let told = ref [||] in
+          segment ~default_selected_key:"dashboard" ~told ();
+          let user = T.setup () in
+          let* () = T.click user (item "Reports") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( !told,
+                  chosen (),
+                  indicated (),
+                  items () |> Array.map (fun i -> T.attribute i "data-selected")
+                )
+              |> toEqual
+                   ( [| "reports" |],
+                     [ "reports" ],
+                     [| "Reports" |],
+                     [| None; None; Some "true" |] )));
+      Jest.testPromise
+        "keeps the selected option selected when it is pressed, and tells \
+         nothing" (fun () ->
+          let told = ref [||] in
+          segment ~default_selected_key:"dashboard" ~told ();
+          let user = T.setup () in
+          let* () = T.click user (item "Dashboard") in
+          Js.Promise.resolve
+            E.(expect (!told, chosen ()) |> toEqual ([||], [ "dashboard" ])));
+      Jest.testPromise "follows selected_key while it is given" (fun () ->
+          let key, set_key = S.create_signal "analytics" in
+          let told = ref [||] in
+          segment ~selected_key:key ~told ();
+          let user = T.setup () in
+          let* () = T.click user (item "Reports") in
+          let pressed = (chosen (), indicated ()) in
+          S.set set_key "reports";
+          Js.Promise.resolve
+            E.(
+              expect (!told, pressed, (chosen (), indicated ()))
+              |> toEqual
+                   ( [| "reports" |],
+                     ([ "analytics" ], [| "Analytics" |]),
+                     ([ "reports" ], [| "Reports" |]) )));
+      Jest.testPromise
+        "moves the selection by the arrow keys, passing over a disabled option"
+        (fun () ->
+          let told = ref [||] in
+          segment ~default_selected_key:"dashboard" ~told
+            ~analytics_disabled:true ();
+          let user = T.setup () in
+          let* () = T.tab user in
+          let focused =
+            Option.bind (Js.Null.toOption active) (fun a ->
+                T.attribute a "value")
+          in
+          let* () = T.keyboard user "{ArrowRight}" in
+          Js.Promise.resolve
+            E.(
+              expect (focused, !told, chosen (), indicated ())
+              |> toEqual
+                   ( Some "dashboard",
+                     [| "reports" |],
+                     [ "reports" ],
+                     [| "Reports" |] )));
+      Jest.testPromise "is disabled whole, and selects nothing" (fun () ->
+          let told = ref [||] in
+          segment ~default_selected_key:"dashboard" ~told ~is_disabled:true ();
+          let user = T.setup () in
+          let* () = T.click user (item "Reports") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( inputs () |> Array.map disabled,
+                  items () |> Array.map (fun i -> T.attribute i "data-disabled"),
+                  T.attribute (T.by_role "radiogroup") "data-disabled",
+                  !told,
+                  chosen () )
+              |> toEqual
+                   ( [| true; true; true |],
+                     [| Some "true"; Some "true"; Some "true" |],
+                     Some "true",
+                     [||],
+                     [ "dashboard" ] )));
+      Jest.test "names each part by Pro's classes, for its variant and size"
+        (fun () ->
+          segment ~default_selected_key:"dashboard" ~variant:`ghost ~size:`sm
+            ~class_:"mine" ();
+          let has e classes =
+            let own = String.split_on_char ' ' (T.class_name e) in
+            List.for_all (fun c -> List.exists (String.equal c) own) classes
+          in
+          let indicator = (all "[data-slot=segment-indicator]").(0) in
+          let separator = (all "[data-slot=segment-separator]").(0) in
+          E.(
+            expect
+              ( has (T.by_role "radiogroup")
+                  [ "segment"; "segment--sm"; "segment--ghost"; "mine" ],
+                has (item "Reports")
+                  [
+                    "segment__item"; "segment__item--sm"; "segment__item--ghost";
+                  ],
+                has indicator
+                  [ "segment__indicator"; "segment__indicator--ghost" ],
+                has separator [ "segment__separator" ],
+                T.attribute separator "aria-hidden" )
+            |> toEqual (true, true, true, true, Some "true")));
+      Jest.test "lets a class given win over its own of the same property"
+        (fun () ->
+          T.render (fun () ->
+              <Segment
+                default_selected_key="one" aria_label="Merged" class_="h-20">
+                <Segment.Item id="one" class_="gap-0">"One"</Segment.Item>
+              </Segment>);
+          let own e = String.split_on_char ' ' (T.class_name e) in
+          E.(
+            expect
+              ( own (T.by_role "radiogroup")
+                |> List.filter (fun c -> String.starts_with ~prefix:"h-" c),
+                own (item "One")
+                |> List.filter (fun c -> String.starts_with ~prefix:"gap-" c) )
+            |> toEqual ([ "h-20" ], [ "gap-0" ])));
+      Jest.testPromise "declares an option's state as React Aria writes it"
+        (fun () ->
+          segment ~default_selected_key:"dashboard" ();
+          let user = T.setup () in
+          let* () = T.hover user (item "Reports") in
+          let hovered = T.state (item "Reports") in
+          let* () = T.unhover user (item "Reports") in
+          let* () = T.tab user in
+          Js.Promise.resolve
+            E.(
+              expect (hovered, T.state (item "Dashboard"))
+              |> toEqual
+                   ( "data-hovered=true",
+                     "data-focused=true data-focus-visible=true" )));
+      Jest.testPromise "tells what is inside an option whether it is selected"
+        (fun () ->
+          T.render (fun () ->
+              <Segment default_selected_key="one" aria_label="Shown">
+                <Segment.Item id="one"><Shown /></Segment.Item>
+                <Segment.Item id="two" aria_label="Two"><Shown /></Segment.Item>
+              </Segment>);
+          let before = items () |> Array.map text in
+          let user = T.setup () in
+          let* () = T.click user (items ()).(1) in
+          Js.Promise.resolve
+            E.(
+              expect (before, items () |> Array.map text)
+              |> toEqual ([| "on"; "off" |], [| "off"; "on" |])));
+      Jest.test "names an option of an icon by its aria_label" (fun () ->
+          T.render (fun () ->
+              <Segment default_selected_key="light" aria_label="Theme">
+                <Segment.Item id="light" aria_label="Light">
+                  <svg />
+                </Segment.Item>
+                <Segment.Item id="dark" aria_label="Dark"><svg /></Segment.Item>
+              </Segment>);
+          E.(
+            expect (inputs () |> Array.map name)
+            |> toEqual [| "Light"; "Dark" |]));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          segment ~default_selected_key:"dashboard" ~analytics_disabled:true ();
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

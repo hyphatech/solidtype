@@ -130,5 +130,9 @@
   color: var(--foreground);
 }
 
-/* Tailwind reads the demos' classes from their .mlx sources. */
+/* Tailwind reads the demos' classes from their .mlx sources, and the
+   classes of the components in HeroUI Pro's shape, which are Tailwind's own,
+   from the library as Melange compiled it, as an application's Tailwind
+   does. */
 @source "../../islands";
+@source "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui";

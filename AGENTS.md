@@ -114,6 +114,11 @@ heroui/              solidtype-heroui: HeroUI's components ported onto
                      heading and close trigger, each port's classes its own
   status_icon        HeroUI's icon for each status, as an alert, a toast and
                      an alert dialog draw it
+  selection_indicator
+                     what a tab's and a segment's indicator share: drawn in
+                     the selected item, it starts where the last one was
+  segment            a component in HeroUI Pro's shape, made here, not
+                     ported: its look Tailwind on HeroUI's tokens
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte
@@ -494,6 +499,18 @@ break.
   -- stays the port's. Test: `test/headless/`, each component as a caller
   meets it, a fix failing on Kobalte's own, and its port's test against
   React's.
+- **A component in HeroUI Pro's shape is made here, never ported.** Pro is
+  licensed and forbids publishing any part of its source, so nothing of
+  `@heroui-pro/react` is installed, imported, copied or generated from: its
+  props and parts are Pro's documented ones, its look is measured from Pro's
+  public demos and written as Tailwind's utilities on HeroUI's tokens, a
+  caller's class merged over them by `Styles.cn`, and Pro's class names are
+  on its parts. It has no twin: its test is a caller's, with axe, and its
+  page shows it alone and links to Pro's. An application's Tailwind reads
+  its utilities by an `@source` of `solidtype-heroui` as Melange compiled it,
+  as `docs/src/styles/heroui.css` does. Why: this repository, its CI and its
+  site are public. Symptom: `rg -n heroui-pro` finds anything but a link to
+  Pro's documentation or a sentence about it.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;

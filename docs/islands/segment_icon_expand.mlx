@@ -1,0 +1,41 @@
+module Segment = Solidtype_heroui.Segment
+
+(* An option's label, its width and opacity nothing while its option is not
+   selected: a grid column that grows from none to the label's own width. *)
+module Label = struct
+  let%component make ~(text : string) () =
+    let selected = Segment.Item.is_selected () in
+    <span
+      class_=(fun () ->
+               "grid transition-[grid-template-columns,opacity] duration-200 \
+                ease-out motion-reduce:transition-none "
+               ^
+               if selected () then "grid-cols-[1fr] opacity-100"
+               else "grid-cols-[0fr] opacity-0")>
+      <span
+        class_=(fun () ->
+                 "min-w-0 overflow-hidden whitespace-nowrap \
+                  transition-[padding] duration-200 ease-out \
+                  motion-reduce:transition-none "
+                 ^ if selected () then "ps-1.5" else "ps-0")>
+        (fun () -> Solidtype.Jsx.string (text ()))
+      </span>
+    </span>
+end
+
+let make () =
+  <Segment
+    variant=`ghost aria_label="Navigation" default_selected_key="meetings">
+    <Segment.Item id="home" aria_label="Home" class_="gap-0">
+      <Gravity.House /> <Label text="Home" />
+    </Segment.Item>
+    <Segment.Item id="chat" aria_label="Chat" class_="gap-0">
+      <Gravity.Comment /> <Label text="Chat" />
+    </Segment.Item>
+    <Segment.Item id="meetings" aria_label="Meetings" class_="gap-0">
+      <Gravity.Video /> <Label text="Meetings" />
+    </Segment.Item>
+    <Segment.Item id="inbox" aria_label="Inbox" class_="gap-0">
+      <Gravity.Tray /> <Label text="Inbox" />
+    </Segment.Item>
+  </Segment>

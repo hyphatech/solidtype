@@ -1,0 +1,189 @@
+---
+title: Segment
+description: A segmented control in HeroUI Pro's shape, for a few options of which one is selected.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/segment_usage.jsx";
+import UsageCode from "@islands/segment_usage.mlx?raw";
+import * as Ghost from "@islands/segment_ghost.jsx";
+import GhostCode from "@islands/segment_ghost.mlx?raw";
+import * as WithSeparators from "@islands/segment_with_separators.jsx";
+import WithSeparatorsCode from "@islands/segment_with_separators.mlx?raw";
+import * as Controlled from "@islands/segment_controlled.jsx";
+import ControlledCode from "@islands/segment_controlled.mlx?raw";
+import * as Disabled from "@islands/segment_disabled.jsx";
+import DisabledCode from "@islands/segment_disabled.mlx?raw";
+import * as DisabledItem from "@islands/segment_disabled_item.jsx";
+import DisabledItemCode from "@islands/segment_disabled_item.mlx?raw";
+import * as Sizes from "@islands/segment_sizes.jsx";
+import SizesCode from "@islands/segment_sizes.mlx?raw";
+import * as ThemeSwitcher from "@islands/segment_theme_switcher.jsx";
+import ThemeSwitcherCode from "@islands/segment_theme_switcher.mlx?raw";
+import * as TwoItems from "@islands/segment_two_items.jsx";
+import TwoItemsCode from "@islands/segment_two_items.mlx?raw";
+import * as WithIcons from "@islands/segment_with_icons.jsx";
+import WithIconsCode from "@islands/segment_with_icons.mlx?raw";
+import * as IconExpand from "@islands/segment_icon_expand.jsx";
+import IconExpandCode from "@islands/segment_icon_expand.mlx?raw";
+
+`Solidtype_heroui.Segment` is a segmented control: a few options side by
+side, one always selected, its indicator sliding to the option chosen. It
+takes the shape of HeroUI Pro's
+[Segment](https://heroui.pro/docs/react/components/segment), its props and
+parts, but Pro is licensed, so this is no port of it: it is made here, on
+Kobalte's segmented control, in HeroUI's free design. Nothing of Pro's is in
+it, and this page shows no React demo beside it.
+
+It is Kobalte's: a `radiogroup` of radios, each option a `<label>` around its
+radio, which Tab reaches as one and the arrow keys move the selection
+through, passing over a disabled option. Pro's, on React Aria's toggle
+button group, moves the focus with the arrows and selects with Space; both
+are accessible, and Segment keeps Kobalte's. Its indicator is drawn in the
+selected option, so a page prerendered already shows it.
+
+## Setup
+
+Its look is Tailwind's own utilities on HeroUI's tokens, not a stylesheet of
+HeroUI's, so an application's Tailwind must read the library to make them:
+an `@source` of `solidtype-heroui` as Melange compiled it, in the stylesheet
+that imports HeroUI's, beside the `@source` of the application's own code.
+
+```css
+@source "../_build/default/app/out/node_modules/solidtype-heroui";
+```
+
+The path is the `melange.emit`'s target, then
+`node_modules/solidtype-heroui`.
+
+## Usage
+
+<Example code={UsageCode} title="segment_usage.mlx"><Usage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Segment aria_label="Billing">
+  <Segment.Item id="monthly">"Monthly"</Segment.Item>
+  <Segment.Item id="yearly"><Segment.Separator /> "Yearly"</Segment.Item>
+</Segment>
+```
+
+## Examples
+
+### Ghost
+
+A transparent track, and the selected option in the accent colour.
+
+<Example code={GhostCode} title="segment_ghost.mlx"><Ghost.make client:visible /></Example>
+
+### With Separators
+
+A `Segment.Separator` inside an option, before its label, draws a line at the
+option's start edge, hidden in the selected option and the one after it. Pro
+draws the first option's at the track's edge too; Segment hides it.
+
+<Example code={WithSeparatorsCode} title="segment_with_separators.mlx"><WithSeparators.make client:visible /></Example>
+
+### Controlled
+
+`selected_key` gives the selected option's id, and `on_selection_change` is
+told each option chosen.
+
+<Example code={ControlledCode} title="segment_controlled.mlx"><Controlled.make client:visible /></Example>
+
+### Disabled
+
+<Example code={DisabledCode} title="segment_disabled.mlx"><Disabled.make client:visible /></Example>
+
+### Disabled Item
+
+<Example code={DisabledItemCode} title="segment_disabled_item.mlx"><DisabledItem.make client:visible /></Example>
+
+### Sizes
+
+<Example code={SizesCode} title="segment_sizes.mlx"><Sizes.make client:visible /></Example>
+
+### Theme Switcher
+
+An option of an icon alone is named by its `aria_label`.
+
+<Example code={ThemeSwitcherCode} title="segment_theme_switcher.mlx"><ThemeSwitcher.make client:visible /></Example>
+
+### Two Items
+
+<Example code={TwoItemsCode} title="segment_two_items.mlx"><TwoItems.make client:visible /></Example>
+
+### With Icons
+
+<Example code={WithIconsCode} title="segment_with_icons.mlx"><WithIcons.make client:visible /></Example>
+
+### Icon Expand
+
+`Segment.Item.is_selected ()`, read as a component inside an option is made,
+says whether that option is selected, as Pro's render props do: here each
+label shows only in the selected option.
+
+<Example code={IconExpandCode} title="segment_icon_expand.mlx"><IconExpand.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+Pro's class names are on each part, so a stylesheet written against them
+reaches the same elements; Segment's own look is Tailwind's utilities beside
+them.
+
+- `.segment`, and its sizes `.segment--sm`, `.segment--md`, `.segment--lg`
+- `.segment--ghost`
+- `.segment__item`, its sizes `.segment__item--sm`, `.segment__item--md`,
+  `.segment__item--lg`, and `.segment__item--ghost`
+- `.segment__indicator`, and `.segment__indicator--ghost`
+- `.segment__separator`
+
+### Interactive States
+
+On `.segment__item`, as React Aria writes them:
+
+- **Selected**: `[data-selected="true"]`
+- **Hovered**: `[data-hovered="true"]`, which dims an option not selected
+- **Focus visible**: `[data-focus-visible="true"]`
+- **Disabled**: `[data-disabled="true"]`
+
+And on `.segment`, `[data-disabled="true"]` while it is disabled.
+
+## API Reference
+
+Each prop beside the name Pro's React component gives it.
+
+### Segment
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `variant` | `variant` | `` [ `default \| `ghost ] `` | `` `default `` | Its look |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its size |
+| `selectedKey` | `selected_key` | `string` | | The selected option's id, while given |
+| `defaultSelectedKey` | `default_selected_key` | `string` | | The one selected at first |
+| `onSelectionChange` | `on_selection_change` | `string -> unit` | | Told each option chosen |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether every option is disabled |
+| `name` | `name` | `string` | | Its radios' name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name |
+| `aria-labelledby` | `aria_labelledby` | `string` | | The id of what names it |
+| `className` | `class_` | `string` | | Added after its own classes |
+| `children` | `children` | elements | | Its options |
+
+### Segment.Item
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `id` | `id` | `string` | | Its key |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `aria-label` | `aria_label` | `string` | | Its name, where its children give none |
+| `className` | `class_` | `string` | | Added after its own classes |
+| `children` | `children` | elements | | Its label; `Segment.Item.is_selected` in place of a render function |
+
+### Segment.Separator
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after its own classes |

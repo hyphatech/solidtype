@@ -1,0 +1,7 @@
+module Segment = Solidtype_heroui.Segment
+
+let make () =
+  <Segment size=`sm aria_label="Billing" default_selected_key="monthly">
+    <Segment.Item id="monthly">"Monthly"</Segment.Item>
+    <Segment.Item id="yearly">"Yearly"</Segment.Item>
+  </Segment>

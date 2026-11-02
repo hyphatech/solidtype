@@ -1,0 +1,210 @@
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.SegmentedControl
+
+type size = [ `sm | `md | `lg ]
+type variant = [ `default | `ghost ]
+
+(* What a segment's options read of it. *)
+type segment = {
+  value : unit -> string option;
+  disabled : unit -> bool;
+  variant : unit -> variant;
+  size : unit -> size;
+  indicators : Selection_indicator.t;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = segment
+end)
+
+(* What an option's content reads of it. *)
+type item = { selected : unit -> bool }
+
+module Item_context = Solidtype.Context.Make_optional (struct
+  type t = item
+end)
+
+(* A class added after the segment's own and merged with them, as a variant
+   function merges React's className: a caller's utility wins over one of the
+   segment's that sets the same property. *)
+let after base = function
+  | Some c ->
+      Option.value (Js.Undefined.toOption (Styles.cn base c)) ~default:""
+  | None -> base
+
+(* Each part's look, measured from Pro's demo and written as Tailwind on
+   HeroUI's tokens: every class is spelt whole, as Tailwind finds a class only
+   as it is written, and each size and variant sets its own, since two
+   utilities of one property are ordered by the stylesheet, never by the
+   attribute. *)
+let root_classes variant size =
+  "segment relative isolate inline-flex w-fit items-center \
+   rounded-[calc(var(--radius)*2.5)] "
+  ^
+  match (variant, size) with
+  | `default, `sm -> "segment--sm h-8 bg-default p-0.5"
+  | `default, `md -> "segment--md h-10 bg-default p-1"
+  | `default, `lg -> "segment--lg h-12 bg-default p-1"
+  | `ghost, `sm -> "segment--sm segment--ghost h-7"
+  | `ghost, `md -> "segment--md segment--ghost h-8"
+  | `ghost, `lg -> "segment--lg segment--ghost h-10"
+
+let item_classes variant size =
+  "segment__item relative z-1 inline-flex cursor-pointer items-center \
+   justify-center gap-1.5 rounded-3xl font-medium whitespace-nowrap text-muted \
+   outline-none transition-[color,background-color,box-shadow,opacity] \
+   duration-150 ease-smooth data-[focus-visible=true]:status-focused \
+   not-data-[selected=true]:data-[hovered=true]:opacity-70 \
+   data-[disabled=true]:cursor-(--cursor-disabled) \
+   data-[disabled=true]:opacity-(--disabled-opacity) \
+   motion-reduce:transition-none "
+  ^ (match size with
+    | `sm -> "segment__item--sm h-7 px-2.5 text-xs"
+    | `md -> "segment__item--md h-8 px-4 text-sm"
+    | `lg -> "segment__item--lg h-10 px-5 text-sm")
+  ^
+  match variant with
+  | `default -> " data-[selected=true]:text-segment-foreground"
+  | `ghost ->
+      " segment__item--ghost data-[selected=true]:text-accent-foreground"
+
+let indicator_classes = function
+  | `default ->
+      "segment__indicator absolute start-0 top-0 -z-1 size-full rounded-3xl \
+       bg-segment shadow-surface transition-[translate,width,height] \
+       duration-250 ease-out-fluid motion-reduce:transition-none"
+  | `ghost ->
+      "segment__indicator segment__indicator--ghost absolute start-0 top-0 \
+       -z-1 size-full rounded-3xl bg-accent \
+       transition-[translate,width,height] duration-250 ease-out-fluid \
+       motion-reduce:transition-none"
+
+(* Hidden in the selected option, in the option after it, whose start edge
+   it shares -- Kobalte marks the selected option's own element, a sibling of
+   the next one's, [data-checked] -- and in the first option, whose start edge
+   is the track's. *)
+let separator_classes =
+  "segment__separator absolute start-0 top-1/4 h-1/2 w-px rounded-sm \
+   bg-muted/25 transition-opacity duration-150 ease-smooth \
+   in-data-[selected=true]:opacity-0 [[data-checked]+*_&]:opacity-0 \
+   [:first-child>*>&]:opacity-0 motion-reduce:transition-none"
+
+let within part =
+  match Context.use () with
+  | Some s -> s
+  | None -> invalid_arg (part ^ " is used inside a Segment")
+
+module Field_content = Field.Content (struct
+  let label = Kobalte.ItemLabel.component
+  let input = Kobalte.ItemInput.component
+end)
+
+(* The indicator, made each time its option is selected. *)
+let indicator s =
+  let i = Selection_indicator.indicator s.indicators in
+  <div
+    class_=(fun () -> indicator_classes (s.variant ()))
+    ref=(fun e -> i.ref e)
+    data_slot="segment-indicator"
+  />
+
+module Item = struct
+  let%component make ~(id : string) ?(is_disabled : bool = false)
+      ?(aria_label : string option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
+    let s = within "Segment.Item" in
+    let selected () =
+      match s.value () with Some v -> String.equal v (id ()) | None -> false
+    in
+    let disabled () = s.disabled () || is_disabled () in
+    let field : Field.state =
+      {
+        selected;
+        indeterminate = (fun () -> false);
+        disabled;
+        invalid = (fun () -> false);
+        read_only = (fun () -> false);
+        required = (fun () -> false);
+        aria_label;
+        described_by = (fun () -> None);
+        interaction =
+          Interaction.create
+            ~disabled:(fun[@u] () -> disabled ())
+            ~keys:`element ();
+      }
+    in
+    <Item_context.Provider value=(fun () -> { selected })>
+      <Kobalte.Item
+        value=(fun () -> id ())
+        disabled=(fun () -> is_disabled ())
+        class_="contents">
+        <Field_content
+          field=(fun () -> field)
+          slot="segment-item"
+          class_=(fun () ->
+                   after (item_classes (s.variant ()) (s.size ())) (class_ ()))
+          props=(Props.others props)>
+          <Show when_=(fun () -> selected ())>
+            (fun () -> Jsx.element (indicator s))
+          </Show>
+          (fun () -> children ())
+        </Field_content>
+      </Kobalte.Item>
+    </Item_context.Provider>
+
+  let is_selected () =
+    match Item_context.use () with
+    | Some i -> i.selected
+    | None ->
+        invalid_arg "Segment.Item.is_selected is used inside a Segment.Item"
+end
+
+module Separator = struct
+  let%component make ?(class_ : string option) () =
+    let (_ : segment) = within "Segment.Separator" in
+    <span
+      aria_hidden=true
+      class_=(fun () -> after separator_classes (class_ ()))
+      data_slot="segment-separator"
+      props=(Props.others props)
+    />
+end
+
+let%component make ?(variant : variant = `default) ?(size : size = `md)
+    ?(selected_key : string option) ?(default_selected_key : string option)
+    ?(on_selection_change : (string -> unit) option)
+    ?(is_disabled : bool = false) ?(name : string option)
+    ?(aria_label : string option) ?(aria_labelledby : string option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  let chosen, choose =
+    Field.controlled
+      ~value:(fun () -> Option.map Option.some (selected_key ()))
+      ~default:(default_selected_key ())
+      ~on_change:
+        (Option.iter (fun key -> ignore (on_selection_change key : unit option)))
+  in
+  let s =
+    {
+      value = chosen;
+      disabled = (fun () -> is_disabled ());
+      variant = (fun () -> variant ());
+      size = (fun () -> size ());
+      indicators = Selection_indicator.create ();
+    }
+  in
+  <Context.Provider value=(fun () -> s)>
+    <Kobalte.Root
+      value=(fun () -> Option.value (chosen ()) ~default:"")
+      on_change=(fun key -> choose (Some key))
+      disabled=(fun () -> is_disabled ())
+      ?name
+      ?aria_label=(fun () -> aria_label ())
+      ?aria_labelledby=(fun () -> aria_labelledby ())
+      class_=(fun () -> after (root_classes (variant ()) (size ())) (class_ ()))
+      data_slot="segment"
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Kobalte.Root>
+  </Context.Provider>

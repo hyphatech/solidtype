@@ -1,8 +1,8 @@
 (* Each of HeroUI's variant functions, by its component: [options] built
    from its variants, then [classes], its class string, or for a component of
-   several parts [slots], a class string per part. Generated from the
-   declarations of @heroui/styles 3.2.6 by generate/heroui.ts; never edited
-   by hand. *)
+   several parts [slots], a class string per part; and [cn], the merge they
+   give a class by. Generated from the declarations of @heroui/styles
+   3.2.6 by generate/heroui.ts; never edited by hand. *)
 
 (** HeroUI's [accordionVariants]. *)
 module Accordion = struct
@@ -1741,3 +1741,9 @@ module Tooltip = struct
   external base : slots -> string = "base" [@@mel.send]
   external trigger : slots -> string = "trigger" [@@mel.send]
 end
+
+(** HeroUI's [cn]: [cn a b] is [a]'s classes and [b]'s, a Tailwind utility of
+    [b] winning over one of [a] that sets the same property, as a variant
+    function merges its [class]; none where both are empty. *)
+external cn : string -> string -> string Js.undefined = "cn"
+[@@mel.module "@heroui/styles"]

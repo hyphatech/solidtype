@@ -1,0 +1,10 @@
+module Segment = Solidtype_heroui.Segment
+
+let make () =
+  <Segment size=`sm aria_label="Theme" default_selected_key="system">
+    <Segment.Item id="light" aria_label="Light"><Gravity.Sun /></Segment.Item>
+    <Segment.Item id="dark" aria_label="Dark"><Gravity.Moon /></Segment.Item>
+    <Segment.Item id="system" aria_label="System">
+      <Gravity.Display />
+    </Segment.Item>
+  </Segment>
