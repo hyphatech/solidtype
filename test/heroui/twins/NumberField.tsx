@@ -16,6 +16,7 @@ type Props = {
   isDisabled?: boolean;
   isInvalid?: boolean;
   isReadOnly?: boolean;
+  isWheelDisabled?: boolean;
   isRequired?: boolean;
   minValue?: number;
   maxValue?: number;

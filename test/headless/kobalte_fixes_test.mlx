@@ -170,11 +170,29 @@ let () =
                        Some {js|0°, Red|js},
                        Some "15" ) ))))
 
+type wheel_init
+
+external wheel_init :
+  delta_y:(float[@mel.as "deltaY"]) ->
+  bubbles:bool ->
+  cancelable:bool ->
+  unit ->
+  wheel_init = ""
+[@@mel.obj]
+
+external wheel_event : (_[@mel.as "wheel"]) -> wheel_init -> Dom.event
+  = "WheelEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
+[@@mel.send]
+
 module Color_channel_field = Solidtype_headless.Color_channel_field
 module Kobalte_channel_field = Solidtype_kobalte.ColorChannelField
 
 (* How many colours a hue field, the fixed one or Kobalte's own, tells as it
-   mounts, and what its input tells a reader of its value after a step up. *)
+   mounts, and what its input tells a reader of its value after a step up and
+   a turn of the wheel down. *)
 let stepped ~fixed =
   let value () = Colors.parse_color "hsl(300, 100%, 25%)" in
   let told = ref 0 in
@@ -201,6 +219,10 @@ let stepped ~fixed =
   let user = H.setup () in
   H.focus input;
   let* () = H.keyboard user "{ArrowUp}" in
+  ignore
+    (dispatch input
+       (wheel_event (wheel_init ~delta_y:1. ~bubbles:true ~cancelable:true ()))
+      : bool);
   Js.Promise.resolve
     ( at_mount,
       H.attribute input "aria-valuenow",
@@ -210,7 +232,8 @@ let () =
   Jest.describe "Kobalte's colour channel field, fixed" (fun () ->
       Jest.afterEach H.cleanup;
       Jest.testPromise
-        "tells no change as it mounts, and its value now as a number" (fun () ->
+        "tells no change as it mounts, its value now as a number, and turns \
+         the wheel as React Aria's" (fun () ->
           let* fixed = stepped ~fixed:true in
           H.cleanup ();
           let* own = stepped ~fixed:false in
@@ -218,28 +241,11 @@ let () =
             E.(
               expect (fixed, own)
               |> toEqual
-                   ( (0, Some "301", Some {js|301°|js}),
-                     (1, Some {js|301°|js}, Some {js|301°|js}) ))))
+                   ( (0, Some "302", Some {js|302°|js}),
+                     (1, Some {js|300°|js}, Some {js|300°|js}) ))))
 
 module Color_field = Solidtype_headless.Color_field
 module Kobalte_field = Solidtype_kobalte.ColorField
-
-type wheel_init
-
-external wheel_init :
-  delta_y:(float[@mel.as "deltaY"]) ->
-  bubbles:bool ->
-  cancelable:bool ->
-  unit ->
-  wheel_init = ""
-[@@mel.obj]
-
-external wheel_event : (_[@mel.as "wheel"]) -> wheel_init -> Dom.event
-  = "WheelEvent"
-[@@mel.new]
-
-external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
-[@@mel.send]
 
 external value_of : Dom.element -> string = "value" [@@mel.get]
 

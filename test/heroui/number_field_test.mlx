@@ -25,6 +25,7 @@ external props :
   ?format_options:
     (Solidtype_kobalte.Types.NumberFormatOptions.t[@mel.as "formatOptions"]) ->
   ?on_blur:((Dom.focusEvent -> unit)[@mel.as "onBlur"]) ->
+  ?is_wheel_disabled:(bool[@mel.as "isWheelDisabled"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -55,6 +56,26 @@ external parent : Dom.element -> Dom.element Js.null = "parentElement"
 [@@mel.get]
 
 external value_of : Dom.element -> string = "value" [@@mel.get]
+
+type wheel_init
+
+external wheel_init :
+  delta_x:(float[@mel.as "deltaX"]) ->
+  delta_y:(float[@mel.as "deltaY"]) ->
+  ctrl_key:(bool[@mel.as "ctrlKey"]) ->
+  bubbles:bool ->
+  cancelable:bool ->
+  unit ->
+  wheel_init = ""
+[@@mel.obj]
+
+external wheel_event : (_[@mel.as "wheel"]) -> wheel_init -> Dom.event
+  = "WheelEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
+[@@mel.send]
+
 external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
 
@@ -127,7 +148,8 @@ let shown host =
       | _ -> " " ^ text e)
 
 (* The field as it is rendered, as its increment and decrement buttons are
-   clicked, and as ArrowUp steps its input: every part, and the value it
+   clicked, as ArrowUp steps its input, and as the wheel turns over it, down,
+   up, mostly sideways and with Control held: every part, and the value it
    told, after each. *)
 let walk ~step host told =
   let user = T.setup () in
@@ -157,10 +179,26 @@ let walk ~step host told =
         let* () = T.click user (part "number-field-input") in
         T.keyboard user "{ArrowUp}")
   in
+  let wheel name ?(delta_x = 0.) ?(ctrl_key = false) delta_y =
+    after name (fun () ->
+        ignore
+          (dispatch
+             (part "number-field-input")
+             (wheel_event
+                (wheel_init ~delta_x ~delta_y ~ctrl_key ~bubbles:true
+                   ~cancelable:true ()))
+            : bool);
+        Js.Promise.resolve ())
+  in
+  let* () = wheel "wheeled down" 1. in
+  let* () = wheel "wheeled up" (-1.) in
+  let* () = wheel "wheeled down, mostly sideways" ~delta_x:4. 1. in
+  let* () = wheel "wheeled down with Control" ~ctrl_key:true 1. in
   Js.Promise.resolve (Array.of_list (List.rev !seen))
 
 let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
-    ?is_required ?min_value ?max_value ?step ?format_options () =
+    ?is_wheel_disabled ?is_required ?min_value ?max_value ?step ?format_options
+    () =
   let told = ref "" in
   T.render (fun () ->
       <Number_field
@@ -169,6 +207,7 @@ let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
         ?is_disabled=(fun () -> is_disabled)
         ?is_invalid=(fun () -> is_invalid)
         ?is_read_only=(fun () -> is_read_only)
+        ?is_wheel_disabled=(fun () -> is_wheel_disabled)
         ?is_required=(fun () -> is_required)
         ?min_value=(fun () -> min_value)
         ?max_value=(fun () -> max_value)
@@ -203,7 +242,7 @@ let both ?variant ?full_width ?is_disabled ?is_invalid ?is_read_only
               (function `primary -> "primary" | `secondary -> "secondary")
               variant)
          ?full_width ?is_disabled ?is_invalid ?is_read_only ?is_required
-         ?min_value ?max_value ?step ?format_options ())
+         ?min_value ?max_value ?step ?format_options ?is_wheel_disabled ())
       (fun v -> told' := Js.Float.toString v)
   in
   let* react = walk ~step:Twin.step host told' in
@@ -231,6 +270,10 @@ let () =
           same r);
       Jest.testPromise "keeps its value while read-only, as React's" (fun () ->
           let* r = both ~is_read_only:true () in
+          same r);
+      Jest.testPromise "leaves the wheel alone when told to, as React's"
+        (fun () ->
+          let* r = both ~is_wheel_disabled:true () in
           same r);
       Jest.testPromise "is invalid and required, its error shown, as React's"
         (fun () ->

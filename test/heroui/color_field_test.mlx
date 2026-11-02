@@ -1,6 +1,9 @@
 (* HeroUI's ColorField on Kobalte's, beside the same field in React: every
    part, its classes and state, what its input shows, and the colour told, as
-   a hex is typed and committed, a hex is stepped and a channel is. *)
+   a hex is typed and committed, a hex is stepped by the keys and the wheel, and
+   a channel by the keys. React Aria's channel never turns on the wheel, which
+   waits for a focus on a group its field never draws; the headless fixes test
+   holds the channel's wheel. *)
 
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
@@ -53,6 +56,23 @@ external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
 external value_of : Dom.element -> string = "value" [@@mel.get]
+
+type wheel_init
+
+external wheel_init :
+  delta_y:(float[@mel.as "deltaY"]) ->
+  bubbles:bool ->
+  cancelable:bool ->
+  unit ->
+  wheel_init = ""
+[@@mel.obj]
+
+external wheel_event : (_[@mel.as "wheel"]) -> wheel_init -> Dom.event
+  = "WheelEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
+[@@mel.send]
 
 (* What HeroUI's styles read and a reader reaches of each part. Ids, and what
    each framework writes for itself, are left out. *)
@@ -138,6 +158,14 @@ let walk ~keys ~step host told =
           step (fun () ->
               match k with
               | "click" -> T.click user (input host)
+              | "wheel" ->
+                  ignore
+                    (dispatch (input host)
+                       (wheel_event
+                          (wheel_init ~delta_y:1. ~bubbles:true ~cancelable:true
+                             ()))
+                      : bool);
+                  Js.Promise.resolve ()
               | k -> T.keyboard user k)
         in
         seen := (shown host, !told) :: !seen;
@@ -248,6 +276,7 @@ let () =
                 "{Home}";
                 "{Control>}a{/Control}{Backspace}";
                 "{ArrowUp}";
+                "wheel";
                 "{Tab}";
               ]
             ());

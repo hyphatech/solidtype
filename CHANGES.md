@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Number_field` takes `is_wheel_disabled`, HeroUI's
+  `isWheelDisabled`; and its wheel, and `Color_field`'s on a channel, turn as
+  React Aria's: down steps up, and a field read-only, a turn mostly sideways
+  and one with Control held step nothing, where Kobalte's turned the other way
+  and stepped on each. `Solidtype_headless.Number_field`, Kobalte's fixed so,
+  beneath it; `Solidtype_headless.Color_channel_field`'s wheel is its.
+
 - `Solidtype_heroui.Color_field`, HeroUI's ColorField on Kobalte's: a hex
   typed and committed as React Aria commits it, on blur and by Enter, or one
   channel of a colour in a colour space; stepped by the arrow keys, Page Up and

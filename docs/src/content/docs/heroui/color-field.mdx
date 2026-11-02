@@ -43,7 +43,9 @@ the colour as it was; the input then shows the colour's hex. A key that is not
 a hex digit is not typed. The arrow keys, and Page Up and Page Down, step the
 hex by one and Home and End take it to `#000000` and `#FFFFFF`; a channel is
 stepped by its own step. The wheel steps either while its input has the
-focus, unless `is_wheel_disabled`.
+focus, as a NumberField's, unless `is_wheel_disabled`. React Aria's channel
+field never turns on the wheel, which waits for a focus on a group its field
+never draws; this one does, as its hex field does.
 
 Its value is Kobalte's `Types.Color`, read from any CSS colour by
 `Solidtype_kobalte.Colors.parse_color`, or none: `value` is a

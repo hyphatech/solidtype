@@ -1,11 +1,12 @@
 (** Kobalte's colour channel field, fixed: a field of one channel of a colour,
     its number stepped by the keys and shown as the colour formats it, as
     {!Solidtype_kobalte.ColorChannelField} is, its parts taking Kobalte's props
-    and every attribute their element does. Two of Kobalte's bugs are fixed: its
-    input's [aria-valuenow] is the channel's number, [301], where Kobalte's is
-    the text it shows once the value changes, [301°], which no reader reads as a
-    number; and its [on_change] is told only a colour other than its own, where
-    Kobalte's tells its own as it mounts.
+    and every attribute their element does. Three of Kobalte's bugs are fixed:
+    its input's [aria-valuenow] is the channel's number, [301], where Kobalte's
+    is the text it shows once the value changes, [301°], which no reader reads
+    as a number; its [on_change] is told only a colour other than its own, where
+    Kobalte's tells its own as it mounts; and its wheel is {!Number_field}'s,
+    which turns as React Aria's does.
 
     {[
       <Color_channel_field.Root

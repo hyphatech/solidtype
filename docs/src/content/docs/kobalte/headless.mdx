@@ -114,3 +114,5 @@ one module. HeroUI's ports dress these, never Kobalte's.
 | `Color_field` | the wheel does nothing | it steps the hex while the input has the focus, unless `change_on_wheel` is `false` |
 | `Color_channel_field` | its input's `aria-valuenow` is the text it shows once the value changes, `301°` | the channel's number, `301` |
 | `Color_channel_field` | `on_change` is told the field's own colour as it mounts | told only a colour other than its own |
+| `Number_field`, `Color_channel_field` | the wheel turned down steps the number down, the other way from React Aria's | turned down it steps up, as React Aria's |
+| `Number_field`, `Color_channel_field` | the wheel steps a field read-only, a turn mostly sideways, and one with Control held, which zooms the page | it steps none of them |

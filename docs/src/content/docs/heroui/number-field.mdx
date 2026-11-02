@@ -1,6 +1,6 @@
 ---
 title: NumberField
-description: A number, typed or stepped by its buttons and the arrow keys.
+description: A number, typed or stepped by its buttons, the arrow keys and the wheel.
 ---
 
 import Example from "@components/Example.astro";
@@ -46,6 +46,12 @@ the field snaps each value, a value halfway to the step away from the
 minimum, written with its step's decimals, so a tenth added to 0.2 is 0.3;
 and it disables a button its step would not move. Its
 input is Kobalte's spinbutton.
+
+The wheel steps it while its input has the focus, as React Aria's: turned
+down it steps up, turned up it steps down, and a turn mostly sideways, one with
+Control held, which zooms the page, or one over a field read-only or
+`is_wheel_disabled` steps nothing. Kobalte's wheel turns the other way and
+steps on each, so the field's is `solidtype-headless`'s.
 
 ## Usage
 
@@ -179,6 +185,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `isDisabled` | `is_disabled` | `bool` | | Whether it is disabled, else as its fieldset is |
 | `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
 | `isReadOnly` | `is_read_only` | `bool` | `false` | Whether its value is kept |
+| `isWheelDisabled` | `is_wheel_disabled` | `bool` | `false` | Whether the wheel leaves it alone |
 | `isRequired` | `is_required` | `bool` | `false` | Whether it is required |
 | `name` | `name` | `string` | | Its name in a form |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |

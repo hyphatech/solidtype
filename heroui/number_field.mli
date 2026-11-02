@@ -21,6 +21,9 @@
     buttons and arrow keys step it by [step], else by 1, or by a hundredth for a
     percent.
 
+    The wheel steps it so too while its input has the focus, as
+    {!Solidtype_headless.Number_field} turns it, unless [is_wheel_disabled].
+
     [format_options], as HeroUI's [formatOptions], is Kobalte's: its input shows
     and reads its value so, a currency, a percent or a unit, and tells a reader
     the value as it shows it.
@@ -113,6 +116,7 @@ module Props : sig
     ?is_disabled:bool Solidtype.Check.value ->
     ?is_invalid:bool Solidtype.Check.value ->
     ?is_read_only:bool Solidtype.Check.value ->
+    ?is_wheel_disabled:bool Solidtype.Check.value ->
     ?is_required:bool Solidtype.Check.value ->
     ?name:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->

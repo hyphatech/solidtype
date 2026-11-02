@@ -1,9 +1,14 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.ColorChannelField
-module Number_field = Solidtype_kobalte.NumberField
 module Field_context = Solidtype_kobalte.Types.NumberFieldContextValue
 module Color = Solidtype_kobalte.Types.Color
+
+(* Whether the wheel steps the field, which its root is told and its input
+   reads, Kobalte's own wheel being off. *)
+module Wheel = Solidtype.Context.Make_optional (struct
+  type t = unit -> bool
+end)
 
 module Root = struct
   module Props = struct
@@ -28,6 +33,8 @@ module Root = struct
 
     external on_change : t -> ((Color.t -> unit)[@u]) option = "onChange"
     [@@mel.get]
+
+    external change_on_wheel : t -> bool option = "changeOnWheel" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -68,12 +75,25 @@ module Root = struct
         match Props.on_change props with Some f -> f c [@u] | None -> ()
       end
     in
-    <Kobalte.Root
-      channel=(fun () -> Props.channel props)
-      ?value=(fun () -> current ())
-      on_change=changed
-      props=(S.omit props [| "channel"; "value"; "defaultValue"; "onChange" |])
-    />
+    let change_on_wheel () =
+      Option.value (Props.change_on_wheel props) ~default:true
+    in
+    <Wheel.Provider value=(fun () -> change_on_wheel)>
+      <Kobalte.Root
+        channel=(fun () -> Props.channel props)
+        ?value=(fun () -> current ())
+        on_change=changed
+        change_on_wheel=(fun () -> false)
+        props=(S.omit props
+                 [|
+                   "channel";
+                   "value";
+                   "defaultValue";
+                   "onChange";
+                   "changeOnWheel";
+                 |])
+      />
+    </Wheel.Provider>
 
   let component = Jsx.component make
 end
@@ -83,18 +103,31 @@ module Input = struct
     include Kobalte.Input.Props
 
     type t
+
+    external on_wheel : t -> ((Dom.wheelEvent -> unit)[@u]) option = "onWheel"
+    [@@mel.get]
   end
 
   let make (props : Props.t) =
     (* Kobalte's channel field is its number field, whose input tells its
        value now as the text it shows once the value changes. *)
     let field = Number_field.use_number_field_context () in
+    let wheel_on = Wheel.use () in
+    let change_on_wheel () =
+      match wheel_on with Some on -> on () | None -> true
+    in
     <Kobalte.Input
+      on_wheel=(fun e ->
+                 Number_field.wheel ~change_on_wheel:(change_on_wheel ()) field
+                   e;
+                 match Props.on_wheel props with
+                 | Some f -> f e [@u]
+                 | None -> ())
       ?aria_valuenow=(fun () ->
                        let v = S.get (Field_context.raw_value field) in
                        if Float.is_nan v then None
                        else Some (Js.Float.toString v))
-      props=(S.omit props [||])
+      props=(S.omit props [| "onWheel" |])
     />
 
   let component = Jsx.component make

@@ -65,7 +65,8 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
   [`Color_channel_field`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_channel_field/index.html),
   [`Color_field`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_field/index.html),
   [`Color_slider`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_slider/index.html),
-  [`Color_swatch`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_swatch/index.html).
+  [`Color_swatch`](/solidtype/reference/solidtype-headless/Solidtype_headless/Color_swatch/index.html),
+  [`Number_field`](/solidtype/reference/solidtype-headless/Solidtype_headless/Number_field/index.html).
 
 ## solidtype-heroui
 

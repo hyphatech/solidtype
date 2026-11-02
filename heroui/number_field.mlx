@@ -1,6 +1,6 @@
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
-module Kobalte = Solidtype_kobalte.NumberField
+module Kobalte = Solidtype_headless.Number_field
 module I18n = Solidtype_kobalte.I18n
 module Types = Solidtype_kobalte.Types
 
@@ -234,8 +234,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(min_value : float option) ?(max_value : float option)
     ?(step : float option) ?(is_disabled : bool option)
     ?(is_invalid : bool = false) ?(is_read_only : bool = false)
-    ?(is_required : bool = false) ?(name : string option)
-    ?(aria_label : string option) ?(class_ : string option)
+    ?(is_wheel_disabled : bool = false) ?(is_required : bool = false)
+    ?(name : string option) ?(aria_label : string option)
+    ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
     ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
   (* A field is disabled as it says, else as its fieldset is. *)
@@ -330,6 +331,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       required=(fun () -> is_required ())
       disabled=(fun () -> disabled ())
       read_only=(fun () -> is_read_only ())
+      change_on_wheel=(fun () -> not (is_wheel_disabled ()))
       ?name
       ?aria_label
       ?format_options

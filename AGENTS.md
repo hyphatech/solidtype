@@ -78,6 +78,7 @@ headless/            solidtype-headless: the components Kobalte lacks, one
   color_channel_field
                      stepped by the keys and the wheel, and a channel's
                      field that tells its number and only a change
+  number_field       Kobalte's, its wheel turned as React Aria's turns it
 rhp/                 solidtype-rhp: rhp's charts, generated where a rule maps
                      rhp's declarations whole: solidtype_rhp, and the types
                      it names, types

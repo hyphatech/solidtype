@@ -1,0 +1,97 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.NumberField
+module Field_context = Solidtype_kobalte.Types.NumberFieldContextValue
+
+external ctrl_key : Dom.wheelEvent -> bool = "ctrlKey" [@@mel.get]
+external delta_x : Dom.wheelEvent -> float = "deltaX" [@@mel.get]
+external delta_y : Dom.wheelEvent -> float = "deltaY" [@@mel.get]
+external target : Dom.wheelEvent -> Dom.element = "currentTarget" [@@mel.get]
+external prevent : Dom.wheelEvent -> unit = "preventDefault" [@@mel.send]
+external stop : Dom.wheelEvent -> unit = "stopPropagation" [@@mel.send]
+external read_only : Dom.element -> bool = "readOnly" [@@mel.get]
+external disabled : Dom.element -> bool = "disabled" [@@mel.get]
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+
+let wheel ~change_on_wheel field e =
+  let input = target e in
+  let focused =
+    match Js.Null.toOption active with Some a -> a == input | None -> false
+  in
+  if
+    change_on_wheel && focused
+    && not (read_only input || disabled input || ctrl_key e)
+  then begin
+    prevent e;
+    stop e;
+    let dx = delta_x e and dy = delta_y e in
+    if Float.abs dy > Float.abs dx then
+      let by = S.get (Field_context.step field) in
+      Field_context.vary_value field (if dy > 0. then by else -.by)
+  end
+
+(* Whether the wheel steps the field, which its root is told and its input
+   reads, Kobalte's own wheel being off. *)
+module Wheel = Solidtype.Context.Make_optional (struct
+  type t = unit -> bool
+end)
+
+module Root = struct
+  module Props = struct
+    include Kobalte.Root.Props
+
+    type t
+
+    external change_on_wheel : t -> bool option = "changeOnWheel" [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let change_on_wheel () =
+      Option.value (Props.change_on_wheel props) ~default:true
+    in
+    <Wheel.Provider value=(fun () -> change_on_wheel)>
+      <Kobalte.Root
+        change_on_wheel=(fun () -> false)
+        props=(S.omit props [| "changeOnWheel" |])
+      />
+    </Wheel.Provider>
+
+  let component = Jsx.component make
+end
+
+module Input = struct
+  module Props = struct
+    include Kobalte.Input.Props
+
+    type t
+
+    external on_wheel : t -> ((Dom.wheelEvent -> unit)[@u]) option = "onWheel"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let field = Kobalte.use_number_field_context () in
+    let wheel_on = Wheel.use () in
+    let change_on_wheel () =
+      match wheel_on with Some on -> on () | None -> true
+    in
+    <Kobalte.Input
+      on_wheel=(fun e ->
+                 wheel ~change_on_wheel:(change_on_wheel ()) field e;
+                 match Props.on_wheel props with
+                 | Some f -> f e [@u]
+                 | None -> ())
+      props=(S.omit props [| "onWheel" |])
+    />
+
+  let component = Jsx.component make
+end
+
+module DecrementTrigger = Kobalte.DecrementTrigger
+module Description = Kobalte.Description
+module ErrorMessage = Kobalte.ErrorMessage
+module HiddenInput = Kobalte.HiddenInput
+module IncrementTrigger = Kobalte.IncrementTrigger
+module Label = Kobalte.Label
+
+let use_number_field_context = Kobalte.use_number_field_context
