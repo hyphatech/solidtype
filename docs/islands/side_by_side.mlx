@@ -31,16 +31,57 @@ external observe : observer -> Dom.htmlDivElement -> watched -> unit = "observe"
 [@@mel.send]
 
 external disconnect : observer -> unit = "disconnect" [@@mel.send]
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 
-(* What one side shows of the element [compared] finds in it: each attribute
-   and its value. *)
+external by_id : Dom.htmlDivElement -> string -> Dom.element Js.null
+  = "querySelector"
+[@@mel.send]
+
+external escape : string -> string = "escape" [@@mel.scope "CSS"]
+
+(* An attribute whose value is ids of other elements, which each framework
+   makes its own way: it is shown as the parts they are, by their data-slot,
+   or their tag where they have none. *)
+let names_others = function
+  | "aria-labelledby" | "aria-describedby" | "aria-controls" | "aria-owns"
+  | "aria-activedescendant" | "for" ->
+      true
+  | _ -> false
+
+let part host id =
+  match Js.Null.toOption (by_id host ("#" ^ escape id)) with
+  | Some e -> (
+      match Js.Null.toOption (attribute e "data-slot") with
+      | Some slot -> slot
+      | None -> String.lowercase_ascii (tag_name e))
+  | None -> "(elsewhere)"
+
+(* An element a key reaches whatever its tabindex, as a browser's own. *)
+let focusable e =
+  match tag_name e with
+  | "BUTTON" | "INPUT" | "SELECT" | "TEXTAREA" -> true
+  | "A" -> Option.is_some (Js.Null.toOption (attribute e "href"))
+  | _ -> false
+
+(* What one side shows of the element [compared] finds in it: whether a key
+   reaches it natively, and each attribute and its value. *)
 let shown compared host =
   match Js.Null.toOption (query host compared) with
-  | None -> [||]
+  | None -> (false, [||])
   | Some e ->
-      attribute_names e
-      |> Array.map (fun name ->
-          (name, Option.value (Js.Null.toOption (attribute e name)) ~default:""))
+      ( focusable e,
+        attribute_names e
+        |> Array.map (fun name ->
+            let v =
+              Option.value (Js.Null.toOption (attribute e name)) ~default:""
+            in
+            if names_others name then
+              ( name,
+                String.split_on_char ' ' v
+                |> List.filter (fun id -> not (String.equal id ""))
+                |> List.map (part host)
+                |> String.concat " " )
+            else (name, v)) )
 
 let value_of name pairs =
   Option.map snd (Array.find_opt (fun (n, _) -> String.equal n name) pairs)
@@ -58,23 +99,62 @@ let rows solidtype react =
     names
 
 (* What each framework writes for itself and no style reads: Solid's
-   hydration key, React Aria's markers and the id it generates. *)
-let internal = function
-  | "data-hk" | "data-rac" | "data-react-aria-pressable" | "data-collection"
-  | "id" ->
+   hydration key, React Aria's markers and the id it generates, React's
+   attribute of a controlled input's value; and Kobalte's own state, present
+   and empty, where React Aria writes none. *)
+let internal name solidtype react =
+  match (name, solidtype, react) with
+  | ( ( "data-hk" | "data-rac" | "data-react-aria-pressable" | "data-collection"
+      | "id" ),
+      _,
+      _ ) ->
       true
+  | _, Some "", None -> String.starts_with ~prefix:"data-" name
+  (* React writes a controlled input's value as an attribute too. *)
+  | "value", None, Some _ -> true
   | _ -> false
 
-(* A class is a set of words, whatever their order and spacing. *)
+(* A class is a set of words, whatever their order and spacing, but React
+   Aria's default class for each of its components, which no style reads. *)
 let words s =
   String.split_on_char ' ' s
-  |> List.filter (fun w -> not (String.equal w ""))
+  |> List.filter (fun w ->
+      not (String.equal w "" || String.starts_with ~prefix:"react-aria-" w))
   |> List.sort_uniq String.compare
 
-let same name a b =
-  match (a, b) with
-  | Some a, Some b when String.equal name "class" ->
-      List.equal String.equal (words a) (words b)
+(* An opaque colour written with its alpha, rgba(4, 133, 247, 1), as a
+   browser writes it back without, rgb(4, 133, 247). *)
+let opaque d =
+  let n = String.length d in
+  if String.ends_with ~suffix:", 1)" d then
+    match String.index_opt d '(' with
+    | Some i when i >= 4 && String.equal (String.sub d (i - 4) 4) "rgba" ->
+        String.sub d 0 (i - 1) ^ String.sub d i (n - i - 4) ^ ")"
+    | Some _ | None -> d
+  else d
+
+(* A style is a set of declarations, however a framework spaces and ends
+   them, and writes an opaque colour. *)
+let declarations s =
+  String.split_on_char ';' s
+  |> List.map (fun d ->
+      String.split_on_char ':' d |> List.map String.trim |> String.concat ":"
+      |> opaque)
+  |> List.filter (fun d -> not (String.equal d ""))
+  |> List.sort_uniq String.compare
+
+let same ~focusable name a b =
+  match (name, a, b) with
+  | "class", Some a, Some b -> List.equal String.equal (words a) (words b)
+  | "class", Some c, None | "class", None, Some c -> (
+      match words c with [] -> true | _ :: _ -> false)
+  | "style", Some a, Some b ->
+      List.equal String.equal (declarations a) (declarations b)
+  | "aria-roledescription", Some a, Some b ->
+      String.equal (String.lowercase_ascii a) (String.lowercase_ascii b)
+  | "aria-disabled", (Some "false" | None), (Some "false" | None) -> true
+  | "tabindex", (Some "0" | None), (Some "0" | None) ->
+      focusable || Option.equal String.equal a b
   | _ -> Option.equal String.equal a b
 
 let cell = function
@@ -85,8 +165,8 @@ let cell = function
    port, [react] renders HeroUI's React component into its host, and is run
    again whenever what it reads changes; [compared] finds the element each
    frame is compared by, its first by default. Below them, each attribute of
-   the two elements: a row marked where they differ, and dimmed where it is a
-   framework's own. *)
+   the two elements, compared as the twin tests compare them: a row marked
+   where they differ, and dimmed where it is a framework's own. *)
 let%component make ?(compared : string = ":scope > *")
     ~(solidtype : Jsx.element) ~(react : Dom.htmlDivElement -> unit) () =
   let table, set_table = S.create_signal [||] in
@@ -95,7 +175,12 @@ let%component make ?(compared : string = ":scope > *")
   let read () =
     match (!solidtype_host, !react_host) with
     | Some s, Some r ->
-        S.set set_table (rows (shown (compared ()) s) (shown (compared ()) r))
+        let s_focusable, s_shown = shown (compared ()) s in
+        let r_focusable, r_shown = shown (compared ()) r in
+        S.set set_table
+          (Array.map
+             (fun (name, a, b) -> (name, a, b, s_focusable && r_focusable))
+             (rows s_shown r_shown))
     | _ -> ()
   in
   (* The observer is made once mounted: the page is also prerendered, where
@@ -153,10 +238,10 @@ let%component make ?(compared : string = ":scope > *")
       </thead>
       <tbody>
         <For each=(fun () -> S.get table)>
-          (fun (name, a, b) _ ->
+          (fun (name, a, b, focusable) _ ->
             let marked =
-              if internal name then "text-muted"
-              else if same name a b then ""
+              if internal name a b then "text-muted"
+              else if same ~focusable name a b then ""
               else "bg-warning-soft"
             in
             <tr class_=marked>
