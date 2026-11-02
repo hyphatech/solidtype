@@ -41,15 +41,21 @@ let run_script tagged =
 
 let () =
   Jest.describe "hydrate" (fun () ->
-      Jest.test "keeps the server's nodes, and makes its handlers live"
-        (fun () ->
+      Jest.test
+        "keeps the server's nodes, a function child's too, and makes its \
+         handlers live" (fun () ->
           run_script (inject "script");
           set_inner_html body ("<div id=\"root\">" ^ inject "html" ^ "</div>");
           let button = query "button" in
+          let drawn_node = query "b" in
           let unmount = Web.hydrate Island.make (query "#root") in
           let buttons = length (query_all "button") in
           let kept = query "button" == button in
+          let drawn_kept = query "b" == drawn_node in
+          let drawn = text (query "b") in
           click button;
           let handled = !Island.clicks in
           unmount ();
-          E.(expect (buttons, kept, handled) |> toEqual (1, true, 1))))
+          E.(
+            expect (buttons, kept, handled, drawn_kept, drawn)
+            |> toEqual (1, true, 1, true, "drawn"))))

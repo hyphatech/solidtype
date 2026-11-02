@@ -28,6 +28,18 @@ external fragment : element array -> element = "%identity"
     given, as JSX's [<>...</>] is: Solid renders an array of elements in order,
     as one. *)
 
+type 'state children
+(** A component's children that are elements, or a function of ['state] that
+    draws them, as HeroUI's render props are: a component takes them as
+    [~(children : state Jsx.children)], and a caller gives either,
+    [<Button>"Save"</Button>] or
+    [<Button>(fun s -> if S.get s.is_pressed then ... else ...)</Button>]. *)
+
+val draw : 'state children -> 'state -> content
+(** [draw children state] is [children] as they are, or what their function
+    draws of [state], read where it is written: in a thunk, Solid tracks both
+    the children and what the function reads. *)
+
 (** A value that stands in an element's place among a component's children,
     never rendered, as Solid's [Match] stands among a [Switch]'s: the component
     resolves its children, {!Solid.children}, and reads the values among them in

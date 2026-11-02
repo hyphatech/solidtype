@@ -6,6 +6,15 @@ module Jsx = Solidtype.Jsx
 
 let clicks = ref 0
 
+(* A tag whose children are drawn of its state, by a function the page gives. *)
+module Tag = struct
+  type state = { label : string S.accessor }
+
+  let%component make ~(children : state Jsx.children) () =
+    let label, _ = S.create_signal "drawn" in
+    <span>(fun () -> Jsx.draw (children ()) { label })</span>
+end
+
 let make () =
   let count, set_count = S.create_signal 0 in
   <div>
@@ -17,4 +26,5 @@ let make () =
       "add"
     </button>
     <p>(fun () -> Jsx.int (S.get count))</p>
+    <Tag>(fun s -> <b>(fun () -> Jsx.string (S.get s.label))</b>)</Tag>
   </div>

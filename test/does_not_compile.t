@@ -150,7 +150,7 @@ A read passed as a component's prop.
   3 |   <Label text=(if Solidtype.Solid.get count = 1 then "time" else "times") />
                                                            ^^^^^^
   Error: This constant has type string but an expression was expected of type
-           unit -> 'a
+           unit -> string
          Hint: Did you forget to wrap the expression using fun () ->?
   [1]
 
@@ -234,16 +234,11 @@ Children whose type does not agree with another prop's.
   >   <Each each=(fun () -> [| "a"; "b" |])>(fun (n : int) -> <li>(fun () -> Solidtype.Jsx.int n)</li>)</Each>
   > EOF
   $ build
-  File "case.mlx", line 2, characters 2-106:
+  File "case.mlx", line 2, characters 27-30:
   2 |   <Each each=(fun () -> [| "a"; "b" |])>(fun (n : int) -> <li>(fun () -> Solidtype.Jsx.int n)</li>)</Each>
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type
-           (int -> Solidtype.Jsx.element, [> `render ])
-           Solidtype.Check.children
-         but an expression was expected of type
-           (string -> Solidtype.Jsx.element, [ `render ])
-           Solidtype.Check.children
-         Type int is not compatible with type string
+                                 ^^^
+  Error: This constant has type string but an expression was expected of type
+           int
   [1]
 
 A function passed by name where a prop takes a function, which would be
@@ -258,13 +253,41 @@ called as a thunk.
   2 | let make () = <Each each=(fun () -> [| "a" |])>render</Each>
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: This expression has type
-           (string -> Solidtype.Jsx.element, [> `nodes ])
-           Solidtype.Check.children
+           ('a -> Solidtype.Jsx.element, [> `nodes ]) Solidtype.Check.children
          but an expression was expected of type
-           (string -> Solidtype.Jsx.element, [ `render ])
-           Solidtype.Check.children
+           ('a -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children
          The second variant type does not allow tag(s) `nodes
   [1]
+
+Children of state, given a function that reads a field its state lacks, and
+one that takes a field's accessor for its value.
+
+  $ cat > tag.mlx <<'EOF'
+  > type state = { label : string Solidtype.Solid.accessor }
+  > let%component make ~(children : state Solidtype.Jsx.children) () =
+  >   <span>(fun () -> Solidtype.Jsx.draw (children ()) { label = (fun [@u] () -> "x") })</span>
+  > EOF
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Tag>(fun s -> <b>(fun () -> Solidtype.Jsx.int s.count)</b>)</Tag>
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 63-68:
+  1 | let make () = <Tag>(fun s -> <b>(fun () -> Solidtype.Jsx.int s.count)</b>)</Tag>
+                                                                     ^^^^^
+  Error: This expression has type Tag.state
+         There is no field count within type Tag.state
+  [1]
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Tag>(fun s -> <b>(fun () -> Solidtype.Jsx.string s.label)</b>)</Tag>
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 64-71:
+  1 | let make () = <Tag>(fun s -> <b>(fun () -> Solidtype.Jsx.string s.label)</b>)</Tag>
+                                                                      ^^^^^^^
+  Error: The field access s.label has type (unit -> string [@u])
+         but an expression was expected of type string
+  [1]
+  $ rm tag.mlx
 
 A function given to an element as a child.
 
@@ -366,12 +389,11 @@ An option given to Show, which Solid would read for truth.
   >   <Solidtype.Show when_=(fun () -> user ())><p>"hello"</p></Solidtype.Show>
   > EOF
   $ build
-  File "case.mlx", line 2, characters 24-43:
+  File "case.mlx", line 2, characters 35-42:
   2 |   <Solidtype.Show when_=(fun () -> user ())><p>"hello"</p></Solidtype.Show>
-                              ^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type string option Solidtype.Check.value
-         but an expression was expected of type bool Solidtype.Check.value
-         Type string option is not compatible with type bool
+                                         ^^^^^^^
+  Error: This expression has type string option
+         but an expression was expected of type bool
   [1]
 
 A prop omit is given that the component does not have.
@@ -395,7 +417,7 @@ A Dynamic given no props, which its component needs.
   File "case.mlx", line 1, characters 14-73:
   1 | let make () = <Solidtype.Dynamic component=(fun () -> Label.component) />
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type props:Label.Props.t -> unit
+  Error: This expression has type props:'a -> unit
          but an expression was expected of type unit
          because it is in the result of a conditional with no else branch
   Hint: This function application is partial, maybe some arguments are missing.
@@ -411,8 +433,8 @@ rest of a component's props.
   File "case.mlx", line 1, characters 75-77:
   1 | let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") props=42 />
                                                                                  ^^
-  Error: The value solidtype__props has type int
-         but an expression was expected of type 'a Solidtype.Solid.rest
+  Error: The constant 42 has type int but an expression was expected of type
+           'a Solidtype.Solid.rest
   [1]
 
 A component given the rest of another component's props, which only its own
@@ -427,7 +449,7 @@ props or the rest a component passes on, [Props.others], can be spread on.
   File "case.mlx", line 3, characters 24-54:
   3 |   <Label text="x" props=(Props.omit props [| Shout |]) />
                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: The value solidtype__props has type Props.t Solidtype.Solid.rest
+  Error: This expression has type Props.t Solidtype.Solid.rest
          but an expression was expected of type
            Label.Props.t Solidtype.Solid.rest
          Type Props.t is not compatible with type Label.Props.t
@@ -533,8 +555,8 @@ A function given where a thunk belongs, which cannot be called as one.
   File "case.mlx", line 1, characters 26-38:
   1 | let make () = <Label text=(fun s -> s) />
                                 ^^^^^^^^^^^^
-  Error: The value solidtype__text has type 'a -> 'a
-         but an expression was expected of type string Solidtype.Check.value
+  Error: This expression should not be a function, the expected type is
+         string Solidtype.Check.value
   [1]
 
 A changing value passed by its name where a thunk belongs: a name is passed
@@ -549,7 +571,7 @@ as it is, so its type, a function, is not the value's.
   File "case.mlx", line 3, characters 14-19:
   3 |   <Label text=count />
                     ^^^^^
-  Error: The value solidtype__text has type unit -> string
+  Error: The value count has type unit -> string
          but an expression was expected of type string Solidtype.Check.value
   [1]
 
@@ -608,15 +630,12 @@ A single-value Select given a list for its value.
   >     value=(fun () -> Js.Nullable.return [| "a" |]) />
   > EOF
   $ build
-  File "case.mlx", line 3, characters 23-80:
+  File "case.mlx", line 3, characters 37-76:
   3 |   <Select.Root options=(fun () -> [| Solidtype_kobalte.Types.Either.left "a" |])
-                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type
-           (string, 'a) Solidtype_kobalte.Types.either array
-           Solidtype.Check.value
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: This expression has type (string, 'a) Solidtype_kobalte.Types.either
          but an expression was expected of type
-           (string array, 'b) Solidtype_kobalte.Types.either array
-           Solidtype.Check.value
+           (string array, 'b) Solidtype_kobalte.Types.either
          Type string is not compatible with type string array
   [1]
 
@@ -651,7 +670,7 @@ An optional prop given where the prop is required, which may then be absent.
   File "case.mlx", line 1, characters 27-47:
   1 | let make () = <Label ?text=(fun () -> Some "x") />
                                  ^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type string Solidtype.Check.value option
+  Error: This expression has type 'a Solidtype.Check.value option
          but an expression was expected of type string Solidtype.Check.value
   [1]
 
@@ -665,7 +684,7 @@ An optional prop given a thunk of a value that is no option.
   1 | let make () = <Label text=(fun () -> "x") ?count=(fun () -> 3) />
                                                                   ^
   Error: The constant 3 has type int but an expression was expected of type
-           'a option
+           int option
   [1]
 
 An optional prop given a value, not a thunk of an option.
@@ -729,13 +748,12 @@ by it, as TSX's Omit types a part: a switch's change is its state.
   > let make () = <Toggle on_change=(fun (_ : Dom.event) -> ()) />
   > EOF
   $ build
-  File "case.mlx", line 1, characters 32-59:
+  File "case.mlx", line 1, characters 37-52:
   1 | let make () = <Toggle on_change=(fun (_ : Dom.event) -> ()) />
-                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: The value solidtype__on_change has type Dom.event -> unit
-         but an expression was expected of type bool -> unit
-         Type Dom.event = Dom._baseClass Dom.event_like
-         is not compatible with type bool
+                                           ^^^^^^^^^^^^^^^
+  Error: This pattern matches values of type
+           Dom.event = Dom._baseClass Dom.event_like
+         but a pattern was expected which matches values of type bool
   [1]
   $ rm toggle.mlx
 

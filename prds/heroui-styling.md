@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stages 1, 2, 3a and 3b have landed.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a and 3b have landed, and stage 4's ground, `Jsx.children` and a function child typed by its check, has.
 Date: 2026-11-02
 
 ## The problem
@@ -19,9 +19,12 @@ switches and motion apply unchanged. What falls short is what a part takes:
   `Close_button.Icon` and `List_box.Load_more_item`, take no `class_` at all.
   The headless parts already take every attribute, by hand.
 - **A part cannot be drawn as another element or component.** HeroUI's
-  `render` puts a router's link or an animated element in a part's place;
+  `render`, a function of the part's props and state, puts an animated
+  element in a part's place, Motion's in its Composition page's example;
   Kobalte does the same with `as`, which `generate/kobalte.ts` leaves out
-  with the rest of `polymorphic`.
+  with the rest of `polymorphic`. A router's link needs none of it here:
+  Solid's router takes every plain same-origin `<a>` as its own unless
+  told `explicitLinks`.
 - **A part's state reaches a caller only as attributes.** HeroUI gives
   children and `className` as functions of `isPressed`, `isSelected`; only a
   list item's `render` does so here.
@@ -67,11 +70,13 @@ function of state.
    Accepted when: a test gives every part `on_click`, `on_key_down`, a `ref`,
    `style` and `title`, finds each on its element, and the part's own
    behaviour holds.
-3. **A router's link as a `Link`.** `<Link as_=Router_link href="/about">`
-   draws the router's anchor with HeroUI's classes, state and Kobalte's
-   behaviour.
-   Accepted when: the component given receives the part's props, and a part
-   given none draws its own element as today.
+3. **An animated element as a `Button`.** `<Button as_=(fun p s ->
+   <Motion.Button props=p animate=(fun () -> ...s.is_pressed ()...) />)>`
+   draws Motion's button with HeroUI's classes, state and Kobalte's
+   behaviour, and animates as it is pressed.
+   Accepted when: the function given receives the part's props, typed as the
+   part's element's, and its state; a component it draws checks its own
+   props; and a part given none draws its own element as today.
 4. **Children of the button's state.** `<Button>(fun s -> if s.is_pressed ()
    then ... else ...)</Button>` changes as it is pressed.
    Accepted when: each part HeroUI gives a render function takes children
@@ -94,8 +99,9 @@ function of state.
   rests on -- a Kobalte option, an id another part names, a state it writes
   -- is never replaced by the caller's; any other the caller gives wins, as
   React Aria's `mergeProps` lets it.
-- **FR-3** A part that draws an element can be given a component to draw in
-  its place, which receives the part's props.
+- **FR-3** A part that draws an element can be given a function to draw in
+  its place, which receives the part's props and its state, and whatever it
+  draws is checked as any element is.
 - **FR-4** A part HeroUI gives a render function takes its children as a
   function of its state.
 - **FR-5** The theme is chosen, resolved, written and kept as HeroUI's
@@ -153,19 +159,61 @@ in the ppx's registry for what one attribute says.
 
 ### `as_`: Kobalte's polymorphism, HeroUI's `render`
 
-The Kobalte binding takes `as` on every part, `?as_:_ Jsx.component`, and
-a port passes it to the Kobalte part beneath, or draws it by `Dynamic`
-where it draws a plain element. The component receives the part's props,
-`ref` and handlers among them, and must spread them on one element of the
-same kind -- HeroUI's rules for `render`, said in each `.mli`.
+`as_` is a function of the part's props, which Solid takes for a
+component, written where it is used, as HeroUI's `render` is:
 
-Rejected: **`render`, HeroUI's name** -- the ppx gives `render=f` to a
-component's function child already (rhp's slat), and a second meaning
-would be read wrongly; Kobalte's and Solid's `Dynamic` both take a
-component, not a function of props and state, so `as_` is what the part
-beneath understands. **State as `as_`'s second argument** -- Kobalte gives
-none; the props carry the state attributes, and scenario 4 gives it
-otherwise.
+```ocaml
+<Button as_=(fun p s ->
+           <Motion.Button props=p
+             animate=(fun () -> if s.is_pressed () then pressed else rest) />)>
+  "Press me"
+</Button>
+```
+
+Each element of `Html` gains `props`, its attributes as one value a spread
+takes, generated with the rest. The Kobalte binding takes `as` on every
+part that draws an element, `?as_:(Html.A.props -> Jsx.element)`, and a
+port passes it to the Kobalte part beneath, or, where it draws a plain
+element, draws by Solid's `Dynamic`, given the function or its own tag, as
+Kobalte's parts draw themselves. A port's part that has a state record
+(*Children of state*) takes it as the function's second argument, built
+over the props Kobalte gives, as HeroUI gives `render` its render props.
+
+The check types the function, so `p` needs no annotation; `p` is abstract,
+only spread, so nothing reads it outside Solid's tracking; and whatever the
+function draws checks its own props, so a required one left out does not
+compile. Three of HeroUI's rules for `render` stay rules, said in each
+`.mli`, as HeroUI only warns of the first: draw an element of the part's
+kind, draw one, and spread `p` on it.
+
+The shapes weighed, each scored 1 to 5 and weighted by the repository's
+own priorities -- type safety 25, ergonomics where it is used 20, parity
+with HeroUI 15, simplicity 15, fidelity to Kobalte and Solid 10, risk 10,
+scope 5:
+
+| Shape | Total |
+|---|---|
+| **A function of the part's props, typed by its check** | **85** |
+| the same, and each element's spread typed by its element | 83 |
+| any component, `_ Jsx.component`, as Kobalte types `as` | 72 |
+| no `as_`: a router's link given Link's classes, as HeroUI's framework guide does | 72 |
+| a component of the element's props, an adapter named once | 66 |
+
+Rejected: **any component** -- a component that needs a prop nothing gives
+it compiles, against the rule that a prop left out does not, and a router's
+own props cannot pass through a part's check; **an adapter named once**,
+`Jsx.component (fun (p : Html.A.props) -> ...)` -- as sound as a function,
+and a definition and an annotation longer; **no `as_`** -- HeroUI's
+Composition page leads with Motion's button, which needs it; **each
+element's spread typed by its element**, which would refuse an `<a>` drawn
+for a `<button>` -- every spread of the library changes with it, and a part
+that draws one of two elements, the headless table's body on `<thead>` or a
+virtualized `<div>`, needs its props split or converted, a decision of its
+own; nothing of `as_` changes when it is taken. **`render`, HeroUI's name**
+-- the ppx gives `render=f` to a component's function child already (rhp's
+slat), and a second meaning would be read wrongly. **Two branches in a
+plain part**, its element and a call of the function -- each part's
+attributes written twice.
 
 ### Children of state
 
@@ -227,9 +275,14 @@ class, which restyles every instance at once.
   the element would beat. Test: each such part's test pins its classes,
   its BEM classes alone, and the documentation's build compiles each
   stylesheet.
-- **A part takes `as_`, Kobalte's `as`** (revises "Kobalte's building
-  blocks ... polymorphic ... are not bound"). Why: HeroUI's `render`, a
-  router's link in a link's place. Test: each port's `as_` in its test.
+- **A part that draws an element takes `as_`, a function of its element's
+  props** (revises "Kobalte's building blocks ... polymorphic ... are not
+  bound"), and of its state where it has a state record. Why: HeroUI's
+  `render`, an animated element in a part's place, typed so that what it
+  draws checks its own props. Test: `test/heroui/attributes_test.mlx`, every
+  part drawn by an `as_`, its classes and behaviour found on what it drew;
+  `test/does_not_compile.t`, an `as_` that draws a component missing a
+  required prop.
 
 ## Stages
 
@@ -248,11 +301,12 @@ class, which restyles every instance at once.
   that draw one of several elements, and those that set a handler on their
   element, each handler composed with the caller's; the attributes test
   over every part. Styling's "Not yet" goes.
-- [ ] 4. `as_` in the Kobalte binding and on every port's part; a
-  router-link example on Link's and Button's pages. Composition's "Not yet"
-  goes.
-- [ ] 5. Children of state on each part HeroUI gives a render function,
+- [ ] 4. Children of state on each part HeroUI gives a render function,
   tested against the React twin's render function.
+- [ ] 5. `Html`'s `props` per element; `as_` in the Kobalte binding and on
+  every port's part, given the state of stage 4 where the part has it;
+  Motion's button on Button's page, beside React's. Composition's "Not yet"
+  goes, and it says a router's link needs none.
 - [ ] 6. `Theme`, its example on the Theming page, tested in jsdom.
 - [ ] 7. A toast's motion under `data-reduce-motion`.
 - [ ] 8. Every component checked alike: each part's look a rule for its
@@ -264,13 +318,6 @@ class, which restyles every instance at once.
 `make test` and `make lint`; the attributes test over every part; each
 port's twin test unchanged; the docs pages' examples of `style`, `as_`, a
 state child and `Theme` built and seen in a browser beside heroui.com's.
-
-## Open
-
-- **Whether `as_` is typed by its element**, a component of a `<button>`'s
-  props for a button, or of any props. A typed one refuses an `<a>` where a
-  `<button>` belongs, as HeroUI only warns; it needs the element's props as
-  a type, which `Html` does not yet give. Blocks stage 4.
 
 ## Where the facts go
 

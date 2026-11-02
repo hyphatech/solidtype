@@ -533,18 +533,25 @@ let component map ~loc path args =
           in
           if List.is_empty bindings then make
           else
-            B.pexp_let ~loc Nonrecursive
-              (List.map
-                 (fun (name, (typ, expr)) ->
+            (* A function of the bound names, applied to their values: OCaml
+               types the function, the check in it, before its arguments, so
+               each value is typed as the check expects it, and a record field
+               a function child reads, [s.is_pressed], is found by its type.
+               OCaml evaluates arguments last first, so they are given last
+               first, and run in the order they are written. *)
+            let bindings = List.rev bindings in
+            B.pexp_apply ~loc
+              (List.fold_right
+                 (fun (name, (typ, _)) body ->
                    let pat = B.pvar ~loc name in
                    let pat =
                      match typ with
                      | Some typ -> B.ppat_constraint ~loc pat typ
                      | None -> pat
                    in
-                   B.value_binding ~loc ~pat ~expr)
-                 bindings)
-              make)
+                   B.pexp_fun ~loc Nolabel None pat body)
+                 bindings make)
+              (List.map (fun (_, (_, expr)) -> (Nolabel, expr)) bindings))
 
 (* A [Switch] whose only child is a thunk of a [match]: each case becomes a
    [Match], a case with variables a [Match.Keyed] given them, so the case's
@@ -775,7 +782,24 @@ let rec props_of ~loc = function
 
 (* Element children are a token in the check, so they never copy the
    elements; a function child is checked as the function, each of its kind. *)
-let is_nodes p = String.equal p.label "children" && p.arity = 0
+let either_state p =
+  match p.typ.ptyp_desc with
+  | Ptyp_constr
+      ( {
+          txt =
+            ( Ldot (Lident "Jsx", "children")
+            | Ldot (Ldot (Lident "Solidtype", "Jsx"), "children") );
+          _;
+        },
+        [ state ] )
+    when String.equal p.label "children" ->
+      Some state
+  | _ -> None
+
+let is_nodes p =
+  String.equal p.label "children"
+  && p.arity = 0
+  && Option.is_none (either_state p)
 
 (* The props module: an abstract type, one getter per prop -- a live read of
    Solid's props object, so Solid tracks it -- and the check. A function prop
@@ -859,11 +883,18 @@ let props_module ~loc ~element props =
       { description with pval_attributes = [ attribute ~loc "mel.obj" ] }
   in
   let checked p =
-    if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
-    else if String.equal p.label "children" then
-      [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
-    else if p.arity > 0 then p.typ
-    else [%type: [%t p.typ] Solidtype.Check.value]
+    match either_state p with
+    | Some state ->
+        [%type:
+          ( [%t state] -> Solidtype.Jsx.element,
+            [ `nodes | `render ] )
+          Solidtype.Check.children]
+    | None ->
+        if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
+        else if String.equal p.label "children" then
+          [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
+        else if p.arity > 0 then p.typ
+        else [%type: [%t p.typ] Solidtype.Check.value]
   in
   let check_param p =
     let checked = checked p in

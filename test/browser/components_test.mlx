@@ -65,6 +65,26 @@ module Save = struct
   [@@element button]
 end
 
+(* A badge that draws its children of its state, a record its caller reads by
+   field, the fields out of the caller's scope. *)
+module Badge = struct
+  type state = { count : int; label : string }
+
+  let%component make ~(children : state -> Jsx.element) () =
+    <span>(fun () -> Jsx.element (children { count = 3; label = "new" }))</span>
+end
+
+(* A toggle whose children are elements, or a function of its state. *)
+module Toggle_tag = struct
+  type state = { is_on : bool S.accessor }
+
+  let%component make ~(children : state Jsx.children) () =
+    let on, set_on = S.create_signal false in
+    <button on_click=(fun _ -> S.update set_on not)>
+      (fun () -> Jsx.draw (children ()) { is_on = on })
+    </button>
+end
+
 external attribute : Dom.element -> string -> string Js.null = "getAttribute"
 [@@mel.send]
 
@@ -174,6 +194,32 @@ let () =
                 (fun () -> Greeting.component)
                 (Greeting.Props.make ~name:"Di" ()));
           E.(expect (T.page ()) |> toBe "Hello, Di"));
+      Jest.test "a function child reads its state's fields by their names alone"
+        (fun () ->
+          T.render (fun () ->
+              <Badge>
+                (fun s ->
+                  <b>
+                    (fun () -> Jsx.string (s.label ^ string_of_int s.count))
+                  </b>)
+              </Badge>);
+          E.(expect (T.page ()) |> toBe "new3"));
+      Jest.test "children of either kind are drawn as elements" (fun () ->
+          T.render (fun () -> <Toggle_tag>"plain " <b>"tag"</b></Toggle_tag>);
+          E.(expect (T.page ()) |> toBe "plain tag"));
+      Jest.test "children of either kind are drawn of the state, as it changes"
+        (fun () ->
+          T.render (fun () ->
+              <Toggle_tag>
+                (fun s ->
+                  <b>
+                    (fun () ->
+                      Jsx.string (if S.get s.is_on then "on" else "off"))
+                  </b>)
+              </Toggle_tag>);
+          let before = T.page () in
+          T.click (T.by_role "button");
+          E.(expect (before, T.page ()) |> toEqual ("off", "on")));
       Jest.testPromise "SuspenseList reveals its Suspenses' children" (fun () ->
           T.render (fun () ->
               <SuspenseList reveal_order=`forwards>

@@ -9,11 +9,38 @@ module HydrationScript = Solidtype.HydrationScript
 module Assets = Solidtype.Assets
 module E = Jest.Expect
 
+(* A tag whose children are elements, or drawn of its state. *)
+module Tag = struct
+  type state = { label : string Solidtype.Solid.accessor }
+
+  let%component make ~(children : state Jsx.children) () =
+    <span>
+      (fun () -> Jsx.draw (children ()) { label = (fun[@u] () -> "drawn") })
+    </span>
+end
+
 let contains part s = Js.String.includes ~search:part s
 let hydration_keys html = Js.String.includes ~search:"data-hk" html
 
 let () =
   Jest.describe "on the server" (fun () ->
+      Jest.test "children of either kind are written as elements or of state"
+        (fun () ->
+          let html =
+            Server.render_to_string (fun () ->
+                <div>
+                  <Tag>"plain"</Tag>
+                  <Tag>
+                    (fun s ->
+                      <b>
+                        (fun () -> Jsx.string (Solidtype.Solid.get s.label))
+                      </b>)
+                  </Tag>
+                </div>)
+          in
+          E.(
+            expect (contains "plain" html, contains ">drawn</b>" html)
+            |> toEqual (true, true)));
       Jest.test "NoHydration renders its children without hydration keys"
         (fun () ->
           let html =

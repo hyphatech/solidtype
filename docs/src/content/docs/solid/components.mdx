@@ -103,6 +103,11 @@ A component may also take a function as its only child, which it calls, as
 `For` does: `~(children : item -> Jsx.element)`. A check names which kinds
 it takes: `[ `nodes ]` for elements, `[ `render ]` for a function, or both.
 
+Children of either kind, as HeroUI's render props are, are
+`~(children : state Jsx.children)`, drawn by `Jsx.draw (children ())
+state`. A caller gives elements, or a function that reads the state's
+fields by name, `(fun s -> if S.get s.is_on then ... else ...)`.
+
 A function prop that takes nothing is written `(fun _ -> ...)`, as
 `on_close` is above, which hides the panel and shows a button in its place: `(fun () -> ...)` is a thunk, which would be read as a
 value.

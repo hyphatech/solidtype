@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- A component may take children of either kind, elements or a function of
+  its state, `~(children : state Jsx.children)`, and draws them with
+  `Jsx.draw`.
+
+- A function child reads a record's fields by name, `s.is_on`, though the
+  record's module is not open, and a prop's type error points at the
+  caller's own expression rather than a name the ppx made.
+
 - A component given its element, `let%component ... [@@element button]`,
   takes that element's attributes after its own props and passes them on,
   its own props taking the place of the element's of the same name.

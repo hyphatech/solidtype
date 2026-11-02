@@ -49,6 +49,12 @@
     [?ref:(given : (Dom.htmlDivElement -> unit) option)], so the prop [ref]
     leaves the stdlib's [ref] to the body.
 
+    Children annotated [~(children : state Jsx.children)] are elements or a
+    function of [state], checked as either; the body draws them with
+    [Jsx.draw (children ()) state]. A function child is typed as the check
+    expects it before it is bound, so it reads a record's fields by their names,
+    [s.is_pressed], though the record's module is not open.
+
     Given the element it draws, [let%component make ... [@@element button]], its
     [check] takes each of that element's attributes after its own props, typed
     as [Solidtype.Html.Button] types them, for [others] to pass on. A prop the
