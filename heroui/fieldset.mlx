@@ -22,6 +22,7 @@ module Legend = struct
       props=(Props.others props)>
       (fun () -> children ())
     </legend>
+  [@@element legend]
 end
 
 module Group = struct
@@ -33,6 +34,7 @@ module Group = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Actions = struct
@@ -43,6 +45,7 @@ module Actions = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 let%component make ?(disabled : bool = false) ?(name : string option)
@@ -61,3 +64,4 @@ let%component make ?(disabled : bool = false) ?(name : string option)
       (fun () -> children ())
     </Context.Provider>
   </fieldset>
+[@@element fieldset]

@@ -186,8 +186,6 @@ ppx/                 ppx_solidtype: MLX's JSX lowered to the markers
   html_names         the attributes and props whose JavaScript name the
   kobalte_names      rule's inverse does not give, generated
   rhp_names
-  html_attributes    each element's attributes, and which are handlers,
-                     which a component given its element takes, generated
 vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   src/index          the plugin Vite runs: a .jsx module's markers rewritten
   src/rewrite        the markers rewritten into Solid's JSX
@@ -285,9 +283,10 @@ component's `Props.check` to its props under `if false`, which the
 compiler checks and Melange drops, and binds each prop that can hold JSX
 once, to name it in both. `let%component` writes a component's `Props`
 from its labelled parameters, and given the element it draws,
-`[@@element button]`, a check that takes the element's attributes after
-its own props, but those its own props name, as TSX's `Omit` types a part,
-by the table `generate/html.ts` writes, `ppx/html_attributes.ml`. The library's own components are `.mlx`
+`[@@element button]`, a check that ends in that element's,
+`Html.Button.check`, after its own props, which an application fills first,
+so an own prop takes the place of the element's of its name, as TSX's
+`Omit` types a part. The library's own components are `.mlx`
 too, lowered with `ppx_solidtype -internal`, which names the library's
 modules without `Solidtype.`, a name the library itself cannot use. Melange compiles the calls as
 calls, through one import of `vite-plugin-solidtype/markers`. The plugin

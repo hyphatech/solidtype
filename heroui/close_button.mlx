@@ -24,6 +24,7 @@ module Icon = struct
         fill_rule="evenodd"
       />
     </svg>
+  [@@element svg]
 end
 
 let%component make ?(variant : [ `default ] = `default)

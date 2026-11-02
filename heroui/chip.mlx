@@ -14,6 +14,7 @@ module Label = struct
       props=(Props.others props)>
       (fun () -> children ())
     </span>
+  [@@element span]
 end
 
 (* Text a chip is given is its label's, as HeroUI's React chip wraps a string
@@ -40,3 +41,4 @@ let%component make
       let c = children () in
       if text c then Jsx.element <Label>(fun () -> c)</Label> else c)
   </span>
+[@@element span]

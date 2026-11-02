@@ -101,6 +101,7 @@ module Header = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Body = struct
@@ -111,6 +112,7 @@ module Body = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Footer = struct
@@ -122,6 +124,7 @@ module Footer = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Icon = struct
@@ -141,6 +144,7 @@ module Icon = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
+  [@@element div]
 end
 
 module Heading = struct

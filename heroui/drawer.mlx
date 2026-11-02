@@ -255,6 +255,7 @@ module Header = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Body = struct
@@ -265,6 +266,7 @@ module Body = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Footer = struct
@@ -275,6 +277,7 @@ module Footer = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Heading = struct
@@ -293,6 +296,7 @@ module Handle = struct
       props=(Props.others props)>
       <div data_slot="drawer-handle-bar" />
     </div>
+  [@@element div]
 end
 
 module Close_trigger = struct

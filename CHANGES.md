@@ -6,6 +6,11 @@
   takes that element's attributes after its own props and passes them on,
   its own props taking the place of the element's of the same name.
 
+- A HeroUI port's part that draws a plain element -- a card's, an alert's,
+  a field's group, 114 in all -- takes every attribute of that element,
+  `style`, `title` and handlers among them, and passes it on, as HeroUI's
+  parts do.
+
 - `Segment`, `Trend_chip` and `Text_shimmer` have their look in stylesheets
   of their own, `segment.css`, `trend-chip.css` and `text-shimmer.css`,
   which `solidtype-heroui` ships beside its JavaScript; a rule for a part's

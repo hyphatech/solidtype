@@ -27,3 +27,4 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
         props=(Props.others props)>
         (fun () -> children ())
       </header>
+[@@element header]

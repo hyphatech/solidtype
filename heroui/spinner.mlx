@@ -57,3 +57,4 @@ let%component make
       </g>
     </svg>
   </span>
+[@@element span]

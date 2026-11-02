@@ -442,6 +442,7 @@ module Indicator = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
+  [@@element div]
 end
 
 module Content = struct
@@ -453,6 +454,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Title = struct

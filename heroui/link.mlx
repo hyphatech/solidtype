@@ -41,6 +41,7 @@ module Icon = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
+  [@@element span]
 end
 
 let%component make ~(href : string) ?(is_disabled : bool option)

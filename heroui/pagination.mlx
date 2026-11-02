@@ -68,6 +68,7 @@ module Summary = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Content = struct
@@ -80,6 +81,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </ul>
+  [@@element ul]
 end
 
 module Item = struct
@@ -91,6 +93,7 @@ module Item = struct
       props=(Props.others props)>
       (fun () -> children ())
     </li>
+  [@@element li]
 end
 
 module Link = struct
@@ -144,6 +147,7 @@ module Previous_icon = struct
         | Some c -> c
         | None -> Jsx.element (chevron left))
     </span>
+  [@@element span]
 end
 
 module Next_icon = struct
@@ -159,6 +163,7 @@ module Next_icon = struct
         | Some c -> c
         | None -> Jsx.element (chevron right))
     </span>
+  [@@element span]
 end
 
 module Ellipsis = struct
@@ -172,6 +177,7 @@ module Ellipsis = struct
       props=(Props.others props)>
       {js|…|js}
     </span>
+  [@@element span]
 end
 
 let%component make ?(size : [ `sm | `md | `lg ] = `md) ?(class_ : string option)
@@ -191,3 +197,4 @@ let%component make ?(size : [ `sm | `md | `lg ] = `md) ?(class_ : string option)
       (fun () -> children ())
     </Context.Provider>
   </nav>
+[@@element nav]

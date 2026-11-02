@@ -16,3 +16,4 @@ let%component make ?(orientation : [ `horizontal | `vertical ] option)
       (fun () -> children ())
     </div>
   </div>
+[@@element div]

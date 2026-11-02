@@ -35,3 +35,4 @@ let%component make ?(animation_type : [ `shimmer | `pulse | `none ] option)
              match class_ () with Some c -> base ^ " " ^ c | None -> base)
     props=(Props.others props)
   />
+[@@element div]

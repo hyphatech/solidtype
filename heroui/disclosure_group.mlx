@@ -107,3 +107,4 @@ let%component make ?(expanded_keys : string array option)
       (fun () -> children ())
     </Context.Provider>
   </div>
+[@@element div]

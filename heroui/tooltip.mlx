@@ -150,6 +150,7 @@ module Arrow = struct
                   </svg>)
         </div>;
       |]
+  [@@element div]
 end
 
 let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)

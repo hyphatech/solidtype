@@ -34,3 +34,4 @@ let%component make ?(is_required : bool option) ?(is_disabled : bool option)
         props=(Props.others props)>
         (fun () -> children ())
       </label>
+[@@element label]

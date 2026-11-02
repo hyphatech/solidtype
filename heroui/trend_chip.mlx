@@ -57,6 +57,7 @@ module Prefix = struct
              props=(Props.others props)>
              (fun () -> children ())
            </span>))
+  [@@element span]
 end
 
 module Suffix = struct
@@ -70,6 +71,7 @@ module Suffix = struct
              props=(Props.others props)>
              (fun () -> children ())
            </span>))
+  [@@element span]
 end
 
 module Indicator = struct
@@ -92,6 +94,7 @@ module Indicator = struct
                </span>
            | None ->
                own_arrow ?class_:(class_ ()) ~others:(Props.others props) trend))
+  [@@element span]
 end
 
 let%component make ?(trend : trend = `up) ?(size : size = `sm)

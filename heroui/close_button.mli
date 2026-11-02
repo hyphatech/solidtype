@@ -16,7 +16,8 @@ module Icon : sig
   module Props : sig
     type t
 
-    val check : ?props:t Solidtype.Solid.rest -> unit -> unit
+    val check :
+      ?props:t Solidtype.Solid.rest -> (unit -> unit) Solidtype.Html.Svg.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

@@ -48,6 +48,7 @@ module Heading = struct
         (fun () -> children ())
       </Button.Trigger.Provider>
     </h3>
+  [@@element h3]
 end
 
 module Trigger = struct
@@ -94,6 +95,7 @@ module Indicator = struct
         fill_rule="evenodd"
       />
     </svg>
+  [@@element svg]
 end
 
 module Content = struct
@@ -129,6 +131,7 @@ module Body = struct
         (fun () -> children ())
       </div>
     </div>
+  [@@element div]
 end
 
 let%component make ?(id : string option) ?(is_expanded : bool option)

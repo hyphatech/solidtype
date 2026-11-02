@@ -88,6 +88,7 @@ module Abbr = struct
       props=(Props.others props)>
       (fun () -> Jsx.string (symbol (key_value ())))
     </abbr>
+  [@@element abbr]
 end
 
 module Content = struct
@@ -97,6 +98,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </span>
+  [@@element span]
 end
 
 let%component make ?(variant : [ `default | `light ] option)
@@ -111,3 +113,4 @@ let%component make ?(variant : [ `default | `light ] option)
     props=(Props.others props)>
     (fun () -> children ())
   </kbd>
+[@@element kbd]

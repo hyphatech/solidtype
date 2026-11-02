@@ -11,3 +11,4 @@ let%component make ?(class_ : string option)
       | Some given -> given
       | None -> Solidtype.Jsx.string "No results found")
   </div>
+[@@element div]

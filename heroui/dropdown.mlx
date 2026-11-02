@@ -585,6 +585,7 @@ module Item_indicator = struct
                 <polyline points="1 9 7 14 15 4" />
               </svg>)
     </span>
+  [@@element span]
 end
 
 module Submenu_indicator = struct
@@ -624,6 +625,7 @@ module Submenu_indicator = struct
                 </svg>)
       </span>
     </Show>
+  [@@element span]
 end
 
 (* How far HeroUI's submenu is from its item, in pixels: past the menu's 6 of

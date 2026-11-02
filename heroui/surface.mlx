@@ -19,3 +19,4 @@ let%component make ?(variant : variant = `default) ?(class_ : string option)
       (fun () -> children ())
     </div>
   </Context.Provider>
+[@@element div]

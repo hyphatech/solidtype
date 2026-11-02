@@ -49,6 +49,7 @@ module Track = struct
       props=(Props.others props)>
       (fun () -> children ())
     </svg>
+  [@@element svg]
 end
 
 module Track_circle = struct
@@ -68,6 +69,7 @@ module Track_circle = struct
       stroke_width=(fun () -> number (stroke_width ()))
       props=(Props.others props)
     />
+  [@@element circle]
 end
 
 module Fill_circle = struct
@@ -100,6 +102,7 @@ module Fill_circle = struct
                   "rotate(-90 " ^ number (cx ()) ^ " " ^ number (cy ()) ^ ")")
       props=(Props.others props)
     />
+  [@@element circle]
 end
 
 let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)

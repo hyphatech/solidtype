@@ -64,6 +64,7 @@ module Track = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Fill = struct
@@ -75,6 +76,7 @@ module Fill = struct
       data_slot="meter-fill"
       props=(Props.others props)
     />
+  [@@element div]
 end
 
 let%component make ~(value : float) ?(min_value : float = 0.)

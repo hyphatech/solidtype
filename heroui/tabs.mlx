@@ -277,6 +277,7 @@ module Indicator = struct
     <Show when_=(fun () -> tab.selected ())>
       (fun () -> Jsx.element (indicator ()))
     </Show>
+  [@@element div]
 end
 
 module Separator = struct
@@ -288,6 +289,7 @@ module Separator = struct
       data_slot="tabs-separator"
       props=(Props.others props)
     />
+  [@@element span]
 end
 
 module Panel = struct

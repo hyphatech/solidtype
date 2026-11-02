@@ -137,6 +137,7 @@ module Value = struct
               (Jsx.fragment
                  (Array.of_list (List.map List_box.content (a.selected ())))))
     </span>
+  [@@element span]
 end
 
 module Indicator = struct

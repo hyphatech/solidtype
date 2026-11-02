@@ -32,6 +32,7 @@ module Separator = struct
       data_slot="toggle-button-group-separator"
       props=(Props.others props)
     />
+  [@@element span]
 end
 
 let%component make ?(selection_mode : [ `single | `multiple ] = `single)

@@ -84,6 +84,7 @@ module Group = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Search_icon = struct
@@ -118,6 +119,7 @@ module Search_icon = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
+  [@@element svg]
 end
 
 module Input = struct

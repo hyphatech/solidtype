@@ -52,3 +52,4 @@ let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
     />
   in
   match Slot.use () with Some slot -> slot drawn [@u] | None -> drawn ()
+[@@element div]

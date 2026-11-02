@@ -85,6 +85,9 @@ and under `data-reduce-motion="true"`.
 
 ## Not yet
 
-- **`style` and an element's other attributes on a part.** A part takes
-  `class_`, its own props and `data_` attributes; React's takes any of its
-  element's. Set a variable or an inline style on an element around it.
+- **`style` and an element's other attributes on every part.** A part
+  that draws a plain element -- a card's, an alert's, a field's group --
+  takes all of that element's attributes. One built on a Kobalte part -- a
+  button, a switch, a field's input -- takes `class_`, its own props and
+  `data_` attributes; set a variable or an inline style on an element
+  around it.

@@ -43,6 +43,7 @@ module Control = struct
       props=(Props.others props)>
       (fun () -> children ())
     </span>
+  [@@element span]
 end
 
 module Thumb = struct
@@ -53,6 +54,7 @@ module Thumb = struct
       data_slot="switch-thumb"
       props=(Props.others props)
     />
+  [@@element span]
 end
 
 let%component make ?(size : [ `lg | `md | `sm ] = `md)

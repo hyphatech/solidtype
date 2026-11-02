@@ -64,8 +64,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Ol.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

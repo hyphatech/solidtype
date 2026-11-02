@@ -40,8 +40,7 @@ module Summary : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -57,8 +56,7 @@ module Content : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Ul.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -74,8 +72,7 @@ module Item : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Li.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -152,8 +149,7 @@ module Previous_icon : sig
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Span.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -170,8 +166,7 @@ module Next_icon : sig
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Span.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -186,8 +181,7 @@ module Ellipsis : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Span.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -202,8 +196,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Nav.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

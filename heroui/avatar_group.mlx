@@ -125,3 +125,4 @@ let%component make ?(size : size = `md) ?(color : color option)
       </Show>
     </div>
   </Context.Provider>
+[@@element div]

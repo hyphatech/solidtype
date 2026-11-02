@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stages 1 and 2 have landed.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stages 1, 2 and 3a have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -114,17 +114,16 @@ let%component make ?(variant : variant = `primary) ?(on_click : ...) ...
 [@@element button]
 ```
 
-Its `Props.check` then takes that element's attributes after its own
-props, each typed by `Html.Button`, but those its own props name: an own
-prop is the component's, whatever the element means by the name, as HeroUI
-types a part, `Omit<DOMProps, keyof OwnProps> & OwnProps`. A switch's
-`on_change` takes its state and a part's `size` its variant, where the
-element's would take an event and a string; some twenty ports have such a
-prop, so a rule that held an own prop to the element's type would leave
-them out. The ppx writes the attributes itself, since `Html.Button.check`
-is a type that cannot drop a label, from a table `generate/html.ts`
-writes, `ppx/html_attributes.ml`: each element's attributes and which are
-handlers.
+Its `Props.check` then ends in that element's, `Html.Button.check`,
+after its own props, and an interface says so in one line, `(unit -> unit)
+Solidtype.Html.Button.check`. An own prop of an attribute's name is the
+component's, whatever the element means by it, as HeroUI types a part,
+`Omit<DOMProps, keyof OwnProps> & OwnProps`: OCaml lets a function type
+name a label twice and an application fills the first, so the own prop,
+which comes first, takes the caller's value and the element's is never
+filled. A switch's `on_change` takes its state and a part's `size` its
+variant, where the element's would take an event and a string; some twenty
+ports have such a prop.
 
 A part that sets a handler or a `ref` on its element names it as its own
 parameter and calls the caller's beside its own, as the headless parts do
@@ -134,6 +133,8 @@ own attribute by its prop, `class_`, passes it on itself.
 
 Rejected: **an own prop held to the element's type**, the first shape built
 -- some twenty ports, every field with a typed `on_change`, could not use it;
+**the element's attributes written out by the ppx, but those an own prop
+names**, the second -- each part's interface would have to list them all;
 **writing each check by hand**, as the headless parts are -- some
 260 parts, each a copy of its element's attributes the generator already
 writes; **a `style` prop alone** -- HeroUI's parts take every DOM prop, and
@@ -230,9 +231,14 @@ class, which restyles every instance at once.
 - [x] 2. `Segment`, `Trend_chip` and `Text_shimmer`'s look in stylesheets,
   shipped and imported into the `components` layer; the Theming page's
   `@source` of the library goes.
-- [ ] 3. Every port's part given its element, handlers composed,
-  `Close_button.Icon` and `List_box.Load_more_item` given `class_`; the
-  attributes test over every part. Styling's "Not yet" goes.
+- [x] 3a. Every port's part that spreads onto a plain element given that
+  element -- 114 of them -- `Close_button.Icon` and
+  `List_box.Load_more_item` taking a class so; the data-attributes test
+  gives each a title, found on its element.
+- [ ] 3b. The parts that spread onto a Kobalte part or another port, those
+  that draw one of several elements, and those that set a handler on their
+  element, each handler composed with the caller's; the attributes test
+  over every part. Styling's "Not yet" goes.
 - [ ] 4. `as_` in the Kobalte binding and on every port's part; a
   router-link example on Link's and Button's pages. Composition's "Not yet"
   goes.

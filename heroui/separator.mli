@@ -57,8 +57,7 @@ module Props : sig
     ?variant:[ `default | `secondary | `tertiary ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

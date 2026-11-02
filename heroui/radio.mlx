@@ -43,6 +43,7 @@ module Control = struct
       props=(Props.others props)>
       (fun () -> children ())
     </span>
+  [@@element span]
 end
 
 module Indicator = struct

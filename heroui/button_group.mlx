@@ -35,6 +35,7 @@ module Separator = struct
       data_slot="button-group-separator"
       props=(Props.others props)
     />
+  [@@element span]
 end
 
 let%component make
@@ -73,3 +74,4 @@ let%component make
       (fun () -> children ())
     </div>
   </Context.Provider>
+[@@element div]

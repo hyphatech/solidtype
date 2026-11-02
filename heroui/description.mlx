@@ -32,3 +32,4 @@ let%component make ?(id : string option) ?(class_ : string option)
         props=(Props.others props)>
         (fun () -> children ())
       </span>
+[@@element span]

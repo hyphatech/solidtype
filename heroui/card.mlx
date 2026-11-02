@@ -16,6 +16,7 @@ module Header = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Title = struct
@@ -28,6 +29,7 @@ module Title = struct
       props=(Props.others props)>
       (fun () -> children ())
     </h3>
+  [@@element h3]
 end
 
 module Description = struct
@@ -38,6 +40,7 @@ module Description = struct
       props=(Props.others props)>
       (fun () -> children ())
     </p>
+  [@@element p]
 end
 
 module Content = struct
@@ -48,6 +51,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Footer = struct
@@ -58,6 +62,7 @@ module Footer = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 let%component make ?(variant : Surface.variant = `default)
@@ -91,3 +96,4 @@ let%component make ?(variant : Surface.variant = `default)
       (fun () -> Jsx.element (card ()))
     </Surface.Context.Provider>
   </Show>
+[@@element div]

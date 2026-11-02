@@ -1,7 +1,8 @@
 (* A data- attribute given to a port reaches the port's own element, as
    HeroUI's React components spread the rest of their props on theirs: each
    part of each port is given [data-testid], its name, which must be on the
-   element its selector finds. An avatar's image, which shows only once it
+   element its selector finds, and a part that takes every attribute of its
+   element its [title] there too. An avatar's image, which shows only once it
    has loaded, is checked by the avatar's own test. *)
 
 module H = Solidtype_heroui
@@ -91,24 +92,167 @@ let misplaced parts =
       | None -> Some (name ^ " missing"))
   |> Array.of_list
 
+(* The parts that take every attribute of their element, as HeroUI's do:
+   each is also given [title], its name, which must be on the element its
+   [data-testid] is on; an svg's, which has no [title], are not. *)
+let with_attributes =
+  [|
+    "Accordion.Body";
+    "Alert";
+    "Alert.Content";
+    "Alert.Description";
+    "Alert.Indicator";
+    "Alert.Title";
+    "Alert_dialog.Body";
+    "Alert_dialog.Footer";
+    "Alert_dialog.Header";
+    "Alert_dialog.Icon";
+    "Autocomplete.Value";
+    "Avatar_group";
+    "Badge";
+    "Badge.Anchor";
+    "Badge.Label";
+    "Breadcrumbs";
+    "Button_group";
+    "Button_group.Separator";
+    "Card";
+    "Card.Content";
+    "Card.Description";
+    "Card.Footer";
+    "Card.Header";
+    "Card.Title";
+    "Checkbox.Control";
+    "Chip";
+    "Chip.Label";
+    "Color_field.Prefix";
+    "Color_field.Suffix";
+    "Color_slider.Output";
+    "Color_swatch_picker.Indicator";
+    "Combo_box.Value";
+    "Description";
+    "Disclosure.Body";
+    "Disclosure.Heading";
+    "Disclosure_group";
+    "Drawer.Body";
+    "Drawer.Footer";
+    "Drawer.Handle";
+    "Drawer.Header";
+    "Dropdown.Item_indicator";
+    "Dropdown.Submenu_indicator";
+    "Empty_state";
+    "Fieldset";
+    "Fieldset.Actions";
+    "Fieldset.Group";
+    "Fieldset.Legend";
+    "Form";
+    "Header";
+    "Input_group.Prefix";
+    "Input_group.Suffix";
+    "Kbd";
+    "Kbd.Abbr";
+    "Kbd.Content";
+    "Label";
+    "Link.Icon";
+    "List_box.Item_indicator";
+    "Meter.Fill";
+    "Meter.Track";
+    "Modal.Body";
+    "Modal.Footer";
+    "Modal.Header";
+    "Modal.Icon";
+    "Number_field.Group";
+    "Pagination";
+    "Pagination.Content";
+    "Pagination.Ellipsis";
+    "Pagination.Item";
+    "Pagination.Next_icon";
+    "Pagination.Previous_icon";
+    "Pagination.Summary";
+    "Popover.Arrow";
+    "Popover.Dialog";
+    "Progress_bar.Fill";
+    "Progress_bar.Track";
+    "Radio.Control";
+    "Scroll_shadow";
+    "Search_field.Group";
+    "Segment.Separator";
+    "Separator";
+    "Skeleton";
+    "Slider.Fill";
+    "Slider.Output";
+    "Spinner";
+    "Surface";
+    "Switch.Control";
+    "Switch.Thumb";
+    "Switch_group";
+    "Table";
+    "Table.Footer";
+    "Table.Load_more_content";
+    "Table.Scroll_container";
+    "Table.Sortable_column_header";
+    "Tabs.Indicator";
+    "Tabs.Separator";
+    "Text_shimmer";
+    "Time_field.Group";
+    "Time_field.Prefix";
+    "Time_field.Suffix";
+    "Toast.Content";
+    "Toast.Indicator";
+    "Toggle_button_group.Separator";
+    "Tooltip.Arrow";
+    "Trend_chip.Indicator";
+    "Trend_chip.Prefix";
+    "Trend_chip.Suffix";
+    "Typography.Prose";
+  |]
+
+external get_attribute : Dom.element -> string -> string Js.null
+  = "getAttribute"
+[@@mel.send]
+
+(* Each such part whose title is not on its element. *)
+let mistitled () =
+  with_attributes |> Array.to_list
+  |> List.filter_map (fun name ->
+      match T.query ("[data-testid=\"" ^ name ^ "\"]") with
+      | Some e -> (
+          match Js.Null.toOption (get_attribute e "title") with
+          | Some t when String.equal t name -> None
+          | Some _ | None -> Some name)
+      | None -> None)
+  |> Array.of_list
+
 let () =
   Jest.describe "A data- attribute given to a port" (fun () ->
       Jest.afterEach (fun () ->
+          let wrong = mistitled () in
           Toast.clear ();
-          T.cleanup ());
+          T.cleanup ();
+          match wrong with
+          | [||] -> ()
+          | names ->
+              Js.Exn.raiseError
+                ("title not on its element: "
+                ^ String.concat ", " (Array.to_list names)));
       Jest.test "reaches each part of a port of no behaviour" (fun () ->
           T.render (fun () ->
               <div>
-                <Alert data_testid="Alert">
-                  <Alert.Indicator data_testid="Alert.Indicator" />
-                  <Alert.Content data_testid="Alert.Content">
-                    <Alert.Title data_testid="Alert.Title">"Title"</Alert.Title>
-                    <Alert.Description data_testid="Alert.Description">
+                <Alert data_testid="Alert" title="Alert">
+                  <Alert.Indicator
+                    data_testid="Alert.Indicator" title="Alert.Indicator"
+                  />
+                  <Alert.Content
+                    data_testid="Alert.Content" title="Alert.Content">
+                    <Alert.Title data_testid="Alert.Title" title="Alert.Title">
+                      "Title"
+                    </Alert.Title>
+                    <Alert.Description
+                      data_testid="Alert.Description" title="Alert.Description">
                       "Description"
                     </Alert.Description>
                   </Alert.Content>
                 </Alert>
-                <Avatar_group data_testid="Avatar_group">
+                <Avatar_group data_testid="Avatar_group" title="Avatar_group">
                   <Avatar data_testid="Avatar">
                     <Avatar.Fallback data_testid="Avatar.Fallback">
                       "JD"
@@ -118,25 +262,31 @@ let () =
                     "+3"
                   </Avatar_group.Count>
                 </Avatar_group>
-                <Badge.Anchor data_testid="Badge.Anchor">
-                  <Badge data_testid="Badge">
-                    <Badge.Label data_testid="Badge.Label">"5"</Badge.Label>
+                <Badge.Anchor data_testid="Badge.Anchor" title="Badge.Anchor">
+                  <Badge data_testid="Badge" title="Badge">
+                    <Badge.Label data_testid="Badge.Label" title="Badge.Label">
+                      "5"
+                    </Badge.Label>
                   </Badge>
                 </Badge.Anchor>
-                <Breadcrumbs data_testid="Breadcrumbs">
+                <Breadcrumbs data_testid="Breadcrumbs" title="Breadcrumbs">
                   <Breadcrumbs.Item data_testid="Breadcrumbs.Item">
                     "Home"
                   </Breadcrumbs.Item>
                 </Breadcrumbs>
-                <Pagination data_testid="Pagination">
-                  <Pagination.Summary data_testid="Pagination.Summary">
+                <Pagination data_testid="Pagination" title="Pagination">
+                  <Pagination.Summary
+                    data_testid="Pagination.Summary" title="Pagination.Summary">
                     "Page 1"
                   </Pagination.Summary>
-                  <Pagination.Content data_testid="Pagination.Content">
-                    <Pagination.Item data_testid="Pagination.Item">
+                  <Pagination.Content
+                    data_testid="Pagination.Content" title="Pagination.Content">
+                    <Pagination.Item
+                      data_testid="Pagination.Item" title="Pagination.Item">
                       <Pagination.Previous data_testid="Pagination.Previous">
                         <Pagination.Previous_icon
                           data_testid="Pagination.Previous_icon"
+                          title="Pagination.Previous_icon"
                         />
                       </Pagination.Previous>
                     </Pagination.Item>
@@ -146,11 +296,16 @@ let () =
                       </Pagination.Link>
                     </Pagination.Item>
                     <Pagination.Item>
-                      <Pagination.Ellipsis data_testid="Pagination.Ellipsis" />
+                      <Pagination.Ellipsis
+                        data_testid="Pagination.Ellipsis"
+                        title="Pagination.Ellipsis"
+                      />
                     </Pagination.Item>
                     <Pagination.Item>
                       <Pagination.Next data_testid="Pagination.Next">
-                        <Pagination.Next_icon data_testid="Pagination.Next_icon"
+                        <Pagination.Next_icon
+                          data_testid="Pagination.Next_icon"
+                          title="Pagination.Next_icon"
                         />
                       </Pagination.Next>
                     </Pagination.Item>
@@ -161,7 +316,10 @@ let () =
                     "Info"
                   </Tooltip.Trigger>
                   <Tooltip.Content data_testid="Tooltip.Content">
-                    <Tooltip.Arrow data_testid="Tooltip.Arrow" /> "More"
+                    <Tooltip.Arrow
+                      data_testid="Tooltip.Arrow" title="Tooltip.Arrow"
+                    />
+                    "More"
                   </Tooltip.Content>
                 </Tooltip>
                 <Popover default_open=true>
@@ -169,8 +327,11 @@ let () =
                     "Profile"
                   </Popover.Trigger>
                   <Popover.Content data_testid="Popover.Content">
-                    <Popover.Dialog data_testid="Popover.Dialog">
-                      <Popover.Arrow data_testid="Popover.Arrow" />
+                    <Popover.Dialog
+                      data_testid="Popover.Dialog" title="Popover.Dialog">
+                      <Popover.Arrow
+                        data_testid="Popover.Arrow" title="Popover.Arrow"
+                      />
                       <Popover.Heading data_testid="Popover.Heading">
                         "Title"
                       </Popover.Heading>
@@ -188,17 +349,26 @@ let () =
                         <Alert_dialog.Close_trigger
                           data_testid="Alert_dialog.Close_trigger"
                         />
-                        <Alert_dialog.Header data_testid="Alert_dialog.Header">
-                          <Alert_dialog.Icon data_testid="Alert_dialog.Icon" />
+                        <Alert_dialog.Header
+                          data_testid="Alert_dialog.Header"
+                          title="Alert_dialog.Header">
+                          <Alert_dialog.Icon
+                            data_testid="Alert_dialog.Icon"
+                            title="Alert_dialog.Icon"
+                          />
                           <Alert_dialog.Heading
                             data_testid="Alert_dialog.Heading">
                             "Sure?"
                           </Alert_dialog.Heading>
                         </Alert_dialog.Header>
-                        <Alert_dialog.Body data_testid="Alert_dialog.Body">
+                        <Alert_dialog.Body
+                          data_testid="Alert_dialog.Body"
+                          title="Alert_dialog.Body">
                           "Body"
                         </Alert_dialog.Body>
-                        <Alert_dialog.Footer data_testid="Alert_dialog.Footer">
+                        <Alert_dialog.Footer
+                          data_testid="Alert_dialog.Footer"
+                          title="Alert_dialog.Footer">
                           "Footer"
                         </Alert_dialog.Footer>
                       </Alert_dialog.Dialog>
@@ -214,10 +384,13 @@ let () =
                       data_testid="Dropdown.Menu"
                       selection_mode=(fun () -> `single)>
                       <Dropdown.Section data_testid="Dropdown.Section">
-                        <Header data_testid="Header">"Format"</Header>
+                        <Header data_testid="Header" title="Header">
+                          "Format"
+                        </Header>
                         <Dropdown.Item id="bold" data_testid="Dropdown.Item">
                           <Dropdown.Item_indicator
                             data_testid="Dropdown.Item_indicator"
+                            title="Dropdown.Item_indicator"
                           />
                           "Bold"
                         </Dropdown.Item>
@@ -227,6 +400,7 @@ let () =
                           "Share"
                           <Dropdown.Submenu_indicator
                             data_testid="Dropdown.Submenu_indicator"
+                            title="Dropdown.Submenu_indicator"
                           />
                         </Dropdown.Item>
                         <Dropdown.Popover>
@@ -244,6 +418,7 @@ let () =
                       "Bob"
                       <List_box.Item_indicator
                         data_testid="List_box.Item_indicator"
+                        title="List_box.Item_indicator"
                       />
                     </List_box.Item>
                   </List_box.Section>
@@ -265,7 +440,9 @@ let () =
                     <Input aria_label="Animal" />
                     <Combo_box.Trigger data_testid="Combo_box.Trigger" />
                   </Combo_box.Input_group>
-                  <Combo_box.Value data_testid="Combo_box.Value" />
+                  <Combo_box.Value
+                    data_testid="Combo_box.Value" title="Combo_box.Value"
+                  />
                   <Combo_box.Popover>
                     <List_box>
                       <List_box.Item id="cat">"Cat"</List_box.Item>
@@ -274,7 +451,10 @@ let () =
                 </Combo_box>
                 <Autocomplete default_open=true data_testid="Autocomplete">
                   <Autocomplete.Trigger data_testid="Autocomplete.Trigger">
-                    <Autocomplete.Value data_testid="Autocomplete.Value" />
+                    <Autocomplete.Value
+                      data_testid="Autocomplete.Value"
+                      title="Autocomplete.Value"
+                    />
                     <Autocomplete.Clear_button
                       data_testid="Autocomplete.Clear_button"
                     />
@@ -301,18 +481,23 @@ let () =
                   <Drawer.Backdrop data_testid="Drawer.Backdrop">
                     <Drawer.Content data_testid="Drawer.Content">
                       <Drawer.Dialog data_testid="Drawer.Dialog">
-                        <Drawer.Handle data_testid="Drawer.Handle" />
+                        <Drawer.Handle
+                          data_testid="Drawer.Handle" title="Drawer.Handle"
+                        />
                         <Drawer.Close_trigger data_testid="Drawer.Close_trigger"
                         />
-                        <Drawer.Header data_testid="Drawer.Header">
+                        <Drawer.Header
+                          data_testid="Drawer.Header" title="Drawer.Header">
                           <Drawer.Heading data_testid="Drawer.Heading">
                             "Title"
                           </Drawer.Heading>
                         </Drawer.Header>
-                        <Drawer.Body data_testid="Drawer.Body">
+                        <Drawer.Body
+                          data_testid="Drawer.Body" title="Drawer.Body">
                           "Body"
                         </Drawer.Body>
-                        <Drawer.Footer data_testid="Drawer.Footer">
+                        <Drawer.Footer
+                          data_testid="Drawer.Footer" title="Drawer.Footer">
                           "Footer"
                         </Drawer.Footer>
                       </Drawer.Dialog>
@@ -328,47 +513,65 @@ let () =
                       <Modal.Dialog data_testid="Modal.Dialog">
                         <Modal.Close_trigger data_testid="Modal.Close_trigger"
                         />
-                        <Modal.Header data_testid="Modal.Header">
-                          <Modal.Icon data_testid="Modal.Icon">"i"</Modal.Icon>
+                        <Modal.Header
+                          data_testid="Modal.Header" title="Modal.Header">
+                          <Modal.Icon
+                            data_testid="Modal.Icon" title="Modal.Icon">
+                            "i"
+                          </Modal.Icon>
                           <Modal.Heading data_testid="Modal.Heading">
                             "Title"
                           </Modal.Heading>
                         </Modal.Header>
-                        <Modal.Body data_testid="Modal.Body">"Body"</Modal.Body>
-                        <Modal.Footer data_testid="Modal.Footer">
+                        <Modal.Body data_testid="Modal.Body" title="Modal.Body">
+                          "Body"
+                        </Modal.Body>
+                        <Modal.Footer
+                          data_testid="Modal.Footer" title="Modal.Footer">
                           "Footer"
                         </Modal.Footer>
                       </Modal.Dialog>
                     </Modal.Container>
                   </Modal.Backdrop>
                 </Modal>
-                <Button_group data_testid="Button_group">
+                <Button_group data_testid="Button_group" title="Button_group">
                   <Button data_testid="Button">"First"</Button>
                   <Button>
-                    <Button_group.Separator data_testid="Button_group.Separator"
+                    <Button_group.Separator
+                      data_testid="Button_group.Separator"
+                      title="Button_group.Separator"
                     />
                     "Second"
                   </Button>
                 </Button_group>
-                <Card data_testid="Card">
-                  <Card.Header data_testid="Card.Header">
-                    <Card.Title data_testid="Card.Title">"Title"</Card.Title>
-                    <Card.Description data_testid="Card.Description">
+                <Card data_testid="Card" title="Card">
+                  <Card.Header data_testid="Card.Header" title="Card.Header">
+                    <Card.Title data_testid="Card.Title" title="Card.Title">
+                      "Title"
+                    </Card.Title>
+                    <Card.Description
+                      data_testid="Card.Description" title="Card.Description">
                       "Description"
                     </Card.Description>
                   </Card.Header>
-                  <Card.Content data_testid="Card.Content">
+                  <Card.Content data_testid="Card.Content" title="Card.Content">
                     "Content"
                   </Card.Content>
-                  <Card.Footer data_testid="Card.Footer">"Footer"</Card.Footer>
+                  <Card.Footer data_testid="Card.Footer" title="Card.Footer">
+                    "Footer"
+                  </Card.Footer>
                 </Card>
-                <Chip data_testid="Chip">
-                  <Chip.Label data_testid="Chip.Label">"Label"</Chip.Label>
+                <Chip data_testid="Chip" title="Chip">
+                  <Chip.Label data_testid="Chip.Label" title="Chip.Label">
+                    "Label"
+                  </Chip.Label>
                 </Chip>
                 <Close_button data_testid="Close_button">
                   <Close_button.Icon data_testid="Close_button.Icon" />
                 </Close_button>
-                <Empty_state data_testid="Empty_state">"Empty"</Empty_state>
+                <Empty_state data_testid="Empty_state" title="Empty_state">
+                  "Empty"
+                </Empty_state>
                 <Color_area
                   data_testid="Color_area"
                   default_value=(fun () ->
@@ -381,11 +584,15 @@ let () =
                   default_value=(fun () ->
                                   Solidtype_kobalte.Colors.parse_color "#0485F7")>
                   <Color_field.Group data_testid="Color_field.Group">
-                    <Color_field.Prefix data_testid="Color_field.Prefix">
+                    <Color_field.Prefix
+                      data_testid="Color_field.Prefix"
+                      title="Color_field.Prefix">
                       "#"
                     </Color_field.Prefix>
                     <Color_field.Input data_testid="Color_field.Input" />
-                    <Color_field.Suffix data_testid="Color_field.Suffix">
+                    <Color_field.Suffix
+                      data_testid="Color_field.Suffix"
+                      title="Color_field.Suffix">
                       "hex"
                     </Color_field.Suffix>
                   </Color_field.Group>
@@ -397,7 +604,10 @@ let () =
                   default_value=(fun () ->
                                   Solidtype_kobalte.Colors.parse_color
                                     "hsl(0, 100%, 50%)")>
-                  <Color_slider.Output data_testid="Color_slider.Output" />
+                  <Color_slider.Output
+                    data_testid="Color_slider.Output"
+                    title="Color_slider.Output"
+                  />
                   <Color_slider.Track data_testid="Color_slider.Track">
                     <Color_slider.Thumb data_testid="Color_slider.Thumb" />
                   </Color_slider.Track>
@@ -417,11 +627,14 @@ let () =
                     />
                     <Color_swatch_picker.Indicator
                       data_testid="Color_swatch_picker.Indicator"
+                      title="Color_swatch_picker.Indicator"
                     />
                   </Color_swatch_picker.Item>
                 </Color_swatch_picker>
-                <Table data_testid="Table">
-                  <Table.Scroll_container data_testid="Table.Scroll_container">
+                <Table data_testid="Table" title="Table">
+                  <Table.Scroll_container
+                    data_testid="Table.Scroll_container"
+                    title="Table.Scroll_container">
                     <Table.Content
                       data_testid="Table.Content" aria_label="Members">
                       <Table.Header data_testid="Table.Header">
@@ -430,7 +643,8 @@ let () =
                         </Table.Column>
                         <Table.Column allows_sorting=true>
                           <Table.Sortable_column_header
-                            data_testid="Table.Sortable_column_header">
+                            data_testid="Table.Sortable_column_header"
+                            title="Table.Sortable_column_header">
                             "Role"
                           </Table.Sortable_column_header>
                         </Table.Column>
@@ -445,14 +659,17 @@ let () =
                           data_testid="Table.Load_more"
                           is_loading=(fun () -> true)>
                           <Table.Load_more_content
-                            data_testid="Table.Load_more_content">
+                            data_testid="Table.Load_more_content"
+                            title="Table.Load_more_content">
                             "Loading"
                           </Table.Load_more_content>
                         </Table.Load_more>
                       </Table.Body>
                     </Table.Content>
                   </Table.Scroll_container>
-                  <Table.Footer data_testid="Table.Footer">"1"</Table.Footer>
+                  <Table.Footer data_testid="Table.Footer" title="Table.Footer">
+                    "1"
+                  </Table.Footer>
                 </Table>
                 <Table>
                   <Table.Resizable_container
@@ -472,18 +689,24 @@ let () =
                     </Table.Content>
                   </Table.Resizable_container>
                 </Table>
-                <Kbd data_testid="Kbd">
-                  <Kbd.Abbr data_testid="Kbd.Abbr" key_value=`command />
-                  <Kbd.Content data_testid="Kbd.Content">"K"</Kbd.Content>
+                <Kbd data_testid="Kbd" title="Kbd">
+                  <Kbd.Abbr
+                    data_testid="Kbd.Abbr" title="Kbd.Abbr" key_value=`command
+                  />
+                  <Kbd.Content data_testid="Kbd.Content" title="Kbd.Content">
+                    "K"
+                  </Kbd.Content>
                 </Kbd>
                 <Link data_testid="Link" href="#">
-                  "Link" <Link.Icon data_testid="Link.Icon" />
+                  "Link" <Link.Icon data_testid="Link.Icon" title="Link.Icon" />
                 </Link>
-                <Scroll_shadow data_testid="Scroll_shadow">
+                <Scroll_shadow
+                  data_testid="Scroll_shadow" title="Scroll_shadow">
                   "Text"
                 </Scroll_shadow>
                 <Disclosure data_testid="Disclosure">
-                  <Disclosure.Heading data_testid="Disclosure.Heading">
+                  <Disclosure.Heading
+                    data_testid="Disclosure.Heading" title="Disclosure.Heading">
                     <Disclosure.Trigger data_testid="Disclosure.Trigger">
                       "Shipping"
                       <Disclosure.Indicator data_testid="Disclosure.Indicator"
@@ -491,7 +714,8 @@ let () =
                     </Disclosure.Trigger>
                   </Disclosure.Heading>
                   <Disclosure.Content data_testid="Disclosure.Content">
-                    <Disclosure.Body data_testid="Disclosure.Body">
+                    <Disclosure.Body
+                      data_testid="Disclosure.Body" title="Disclosure.Body">
                       "Orders ship."
                     </Disclosure.Body>
                   </Disclosure.Content>
@@ -504,7 +728,8 @@ let () =
                   </Disclosure.Heading>
                   <Disclosure.Content>"Within 30 days."</Disclosure.Content>
                 </Disclosure>
-                <Disclosure_group data_testid="Disclosure_group">
+                <Disclosure_group
+                  data_testid="Disclosure_group" title="Disclosure_group">
                   <Disclosure id="gift">
                     <Disclosure.Heading>
                       <Disclosure.Trigger>"Gift wrap"</Disclosure.Trigger>
@@ -524,7 +749,8 @@ let () =
                       </Accordion.Trigger>
                     </Accordion.Heading>
                     <Accordion.Panel data_testid="Accordion.Panel">
-                      <Accordion.Body data_testid="Accordion.Body">
+                      <Accordion.Body
+                        data_testid="Accordion.Body" title="Accordion.Body">
                         "Answers."
                       </Accordion.Body>
                     </Accordion.Panel>
@@ -546,10 +772,16 @@ let () =
                   <Tabs.List_container data_testid="Tabs.List_container">
                     <Tabs.List data_testid="Tabs.List" aria_label="Options">
                       <Tabs.Tab data_testid="Tabs.Tab" id="one">
-                        "One" <Tabs.Indicator data_testid="Tabs.Indicator" />
+                        "One"
+                        <Tabs.Indicator
+                          data_testid="Tabs.Indicator" title="Tabs.Indicator"
+                        />
                       </Tabs.Tab>
                       <Tabs.Tab id="two">
-                        <Tabs.Separator data_testid="Tabs.Separator" /> "Two"
+                        <Tabs.Separator
+                          data_testid="Tabs.Separator" title="Tabs.Separator"
+                        />
+                        "Two"
                       </Tabs.Tab>
                     </Tabs.List>
                   </Tabs.List_container>
@@ -566,26 +798,36 @@ let () =
                     "Month"
                   </Segment.Item>
                   <Segment.Item id="year">
-                    <Segment.Separator data_testid="Segment.Separator" /> "Year"
+                    <Segment.Separator
+                      data_testid="Segment.Separator" title="Segment.Separator"
+                    />
+                    "Year"
                   </Segment.Item>
                 </Segment>
-                <Text_shimmer data_testid="Text_shimmer">
+                <Text_shimmer data_testid="Text_shimmer" title="Text_shimmer">
                   "Working"
                 </Text_shimmer>
                 <Trend_chip data_testid="Trend_chip">
-                  <Trend_chip.Indicator data_testid="Trend_chip.Indicator" />
-                  <Trend_chip.Prefix data_testid="Trend_chip.Prefix">
+                  <Trend_chip.Indicator
+                    data_testid="Trend_chip.Indicator"
+                    title="Trend_chip.Indicator"
+                  />
+                  <Trend_chip.Prefix
+                    data_testid="Trend_chip.Prefix" title="Trend_chip.Prefix">
                     "+"
                   </Trend_chip.Prefix>
                   "3%"
-                  <Trend_chip.Suffix data_testid="Trend_chip.Suffix">
+                  <Trend_chip.Suffix
+                    data_testid="Trend_chip.Suffix" title="Trend_chip.Suffix">
                     "MoM"
                   </Trend_chip.Suffix>
                 </Trend_chip>
-                <Separator data_testid="Separator" />
-                <Skeleton data_testid="Skeleton" />
-                <Spinner data_testid="Spinner" />
-                <Surface data_testid="Surface">"Surface"</Surface>
+                <Separator data_testid="Separator" title="Separator" />
+                <Skeleton data_testid="Skeleton" title="Skeleton" />
+                <Spinner data_testid="Spinner" title="Spinner" />
+                <Surface data_testid="Surface" title="Surface">
+                  "Surface"
+                </Surface>
                 <Toggle_button data_testid="Toggle_button">
                   "Like"
                 </Toggle_button>
@@ -597,6 +839,7 @@ let () =
                   <Toggle_button id="right">
                     <Toggle_button_group.Separator
                       data_testid="Toggle_button_group.Separator"
+                      title="Toggle_button_group.Separator"
                     />
                     "Right"
                   </Toggle_button>
@@ -611,7 +854,8 @@ let () =
                 <Typography.Code data_testid="Typography.Code">
                   "code"
                 </Typography.Code>
-                <Typography.Prose data_testid="Typography.Prose">
+                <Typography.Prose
+                  data_testid="Typography.Prose" title="Typography.Prose">
                   "Prose"
                 </Typography.Prose>
               </div>);
@@ -824,16 +1068,19 @@ let () =
             |> toEqual [||]));
       Jest.test "reaches each part of a field" (fun () ->
           T.render (fun () ->
-              <Form data_testid="Form">
-                <Fieldset data_testid="Fieldset">
-                  <Fieldset.Legend data_testid="Fieldset.Legend">
+              <Form data_testid="Form" title="Form">
+                <Fieldset data_testid="Fieldset" title="Fieldset">
+                  <Fieldset.Legend
+                    data_testid="Fieldset.Legend" title="Fieldset.Legend">
                     "Legend"
                   </Fieldset.Legend>
-                  <Fieldset.Group data_testid="Fieldset.Group">
+                  <Fieldset.Group
+                    data_testid="Fieldset.Group" title="Fieldset.Group">
                     <Text_field data_testid="Text_field" is_invalid=true>
-                      <Label data_testid="Label">"Name"</Label>
+                      <Label data_testid="Label" title="Label">"Name"</Label>
                       <Input data_testid="Input" />
-                      <Description data_testid="Description">
+                      <Description
+                        data_testid="Description" title="Description">
                         "Description"
                       </Description>
                       <Field_error data_testid="Field_error">
@@ -846,11 +1093,15 @@ let () =
                     <Text_field>
                       <Label>"Email"</Label>
                       <Input_group data_testid="Input_group">
-                        <Input_group.Prefix data_testid="Input_group.Prefix">
+                        <Input_group.Prefix
+                          data_testid="Input_group.Prefix"
+                          title="Input_group.Prefix">
                           "@"
                         </Input_group.Prefix>
                         <Input_group.Input data_testid="Input_group.Input" />
-                        <Input_group.Suffix data_testid="Input_group.Suffix">
+                        <Input_group.Suffix
+                          data_testid="Input_group.Suffix"
+                          title="Input_group.Suffix">
                           ".com"
                         </Input_group.Suffix>
                       </Input_group>
@@ -859,7 +1110,9 @@ let () =
                       <Label>"Interests"</Label>
                       <Checkbox data_testid="Checkbox" value="coding">
                         <Checkbox.Content data_testid="Checkbox.Content">
-                          <Checkbox.Control data_testid="Checkbox.Control">
+                          <Checkbox.Control
+                            data_testid="Checkbox.Control"
+                            title="Checkbox.Control">
                             <Checkbox.Indicator data_testid="Checkbox.Indicator"
                             />
                           </Checkbox.Control>
@@ -871,18 +1124,23 @@ let () =
                       <Label>"Plan"</Label>
                       <Radio data_testid="Radio" value="basic">
                         <Radio.Content data_testid="Radio.Content">
-                          <Radio.Control data_testid="Radio.Control">
+                          <Radio.Control
+                            data_testid="Radio.Control" title="Radio.Control">
                             <Radio.Indicator data_testid="Radio.Indicator" />
                           </Radio.Control>
                           "Basic"
                         </Radio.Content>
                       </Radio>
                     </Radio_group>
-                    <Switch_group data_testid="Switch_group">
+                    <Switch_group
+                      data_testid="Switch_group" title="Switch_group">
                       <Switch data_testid="Switch">
                         <Switch.Content data_testid="Switch.Content">
-                          <Switch.Control data_testid="Switch.Control">
-                            <Switch.Thumb data_testid="Switch.Thumb" />
+                          <Switch.Control
+                            data_testid="Switch.Control" title="Switch.Control">
+                            <Switch.Thumb
+                              data_testid="Switch.Thumb" title="Switch.Thumb"
+                            />
                           </Switch.Control>
                           "Notify"
                         </Switch.Content>
@@ -890,7 +1148,9 @@ let () =
                     </Switch_group>
                     <Number_field data_testid="Number_field" default_value=1.>
                       <Label>"Width"</Label>
-                      <Number_field.Group data_testid="Number_field.Group">
+                      <Number_field.Group
+                        data_testid="Number_field.Group"
+                        title="Number_field.Group">
                         <Number_field.Decrement_button
                           data_testid="Number_field.Decrement_button"
                         />
@@ -902,7 +1162,9 @@ let () =
                     </Number_field>
                     <Search_field data_testid="Search_field">
                       <Label>"Search"</Label>
-                      <Search_field.Group data_testid="Search_field.Group">
+                      <Search_field.Group
+                        data_testid="Search_field.Group"
+                        title="Search_field.Group">
                         <Search_field.Search_icon
                           data_testid="Search_field.Search_icon"
                         />
@@ -915,16 +1177,23 @@ let () =
                     <Slider
                       data_testid="Slider" default_value=(fun () -> [| 30. |])>
                       <Label>"Volume"</Label>
-                      <Slider.Output data_testid="Slider.Output" />
+                      <Slider.Output
+                        data_testid="Slider.Output" title="Slider.Output"
+                      />
                       <Slider.Track data_testid="Slider.Track">
-                        <Slider.Fill data_testid="Slider.Fill" />
+                        <Slider.Fill
+                          data_testid="Slider.Fill" title="Slider.Fill"
+                        />
                         <Slider.Thumb data_testid="Slider.Thumb" />
                       </Slider.Track>
                     </Slider>
                     <Time_field data_testid="Time_field">
                       <Label>"Time"</Label>
-                      <Time_field.Group data_testid="Time_field.Group">
-                        <Time_field.Prefix data_testid="Time_field.Prefix">
+                      <Time_field.Group
+                        data_testid="Time_field.Group" title="Time_field.Group">
+                        <Time_field.Prefix
+                          data_testid="Time_field.Prefix"
+                          title="Time_field.Prefix">
                           "at"
                         </Time_field.Prefix>
                         <Time_field.Input data_testid="Time_field.Input">
@@ -934,7 +1203,9 @@ let () =
                               segment=(fun () -> Solidtype.Solid.get segment)
                             />)
                         </Time_field.Input>
-                        <Time_field.Suffix data_testid="Time_field.Suffix">
+                        <Time_field.Suffix
+                          data_testid="Time_field.Suffix"
+                          title="Time_field.Suffix">
                           "UTC"
                         </Time_field.Suffix>
                       </Time_field.Group>
@@ -956,7 +1227,8 @@ let () =
                       </Time_field.Zoned>
                     </div>
                   </Fieldset.Group>
-                  <Fieldset.Actions data_testid="Fieldset.Actions">
+                  <Fieldset.Actions
+                    data_testid="Fieldset.Actions" title="Fieldset.Actions">
                     <Button>"Save"</Button>
                   </Fieldset.Actions>
                 </Fieldset>
@@ -1030,15 +1302,18 @@ let () =
                 <Meter data_testid="Meter" value=60.>
                   <Label>"Storage"</Label>
                   <Meter.Output data_testid="Meter.Output" />
-                  <Meter.Track data_testid="Meter.Track">
-                    <Meter.Fill data_testid="Meter.Fill" />
+                  <Meter.Track data_testid="Meter.Track" title="Meter.Track">
+                    <Meter.Fill data_testid="Meter.Fill" title="Meter.Fill" />
                   </Meter.Track>
                 </Meter>
                 <Progress_bar data_testid="Progress_bar" value=60.>
                   <Label>"Loading"</Label>
                   <Progress_bar.Output data_testid="Progress_bar.Output" />
-                  <Progress_bar.Track data_testid="Progress_bar.Track">
-                    <Progress_bar.Fill data_testid="Progress_bar.Fill" />
+                  <Progress_bar.Track
+                    data_testid="Progress_bar.Track" title="Progress_bar.Track">
+                    <Progress_bar.Fill
+                      data_testid="Progress_bar.Fill" title="Progress_bar.Fill"
+                    />
                   </Progress_bar.Track>
                 </Progress_bar>
                 <Progress_circle
@@ -1055,8 +1330,11 @@ let () =
                 <Toast.Provider data_testid="Toast.Provider">
                   (fun toast ->
                     <Toast data_testid="Toast" toast=(fun () -> toast)>
-                      <Toast.Indicator data_testid="Toast.Indicator" />
-                      <Toast.Content data_testid="Toast.Content">
+                      <Toast.Indicator
+                        data_testid="Toast.Indicator" title="Toast.Indicator"
+                      />
+                      <Toast.Content
+                        data_testid="Toast.Content" title="Toast.Content">
                         <Toast.Title data_testid="Toast.Title">
                           "Title"
                         </Toast.Title>

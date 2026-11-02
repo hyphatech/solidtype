@@ -254,6 +254,7 @@ module Body = struct
         (fun () -> children ())
       </div>
     </div>
+  [@@element div]
 end
 
 let%component make ?(expanded_keys : string array option)

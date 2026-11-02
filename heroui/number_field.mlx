@@ -104,6 +104,7 @@ module Group = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Input = struct

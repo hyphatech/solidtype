@@ -85,6 +85,7 @@ module Output = struct
                  (S.get (Slider_context.value context))
                  (s.channel ())))
     </output>
+  [@@element output]
 end
 
 module Track = struct

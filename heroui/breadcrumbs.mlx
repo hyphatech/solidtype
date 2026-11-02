@@ -152,3 +152,4 @@ let%component make ?(separator : Jsx.element option)
       </For>
     </ol>
   </Kobalte.Root>
+[@@element ol]

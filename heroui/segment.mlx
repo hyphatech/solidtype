@@ -127,6 +127,7 @@ module Separator = struct
       data_slot="segment-separator"
       props=(Props.others props)
     />
+  [@@element span]
 end
 
 let%component make ?(variant : variant = `default) ?(size : size = `md)

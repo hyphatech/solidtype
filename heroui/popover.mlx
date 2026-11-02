@@ -172,6 +172,7 @@ module Dialog = struct
       props=(Props.others props)>
       (fun () -> children ())
     </section>
+  [@@element section]
 end
 
 module Heading = struct
@@ -218,6 +219,7 @@ module Arrow = struct
                   </svg>)
         </div>;
       |]
+  [@@element div]
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)

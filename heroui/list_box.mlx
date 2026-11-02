@@ -280,6 +280,7 @@ module Item_indicator = struct
                 <polyline points="1 9 7 14 15 4" />
               </svg>)
     </span>
+  [@@element span]
 end
 
 (* A separator stands in its place, among the options. *)
@@ -319,6 +320,7 @@ module Load_more_item = struct
         |]
     in
     Entry.element (Loader draw)
+  [@@element div]
 end
 
 module Section = struct

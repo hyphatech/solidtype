@@ -86,6 +86,7 @@ module Prefix = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Suffix = struct
@@ -98,6 +99,7 @@ module Suffix = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Input = struct

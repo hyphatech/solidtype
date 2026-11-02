@@ -46,6 +46,7 @@ module Scroll_container = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 (* HeroUI's ResizableContainer takes no class of the table's: its class is
@@ -264,6 +265,7 @@ module Sortable_column_header = struct
               </svg>)
       </Solidtype.Show.Some>
     </span>
+  [@@element span]
 end
 
 module Body = struct
@@ -393,6 +395,7 @@ module Load_more_content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 module Footer = struct
@@ -404,6 +407,7 @@ module Footer = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end
 
 let%component make ?(variant : [ `primary | `secondary ] option)
@@ -419,3 +423,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       (fun () -> children ())
     </div>
   </Slots.Provider>
+[@@element div]

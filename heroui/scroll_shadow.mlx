@@ -248,3 +248,4 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
     props=(Props.others props)>
     (fun () -> children ())
   </div>
+[@@element div]

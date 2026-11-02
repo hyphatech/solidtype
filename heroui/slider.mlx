@@ -83,6 +83,7 @@ module Output = struct
               (String.concat {js| – |js}
                  (Array.to_list (Array.map s.format (s.values ())))))
     </output>
+  [@@element output]
 end
 
 module Track = struct
@@ -128,6 +129,7 @@ module Fill = struct
       data_slot="slider-fill"
       props=(Props.others props)
     />
+  [@@element div]
 end
 
 module Thumb = struct

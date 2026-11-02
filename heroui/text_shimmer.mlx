@@ -62,3 +62,4 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
       (fun () -> children ())
     </span>
   </span>
+[@@element span]

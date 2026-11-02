@@ -102,6 +102,7 @@ module Indicator = struct
                 <polyline points="2.5 6 5 8.5 9.5 3" />
               </svg>)
     </span>
+  [@@element span]
 end
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)

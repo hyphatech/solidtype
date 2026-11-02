@@ -118,4 +118,5 @@ module Prose = struct
       props=(Props.others props)>
       (fun () -> children ())
     </div>
+  [@@element div]
 end

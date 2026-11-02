@@ -876,38 +876,30 @@ let props_module ~loc ~element props =
       None
       (Pfunction_body [%expr ()])
   in
-  (* Given its element, the check takes the element's attributes after the
-     component's own props, as a part that passes them on, but those its own
-     props name: an own prop is the component's, whatever the element means
-     by the name, as TSX types a part [Omit<DOM, keyof Own> & Own]. Each is
-     typed by the element's [Solidtype.Html] module. A check of a hundred
-     labels is a type a [fun] cannot be written for, so an external, which
-     only the check under [if false] names. *)
+  (* Given its element, the check ends in the element's own, as a part that
+     passes the element's attributes on. An own prop of an attribute's name
+     comes first, and an application fills the first parameter of a label, so
+     the own prop is the component's whatever the element means by the name,
+     as TSX types a part [Omit<DOM, keyof Own> & Own]; the element's is never
+     filled. It is a function type a [fun] cannot be written for, so an
+     external, which only the check under [if false] names. *)
   let check =
     match element with
     | None -> [%stri let check = [%e check_fun]]
-    | Some (path, attributes) ->
+    | Some path ->
         let arrow p rest =
           match p.presence with
           | Required -> B.ptyp_arrow ~loc (Labelled p.label) (checked p) rest
           | Optional | Default _ ->
               B.ptyp_arrow ~loc (Optional p.label) (checked p) rest
         in
-        let element_attribute (name, handler) rest =
-          let typ = B.ptyp_constr ~loc { txt = Ldot (path, name); loc } [] in
-          let typ =
-            if handler then typ else [%type: [%t typ] Solidtype.Check.value]
-          in
-          B.ptyp_arrow ~loc (Optional name) typ rest
-        in
-        let own name = List.exists (fun p -> String.equal p.label name) props in
         let type_ =
           List.fold_right arrow props
             (B.ptyp_arrow ~loc (Optional spread)
                [%type: [%t t] Solidtype.Solid.rest]
-               (List.fold_right element_attribute
-                  (List.filter (fun (name, _) -> not (own name)) attributes)
-                  [%type: unit -> unit]))
+               (B.ptyp_constr ~loc
+                  { txt = Ldot (path, "check"); loc }
+                  [ [%type: unit -> unit] ]))
         in
         let description =
           B.value_description ~loc ~name:{ txt = "check"; loc } ~type_
@@ -1059,8 +1051,8 @@ let reader ~loc p =
   }
 
 (* [[@@element button]]: the element a component draws and passes the rest of
-   its props to, whose attributes its check then takes; its [Solidtype.Html]
-   module and its attributes' names. *)
+   its props to, whose check its own then ends in: its [Solidtype.Html]
+   module, which the compiler finds or reports unbound. *)
 let element_of (vb : value_binding) =
   match
     List.filter
@@ -1080,31 +1072,12 @@ let element_of (vb : value_binding) =
              _;
            };
          ];
-     attr_loc = loc;
      _;
    };
-  ] -> (
-      let attributes =
-        match List.assoc_opt tag Html_attributes.elements with
-        | None -> None
-        | Some interface -> (
-            match List.assoc_opt interface Html_attributes.interfaces with
-            | Some (true, own) -> Some (own @ Html_attributes.common)
-            | Some (false, own) -> Some own
-            | None -> None)
-      in
-      match attributes with
-      | Some attributes ->
-          Ok
-            (Some
-               ( Ldot
-                   ( Ldot (Lident "Solidtype", "Html"),
-                     String.capitalize_ascii tag ),
-                 attributes ))
-      | None ->
-          Error
-            (loc, Printf.sprintf "[@@element %s] names no element <%s>" tag tag)
-      )
+  ] ->
+      Ok
+        (Some
+           (Ldot (Ldot (Lident "Solidtype", "Html"), String.capitalize_ascii tag)))
   | a :: _ ->
       Error
         ( a.attr_loc,

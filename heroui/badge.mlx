@@ -11,6 +11,7 @@ module Anchor = struct
       props=(Props.others props)>
       (fun () -> children ())
     </span>
+  [@@element span]
 end
 
 module Label = struct
@@ -25,6 +26,7 @@ module Label = struct
       props=(Props.others props)>
       (fun () -> children ())
     </span>
+  [@@element span]
 end
 
 (* Text a badge is given is its label's, as HeroUI's React badge wraps a
@@ -55,3 +57,4 @@ let%component make
       | Some c -> c
       | None -> Jsx.string "")
   </span>
+[@@element span]

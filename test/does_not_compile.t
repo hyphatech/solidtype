@@ -745,9 +745,10 @@ An element there is none of.
   > let%component make () = <button props=(Props.others props) /> [@@element buton]
   > EOF
   $ build
-  File "case.mlx", line 1, characters 62-79:
+  File "case.mlx", line 1, characters 0-79:
   1 | let%component make () = <button props=(Props.others props) /> [@@element buton]
-                                                                    ^^^^^^^^^^^^^^^^^
-  Error: [@@element buton] names no element <buton>
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: Unbound module Solidtype.Html.Buton
+  Hint:    Did you mean Solidtype.Html.Button?
   [1]
   $ rm save.mlx
