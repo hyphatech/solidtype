@@ -106,7 +106,11 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(is_disabled : bool option) ?(is_invalid : bool = false)
     ?(is_read_only : bool = false) ?(is_required : bool = false)
     ?(name : string option) ?(class_ : string option)
-    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+    ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -143,17 +147,27 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       read_only=(fun () -> is_read_only ())
       required=(fun () -> is_required ())
       ?name
-      on_key_down=(fun e -> if is_read_only () then move_focus e)
-      on_click=(fun e -> if is_read_only () then keep_choice e)
+      on_key_down=(fun e ->
+                    ignore (on_key_down e : unit option);
+                    if is_read_only () then move_focus e)
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 if is_read_only () then keep_choice e)
       validation_state=(fun () -> if invalid () then `invalid else `valid)
       class_=(fun () ->
                Styles.RadioGroup.classes
                  (Styles.RadioGroup.options ~variant:(variant ())
                     ?class_:(class_ ()) ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="radio-group"
       data_orientation=(fun () ->
                          Jsx.data
@@ -172,3 +186,4 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

@@ -101,10 +101,11 @@ module Content (_ : Kobalte) : sig
       field:state Solidtype.Check.value ->
       slot:string Solidtype.Check.value ->
       class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlLabelElement -> unit) ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Label.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

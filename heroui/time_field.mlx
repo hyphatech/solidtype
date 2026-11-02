@@ -113,6 +113,7 @@ end
 
 module Input = struct
   let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : segment S.accessor -> Jsx.element) () =
     let f = within "Time_field.Input" in
     let slots = in_group "Time_field.Input" in
@@ -120,7 +121,9 @@ module Input = struct
     (* React Aria's input is a group of its own, where Kobalte's presents. *)
     <Kobalte.Input
       role=`group
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () ->
                after (Styles.DateInputGroup.input (slots ())) (class_ ()))
       data_slot="date-input-group-input"
@@ -183,10 +186,12 @@ module Input = struct
         in
         Jsx.fragment [| literals fst; children segment; literals snd; zone |])
     </Kobalte.Input>
+  [@@element div]
 end
 
 module Segment = struct
-  let%component make ~(segment : segment) ?(class_ : string option) () =
+  let%component make ~(segment : segment) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option) () =
     let f = within "Time_field.Segment" in
     let slots = in_group "Time_field.Segment" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
@@ -204,20 +209,22 @@ module Segment = struct
     let drawn () =
       <Kobalte.Segment
         segment=(fun () -> segment ())
-        ref=(fun e -> Interaction.watch i e)
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              Interaction.watch i e)
         class_=(fun () ->
                  after (Styles.DateInputGroup.segment (slots ())) (class_ ()))
-               (* Kobalte leaves a disabled segment editable, its text typed into. *)
-        content_editable=(fun () ->
-                           if f.disabled () || f.read_only () then "false"
-                           else "true")
         data_slot="date-input-group-segment"
         data_placeholder=(fun () -> Jsx.flag (placeholder ()))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
         data_disabled=(fun () -> Jsx.flag (f.disabled ()))
         data_readonly=(fun () -> Jsx.flag (f.read_only ()))
-        props=(Props.others props)>
+        props=(Props.others props)
+              (* Kobalte leaves a disabled segment editable, its text typed into. *)
+        content_editable=(fun () ->
+                           if f.disabled () || f.read_only () then "false"
+                           else "true")>
         (* Kobalte's placeholder is a dash an hour, React Aria's two. *)
         (fun () ->
           match segment () with
@@ -248,6 +255,7 @@ module Segment = struct
               (fun () -> Jsx.element (Jsx.fragment (rest ())))
             </span>;
           |]
+  [@@element div]
 end
 
 let thirteen () =
@@ -326,7 +334,7 @@ let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
     ~(max_value : unit -> Time.t option) ~(hide_time_zone : unit -> bool)
     ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
     ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width ~class_
-    ~on_blur ~children ~others =
+    ~on_blur ~on_focus_out ~given_ref ~children ~others =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let current, set =
@@ -555,10 +563,16 @@ let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
                Styles.TimeField.classes
                  (Styles.TimeField.options ?full_width:(full_width ())
                     ?class_:(class_ ()) ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="time-field"
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
@@ -593,6 +607,8 @@ let%component make ?(value : Time.t Js.Nullable.t option)
     ?(is_read_only : bool = false) ?(name : string option)
     ?(aria_label : string option) ?(full_width : bool option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ~(children : Jsx.content) () =
   field ~kind:time_kind
     ~fallback:(fun () ->
@@ -601,7 +617,8 @@ let%component make ?(value : Time.t Js.Nullable.t option)
     ~hide_time_zone:(fun () -> true)
     ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
     ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width ~class_
-    ~on_blur ~children ~others:(Props.others props)
+    ~on_blur ~on_focus_out ~given_ref ~children ~others:(Props.others props)
+[@@element div]
 
 module Date_time = struct
   module V = D.Types.CalendarDateTime
@@ -617,6 +634,8 @@ module Date_time = struct
       ?(is_read_only : bool = false) ?(name : string option)
       ?(aria_label : string option) ?(full_width : bool option)
       ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?(on_focus_out : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     field ~kind:date_time_kind ~fallback:placeholder_value ~value ~default_value
       ~on_change
@@ -625,7 +644,9 @@ module Date_time = struct
       ~hide_time_zone:(fun () -> true)
       ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
       ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width
-      ~class_ ~on_blur ~children ~others:(Props.others props)
+      ~class_ ~on_blur ~on_focus_out ~given_ref ~children
+      ~others:(Props.others props)
+  [@@element div]
 end
 
 module Zoned = struct
@@ -642,12 +663,15 @@ module Zoned = struct
       ?(is_read_only : bool = false) ?(name : string option)
       ?(aria_label : string option) ?(full_width : bool option)
       ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+      ?(on_focus_out : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     field ~kind:zoned_kind ~fallback:placeholder_value ~value ~default_value
       ~on_change
       ~placeholder_value:(fun () -> Some (placeholder_value ()))
       ~min_value ~max_value ~hide_time_zone ~granularity ~hour_cycle
       ~should_force_leading_zeros ~is_required ~is_invalid ~is_disabled
-      ~is_read_only ~name ~aria_label ~full_width ~class_ ~on_blur ~children
-      ~others:(Props.others props)
+      ~is_read_only ~name ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out
+      ~given_ref ~children ~others:(Props.others props)
+  [@@element div]
 end

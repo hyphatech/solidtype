@@ -43,10 +43,10 @@ module Track : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -61,6 +61,7 @@ module Fill : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -78,10 +79,11 @@ module Thumb : sig
     val check :
       ?index:int Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlSpanElement -> unit) ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Span.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -107,10 +109,11 @@ module Props : sig
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

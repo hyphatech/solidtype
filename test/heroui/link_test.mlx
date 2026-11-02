@@ -56,4 +56,24 @@ let () =
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is disabled as React Aria's is" (fun () ->
           let* solidtype, react = both ~disabled:true in
-          Js.Promise.resolve E.(expect solidtype |> toEqual react)))
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref beside its own"
+        (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <Link
+                href="#top" title="Top" style="--x: 1" ref=(fun _ -> incr refs)>
+                "HeroUI"
+              </Link>);
+          let user = T.setup () in
+          let link = T.by_role "link" in
+          let* () = T.hover user link in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( T.attribute link "title",
+                  T.attribute link "style",
+                  T.attribute link "data-hovered",
+                  !refs )
+              |> toEqual (Some "Top", Some "--x: 1;", Some "true", 1))))

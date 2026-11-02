@@ -45,7 +45,9 @@
     their own -- and [make] and [component]. In [body] a value prop is read as a
     thunk, [text ()], and a function prop is called, [on_pick v], an optional
     one giving [Some] of its result or [None]: each is a live read of Solid's
-    props, so Solid tracks it.
+    props, so Solid tracks it. A prop may be read by a name of the body's own,
+    [?ref:(given : (Dom.htmlDivElement -> unit) option)], so the prop [ref]
+    leaves the stdlib's [ref] to the body.
 
     Given the element it draws, [let%component make ... [@@element button]], its
     [check] takes each of that element's attributes after its own props, typed

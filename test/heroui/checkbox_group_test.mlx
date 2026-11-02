@@ -8,6 +8,7 @@ module Checkbox_group = Solidtype_heroui.Checkbox_group
 module Description = Solidtype_heroui.Description
 module Fieldset = Solidtype_heroui.Fieldset
 module Label = Solidtype_heroui.Label
+module Form = Solidtype_heroui.Form
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -44,6 +45,8 @@ external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
 
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external checked : Dom.element -> bool = "checked" [@@mel.get]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
 
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]
@@ -296,4 +299,50 @@ let () =
                     : Dom.element))
           in
           Twin.cleanup ();
-          E.(expect (solidtype, react) |> toEqual (1, 1))))
+          E.(expect (solidtype, react) |> toEqual (1, 1)));
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and outs = ref 0 in
+          let blurs =
+            T.blurs ~root:"[data-slot=checkbox-group]" (fun on_blur ->
+                T.render (fun () ->
+                    <Form on_submit=prevent_default>
+                      <Checkbox_group
+                        name="interests"
+                        is_invalid=true
+                        on_blur
+                        title="Interests"
+                        style="--x: 1"
+                        ref=(fun _ -> incr refs)
+                        on_focus_out=(fun _ -> incr outs)>
+                        <Label>"Interests"</Label>
+                        <Checkbox value="coding">
+                          <Checkbox.Content>"Coding"</Checkbox.Content>
+                        </Checkbox>
+                        <Checkbox value="music">
+                          <Checkbox.Content>"Music"</Checkbox.Content>
+                        </Checkbox>
+                      </Checkbox_group>
+                      <button data_slot="button" type_=`submit>"Save"</button>
+                    </Form>))
+          in
+          let group =
+            match T.query "[data-slot=checkbox-group]" with
+            | Some g -> g
+            | None -> T.body
+          in
+          let first =
+            match T.query "[data-slot=checkbox-group] input" with
+            | Some i -> i
+            | None -> T.body
+          in
+          (* Focus out of the first checkbox into the second, then out. *)
+          let left = !outs in
+          let* () = T.click (T.setup ()) (T.by_role "button") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute group "title", T.attribute group "style"),
+                  (blurs, left, !refs, active == first) )
+              |> toEqual ((Some "Interests", Some "--x: 1;"), (1, 2, 1, true)))))

@@ -95,8 +95,7 @@ module Props : sig
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

@@ -112,6 +112,7 @@ module Item = struct
           </Show>
         </li>);
     Jsx.nothing
+  [@@element li]
 end
 
 let%component make ?(separator : Jsx.element option)

@@ -125,8 +125,10 @@ let%component make
     ?(is_pending : bool = false) ?(id : string option)
     ?(slot : [ `trigger | `close | `chevron ] option)
     ?(type_ : Solidtype.Html.Button.type_ = `button) ?(class_ : string option)
-    ?(on_click : (Dom.mouseEvent -> unit) option) ?(aria_label : string option)
-    ~(children : Solidtype.Jsx.content) () =
+    ?(on_click : (Dom.mouseEvent -> unit) option)
+    ?(on_focus : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+    ?(aria_label : string option) ~(children : Solidtype.Jsx.content) () =
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
   let group = Button_group.Context.use () in
@@ -253,9 +255,10 @@ let%component make
                  stop_propagation ev;
                  prevent_default ev
                end));
-          match Option.bind trigger (fun (t : trigger) -> t.element) with
+          (match Option.bind trigger (fun (t : trigger) -> t.element) with
           | Some made -> made (as_element b)
-          | None -> ())
+          | None -> ());
+          ignore (given_ref b : unit option))
     ?slot=(fun () ->
             Option.map
               (function
@@ -264,7 +267,8 @@ let%component make
                 | `chevron -> "chevron")
               (slot ()))
     ?tabindex=(fun () -> Option.map (fun _ -> "-1") chevron)
-    on_focus=(fun _ ->
+    on_focus=(fun e ->
+               ignore (on_focus e : unit option);
                (* A chevron's press is its row's, which takes the focus, as
                   React Aria's does: from the button the pointer focused, so
                   the row shows no ring a key's focus would. *)
@@ -300,3 +304,4 @@ let%component make
       (fun () -> children ())
     </Spinner.Progress.Provider>
   </Root>
+[@@element button]

@@ -94,13 +94,13 @@ module Input : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:
         ( segment Solidtype.Solid.accessor -> Solidtype.Jsx.element,
           [ `render ] )
         Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -116,9 +116,9 @@ module Segment : sig
     val check :
       segment:segment Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -153,10 +153,11 @@ module Props : sig
     ?full_width:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element
@@ -201,10 +202,11 @@ module Date_time : sig
       ?full_width:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?on_blur:(Dom.focusEvent -> unit) ->
+      ?on_focus_out:(Dom.focusEvent -> unit) ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -253,10 +255,11 @@ module Zoned : sig
       ?full_width:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?on_blur:(Dom.focusEvent -> unit) ->
+      ?on_focus_out:(Dom.focusEvent -> unit) ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

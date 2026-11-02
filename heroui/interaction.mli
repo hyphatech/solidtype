@@ -50,7 +50,9 @@ val watch : t -> _ Dom.element_like -> unit
       a key typed into a text not counted, but Tab and Escape, as React Aria
       decides; so a pointer pressed elsewhere hides its ring.
 
-    It is called once, as the element is made: from its [ref]. *)
+    It is called from the element's [ref]. Watching the element it watches again
+    does nothing, as Kobalte hands an element to its ref again while its props
+    change. *)
 
 val hovered : t -> bool
 (** Whether it is hovered, and not disabled; a read Solid tracks, as are the

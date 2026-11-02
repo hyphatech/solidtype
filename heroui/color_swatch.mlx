@@ -24,3 +24,4 @@ let%component make ~(color : Color.t) ?(color_name : string option)
     data_slot="color-swatch"
     props=(Props.others props)
   />
+[@@element div]

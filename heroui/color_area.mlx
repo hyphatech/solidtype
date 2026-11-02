@@ -33,7 +33,8 @@ let painted color style =
   ^ match style with Some s -> "; " ^ s | None -> ""
 
 module Thumb = struct
-  let%component make ?(class_ : string option) ?(style : string option) () =
+  let%component make ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option) () =
     let { slots; disabled } =
       match Area_context.use () with
       | Some a -> a
@@ -44,7 +45,9 @@ module Thumb = struct
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
     (* HeroUI's disabled style stops the pointer. *)
     <Headless.Thumb
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () -> after (Styles.ColorArea.thumb (slots ())) (class_ ()))
       style=(fun () -> painted (Area.get_display_color area ()) (style ()))
       data_slot="color-area-thumb"
@@ -54,6 +57,7 @@ module Thumb = struct
       props=(Props.others props)>
       <Headless.HiddenInputX /> <Headless.HiddenInputY />
     </Headless.Thumb>
+  [@@element span]
 end
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)
@@ -94,3 +98,4 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       </Headless.Background>
     </Headless.Root>
   </Area_context.Provider>
+[@@element div]

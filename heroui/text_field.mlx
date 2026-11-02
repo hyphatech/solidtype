@@ -25,7 +25,10 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_required : bool = false) ?(is_invalid : bool = false)
     ?(is_disabled : bool = false) ?(is_read_only : bool = false)
     ?(name : string option) ?(class_ : string option)
-    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : Jsx.content) () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let f =
@@ -53,10 +56,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                Styles.TextField.classes
                  (Styles.TextField.options ?full_width:(full_width ())
                     ?class_:(class_ ()) ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="textfield"
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
@@ -68,3 +77,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

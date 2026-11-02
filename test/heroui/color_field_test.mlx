@@ -11,6 +11,7 @@ module Color_field = Solidtype_heroui.Color_field
 module Color_swatch = Solidtype_heroui.Color_swatch
 module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
 module Label = Solidtype_heroui.Label
 module Colors = Solidtype_kobalte.Colors
 module Color = Solidtype_kobalte.Types.Color
@@ -54,6 +55,8 @@ external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
 [@@mel.send]
 
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 external text : Dom.element -> string = "textContent" [@@mel.get]
 external value_of : Dom.element -> string = "value" [@@mel.get]
 
@@ -294,3 +297,76 @@ let () =
         (fun () ->
           both ~channel:"saturation" ~default_value:"#7F007F"
             ~variant:"secondary" ~suffix:"%" ~keys:[] ()))
+
+(* A field of [channel], else of a hex, each part given a caller's attributes,
+   ref and handlers, as it is hovered, has its prefix clicked, is refused by
+   its form and is left: what each part shows, and what the caller is told. *)
+let given ?channel () =
+  let told = ref [] in
+  let tell name = told := name :: !told in
+  T.render (fun () ->
+      <Form on_submit=prevent_default>
+        <Color_field
+          ?channel=(fun () -> channel)
+          name="color"
+          is_invalid=true
+          title="Color"
+          style="--x: 1"
+          ref=(fun _ -> tell "field ref")
+          on_focus_out=(fun _ -> tell "field focus out")
+          on_blur=(fun _ -> tell "field blur")>
+          <Label>"Color"</Label>
+          <Color_field.Group
+            title="Group" on_click=(fun _ -> tell "group click")>
+            <Color_field.Prefix>"#"</Color_field.Prefix>
+            <Color_field.Input title="Value" ref=(fun _ -> tell "input ref") />
+          </Color_field.Group>
+        </Color_field>
+        <button data_slot="submit" type_=`submit>"Save"</button>
+      </Form>);
+  let user = T.setup () in
+  let part slot =
+    Option.value (T.query ("[data-slot=" ^ slot ^ "]")) ~default:T.body
+  in
+  let input = part "color-input-group-input" in
+  (* The input's ref watches the pointer. *)
+  let* () = T.hover user input in
+  let hovered = T.attribute input "data-hovered" in
+  (* A click on the group's prefix focuses its input. *)
+  let* () = T.click user (part "color-input-group-prefix") in
+  let prefixed = T.attribute active "data-slot" in
+  (* The form focuses the invalid field it finds by the field's ref. *)
+  let* () = T.click user (part "submit") in
+  let submitted = T.attribute active "data-slot" in
+  let* () = T.click user T.body in
+  let root = part "color-field" in
+  Js.Promise.resolve
+    E.(
+      expect
+        ( (T.attribute root "title", T.attribute root "style"),
+          ( T.attribute (part "color-input-group") "title",
+            T.attribute input "title" ),
+          (hovered, prefixed, submitted),
+          Array.of_list (List.sort_uniq String.compare !told) )
+      |> toEqual
+           ( (Some "Color", Some "--x: 1;"),
+             (Some "Group", Some "Value"),
+             ( Some "true",
+               Some "color-input-group-input",
+               Some "color-input-group-input" ),
+             [|
+               "field blur";
+               "field focus out";
+               "field ref";
+               "group click";
+               "input ref";
+             |] ))
+
+let () =
+  Jest.describe "Color_field, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref and handlers \
+         beside their own" (fun () -> given ());
+      Jest.testPromise "take them so in a field of a channel" (fun () ->
+          given ~channel:`hue ()))

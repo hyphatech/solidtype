@@ -104,11 +104,6 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
                           match keys () with
                           | [||] -> Js.Nullable.null
                           | ks -> Js.Nullable.return ks.(0))
-                  on_change=(fun v ->
-                              change
-                                (match Js.Nullable.toOption v with
-                                | Some k -> [| k |]
-                                | None -> [||]))
                   orientation=(fun () -> orientation ())
                   disabled=(fun () -> all_disabled ())
                   ?aria_label
@@ -116,13 +111,17 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
                   class_=(fun () -> class_ ())
                   data_slot="toggle-button-group"
                   data_disabled=(fun () -> Jsx.flag (disabled ()))
-                  props=(Props.others props)>
+                  props=(Props.others props)
+                  on_change=(fun v ->
+                              change
+                                (match Js.Nullable.toOption v with
+                                | Some k -> [| k |]
+                                | None -> [||]))>
                   (fun () -> children ())
                 </Kobalte.Root>)>
       <Kobalte.Root_multiple
         multiple=true
         value=(fun () -> keys ())
-        on_change=change
         orientation=(fun () -> orientation ())
         disabled=(fun () -> all_disabled ())
         ?aria_label
@@ -130,8 +129,10 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         class_=(fun () -> class_ ())
         data_slot="toggle-button-group"
         data_disabled=(fun () -> Jsx.flag (disabled ()))
-        props=(Props.others props)>
+        props=(Props.others props)
+        on_change=change>
         (fun () -> children ())
       </Kobalte.Root_multiple>
     </Show>
   </Context.Provider>
+[@@element div]

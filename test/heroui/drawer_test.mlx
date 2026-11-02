@@ -265,6 +265,18 @@ let both ?variant ?is_dismissable ?placement ?(custom = false) () =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The title and the style a part is given, found on its element: the style
+   as whether it holds the declaration given, beside any the port's own. *)
+let given slot =
+  let e = first ("[data-slot=" ^ slot ^ "]") in
+  ( T.attribute e "title",
+    Option.map (Js.String.includes ~search:"--x: 1") (T.attribute e "style") )
+
+let focused () =
+  match Js.Null.toOption active with
+  | Some e -> T.attribute e "data-slot"
+  | None -> None
+
 let () =
   Jest.describe "Drawer" (fun () ->
       Jest.afterEach T.cleanup;
@@ -281,6 +293,84 @@ let () =
       Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
           let* r = both ~custom:true () in
           same r);
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and focus_outs = ref 0 and clicks = ref 0 in
+          let made part = refs := part :: !refs in
+          T.render (fun () ->
+              <Drawer>
+                <Drawer.Trigger
+                  title="Trigger" style="--x: 1" ref=(fun _ -> made "trigger")>
+                  "Open"
+                </Drawer.Trigger>
+                <Drawer.Backdrop
+                  title="Backdrop" style="--x: 1" ref=(fun _ -> made "backdrop")>
+                  <Drawer.Content
+                    title="Content" style="--x: 1" ref=(fun _ -> made "content")>
+                    <Drawer.Dialog
+                      title="Dialog"
+                      style="--x: 1"
+                      ref=(fun _ -> made "dialog")
+                      on_focus_out=(fun _ -> incr focus_outs)>
+                      <Drawer.Close_trigger
+                        title="Close"
+                        style="--x: 1"
+                        on_click=(fun _ -> incr clicks)
+                      />
+                      <Drawer.Heading title="Heading" style="--x: 1">
+                        "Drawer Title"
+                      </Drawer.Heading>
+                    </Drawer.Dialog>
+                  </Drawer.Content>
+                </Drawer.Backdrop>
+              </Drawer>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () = T.hover user (trigger ()) in
+          let hovered = T.attribute (trigger ()) "data-hovered" in
+          let* () = T.click user (trigger ()) in
+          let* () = settle () in
+          let parts =
+            List.map given
+              [
+                "drawer-trigger";
+                "drawer-backdrop";
+                "drawer-content";
+                "drawer-dialog";
+                "drawer-close-trigger";
+                "drawer-heading";
+              ]
+          in
+          let viewport =
+            Option.map
+              (Js.String.includes ~search:"--visual-viewport-height")
+              (T.attribute (first "[data-slot=drawer-backdrop]") "style")
+          in
+          let opened_on = focused () in
+          let* () = T.tab user in
+          let* () = T.click user (first "[data-slot=drawer-close-trigger]") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( parts,
+                  (hovered, viewport, opened_on),
+                  List.sort String.compare !refs,
+                  (!focus_outs > 0, !clicks),
+                  Array.length (all "[role=dialog]") )
+              |> toEqual
+                   ( [
+                       (Some "Trigger", Some true);
+                       (Some "Backdrop", Some true);
+                       (Some "Content", Some true);
+                       (Some "Dialog", Some true);
+                       (Some "Close", Some true);
+                       (Some "Heading", Some true);
+                     ],
+                     (Some "true", Some true, Some "drawer-dialog"),
+                     [ "backdrop"; "content"; "dialog"; "trigger" ],
+                     (true, 1),
+                     0 )));
       Jest.testPromise "closes as its handle is dragged toward its edge"
         (fun () ->
           T.render (fun () ->

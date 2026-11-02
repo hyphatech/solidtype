@@ -30,6 +30,7 @@ let luminance c =
 module Item = struct
   let%component make ~(color : Color.t) ?(is_disabled : bool option)
       ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     let slots = within "Color_swatch_picker.Item" in
     let disabled () = Option.value (is_disabled ()) ~default:false in
@@ -39,7 +40,9 @@ module Item = struct
     <Headless.Item
       color=(fun () -> color ())
       is_disabled=(fun () -> disabled ())
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () ->
                after (Styles.ColorSwatchPicker.item (slots ())) (class_ ()))
       style=(fun () ->
@@ -57,6 +60,7 @@ module Item = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Item>
+  [@@element div]
 end
 
 module Swatch = struct
@@ -70,6 +74,7 @@ module Swatch = struct
       data_slot="color-swatch-picker-swatch"
       props=(Props.others props)
     />
+  [@@element div]
 end
 
 module Indicator = struct
@@ -132,3 +137,4 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       (fun () -> children ())
     </Headless.Root>
   </Context.Provider>
+[@@element div]

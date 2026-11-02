@@ -54,10 +54,14 @@ module Output = struct
                   data_slot="progress-bar-output"
                   props=(Props.others props)
                 />)>
-      <span class_=(fun () -> classes ()) data_slot="progress-bar-output">
+      <span
+        class_=(fun () -> classes ())
+        data_slot="progress-bar-output"
+        props=(Props.others props)>
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
+  [@@element span]
 end
 
 module Track = struct
@@ -74,15 +78,18 @@ module Track = struct
 end
 
 module Fill = struct
-  let%component make ?(class_ : string option) () =
+  let%component make ?(class_ : string option) ?(style : string option) () =
     let m = within "Progress_bar.Fill" in
     <div
       class_=(fun () ->
                after (Styles.ProgressBar.fill (m.slots ())) (class_ ()))
       ?style=(fun () ->
-               Option.map
-                 (fun p -> "width: " ^ Js.Float.toString p ^ "%;")
-                 (m.percent ()))
+               match (m.percent (), style ()) with
+               | Some p, given ->
+                   let own = "width: " ^ Js.Float.toString p ^ "%;" in
+                   Some
+                     (match given with Some s -> own ^ " " ^ s | None -> own)
+               | None, given -> given)
       data_slot="progress-bar-fill"
       props=(Props.others props)
     />
@@ -151,3 +158,4 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

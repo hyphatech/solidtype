@@ -221,6 +221,99 @@ let () =
           let* react = reveal host in
           Twin.cleanup ();
           same (solidtype, react));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs beside its own"
+        (fun () ->
+          let triggers = ref 0 and contents = ref 0 in
+          T.render (fun () ->
+              <Disclosure>
+                <Disclosure.Heading>
+                  <Disclosure.Trigger
+                    title="Opens" style="--x: 1" ref=(fun _ -> incr triggers)>
+                    "Shipping"
+                  </Disclosure.Trigger>
+                </Disclosure.Heading>
+                <Disclosure.Content
+                  title="Shown" style="--y: 2" ref=(fun _ -> incr contents)>
+                  "Soon."
+                </Disclosure.Content>
+              </Disclosure>);
+          let user = T.setup () in
+          let trigger = T.by_role "button" in
+          let content () =
+            match T.query "[data-slot=disclosure-content]" with
+            | Some c -> c
+            | None -> T.body
+          in
+          let height () =
+            property (style (content ())) "--disclosure-panel-height"
+          in
+          let collapsed = height () in
+          (* Counted before it is expanded: Kobalte's parts give their ref
+             again as their state changes. *)
+          let given = (!triggers, !contents) in
+          let* () = T.hover user trigger in
+          let hovered = T.attribute trigger "data-hovered" in
+          let* () = T.click user trigger in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute trigger "title", T.attribute trigger "style"),
+                  ( T.attribute (content ()) "title",
+                    property (style (content ())) "--y" ),
+                  ( hovered,
+                    collapsed,
+                    height (),
+                    T.attribute (content ()) "hidden" ),
+                  given )
+              |> toEqual
+                   ( (Some "Opens", Some "--x: 1;"),
+                     (Some "Shown", "2"),
+                     (Some "true", "0px", "auto", None),
+                     (1, 1) )));
+      Jest.testPromise "keeps its size as a caller's style changes" (fun () ->
+          let shade, set_shade = Solidtype.Solid.create_signal "1" in
+          T.render (fun () ->
+              <Disclosure>
+                <Disclosure.Heading>
+                  <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
+                </Disclosure.Heading>
+                <Disclosure.Content
+                  style=(fun () -> "--y: " ^ Solidtype.Solid.get shade)>
+                  "Soon."
+                </Disclosure.Content>
+              </Disclosure>);
+          let* () = T.click (T.setup ()) (T.by_role "button") in
+          Solidtype.Solid.set set_shade "2";
+          let content =
+            match T.query "[data-slot=disclosure-content]" with
+            | Some c -> c
+            | None -> T.body
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( property (style content) "--disclosure-panel-height",
+                  property (style content) "--y" )
+              |> toEqual ("auto", "2")));
+      Jest.test "keeps its trigger controlling its content given an id"
+        (fun () ->
+          T.render (fun () ->
+              <Disclosure default_expanded=true>
+                <Disclosure.Heading>
+                  <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
+                </Disclosure.Heading>
+                <Disclosure.Content id="mine">
+                  <Disclosure.Body>"Soon."</Disclosure.Body>
+                </Disclosure.Content>
+              </Disclosure>);
+          let controlled =
+            Option.bind
+              (T.attribute (T.by_role "button") "aria-controls")
+              (fun id -> T.query ("#" ^ id))
+            |> Option.map (fun e -> T.attribute e "data-slot")
+          in
+          E.(expect controlled |> toEqual (Some (Some "disclosure-content"))));
       Jest.test "is a button given the trigger's slot outside one" (fun () ->
           T.render (fun () -> <Button slot=`trigger>"Save"</Button>);
           let expanded =

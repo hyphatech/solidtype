@@ -259,3 +259,55 @@ let () =
         ];
       Jest.testPromise "draws an indicator of its own, as React's does"
         (fun () -> both ~heart:true ~default_value:"#F8FAFC" ~steps:[] ()))
+
+let () =
+  Jest.describe "Color_swatch_picker, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref beside its own"
+        (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <Picker title="Colors" style="--x: 1">
+                <Picker.Item
+                  color=(fun () -> Colors.parse_color "#F43F5E")
+                  title="Rose"
+                  style="--y: 2"
+                  ref=(fun _ -> incr refs)>
+                  <Picker.Swatch title="Swatch" /> <Picker.Indicator />
+                </Picker.Item>
+              </Picker>);
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          (* The item's ref watches the pointer. *)
+          let* () =
+            T.hover (T.setup ())
+              (Option.value
+                 (T.query "[data-slot=color-swatch-picker-item]")
+                 ~default:T.body)
+          in
+          let item_style =
+            Option.map
+              (fun s ->
+                ( Js.String.includes ~search:"--color-swatch-current" s,
+                  Js.String.includes ~search:"--y: 2" s ))
+              (read "color-swatch-picker-item" "style")
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( read "color-swatch-picker" "title",
+                    read "color-swatch-picker" "style" ),
+                  ( read "color-swatch-picker-item" "title",
+                    item_style,
+                    read "color-swatch-picker-swatch" "title" ),
+                  read "color-swatch-picker-item" "data-hovered",
+                  !refs )
+              |> toEqual
+                   ( (Some "Colors", Some "--x: 1;"),
+                     (Some "Rose", Some (true, true), Some "Swatch"),
+                     Some "true",
+                     1 ))))

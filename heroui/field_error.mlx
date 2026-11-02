@@ -34,3 +34,4 @@ let%component make ?(class_ : string option) ?(children : Jsx.content option) ()
   match Slot.use () with
   | Some render -> render classes (Props.others props) content [@u]
   | None -> invalid_arg "Field_error is used inside a field"
+[@@element span]

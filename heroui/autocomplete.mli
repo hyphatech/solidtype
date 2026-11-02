@@ -82,10 +82,11 @@ module Trigger : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -123,8 +124,7 @@ module Indicator : sig
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Svg.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -141,8 +141,7 @@ module Clear_button : sig
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -159,10 +158,11 @@ module Popover : sig
     val check :
       ?placement:placement Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -220,10 +220,11 @@ module Props : sig
     ?full_width:bool Solidtype.Check.value ->
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

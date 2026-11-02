@@ -13,7 +13,10 @@
     [slot=`close] inside it what closes it.
 
     Each function takes its element's [data-slot], its classes, and the rest of
-    its component's props, and is called from that component. *)
+    its component's props, and is called from that component. A [style], a [ref]
+    or a handler it takes is the caller's, given beside the port's own: a
+    handler and a [ref] are called before the port's, and a style's declarations
+    follow the port's. *)
 
 type t
 (** A backdrop, as its parts read it. *)
@@ -53,6 +56,8 @@ val backdrop :
   slot:string ->
   portal_container:(unit -> _ Dom.element_like option) ->
   class_:(unit -> string) ->
+  style:(unit -> string option) ->
+  ref:(Dom.htmlDivElement -> unit option) ->
   dismissable:(unit -> bool) ->
   keyboard_dismissable:(unit -> bool) ->
   is_open:(unit -> bool option) ->
@@ -71,6 +76,7 @@ val container :
   slot:string ->
   class_:(unit -> string) ->
   placement:(unit -> string) ->
+  ref:(Dom.htmlDivElement -> unit option) ->
   others:_ Solidtype.Solid.rest ->
   (unit -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
@@ -83,6 +89,8 @@ val dialog :
   role:Solidtype.Html.Section.role ->
   class_:(unit -> string) ->
   placement:(unit -> string) ->
+  ref:(Dom.htmlElement -> unit option) ->
+  on_focus_out:(Dom.focusEvent -> unit option) ->
   others:_ Solidtype.Solid.rest ->
   (unit -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
@@ -101,6 +109,7 @@ val close_trigger :
   t ->
   slot:string ->
   class_:(unit -> string) ->
+  on_click:(Dom.mouseEvent -> unit option) ->
   others:Close_button.Props.t Solidtype.Solid.rest ->
   Solidtype.Jsx.element
 (** HeroUI's close button, which closes the dialog. *)

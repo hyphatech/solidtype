@@ -5,6 +5,7 @@
 module S = Solidtype.Solid
 module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
 module Input = Solidtype_heroui.Input
 module Label = Solidtype_heroui.Label
 module Text_area = Solidtype_heroui.Text_area
@@ -70,6 +71,9 @@ external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
 
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]
+
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
 (* An attribute that names elements by id, written as the slots of the
    elements it names, since each side makes its own ids. *)
@@ -318,3 +322,39 @@ let () =
           in
           Twin.cleanup ();
           E.(expect (solidtype, react) |> toEqual (1, 1))))
+
+let () =
+  Jest.describe "Text_field, its element" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and outs = ref 0 and blurs = ref 0 in
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Text_field
+                  name="email"
+                  is_invalid=true
+                  title="Email"
+                  style="--x: 1"
+                  ref=(fun _ -> incr refs)
+                  on_focus_out=(fun _ -> incr outs)
+                  on_blur=(fun _ -> incr blurs)>
+                  <Label>"Email"</Label> <Input />
+                </Text_field>
+                <button type_=`submit>"Save"</button>
+              </Form>);
+          let user = T.setup () in
+          (* The form focuses the invalid field it finds by the field's ref. *)
+          let* () = T.click user (T.by_role "button") in
+          let focused = tag_name active in
+          let* () = T.click user T.body in
+          let root = solidtype_host () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( T.attribute root "title",
+                  T.attribute root "style",
+                  focused,
+                  (!refs, !outs, !blurs) )
+              |> toEqual (Some "Email", Some "--x: 1;", "INPUT", (1, 1, 1)))))

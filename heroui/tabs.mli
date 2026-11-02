@@ -43,8 +43,7 @@ module List_container : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -61,8 +60,7 @@ module List : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -83,10 +81,10 @@ module Tab : sig
       ?href:string Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.A.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -135,8 +133,7 @@ module Panel : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -158,8 +155,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

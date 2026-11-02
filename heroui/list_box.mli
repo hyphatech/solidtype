@@ -91,7 +91,7 @@ type hosted = {
       (** Its options, sections and separators, given Kobalte's collection, as
           the children of Kobalte's list: inside a {!Listing}; or, while it
           draws no option, its empty state. *)
-  list_ref : Dom.element -> unit;
+  list_ref : Dom.htmlDivElement -> unit;
       (** Kobalte's list's element, given as it is made: where an option is
           found to bring it into view. *)
   scroll_to_item : string -> unit;
@@ -133,10 +133,12 @@ module Item : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?variant:[ `default | `danger ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
+      ?on_key_down:(Dom.keyboardEvent -> unit) ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -196,8 +198,7 @@ module Section : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Section.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -224,10 +225,10 @@ module Props : sig
     ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
     ?variant:[ `default | `danger ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

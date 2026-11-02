@@ -7,6 +7,7 @@ module Select = Solidtype_heroui.Select
 module List_box = Solidtype_heroui.List_box
 module Label = Solidtype_heroui.Label
 module Description = Solidtype_heroui.Description
+module Form = Solidtype_heroui.Form
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -346,4 +347,122 @@ let () =
           Js.Promise.resolve
             E.(
               expect (text (first "[data-slot=select-value]"))
-              |> toEqual "2 states")))
+              |> toEqual "2 states"));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and told = ref [] and left = ref 0 in
+          let note seen what = seen := what :: !seen in
+          T.render (fun () ->
+              <Form validation_errors=(fun () -> [ ("state", "Choose again") ])>
+                <Select
+                  name="state"
+                  title="States"
+                  ref=(fun _ -> note refs "select")
+                  on_focus_out=(fun _ -> incr left)
+                  on_change=(fun keys ->
+                              note told
+                                ("changed "
+                                ^ String.concat " " (Array.to_list keys)))>
+                  <Label>"State"</Label>
+                  <Select.Trigger
+                    title="Opens"
+                    ref=(fun _ -> note refs "trigger")
+                    on_key_down=(fun _ -> note told "key")>
+                    <Select.Value title="Chosen" />
+                    <Select.Clear_button
+                      title="Clears"
+                      on_pointer_down=(fun _ -> note told "pointer")
+                    />
+                    <Select.Indicator style="--z: 3" />
+                  </Select.Trigger>
+                  <Select.Popover
+                    title="Options"
+                    style="--y: 2"
+                    ref=(fun _ -> note refs "popover")>
+                    <List_box>
+                      <List_box.Item id="florida">"Florida"</List_box.Item>
+                      <List_box.Item id="utah">"Utah"</List_box.Item>
+                    </List_box>
+                  </Select.Popover>
+                </Select>
+                <button type_=`button>"After"</button>
+              </Form>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let step action =
+            let* () = action () in
+            settle ()
+          in
+          let root () = first "[data-slot=select]" in
+          let trigger () = first "[data-slot=select-trigger]" in
+          let option_ name () =
+            match
+              List.find_opt
+                (fun e -> String.equal (text e) name)
+                (Array.to_list (all "[data-slot=list-box-item]"))
+            with
+            | Some e -> T.click user e
+            | None -> Js.Promise.resolve ()
+          in
+          let invalid = T.attribute (root ()) "data-invalid" in
+          let* () = step (fun () -> T.hover user (trigger ())) in
+          let hovered = T.attribute (trigger ()) "data-hovered" in
+          let* () = step (fun () -> T.click user (trigger ())) in
+          let popover = first "[data-slot=select-popover]" in
+          let popover_shown =
+            ( T.attribute popover "title",
+              Option.map
+                (fun style ->
+                  ( Js.String.includes ~search:"--trigger-width" style,
+                    Js.String.includes ~search:"--y: 2;" style ))
+                (T.attribute popover "style") )
+          in
+          let* () = step (option_ "Utah") in
+          let* () =
+            step (fun () ->
+                T.click user (first "[data-slot=select-clear-button]"))
+          in
+          let cleared_closed = T.attribute (root ()) "data-open" in
+          let* () = step (fun () -> T.click user (trigger ())) in
+          let* () = step (option_ "Florida") in
+          let* () = step (fun () -> T.keyboard user "{Backspace}") in
+          let focus_visible = T.attribute (root ()) "data-focus-visible" in
+          let* () = step (fun () -> T.tab user) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( T.attribute (root ()) "title",
+                    T.attribute (trigger ()) "title",
+                    T.attribute (first "[data-slot=select-value]") "title",
+                    T.attribute
+                      (first "[data-slot=select-clear-button]")
+                      "title",
+                    T.attribute
+                      (first "[data-slot=select-default-indicator]")
+                      "style" ),
+                  popover_shown,
+                  (hovered, cleared_closed, invalid, focus_visible),
+                  T.attribute (root ()) "data-invalid",
+                  Array.of_list (List.rev !told),
+                  !left > 0,
+                  Array.of_list (List.sort_uniq String.compare !refs) )
+              |> toEqual
+                   ( ( Some "States",
+                       Some "Opens",
+                       Some "Chosen",
+                       Some "Clears",
+                       Some "--z: 3;" ),
+                     (Some "Options", Some (true, true)),
+                     (Some "true", None, Some "true", Some "true"),
+                     None,
+                     [|
+                       "changed utah";
+                       "pointer";
+                       "changed ";
+                       "changed florida";
+                       "key";
+                       "changed ";
+                       "key";
+                     |],
+                     true,
+                     [| "popover"; "select"; "trigger" |] ))))

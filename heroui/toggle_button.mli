@@ -25,12 +25,12 @@ module Props : sig
     ?on_change:(bool -> unit) ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
+    ?ref:(Dom.htmlButtonElement -> unit) ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Button.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

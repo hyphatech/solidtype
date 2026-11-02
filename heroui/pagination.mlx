@@ -15,14 +15,18 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 
 (* A page, Previous or Next: Kobalte's button with the state HeroUI's styles
    read, kept as React Aria keeps it. *)
-let button ~slot ~classes ~is_active ~is_disabled ~on_press ~others children =
+let button ~slot ~classes ~is_active ~is_disabled ~on_press ~on_click ~given_ref
+    ~others children =
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
     class_=(fun () -> classes ())
-    disabled=(fun () -> is_disabled ())
     ?aria_current=(fun () -> if is_active () then Some "page" else None)
-    on_click=(fun _ -> ignore (on_press () : unit option))
-    ref=(fun b -> Interaction.watch i b)
+    on_click=(fun e ->
+               ignore (on_click e : unit option);
+               ignore (on_press () : unit option))
+    ref=(fun b ->
+          ignore (given_ref b : unit option);
+          Interaction.watch i b)
     data_slot=(fun () -> Jsx.data slot)
     data_active=(fun () -> Jsx.flag (is_active ()))
     data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -30,7 +34,8 @@ let button ~slot ~classes ~is_active ~is_disabled ~on_press ~others children =
     data_focused=(fun () -> Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-    props=others>
+    props=others
+    disabled=(fun () -> is_disabled ())>
     (fun () -> children ())
   </Kobalte.Root>
 
@@ -98,18 +103,24 @@ end
 
 module Link = struct
   let%component make ?(is_active : bool = false) ?(is_disabled : bool = false)
-      ?(on_press : (unit -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(on_press : (unit -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = within "Pagination.Link" in
     button ~slot:"pagination-link"
       ~classes:(fun () -> after (Styles.Pagination.link (slots ())) (class_ ()))
-      ~is_active ~is_disabled ~on_press ~others:(Props.others props) children
+      ~is_active ~is_disabled ~on_press ~on_click ~given_ref
+      ~others:(Props.others props) children
+  [@@element button]
 end
 
 module Previous = struct
   let%component make ?(is_disabled : bool = false)
-      ?(on_press : (unit -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(on_press : (unit -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = within "Pagination.Previous" in
     button ~slot:"pagination-previous"
       ~classes:(fun () ->
@@ -117,13 +128,17 @@ module Previous = struct
           (Styles.Pagination.link (slots ()) ^ " pagination__link--nav")
           (class_ ()))
       ~is_active:(fun () -> false)
-      ~is_disabled ~on_press ~others:(Props.others props) children
+      ~is_disabled ~on_press ~on_click ~given_ref ~others:(Props.others props)
+      children
+  [@@element button]
 end
 
 module Next = struct
   let%component make ?(is_disabled : bool = false)
-      ?(on_press : (unit -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(on_press : (unit -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = within "Pagination.Next" in
     button ~slot:"pagination-next"
       ~classes:(fun () ->
@@ -131,7 +146,9 @@ module Next = struct
           (Styles.Pagination.link (slots ()) ^ " pagination__link--nav")
           (class_ ()))
       ~is_active:(fun () -> false)
-      ~is_disabled ~on_press ~others:(Props.others props) children
+      ~is_disabled ~on_press ~on_click ~given_ref ~others:(Props.others props)
+      children
+  [@@element button]
 end
 
 module Previous_icon = struct

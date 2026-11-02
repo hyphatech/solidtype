@@ -89,12 +89,15 @@ let first_in_page elements =
 
 (* A field's control, as Tab would reach it: a radio group's checked radio,
    else the first control inside it Tab stops at, past the input Kobalte hides
-   to submit a value. *)
+   to submit a value: a time field's first segment among them; else a button,
+   as an autocomplete's, whose trigger is a group around one. A button comes
+   last, so a number field's input is focused before its decrement button. *)
 let control root =
   [
     "input[type=radio]:checked";
     "input:not([type=hidden]):not([disabled]):not([tabindex='-1']), textarea, \
-     [role=slider]";
+     [role=slider], [role=spinbutton]";
+    "button:not([disabled])";
   ]
   |> List.find_map (fun selector -> Js.Null.toOption (query root selector))
 

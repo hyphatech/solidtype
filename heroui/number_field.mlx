@@ -108,8 +108,8 @@ module Group = struct
 end
 
 module Input = struct
-  let%component make ?(placeholder : string option) ?(class_ : string option) ()
-      =
+  let%component make ?(placeholder : string option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlInputElement -> unit) option) () =
     let f = within "Number_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
     (* Kobalte's input tells its value now as the text it shows once the value
@@ -118,7 +118,9 @@ module Input = struct
       ?placeholder
       class_=(fun () ->
                after (Styles.NumberField.input (f.slots ())) (class_ ()))
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       ?aria_valuenow=(fun () ->
                        let v = f.current () in
                        if Float.is_nan v then None
@@ -131,6 +133,7 @@ module Input = struct
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
       props=(Props.others props)
     />
+  [@@element input]
 end
 
 (* HeroUI's own plus and minus, drawn where a button is given no children. *)
@@ -161,14 +164,13 @@ let minus =
 
 module Increment_button = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
-      () =
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
     let f = within "Number_field.Increment_button" in
     let disabled () = not (f.can_increment ()) in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
     (* Named "Increase" and by the field's label, as React Aria's is. *)
     let id = Solidtype.Solid.create_unique_id () in
     <Kobalte.IncrementTrigger
-      id=(fun () -> id)
       aria_label="Increase"
       aria_labelledby=(fun () -> id ^ " " ^ f.label_id)
       class_=(fun () ->
@@ -176,15 +178,18 @@ module Increment_button = struct
                  (Styles.NumberField.increment_button (f.slots ()))
                  (class_ ()))
       slot="increment"
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       data_slot="number-field-increment-button"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      disabled=(fun () -> disabled ())
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-      props=(Props.others props)>
+      props=(Props.others props)
+      id=(fun () -> id)
+      disabled=(fun () -> disabled ())>
       <Show
         when_=(fun () -> Option.is_some (children ()))
         fallback=(fun () ->
@@ -192,18 +197,18 @@ module Increment_button = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </Show>
     </Kobalte.IncrementTrigger>
+  [@@element button]
 end
 
 module Decrement_button = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
-      () =
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
     let f = within "Number_field.Decrement_button" in
     let disabled () = not (f.can_decrement ()) in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
     (* Named "Decrease" and by the field's label, as React Aria's is. *)
     let id = Solidtype.Solid.create_unique_id () in
     <Kobalte.DecrementTrigger
-      id=(fun () -> id)
       aria_label="Decrease"
       aria_labelledby=(fun () -> id ^ " " ^ f.label_id)
       class_=(fun () ->
@@ -211,15 +216,18 @@ module Decrement_button = struct
                  (Styles.NumberField.decrement_button (f.slots ()))
                  (class_ ()))
       slot="decrement"
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       data_slot="number-field-decrement-button"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      disabled=(fun () -> disabled ())
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-      props=(Props.others props)>
+      props=(Props.others props)
+      id=(fun () -> id)
+      disabled=(fun () -> disabled ())>
       <Show
         when_=(fun () -> Option.is_some (children ()))
         fallback=(fun () ->
@@ -227,6 +235,7 @@ module Decrement_button = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </Show>
     </Kobalte.DecrementTrigger>
+  [@@element button]
 end
 
 let%component make ?(variant : [ `primary | `secondary ] option)
@@ -239,7 +248,10 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(name : string option) ?(aria_label : string option)
     ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
-    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : Jsx.content) () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -339,10 +351,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?text_value
       class_=(fun () ->
                after (Styles.NumberField.base (f.slots ())) (class_ ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="number-field"
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
@@ -355,3 +373,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

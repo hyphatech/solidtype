@@ -5,6 +5,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Color_slider = Solidtype_heroui.Color_slider
+module Form = Solidtype_heroui.Form
 module Label = Solidtype_heroui.Label
 module Colors = Solidtype_kobalte.Colors
 module Color = Solidtype_kobalte.Types.Color
@@ -43,6 +44,8 @@ external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
 
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
 external closest : Dom.element -> string -> Dom.element Js.null = "closest"
 [@@mel.send]
@@ -225,3 +228,91 @@ let () =
             ~label:"Alpha" ());
       Jest.testPromise "is a red, as React's is" (fun () ->
           both ~channel:(Some "red") ~value:"rgb(255, 100, 50)" ~label:"Red" ()))
+
+let () =
+  Jest.describe "Color_slider, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref and handlers \
+         beside their own" (fun () ->
+          let told = ref [] in
+          let tell name = told := name :: !told in
+          T.render (fun () ->
+              <Form
+                on_submit=prevent_default
+                validation_errors=(fun () -> [ ("hue", "Too red.") ])>
+                <Color_slider
+                  name="hue"
+                  channel=`hue
+                  aria_label="Hue"
+                  default_value=(fun () ->
+                                  Colors.parse_color "hsl(0, 100%, 50%)")
+                  title="Hue"
+                  style="--x: 1"
+                  ref=(fun _ -> tell "slider ref")
+                  on_focus_out=(fun _ -> tell "slider focus out")
+                  on_blur=(fun _ -> tell "slider blur")>
+                  <Color_slider.Track>
+                    <Color_slider.Thumb
+                      title="Thumb" ref=(fun _ -> tell "thumb ref")
+                    />
+                  </Color_slider.Track>
+                </Color_slider>
+                <button data_slot="submit" type_=`submit>"Save"</button>
+              </Form>);
+          let user = T.setup () in
+          let part slot =
+            Option.value (T.query ("[data-slot=" ^ slot ^ "]")) ~default:T.body
+          in
+          let thumb = part "color-slider-thumb" in
+          (* The thumb's ref watches the pointer. *)
+          let* () = T.hover user thumb in
+          let hovered = T.attribute thumb "data-hovered" in
+          (* The form focuses the slider it finds by the slider's ref. *)
+          let* () = T.click user (part "submit") in
+          let submitted =
+            Option.is_some
+              (Js.Null.toOption
+                 (closest active "[data-slot=color-slider-thumb]"))
+          in
+          let* () = T.click user T.body in
+          let root = part "color-slider" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute root "title", T.attribute root "style"),
+                  (T.attribute thumb "title", hovered, submitted),
+                  Array.of_list (List.sort_uniq String.compare !told) )
+              |> toEqual
+                   ( (Some "Hue", Some "--x: 1;"),
+                     (Some "Thumb", Some "true", true),
+                     [|
+                       "slider blur";
+                       "slider focus out";
+                       "slider ref";
+                       "thumb ref";
+                     |] ))))
+
+let () =
+  Jest.describe "Color_slider's thumb, given an id" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "keeps the id its output names" (fun () ->
+          T.render (fun () ->
+              <Color_slider
+                channel=`hue
+                default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")>
+                <Label>"Hue"</Label>
+                <Color_slider.Output />
+                <Color_slider.Track>
+                  <Color_slider.Thumb id="mine" />
+                </Color_slider.Track>
+              </Color_slider>);
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          let id = read "color-slider-thumb" "id" in
+          E.(
+            expect (Option.is_some id, read "color-slider-output" "for")
+            |> toEqual (true, id))))

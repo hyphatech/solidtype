@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stages 1, 2 and 3a have landed.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stages 1, 2, 3a and 3b have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -89,8 +89,11 @@ function of state.
 
 - **FR-1** A part that draws an element takes every attribute of it,
   `style`, handlers and `ref` among them, and `class_`.
-- **FR-2** A caller's handler and `ref` are called beside a part's own; a
-  part's own attribute is never replaced by the caller's.
+- **FR-2** A caller's handler and `ref` are called beside a part's own, and
+  its `style` written after the part's; an attribute the part's behaviour
+  rests on -- a Kobalte option, an id another part names, a state it writes
+  -- is never replaced by the caller's; any other the caller gives wins, as
+  React Aria's `mergeProps` lets it.
 - **FR-3** A part that draws an element can be given a component to draw in
   its place, which receives the part's props.
 - **FR-4** A part HeroUI gives a render function takes its children as a
@@ -125,11 +128,17 @@ filled. A switch's `on_change` takes its state and a part's `size` its
 variant, where the element's would take an event and a string; some twenty
 ports have such a prop.
 
-A part that sets a handler or a `ref` on its element names it as its own
-parameter and calls the caller's beside its own, as the headless parts do
-by hand; `Props.others` spreads the rest after the part's attributes, which
-already happens in 68 of 70 modules. A port that means the element's
-own attribute by its prop, `class_`, passes it on itself.
+A part that sets a handler, a `ref` or a `style` on its element names it as
+its own parameter, `?ref:(given_ref : ...)`, and calls or writes the
+caller's beside its own, as the headless parts do by hand; `Props.others`
+spreads the rest after the part's attributes, so the caller's wins, but for
+what the part's behaviour rests on -- Kobalte's `on_change`, the id a
+trigger's `aria-controls` names, a fix of Kobalte's -- written after the
+spread, since Solid merges props in the order they are written. A ref on a
+plain element needs no composing: Solid calls the written one and the
+spread's both. A port that means the element's own attribute by its prop,
+`class_`, passes it on itself. A part that draws no element, a root that
+only gives context, takes none.
 
 Rejected: **an own prop held to the element's type**, the first shape built
 -- some twenty ports, every field with a typed `on_change`, could not use it;
@@ -235,7 +244,7 @@ class, which restyles every instance at once.
   element -- 114 of them -- `Close_button.Icon` and
   `List_box.Load_more_item` taking a class so; the data-attributes test
   gives each a title, found on its element.
-- [ ] 3b. The parts that spread onto a Kobalte part or another port, those
+- [x] 3b. The parts that spread onto a Kobalte part or another port, those
   that draw one of several elements, and those that set a handler on their
   element, each handler composed with the caller's; the attributes test
   over every part. Styling's "Not yet" goes.
@@ -267,7 +276,7 @@ state child and `Theme` built and seen in a browser beside heroui.com's.
 
 | Fact | Goes to |
 |---|---|
-| that a part takes every attribute, `as_` and a state child | `README.md`, and the Styling and Composition pages |
+| that a part takes every attribute, `as_` and a state child | the Styling and Composition pages |
 | each part's element, state record and `as_` | its `.mli` |
 | the two rules | `AGENTS.md` |
 | `[@@element]` | `ppx/ppx_solidtype.mli` |

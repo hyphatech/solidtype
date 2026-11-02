@@ -190,6 +190,23 @@ let both ?placement ?(arrow = false) ?(custom = false) () =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The title a part is given, found on the element [selector] finds, and
+   whether its style holds the declaration given and [own], the port's. *)
+let given ?(own = "--x: 1") selector =
+  match all selector with
+  | [||] -> (None, None)
+  | found ->
+      let style = Option.value (T.attribute found.(0) "style") ~default:"" in
+      ( T.attribute found.(0) "title",
+        Some
+          (Js.String.includes ~search:"--x: 1" style
+          && Js.String.includes ~search:own style) )
+
+let focused () =
+  match Js.Null.toOption active with
+  | Some e -> T.attribute e "data-slot"
+  | None -> None
+
 let () =
   Jest.describe "Popover" (fun () ->
       Jest.afterEach T.cleanup;
@@ -202,6 +219,59 @@ let () =
       Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
           let* r = both ~custom:true () in
           same r);
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs beside its own"
+        (fun () ->
+          let refs = ref [] in
+          let made part = refs := part :: !refs in
+          T.render (fun () ->
+              <Popover>
+                <Popover.Trigger title="Trigger" style="--x: 1">
+                  "Open"
+                </Popover.Trigger>
+                <Popover.Content
+                  title="Content" style="--x: 1" ref=(fun _ -> made "content")>
+                  <Popover.Dialog
+                    title="Dialog" style="--x: 1" ref=(fun _ -> made "dialog")>
+                    <Popover.Arrow title="Arrow" style="--x: 1" />
+                    <Popover.Heading title="Heading" style="--x: 1">
+                      "Popover Title"
+                    </Popover.Heading>
+                    <Button>"Follow"</Button>
+                  </Popover.Dialog>
+                </Popover.Content>
+              </Popover>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () = T.click user (trigger ()) in
+          let* () = settle () in
+          let parts =
+            [
+              given "[data-slot=popover-trigger]";
+              given ~own:"--trigger-anchor-point" ".popover";
+              given "[data-slot=popover-dialog]";
+              given ~own:"position: absolute"
+                "[data-slot=popover-overlay-arrow-group]";
+              given "[data-slot=popover-dialog] h2";
+            ]
+          in
+          let opened_on = focused () in
+          let* () = T.keyboard user "{Escape}" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                (parts, opened_on, focused (), List.sort String.compare !refs)
+              |> toEqual
+                   ( [
+                       (Some "Trigger", Some true);
+                       (Some "Content", Some true);
+                       (Some "Dialog", Some true);
+                       (Some "Arrow", Some true);
+                       (Some "Heading", Some true);
+                     ],
+                     Some "popover-dialog",
+                     Some "popover-trigger",
+                     [ "content"; "dialog" ] )));
       Jest.testPromise "is a dialog its heading names, its buttons buttons"
         (fun () ->
           T.render (fun () ->

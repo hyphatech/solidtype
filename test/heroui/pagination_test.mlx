@@ -151,4 +151,67 @@ let () =
           same r);
       Jest.testPromise "is large, as React's" (fun () ->
           let* r = both ~size:`lg () in
-          same r))
+          same r);
+      Jest.testPromise
+        "takes its buttons' attributes, calling a caller's ref and click \
+         beside its own" (fun () ->
+          let refs = ref 0 and clicks = ref 0 and pressed = ref [] in
+          let press name () = pressed := name :: !pressed in
+          let mine _ = incr clicks in
+          T.render (fun () ->
+              <Pagination>
+                <Pagination.Content>
+                  <Pagination.Item>
+                    <Pagination.Previous
+                      is_disabled=true
+                      disabled=false
+                      title="Back"
+                      style="--x: 1"
+                      ref=(fun _ -> incr refs)
+                      on_click=mine
+                      on_press=(press "previous")>
+                      "Previous"
+                    </Pagination.Previous>
+                  </Pagination.Item>
+                  <Pagination.Item>
+                    <Pagination.Link
+                      title="First"
+                      ref=(fun _ -> incr refs)
+                      on_click=mine
+                      on_press=(press "1")>
+                      "1"
+                    </Pagination.Link>
+                  </Pagination.Item>
+                  <Pagination.Item>
+                    <Pagination.Next
+                      title="On"
+                      ref=(fun _ -> incr refs)
+                      on_click=mine
+                      on_press=(press "next")>
+                      "Next"
+                    </Pagination.Next>
+                  </Pagination.Item>
+                </Pagination.Content>
+              </Pagination>);
+          let user = T.setup () in
+          let button title =
+            Option.value (T.query ("[title=" ^ title ^ "]")) ~default:T.body
+          in
+          let* () = T.hover user (button "First") in
+          let hovered = T.attribute (button "First") "data-hovered" in
+          let* () = T.click user (button "Back") in
+          let* () = T.click user (button "First") in
+          let* () = T.click user (button "On") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( T.attribute (button "Back") "style",
+                    T.attribute (button "Back") "disabled" ),
+                  hovered,
+                  Array.of_list (List.rev !pressed),
+                  (!refs, !clicks) )
+              |> toEqual
+                   ( (Some "--x: 1;", Some ""),
+                     Some "true",
+                     [| "1"; "next" |],
+                     (3, 2) ))))

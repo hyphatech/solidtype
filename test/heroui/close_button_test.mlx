@@ -101,6 +101,24 @@ let () =
           S.set set_disabled true;
           let* () = T.click user b in
           Js.Promise.resolve E.(expect !clicks |> toBe 1));
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref beside its own"
+        (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <Close_button
+                title="Closes" style="--x: 1" ref=(fun _ -> incr refs)
+              />);
+          let b = T.by_role "button" in
+          let* () = T.hover (T.setup ()) b in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( T.attribute b "title",
+                  T.attribute b "style",
+                  T.attribute b "data-hovered",
+                  !refs )
+              |> toEqual (Some "Closes", Some "--x: 1;", Some "true", 1)));
       Jest.testPromise "shows hover, press and focus as React Aria does"
         (fun () ->
           let* solidtype, react = both ~disabled:false in

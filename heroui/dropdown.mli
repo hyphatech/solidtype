@@ -52,10 +52,10 @@ module Trigger : sig
     val check :
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -73,10 +73,12 @@ module Popover : sig
     val check :
       ?placement:[ `top | `bottom | `left | `right ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
+      ?on_focus:(Dom.focusEvent -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -103,8 +105,7 @@ module Menu : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -127,8 +128,7 @@ module Section : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Section.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -150,10 +150,11 @@ module Item : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?variant:[ `default | `danger ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
+      ?on_key_down:(Dom.keyboardEvent -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

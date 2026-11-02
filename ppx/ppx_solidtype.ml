@@ -691,6 +691,9 @@ type presence = Required | Optional | Default of expression
 
 type prop = {
   label : string;
+  var : string;
+      (** What the body names it: the label, or [given] of [?ref:(given : t)].
+      *)
   typ : core_type;  (** Without the [option] of an optional prop. *)
   presence : presence;
   arity : int;  (** How many arguments a function prop takes; 0 for a value. *)
@@ -712,41 +715,48 @@ let rec type_vars (t : core_type) =
 
 let prop_of (p : function_param) =
   let loc = p.pparam_loc in
-  let prop label typ presence =
+  let prop label (var : string loc) typ presence =
     if String.equal label spread then
       Error
         ( loc,
           "props=p spreads a component's props, so no prop is named props: \
            give this one another name" )
-    else Result.map (fun arity -> { label; typ; presence; arity }) (arity typ)
+    else
+      Result.map
+        (fun arity -> { label; var = var.txt; typ; presence; arity })
+        (arity typ)
   in
   match p.pparam_desc with
   | Pparam_val
       ( Labelled label,
         None,
-        { ppat_desc = Ppat_constraint ({ ppat_desc = Ppat_var _; _ }, typ); _ }
-      ) ->
-      prop label typ Required
+        {
+          ppat_desc = Ppat_constraint ({ ppat_desc = Ppat_var var; _ }, typ);
+          _;
+        } ) ->
+      prop label var typ Required
   | Pparam_val
       ( Optional label,
         Some default,
-        { ppat_desc = Ppat_constraint ({ ppat_desc = Ppat_var _; _ }, typ); _ }
-      ) ->
-      prop label typ (Default default)
+        {
+          ppat_desc = Ppat_constraint ({ ppat_desc = Ppat_var var; _ }, typ);
+          _;
+        } ) ->
+      prop label var typ (Default default)
   | Pparam_val
       ( Optional label,
         None,
         {
           ppat_desc =
             Ppat_constraint
-              ( { ppat_desc = Ppat_var _; _ },
+              ( { ppat_desc = Ppat_var var; _ },
                 {
                   ptyp_desc = Ptyp_constr ({ txt = Lident "option"; _ }, [ typ ]);
                   _;
                 } );
           _;
         } ) ->
-      prop label typ Optional
+      prop label var typ Optional
   | _ ->
       Error
         ( loc,
@@ -1041,7 +1051,7 @@ let reader ~loc p =
   in
   (* A component reads the props it needs; the others are still props. *)
   {
-    (B.value_binding ~loc ~pat:(B.pvar ~loc p.label) ~expr) with
+    (B.value_binding ~loc ~pat:(B.pvar ~loc p.var) ~expr) with
     pvb_attributes =
       [
         attribute ~loc "inline";

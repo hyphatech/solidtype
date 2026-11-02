@@ -200,3 +200,46 @@ let () =
       Jest.testPromise "is a text area, as React's is" (fun () ->
           let* r = both ~in_field:true ~multiline:true () in
           same r))
+
+let () =
+  Jest.describe "Input_group, its element" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and clicks = ref 0 in
+          T.render (fun () ->
+              <Input_group
+                title="Site"
+                style="--x: 1"
+                ref=(fun _ -> incr refs)
+                on_click=(fun _ -> incr clicks)>
+                <Input_group.Prefix>"https://"</Input_group.Prefix>
+                <Input_group.Input aria_label="Site" />
+              </Input_group>);
+          let user = T.setup () in
+          let group =
+            Option.value (T.query "[data-slot=input-group]") ~default:T.body
+          in
+          (* Its ref watches the pointer, and its click on the prefix focuses
+             the input. *)
+          let* () =
+            T.click user
+              (Option.value
+                 (T.query "[data-slot=input-group-prefix]")
+                 ~default:T.body)
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( T.attribute group "title",
+                  T.attribute group "style",
+                  T.attribute group "data-hovered",
+                  focused (),
+                  (!refs, !clicks) )
+              |> toEqual
+                   ( Some "Site",
+                     Some "--x: 1;",
+                     Some "true",
+                     "input-group-input",
+                     (1, 1) ))))

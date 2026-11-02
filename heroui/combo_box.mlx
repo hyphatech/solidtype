@@ -47,14 +47,21 @@ let within part =
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
+(* A style given after the part's own, so its declarations win. *)
+let styled own = function Some s -> own ^ " " ^ s | None -> own
+
 module Input_group = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.content) () =
     let c = within "Combo_box.Input_group" in
     (* Hovered, focused within and focus-visible as React Aria's group is. *)
     let i = Interaction.create ~disabled:(fun[@u] () -> c.disabled ()) () in
     <Kobalte.Control
       role=`group
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () ->
                after (Styles.ComboBox.input_group (c.slots ())) (class_ ()))
       data_slot="combo-box-input-group"
@@ -66,17 +73,21 @@ module Input_group = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Control>
+  [@@element div]
 end
 
 module Trigger = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
-      () =
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(children : Jsx.content option) () =
     let c = within "Combo_box.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> c.disabled ()) () in
     <Kobalte.Trigger
       class_=(fun () ->
                after (Styles.ComboBox.trigger (c.slots ())) (class_ ()))
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       data_slot="combo-box-trigger"
       data_open=(fun () -> Jsx.flag (c.is_open ()))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -108,6 +119,7 @@ module Trigger = struct
                 />
               </svg>)
     </Kobalte.Trigger>
+  [@@element button]
 end
 
 type list_format
@@ -169,6 +181,8 @@ end
 
 module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     let c = within "Combo_box.Popover" in
     S.create_computed (fun () ->
@@ -187,11 +201,16 @@ module Popover = struct
             <Kobalte.Content
               class_=(fun () ->
                        after (Styles.ComboBox.popover (c.slots ())) (class_ ()))
-              style="--trigger-width: var(--kb-popper-anchor-width); \
-                     --trigger-anchor-point: \
-                     var(--kb-combobox-content-transform-origin); max-height: \
-                     var(--kb-popper-content-available-height);"
+              style=(fun () ->
+                      styled
+                        "--trigger-width: var(--kb-popper-anchor-width); \
+                         --trigger-anchor-point: \
+                         var(--kb-combobox-content-transform-origin); \
+                         max-height: \
+                         var(--kb-popper-content-available-height);"
+                        (style ()))
               ref=(fun e ->
+                    ignore (given_ref e : unit option);
                     Overlay.watch o e;
                     watch_side e)
               data_slot="combo-box-popover"
@@ -205,7 +224,7 @@ module Popover = struct
                     Jsx.element
                       <As_list
                         as_="div"
-                        ref=(fun e -> h.list_ref (as_element e))
+                        ref=(fun e -> h.list_ref e)
                         scroll_to_item=(fun key -> h.scroll_to_item key)
                         aria_orientation=`vertical
                         class_=(fun () -> h.classes ())
@@ -221,6 +240,7 @@ module Popover = struct
           </Kobalte.Portal>
         </Show>;
       |]
+  [@@element div]
 end
 
 (* Its label, description and error: Kobalte's, which name and describe its
@@ -290,7 +310,11 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
     ?(form_value : [ `key | `text ] = `key)
     ?(on_blur : (Dom.focusEvent -> unit) option) ?(full_width : bool = false)
     ?(variant : [ `primary | `secondary ] = `primary) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_in : (Dom.focusEvent -> unit) option)
+    ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
+    () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -524,6 +548,30 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
   in
   let root_classes () = after (Styles.ComboBox.base (c.slots ())) (class_ ()) in
   let others = Props.others props in
+  let given e =
+    ignore (given_ref e : unit option);
+    root := Some (as_element e);
+    Interaction.watch i e;
+    in_form.root e
+  in
+  let focus_in e =
+    ignore (on_focus_in e : unit option);
+    focused_in e
+  in
+  let key_down e =
+    ignore (on_key_down e : unit option);
+    escaped e
+  in
+  let leave =
+    Fields.on_leave (fun e ->
+        S.set set_returned false;
+        in_form.left ();
+        ignore (on_blur e : unit option))
+  in
+  let focus_out e =
+    ignore (on_focus_out e : unit option);
+    leave e
+  in
   (* Its popover keeps as far from the page's edge as React Aria's, 12 pixels,
      and is no taller than the room it has. *)
   match mode with
@@ -564,16 +612,10 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         required=(fun () -> is_required ())
         validation_state=(fun () -> if invalid () then `invalid else `valid)
         class_=(fun () -> root_classes ())
-        ref=(fun e ->
-              root := Some (as_element e);
-              Interaction.watch i e;
-              in_form.root e)
-        on_focus_in=focused_in
-        on_key_down=escaped
-        on_focus_out=(Fields.on_leave (fun e ->
-                          S.set set_returned false;
-                          in_form.left ();
-                          ignore (on_blur e : unit option)))
+        ref=given
+        on_focus_in=focus_in
+        on_key_down=key_down
+        on_focus_out=focus_out
         data_slot="combo-box"
         data_open=(fun () -> Jsx.flag (S.get opened))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -628,16 +670,10 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         required=(fun () -> is_required ())
         validation_state=(fun () -> if invalid () then `invalid else `valid)
         class_=(fun () -> root_classes ())
-        ref=(fun e ->
-              root := Some (as_element e);
-              Interaction.watch i e;
-              in_form.root e)
-        on_focus_in=focused_in
-        on_key_down=escaped
-        on_focus_out=(Fields.on_leave (fun e ->
-                          S.set set_returned false;
-                          in_form.left ();
-                          ignore (on_blur e : unit option)))
+        ref=given
+        on_focus_in=focus_in
+        on_key_down=key_down
+        on_focus_out=focus_out
         data_slot="combo-box"
         data_open=(fun () -> Jsx.flag (S.get opened))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -648,3 +684,4 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root_multiple>
+[@@element div]

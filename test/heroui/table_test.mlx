@@ -187,4 +187,97 @@ let () =
       Jest.testPromise "is secondary, as React's is" (fun () ->
           both ~variant:`secondary ());
       Jest.testPromise "shows its empty state, as React's does" (fun () ->
-          both ~members:[||] ()))
+          both ~members:[||] ());
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref beside its own \
+         and its style after its own" (fun () ->
+          let refs = ref [] in
+          let counted part = refs := part :: !refs in
+          T.render (fun () ->
+              <Table>
+                <Table.Resizable_container title="Resizes">
+                  <Table.Content aria_label="Team members" title="Team">
+                    <Table.Header title="Head">
+                      <Table.Column
+                        id="name"
+                        is_row_header=true
+                        title="Name"
+                        ref=(fun _ -> counted "column")>
+                        "Name"
+                        <Table.Column_resizer
+                          title="Resizer" ref=(fun _ -> counted "resizer")
+                        />
+                      </Table.Column>
+                    </Table.Header>
+                    <Table.Body title="Rows">
+                      <Table.Row
+                        id="1"
+                        title="Kate"
+                        style="--x: 1"
+                        ref=(fun _ -> counted "row")>
+                        <Table.Cell
+                          title="Her name" ref=(fun _ -> counted "cell")>
+                          "Kate Moore"
+                        </Table.Cell>
+                      </Table.Row>
+                      <Table.Load_more
+                        is_loading=true title="More" style="--y: 2">
+                        "Loading"
+                      </Table.Load_more>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Resizable_container>
+              </Table>);
+          let user = T.setup () in
+          let part slot =
+            Option.value
+              (T.query ("[data-slot=table-" ^ slot ^ "]"))
+              ~default:T.body
+          in
+          let hovered slot =
+            let* () = T.hover user (part slot) in
+            Js.Promise.resolve (T.attribute (part slot) "data-hovered")
+          in
+          let* column = hovered "column" in
+          let* resizer = hovered "column-resizer" in
+          let* row = hovered "row" in
+          let* () = T.click user T.body in
+          let* () = T.tab user in
+          let* () = T.keyboard user "{ArrowRight}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Array.map
+                    (fun slot -> T.attribute (part slot) "title")
+                    [|
+                      "resizable-container";
+                      "content";
+                      "header";
+                      "column";
+                      "column-resizer";
+                      "body";
+                      "row";
+                      "cell";
+                      "load-more";
+                    |],
+                  ( T.attribute (part "row") "style",
+                    T.attribute (part "load-more") "style" ),
+                  ( (column, resizer, row),
+                    T.attribute (part "cell") "data-focus-visible" ),
+                  Array.of_list (List.sort String.compare !refs) )
+              |> toEqual
+                   ( [|
+                       Some "Resizes";
+                       Some "Team";
+                       Some "Head";
+                       Some "Name";
+                       Some "Resizer";
+                       Some "Rows";
+                       Some "Kate";
+                       Some "Her name";
+                       Some "More";
+                     |],
+                     ( Some "--table-row-level: 1; --x: 1;",
+                       Some "--table-row-level: 1; --y: 2;" ),
+                     ((Some "true", Some "true", Some "true"), Some "true"),
+                     [| "cell"; "column"; "resizer"; "row" |] ))))

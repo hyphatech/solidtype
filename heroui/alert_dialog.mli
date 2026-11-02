@@ -42,8 +42,7 @@ module Trigger : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -69,10 +68,11 @@ module Backdrop : sig
       ?on_open_change:(bool -> unit) ->
       ?portal_container:_ Dom.element_like Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -90,10 +90,10 @@ module Container : sig
       ?placement:[ `auto | `center | `top | `bottom ] Solidtype.Check.value ->
       ?size:[ `xs | `sm | `md | `lg | `cover ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -109,10 +109,11 @@ module Dialog : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlElement -> unit) ->
+      ?on_focus_out:(Dom.focusEvent -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Section.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -197,8 +198,7 @@ module Heading : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.H2.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -212,9 +212,9 @@ module Close_trigger : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

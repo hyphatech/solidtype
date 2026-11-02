@@ -99,6 +99,18 @@ module Removable = struct
     <button on_click=(fun _ -> on_remove ())>"x"</button>
 end
 
+(* A parameter names its variable apart from its label, so a prop called [ref]
+   leaves Stdlib's [ref] to the body. *)
+module Measured = struct
+  let%component make ?ref:(given : (Dom.htmlDivElement -> unit) option) () =
+    let seen = ref 0 in
+    <div
+      ref=(fun e ->
+              incr seen;
+              ignore (given e : unit option))
+    />
+end
+
 let optional_attribute = <a title=(fun () -> "x") ?href=(fun () -> link ()) />
 let optional_prop = <Label text=(fun () -> "x") ?count=(fun () -> count ()) />
 let optional_name = <Label text=(fun () -> "x") ?count />

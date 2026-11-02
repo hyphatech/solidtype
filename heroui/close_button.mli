@@ -33,10 +33,10 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
+    ?ref:(Dom.htmlButtonElement -> unit) ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Button.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

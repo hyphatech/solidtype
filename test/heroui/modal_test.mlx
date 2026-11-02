@@ -227,6 +227,18 @@ let both ?variant ?is_dismissable ?placement ?size ?scroll ?(custom = false) ()
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The title and the style a part is given, found on its element: the style
+   as whether it holds the declaration given, beside any the port's own. *)
+let given slot =
+  let e = first ("[data-slot=" ^ slot ^ "]") in
+  ( T.attribute e "title",
+    Option.map (Js.String.includes ~search:"--x: 1") (T.attribute e "style") )
+
+let focused () =
+  match Js.Null.toOption active with
+  | Some e -> T.attribute e "data-slot"
+  | None -> None
+
 let () =
   Jest.describe "Modal" (fun () ->
       Jest.afterEach T.cleanup;
@@ -272,6 +284,81 @@ let () =
             E.(
               expect (before, opened, shown (), List.rev !told)
               |> toEqual (0, 1, 0, [ false ])));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and focus_outs = ref 0 and clicks = ref 0 in
+          let made part = refs := part :: !refs in
+          T.render (fun () ->
+              <Modal>
+                <Button>"Open"</Button>
+                <Modal.Backdrop
+                  title="Backdrop" style="--x: 1" ref=(fun _ -> made "backdrop")>
+                  <Modal.Container
+                    title="Container"
+                    style="--x: 1"
+                    ref=(fun _ -> made "container")>
+                    <Modal.Dialog
+                      title="Dialog"
+                      style="--x: 1"
+                      ref=(fun _ -> made "dialog")
+                      on_focus_out=(fun _ -> incr focus_outs)>
+                      <Modal.Close_trigger
+                        title="Close"
+                        style="--x: 1"
+                        on_click=(fun _ -> incr clicks)
+                      />
+                      <Modal.Heading title="Heading" style="--x: 1">
+                        "Welcome"
+                      </Modal.Heading>
+                    </Modal.Dialog>
+                  </Modal.Container>
+                </Modal.Backdrop>
+              </Modal>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () = T.click user (trigger ()) in
+          let* () = settle () in
+          let parts =
+            List.map given
+              [
+                "modal-backdrop";
+                "modal-container";
+                "modal-dialog";
+                "modal-close-trigger";
+                "modal-heading";
+              ]
+          in
+          let viewport =
+            Option.map
+              (Js.String.includes ~search:"--visual-viewport-height")
+              (T.attribute (first "[data-slot=modal-backdrop]") "style")
+          in
+          let opened_on = focused () in
+          let* () = T.tab user in
+          let* () = T.click user (first "[data-slot=modal-close-trigger]") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( parts,
+                  viewport,
+                  opened_on,
+                  List.sort String.compare !refs,
+                  (!focus_outs > 0, !clicks),
+                  Array.length (all "[role=dialog]") )
+              |> toEqual
+                   ( [
+                       (Some "Backdrop", Some true);
+                       (Some "Container", Some true);
+                       (Some "Dialog", Some true);
+                       (Some "Close", Some true);
+                       (Some "Heading", Some true);
+                     ],
+                     Some true,
+                     Some "modal-dialog",
+                     [ "backdrop"; "container"; "dialog" ],
+                     (true, 1),
+                     0 )));
       Jest.testPromise "is drawn in the portal container it is given" (fun () ->
           let host = create_div "div" in
           append T.body host;

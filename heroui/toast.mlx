@@ -466,6 +466,7 @@ module Title = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Title>
+  [@@element div]
 end
 
 module Description = struct
@@ -477,28 +478,35 @@ module Description = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Description>
+  [@@element div]
 end
 
 module Action_button = struct
   let%component make ?(variant : button_variant = `tertiary)
       ?(on_press : (unit -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) ()
+      =
     let slots = slots_of "Toast.Action_button" in
     <Button
       variant=(fun () -> variant ())
       class_=(fun () -> after (Styles.Toast.action (slots ())) (class_ ()))
-      on_click=(fun _ -> ignore (on_press () : unit option))
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 ignore (on_press () : unit option))
       data_slot="toast-action-button"
       props=(Props.others props)>
       (fun () -> children ())
     </Button>
+  [@@element button]
 end
 
 (* HeroUI's close button, drawn here rather than by {!Close_button}, which
    names its own slot over the toast's, [toast-close], that HeroUI's styles
    read. *)
 module Close_button = struct
-  let%component make ?(key : key option) ?(class_ : string option) () =
+  let%component make ?(key : key option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option) () =
     let s = in_stack "Toast.Close_button" in
     let slots = slots_of "Toast.Close_button" in
     let i = Interaction.create () in
@@ -509,9 +517,13 @@ module Close_button = struct
                  (Styles.CloseButton.options
                     ~class_:(after (Styles.Toast.close (slots ())) (class_ ()))
                     ()))
-      ref=(fun b -> Interaction.watch i b)
+      ref=(fun b ->
+            ignore (given_ref b : unit option);
+            Interaction.watch i b)
       type_=`button
-      on_click=(fun _ -> Option.iter (fun k -> close ~queue:s.queue k) (key ()))
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 Option.iter (fun k -> close ~queue:s.queue k) (key ()))
       data_slot="toast-close"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
@@ -520,6 +532,7 @@ module Close_button = struct
       props=(Props.others props)>
       <Close_button.Icon />
     </Solidtype_kobalte.Button.Root>
+  [@@element button]
 end
 
 let placement_name = function
@@ -532,7 +545,9 @@ let placement_name = function
 
 module Item = struct
   let%component make ~(toast : queued) ?(variant : variant option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.element -> unit) option) ~(children : Jsx.content)
+      () =
     let s = in_stack "Toast" in
     let e = toast () in
     let variant () =
@@ -580,7 +595,7 @@ module Item = struct
       in
       go 0 0. (laid_out ())
     in
-    let style () =
+    let layout () =
       let i = float_of_int (index ()) in
       let full = position e (all ()) in
       String.concat "; "
@@ -661,9 +676,12 @@ module Item = struct
         persistent=true
                    (* Escape folds HeroUI's stack; it does not close a toast. *)
         on_escape_key_down=(fun ev -> prevent_default ev)
-        ref=(fun el -> watch el)
+        ref=(fun el ->
+              ignore (given_ref el : unit option);
+              watch el)
         class_=(fun () -> after (Styles.Toast.toast (slots ())) (class_ ()))
-        style=(fun () -> style ())
+        style=(fun () ->
+                layout () ^ match style () with Some s -> " " ^ s | None -> "")
         tab_index=(fun () ->
                     if
                       frontmost ()
@@ -685,6 +703,7 @@ module Item = struct
         (fun () -> children ())
       </Kobalte.Root>
     </Slots.Provider>
+  [@@element li]
 end
 
 include Item
@@ -814,6 +833,8 @@ module Provider = struct
       ?(hotkey : string array = [| "altKey"; "KeyT" |])
       ?(scale_factor : float = 0.05) ?(width : string = "460px")
       ?(queue : Queue.t option) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ?(children : (queued -> Jsx.element) option) () =
     let q = queue_of (queue ()) in
     let heights, set_heights = S.create_signal [] in
@@ -943,7 +964,9 @@ module Provider = struct
                        ())
       pause_on_interaction=false
       pause_on_page_idle=false
-      ref=(fun el -> watch el)
+      ref=(fun el ->
+            ignore (given_ref el : unit option);
+            watch el)
       class_=(fun () ->
                after
                  (Styles.Toast.region
@@ -960,7 +983,8 @@ module Provider = struct
               ^ placement_name (placement ())
               ^ "; --scale-factor: "
               ^ Js.Float.toString (scale_factor ())
-              ^ "; --toast-width: " ^ width () ^ ";")
+              ^ "; --toast-width: " ^ width () ^ ";"
+              ^ match style () with Some s -> " " ^ s | None -> "")
       data_expanded=(fun () -> Jsx.flag (expanded ()))
       data_slot="toast-region"
       props=(Props.others props)>
@@ -968,4 +992,5 @@ module Provider = struct
         style="display: contents; margin: 0; padding: 0; list-style: none;"
       />
     </Kobalte.Region>
+  [@@element div]
 end

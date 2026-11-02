@@ -103,19 +103,23 @@ module Suffix = struct
 end
 
 module Input = struct
-  let%component make ?(placeholder : string option) ?(class_ : string option) ()
-      =
+  let%component make ?(placeholder : string option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlInputElement -> unit) option) () =
     let f = within "Color_field.Input" in
     let slots = in_group "Color_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
     let classes () =
       after (Styles.ColorInputGroup.input (slots ())) (class_ ())
     in
+    let watched e =
+      ignore (given_ref e : unit option);
+      Interaction.watch i e
+    in
     if f.by_channel then
       <Channel.Input
         ?placeholder
         class_=(fun () -> classes ())
-        ref=(fun e -> Interaction.watch i e)
+        ref=watched
         data_slot="color-input-group-input"
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -129,7 +133,7 @@ module Input = struct
         role=`textbox
         ?placeholder
         class_=(fun () -> classes ())
-        ref=(fun e -> Interaction.watch i e)
+        ref=watched
         data_slot="color-input-group-input"
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -137,12 +141,14 @@ module Input = struct
         data_disabled=(fun () -> Jsx.flag (f.disabled ()))
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
         props=(Props.others props) />
+  [@@element input]
 end
 
 module Group = struct
   let%component make ?(variant : [ `primary | `secondary ] option)
       ?(full_width : bool option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) ()
+      =
     let f = within "Color_field.Group" in
     let slots () =
       Styles.ColorInputGroup.slots
@@ -153,6 +159,7 @@ module Group = struct
     let element = ref None in
     (* A press on the group but on its input gives the input the focus. *)
     let clicked e =
+      ignore (on_click e : unit option);
       match !element with
       | Some group -> (
           match Js.Null.toOption (query group "input") with
@@ -180,6 +187,7 @@ module Group = struct
         (fun () -> children ())
       </div>
     </Group_context.Provider>
+  [@@element div]
 end
 
 let%component make ?(value : Color.t Js.Nullable.t option)
@@ -190,6 +198,8 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     ?(is_disabled : bool option) ?(is_read_only : bool = false)
     ?(is_wheel_disabled : bool = false) ?(name : string option)
     ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(class_ : string option) ~(children : Jsx.content) () =
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -209,10 +219,17 @@ let%component make ?(value : Color.t Js.Nullable.t option)
       (Styles.ColorField.options ?full_width:(full_width ()) ?class_:(class_ ())
          ())
   in
-  let leave =
-    Field.on_leave (fun e ->
+  let leave e =
+    ignore (on_focus_out e : unit option);
+    Field.on_leave
+      (fun e ->
         in_form.left ();
         on_blur e)
+      e
+  in
+  let root e =
+    ignore (given_ref e : unit option);
+    in_form.root e
   in
   <Context.Provider value=(fun () -> f)>
     (fun () ->
@@ -234,7 +251,7 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               ?name
               ?aria_label
               class_=(fun () -> classes ())
-              ref=(fun e -> in_form.root e)
+              ref=root
               on_focus_out=leave
               data_slot="color-field"
               data_channel=(fun () -> Jsx.data (channel_name ch))
@@ -262,7 +279,7 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               ?name
               ?aria_label
               class_=(fun () -> classes ())
-              ref=(fun e -> in_form.root e)
+              ref=root
               on_focus_out=leave
               data_slot="color-field"
               data_channel="hex"
@@ -276,3 +293,4 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               </Field_error.Message.Provider>
             </Hex.Root>)
   </Context.Provider>
+[@@element div]

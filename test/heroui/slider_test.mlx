@@ -3,6 +3,7 @@
    thumb is stepped by the keyboard. *)
 
 module For = Solidtype.For
+module Form = Solidtype_heroui.Form
 module Label = Solidtype_heroui.Label
 module Slider = Solidtype_heroui.Slider
 module E = Jest.Expect
@@ -51,6 +52,8 @@ external parent : Dom.element -> Dom.element Js.null = "parentElement"
 [@@mel.get]
 
 external focus : Dom.element -> unit = "focus" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
 external closest : Dom.element -> string -> Dom.element Js.null = "closest"
 [@@mel.send]
@@ -322,3 +325,99 @@ let () =
           (* React's Slider takes no onBlur; a form needs it as of any
              field. *)
           E.(expect (solidtype, react) |> toEqual (1, 0))))
+
+let () =
+  Jest.describe "Slider, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref and handlers \
+         beside their own, its style after their own" (fun () ->
+          let told = ref [] in
+          let tell name = told := name :: !told in
+          T.render (fun () ->
+              <Form
+                on_submit=prevent_default
+                validation_errors=(fun () -> [ ("volume", "Too loud.") ])>
+                <Slider
+                  name="volume"
+                  default_value=(fun () -> [| 40. |])
+                  title="Volume"
+                  style="--x: 1"
+                  ref=(fun _ -> tell "slider ref")
+                  on_focus_out=(fun _ -> tell "slider focus out")
+                  on_blur=(fun _ -> tell "slider blur")>
+                  <Label>"Volume"</Label>
+                  <Slider.Track title="Track" style="--track: 1">
+                    <Slider.Fill style="--fill: 1" />
+                    <Slider.Thumb
+                      title="Thumb"
+                      style="--thumb: 1"
+                      ref=(fun _ -> tell "thumb ref")
+                    />
+                  </Slider.Track>
+                </Slider>
+                <button data_slot="submit" type_=`submit>"Save"</button>
+              </Form>);
+          let user = T.setup () in
+          let part slot =
+            Option.value (T.query ("[data-slot=" ^ slot ^ "]")) ~default:T.body
+          in
+          let styled slot declarations =
+            let style =
+              Option.value (T.attribute (part slot) "style") ~default:""
+            in
+            List.for_all
+              (fun d -> Js.String.includes ~search:d style)
+              declarations
+          in
+          let thumb = part "slider-thumb" in
+          (* The thumb's ref watches the pointer. *)
+          let* () = T.hover user thumb in
+          let hovered = T.attribute thumb "data-hovered" in
+          (* The form focuses the slider it finds by the slider's ref. *)
+          let* () = T.click user (part "submit") in
+          let submitted =
+            Option.is_some
+              (Js.Null.toOption (closest active "[data-slot=slider-thumb]"))
+          in
+          let* () = T.click user T.body in
+          let root = part "slider" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute root "title", T.attribute root "style"),
+                  ( styled "slider-track" [ "position: relative"; "--track: 1" ],
+                    styled "slider-fill" [ "width: 40%"; "--fill: 1" ],
+                    styled "slider-thumb" [ "left: 40%"; "--thumb: 1" ] ),
+                  (T.attribute thumb "title", hovered, submitted),
+                  Array.of_list (List.sort_uniq String.compare !told) )
+              |> toEqual
+                   ( (Some "Volume", Some "--x: 1;"),
+                     (true, true, true),
+                     (Some "Thumb", Some "true", true),
+                     [|
+                       "slider blur";
+                       "slider focus out";
+                       "slider ref";
+                       "thumb ref";
+                     |] ))))
+
+let () =
+  Jest.describe "Slider's thumb, given an id" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "keeps the id its output names" (fun () ->
+          T.render (fun () ->
+              <Slider default_value=(fun () -> [| 40. |])>
+                <Label>"Volume"</Label>
+                <Slider.Output />
+                <Slider.Track><Slider.Thumb id="mine" /></Slider.Track>
+              </Slider>);
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          let id = read "slider-thumb" "id" in
+          E.(
+            expect (Option.is_some id, read "slider-output" "for")
+            |> toEqual (true, id))))

@@ -372,6 +372,76 @@ let () =
           Js.Promise.resolve
             E.(
               expect (focused, scroll_top list) |> toEqual ("User 1000", 50000.)));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          (* Kobalte's option calls its ref again as it is pressed, on the
+             same element: each part's is counted once. *)
+          let refs = ref [] and handled = ref [] and acted = ref [] in
+          let note seen what = seen := what :: !seen in
+          T.render (fun () ->
+              <List_box
+                aria_label="Files"
+                selection_mode=`none
+                on_action=(fun key -> note acted key)
+                title="Files"
+                style="--x: 1"
+                ref=(fun _ -> note refs "list")>
+                <List_box.Section title="Actions">
+                  <List_box.Item
+                    id="new"
+                    title="New"
+                    style="--y: 2"
+                    ref=(fun _ -> note refs "item")
+                    on_click=(fun _ -> note handled "click")
+                    on_key_down=(fun _ -> note handled "key")>
+                    <Label>"New file"</Label>
+                  </List_box.Item>
+                </List_box.Section>
+              </List_box>);
+          let user = T.setup () in
+          let item = by_text "[role=option]" "New file" in
+          let* () = T.hover user item in
+          let hovered = T.attribute item "data-hovered" in
+          let* () = T.click user item in
+          let* () = T.keyboard user "{Enter}" in
+          let titled selector =
+            Option.bind (T.query selector) (fun e -> T.attribute e "title")
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( titled "[role=listbox]",
+                    titled "section",
+                    titled "[role=option]" ),
+                  (T.attribute item "style", hovered),
+                  Array.of_list (List.rev !acted),
+                  Array.of_list (List.rev !handled),
+                  Array.of_list (List.sort_uniq String.compare !refs) )
+              |> toEqual
+                   ( (Some "Files", Some "Actions", Some "New"),
+                     (Some "--y: 2;", Some "true"),
+                     [| "new"; "new" |],
+                     [| "click"; "key" |],
+                     [| "item"; "list" |] )));
+      Jest.testPromise "takes a caller's change, and still selects" (fun () ->
+          let told = ref [] in
+          T.render (fun () ->
+              <List_box
+                aria_label="Users"
+                on_selection_change=(fun keys -> told := keys :: !told)
+                on_change=(fun _ -> ())>
+                <List_box.Item id="bob">"Bob"</List_box.Item>
+                <List_box.Item id="fred">"Fred"</List_box.Item>
+              </List_box>);
+          let* () = T.click (T.setup ()) (by_text "[role=option]" "Fred") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Array.of_list !told,
+                  T.attribute (by_text "[role=option]" "Fred") "aria-selected"
+                )
+              |> toEqual ([| [| "fred" |] |], Some "true")));
       Jest.testPromise "virtualized, keeps the option with the focus drawn"
         (fun () ->
           let list = virtualized () in

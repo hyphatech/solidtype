@@ -177,8 +177,9 @@ module Portal = struct
   let component = Kobalte.Portal.component
 end
 
-let backdrop ~slot ~portal_container ~class_ ~dismissable ~keyboard_dismissable
-    ~is_open ~default_open ~on_open_change ~others children =
+let backdrop ~slot ~portal_container ~class_ ~style ~ref:given_ref ~dismissable
+    ~keyboard_dismissable ~is_open ~default_open ~on_open_change ~others
+    children =
   (* The backdrop inside Kobalte's root, its own or the dialog's. *)
   let shown () =
     let k = Kobalte.use_dialog_context () in
@@ -198,11 +199,19 @@ let backdrop ~slot ~portal_container ~class_ ~dismissable ~keyboard_dismissable
         <div
           class_=(fun () -> class_ ())
           style=(fun () ->
-                  match height () with
-                  | Some h ->
-                      "--visual-viewport-height: " ^ Js.Float.toString h ^ "px;"
-                  | None -> "")
-          ref=(fun e -> Overlay.watch o e)
+                  String.concat " "
+                    (List.filter_map Fun.id
+                       [
+                         Option.map
+                           (fun h ->
+                             "--visual-viewport-height: " ^ Js.Float.toString h
+                             ^ "px;")
+                           (height ());
+                         style ();
+                       ]))
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                Overlay.watch o e)
           data_slot=(fun () -> Jsx.data slot)
           data_entering=(fun () -> Jsx.flag (Overlay.entering o))
           data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
@@ -227,11 +236,13 @@ let backdrop ~slot ~portal_container ~class_ ~dismissable ~keyboard_dismissable
         (fun () -> Jsx.element (shown ()))
       </Kobalte.Root>
 
-let container f ~slot ~class_ ~placement ~others children =
+let container f ~slot ~class_ ~placement ~ref:given_ref ~others children =
   let o = f.overlay in
   <div
     class_=(fun () -> class_ ())
-    ref=(fun e -> Overlay.watch o e)
+    ref=(fun e ->
+          ignore (given_ref e : unit option);
+          Overlay.watch o e)
     data_placement=(fun () -> Jsx.data (placement ()))
     data_slot=(fun () -> Jsx.data slot)
     data_entering=(fun () -> Jsx.flag (Overlay.entering o))
@@ -259,7 +270,7 @@ let dismiss close =
   </div>
 
 let dialog ?(on_element = fun (_ : Dom.element) -> ()) f ~slot ~role ~class_
-    ~placement ~others children =
+    ~placement ~ref:given_ref ~on_focus_out ~others children =
   let content = ref None in
   Overlay.return_focus
     ~is_open:(fun () -> not (Overlay.exiting f.overlay))
@@ -280,6 +291,7 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) f ~slot ~role ~class_
     class_=(fun () -> class_ ())
     role=(fun () -> role)
     ref=(fun e ->
+          ignore (given_ref e : unit option);
           let e = as_element e in
           content := Some e;
           (* A drawer's dialog slides in and out itself, as its content
@@ -293,6 +305,7 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) f ~slot ~role ~class_
     on_pointer_down_outside=(fun e ->
                               if not (f.dismissable ()) then prevent_default e)
     on_focus_out=(fun e ->
+                   ignore (on_focus_out e : unit option);
                    (* A press on the backdrop of a dialog that stays leaves
                       the focus nowhere, which Kobalte's trap does not catch:
                       the dialog takes it back, as React Aria's does. *)
@@ -321,10 +334,12 @@ let heading ~slot ~class_ ~others children =
     (fun () -> children ())
   </Kobalte.Title>
 
-let close_trigger f ~slot ~class_ ~others =
+let close_trigger f ~slot ~class_ ~on_click ~others =
   <Close_button
     class_=(fun () -> class_ ())
-    on_click=(fun _ -> f.close ())
+    on_click=(fun e ->
+               ignore (on_click e : unit option);
+               f.close ())
     data_slot=(fun () -> Jsx.data slot)
     props=others
   />

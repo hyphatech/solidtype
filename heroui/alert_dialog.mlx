@@ -39,6 +39,7 @@ module Trigger = struct
       ~class_:(fun () ->
         after (Styles.AlertDialog.trigger (slots ())) (class_ ()))
       ~aria_label ~others:(Props.others props) children
+  [@@element div]
 end
 
 module Backdrop = struct
@@ -47,6 +48,8 @@ module Backdrop = struct
       ?(is_keyboard_dismiss_disabled : bool = true) ?(is_open : bool option)
       ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
       ?(portal_container : _ Dom.element_like option) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     Dialog_frame.backdrop ~slot:"alert-dialog-backdrop" ~portal_container
       ~class_:(fun () ->
@@ -57,12 +60,15 @@ module Backdrop = struct
       ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
       ~is_open ~default_open
       ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-      ~others:(Props.others props) children
+      ~style ~ref:given_ref ~others:(Props.others props) children
+  [@@element div]
 end
 
 module Container = struct
   let%component make ?(placement : placement = `auto) ?(size : size = `md)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.content) () =
     let f = within "Alert_dialog.Container" in
     let c = { placement; size } in
     Dialog_frame.container f ~slot:"alert-dialog-container"
@@ -71,16 +77,20 @@ module Container = struct
           (Styles.AlertDialog.container (slots ~size:(size ()) ()))
           (class_ ()))
       ~placement:(fun () -> placement_name (placement ()))
-      ~others:(Props.others props)
+      ~ref:given_ref ~others:(Props.others props)
       (fun () ->
         Jsx.element
           <Container_context.Provider value=(fun () -> c)>
             (fun () -> children ())
           </Container_context.Provider>)
+  [@@element div]
 end
 
 module Dialog = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlElement -> unit) option)
+      ?(on_focus_out : (Dom.focusEvent -> unit) option)
+      ~(children : Jsx.content) () =
     let f = within "Alert_dialog.Dialog" in
     let c = container () in
     Dialog_frame.dialog f ~slot:"alert-dialog-dialog" ~role:`alertdialog
@@ -89,7 +99,8 @@ module Dialog = struct
           (Styles.AlertDialog.dialog (slots ~size:(c.size ()) ()))
           (class_ ()))
       ~placement:(fun () -> placement_name (c.placement ()))
-      ~others:(Props.others props) children
+      ~ref:given_ref ~on_focus_out ~others:(Props.others props) children
+  [@@element section]
 end
 
 module Header = struct
@@ -153,15 +164,18 @@ module Heading = struct
       ~class_:(fun () ->
         after (Styles.AlertDialog.heading (slots ())) (class_ ()))
       ~others:(Props.others props) children
+  [@@element h2]
 end
 
 module Close_trigger = struct
-  let%component make ?(class_ : string option) () =
+  let%component make ?(class_ : string option)
+      ?(on_click : (Dom.mouseEvent -> unit) option) () =
     let f = within "Alert_dialog.Close_trigger" in
     Dialog_frame.close_trigger f ~slot:"alert-dialog-close-trigger"
       ~class_:(fun () ->
         after (Styles.AlertDialog.close_trigger (slots ())) (class_ ()))
-      ~others:(Props.others props)
+      ~on_click ~others:(Props.others props)
+  [@@element button]
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)

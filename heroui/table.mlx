@@ -23,6 +23,9 @@ let direction_name = function
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
+(* A style given after the part's own, so its declarations win. *)
+let styled own = function Some s -> own ^ "; " ^ s | None -> own
+
 (* The table's classes, which every part reads. *)
 module Slots = Solidtype.Context.Make_optional (struct
   type t = unit -> Styles.Table.slots
@@ -69,6 +72,7 @@ module Resizable_container = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Resizable_container>
+  [@@element div]
 end
 
 module Content = struct
@@ -111,6 +115,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Root>
+  [@@element table]
 end
 
 module Header = struct
@@ -139,6 +144,7 @@ module Header = struct
         (fun () -> children ())
       </Headless.Header>
     </Checkbox.Selection.Provider>
+  [@@element thead]
 end
 
 module Column = struct
@@ -146,6 +152,7 @@ module Column = struct
       ?(is_row_header : bool option) ?(width : column_size option)
       ?(default_width : column_size option) ?(min_width : float option)
       ?(max_width : float option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlTableCellElement -> unit) option)
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Column" in
     let t = Headless.use_context () in
@@ -163,7 +170,9 @@ module Column = struct
       ?default_width
       ?min_width
       ?max_width
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () -> after (Styles.Table.column (slots ())) (class_ ()))
       data_slot="table-column"
       data_allows_sorting=(fun () -> Jsx.flag (allows_sorting ()))
@@ -173,13 +182,14 @@ module Column = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Column>
+  [@@element th]
 end
 
 (* HeroUI's styles read React Aria's state: the handle hovered, and its
    input focused. *)
 module Column_resizer = struct
-  let%component make ?(aria_label : string option) ?(class_ : string option) ()
-      =
+  let%component make ?(aria_label : string option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option) () =
     let slots = in_table "Table.Column_resizer" in
     let column = Headless.use_column_context () in
     let handle = Interaction.create () in
@@ -187,6 +197,7 @@ module Column_resizer = struct
     <Headless.Column_resizer
       ?aria_label
       ref=(fun e ->
+            ignore (given_ref e : unit option);
             Interaction.watch handle e;
             S.on_mount (fun () ->
                 Option.iter (Interaction.watch input)
@@ -200,6 +211,7 @@ module Column_resizer = struct
       data_resizing=(fun () -> Jsx.flag (column.resizing ()))
       props=(Props.others props)
     />
+  [@@element div]
 end
 
 (* A column's label, and HeroUI's chevron for how it is sorted, up for
@@ -279,11 +291,13 @@ module Body = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Body>
+  [@@element tbody]
 end
 
 module Row = struct
   let%component make ?(id : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?ref:(given_ref : (Dom.htmlTableRowElement -> unit) option)
+      ?(style : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Row" in
     let t = Headless.use_context () in
     let key =
@@ -309,8 +323,10 @@ module Row = struct
     <Checkbox.Selection.Provider value=(fun () -> one)>
       <Headless.Row
         id=(fun () -> key)
-        ref=(fun e -> Interaction.watch i e)
-        style=(fun () -> "--table-row-level: " ^ level ())
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              Interaction.watch i e)
+        style=(fun () -> styled ("--table-row-level: " ^ level ()) (style ()))
         class_=(fun () -> after (Styles.Table.row (slots ())) (class_ ()))
         data_slot="table-row"
         data_level=(fun () -> Jsx.data (level ()))
@@ -327,17 +343,22 @@ module Row = struct
         (fun () -> children ())
       </Headless.Row>
     </Checkbox.Selection.Provider>
+  [@@element tr]
 end
 
 module Cell = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlTableCellElement -> unit) option)
+      ~(children : Jsx.content) () =
     let slots = in_table "Table.Cell" in
     let i = Interaction.create () in
     (* Its row's state and its column's, which the headless cell gives the
        attributes it writes; and its row's chevron, to a button inside it. *)
     let row () = Headless.use_row_context () in
     <Headless.Cell
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () -> after (Styles.Table.cell (slots ())) (class_ ()))
       data_slot="table-cell"
       data_level=(fun () -> Jsx.data (string_of_int (row ()).level))
@@ -363,6 +384,7 @@ module Cell = struct
             (fun () -> children ())
           </Button.Chevron.Provider>)
     </Headless.Cell>
+  [@@element td]
 end
 
 (* What loads more rows: HeroUI's classes on the loading row, and React
@@ -370,19 +392,21 @@ end
 module Load_more = struct
   let%component make ?(is_loading : bool option)
       ?(on_load_more : (unit -> unit) option) ?(scroll_offset : float option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ?(style : string option)
+      ~(children : Jsx.content) () =
     let slots = in_table "Table.Load_more" in
     <Headless.Load_more
       ?is_loading
       on_load_more=(fun _ -> ignore (on_load_more () : unit option))
       ?scroll_offset
-      style="--table-row-level: 1"
+      style=(fun () -> styled "--table-row-level: 1" (style ()))
       class_=(fun () -> after (Styles.Table.load_more (slots ())) (class_ ()))
       data_slot="table-load-more"
       data_level="1"
       props=(Props.others props)>
       (fun () -> children ())
     </Headless.Load_more>
+  [@@element tr]
 end
 
 module Load_more_content = struct

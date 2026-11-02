@@ -6,10 +6,26 @@
   takes that element's attributes after its own props and passes them on,
   its own props taking the place of the element's of the same name.
 
-- A HeroUI port's part that draws a plain element -- a card's, an alert's,
-  a field's group, 114 in all -- takes every attribute of that element,
-  `style`, `title` and handlers among them, and passes it on, as HeroUI's
-  parts do.
+- Every HeroUI port's part that draws an element takes every attribute of
+  that element, `style`, `title`, handlers and `ref` among them, and passes
+  it on, as HeroUI's parts do. A handler or `ref` given is called beside the
+  part's own, and a `style` written after the part's; what the part's
+  behaviour rests on, Kobalte's `on_change` or the id a trigger names, stays
+  the part's.
+
+- A `Form` refusing a submit focuses an invalid time field's first segment
+  and an autocomplete's button, which it left unfocused before.
+
+- An expanded disclosure's or accordion's panel keeps its size as a style
+  given it changes, and a part's state no longer listens twice to an element
+  Kobalte hands its ref again.
+
+- `Input` and `Text_area` inside a field show the `title` they are given, in
+  place of the empty one React Aria gives a field's input.
+
+- A `let%component` prop may be read by a name of the body's own,
+  `?ref:(given : ...)`; before, the body read it by its label whatever the
+  pattern named.
 
 - `Segment`, `Trend_chip` and `Text_shimmer` have their look in stylesheets
   of their own, `segment.css`, `trend-chip.css` and `text-shimmer.css`,

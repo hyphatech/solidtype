@@ -210,8 +210,7 @@ module Title : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -227,8 +226,7 @@ module Description : sig
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -252,10 +250,10 @@ module Action_button : sig
         Solidtype.Check.value ->
       ?on_press:(unit -> unit) ->
       ?class_:string Solidtype.Check.value ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -270,9 +268,10 @@ module Close_button : sig
     val check :
       ?key:key Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -289,10 +288,11 @@ module Props : sig
     toast:queued Solidtype.Check.value ->
     ?variant:variant Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?style:string Solidtype.Check.value ->
+    ?ref:(Dom.element -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Li.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element
@@ -317,11 +317,12 @@ module Provider : sig
       ?width:string Solidtype.Check.value ->
       ?queue:Queue.t Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?style:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
       ?children:
         (queued -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

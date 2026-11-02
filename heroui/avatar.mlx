@@ -43,6 +43,7 @@ module Image = struct
                  (class_ ()))
       props=(Props.others props)
     />
+  [@@element img]
 end
 
 module Fallback = struct
@@ -59,6 +60,7 @@ module Fallback = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Fallback>
+  [@@element span]
 end
 
 let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
@@ -98,3 +100,4 @@ let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
       </Kobalte.Root>
     </Context.Provider>
   </Show>
+[@@element span]

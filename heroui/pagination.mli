@@ -89,11 +89,12 @@ module Link : sig
       ?is_active:bool Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
       ?on_press:(unit -> unit) ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -109,11 +110,12 @@ module Previous : sig
     val check :
       ?is_disabled:bool Solidtype.Check.value ->
       ?on_press:(unit -> unit) ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -128,11 +130,12 @@ module Next : sig
     val check :
       ?is_disabled:bool Solidtype.Check.value ->
       ?on_press:(unit -> unit) ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element

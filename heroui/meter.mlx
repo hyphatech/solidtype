@@ -49,10 +49,14 @@ module Output = struct
                   data_slot="meter-output"
                   props=(Props.others props)
                 />)>
-      <span class_=(fun () -> classes ()) data_slot="meter-output">
+      <span
+        class_=(fun () -> classes ())
+        data_slot="meter-output"
+        props=(Props.others props)>
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
+  [@@element span]
 end
 
 module Track = struct
@@ -68,11 +72,13 @@ module Track = struct
 end
 
 module Fill = struct
-  let%component make ?(class_ : string option) () =
+  let%component make ?(class_ : string option) ?(style : string option) () =
     let m = within "Meter.Fill" in
     <div
       class_=(fun () -> after (Styles.Meter.fill (m.slots ())) (class_ ()))
-      style=(fun () -> "width: " ^ Js.Float.toString (m.percent ()) ^ "%;")
+      style=(fun () ->
+              let own = "width: " ^ Js.Float.toString (m.percent ()) ^ "%;" in
+              match style () with Some s -> own ^ " " ^ s | None -> own)
       data_slot="meter-fill"
       props=(Props.others props)
     />
@@ -137,3 +143,4 @@ let%component make ~(value : float) ?(min_value : float = 0.)
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

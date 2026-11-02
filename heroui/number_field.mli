@@ -55,9 +55,9 @@ module Input : sig
     val check :
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlInputElement -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Input.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -73,9 +73,9 @@ module Increment_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -91,9 +91,9 @@ module Decrement_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -123,10 +123,11 @@ module Props : sig
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

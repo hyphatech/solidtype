@@ -64,6 +64,7 @@ module Count = struct
       ~color:(own color (fun (g : group) -> g.color ()))
       ~variant:(own variant (fun (g : group) -> g.variant ()))
       ~class_ children
+  [@@element span]
 end
 
 let%component make ?(size : size = `md) ?(color : color option)

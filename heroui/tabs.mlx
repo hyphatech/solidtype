@@ -188,6 +188,7 @@ module List_container = struct
             (chevron (if vertical () then chevron_down else chevron_right)))
       </button>
     </div>
+  [@@element div]
 end
 
 (* Kobalte's trigger as the element a tab is: an [<a>] while it is a link, a
@@ -207,9 +208,15 @@ module As_tab = struct
   let component = Kobalte.Trigger.component
 end
 
+(* A tab is an anchor or a button, as it has an href or not: its ref is handed
+   either, which Kobalte's part, typed by the anchor's attributes, calls an
+   anchor. *)
+external as_html : Dom.htmlAnchorElement -> Dom.htmlElement = "%identity"
+
 module Tab = struct
   let%component make ~(id : string) ?(href : string option)
       ?(is_disabled : bool = false) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlElement -> unit) option)
       ~(children : Jsx.content) () =
     let t = within "Tabs.Tab" in
     let k = Kobalte.use_tabs_context () in
@@ -238,13 +245,12 @@ module Tab = struct
       as_=(fun () -> match link () with Some _ -> "a" | None -> "button")
       ?href=(fun () -> link ())
       id=(fun () -> t.tab_id (id ()))
-      ?aria_controls=(fun () ->
-                       if selected () then Some (t.tab_id (id ()) ^ "-panel")
-                       else None)
       value=(fun () -> id ())
       disabled=(fun () -> is_disabled ())
       class_=(fun () -> after (Styles.Tabs.tab (t.slots ())) (class_ ()))
-      ref=(fun b -> Interaction.watch n b)
+      ref=(fun b ->
+            ignore (given_ref (as_html b) : unit option);
+            Interaction.watch n b)
       data_slot="tabs-tab"
       data_selected=(fun () -> Jsx.flag (selected ()))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
@@ -252,11 +258,17 @@ module Tab = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused n))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
-      props=(Props.others props)>
+      props=(Props.others props)
+            (* The panel a selected tab names is the tabs', which an attribute in
+         the rest must not replace. *)
+      ?aria_controls=(fun () ->
+                       if selected () then Some (t.tab_id (id ()) ^ "-panel")
+                       else None)>
       <Tab_context.Provider value=(fun () -> { selected })>
         (fun () -> children ())
       </Tab_context.Provider>
     </As_tab>
+  [@@element a]
 end
 
 module Indicator = struct
@@ -322,6 +334,7 @@ module Panel = struct
         (fun () -> children ())
       </Kobalte.Content>
     </Show>
+  [@@element div]
 end
 
 (* Last, since it takes the name of the stdlib's lists. *)
@@ -336,6 +349,7 @@ module List = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.List>
+  [@@element div]
 end
 
 let%component make ?(selected_key : string option)
@@ -394,15 +408,16 @@ let%component make ?(selected_key : string option)
   in
   <Kobalte.Root
     ?value=(fun () -> selected ())
-    on_change=change
     orientation=(fun () -> orientation ())
     activation_mode=(fun () -> keyboard_activation ())
     disabled=(fun () -> is_disabled ())
     class_=(fun () -> after (Styles.Tabs.base (t.slots ())) (class_ ()))
     data_slot="tabs"
     data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-    props=(Props.others props)>
+    props=(Props.others props)
+    on_change=change>
     <Context.Provider value=(fun () -> t)>
       (fun () -> children ())
     </Context.Provider>
   </Kobalte.Root>
+[@@element div]

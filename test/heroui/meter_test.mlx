@@ -161,3 +161,32 @@ let () =
               ()
           in
           E.(expect solidtype |> toEqual react)))
+
+let () =
+  Jest.describe "Meter, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "take their elements' attributes, a style after their own"
+        (fun () ->
+          T.render (fun () ->
+              <Meter value=40. aria_label="Storage" title="Storage">
+                <Meter.Output title="Used" />
+                <Meter.Track title="Track">
+                  <Meter.Fill title="Fill" style="--y: 2" />
+                </Meter.Track>
+              </Meter>);
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          E.(
+            expect
+              ( read "meter" "title",
+                read "meter-output" "title",
+                read "meter-fill" "title",
+                read "meter-fill" "style" )
+            |> toEqual
+                 ( Some "Storage",
+                   Some "Used",
+                   Some "Fill",
+                   Some "width: 40%; --y: 2;" ))))

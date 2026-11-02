@@ -32,6 +32,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Field_content>
+  [@@element label]
 end
 
 module Control = struct
@@ -64,7 +65,9 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
     ?(is_required : bool = false) ?(name : string option)
     ?(value : string option) ?(aria_label : string option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
-    ~(children : Jsx.content) () =
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
+    () =
   (* The state is the switch's, read by Kobalte and by every part alike. *)
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
@@ -109,10 +112,16 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       ?name
       ?value
       class_=(fun () -> after (Styles.Switch.base (s.slots ())) (class_ ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="switch"
       data_selected=(fun () -> Jsx.flag (on ()))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
@@ -123,3 +132,4 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       (fun () -> children ())
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

@@ -9,6 +9,7 @@ module List_box = Solidtype_heroui.List_box
 module Search_field = Solidtype_heroui.Search_field
 module Label = Solidtype_heroui.Label
 module Description = Solidtype_heroui.Description
+module Form = Solidtype_heroui.Form
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -465,4 +466,93 @@ let () =
                    ( [ "Texas" ],
                      "Tex",
                      [ "Florida"; "Texas"; "Utah" ],
-                     [ "Texx" ] ))))
+                     [ "Texx" ] )));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and clicks = ref 0 and left = ref 0 in
+          let note what = refs := what :: !refs in
+          T.render (fun () ->
+              <Form
+                validation_errors=(fun () -> [ ("state", "Choose again") ])
+                on_submit=(fun _ -> ())>
+                <Autocomplete
+                  name="state"
+                  title="States"
+                  ref=(fun _ -> note "autocomplete")
+                  on_focus_out=(fun _ -> incr left)>
+                  <Label>"State"</Label>
+                  <Autocomplete.Trigger
+                    title="Opens"
+                    ref=(fun _ -> note "trigger")
+                    on_click=(fun _ -> incr clicks)>
+                    <Autocomplete.Value />
+                    <Autocomplete.Clear_button title="Clears" />
+                    <Autocomplete.Indicator style="--z: 3" />
+                  </Autocomplete.Trigger>
+                  <Autocomplete.Popover
+                    title="Options" style="--y: 2" ref=(fun _ -> note "popover")>
+                    <Autocomplete.Filter>
+                      (fun () -> Solidtype.Jsx.element (search_and_list ()))
+                    </Autocomplete.Filter>
+                  </Autocomplete.Popover>
+                </Autocomplete>
+                <button type_=`submit data_slot="save">"Save"</button>
+              </Form>);
+          let user = T.setup () in
+          let step action =
+            let* () = action () in
+            settle ()
+          in
+          let part slot = first ("[data-slot=" ^ slot ^ "]") in
+          let invalid = T.attribute (part "autocomplete") "data-invalid" in
+          let* () =
+            step (fun () -> T.hover user (part "autocomplete-trigger"))
+          in
+          let hovered =
+            T.attribute (part "autocomplete-trigger") "data-hovered"
+          in
+          let* () =
+            step (fun () -> T.click user (part "autocomplete-trigger"))
+          in
+          let opened = options () in
+          let popover = part "autocomplete-popover" in
+          let popover_shown =
+            ( T.attribute popover "title",
+              Option.map
+                (fun style ->
+                  ( Js.String.includes ~search:"--trigger-width" style,
+                    Js.String.includes ~search:"--y: 2;" style ))
+                (T.attribute popover "style") )
+          in
+          let* () =
+            step (fun () ->
+                match
+                  List.find_opt
+                    (fun e -> String.equal (text e) "Utah")
+                    (Array.to_list (all "[data-slot=list-box-item]"))
+                with
+                | Some e -> T.click user e
+                | None -> Js.Promise.resolve ())
+          in
+          let* () = step (fun () -> T.click user (part "save")) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( T.attribute (part "autocomplete") "title",
+                    T.attribute (part "autocomplete-trigger") "title",
+                    T.attribute (part "autocomplete-clear-button") "title",
+                    T.attribute (part "autocomplete-default-indicator") "style"
+                  ),
+                  popover_shown,
+                  (invalid, hovered, opened),
+                  T.attribute (part "autocomplete") "data-invalid",
+                  (!clicks > 0, !left > 0),
+                  Array.of_list (List.sort_uniq String.compare !refs) )
+              |> toEqual
+                   ( (Some "States", Some "Opens", Some "Clears", Some "--z: 3;"),
+                     (Some "Options", Some (true, true)),
+                     (Some "true", Some "true", [ "Florida"; "Texas"; "Utah" ]),
+                     None,
+                     (true, true),
+                     [| "autocomplete"; "popover"; "trigger" |] ))))

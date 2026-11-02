@@ -89,6 +89,32 @@ let () =
           Js.Promise.resolve
             E.(
               expect (!clicks, T.attribute b "disabled") |> toEqual (1, Some "")));
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and focuses = ref 0 and clicks = ref 0 in
+          T.render (fun () ->
+              <Button
+                title="Saves"
+                style="--x: 1"
+                ref=(fun _ -> incr refs)
+                on_focus=(fun _ -> incr focuses)
+                on_click=(fun _ -> incr clicks)>
+                "Save"
+              </Button>);
+          let user = T.setup () in
+          let b = T.by_role "button" in
+          let* () = T.hover user b in
+          let hovered = T.attribute b "data-hovered" in
+          let* () = T.click user b in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( T.attribute b "title",
+                  T.attribute b "style",
+                  hovered,
+                  (!refs, !focuses, !clicks) )
+              |> toEqual (Some "Saves", Some "--x: 1;", Some "true", (1, 1, 1))));
       Jest.testPromise "shows hover, press and focus as React Aria does"
         (fun () ->
           let* solidtype, react = both ~disabled:false () in

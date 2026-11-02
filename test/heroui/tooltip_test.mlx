@@ -190,6 +190,18 @@ let both ?placement ?(show_arrow = false) ?(is_disabled = false)
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The title a part is given, found on the element [selector] finds, and
+   whether its style holds the declaration given and [own], the port's. *)
+let given ?(own = "--x: 1") selector =
+  match Js.Array.from (query_all T.body selector) with
+  | [||] -> (None, None)
+  | found ->
+      let style = Option.value (T.attribute found.(0) "style") ~default:"" in
+      ( T.attribute found.(0) "title",
+        Some
+          (Js.String.includes ~search:"--x: 1" style
+          && Js.String.includes ~search:own style) )
+
 let () =
   Jest.describe "Tooltip" (fun () ->
       Jest.afterEach T.cleanup;
@@ -202,6 +214,41 @@ let () =
       Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
           let* r = both ~custom:true () in
           same r);
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref beside its own"
+        (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <Tooltip default_open=true>
+                <Tooltip.Trigger title="Trigger" style="--x: 1">
+                  "Status"
+                </Tooltip.Trigger>
+                <Tooltip.Content
+                  show_arrow=true
+                  title="Content"
+                  style="--x: 1"
+                  ref=(fun _ -> incr refs)>
+                  <Tooltip.Arrow title="Arrow" style="--x: 1" />
+                  <p>"This is a tooltip"</p>
+                </Tooltip.Content>
+              </Tooltip>);
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( [
+                    given "[data-slot=tooltip-trigger]";
+                    given ~own:"--trigger-anchor-point" "[role=tooltip]";
+                    given ~own:"position: absolute" "[data-slot=tooltip-arrow]";
+                  ],
+                  !refs )
+              |> toEqual
+                   ( [
+                       (Some "Trigger", Some true);
+                       (Some "Content", Some true);
+                       (Some "Arrow", Some true);
+                     ],
+                     1 )));
       Jest.testPromise "stays shut while disabled, as React's" (fun () ->
           let* r = both ~is_disabled:true () in
           same r))

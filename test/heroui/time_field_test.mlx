@@ -527,3 +527,89 @@ let () =
               </Time_field>);
           S.set set_granularity `minute;
           E.(expect (colons ()) |> toEqual 1)))
+
+let () =
+  Jest.describe "Time_field, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref and handlers \
+         beside their own" (fun () ->
+          let told = ref [] in
+          let tell name = told := name :: !told in
+          T.render (fun () ->
+              <Time_field
+                hour_cycle=`h24
+                title="Start"
+                style="--x: 1"
+                ref=(fun _ -> tell "field ref")
+                on_focus_out=(fun _ -> tell "field focus out")
+                on_blur=(fun _ -> tell "field blur")>
+                <Label>"Start"</Label>
+                <Time_field.Group>
+                  <Time_field.Input
+                    title="Time" ref=(fun _ -> tell "input ref")>
+                    (fun segment ->
+                      <Time_field.Segment
+                        segment=(fun () -> S.get segment)
+                        title="Part"
+                        ref=(fun _ -> tell "segment ref")
+                      />)
+                  </Time_field.Input>
+                </Time_field.Group>
+              </Time_field>);
+          let user = T.setup () in
+          let part slot =
+            Option.value (T.query ("[data-slot=" ^ slot ^ "]")) ~default:T.body
+          in
+          let input = part "date-input-group-input" in
+          let hour = segment T.body "hour" in
+          (* The input's and each segment's ref watch the focus. *)
+          let* () = T.click user hour in
+          let focused =
+            ( T.attribute input "data-focus-within",
+              T.attribute hour "data-focused" )
+          in
+          let* () = T.click user T.body in
+          let root = part "time-field" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute root "title", T.attribute root "style"),
+                  (T.attribute input "title", T.attribute hour "title"),
+                  focused,
+                  Array.of_list (List.sort_uniq String.compare !told) )
+              |> toEqual
+                   ( (Some "Start", Some "--x: 1;"),
+                     (Some "Time", Some "Part"),
+                     (Some "true", Some "true"),
+                     [|
+                       "field blur";
+                       "field focus out";
+                       "field ref";
+                       "input ref";
+                       "segment ref";
+                     |] ))))
+
+let () =
+  Jest.describe "Time_field's segment, given content_editable" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "stays uneditable in a disabled field" (fun () ->
+          T.render (fun () ->
+              <Time_field
+                default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+                hour_cycle=`h24
+                is_disabled=true>
+                <Label>"Start"</Label>
+                <Time_field.Group>
+                  <Time_field.Input>
+                    (fun segment ->
+                      <Time_field.Segment
+                        segment=(fun () -> S.get segment)
+                        content_editable="true"
+                      />)
+                  </Time_field.Input>
+                </Time_field.Group>
+              </Time_field>);
+          E.(
+            expect (T.attribute (segment T.body "hour") "contenteditable")
+            |> toEqual (Some "false"))))

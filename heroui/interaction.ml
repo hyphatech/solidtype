@@ -133,6 +133,9 @@ type t = {
   set_press : bool S.setter;
   focus : bool S.accessor;
   set_focus : bool S.setter;
+  mutable watched : Dom.element option;
+      (* Kobalte hands a part's element to its ref again as its props
+         change, which must not add the listeners again. *)
 }
 
 let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
@@ -161,6 +164,7 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
     set_press;
     focus;
     set_focus;
+    watched = None;
   }
 
 let disabled i = match i.off with Some d -> S.get d | None -> false
@@ -175,7 +179,8 @@ let pressed i = S.get i.press && not (disabled i)
 let focused i = S.get i.focus && not (disabled i)
 let focus_visible i = focused i && by_keyboard ()
 
-let watch i element =
+let listen i element =
+  i.watched <- Some (as_element element);
   watch_modality ();
   let down = ref false in
   let press on = S.set i.set_press on in
@@ -213,3 +218,8 @@ let watch i element =
      takes the focus. *)
   on_focus element "focusin" (fun _ -> S.set i.set_focus true);
   on_focus element "focusout" (fun _ -> S.set i.set_focus false)
+
+let watch i element =
+  match i.watched with
+  | Some watched when watched == as_element element -> ()
+  | Some _ | None -> listen i element

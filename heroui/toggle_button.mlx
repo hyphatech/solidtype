@@ -7,6 +7,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
     ?(id : string option) ?(is_selected : bool option)
     ?(default_selected : bool = false) ?(on_change : (bool -> unit) option)
     ?(is_disabled : bool option) ?(on_click : (Dom.mouseEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
     ?(aria_label : string option) ?(class_ : string option)
     ~(children : Jsx.content) () =
   let group = Toggle_button_group.Context.use () in
@@ -41,6 +42,10 @@ let%component make ?(variant : [ `default | `ghost ] option)
          ~is_icon_only:(is_icon_only ()) ?class_:(class_ ()) ())
   in
   let on_click e = ignore (on_click e : unit option) in
+  let watch b =
+    ignore (given_ref b : unit option);
+    Interaction.watch i b
+  in
   match group with
   | None ->
       let selected, set_selected =
@@ -51,9 +56,8 @@ let%component make ?(variant : [ `default | `ghost ] option)
         pressed=(fun () -> selected ())
         on_change=set_selected
         class_=(fun () -> class_ ())
-        disabled=(fun () -> disabled ())
         ?aria_label
-        ref=(fun b -> Interaction.watch i b)
+        ref=watch
         data_slot="toggle-button"
         data_selected=(fun () -> Jsx.flag (selected ()))
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -62,7 +66,8 @@ let%component make ?(variant : [ `default | `ghost ] option)
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
         on_click
-        props=(Props.others props)>
+        props=(Props.others props)
+        disabled=(fun () -> disabled ())>
         (fun () -> children ())
       </Kobalte.Root>
   | Some g -> (
@@ -71,11 +76,9 @@ let%component make ?(variant : [ `default | `ghost ] option)
       | Some key ->
           g.join disabled;
           <Item
-            value=(fun () -> key)
             class_=(fun () -> class_ ())
-            disabled=(fun () -> disabled ())
             ?aria_label
-            ref=(fun b -> Interaction.watch i b)
+            ref=watch
             data_slot="toggle-button"
             data_selected=(fun () -> Jsx.flag (g.is_selected key))
             data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -85,6 +88,9 @@ let%component make ?(variant : [ `default | `ghost ] option)
                                  Jsx.flag (Interaction.focus_visible i))
             data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
             on_click
-            props=(Props.others props)>
+            props=(Props.others props)
+            value=(fun () -> key)
+            disabled=(fun () -> disabled ())>
             (fun () -> children ())
           </Item>)
+[@@element button]

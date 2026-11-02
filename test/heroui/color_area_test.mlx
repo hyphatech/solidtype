@@ -165,3 +165,46 @@ let () =
       Jest.testPromise "is red across and green up, as React's is" (fun () ->
           both ~default_value:"#9B80FF" ~color_space:`rgb ~x_channel:`red
             ~y_channel:`green ()))
+
+let () =
+  Jest.describe "Color_area, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref beside its own"
+        (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <Color_area
+                default_value=(fun () -> Colors.parse_color "#9B80FF")
+                title="Area"
+                style="--x: 1">
+                <Color_area.Thumb
+                  title="Thumb" style="--y: 2" ref=(fun _ -> incr refs)
+                />
+              </Color_area>);
+          (* The thumb's ref watches the focus. *)
+          let* () = T.tab (T.setup ()) in
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          let thumb_style =
+            Option.map
+              (fun s ->
+                ( Js.String.includes ~search:"--color-area-thumb-color" s,
+                  Js.String.includes ~search:"--y: 2" s ))
+              (read "color-area-thumb" "style")
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (read "color-area" "title", read "color-area" "style"),
+                  (read "color-area-thumb" "title", thumb_style),
+                  read "color-area-thumb" "data-focus-visible",
+                  !refs )
+              |> toEqual
+                   ( (Some "Area", Some "--x: 1;"),
+                     (Some "Thumb", Some (true, true)),
+                     Some "true",
+                     1 ))))

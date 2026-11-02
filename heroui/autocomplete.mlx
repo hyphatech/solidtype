@@ -76,6 +76,9 @@ let within part =
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
+(* A style given after the part's own, so its declarations win. *)
+let styled own = function Some s -> own ^ " " ^ s | None -> own
+
 external as_element : _ Dom.element_like -> Dom.element = "%identity"
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
 
@@ -92,16 +95,23 @@ external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
 external body : Dom.element = "body" [@@mel.scope "document"]
 
 module Trigger = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.content) () =
     let a = within "Autocomplete.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> a.disabled ()) () in
     (* A press anywhere on it opens or closes the list, as HeroUI's does. *)
     <Kobalte.Control
       role=`group
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       class_=(fun () ->
                after (Styles.Autocomplete.trigger (a.slots ())) (class_ ()))
-      on_click=(fun _ -> if not (a.disabled ()) then a.toggle ())
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 if not (a.disabled ()) then a.toggle ())
       data_slot="autocomplete-trigger"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
@@ -109,6 +119,7 @@ module Trigger = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Control>
+  [@@element div]
 end
 
 module Value = struct
@@ -215,6 +226,7 @@ module Indicator = struct
                 />
               </svg>)
     </button>
+  [@@element svg]
 end
 
 module Clear_button = struct
@@ -256,6 +268,7 @@ module Clear_button = struct
         />
       </svg>
     </button>
+  [@@element button]
 end
 
 (* Kobalte's list as the [<div>] React Aria's list box is. *)
@@ -280,6 +293,8 @@ end
 
 module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     let a = within "Autocomplete.Popover" in
     S.create_computed (fun () ->
@@ -306,11 +321,15 @@ module Popover = struct
           aria_labelledby=(fun () -> a.label_id)
           class_=(fun () ->
                    after (Styles.Autocomplete.popover (a.slots ())) (class_ ()))
-          style="--trigger-width: var(--kb-popper-anchor-width); \
-                 --trigger-anchor-point: \
-                 var(--kb-combobox-content-transform-origin); max-height: \
-                 var(--kb-popper-content-available-height);"
+          style=(fun () ->
+                  styled
+                    "--trigger-width: var(--kb-popper-anchor-width); \
+                     --trigger-anchor-point: \
+                     var(--kb-combobox-content-transform-origin); max-height: \
+                     var(--kb-popper-content-available-height);"
+                    (style ()))
           ref=(fun e ->
+                ignore (given_ref e : unit option);
                 Overlay.watch o e;
                 watch_side e)
           on_close_auto_focus=(fun e ->
@@ -334,7 +353,7 @@ module Popover = struct
                 Jsx.element
                   <As_list
                     as_="div"
-                    ref=(fun e -> h.list_ref (as_element e))
+                    ref=(fun e -> h.list_ref e)
                     scroll_to_item=(fun key -> h.scroll_to_item key)
                     aria_orientation=`vertical
                     class_=(fun () -> h.classes ())
@@ -349,6 +368,7 @@ module Popover = struct
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>
+  [@@element div]
 end
 
 module Filter = struct
@@ -407,7 +427,9 @@ let%component make ?(placeholder : string = "Select an item")
     ?(is_required : bool = false) ?(is_invalid : bool = false)
     ?(name : string option) ?(full_width : bool = false)
     ?(variant : [ `primary | `secondary ] = `primary) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
+    () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -751,6 +773,15 @@ let%component make ?(placeholder : string = "Select an item")
     after (Styles.Autocomplete.base (a.slots ())) (class_ ())
   in
   let others = Props.others props in
+  let root e =
+    ignore (given_ref e : unit option);
+    in_form.root e
+  in
+  let leave = Fields.on_leave (fun (_ : Dom.focusEvent) -> in_form.left ()) in
+  let focus_out e =
+    ignore (on_focus_out e : unit option);
+    leave e
+  in
   (* Kobalte keeps the list open while the search keeps no option, as React
      Aria's does; an autocomplete opens with no option at all only by
      [allows_empty_collection]. *)
@@ -795,9 +826,8 @@ let%component make ?(placeholder : string = "Select an item")
         required=(fun () -> is_required ())
         validation_state=(fun () -> if invalid () then `invalid else `valid)
         class_=(fun () -> root_classes ())
-        ref=(fun e -> in_form.root e)
-        on_focus_out=(Fields.on_leave (fun (_ : Dom.focusEvent) ->
-                          in_form.left ()))
+        ref=root
+        on_focus_out=focus_out
         data_slot="autocomplete"
         data_open=(fun () -> Jsx.flag (opened ()))
         data_focused=(fun () -> Jsx.flag (focused ()))
@@ -836,9 +866,8 @@ let%component make ?(placeholder : string = "Select an item")
         required=(fun () -> is_required ())
         validation_state=(fun () -> if invalid () then `invalid else `valid)
         class_=(fun () -> root_classes ())
-        ref=(fun e -> in_form.root e)
-        on_focus_out=(Fields.on_leave (fun (_ : Dom.focusEvent) ->
-                          in_form.left ()))
+        ref=root
+        on_focus_out=focus_out
         data_slot="autocomplete"
         data_open=(fun () -> Jsx.flag (opened ()))
         data_focused=(fun () -> Jsx.flag (focused ()))
@@ -848,3 +877,4 @@ let%component make ?(placeholder : string = "Select an item")
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root_multiple>
+[@@element div]

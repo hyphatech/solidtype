@@ -48,6 +48,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Field_content>
+  [@@element label]
 end
 
 module Control = struct
@@ -115,6 +116,7 @@ module Indicator = struct
                 (fun () -> Jsx.element (dash ()))
               </Show>)
     </span>
+  [@@element span]
 end
 
 module Kobalte_description = Field.As_span (struct
@@ -160,7 +162,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(name : string option) ?(value : string option)
     ?(aria_label : string option) ?(class_ : string option)
     ?(slot : [ `selection ] option) ?(on_blur : (Dom.focusEvent -> unit) option)
-    ~(children : Jsx.content) () =
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
+    () =
   (* Given its slot, its state is the selection of the part above it. *)
   let slotted =
     match (slot (), Selection.use ()) with
@@ -279,10 +283,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       ?value
       validation_state=(fun () -> if invalid () then `invalid else `valid)
       class_=(fun () -> after (Styles.Checkbox.base (c.slots ())) (class_ ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="checkbox"
       data_selected=(fun () -> Jsx.flag (on ()))
       data_indeterminate=(fun () -> Jsx.flag (is_indeterminate ()))
@@ -298,3 +308,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       </Description.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

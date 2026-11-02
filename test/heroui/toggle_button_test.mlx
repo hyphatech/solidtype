@@ -253,6 +253,52 @@ let () =
               expect (!told, before, selected b)
               |> toEqual
                    ([ true ], (None, Some "false"), (Some "true", Some "true"))));
+      Jest.testPromise
+        "takes its element's attributes, calling a caller's ref beside its \
+         own, alone and in a group" (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <div>
+                <Toggle_button
+                  title="Likes" style="--x: 1" ref=(fun _ -> incr refs)>
+                  "Like"
+                </Toggle_button>
+                <Toggle_button_group
+                  title="Sides" style="--y: 2" on_change=(fun _ -> ())>
+                  <Toggle_button
+                    id="left"
+                    title="Left"
+                    value="other"
+                    disabled=true
+                    ref=(fun _ -> incr refs)>
+                    "left"
+                  </Toggle_button>
+                </Toggle_button_group>
+              </div>);
+          let user = T.setup () in
+          let alone = button_named T.body "Like" in
+          let grouped = button_named T.body "left" in
+          let* () = T.hover user alone in
+          let alone_hovered = T.attribute alone "data-hovered" in
+          let* () = T.hover user grouped in
+          let* () = T.click user grouped in
+          let group = T.query "[data-slot=toggle-button-group]" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute alone "title", T.attribute alone "style"),
+                  ( T.attribute grouped "title",
+                    Option.bind group (fun g -> T.attribute g "title"),
+                    Option.bind group (fun g -> T.attribute g "style") ),
+                  (alone_hovered, T.attribute grouped "data-hovered"),
+                  selected grouped,
+                  !refs )
+              |> toEqual
+                   ( (Some "Likes", Some "--x: 1;"),
+                     (Some "Left", Some "Sides", Some "--y: 2;"),
+                     (Some "true", Some "true"),
+                     (Some "true", Some "true"),
+                     2 )));
       Jest.test "refuses a button with no id inside a group" (fun () ->
           E.(
             expect (fun () ->

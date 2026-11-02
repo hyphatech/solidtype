@@ -61,6 +61,7 @@ let%component make ?(type_ : type_ = `body) ?(align : align option)
     ~(children : Jsx.content) () =
   text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
     ~element_type ~class_ children
+[@@element element]
 
 module Heading = struct
   let%component make ?(level : int = 1) ?(align : align option)
@@ -81,6 +82,7 @@ module Heading = struct
     in
     text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
       ~element_type ~class_ children
+  [@@element element]
 end
 
 module Paragraph = struct
@@ -93,6 +95,7 @@ module Paragraph = struct
     in
     text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
       ~element_type ~class_ children
+  [@@element element]
 end
 
 module Code = struct
@@ -103,6 +106,7 @@ module Code = struct
     text ~others:(Props.others props)
       ~type_:(fun () -> `code)
       ~align ~color ~weight ~truncate ~element_type ~class_ children
+  [@@element element]
 end
 
 module Prose = struct

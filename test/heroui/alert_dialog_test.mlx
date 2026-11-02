@@ -243,6 +243,18 @@ let both ?variant ?is_dismissable ?is_keyboard_dismiss_disabled ?placement ?size
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The title and the style a part is given, found on its element: the style
+   as whether it holds the declaration given, beside any the port's own. *)
+let given slot =
+  let e = first ("[data-slot=" ^ slot ^ "]") in
+  ( T.attribute e "title",
+    Option.map (Js.String.includes ~search:"--x: 1") (T.attribute e "style") )
+
+let focused () =
+  match Js.Null.toOption active with
+  | Some e -> T.attribute e "data-slot"
+  | None -> None
+
 let () =
   Jest.describe "Alert_dialog" (fun () ->
       Jest.afterEach T.cleanup;
@@ -264,6 +276,83 @@ let () =
       Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
           let* r = both ~custom:true ~status:`warning () in
           same r);
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and focus_outs = ref 0 and clicks = ref 0 in
+          let made part = refs := part :: !refs in
+          T.render (fun () ->
+              <Alert_dialog>
+                <Button>"Open"</Button>
+                <Alert_dialog.Backdrop
+                  title="Backdrop" style="--x: 1" ref=(fun _ -> made "backdrop")>
+                  <Alert_dialog.Container
+                    title="Container"
+                    style="--x: 1"
+                    ref=(fun _ -> made "container")>
+                    <Alert_dialog.Dialog
+                      title="Dialog"
+                      style="--x: 1"
+                      ref=(fun _ -> made "dialog")
+                      on_focus_out=(fun _ -> incr focus_outs)>
+                      <Alert_dialog.Close_trigger
+                        title="Close"
+                        style="--x: 1"
+                        on_click=(fun _ -> incr clicks)
+                      />
+                      <Alert_dialog.Heading title="Heading" style="--x: 1">
+                        "Delete?"
+                      </Alert_dialog.Heading>
+                    </Alert_dialog.Dialog>
+                  </Alert_dialog.Container>
+                </Alert_dialog.Backdrop>
+              </Alert_dialog>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () = T.click user (trigger ()) in
+          let* () = settle () in
+          let parts =
+            List.map given
+              [
+                "alert-dialog-backdrop";
+                "alert-dialog-container";
+                "alert-dialog-dialog";
+                "alert-dialog-close-trigger";
+                "alert-dialog-heading";
+              ]
+          in
+          let viewport =
+            Option.map
+              (Js.String.includes ~search:"--visual-viewport-height")
+              (T.attribute (first "[data-slot=alert-dialog-backdrop]") "style")
+          in
+          let opened_on = focused () in
+          let* () = T.tab user in
+          let* () =
+            T.click user (first "[data-slot=alert-dialog-close-trigger]")
+          in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( parts,
+                  viewport,
+                  opened_on,
+                  List.sort String.compare !refs,
+                  (!focus_outs > 0, !clicks),
+                  Array.length (all "[role=alertdialog]") )
+              |> toEqual
+                   ( [
+                       (Some "Backdrop", Some true);
+                       (Some "Container", Some true);
+                       (Some "Dialog", Some true);
+                       (Some "Close", Some true);
+                       (Some "Heading", Some true);
+                     ],
+                     Some true,
+                     Some "alert-dialog-dialog",
+                     [ "backdrop"; "container"; "dialog" ],
+                     (true, 1),
+                     0 )));
       Jest.testPromise "is drawn in the portal container it is given" (fun () ->
           let host = create_div "div" in
           append T.body host;

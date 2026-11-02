@@ -8,6 +8,7 @@ module Radio_group = Solidtype_heroui.Radio_group
 module Radio = Solidtype_heroui.Radio
 module Label = Solidtype_heroui.Label
 module Description = Solidtype_heroui.Description
+module Form = Solidtype_heroui.Form
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -44,6 +45,8 @@ end
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external checked : Dom.element -> bool = "checked" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
 
 external query_all_js : string -> Dom.element Js.Array.array_like
   = "querySelectorAll"
@@ -246,4 +249,83 @@ let () =
                      ~is_required:false ~name:"plan" ~on_blur ()))
           in
           Twin.cleanup ();
-          E.(expect (solidtype, react) |> toEqual (1, 1))))
+          E.(expect (solidtype, react) |> toEqual (1, 1)));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and outs = ref 0 in
+          let clicks = ref 0 and keys = ref 0 in
+          let content_refs = ref 0 and content_clicks = ref 0 in
+          let radio value =
+            <Radio value=(fun () -> value)>
+              <Radio.Content
+                title=(fun () -> "Chooses " ^ value)
+                style="--y: 2"
+                ref=(fun _ -> incr content_refs)
+                on_click=(fun _ -> incr content_clicks)>
+                <Radio.Control><Radio.Indicator /></Radio.Control>
+                (fun () -> Solidtype.Jsx.string value)
+              </Radio.Content>
+            </Radio>
+          in
+          let blurs =
+            T.blurs ~root:"[data-slot=radio-group]" (fun on_blur ->
+                T.render (fun () ->
+                    <Form on_submit=prevent_default>
+                      <Radio_group
+                        name="plan"
+                        default_value="pro"
+                        is_read_only=true
+                        is_invalid=true
+                        on_blur
+                        title="Plans"
+                        style="--x: 1"
+                        ref=(fun _ -> incr refs)
+                        on_focus_out=(fun _ -> incr outs)
+                        on_click=(fun _ -> incr clicks)
+                        on_key_down=(fun _ -> incr keys)>
+                        <Label>"Plan"</Label>
+                        (fun () -> Solidtype.Jsx.element (radio "starter"))
+                        (fun () -> Solidtype.Jsx.element (radio "pro"))
+                        (fun () -> Solidtype.Jsx.element (radio "teams"))
+                      </Radio_group>
+                      <button data_slot="button" type_=`submit>"Save"</button>
+                    </Form>))
+          in
+          let left = !outs and given = (!refs, !content_refs) in
+          let input value =
+            match T.query ("input[value=" ^ value ^ "]") with
+            | Some i -> i
+            | None -> T.body
+          in
+          let part slot =
+            match T.query ("[data-slot=" ^ slot ^ "]") with
+            | Some e -> e
+            | None -> T.body
+          in
+          let group = part "radio-group" and content = part "radio-content" in
+          let user = T.setup () in
+          let* () = T.hover user content in
+          let hovered = T.attribute content "data-hovered" in
+          let* () = T.click user content in
+          let clicked = (chosen (), active == input "starter") in
+          T.focus (input "pro");
+          let* () = T.keyboard user "{ArrowDown}" in
+          let moved = (chosen (), active == input "teams") in
+          let* () = T.click user (T.by_role "button") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute group "title", T.attribute group "style"),
+                  (T.attribute content "title", T.attribute content "style"),
+                  (blurs, left, given, active == input "pro"),
+                  (hovered, clicked, moved),
+                  (!clicks, !keys, !content_clicks) )
+              |> toEqual
+                   ( (Some "Plans", Some "--x: 1;"),
+                     (Some "Chooses starter", Some "--y: 2;"),
+                     (* Focus out of each radio into the next, then out. *)
+                     (1, 3, (1, 3), true),
+                     (* No hover while read-only, as React Aria's. *)
+                     (None, ([ Some "pro" ], true), ([ Some "pro" ], true)),
+                     (1, 1, 1) ))))

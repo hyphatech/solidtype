@@ -115,7 +115,10 @@ module Search_icon = struct
                     fill_rule="evenodd"
                   />
                 </svg>)>
-      <span class_=(fun () -> classes ()) data_slot="search-field-search-icon">
+      <span
+        class_=(fun () -> classes ())
+        data_slot="search-field-search-icon"
+        props=(Props.others props)>
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
@@ -123,14 +126,16 @@ module Search_icon = struct
 end
 
 module Input = struct
-  let%component make ?(placeholder : string option) ?(class_ : string option) ()
-      =
+  let%component make ?(placeholder : string option) ?(class_ : string option)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlInputElement -> unit) option) () =
     let f = within "Search_field.Input" in
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
     let classes () =
       after (Styles.SearchField.input (f.slots ())) (class_ ())
     in
     let watched e =
+      ignore (given_ref e : unit option);
       f.input := Some e;
       Interaction.watch i e
     in
@@ -147,6 +152,7 @@ module Input = struct
           type_="search"
           class_=(fun () -> classes ())
           ref=watched
+          on_key_down=(fun e -> ignore (on_key_down e : unit option))
           data_slot="search-field-input"
           data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
           data_focused=(fun () ->
@@ -164,6 +170,7 @@ module Input = struct
         (* Escape clears a search, and Enter submits it, as React Aria's
            does. *)
         let keyed e =
+          ignore (on_key_down e : unit option);
           match key e with
           | "Escape" when not (String.equal (f.value ()) "" || f.read_only ())
             ->
@@ -186,11 +193,14 @@ module Input = struct
           data_invalid=(fun () -> Jsx.flag (f.invalid ()))
           props=(Props.others props)
         />
+  [@@element input]
 end
 
 module Clear_button = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
-      () =
+      ?(on_pointer_down : (Dom.pointerEvent -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
     let f = within "Search_field.Clear_button" in
     let disabled () = f.disabled () || f.read_only () in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
@@ -202,14 +212,18 @@ module Clear_button = struct
                  ^ " "
                  ^ Styles.SearchField.clear_button (f.slots ()))
                  (class_ ()))
-      disabled=(fun () -> disabled ())
       slot="clear"
       ?tab_index=(fun () -> if disabled () then None else Some "-1")
       type_=`button
-      ref=(fun b -> Interaction.watch i b)
+      ref=(fun b ->
+            ignore (given_ref b : unit option);
+            Interaction.watch i b)
           (* A press keeps the focus where it is, in the input. *)
-      on_pointer_down=(fun e -> prevent_pointer e)
-      on_click=(fun _ ->
+      on_pointer_down=(fun e ->
+                        ignore (on_pointer_down e : unit option);
+                        prevent_pointer e)
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
                  f.clear ();
                  Option.iter focus !(f.input))
       data_slot="search-field-clear-button"
@@ -217,12 +231,14 @@ module Clear_button = struct
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-      props=(Props.others props)>
+      props=(Props.others props)
+      disabled=(fun () -> disabled ())>
       (fun () ->
         match children () with
         | Some c -> c
         | None -> Jsx.element <Close_button.Icon />)
     </Kobalte_button.Root>
+  [@@element button]
 end
 
 let%component make ?(variant : [ `primary | `secondary ] option)
@@ -233,6 +249,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_read_only : bool = false) ?(is_required : bool = false)
     ?(name : string option) ?(aria_label : string option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ~(children : Jsx.content) () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
@@ -286,10 +304,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                     if Option.is_some search then None else aria_label ())
       class_=(fun () ->
                after (Styles.SearchField.base (f.slots ())) (class_ ()))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="search-field"
       data_empty=(fun () -> Jsx.flag (String.equal (current ()) ""))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
@@ -302,3 +326,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

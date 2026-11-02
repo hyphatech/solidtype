@@ -503,4 +503,98 @@ let () =
                     T.attribute (first "[data-slot=list-box]") "data-empty" ) )
               |> toEqual
                    ( ([ "Cat" ], None),
-                     ([], Some "No results found", Some "true") ))))
+                     ([], Some "No results found", Some "true") )));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and told = ref [] in
+          let note seen what = seen := what :: !seen in
+          let counts = Array.make 3 0 in
+          let count i = counts.(i) <- counts.(i) + 1 in
+          T.render (fun () ->
+              <div>
+                <Combo_box
+                  title="Animals"
+                  ref=(fun _ -> note refs "combo box")
+                  on_focus_in=(fun _ -> count 0)
+                  on_key_down=(fun _ -> count 1)
+                  on_focus_out=(fun _ -> count 2)
+                  on_blur=(fun _ -> note told "left")>
+                  <Combo_box.Input_group
+                    title="Group" ref=(fun _ -> note refs "group")>
+                    <Input aria_label="Animal" />
+                    <Combo_box.Trigger
+                      title="Opens" ref=(fun _ -> note refs "trigger")
+                    />
+                  </Combo_box.Input_group>
+                  <Combo_box.Popover
+                    title="Options"
+                    style="--y: 2"
+                    ref=(fun _ -> note refs "popover")>
+                    (fun () -> Solidtype.Jsx.element (animals ()))
+                  </Combo_box.Popover>
+                </Combo_box>
+                <button type_=`button>"After"</button>
+              </div>);
+          let user = T.setup () in
+          let step action =
+            let* () = action () in
+            settle ()
+          in
+          let part slot = first ("[data-slot=" ^ slot ^ "]") in
+          let* () =
+            step (fun () -> T.hover user (part "combo-box-input-group"))
+          in
+          let group_hovered =
+            T.attribute (part "combo-box-input-group") "data-hovered"
+          in
+          let* () = step (fun () -> T.hover user (part "combo-box-trigger")) in
+          let trigger_hovered =
+            T.attribute (part "combo-box-trigger") "data-hovered"
+          in
+          let* () = step (fun () -> T.click user (input ())) in
+          let opened = options () in
+          let focused = T.attribute (part "combo-box") "data-focused" in
+          let popover = part "combo-box-popover" in
+          let popover_shown =
+            ( T.attribute popover "title",
+              Option.map
+                (fun style ->
+                  ( Js.String.includes ~search:"--trigger-width" style,
+                    Js.String.includes ~search:"--y: 2;" style ))
+                (T.attribute popover "style") )
+          in
+          let* () =
+            step (fun () ->
+                match
+                  List.find_opt
+                    (fun e -> String.equal (text e) "Cat")
+                    (Array.to_list (all "[data-slot=list-box-item]"))
+                with
+                | Some e -> T.click user e
+                | None -> Js.Promise.resolve ())
+          in
+          let* () = step (fun () -> T.keyboard user "{Escape}") in
+          let escaped = input_value (input ()) in
+          let* () = step (fun () -> T.tab user) in
+          let* () = step (fun () -> T.tab user) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( T.attribute (part "combo-box") "title",
+                    T.attribute (part "combo-box-input-group") "title",
+                    T.attribute (part "combo-box-trigger") "title" ),
+                  popover_shown,
+                  (group_hovered, trigger_hovered, focused),
+                  ( opened,
+                    escaped,
+                    Array.of_list (List.sort_uniq String.compare !told) ),
+                  Array.map (fun n -> n > 0) counts,
+                  Array.of_list (List.sort_uniq String.compare !refs) )
+              |> toEqual
+                   ( (Some "Animals", Some "Group", Some "Opens"),
+                     (Some "Options", Some (true, true)),
+                     (Some "true", Some "true", Some "true"),
+                     ([ "Cat"; "Dog"; "Kangaroo"; "Panda" ], "Cat", [| "left" |]),
+                     [| true; true; true |],
+                     [| "combo box"; "group"; "popover"; "trigger" |] ))))

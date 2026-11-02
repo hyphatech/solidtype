@@ -31,10 +31,10 @@ module Props : sig
     href:string Solidtype.Check.value ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?ref:(Dom.htmlAnchorElement -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.A.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

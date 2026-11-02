@@ -401,7 +401,7 @@ break.
   `heroui/interaction` only listens. Why: an attribute Solid writes is in the HTML a page is
   prerendered with and never races one the component writes itself; one
   set from a `ref` is neither. Test: `test/server/data_attributes_test.mlx`,
-  `test/does_not_compile.t`, `test/heroui/data_attributes_test.mlx`, which
+  `test/does_not_compile.t`, `test/heroui/attributes_test.mlx`, which
   gives one to every part of every port, and each port's test against its
   React twin.
 - **A spread is `props=p`, and no prop is named `props`.** MLX has no
@@ -504,6 +504,21 @@ break.
   -- stays the port's. Test: `test/headless/`, each component as a caller
   meets it, a fix failing on Kobalte's own, and its port's test against
   React's.
+- **A port's part takes every attribute of its element.** Its check ends in
+  its element's `Html` check, given by `[@@element]`, and it spreads
+  `Props.others` on that element, or on the Kobalte part or port that draws
+  it, after its own attributes, so a caller's attribute wins, as React Aria's
+  `mergeProps` lets it. A handler, `ref` or `style` the part sets there is
+  its own prop, `?ref:(given_ref : ...)`, the caller's called or written
+  beside its own; what the part's behaviour rests on -- a Kobalte option, an
+  id another part names, a fix of Kobalte's -- is written after the spread,
+  since Solid merges props in the order they are written. A part that draws
+  no element, a root that only gives context, takes none. Why: HeroUI's
+  parts take every DOM prop, and an attribute a port refuses, or one a
+  caller's spread replaces, is one an application cannot set without
+  breaking the port. Test: `test/heroui/attributes_test.mlx`, every part
+  given a style, a title, a handler and a `ref`; each composition in its
+  port's test.
 - **A component HeroUI ships no stylesheet for has one of its own.** It is
   made as every port is, from scratch on Solid and Kobalte with HeroUI's
   look and feel as the reference -- a segmented control, a trend chip, a

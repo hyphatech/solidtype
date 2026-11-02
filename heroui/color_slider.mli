@@ -57,8 +57,7 @@ module Track : sig
       ?style:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Div.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -75,10 +74,10 @@ module Thumb : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
+      ?ref:(Dom.htmlSpanElement -> unit) ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Span.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -109,11 +108,12 @@ module Props : sig
     ?name:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

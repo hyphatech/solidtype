@@ -20,10 +20,14 @@ module Props = struct
   external class_ : t -> string option = "class" [@@mel.get]
   external disabled : t -> bool option = "disabled" [@@mel.get]
   external aria_invalid : t -> string option = "aria-invalid" [@@mel.get]
+  external title : t -> string option = "title" [@@mel.get]
+
+  external ref : t -> ((Dom.htmlTextAreaElement -> unit)[@u]) option = "ref"
+  [@@mel.get]
 end
 
 (* The props this textarea takes for itself; the rest it passes on. *)
-let own = [| "variant"; "fullWidth"; "class" |]
+let own = [| "variant"; "fullWidth"; "class"; "title"; "ref" |]
 
 let text_area ~classes ~slot (props : Props.t) =
   let field = Text_field.Context.use () in
@@ -58,8 +62,13 @@ let text_area ~classes ~slot (props : Props.t) =
       <Kobalte
         props=rest
         class_=(fun () -> classes ())
-        ?title=(fun () -> if disabled () then None else Some "")
-        ref=(fun e -> Interaction.watch i e)
+        ?title=(fun () ->
+                 match Props.title props with
+                 | Some t -> Some t
+                 | None -> if disabled () then None else Some "")
+        ref=(fun e ->
+              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -71,7 +80,10 @@ let text_area ~classes ~slot (props : Props.t) =
       <textarea
         props=rest
         class_=(fun () -> classes ())
-        ref=(fun e -> Interaction.watch i e)
+        ?title=(fun () -> Props.title props)
+        ref=(fun e ->
+              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))

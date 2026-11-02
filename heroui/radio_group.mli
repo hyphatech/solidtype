@@ -61,10 +61,13 @@ module Props : sig
     ?name:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
+    ?on_key_down:(Dom.keyboardEvent -> unit) ->
+    ?on_click:(Dom.mouseEvent -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

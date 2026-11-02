@@ -68,24 +68,37 @@ type t = {
   mutable toggled : bool -> unit;
       (* What the content does as it is toggled, once its element is watched;
          nothing before. *)
+  mutable size : string * string;
+      (* Its width and height as last set, which its style gives again when
+         Solid writes the attribute whole, as a caller's style changes. *)
+  mutable watched : Dom.element option;
+      (* Kobalte hands the content's element to its ref again as its props
+         change, which must not listen again. *)
 }
 
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+
 let create ~expanded ~expand () =
+  let at_first = Solid.untrack expanded in
   let p =
     {
       expanded;
       expand;
-      at_first = Solid.untrack expanded;
+      at_first;
       toggled = (fun (_ : bool) -> ());
+      size = (if at_first then ("auto", "auto") else ("0px", "0px"));
+      watched = None;
     }
   in
   Solid.create_effect
     (Solid.on ~defer:true expanded (fun now _ -> p.toggled now));
   p
 
-let watch p e =
+let listen p e =
+  p.watched <- Some (as_element e);
   let inline = style_of e in
   let size width height =
+    p.size <- (width, height);
     set_property inline "--disclosure-panel-width" width;
     set_property inline "--disclosure-panel-height" height
   in
@@ -131,9 +144,14 @@ let watch p e =
         Some (request_frame (fun _ -> if not (p.expanded ()) then hide ()));
       p.expand ())
 
+let watch p e =
+  match p.watched with
+  | Some watched when watched == as_element e -> ()
+  | Some _ | None -> listen p e
+
 let hidden p = if p.at_first then None else Some "until-found"
 
 let style p =
-  if p.at_first then
-    "--disclosure-panel-width: auto; --disclosure-panel-height: auto"
-  else "--disclosure-panel-width: 0px; --disclosure-panel-height: 0px"
+  let width, height = p.size in
+  "--disclosure-panel-width: " ^ width ^ "; --disclosure-panel-height: "
+  ^ height

@@ -4,6 +4,7 @@
 
 module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
 module Label = Solidtype_heroui.Label
 module Number_field = Solidtype_heroui.Number_field
 module E = Jest.Expect
@@ -78,6 +79,8 @@ external dispatch : Dom.element -> Dom.event -> bool = "dispatchEvent"
 
 external element_count : Dom.element -> int = "childElementCount" [@@mel.get]
 external text : Dom.element -> string = "textContent" [@@mel.get]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]
@@ -396,3 +399,112 @@ let () =
           in
           Twin.cleanup ();
           E.(expect (solidtype, react) |> toEqual (1, 1))))
+
+let () =
+  Jest.describe "Number_field, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref and handlers \
+         beside their own" (fun () ->
+          let told = ref [] in
+          let tell name = told := name :: !told in
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Number_field
+                  name="width"
+                  is_invalid=true
+                  title="Width"
+                  style="--x: 1"
+                  ref=(fun _ -> tell "field ref")
+                  on_focus_out=(fun _ -> tell "field focus out")
+                  on_blur=(fun _ -> tell "field blur")>
+                  <Label>"Width"</Label>
+                  <Number_field.Group>
+                    <Number_field.Decrement_button
+                      title="Less" ref=(fun _ -> tell "decrement ref")
+                    />
+                    <Number_field.Input
+                      title="Width" ref=(fun _ -> tell "input ref")
+                    />
+                    <Number_field.Increment_button
+                      title="More" ref=(fun _ -> tell "increment ref")
+                    />
+                  </Number_field.Group>
+                </Number_field>
+                <button data_slot="submit" type_=`submit>"Save"</button>
+              </Form>);
+          let user = T.setup () in
+          let part slot =
+            Option.value (T.query ("[data-slot=" ^ slot ^ "]")) ~default:T.body
+          in
+          (* Each part's ref watches the pointer. *)
+          let hovered slot =
+            let* () = T.hover user (part slot) in
+            Js.Promise.resolve
+              ( T.attribute (part slot) "title",
+                T.attribute (part slot) "data-hovered" )
+          in
+          let* input = hovered "number-field-input" in
+          let* increment = hovered "number-field-increment-button" in
+          let* decrement = hovered "number-field-decrement-button" in
+          (* The form focuses the invalid field it finds by the field's ref. *)
+          let* () = T.click user (part "submit") in
+          let focused = T.attribute active "role" in
+          let* () = T.click user T.body in
+          let root = part "number-field" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute root "title", T.attribute root "style"),
+                  [| input; increment; decrement |],
+                  focused,
+                  Array.of_list (List.sort_uniq String.compare !told) )
+              |> toEqual
+                   ( (Some "Width", Some "--x: 1;"),
+                     [|
+                       (Some "Width", Some "true");
+                       (Some "More", Some "true");
+                       (Some "Less", Some "true");
+                     |],
+                     Some "spinbutton",
+                     [|
+                       "decrement ref";
+                       "field blur";
+                       "field focus out";
+                       "field ref";
+                       "increment ref";
+                       "input ref";
+                     |] ))))
+
+let () =
+  Jest.describe "Number_field, its buttons" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "keep their id and state over a caller's attributes" (fun () ->
+          T.render (fun () ->
+              <Number_field default_value=5. max_value=5.>
+                <Label>"Width"</Label>
+                <Number_field.Group>
+                  <Number_field.Input />
+                  <Number_field.Increment_button id="more" disabled=false />
+                </Number_field.Group>
+              </Number_field>);
+          let button =
+            Option.value
+              (T.query "[data-slot=number-field-increment-button]")
+              ~default:T.body
+          in
+          (* The button is named by its own id, and disabled at the field's
+             maximum. *)
+          let named =
+            match
+              (T.attribute button "id", T.attribute button "aria-labelledby")
+            with
+            | Some id, Some by -> (
+                match String.split_on_char ' ' by with
+                | first :: _ -> String.equal first id
+                | [] -> false)
+            | _ -> false
+          in
+          E.(
+            expect (named, T.attribute button "disabled")
+            |> toEqual (true, Some ""))))

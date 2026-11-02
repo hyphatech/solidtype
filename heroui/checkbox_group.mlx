@@ -33,7 +33,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_invalid : bool = false) ?(is_read_only : bool = false)
     ?(is_required : bool = false) ?(name : string option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
-    ~(children : Jsx.content) () =
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
+    () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -106,10 +108,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                        Styles.CheckboxGroup.classes
                          (Styles.CheckboxGroup.options ?variant:(variant ())
                             ?class_:(class_ ()) ()))
-              ref=(fun e -> in_form.root e)
-              on_focus_out=(Field.on_leave (fun e ->
-                                in_form.left ();
-                                on_blur e))
+              ref=(fun e ->
+                    ignore (given_ref e : unit option);
+                    in_form.root e)
+              on_focus_out=(fun e ->
+                             ignore (on_focus_out e : unit option);
+                             Field.on_leave
+                               (fun e ->
+                                 in_form.left ();
+                                 on_blur e)
+                               e)
               data_slot="checkbox-group"
               data_disabled=(fun () -> Jsx.flag (disabled ()))
               data_invalid=(fun () -> Jsx.flag (invalid ()))
@@ -122,3 +130,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       </Description.Slot.Provider>
     </Label.Slot.Provider>
   </Context.Provider>
+[@@element div]

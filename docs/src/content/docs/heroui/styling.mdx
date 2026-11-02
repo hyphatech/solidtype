@@ -83,11 +83,20 @@ Tailwind's `animate-*` and `transition-*` utilities go in `class_`. HeroUI's
 `motion-reduce:` variant turns its motion off for `prefers-reduced-motion`
 and under `data-reduce-motion="true"`.
 
-## Not yet
+## Attributes
 
-- **`style` and an element's other attributes on every part.** A part
-  that draws a plain element -- a card's, an alert's, a field's group --
-  takes all of that element's attributes. One built on a Kobalte part -- a
-  button, a switch, a field's input -- takes `class_`, its own props and
-  `data_` attributes; set a variable or an inline style on an element
-  around it.
+Every part takes each attribute of the element it draws, as HeroUI's parts
+take their element's props: `style`, `title`, `id`, handlers and `ref`.
+
+```ocaml
+<Button style="--radius: 0" title="Save the draft" on_focus=(fun _ -> track ())>
+  "Save"
+</Button>
+```
+
+A handler or `ref` you give is called beside the port's own, and a `style`
+is written after the port's, so the port keeps its behaviour. Any other
+attribute you give wins over the port's, but for what its behaviour rests
+on: Kobalte's options and the ids that link its parts. A prop the port names
+itself is the port's, whatever the element means by it: a switch's
+`on_change` takes its state.

@@ -390,6 +390,109 @@ let () =
                      true );
                  |])
           |> Js.Promise.resolve);
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let focus_ins = ref 0 and trigger_refs = ref 0 in
+          let clicks = ref 0 and downs = ref 0 and ups = ref 0 in
+          let panel_refs = ref 0 and presses = ref 0 in
+          T.render (fun () ->
+              <Accordion>
+                <Accordion.Item
+                  id="one" title="First" on_focus_in=(fun _ -> incr focus_ins)>
+                  <Accordion.Heading>
+                    <Accordion.Trigger
+                      title="Opens"
+                      style="--x: 1"
+                      ref=(fun _ -> incr trigger_refs)
+                      on_click=(fun _ -> incr clicks)
+                      on_key_down=(fun _ -> incr downs)
+                      on_key_up=(fun _ -> incr ups)
+                      on_press=(fun () -> incr presses)>
+                      "One"
+                    </Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel
+                    title="Shown" style="--y: 2" ref=(fun _ -> incr panel_refs)>
+                    "First."
+                  </Accordion.Panel>
+                </Accordion.Item>
+                <Accordion.Item id="two">
+                  <Accordion.Heading>
+                    <Accordion.Trigger>"Two"</Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>"Second."</Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>);
+          let user = T.setup () in
+          let item =
+            match T.query "[data-slot=accordion-item]" with
+            | Some e -> e
+            | None -> T.body
+          in
+          let first = trigger T.body 0 in
+          let panel () =
+            match T.query "[data-slot=accordion-panel]" with
+            | Some e -> e
+            | None -> T.body
+          in
+          let height () =
+            property (style (panel ())) "--disclosure-panel-height"
+          in
+          let collapsed = height () in
+          (* Counted before it is expanded: Kobalte's parts give their ref
+             again as their state changes. *)
+          let given = (!trigger_refs, !panel_refs) in
+          let* () = T.hover user first in
+          let hovered = T.attribute first "data-hovered" in
+          let* () = T.click user first in
+          let expanded = height () in
+          T.focus first;
+          let* () = T.keyboard user "{Enter}" in
+          let* () = T.keyboard user "{ArrowDown}" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( ( T.attribute item "title",
+                    T.attribute first "title",
+                    T.attribute first "style",
+                    T.attribute (panel ()) "title",
+                    property (style (panel ())) "--y" ),
+                  (given, hovered, collapsed, expanded),
+                  (focused (), !focus_ins, !presses),
+                  (!clicks, !downs, !ups) )
+              |> toEqual
+                   ( ( Some "First",
+                       Some "Opens",
+                       Some "--x: 1;",
+                       Some "Shown",
+                       "2" ),
+                     ((1, 1), Some "true", "0px", "auto"),
+                     ("Two", 1, 2),
+                     (* ArrowDown is let go on the trigger it moved to. *)
+                     (1, 2, 1) )));
+      Jest.testPromise
+        "expands as it is clicked though a caller gives the root on_change"
+        (fun () ->
+          (* The root's on_change is Kobalte's, which a DOM one given beside
+             it must not replace. *)
+          let changes = ref 0 in
+          T.render (fun () ->
+              <Accordion on_change=(fun _ -> incr changes)>
+                <Accordion.Item id="one">
+                  <Accordion.Heading>
+                    <Accordion.Trigger>"One"</Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>"First."</Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>);
+          let user = T.setup () in
+          let trigger = T.by_role "button" in
+          let* () = T.click user trigger in
+          Js.Promise.resolve
+            E.(
+              expect (T.attribute trigger "aria-expanded", !changes)
+              |> toEqual (Some "true", 0)));
       Jest.testPromise "leaves each panel free to animate once on the page"
         (fun () ->
           (* Kobalte stops its content's transitions as it mounts, until it

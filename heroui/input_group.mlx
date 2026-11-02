@@ -77,7 +77,7 @@ end
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(is_disabled : bool option)
     ?(is_invalid : bool option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) () =
   let field = Text_field.Context.use () in
   let disabled () =
     match (is_disabled (), field) with
@@ -111,6 +111,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   (* A click on the group but on its input gives the input the focus, as
      HeroUI's does: an input's, never a text area's. *)
   let clicked e =
+    ignore (on_click e : unit option);
     match !element with
     | Some group -> (
         match Js.Null.toOption (query group "input") with
@@ -140,3 +141,4 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       (fun () -> children ())
     </div>
   </Context.Provider>
+[@@element div]

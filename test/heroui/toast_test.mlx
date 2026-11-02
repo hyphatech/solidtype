@@ -404,6 +404,111 @@ let () =
           Js.Promise.resolve
             E.(
               expect (with_control, region_focused ()) |> toEqual (false, true)));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and clicks = ref [] and presses = ref 0 in
+          let made part = refs := part :: !refs in
+          let clicked part = clicks := part :: !clicks in
+          T.render (fun () ->
+              <Toast.Provider
+                title="Region" style="--x: 1" ref=(fun _ -> made "region")>
+                (fun t ->
+                  <Toast
+                    toast=(fun () -> t)
+                    title="Toast"
+                    style="--x: 1"
+                    ref=(fun _ -> made "toast")>
+                    <Toast.Content>
+                      <Toast.Title title="Title" style="--x: 1">
+                        (fun () -> Solidtype.Jsx.string (Toast.title t))
+                      </Toast.Title>
+                      <Toast.Description title="Description" style="--x: 1">
+                        "Saved"
+                      </Toast.Description>
+                    </Toast.Content>
+                    <Toast.Action_button
+                      title="Action"
+                      style="--x: 1"
+                      on_click=(fun _ -> clicked "action")
+                      on_press=(fun () -> incr presses)>
+                      "Undo"
+                    </Toast.Action_button>
+                    <Toast.Close_button
+                      key=(fun () -> Toast.key t)
+                      title="Close"
+                      style="--x: 1"
+                      ref=(fun _ -> made "close")
+                      on_click=(fun _ -> clicked "close")
+                    />
+                  </Toast>)
+              </Toast.Provider>);
+          (* The toasts an earlier test cleared leave as they exit. *)
+          let* () = wait 400 in
+          let (_ : Toast.key) = Toast.show ~timeout_ms:0. "First" in
+          let (_ : Toast.key) = Toast.show ~timeout_ms:0. "Second" in
+          let* () = wait 50 in
+          let given ?(own = "--x: 1") slot =
+            match T.query ("[data-slot=" ^ slot ^ "]") with
+            | Some e ->
+                let style = Option.value (T.attribute e "style") ~default:"" in
+                ( T.attribute e "title",
+                  Js.String.includes ~search:"--x: 1" style
+                  && Js.String.includes ~search:own style )
+            | None -> (None, false)
+          in
+          let parts =
+            [
+              given ~own:"pointer-events: none" "toast-region";
+              given ~own:"--toast-height" "toast";
+              given "toast-title";
+              given "toast-description";
+              given "toast-action-button";
+              given "toast-close";
+            ]
+          in
+          let user = setup (setup_options ~pointer_events_check:0 ()) in
+          let first slot =
+            match T.query ("[data-slot=" ^ slot ^ "]") with
+            | Some e -> e
+            | None -> T.body
+          in
+          let* () = T.hover user (first "toast-close") in
+          let hovered =
+            ( T.attribute (first "toast-region") "data-expanded",
+              T.attribute (first "toast-close") "data-hovered" )
+          in
+          let* () = T.click user (first "toast-action-button") in
+          let count () =
+            Array.length
+              (Js.Array.from
+                 (query_all "[data-slot=toast]:not([data-exiting])"))
+          in
+          let before = count () in
+          let* () = T.click user (first "toast-close") in
+          let* () = wait 50 in
+          let closed = before - count () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( parts,
+                  hovered,
+                  List.sort_uniq String.compare !refs,
+                  (List.rev !clicks, !presses),
+                  closed )
+              |> toEqual
+                   ( [
+                       (Some "Region", true);
+                       (Some "Toast", true);
+                       (Some "Title", true);
+                       (Some "Description", true);
+                       (Some "Action", true);
+                       (Some "Close", true);
+                     ],
+                     (Some "true", Some "true"),
+                     [ "close"; "region"; "toast" ],
+                     ([ "action"; "close" ], 1),
+                     1 )));
       Jest.testPromise "is as tall as its content, measured as HeroUI does"
         (fun () ->
           define_property element_prototype "scrollHeight"

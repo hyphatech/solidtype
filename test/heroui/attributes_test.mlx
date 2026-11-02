@@ -1,0 +1,2552 @@
+(* Each part of each port takes every attribute of its element and passes it
+   on, as HeroUI's React components spread the rest of their props on theirs:
+   each part is given [data-testid], [title], [style], a [ref] and an
+   [on_key_down], which must reach the element its selector finds -- the ref
+   handed it, the handler called on it -- beside the part's own. An svg takes
+   no [title]. An avatar's image, which shows only once it has loaded, is
+   checked by the avatar's own test. *)
+
+module H = Solidtype_heroui
+module Date = Solidtype_internationalized_date
+module Accordion = H.Accordion
+module Alert = H.Alert
+module Avatar = H.Avatar
+module Avatar_group = H.Avatar_group
+module Badge = H.Badge
+module Breadcrumbs = H.Breadcrumbs
+module Alert_dialog = H.Alert_dialog
+module Drawer = H.Drawer
+module Dropdown = H.Dropdown
+module Header = H.Header
+module Modal = H.Modal
+module Pagination = H.Pagination
+module Popover = H.Popover
+module Tooltip = H.Tooltip
+module Button = H.Button
+module Button_group = H.Button_group
+module Card = H.Card
+module Checkbox = H.Checkbox
+module Checkbox_group = H.Checkbox_group
+module Chip = H.Chip
+module Close_button = H.Close_button
+module Description = H.Description
+module Disclosure = H.Disclosure
+module Disclosure_group = H.Disclosure_group
+module Empty_state = H.Empty_state
+module Field_error = H.Field_error
+module Fieldset = H.Fieldset
+module Form = H.Form
+module Input = H.Input
+module Input_group = H.Input_group
+module Kbd = H.Kbd
+module Table = H.Table
+module Color_swatch = H.Color_swatch
+module Color_area = H.Color_area
+module Color_slider = H.Color_slider
+module Color_swatch_picker = H.Color_swatch_picker
+module Color_field = H.Color_field
+module Label = H.Label
+module Link = H.Link
+module Select = H.Select
+module Autocomplete = H.Autocomplete
+module Combo_box = H.Combo_box
+module List_box = H.List_box
+module Meter = H.Meter
+module Number_field = H.Number_field
+module Progress_bar = H.Progress_bar
+module Progress_circle = H.Progress_circle
+module Radio = H.Radio
+module Radio_group = H.Radio_group
+module Scroll_shadow = H.Scroll_shadow
+module Search_field = H.Search_field
+module Segment = H.Segment
+module Trend_chip = H.Trend_chip
+module Text_shimmer = H.Text_shimmer
+module Separator = H.Separator
+module Skeleton = H.Skeleton
+module Slider = H.Slider
+module Spinner = H.Spinner
+module Surface = H.Surface
+module Switch = H.Switch
+module Switch_group = H.Switch_group
+module Tabs = H.Tabs
+module Text_area = H.Text_area
+module Text_field = H.Text_field
+module Time_field = H.Time_field
+module Toast = H.Toast
+module Toggle_button = H.Toggle_button
+module Toggle_button_group = H.Toggle_button_group
+module Typography = H.Typography
+module E = Jest.Expect
+module T = Testing
+
+external matches : Dom.element -> string -> bool = "matches" [@@mel.send]
+
+(* What each part's ref was handed, and the element each part's handler was
+   called on, by the part's name. *)
+let refs : (string, Dom.element) Hashtbl.t = Hashtbl.create 256
+let handled : (string, Dom.element) Hashtbl.t = Hashtbl.create 256
+
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+
+external current_target : Dom.keyboardEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+(* A part drawn several times, a time field's segments, is handed each. *)
+let seen name e = Hashtbl.add refs name (as_element e)
+let heard name e = Hashtbl.add handled name (current_target e)
+
+type keyboard_event_init
+
+external keyboard_event_init :
+  key:string -> bubbles:bool -> unit -> keyboard_event_init = ""
+[@@mel.obj]
+
+type keyboard_event
+
+external keyboard_event : string -> keyboard_event_init -> keyboard_event
+  = "KeyboardEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> keyboard_event -> bool = "dispatchEvent"
+[@@mel.send]
+
+(* The parts typed by an svg's attributes, which hold no title. *)
+let untitled =
+  [
+    "Accordion.Indicator";
+    "Accordion.Indicator.icon";
+    "Autocomplete.Indicator";
+    "Close_button.Icon";
+    "Disclosure.Indicator";
+    "Progress_circle.Fill_circle";
+    "Progress_circle.Track";
+    "Progress_circle.Track_circle";
+    "Search_field.Search_icon";
+    "Select.Indicator";
+  ]
+
+type css_style
+
+external style_of : Dom.element -> css_style = "style" [@@mel.get]
+
+external property : css_style -> string -> string = "getPropertyValue"
+[@@mel.send]
+
+external get_attribute : Dom.element -> string -> string Js.null
+  = "getAttribute"
+[@@mel.send]
+
+(* What of a part's attributes is not on its element: its title, which an svg
+   does not take, its style, its ref and its handler, told a key no part acts
+   on. *)
+let unattributed name e =
+  ignore
+    (dispatch e
+       (keyboard_event "keydown"
+          (keyboard_event_init ~key:"Unidentified" ~bubbles:true ()))
+      : bool);
+  let title =
+    match Js.Null.toOption (get_attribute e "title") with
+    | Some t -> String.equal t name
+    | None -> List.exists (String.equal name) untitled
+  in
+  let same table =
+    List.exists (fun x -> x == e) (Hashtbl.find_all table name)
+  in
+  [
+    (title, "title");
+    (String.equal (property (style_of e) "--part") "1", "style");
+    (same refs, "ref");
+    (same handled, "on_key_down");
+  ]
+  |> List.filter_map (fun (holds, what) -> if holds then None else Some what)
+
+(* Each part's name whose data-testid is missing, on an element its selector
+   does not find, or beside an attribute of its own that is not. *)
+let misplaced parts =
+  parts
+  |> List.filter_map (fun (name, selector) ->
+      match T.query ("[data-testid=\"" ^ name ^ "\"]") with
+      | Some e when matches e selector -> (
+          match unattributed name e with
+          | [] -> None
+          | missing -> Some (name ^ " without " ^ String.concat ", " missing))
+      | Some e -> Some (name ^ " on " ^ T.attributes e)
+      | None -> Some (name ^ " missing"))
+  |> Array.of_list
+
+let () =
+  Jest.describe "An attribute given to a port" (fun () ->
+      Jest.afterEach (fun () ->
+          Toast.clear ();
+          Hashtbl.reset refs;
+          Hashtbl.reset handled;
+          T.cleanup ());
+      Jest.test "reaches each part of a port of no behaviour" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Alert
+                  data_testid="Alert"
+                  title="Alert"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Alert" e)
+                  on_key_down=(fun e -> heard "Alert" e)>
+                  <Alert.Indicator
+                    data_testid="Alert.Indicator"
+                    title="Alert.Indicator"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Alert.Indicator" e)
+                    on_key_down=(fun e -> heard "Alert.Indicator" e)
+                  />
+                  <Alert.Content
+                    data_testid="Alert.Content"
+                    title="Alert.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Alert.Content" e)
+                    on_key_down=(fun e -> heard "Alert.Content" e)>
+                    <Alert.Title
+                      data_testid="Alert.Title"
+                      title="Alert.Title"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Alert.Title" e)
+                      on_key_down=(fun e -> heard "Alert.Title" e)>
+                      "Title"
+                    </Alert.Title>
+                    <Alert.Description
+                      data_testid="Alert.Description"
+                      title="Alert.Description"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Alert.Description" e)
+                      on_key_down=(fun e -> heard "Alert.Description" e)>
+                      "Description"
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert>
+                <Avatar_group
+                  data_testid="Avatar_group"
+                  title="Avatar_group"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Avatar_group" e)
+                  on_key_down=(fun e -> heard "Avatar_group" e)>
+                  <Avatar
+                    data_testid="Avatar"
+                    title="Avatar"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Avatar" e)
+                    on_key_down=(fun e -> heard "Avatar" e)>
+                    <Avatar.Fallback
+                      data_testid="Avatar.Fallback"
+                      title="Avatar.Fallback"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Avatar.Fallback" e)
+                      on_key_down=(fun e -> heard "Avatar.Fallback" e)>
+                      "JD"
+                    </Avatar.Fallback>
+                  </Avatar>
+                  <Avatar_group.Count
+                    data_testid="Avatar_group.Count"
+                    title="Avatar_group.Count"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Avatar_group.Count" e)
+                    on_key_down=(fun e -> heard "Avatar_group.Count" e)>
+                    "+3"
+                  </Avatar_group.Count>
+                </Avatar_group>
+                <Badge.Anchor
+                  data_testid="Badge.Anchor"
+                  title="Badge.Anchor"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Badge.Anchor" e)
+                  on_key_down=(fun e -> heard "Badge.Anchor" e)>
+                  <Badge
+                    data_testid="Badge"
+                    title="Badge"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Badge" e)
+                    on_key_down=(fun e -> heard "Badge" e)>
+                    <Badge.Label
+                      data_testid="Badge.Label"
+                      title="Badge.Label"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Badge.Label" e)
+                      on_key_down=(fun e -> heard "Badge.Label" e)>
+                      "5"
+                    </Badge.Label>
+                  </Badge>
+                </Badge.Anchor>
+                <Breadcrumbs
+                  data_testid="Breadcrumbs"
+                  title="Breadcrumbs"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Breadcrumbs" e)
+                  on_key_down=(fun e -> heard "Breadcrumbs" e)>
+                  <Breadcrumbs.Item
+                    data_testid="Breadcrumbs.Item"
+                    title="Breadcrumbs.Item"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Breadcrumbs.Item" e)
+                    on_key_down=(fun e -> heard "Breadcrumbs.Item" e)>
+                    "Home"
+                  </Breadcrumbs.Item>
+                </Breadcrumbs>
+                <Pagination
+                  data_testid="Pagination"
+                  title="Pagination"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Pagination" e)
+                  on_key_down=(fun e -> heard "Pagination" e)>
+                  <Pagination.Summary
+                    data_testid="Pagination.Summary"
+                    title="Pagination.Summary"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Pagination.Summary" e)
+                    on_key_down=(fun e -> heard "Pagination.Summary" e)>
+                    "Page 1"
+                  </Pagination.Summary>
+                  <Pagination.Content
+                    data_testid="Pagination.Content"
+                    title="Pagination.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Pagination.Content" e)
+                    on_key_down=(fun e -> heard "Pagination.Content" e)>
+                    <Pagination.Item
+                      data_testid="Pagination.Item"
+                      title="Pagination.Item"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Pagination.Item" e)
+                      on_key_down=(fun e -> heard "Pagination.Item" e)>
+                      <Pagination.Previous
+                        data_testid="Pagination.Previous"
+                        title="Pagination.Previous"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Pagination.Previous" e)
+                        on_key_down=(fun e -> heard "Pagination.Previous" e)>
+                        <Pagination.Previous_icon
+                          data_testid="Pagination.Previous_icon"
+                          title="Pagination.Previous_icon"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Pagination.Previous_icon" e)
+                          on_key_down=(fun e ->
+                                        heard "Pagination.Previous_icon" e)
+                        />
+                      </Pagination.Previous>
+                    </Pagination.Item>
+                    <Pagination.Item>
+                      <Pagination.Link
+                        data_testid="Pagination.Link"
+                        title="Pagination.Link"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Pagination.Link" e)
+                        on_key_down=(fun e -> heard "Pagination.Link" e)>
+                        "1"
+                      </Pagination.Link>
+                    </Pagination.Item>
+                    <Pagination.Item>
+                      <Pagination.Ellipsis
+                        data_testid="Pagination.Ellipsis"
+                        title="Pagination.Ellipsis"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Pagination.Ellipsis" e)
+                        on_key_down=(fun e -> heard "Pagination.Ellipsis" e)
+                      />
+                    </Pagination.Item>
+                    <Pagination.Item>
+                      <Pagination.Next
+                        data_testid="Pagination.Next"
+                        title="Pagination.Next"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Pagination.Next" e)
+                        on_key_down=(fun e -> heard "Pagination.Next" e)>
+                        <Pagination.Next_icon
+                          data_testid="Pagination.Next_icon"
+                          title="Pagination.Next_icon"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Pagination.Next_icon" e)
+                          on_key_down=(fun e -> heard "Pagination.Next_icon" e)
+                        />
+                      </Pagination.Next>
+                    </Pagination.Item>
+                  </Pagination.Content>
+                </Pagination>
+                <Tooltip default_open=true>
+                  <Tooltip.Trigger
+                    data_testid="Tooltip.Trigger"
+                    title="Tooltip.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Tooltip.Trigger" e)
+                    on_key_down=(fun e -> heard "Tooltip.Trigger" e)>
+                    "Info"
+                  </Tooltip.Trigger>
+                  <Tooltip.Content
+                    data_testid="Tooltip.Content"
+                    title="Tooltip.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Tooltip.Content" e)
+                    on_key_down=(fun e -> heard "Tooltip.Content" e)>
+                    <Tooltip.Arrow
+                      data_testid="Tooltip.Arrow"
+                      title="Tooltip.Arrow"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Tooltip.Arrow" e)
+                      on_key_down=(fun e -> heard "Tooltip.Arrow" e)
+                    />
+                    "More"
+                  </Tooltip.Content>
+                </Tooltip>
+                <Popover default_open=true>
+                  <Popover.Trigger
+                    data_testid="Popover.Trigger"
+                    title="Popover.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Popover.Trigger" e)
+                    on_key_down=(fun e -> heard "Popover.Trigger" e)>
+                    "Profile"
+                  </Popover.Trigger>
+                  <Popover.Content
+                    data_testid="Popover.Content"
+                    title="Popover.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Popover.Content" e)
+                    on_key_down=(fun e -> heard "Popover.Content" e)>
+                    <Popover.Dialog
+                      data_testid="Popover.Dialog"
+                      title="Popover.Dialog"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Popover.Dialog" e)
+                      on_key_down=(fun e -> heard "Popover.Dialog" e)>
+                      <Popover.Arrow
+                        data_testid="Popover.Arrow"
+                        title="Popover.Arrow"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Popover.Arrow" e)
+                        on_key_down=(fun e -> heard "Popover.Arrow" e)
+                      />
+                      <Popover.Heading
+                        data_testid="Popover.Heading"
+                        title="Popover.Heading"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Popover.Heading" e)
+                        on_key_down=(fun e -> heard "Popover.Heading" e)>
+                        "Title"
+                      </Popover.Heading>
+                    </Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
+                <Alert_dialog default_open=true>
+                  <Alert_dialog.Trigger
+                    data_testid="Alert_dialog.Trigger"
+                    title="Alert_dialog.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Alert_dialog.Trigger" e)
+                    on_key_down=(fun e -> heard "Alert_dialog.Trigger" e)>
+                    "Delete"
+                  </Alert_dialog.Trigger>
+                  <Alert_dialog.Backdrop
+                    data_testid="Alert_dialog.Backdrop"
+                    title="Alert_dialog.Backdrop"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Alert_dialog.Backdrop" e)
+                    on_key_down=(fun e -> heard "Alert_dialog.Backdrop" e)>
+                    <Alert_dialog.Container
+                      data_testid="Alert_dialog.Container"
+                      title="Alert_dialog.Container"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Alert_dialog.Container" e)
+                      on_key_down=(fun e -> heard "Alert_dialog.Container" e)>
+                      <Alert_dialog.Dialog
+                        data_testid="Alert_dialog.Dialog"
+                        title="Alert_dialog.Dialog"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Alert_dialog.Dialog" e)
+                        on_key_down=(fun e -> heard "Alert_dialog.Dialog" e)>
+                        <Alert_dialog.Close_trigger
+                          data_testid="Alert_dialog.Close_trigger"
+                          title="Alert_dialog.Close_trigger"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Alert_dialog.Close_trigger" e)
+                          on_key_down=(fun e ->
+                                        heard "Alert_dialog.Close_trigger" e)
+                        />
+                        <Alert_dialog.Header
+                          data_testid="Alert_dialog.Header"
+                          title="Alert_dialog.Header"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Alert_dialog.Header" e)
+                          on_key_down=(fun e -> heard "Alert_dialog.Header" e)>
+                          <Alert_dialog.Icon
+                            data_testid="Alert_dialog.Icon"
+                            title="Alert_dialog.Icon"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Alert_dialog.Icon" e)
+                            on_key_down=(fun e -> heard "Alert_dialog.Icon" e)
+                          />
+                          <Alert_dialog.Heading
+                            data_testid="Alert_dialog.Heading"
+                            title="Alert_dialog.Heading"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Alert_dialog.Heading" e)
+                            on_key_down=(fun e ->
+                                          heard "Alert_dialog.Heading" e)>
+                            "Sure?"
+                          </Alert_dialog.Heading>
+                        </Alert_dialog.Header>
+                        <Alert_dialog.Body
+                          data_testid="Alert_dialog.Body"
+                          title="Alert_dialog.Body"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Alert_dialog.Body" e)
+                          on_key_down=(fun e -> heard "Alert_dialog.Body" e)>
+                          "Body"
+                        </Alert_dialog.Body>
+                        <Alert_dialog.Footer
+                          data_testid="Alert_dialog.Footer"
+                          title="Alert_dialog.Footer"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Alert_dialog.Footer" e)
+                          on_key_down=(fun e -> heard "Alert_dialog.Footer" e)>
+                          "Footer"
+                        </Alert_dialog.Footer>
+                      </Alert_dialog.Dialog>
+                    </Alert_dialog.Container>
+                  </Alert_dialog.Backdrop>
+                </Alert_dialog>
+                <Dropdown default_open=true>
+                  <Dropdown.Trigger
+                    data_testid="Dropdown.Trigger"
+                    title="Dropdown.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Dropdown.Trigger" e)
+                    on_key_down=(fun e -> heard "Dropdown.Trigger" e)>
+                    "Actions"
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover
+                    data_testid="Dropdown.Popover"
+                    title="Dropdown.Popover"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Dropdown.Popover" e)
+                    on_key_down=(fun e -> heard "Dropdown.Popover" e)>
+                    <Dropdown.Menu
+                      data_testid="Dropdown.Menu"
+                      title="Dropdown.Menu"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Dropdown.Menu" e)
+                      on_key_down=(fun e -> heard "Dropdown.Menu" e)
+                      selection_mode=(fun () -> `single)>
+                      <Dropdown.Section
+                        data_testid="Dropdown.Section"
+                        title="Dropdown.Section"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Dropdown.Section" e)
+                        on_key_down=(fun e -> heard "Dropdown.Section" e)>
+                        <Header
+                          data_testid="Header"
+                          title="Header"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Header" e)
+                          on_key_down=(fun e -> heard "Header" e)>
+                          "Format"
+                        </Header>
+                        <Dropdown.Item
+                          id="bold"
+                          data_testid="Dropdown.Item"
+                          title="Dropdown.Item"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Dropdown.Item" e)
+                          on_key_down=(fun e -> heard "Dropdown.Item" e)>
+                          <Dropdown.Item_indicator
+                            data_testid="Dropdown.Item_indicator"
+                            title="Dropdown.Item_indicator"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Dropdown.Item_indicator" e)
+                            on_key_down=(fun e ->
+                                          heard "Dropdown.Item_indicator" e)
+                          />
+                          "Bold"
+                        </Dropdown.Item>
+                      </Dropdown.Section>
+                      <Dropdown.Submenu_trigger>
+                        <Dropdown.Item id="share">
+                          "Share"
+                          <Dropdown.Submenu_indicator
+                            data_testid="Dropdown.Submenu_indicator"
+                            title="Dropdown.Submenu_indicator"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Dropdown.Submenu_indicator" e)
+                            on_key_down=(fun e ->
+                                          heard "Dropdown.Submenu_indicator" e)
+                          />
+                        </Dropdown.Item>
+                        <Dropdown.Popover>
+                          <Dropdown.Menu>
+                            <Dropdown.Item id="email">"Email"</Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown.Popover>
+                      </Dropdown.Submenu_trigger>
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
+                <List_box
+                  aria_label="Users"
+                  data_testid="List_box"
+                  title="List_box"
+                  style="--part: 1"
+                  ref=(fun e -> seen "List_box" e)
+                  on_key_down=(fun e -> heard "List_box" e)>
+                  <List_box.Section
+                    data_testid="List_box.Section"
+                    title="List_box.Section"
+                    style="--part: 1"
+                    ref=(fun e -> seen "List_box.Section" e)
+                    on_key_down=(fun e -> heard "List_box.Section" e)>
+                    <List_box.Item
+                      id="bob"
+                      data_testid="List_box.Item"
+                      title="List_box.Item"
+                      style="--part: 1"
+                      ref=(fun e -> seen "List_box.Item" e)
+                      on_key_down=(fun e -> heard "List_box.Item" e)>
+                      "Bob"
+                      <List_box.Item_indicator
+                        data_testid="List_box.Item_indicator"
+                        title="List_box.Item_indicator"
+                        style="--part: 1"
+                        ref=(fun e -> seen "List_box.Item_indicator" e)
+                        on_key_down=(fun e -> heard "List_box.Item_indicator" e)
+                      />
+                    </List_box.Item>
+                  </List_box.Section>
+                </List_box>
+                <Select
+                  default_open=true
+                  data_testid="Select"
+                  title="Select"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Select" e)
+                  on_key_down=(fun e -> heard "Select" e)>
+                  <Select.Trigger
+                    data_testid="Select.Trigger"
+                    title="Select.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Select.Trigger" e)
+                    on_key_down=(fun e -> heard "Select.Trigger" e)>
+                    <Select.Value
+                      data_testid="Select.Value"
+                      title="Select.Value"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Select.Value" e)
+                      on_key_down=(fun e -> heard "Select.Value" e)
+                    />
+                    <Select.Clear_button
+                      data_testid="Select.Clear_button"
+                      title="Select.Clear_button"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Select.Clear_button" e)
+                      on_key_down=(fun e -> heard "Select.Clear_button" e)
+                    />
+                    <Select.Indicator
+                      data_testid="Select.Indicator"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Select.Indicator" e)
+                      on_key_down=(fun e -> heard "Select.Indicator" e)
+                    />
+                  </Select.Trigger>
+                  <Select.Popover
+                    data_testid="Select.Popover"
+                    title="Select.Popover"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Select.Popover" e)
+                    on_key_down=(fun e -> heard "Select.Popover" e)>
+                    <List_box>
+                      <List_box.Item id="utah">"Utah"</List_box.Item>
+                    </List_box>
+                  </Select.Popover>
+                </Select>
+                <Combo_box
+                  data_testid="Combo_box"
+                  title="Combo_box"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Combo_box" e)
+                  on_key_down=(fun e -> heard "Combo_box" e)>
+                  <Combo_box.Input_group
+                    data_testid="Combo_box.Input_group"
+                    title="Combo_box.Input_group"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Combo_box.Input_group" e)
+                    on_key_down=(fun e -> heard "Combo_box.Input_group" e)>
+                    <Input aria_label="Animal" />
+                    <Combo_box.Trigger
+                      data_testid="Combo_box.Trigger"
+                      title="Combo_box.Trigger"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Combo_box.Trigger" e)
+                      on_key_down=(fun e -> heard "Combo_box.Trigger" e)
+                    />
+                  </Combo_box.Input_group>
+                  <Combo_box.Value
+                    data_testid="Combo_box.Value"
+                    title="Combo_box.Value"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Combo_box.Value" e)
+                    on_key_down=(fun e -> heard "Combo_box.Value" e)
+                  />
+                  <Combo_box.Popover>
+                    <List_box>
+                      <List_box.Item id="cat">"Cat"</List_box.Item>
+                    </List_box>
+                  </Combo_box.Popover>
+                </Combo_box>
+                <Autocomplete
+                  default_open=true
+                  data_testid="Autocomplete"
+                  title="Autocomplete"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Autocomplete" e)
+                  on_key_down=(fun e -> heard "Autocomplete" e)>
+                  <Autocomplete.Trigger
+                    data_testid="Autocomplete.Trigger"
+                    title="Autocomplete.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Autocomplete.Trigger" e)
+                    on_key_down=(fun e -> heard "Autocomplete.Trigger" e)>
+                    <Autocomplete.Value
+                      data_testid="Autocomplete.Value"
+                      title="Autocomplete.Value"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Autocomplete.Value" e)
+                      on_key_down=(fun e -> heard "Autocomplete.Value" e)
+                    />
+                    <Autocomplete.Clear_button
+                      data_testid="Autocomplete.Clear_button"
+                      title="Autocomplete.Clear_button"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Autocomplete.Clear_button" e)
+                      on_key_down=(fun e -> heard "Autocomplete.Clear_button" e)
+                    />
+                    <Autocomplete.Indicator
+                      data_testid="Autocomplete.Indicator"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Autocomplete.Indicator" e)
+                      on_key_down=(fun e -> heard "Autocomplete.Indicator" e)
+                    />
+                  </Autocomplete.Trigger>
+                  <Autocomplete.Popover
+                    data_testid="Autocomplete.Popover"
+                    title="Autocomplete.Popover"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Autocomplete.Popover" e)
+                    on_key_down=(fun e -> heard "Autocomplete.Popover" e)>
+                    <Autocomplete.Filter>
+                      <Search_field aria_label="Search">
+                        <Search_field.Group>
+                          <Search_field.Input />
+                        </Search_field.Group>
+                      </Search_field>
+                      <List_box>
+                        <List_box.Item id="utah">"Utah"</List_box.Item>
+                      </List_box>
+                    </Autocomplete.Filter>
+                  </Autocomplete.Popover>
+                </Autocomplete>
+                <Drawer default_open=true>
+                  <Drawer.Trigger
+                    data_testid="Drawer.Trigger"
+                    title="Drawer.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Drawer.Trigger" e)
+                    on_key_down=(fun e -> heard "Drawer.Trigger" e)>
+                    "Open"
+                  </Drawer.Trigger>
+                  <Drawer.Backdrop
+                    data_testid="Drawer.Backdrop"
+                    title="Drawer.Backdrop"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Drawer.Backdrop" e)
+                    on_key_down=(fun e -> heard "Drawer.Backdrop" e)>
+                    <Drawer.Content
+                      data_testid="Drawer.Content"
+                      title="Drawer.Content"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Drawer.Content" e)
+                      on_key_down=(fun e -> heard "Drawer.Content" e)>
+                      <Drawer.Dialog
+                        data_testid="Drawer.Dialog"
+                        title="Drawer.Dialog"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Drawer.Dialog" e)
+                        on_key_down=(fun e -> heard "Drawer.Dialog" e)>
+                        <Drawer.Handle
+                          data_testid="Drawer.Handle"
+                          title="Drawer.Handle"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Drawer.Handle" e)
+                          on_key_down=(fun e -> heard "Drawer.Handle" e)
+                        />
+                        <Drawer.Close_trigger
+                          data_testid="Drawer.Close_trigger"
+                          title="Drawer.Close_trigger"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Drawer.Close_trigger" e)
+                          on_key_down=(fun e -> heard "Drawer.Close_trigger" e)
+                        />
+                        <Drawer.Header
+                          data_testid="Drawer.Header"
+                          title="Drawer.Header"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Drawer.Header" e)
+                          on_key_down=(fun e -> heard "Drawer.Header" e)>
+                          <Drawer.Heading
+                            data_testid="Drawer.Heading"
+                            title="Drawer.Heading"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Drawer.Heading" e)
+                            on_key_down=(fun e -> heard "Drawer.Heading" e)>
+                            "Title"
+                          </Drawer.Heading>
+                        </Drawer.Header>
+                        <Drawer.Body
+                          data_testid="Drawer.Body"
+                          title="Drawer.Body"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Drawer.Body" e)
+                          on_key_down=(fun e -> heard "Drawer.Body" e)>
+                          "Body"
+                        </Drawer.Body>
+                        <Drawer.Footer
+                          data_testid="Drawer.Footer"
+                          title="Drawer.Footer"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Drawer.Footer" e)
+                          on_key_down=(fun e -> heard "Drawer.Footer" e)>
+                          "Footer"
+                        </Drawer.Footer>
+                      </Drawer.Dialog>
+                    </Drawer.Content>
+                  </Drawer.Backdrop>
+                </Drawer>
+                <Modal default_open=true>
+                  <Modal.Trigger
+                    data_testid="Modal.Trigger"
+                    title="Modal.Trigger"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Modal.Trigger" e)
+                    on_key_down=(fun e -> heard "Modal.Trigger" e)>
+                    "Open"
+                  </Modal.Trigger>
+                  <Modal.Backdrop
+                    data_testid="Modal.Backdrop"
+                    title="Modal.Backdrop"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Modal.Backdrop" e)
+                    on_key_down=(fun e -> heard "Modal.Backdrop" e)>
+                    <Modal.Container
+                      data_testid="Modal.Container"
+                      title="Modal.Container"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Modal.Container" e)
+                      on_key_down=(fun e -> heard "Modal.Container" e)>
+                      <Modal.Dialog
+                        data_testid="Modal.Dialog"
+                        title="Modal.Dialog"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Modal.Dialog" e)
+                        on_key_down=(fun e -> heard "Modal.Dialog" e)>
+                        <Modal.Close_trigger
+                          data_testid="Modal.Close_trigger"
+                          title="Modal.Close_trigger"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Modal.Close_trigger" e)
+                          on_key_down=(fun e -> heard "Modal.Close_trigger" e)
+                        />
+                        <Modal.Header
+                          data_testid="Modal.Header"
+                          title="Modal.Header"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Modal.Header" e)
+                          on_key_down=(fun e -> heard "Modal.Header" e)>
+                          <Modal.Icon
+                            data_testid="Modal.Icon"
+                            title="Modal.Icon"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Modal.Icon" e)
+                            on_key_down=(fun e -> heard "Modal.Icon" e)>
+                            "i"
+                          </Modal.Icon>
+                          <Modal.Heading
+                            data_testid="Modal.Heading"
+                            title="Modal.Heading"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Modal.Heading" e)
+                            on_key_down=(fun e -> heard "Modal.Heading" e)>
+                            "Title"
+                          </Modal.Heading>
+                        </Modal.Header>
+                        <Modal.Body
+                          data_testid="Modal.Body"
+                          title="Modal.Body"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Modal.Body" e)
+                          on_key_down=(fun e -> heard "Modal.Body" e)>
+                          "Body"
+                        </Modal.Body>
+                        <Modal.Footer
+                          data_testid="Modal.Footer"
+                          title="Modal.Footer"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Modal.Footer" e)
+                          on_key_down=(fun e -> heard "Modal.Footer" e)>
+                          "Footer"
+                        </Modal.Footer>
+                      </Modal.Dialog>
+                    </Modal.Container>
+                  </Modal.Backdrop>
+                </Modal>
+                <Button_group
+                  data_testid="Button_group"
+                  title="Button_group"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Button_group" e)
+                  on_key_down=(fun e -> heard "Button_group" e)>
+                  <Button
+                    data_testid="Button"
+                    title="Button"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Button" e)
+                    on_key_down=(fun e -> heard "Button" e)>
+                    "First"
+                  </Button>
+                  <Button>
+                    <Button_group.Separator
+                      data_testid="Button_group.Separator"
+                      title="Button_group.Separator"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Button_group.Separator" e)
+                      on_key_down=(fun e -> heard "Button_group.Separator" e)
+                    />
+                    "Second"
+                  </Button>
+                </Button_group>
+                <Card
+                  data_testid="Card"
+                  title="Card"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Card" e)
+                  on_key_down=(fun e -> heard "Card" e)>
+                  <Card.Header
+                    data_testid="Card.Header"
+                    title="Card.Header"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Card.Header" e)
+                    on_key_down=(fun e -> heard "Card.Header" e)>
+                    <Card.Title
+                      data_testid="Card.Title"
+                      title="Card.Title"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Card.Title" e)
+                      on_key_down=(fun e -> heard "Card.Title" e)>
+                      "Title"
+                    </Card.Title>
+                    <Card.Description
+                      data_testid="Card.Description"
+                      title="Card.Description"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Card.Description" e)
+                      on_key_down=(fun e -> heard "Card.Description" e)>
+                      "Description"
+                    </Card.Description>
+                  </Card.Header>
+                  <Card.Content
+                    data_testid="Card.Content"
+                    title="Card.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Card.Content" e)
+                    on_key_down=(fun e -> heard "Card.Content" e)>
+                    "Content"
+                  </Card.Content>
+                  <Card.Footer
+                    data_testid="Card.Footer"
+                    title="Card.Footer"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Card.Footer" e)
+                    on_key_down=(fun e -> heard "Card.Footer" e)>
+                    "Footer"
+                  </Card.Footer>
+                </Card>
+                <Chip
+                  data_testid="Chip"
+                  title="Chip"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Chip" e)
+                  on_key_down=(fun e -> heard "Chip" e)>
+                  <Chip.Label
+                    data_testid="Chip.Label"
+                    title="Chip.Label"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Chip.Label" e)
+                    on_key_down=(fun e -> heard "Chip.Label" e)>
+                    "Label"
+                  </Chip.Label>
+                </Chip>
+                <Close_button
+                  data_testid="Close_button"
+                  title="Close_button"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Close_button" e)
+                  on_key_down=(fun e -> heard "Close_button" e)>
+                  <Close_button.Icon
+                    data_testid="Close_button.Icon"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Close_button.Icon" e)
+                    on_key_down=(fun e -> heard "Close_button.Icon" e)
+                  />
+                </Close_button>
+                <Empty_state
+                  data_testid="Empty_state"
+                  title="Empty_state"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Empty_state" e)
+                  on_key_down=(fun e -> heard "Empty_state" e)>
+                  "Empty"
+                </Empty_state>
+                <Color_area
+                  data_testid="Color_area"
+                  title="Color_area"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Color_area" e)
+                  on_key_down=(fun e -> heard "Color_area" e)
+                  default_value=(fun () ->
+                                  Solidtype_kobalte.Colors.parse_color "#0485F7")>
+                  <Color_area.Thumb
+                    data_testid="Color_area.Thumb"
+                    title="Color_area.Thumb"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Color_area.Thumb" e)
+                    on_key_down=(fun e -> heard "Color_area.Thumb" e)
+                  />
+                </Color_area>
+                <Color_field
+                  data_testid="Color_field"
+                  title="Color_field"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Color_field" e)
+                  on_key_down=(fun e -> heard "Color_field" e)
+                  aria_label="Colour"
+                  default_value=(fun () ->
+                                  Solidtype_kobalte.Colors.parse_color "#0485F7")>
+                  <Color_field.Group
+                    data_testid="Color_field.Group"
+                    title="Color_field.Group"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Color_field.Group" e)
+                    on_key_down=(fun e -> heard "Color_field.Group" e)>
+                    <Color_field.Prefix
+                      data_testid="Color_field.Prefix"
+                      title="Color_field.Prefix"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_field.Prefix" e)
+                      on_key_down=(fun e -> heard "Color_field.Prefix" e)>
+                      "#"
+                    </Color_field.Prefix>
+                    <Color_field.Input
+                      data_testid="Color_field.Input"
+                      title="Color_field.Input"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_field.Input" e)
+                      on_key_down=(fun e -> heard "Color_field.Input" e)
+                    />
+                    <Color_field.Suffix
+                      data_testid="Color_field.Suffix"
+                      title="Color_field.Suffix"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_field.Suffix" e)
+                      on_key_down=(fun e -> heard "Color_field.Suffix" e)>
+                      "hex"
+                    </Color_field.Suffix>
+                  </Color_field.Group>
+                </Color_field>
+                <Color_slider
+                  data_testid="Color_slider"
+                  title="Color_slider"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Color_slider" e)
+                  on_key_down=(fun e -> heard "Color_slider" e)
+                  aria_label="Hue"
+                  channel=`hue
+                  default_value=(fun () ->
+                                  Solidtype_kobalte.Colors.parse_color
+                                    "hsl(0, 100%, 50%)")>
+                  <Color_slider.Output
+                    data_testid="Color_slider.Output"
+                    title="Color_slider.Output"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Color_slider.Output" e)
+                    on_key_down=(fun e -> heard "Color_slider.Output" e)
+                  />
+                  <Color_slider.Track
+                    data_testid="Color_slider.Track"
+                    title="Color_slider.Track"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Color_slider.Track" e)
+                    on_key_down=(fun e -> heard "Color_slider.Track" e)>
+                    <Color_slider.Thumb
+                      data_testid="Color_slider.Thumb"
+                      title="Color_slider.Thumb"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_slider.Thumb" e)
+                      on_key_down=(fun e -> heard "Color_slider.Thumb" e)
+                    />
+                  </Color_slider.Track>
+                </Color_slider>
+                <Color_swatch
+                  data_testid="Color_swatch"
+                  title="Color_swatch"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Color_swatch" e)
+                  on_key_down=(fun e -> heard "Color_swatch" e)
+                  color=(fun () ->
+                          Solidtype_kobalte.Colors.parse_color "#0485F7")
+                />
+                <Color_swatch_picker
+                  data_testid="Color_swatch_picker"
+                  title="Color_swatch_picker"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Color_swatch_picker" e)
+                  on_key_down=(fun e -> heard "Color_swatch_picker" e)>
+                  <Color_swatch_picker.Item
+                    data_testid="Color_swatch_picker.Item"
+                    title="Color_swatch_picker.Item"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Color_swatch_picker.Item" e)
+                    on_key_down=(fun e -> heard "Color_swatch_picker.Item" e)
+                    color=(fun () ->
+                            Solidtype_kobalte.Colors.parse_color "#F43F5E")>
+                    <Color_swatch_picker.Swatch
+                      data_testid="Color_swatch_picker.Swatch"
+                      title="Color_swatch_picker.Swatch"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_swatch_picker.Swatch" e)
+                      on_key_down=(fun e ->
+                                    heard "Color_swatch_picker.Swatch" e)
+                    />
+                    <Color_swatch_picker.Indicator
+                      data_testid="Color_swatch_picker.Indicator"
+                      title="Color_swatch_picker.Indicator"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_swatch_picker.Indicator" e)
+                      on_key_down=(fun e ->
+                                    heard "Color_swatch_picker.Indicator" e)
+                    />
+                  </Color_swatch_picker.Item>
+                </Color_swatch_picker>
+                <Table
+                  data_testid="Table"
+                  title="Table"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Table" e)
+                  on_key_down=(fun e -> heard "Table" e)>
+                  <Table.Scroll_container
+                    data_testid="Table.Scroll_container"
+                    title="Table.Scroll_container"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Table.Scroll_container" e)
+                    on_key_down=(fun e -> heard "Table.Scroll_container" e)>
+                    <Table.Content
+                      data_testid="Table.Content"
+                      title="Table.Content"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Table.Content" e)
+                      on_key_down=(fun e -> heard "Table.Content" e)
+                      aria_label="Members">
+                      <Table.Header
+                        data_testid="Table.Header"
+                        title="Table.Header"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Table.Header" e)
+                        on_key_down=(fun e -> heard "Table.Header" e)>
+                        <Table.Column
+                          data_testid="Table.Column"
+                          title="Table.Column"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Table.Column" e)
+                          on_key_down=(fun e -> heard "Table.Column" e)>
+                          "Name"
+                        </Table.Column>
+                        <Table.Column allows_sorting=true>
+                          <Table.Sortable_column_header
+                            data_testid="Table.Sortable_column_header"
+                            title="Table.Sortable_column_header"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Table.Sortable_column_header" e)
+                            on_key_down=(fun e ->
+                                          heard "Table.Sortable_column_header" e)>
+                            "Role"
+                          </Table.Sortable_column_header>
+                        </Table.Column>
+                      </Table.Header>
+                      <Table.Body
+                        data_testid="Table.Body"
+                        title="Table.Body"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Table.Body" e)
+                        on_key_down=(fun e -> heard "Table.Body" e)>
+                        <Table.Row
+                          data_testid="Table.Row"
+                          title="Table.Row"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Table.Row" e)
+                          on_key_down=(fun e -> heard "Table.Row" e)>
+                          <Table.Cell
+                            data_testid="Table.Cell"
+                            title="Table.Cell"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Table.Cell" e)
+                            on_key_down=(fun e -> heard "Table.Cell" e)>
+                            "Kate"
+                          </Table.Cell>
+                        </Table.Row>
+                        <Table.Load_more
+                          data_testid="Table.Load_more"
+                          title="Table.Load_more"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Table.Load_more" e)
+                          on_key_down=(fun e -> heard "Table.Load_more" e)
+                          is_loading=(fun () -> true)>
+                          <Table.Load_more_content
+                            data_testid="Table.Load_more_content"
+                            title="Table.Load_more_content"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Table.Load_more_content" e)
+                            on_key_down=(fun e ->
+                                          heard "Table.Load_more_content" e)>
+                            "Loading"
+                          </Table.Load_more_content>
+                        </Table.Load_more>
+                      </Table.Body>
+                    </Table.Content>
+                  </Table.Scroll_container>
+                  <Table.Footer
+                    data_testid="Table.Footer"
+                    title="Table.Footer"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Table.Footer" e)
+                    on_key_down=(fun e -> heard "Table.Footer" e)>
+                    "1"
+                  </Table.Footer>
+                </Table>
+                <Table>
+                  <Table.Resizable_container
+                    data_testid="Table.Resizable_container"
+                    title="Table.Resizable_container"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Table.Resizable_container" e)
+                    on_key_down=(fun e -> heard "Table.Resizable_container" e)>
+                    <Table.Content aria_label="Resizable">
+                      <Table.Header>
+                        <Table.Column id="name" is_row_header=true>
+                          "Name"
+                          <Table.Column_resizer
+                            data_testid="Table.Column_resizer"
+                            title="Table.Column_resizer"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Table.Column_resizer" e)
+                            on_key_down=(fun e ->
+                                          heard "Table.Column_resizer" e)
+                          />
+                        </Table.Column>
+                      </Table.Header>
+                      <Table.Body>
+                        <Table.Row><Table.Cell>"Kate"</Table.Cell></Table.Row>
+                      </Table.Body>
+                    </Table.Content>
+                  </Table.Resizable_container>
+                </Table>
+                <Kbd
+                  data_testid="Kbd"
+                  title="Kbd"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Kbd" e)
+                  on_key_down=(fun e -> heard "Kbd" e)>
+                  <Kbd.Abbr
+                    data_testid="Kbd.Abbr"
+                    title="Kbd.Abbr"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Kbd.Abbr" e)
+                    on_key_down=(fun e -> heard "Kbd.Abbr" e)
+                    key_value=`command
+                  />
+                  <Kbd.Content
+                    data_testid="Kbd.Content"
+                    title="Kbd.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Kbd.Content" e)
+                    on_key_down=(fun e -> heard "Kbd.Content" e)>
+                    "K"
+                  </Kbd.Content>
+                </Kbd>
+                <Link
+                  data_testid="Link"
+                  title="Link"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Link" e)
+                  on_key_down=(fun e -> heard "Link" e)
+                  href="#">
+                  "Link"
+                  <Link.Icon
+                    data_testid="Link.Icon"
+                    title="Link.Icon"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Link.Icon" e)
+                    on_key_down=(fun e -> heard "Link.Icon" e)
+                  />
+                </Link>
+                <Scroll_shadow
+                  data_testid="Scroll_shadow"
+                  title="Scroll_shadow"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Scroll_shadow" e)
+                  on_key_down=(fun e -> heard "Scroll_shadow" e)>
+                  "Text"
+                </Scroll_shadow>
+                <Disclosure
+                  data_testid="Disclosure"
+                  title="Disclosure"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Disclosure" e)
+                  on_key_down=(fun e -> heard "Disclosure" e)>
+                  <Disclosure.Heading
+                    data_testid="Disclosure.Heading"
+                    title="Disclosure.Heading"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Disclosure.Heading" e)
+                    on_key_down=(fun e -> heard "Disclosure.Heading" e)>
+                    <Disclosure.Trigger
+                      data_testid="Disclosure.Trigger"
+                      title="Disclosure.Trigger"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Disclosure.Trigger" e)
+                      on_key_down=(fun e -> heard "Disclosure.Trigger" e)>
+                      "Shipping"
+                      <Disclosure.Indicator
+                        data_testid="Disclosure.Indicator"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Disclosure.Indicator" e)
+                        on_key_down=(fun e -> heard "Disclosure.Indicator" e)
+                      />
+                    </Disclosure.Trigger>
+                  </Disclosure.Heading>
+                  <Disclosure.Content
+                    data_testid="Disclosure.Content"
+                    title="Disclosure.Content"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Disclosure.Content" e)
+                    on_key_down=(fun e -> heard "Disclosure.Content" e)>
+                    <Disclosure.Body
+                      data_testid="Disclosure.Body"
+                      title="Disclosure.Body"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Disclosure.Body" e)
+                      on_key_down=(fun e -> heard "Disclosure.Body" e)>
+                      "Orders ship."
+                    </Disclosure.Body>
+                  </Disclosure.Content>
+                </Disclosure>
+                <Disclosure>
+                  <Disclosure.Heading>
+                    <Button
+                      data_testid="Button.trigger"
+                      title="Button.trigger"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Button.trigger" e)
+                      on_key_down=(fun e -> heard "Button.trigger" e)
+                      slot=`trigger>
+                      "Returns"
+                    </Button>
+                  </Disclosure.Heading>
+                  <Disclosure.Content>"Within 30 days."</Disclosure.Content>
+                </Disclosure>
+                <Disclosure_group
+                  data_testid="Disclosure_group"
+                  title="Disclosure_group"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Disclosure_group" e)
+                  on_key_down=(fun e -> heard "Disclosure_group" e)>
+                  <Disclosure id="gift">
+                    <Disclosure.Heading>
+                      <Disclosure.Trigger>"Gift wrap"</Disclosure.Trigger>
+                    </Disclosure.Heading>
+                    <Disclosure.Content>
+                      "Wrapped on request."
+                    </Disclosure.Content>
+                  </Disclosure>
+                </Disclosure_group>
+                <Accordion
+                  data_testid="Accordion"
+                  title="Accordion"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Accordion" e)
+                  on_key_down=(fun e -> heard "Accordion" e)>
+                  <Accordion.Item
+                    data_testid="Accordion.Item"
+                    title="Accordion.Item"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Accordion.Item" e)
+                    on_key_down=(fun e -> heard "Accordion.Item" e)
+                    id="faq">
+                    <Accordion.Heading
+                      data_testid="Accordion.Heading"
+                      title="Accordion.Heading"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Accordion.Heading" e)
+                      on_key_down=(fun e -> heard "Accordion.Heading" e)>
+                      <Accordion.Trigger
+                        data_testid="Accordion.Trigger"
+                        title="Accordion.Trigger"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Accordion.Trigger" e)
+                        on_key_down=(fun e -> heard "Accordion.Trigger" e)>
+                        "Questions"
+                        <Accordion.Indicator
+                          data_testid="Accordion.Indicator"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Accordion.Indicator" e)
+                          on_key_down=(fun e -> heard "Accordion.Indicator" e)
+                        />
+                      </Accordion.Trigger>
+                    </Accordion.Heading>
+                    <Accordion.Panel
+                      data_testid="Accordion.Panel"
+                      title="Accordion.Panel"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Accordion.Panel" e)
+                      on_key_down=(fun e -> heard "Accordion.Panel" e)>
+                      <Accordion.Body
+                        data_testid="Accordion.Body"
+                        title="Accordion.Body"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Accordion.Body" e)
+                        on_key_down=(fun e -> heard "Accordion.Body" e)>
+                        "Answers."
+                      </Accordion.Body>
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                  <Accordion.Item id="more">
+                    <Accordion.Heading>
+                      <Accordion.Trigger>
+                        "More"
+                        <Accordion.Indicator
+                          data_testid="Accordion.Indicator.icon"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Accordion.Indicator.icon" e)
+                          on_key_down=(fun e ->
+                                        heard "Accordion.Indicator.icon" e)>
+                          <svg />
+                        </Accordion.Indicator>
+                      </Accordion.Trigger>
+                    </Accordion.Heading>
+                    <Accordion.Panel>"More answers."</Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+                <Tabs
+                  data_testid="Tabs"
+                  title="Tabs"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Tabs" e)
+                  on_key_down=(fun e -> heard "Tabs" e)>
+                  <Tabs.List_container
+                    data_testid="Tabs.List_container"
+                    title="Tabs.List_container"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Tabs.List_container" e)
+                    on_key_down=(fun e -> heard "Tabs.List_container" e)>
+                    <Tabs.List
+                      data_testid="Tabs.List"
+                      title="Tabs.List"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Tabs.List" e)
+                      on_key_down=(fun e -> heard "Tabs.List" e)
+                      aria_label="Options">
+                      <Tabs.Tab
+                        data_testid="Tabs.Tab"
+                        title="Tabs.Tab"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Tabs.Tab" e)
+                        on_key_down=(fun e -> heard "Tabs.Tab" e)
+                        id="one">
+                        "One"
+                        <Tabs.Indicator
+                          data_testid="Tabs.Indicator"
+                          title="Tabs.Indicator"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Tabs.Indicator" e)
+                          on_key_down=(fun e -> heard "Tabs.Indicator" e)
+                        />
+                      </Tabs.Tab>
+                      <Tabs.Tab id="two">
+                        <Tabs.Separator
+                          data_testid="Tabs.Separator"
+                          title="Tabs.Separator"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Tabs.Separator" e)
+                          on_key_down=(fun e -> heard "Tabs.Separator" e)
+                        />
+                        "Two"
+                      </Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs.List_container>
+                  <Tabs.Panel
+                    data_testid="Tabs.Panel"
+                    title="Tabs.Panel"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Tabs.Panel" e)
+                    on_key_down=(fun e -> heard "Tabs.Panel" e)
+                    id="one">
+                    "First."
+                  </Tabs.Panel>
+                  <Tabs.Panel id="two">"Second."</Tabs.Panel>
+                </Tabs>
+                <Segment
+                  data_testid="Segment"
+                  title="Segment"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Segment" e)
+                  on_key_down=(fun e -> heard "Segment" e)
+                  aria_label="Period"
+                  default_selected_key="month">
+                  <Segment.Item
+                    data_testid="Segment.Item"
+                    title="Segment.Item"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Segment.Item" e)
+                    on_key_down=(fun e -> heard "Segment.Item" e)
+                    id="month">
+                    "Month"
+                  </Segment.Item>
+                  <Segment.Item id="year">
+                    <Segment.Separator
+                      data_testid="Segment.Separator"
+                      title="Segment.Separator"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Segment.Separator" e)
+                      on_key_down=(fun e -> heard "Segment.Separator" e)
+                    />
+                    "Year"
+                  </Segment.Item>
+                </Segment>
+                <Text_shimmer
+                  data_testid="Text_shimmer"
+                  title="Text_shimmer"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Text_shimmer" e)
+                  on_key_down=(fun e -> heard "Text_shimmer" e)>
+                  "Working"
+                </Text_shimmer>
+                <Trend_chip
+                  data_testid="Trend_chip"
+                  title="Trend_chip"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Trend_chip" e)
+                  on_key_down=(fun e -> heard "Trend_chip" e)>
+                  <Trend_chip.Indicator
+                    data_testid="Trend_chip.Indicator"
+                    title="Trend_chip.Indicator"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Trend_chip.Indicator" e)
+                    on_key_down=(fun e -> heard "Trend_chip.Indicator" e)
+                  />
+                  <Trend_chip.Prefix
+                    data_testid="Trend_chip.Prefix"
+                    title="Trend_chip.Prefix"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Trend_chip.Prefix" e)
+                    on_key_down=(fun e -> heard "Trend_chip.Prefix" e)>
+                    "+"
+                  </Trend_chip.Prefix>
+                  "3%"
+                  <Trend_chip.Suffix
+                    data_testid="Trend_chip.Suffix"
+                    title="Trend_chip.Suffix"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Trend_chip.Suffix" e)
+                    on_key_down=(fun e -> heard "Trend_chip.Suffix" e)>
+                    "MoM"
+                  </Trend_chip.Suffix>
+                </Trend_chip>
+                <Separator
+                  data_testid="Separator"
+                  title="Separator"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Separator" e)
+                  on_key_down=(fun e -> heard "Separator" e)
+                />
+                <Skeleton
+                  data_testid="Skeleton"
+                  title="Skeleton"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Skeleton" e)
+                  on_key_down=(fun e -> heard "Skeleton" e)
+                />
+                <Spinner
+                  data_testid="Spinner"
+                  title="Spinner"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Spinner" e)
+                  on_key_down=(fun e -> heard "Spinner" e)
+                />
+                <Surface
+                  data_testid="Surface"
+                  title="Surface"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Surface" e)
+                  on_key_down=(fun e -> heard "Surface" e)>
+                  "Surface"
+                </Surface>
+                <Toggle_button
+                  data_testid="Toggle_button"
+                  title="Toggle_button"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Toggle_button" e)
+                  on_key_down=(fun e -> heard "Toggle_button" e)>
+                  "Like"
+                </Toggle_button>
+                <Toggle_button_group
+                  data_testid="Toggle_button_group"
+                  title="Toggle_button_group"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Toggle_button_group" e)
+                  on_key_down=(fun e -> heard "Toggle_button_group" e)
+                  aria_label="Alignment">
+                  <Toggle_button
+                    data_testid="Toggle_button.Item"
+                    title="Toggle_button.Item"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Toggle_button.Item" e)
+                    on_key_down=(fun e -> heard "Toggle_button.Item" e)
+                    id="left">
+                    "Left"
+                  </Toggle_button>
+                  <Toggle_button id="right">
+                    <Toggle_button_group.Separator
+                      data_testid="Toggle_button_group.Separator"
+                      title="Toggle_button_group.Separator"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Toggle_button_group.Separator" e)
+                      on_key_down=(fun e ->
+                                    heard "Toggle_button_group.Separator" e)
+                    />
+                    "Right"
+                  </Toggle_button>
+                </Toggle_button_group>
+                <Typography
+                  data_testid="Typography"
+                  title="Typography"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Typography" e)
+                  on_key_down=(fun e -> heard "Typography" e)>
+                  "Body"
+                </Typography>
+                <Typography.Heading
+                  data_testid="Typography.Heading"
+                  title="Typography.Heading"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Typography.Heading" e)
+                  on_key_down=(fun e -> heard "Typography.Heading" e)
+                  level=2>
+                  "Heading"
+                </Typography.Heading>
+                <Typography.Paragraph
+                  data_testid="Typography.Paragraph"
+                  title="Typography.Paragraph"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Typography.Paragraph" e)
+                  on_key_down=(fun e -> heard "Typography.Paragraph" e)>
+                  "Paragraph"
+                </Typography.Paragraph>
+                <Typography.Code
+                  data_testid="Typography.Code"
+                  title="Typography.Code"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Typography.Code" e)
+                  on_key_down=(fun e -> heard "Typography.Code" e)>
+                  "code"
+                </Typography.Code>
+                <Typography.Prose
+                  data_testid="Typography.Prose"
+                  title="Typography.Prose"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Typography.Prose" e)
+                  on_key_down=(fun e -> heard "Typography.Prose" e)>
+                  "Prose"
+                </Typography.Prose>
+              </div>);
+          E.(
+            expect
+              (misplaced
+                 [
+                   ("Alert", "[data-slot=alert-root]");
+                   ("Alert.Indicator", "[data-slot=alert-indicator]");
+                   ("Alert.Content", "[data-slot=alert-content]");
+                   ("Alert.Title", "[data-slot=alert-title]");
+                   ("Alert.Description", "[data-slot=alert-description]");
+                   ("Avatar_group", "[data-slot=avatar-group]");
+                   ("Avatar", ".avatar");
+                   ("Avatar.Fallback", "[data-slot=avatar-fallback]");
+                   ("Avatar_group.Count", "[data-slot=avatar-group-count]");
+                   ("Badge.Anchor", "[data-slot=badge-anchor]");
+                   ("Badge", "[data-slot=badge]");
+                   ("Badge.Label", "[data-slot=badge-label]");
+                   ("Breadcrumbs", "[data-slot=breadcrumbs]");
+                   ("Breadcrumbs.Item", "[data-slot=breadcrumbs-item]");
+                   ("Pagination", "[data-slot=pagination]");
+                   ("Pagination.Summary", "[data-slot=pagination-summary]");
+                   ("Pagination.Content", "[data-slot=pagination-content]");
+                   ("Pagination.Item", "[data-slot=pagination-item]");
+                   ("Pagination.Previous", "[data-slot=pagination-previous]");
+                   ( "Pagination.Previous_icon",
+                     "[data-slot=pagination-previous-icon]" );
+                   ("Pagination.Link", "[data-slot=pagination-link]");
+                   ("Pagination.Ellipsis", "[data-slot=pagination-ellipsis]");
+                   ("Pagination.Next", "[data-slot=pagination-next]");
+                   ("Pagination.Next_icon", "[data-slot=pagination-next-icon]");
+                   ("Tooltip.Trigger", "[data-slot=tooltip-trigger]");
+                   ("Tooltip.Content", "[role=tooltip]");
+                   ("Tooltip.Arrow", "[data-slot=tooltip-arrow]");
+                   ("Popover.Trigger", "[data-slot=popover-trigger]");
+                   ("Popover.Content", ".popover");
+                   ("Popover.Dialog", "[data-slot=popover-dialog]");
+                   ("Popover.Arrow", "[data-slot=popover-overlay-arrow-group]");
+                   ("Popover.Heading", ".popover__heading");
+                   ("Alert_dialog.Trigger", "[data-slot=alert-dialog-trigger]");
+                   ("Alert_dialog.Backdrop", "[data-slot=alert-dialog-backdrop]");
+                   ( "Alert_dialog.Container",
+                     "[data-slot=alert-dialog-container]" );
+                   ("Alert_dialog.Dialog", "[data-slot=alert-dialog-dialog]");
+                   ( "Alert_dialog.Close_trigger",
+                     "[data-slot=alert-dialog-close-trigger]" );
+                   ("Alert_dialog.Header", "[data-slot=alert-dialog-header]");
+                   ("Alert_dialog.Icon", "[data-slot=alert-dialog-icon]");
+                   ("Alert_dialog.Heading", "[data-slot=alert-dialog-heading]");
+                   ("Alert_dialog.Body", "[data-slot=alert-dialog-body]");
+                   ("Alert_dialog.Footer", "[data-slot=alert-dialog-footer]");
+                   ("Dropdown.Trigger", "[data-slot=dropdown-trigger]");
+                   ("Dropdown.Popover", "[data-slot=dropdown-popover]");
+                   ("Dropdown.Menu", "[data-slot=dropdown-menu]");
+                   ("Dropdown.Section", ".menu-section");
+                   ("Header", "[data-slot=header]");
+                   ("Dropdown.Item", "[data-slot=menu-item]");
+                   ("Dropdown.Item_indicator", "[data-slot=menu-item-indicator]");
+                   ( "Dropdown.Submenu_indicator",
+                     "[data-slot=submenu-indicator]" );
+                   ("List_box", "[data-slot=list-box]");
+                   ("List_box.Section", ".list-box-section");
+                   ("List_box.Item", "[data-slot=list-box-item]");
+                   ( "List_box.Item_indicator",
+                     "[data-slot=list-box-item-indicator]" );
+                   ("Select", "[data-slot=select]");
+                   ("Select.Trigger", "[data-slot=select-trigger]");
+                   ("Select.Value", "[data-slot=select-value]");
+                   ("Select.Clear_button", "[data-slot=select-clear-button]");
+                   ("Select.Indicator", "[data-slot=select-default-indicator]");
+                   ("Select.Popover", "[data-slot=select-popover]");
+                   ("Autocomplete", "[data-slot=autocomplete]");
+                   ("Autocomplete.Trigger", "[data-slot=autocomplete-trigger]");
+                   ("Autocomplete.Value", "[data-slot=autocomplete-value]");
+                   ( "Autocomplete.Clear_button",
+                     "[data-slot=autocomplete-clear-button]" );
+                   ( "Autocomplete.Indicator",
+                     "[data-slot=autocomplete-default-indicator]" );
+                   ("Autocomplete.Popover", "[data-slot=autocomplete-popover]");
+                   ("Combo_box", "[data-slot=combo-box]");
+                   ("Combo_box.Input_group", "[data-slot=combo-box-input-group]");
+                   ("Combo_box.Trigger", "[data-slot=combo-box-trigger]");
+                   ("Combo_box.Value", "[data-slot=combo-box-value]");
+                   ("Drawer.Trigger", "[data-slot=drawer-trigger]");
+                   ("Drawer.Backdrop", "[data-slot=drawer-backdrop]");
+                   ("Drawer.Content", "[data-slot=drawer-content]");
+                   ("Drawer.Dialog", "[data-slot=drawer-dialog]");
+                   ("Drawer.Handle", "[data-slot=drawer-handle]");
+                   ("Drawer.Close_trigger", "[data-slot=drawer-close-trigger]");
+                   ("Drawer.Header", "[data-slot=drawer-header]");
+                   ("Drawer.Heading", "[data-slot=drawer-heading]");
+                   ("Drawer.Body", "[data-slot=drawer-body]");
+                   ("Drawer.Footer", "[data-slot=drawer-footer]");
+                   ("Modal.Trigger", "[data-slot=modal-trigger]");
+                   ("Modal.Backdrop", "[data-slot=modal-backdrop]");
+                   ("Modal.Container", "[data-slot=modal-container]");
+                   ("Modal.Dialog", "[data-slot=modal-dialog]");
+                   ("Modal.Close_trigger", "[data-slot=modal-close-trigger]");
+                   ("Modal.Header", "[data-slot=modal-header]");
+                   ("Modal.Icon", "[data-slot=modal-icon]");
+                   ("Modal.Heading", "[data-slot=modal-heading]");
+                   ("Modal.Body", "[data-slot=modal-body]");
+                   ("Modal.Footer", "[data-slot=modal-footer]");
+                   ("Button_group", "[data-slot=button-group]");
+                   ("Button", "[data-slot=button]");
+                   ( "Button_group.Separator",
+                     "[data-slot=button-group-separator]" );
+                   ("Card", "[data-slot=card]");
+                   ("Card.Header", "[data-slot=card-header]");
+                   ("Card.Title", "[data-slot=card-title]");
+                   ("Card.Description", "[data-slot=card-description]");
+                   ("Card.Content", "[data-slot=card-content]");
+                   ("Card.Footer", "[data-slot=card-footer]");
+                   ("Chip", "[data-slot=chip]");
+                   ("Chip.Label", "[data-slot=chip-label]");
+                   ("Close_button", "[data-slot=close-button]");
+                   ("Close_button.Icon", "[data-slot=close-button-icon]");
+                   ("Empty_state", "[data-slot=empty-state]");
+                   ("Color_area", "[data-slot=color-area]");
+                   ("Color_area.Thumb", "[data-slot=color-area-thumb]");
+                   ("Color_field", "[data-slot=color-field]");
+                   ("Color_field.Group", "[data-slot=color-input-group]");
+                   ("Color_field.Prefix", "[data-slot=color-input-group-prefix]");
+                   ("Color_field.Input", "[data-slot=color-input-group-input]");
+                   ("Color_field.Suffix", "[data-slot=color-input-group-suffix]");
+                   ("Color_swatch_picker", "[data-slot=color-swatch-picker]");
+                   ( "Color_swatch_picker.Item",
+                     "[data-slot=color-swatch-picker-item]" );
+                   ( "Color_swatch_picker.Swatch",
+                     "[data-slot=color-swatch-picker-swatch]" );
+                   ( "Color_swatch_picker.Indicator",
+                     "[data-slot=color-swatch-picker-indicator]" );
+                   ("Color_slider", "[data-slot=color-slider]");
+                   ("Color_slider.Output", "[data-slot=color-slider-output]");
+                   ("Color_slider.Track", "[data-slot=color-slider-track]");
+                   ("Color_slider.Thumb", "[data-slot=color-slider-thumb]");
+                   ("Color_swatch", "[data-slot=color-swatch]");
+                   ("Table", "[data-slot=table]");
+                   ( "Table.Scroll_container",
+                     "[data-slot=table-scroll-container]" );
+                   ("Table.Content", "[data-slot=table-content]");
+                   ("Table.Header", "[data-slot=table-header]");
+                   ("Table.Column", "[data-slot=table-column]");
+                   ( "Table.Sortable_column_header",
+                     "[data-slot=table-sortable-column-header]" );
+                   ("Table.Body", "[data-slot=table-body]");
+                   ("Table.Row", "[data-slot=table-row]");
+                   ("Table.Cell", "[data-slot=table-cell]");
+                   ("Table.Load_more", "[data-slot=table-load-more]");
+                   ( "Table.Resizable_container",
+                     "[data-slot=table-resizable-container]" );
+                   ("Table.Column_resizer", "[data-slot=table-column-resizer]");
+                   ( "Table.Load_more_content",
+                     "[data-slot=table-load-more-content]" );
+                   ("Table.Footer", "[data-slot=table-footer]");
+                   ("Kbd", "kbd");
+                   ("Kbd.Abbr", "abbr");
+                   ("Kbd.Content", "kbd > span");
+                   ("Link", "[data-slot=link]");
+                   ("Link.Icon", "[data-slot=link-icon]");
+                   ("Scroll_shadow", "[data-slot=scroll-shadow]");
+                   ("Separator", "[role=separator]");
+                   ("Skeleton", ".skeleton");
+                   ("Spinner", "[data-slot=spinner]");
+                   ("Surface", "[data-slot=surface]");
+                   ("Disclosure", "[data-slot=disclosure]");
+                   ("Disclosure.Heading", "[data-slot=disclosure-heading]");
+                   ("Disclosure_group", "[data-slot=disclosure-group]");
+                   ("Disclosure.Trigger", "[data-slot=disclosure-trigger]");
+                   ("Disclosure.Indicator", "[data-slot=disclosure-indicator]");
+                   ("Disclosure.Content", "[data-slot=disclosure-content]");
+                   ("Disclosure.Body", "[data-slot=disclosure-body]");
+                   ("Accordion", "[data-slot=accordion]");
+                   ("Accordion.Item", "[data-slot=accordion-item]");
+                   ("Accordion.Heading", "[data-slot=accordion-heading]");
+                   ("Accordion.Trigger", "[data-slot=accordion-trigger]");
+                   ("Accordion.Indicator", "[data-slot=accordion-indicator]");
+                   ( "Accordion.Indicator.icon",
+                     "span[data-slot=accordion-indicator]" );
+                   ("Accordion.Panel", "[data-slot=accordion-panel]");
+                   ("Accordion.Body", "[data-slot=accordion-body]");
+                   ("Tabs", "[data-slot=tabs]");
+                   ("Tabs.List_container", "[data-slot=tabs-list-container]");
+                   ("Tabs.List", "[data-slot=tabs-list]");
+                   ("Tabs.Tab", "[data-slot=tabs-tab]");
+                   ("Tabs.Indicator", "[data-slot=tabs-indicator]");
+                   ("Tabs.Separator", "[data-slot=tabs-separator]");
+                   ("Tabs.Panel", "[data-slot=tabs-panel]");
+                   ("Segment", "[data-slot=segment]");
+                   ("Segment.Item", "[data-slot=segment-item]");
+                   ("Segment.Separator", "[data-slot=segment-separator]");
+                   ("Text_shimmer", "[data-slot=text-shimmer]");
+                   ("Trend_chip", "[data-trend]");
+                   ("Trend_chip.Indicator", "[data-slot=trend-chip-indicator]");
+                   ("Trend_chip.Prefix", "[data-slot=trend-chip-prefix]");
+                   ("Trend_chip.Suffix", "[data-slot=trend-chip-suffix]");
+                   ("Button.trigger", "[data-slot=button][aria-expanded]");
+                   ("Toggle_button", "[data-slot=toggle-button]");
+                   ("Toggle_button_group", "[data-slot=toggle-button-group]");
+                   ("Toggle_button.Item", "[data-slot=toggle-button]");
+                   ( "Toggle_button_group.Separator",
+                     "[data-slot=toggle-button-group-separator]" );
+                   ("Typography", "[data-slot=typography]");
+                   ("Typography.Heading", "h2");
+                   ("Typography.Paragraph", "p");
+                   ("Typography.Code", "code");
+                   ("Typography.Prose", "[data-slot=prose]");
+                 ])
+            |> toEqual [||]));
+      Jest.test "reaches each part of a field" (fun () ->
+          T.render (fun () ->
+              <Form
+                data_testid="Form"
+                title="Form"
+                style="--part: 1"
+                ref=(fun e -> seen "Form" e)
+                on_key_down=(fun e -> heard "Form" e)>
+                <Fieldset
+                  data_testid="Fieldset"
+                  title="Fieldset"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Fieldset" e)
+                  on_key_down=(fun e -> heard "Fieldset" e)>
+                  <Fieldset.Legend
+                    data_testid="Fieldset.Legend"
+                    title="Fieldset.Legend"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Fieldset.Legend" e)
+                    on_key_down=(fun e -> heard "Fieldset.Legend" e)>
+                    "Legend"
+                  </Fieldset.Legend>
+                  <Fieldset.Group
+                    data_testid="Fieldset.Group"
+                    title="Fieldset.Group"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Fieldset.Group" e)
+                    on_key_down=(fun e -> heard "Fieldset.Group" e)>
+                    <Text_field
+                      data_testid="Text_field"
+                      title="Text_field"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Text_field" e)
+                      on_key_down=(fun e -> heard "Text_field" e)
+                      is_invalid=true>
+                      <Label
+                        data_testid="Label"
+                        title="Label"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Label" e)
+                        on_key_down=(fun e -> heard "Label" e)>
+                        "Name"
+                      </Label>
+                      <Input
+                        data_testid="Input"
+                        title="Input"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Input" e)
+                        on_key_down=(fun e -> heard "Input" e)
+                      />
+                      <Description
+                        data_testid="Description"
+                        title="Description"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Description" e)
+                        on_key_down=(fun e -> heard "Description" e)>
+                        "Description"
+                      </Description>
+                      <Field_error
+                        data_testid="Field_error"
+                        title="Field_error"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Field_error" e)
+                        on_key_down=(fun e -> heard "Field_error" e)>
+                        "Error"
+                      </Field_error>
+                    </Text_field>
+                    <Text_field>
+                      <Label>"Bio"</Label>
+                      <Text_area
+                        data_testid="Text_area"
+                        title="Text_area"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Text_area" e)
+                        on_key_down=(fun e -> heard "Text_area" e)
+                      />
+                    </Text_field>
+                    <Text_field>
+                      <Label>"Email"</Label>
+                      <Input_group
+                        data_testid="Input_group"
+                        title="Input_group"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Input_group" e)
+                        on_key_down=(fun e -> heard "Input_group" e)>
+                        <Input_group.Prefix
+                          data_testid="Input_group.Prefix"
+                          title="Input_group.Prefix"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Input_group.Prefix" e)
+                          on_key_down=(fun e -> heard "Input_group.Prefix" e)>
+                          "@"
+                        </Input_group.Prefix>
+                        <Input_group.Input
+                          data_testid="Input_group.Input"
+                          title="Input_group.Input"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Input_group.Input" e)
+                          on_key_down=(fun e -> heard "Input_group.Input" e)
+                        />
+                        <Input_group.Suffix
+                          data_testid="Input_group.Suffix"
+                          title="Input_group.Suffix"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Input_group.Suffix" e)
+                          on_key_down=(fun e -> heard "Input_group.Suffix" e)>
+                          ".com"
+                        </Input_group.Suffix>
+                      </Input_group>
+                    </Text_field>
+                    <Checkbox_group
+                      data_testid="Checkbox_group"
+                      title="Checkbox_group"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Checkbox_group" e)
+                      on_key_down=(fun e -> heard "Checkbox_group" e)>
+                      <Label>"Interests"</Label>
+                      <Checkbox
+                        data_testid="Checkbox"
+                        title="Checkbox"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Checkbox" e)
+                        on_key_down=(fun e -> heard "Checkbox" e)
+                        value="coding">
+                        <Checkbox.Content
+                          data_testid="Checkbox.Content"
+                          title="Checkbox.Content"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Checkbox.Content" e)
+                          on_key_down=(fun e -> heard "Checkbox.Content" e)>
+                          <Checkbox.Control
+                            data_testid="Checkbox.Control"
+                            title="Checkbox.Control"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Checkbox.Control" e)
+                            on_key_down=(fun e -> heard "Checkbox.Control" e)>
+                            <Checkbox.Indicator
+                              data_testid="Checkbox.Indicator"
+                              title="Checkbox.Indicator"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Checkbox.Indicator" e)
+                              on_key_down=(fun e ->
+                                            heard "Checkbox.Indicator" e)
+                            />
+                          </Checkbox.Control>
+                          "Coding"
+                        </Checkbox.Content>
+                      </Checkbox>
+                    </Checkbox_group>
+                    <Radio_group
+                      data_testid="Radio_group"
+                      title="Radio_group"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Radio_group" e)
+                      on_key_down=(fun e -> heard "Radio_group" e)>
+                      <Label>"Plan"</Label>
+                      <Radio
+                        data_testid="Radio"
+                        title="Radio"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Radio" e)
+                        on_key_down=(fun e -> heard "Radio" e)
+                        value="basic">
+                        <Radio.Content
+                          data_testid="Radio.Content"
+                          title="Radio.Content"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Radio.Content" e)
+                          on_key_down=(fun e -> heard "Radio.Content" e)>
+                          <Radio.Control
+                            data_testid="Radio.Control"
+                            title="Radio.Control"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Radio.Control" e)
+                            on_key_down=(fun e -> heard "Radio.Control" e)>
+                            <Radio.Indicator
+                              data_testid="Radio.Indicator"
+                              title="Radio.Indicator"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Radio.Indicator" e)
+                              on_key_down=(fun e -> heard "Radio.Indicator" e)
+                            />
+                          </Radio.Control>
+                          "Basic"
+                        </Radio.Content>
+                      </Radio>
+                    </Radio_group>
+                    <Switch_group
+                      data_testid="Switch_group"
+                      title="Switch_group"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Switch_group" e)
+                      on_key_down=(fun e -> heard "Switch_group" e)>
+                      <Switch
+                        data_testid="Switch"
+                        title="Switch"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Switch" e)
+                        on_key_down=(fun e -> heard "Switch" e)>
+                        <Switch.Content
+                          data_testid="Switch.Content"
+                          title="Switch.Content"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Switch.Content" e)
+                          on_key_down=(fun e -> heard "Switch.Content" e)>
+                          <Switch.Control
+                            data_testid="Switch.Control"
+                            title="Switch.Control"
+                            style="--part: 1"
+                            ref=(fun e -> seen "Switch.Control" e)
+                            on_key_down=(fun e -> heard "Switch.Control" e)>
+                            <Switch.Thumb
+                              data_testid="Switch.Thumb"
+                              title="Switch.Thumb"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Switch.Thumb" e)
+                              on_key_down=(fun e -> heard "Switch.Thumb" e)
+                            />
+                          </Switch.Control>
+                          "Notify"
+                        </Switch.Content>
+                      </Switch>
+                    </Switch_group>
+                    <Number_field
+                      data_testid="Number_field"
+                      title="Number_field"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Number_field" e)
+                      on_key_down=(fun e -> heard "Number_field" e)
+                      default_value=1.>
+                      <Label>"Width"</Label>
+                      <Number_field.Group
+                        data_testid="Number_field.Group"
+                        title="Number_field.Group"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Number_field.Group" e)
+                        on_key_down=(fun e -> heard "Number_field.Group" e)>
+                        <Number_field.Decrement_button
+                          data_testid="Number_field.Decrement_button"
+                          title="Number_field.Decrement_button"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Number_field.Decrement_button" e)
+                          on_key_down=(fun e ->
+                                        heard "Number_field.Decrement_button" e)
+                        />
+                        <Number_field.Input
+                          data_testid="Number_field.Input"
+                          title="Number_field.Input"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Number_field.Input" e)
+                          on_key_down=(fun e -> heard "Number_field.Input" e)
+                        />
+                        <Number_field.Increment_button
+                          data_testid="Number_field.Increment_button"
+                          title="Number_field.Increment_button"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Number_field.Increment_button" e)
+                          on_key_down=(fun e ->
+                                        heard "Number_field.Increment_button" e)
+                        />
+                      </Number_field.Group>
+                    </Number_field>
+                    <Search_field
+                      data_testid="Search_field"
+                      title="Search_field"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Search_field" e)
+                      on_key_down=(fun e -> heard "Search_field" e)>
+                      <Label>"Search"</Label>
+                      <Search_field.Group
+                        data_testid="Search_field.Group"
+                        title="Search_field.Group"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Search_field.Group" e)
+                        on_key_down=(fun e -> heard "Search_field.Group" e)>
+                        <Search_field.Search_icon
+                          data_testid="Search_field.Search_icon"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Search_field.Search_icon" e)
+                          on_key_down=(fun e ->
+                                        heard "Search_field.Search_icon" e)
+                        />
+                        <Search_field.Input
+                          data_testid="Search_field.Input"
+                          title="Search_field.Input"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Search_field.Input" e)
+                          on_key_down=(fun e -> heard "Search_field.Input" e)
+                        />
+                        <Search_field.Clear_button
+                          data_testid="Search_field.Clear_button"
+                          title="Search_field.Clear_button"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Search_field.Clear_button" e)
+                          on_key_down=(fun e ->
+                                        heard "Search_field.Clear_button" e)
+                        />
+                      </Search_field.Group>
+                    </Search_field>
+                    <Slider
+                      data_testid="Slider"
+                      title="Slider"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Slider" e)
+                      on_key_down=(fun e -> heard "Slider" e)
+                      default_value=(fun () -> [| 30. |])>
+                      <Label>"Volume"</Label>
+                      <Slider.Output
+                        data_testid="Slider.Output"
+                        title="Slider.Output"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Slider.Output" e)
+                        on_key_down=(fun e -> heard "Slider.Output" e)
+                      />
+                      <Slider.Track
+                        data_testid="Slider.Track"
+                        title="Slider.Track"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Slider.Track" e)
+                        on_key_down=(fun e -> heard "Slider.Track" e)>
+                        <Slider.Fill
+                          data_testid="Slider.Fill"
+                          title="Slider.Fill"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Slider.Fill" e)
+                          on_key_down=(fun e -> heard "Slider.Fill" e)
+                        />
+                        <Slider.Thumb
+                          data_testid="Slider.Thumb"
+                          title="Slider.Thumb"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Slider.Thumb" e)
+                          on_key_down=(fun e -> heard "Slider.Thumb" e)
+                        />
+                      </Slider.Track>
+                    </Slider>
+                    <Time_field
+                      data_testid="Time_field"
+                      title="Time_field"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Time_field" e)
+                      on_key_down=(fun e -> heard "Time_field" e)>
+                      <Label>"Time"</Label>
+                      <Time_field.Group
+                        data_testid="Time_field.Group"
+                        title="Time_field.Group"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Time_field.Group" e)
+                        on_key_down=(fun e -> heard "Time_field.Group" e)>
+                        <Time_field.Prefix
+                          data_testid="Time_field.Prefix"
+                          title="Time_field.Prefix"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Time_field.Prefix" e)
+                          on_key_down=(fun e -> heard "Time_field.Prefix" e)>
+                          "at"
+                        </Time_field.Prefix>
+                        <Time_field.Input
+                          data_testid="Time_field.Input"
+                          title="Time_field.Input"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Time_field.Input" e)
+                          on_key_down=(fun e -> heard "Time_field.Input" e)>
+                          (fun segment ->
+                            <Time_field.Segment
+                              data_testid="Time_field.Segment"
+                              title="Time_field.Segment"
+                              style="--part: 1"
+                              ref=(fun e -> seen "Time_field.Segment" e)
+                              on_key_down=(fun e ->
+                                            heard "Time_field.Segment" e)
+                              segment=(fun () -> Solidtype.Solid.get segment)
+                            />)
+                        </Time_field.Input>
+                        <Time_field.Suffix
+                          data_testid="Time_field.Suffix"
+                          title="Time_field.Suffix"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Time_field.Suffix" e)
+                          on_key_down=(fun e -> heard "Time_field.Suffix" e)>
+                          "UTC"
+                        </Time_field.Suffix>
+                      </Time_field.Group>
+                    </Time_field>
+                    <div id="on-date">
+                      <Time_field.Date_time
+                        data_testid="Time_field.Date_time"
+                        title="Time_field.Date_time"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Time_field.Date_time" e)
+                        on_key_down=(fun e -> heard "Time_field.Date_time" e)
+                        placeholder_value=(fun () ->
+                                            Date.Types.CalendarDateTime.make
+                                              2026 10 30 ())>
+                        <Label>"Time"</Label>
+                      </Time_field.Date_time>
+                    </div>
+                    <div id="in-zone">
+                      <Time_field.Zoned
+                        data_testid="Time_field.Zoned"
+                        title="Time_field.Zoned"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Time_field.Zoned" e)
+                        on_key_down=(fun e -> heard "Time_field.Zoned" e)
+                        placeholder_value=(fun () -> Date.now "Europe/Kyiv")>
+                        <Label>"Time"</Label>
+                      </Time_field.Zoned>
+                    </div>
+                  </Fieldset.Group>
+                  <Fieldset.Actions
+                    data_testid="Fieldset.Actions"
+                    title="Fieldset.Actions"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Fieldset.Actions" e)
+                    on_key_down=(fun e -> heard "Fieldset.Actions" e)>
+                    <Button>"Save"</Button>
+                  </Fieldset.Actions>
+                </Fieldset>
+              </Form>);
+          E.(
+            expect
+              (misplaced
+                 [
+                   ("Form", "[data-slot=form]");
+                   ("Fieldset", "[data-slot=fieldset]");
+                   ("Fieldset.Legend", "[data-slot=fieldset-legend]");
+                   ("Fieldset.Group", "[data-slot=fieldset-field-group]");
+                   ("Fieldset.Actions", "[data-slot=fieldset-actions]");
+                   ("Text_field", "[data-slot=textfield]");
+                   ("Label", "[data-slot=label]");
+                   ("Input", "[data-slot=input]");
+                   ("Description", "[data-slot=description]");
+                   ("Field_error", ".field-error");
+                   ("Text_area", "[data-slot=textarea]");
+                   ("Input_group", "[data-slot=input-group]");
+                   ("Input_group.Prefix", "[data-slot=input-group-prefix]");
+                   ("Input_group.Input", "[data-slot=input-group-input]");
+                   ("Input_group.Suffix", "[data-slot=input-group-suffix]");
+                   ("Checkbox_group", "[data-slot=checkbox-group]");
+                   ("Checkbox", "[data-slot=checkbox]");
+                   ("Checkbox.Content", "[data-slot=checkbox-content]");
+                   ("Checkbox.Control", "[data-slot=checkbox-control]");
+                   ("Checkbox.Indicator", "[data-slot=checkbox-indicator]");
+                   ("Radio_group", "[data-slot=radio-group]");
+                   ("Radio", "[data-slot=radio]");
+                   ("Radio.Content", "[data-slot=radio-content]");
+                   ("Radio.Control", "[data-slot=radio-control]");
+                   ("Radio.Indicator", "[data-slot=radio-indicator]");
+                   ("Switch_group", "[data-slot=switch-group]");
+                   ("Switch", "[data-slot=switch]");
+                   ("Switch.Content", "[data-slot=switch-content]");
+                   ("Switch.Control", "[data-slot=switch-control]");
+                   ("Switch.Thumb", "[data-slot=switch-thumb]");
+                   ("Number_field", "[data-slot=number-field]");
+                   ("Number_field.Group", "[data-slot=number-field-group]");
+                   ( "Number_field.Decrement_button",
+                     "[data-slot=number-field-decrement-button]" );
+                   ("Number_field.Input", "[data-slot=number-field-input]");
+                   ( "Number_field.Increment_button",
+                     "[data-slot=number-field-increment-button]" );
+                   ("Search_field", "[data-slot=search-field]");
+                   ("Search_field.Group", "[data-slot=search-field-group]");
+                   ( "Search_field.Search_icon",
+                     "[data-slot=search-field-search-icon]" );
+                   ("Search_field.Input", "[data-slot=search-field-input]");
+                   ( "Search_field.Clear_button",
+                     "[data-slot=search-field-clear-button]" );
+                   ("Slider", "[data-slot=slider]");
+                   ("Slider.Output", "[data-slot=slider-output]");
+                   ("Slider.Track", "[data-slot=slider-track]");
+                   ("Slider.Fill", "[data-slot=slider-fill]");
+                   ("Slider.Thumb", "[data-slot=slider-thumb]");
+                   ("Time_field", "[data-slot=time-field]");
+                   ("Time_field.Group", "[data-slot=date-input-group]");
+                   ("Time_field.Prefix", "[data-slot=date-input-group-prefix]");
+                   ("Time_field.Input", "[data-slot=date-input-group-input]");
+                   ("Time_field.Segment", "[data-slot=date-input-group-segment]");
+                   ("Time_field.Suffix", "[data-slot=date-input-group-suffix]");
+                   ("Time_field.Date_time", "#on-date [data-slot=time-field]");
+                   ("Time_field.Zoned", "#in-zone [data-slot=time-field]");
+                 ])
+            |> toEqual [||]));
+      Jest.test "reaches each part of a status" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Meter
+                  data_testid="Meter"
+                  title="Meter"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Meter" e)
+                  on_key_down=(fun e -> heard "Meter" e)
+                  value=60.>
+                  <Label>"Storage"</Label>
+                  <Meter.Output
+                    data_testid="Meter.Output"
+                    title="Meter.Output"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Meter.Output" e)
+                    on_key_down=(fun e -> heard "Meter.Output" e)
+                  />
+                  <Meter.Track
+                    data_testid="Meter.Track"
+                    title="Meter.Track"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Meter.Track" e)
+                    on_key_down=(fun e -> heard "Meter.Track" e)>
+                    <Meter.Fill
+                      data_testid="Meter.Fill"
+                      title="Meter.Fill"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Meter.Fill" e)
+                      on_key_down=(fun e -> heard "Meter.Fill" e)
+                    />
+                  </Meter.Track>
+                </Meter>
+                <Progress_bar
+                  data_testid="Progress_bar"
+                  title="Progress_bar"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Progress_bar" e)
+                  on_key_down=(fun e -> heard "Progress_bar" e)
+                  value=60.>
+                  <Label>"Loading"</Label>
+                  <Progress_bar.Output
+                    data_testid="Progress_bar.Output"
+                    title="Progress_bar.Output"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Progress_bar.Output" e)
+                    on_key_down=(fun e -> heard "Progress_bar.Output" e)
+                  />
+                  <Progress_bar.Track
+                    data_testid="Progress_bar.Track"
+                    title="Progress_bar.Track"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Progress_bar.Track" e)
+                    on_key_down=(fun e -> heard "Progress_bar.Track" e)>
+                    <Progress_bar.Fill
+                      data_testid="Progress_bar.Fill"
+                      title="Progress_bar.Fill"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Progress_bar.Fill" e)
+                      on_key_down=(fun e -> heard "Progress_bar.Fill" e)
+                    />
+                  </Progress_bar.Track>
+                </Progress_bar>
+                <Progress_circle
+                  data_testid="Progress_circle"
+                  title="Progress_circle"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Progress_circle" e)
+                  on_key_down=(fun e -> heard "Progress_circle" e)
+                  aria_label="Loading"
+                  value=60.>
+                  <Progress_circle.Track
+                    data_testid="Progress_circle.Track"
+                    style="--part: 1"
+                    ref=(fun e -> seen "Progress_circle.Track" e)
+                    on_key_down=(fun e -> heard "Progress_circle.Track" e)>
+                    <Progress_circle.Track_circle
+                      data_testid="Progress_circle.Track_circle"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Progress_circle.Track_circle" e)
+                      on_key_down=(fun e ->
+                                    heard "Progress_circle.Track_circle" e)
+                    />
+                    <Progress_circle.Fill_circle
+                      data_testid="Progress_circle.Fill_circle"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Progress_circle.Fill_circle" e)
+                      on_key_down=(fun e ->
+                                    heard "Progress_circle.Fill_circle" e)
+                    />
+                  </Progress_circle.Track>
+                </Progress_circle>
+                <Toast.Provider
+                  data_testid="Toast.Provider"
+                  title="Toast.Provider"
+                  style="--part: 1"
+                  ref=(fun e -> seen "Toast.Provider" e)
+                  on_key_down=(fun e -> heard "Toast.Provider" e)>
+                  (fun toast ->
+                    <Toast
+                      data_testid="Toast"
+                      title="Toast"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Toast" e)
+                      on_key_down=(fun e -> heard "Toast" e)
+                      toast=(fun () -> toast)>
+                      <Toast.Indicator
+                        data_testid="Toast.Indicator"
+                        title="Toast.Indicator"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Toast.Indicator" e)
+                        on_key_down=(fun e -> heard "Toast.Indicator" e)
+                      />
+                      <Toast.Content
+                        data_testid="Toast.Content"
+                        title="Toast.Content"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Toast.Content" e)
+                        on_key_down=(fun e -> heard "Toast.Content" e)>
+                        <Toast.Title
+                          data_testid="Toast.Title"
+                          title="Toast.Title"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Toast.Title" e)
+                          on_key_down=(fun e -> heard "Toast.Title" e)>
+                          "Title"
+                        </Toast.Title>
+                        <Toast.Description
+                          data_testid="Toast.Description"
+                          title="Toast.Description"
+                          style="--part: 1"
+                          ref=(fun e -> seen "Toast.Description" e)
+                          on_key_down=(fun e -> heard "Toast.Description" e)>
+                          "Description"
+                        </Toast.Description>
+                      </Toast.Content>
+                      <Toast.Action_button
+                        data_testid="Toast.Action_button"
+                        title="Toast.Action_button"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Toast.Action_button" e)
+                        on_key_down=(fun e -> heard "Toast.Action_button" e)>
+                        "Undo"
+                      </Toast.Action_button>
+                      <Toast.Close_button
+                        data_testid="Toast.Close_button"
+                        title="Toast.Close_button"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Toast.Close_button" e)
+                        on_key_down=(fun e -> heard "Toast.Close_button" e)
+                      />
+                    </Toast>)
+                </Toast.Provider>
+              </div>);
+          let (_ : Toast.key) = Toast.show ~timeout_ms:0. "Saved" in
+          E.(
+            expect
+              (misplaced
+                 [
+                   ("Meter", "[data-slot=meter]");
+                   ("Meter.Output", "[data-slot=meter-output]");
+                   ("Meter.Track", "[data-slot=meter-track]");
+                   ("Meter.Fill", "[data-slot=meter-fill]");
+                   ("Progress_bar", "[data-slot=progress-bar]");
+                   ("Progress_bar.Output", "[data-slot=progress-bar-output]");
+                   ("Progress_bar.Track", "[data-slot=progress-bar-track]");
+                   ("Progress_bar.Fill", "[data-slot=progress-bar-fill]");
+                   ("Progress_circle", "[data-slot=progress-circle]");
+                   ("Progress_circle.Track", "[data-slot=progress-circle-track]");
+                   ( "Progress_circle.Track_circle",
+                     "[data-slot=progress-circle-track-circle]" );
+                   ( "Progress_circle.Fill_circle",
+                     "[data-slot=progress-circle-fill-circle]" );
+                   ("Toast.Provider", "[data-slot=toast-region]");
+                   ("Toast", "[data-slot=toast]");
+                   ("Toast.Indicator", "[data-slot=toast-indicator]");
+                   ("Toast.Content", "[data-slot=toast-content]");
+                   ("Toast.Title", "[data-slot=toast-title]");
+                   ("Toast.Description", "[data-slot=toast-description]");
+                   ("Toast.Action_button", "[data-slot=toast-action-button]");
+                   ("Toast.Close_button", "[data-slot=toast-close]");
+                 ])
+            |> toEqual [||])))

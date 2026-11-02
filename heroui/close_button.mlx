@@ -30,6 +30,7 @@ end
 let%component make ?(variant : [ `default ] = `default)
     ?(is_disabled : bool = false) ?(aria_label : string = "Close")
     ?(class_ : string option) ?(on_click : (Dom.mouseEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
     ?(children : Jsx.content option) () =
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
@@ -39,7 +40,9 @@ let%component make ?(variant : [ `default ] = `default)
                (Styles.CloseButton.options ~variant:(variant ())
                   ?class_:(class_ ()) ()))
     disabled=(fun () -> is_disabled ())
-    ref=(fun b -> Interaction.watch i b)
+    ref=(fun b ->
+          ignore (given_ref b : unit option);
+          Interaction.watch i b)
     data_slot="close-button"
     data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
     data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
@@ -55,3 +58,4 @@ let%component make ?(variant : [ `default ] = `default)
       (fun () -> match children () with Some c -> c | None -> Jsx.string "")
     </Show>
   </Kobalte.Root>
+[@@element button]

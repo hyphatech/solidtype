@@ -351,6 +351,21 @@ let both ?(custom = false) ?(long_press = false) (menu : menu) =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The title a part is given, found on the element [selector] finds, and
+   whether its style holds the declaration given and [own], the port's. *)
+let given ?(own = "--x: 1") selector =
+  match all selector with
+  | [||] -> (None, None)
+  | found ->
+      let style = Option.value (T.attribute found.(0) "style") ~default:"" in
+      ( T.attribute found.(0) "title",
+        Some
+          (Js.String.includes ~search:"--x: 1" style
+          && Js.String.includes ~search:own style) )
+
+let first selector =
+  match all selector with [||] -> T.body | found -> found.(0)
+
 let () =
   Jest.describe "Dropdown" (fun () ->
       Jest.afterEach T.cleanup;
@@ -415,6 +430,129 @@ let () =
             E.(
               expect (before, shown ())
               |> toEqual ([| "selected"; "" |], [| "selected"; "selected" |])));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref [] and focuses = ref 0 and keys = ref 0 in
+          let made part = refs := part :: !refs in
+          T.render (fun () ->
+              <Dropdown>
+                <Dropdown.Trigger
+                  title="Trigger" style="--x: 1" ref=(fun _ -> made "trigger")>
+                  "Format"
+                </Dropdown.Trigger>
+                <Dropdown.Popover
+                  title="Popover"
+                  style="--x: 1"
+                  ref=(fun _ -> made "popover")
+                  on_focus=(fun _ -> incr focuses)>
+                  <Dropdown.Menu
+                    title="Menu"
+                    style="--x: 1"
+                    selection_mode=`multiple
+                    default_selected_keys=(fun () -> [| "italic" |])>
+                    <Dropdown.Section title="Section" style="--x: 1">
+                      <Dropdown.Item id="bold" text_value="Bold">
+                        <Label>"Bold"</Label>
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        id="italic"
+                        text_value="Italic"
+                        title="Item"
+                        style="--x: 1"
+                        ref=(fun _ -> made "item")
+                        on_key_down=(fun _ -> incr keys)>
+                        <Label>"Italic"</Label>
+                      </Dropdown.Item>
+                    </Dropdown.Section>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () = T.hover user (trigger ()) in
+          let trigger_hovered = T.attribute (trigger ()) "data-hovered" in
+          let* () = T.click user (trigger ()) in
+          let* () = settle () in
+          let parts =
+            [
+              given "[data-slot=dropdown-trigger]";
+              given ~own:"--trigger-anchor-point" ".dropdown__popover";
+              given "[data-slot=dropdown-menu]";
+              given "[data-slot=dropdown-menu] section";
+              given "[data-key$=italic]";
+            ]
+          in
+          let opened_on =
+            match Js.Null.toOption active with Some e -> text e | None -> ""
+          in
+          let* () = T.hover user (first "[data-key$=italic]") in
+          let item_hovered =
+            T.attribute (first "[data-key$=italic]") "data-hovered"
+          in
+          let* () = T.keyboard user "{Enter}" in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( parts,
+                  (trigger_hovered, opened_on, item_hovered),
+                  (* Kobalte gives an item's element to its ref more than
+                     once, as its props change. *)
+                  List.sort_uniq String.compare !refs,
+                  (!focuses > 0, !keys > 0),
+                  Array.length (all "[role=menu]") )
+              |> toEqual
+                   ( [
+                       (Some "Trigger", Some true);
+                       (Some "Popover", Some true);
+                       (Some "Menu", Some true);
+                       (Some "Section", Some true);
+                       (Some "Item", Some true);
+                     ],
+                     (Some "true", "Italic", Some "true"),
+                     [ "item"; "popover"; "trigger" ],
+                     (true, true),
+                     0 )));
+      Jest.testPromise
+        "acts and selects, given a caller's on_select and on_change" (fun () ->
+          let told = ref [] in
+          let tell said = told := said :: !told in
+          let item key =
+            <Dropdown.Item
+              id=(fun () -> key)
+              text_value=(fun () -> key)
+              on_select=(fun _ -> tell "caller's select")
+              on_change=(fun _ -> tell "caller's change")>
+              <Label>(fun () -> Solidtype.Jsx.string key)</Label>
+            </Dropdown.Item>
+          in
+          T.render (fun () ->
+              <Dropdown default_open=true>
+                <Button>"Menu"</Button>
+                <Dropdown.Popover>
+                  <Dropdown.Menu on_action=(fun key -> tell ("action " ^ key))>
+                    (fun () -> Solidtype.Jsx.element (item "copy"))
+                  </Dropdown.Menu>
+                  <Dropdown.Menu
+                    selection_mode=`multiple
+                    on_selection_change=(fun keys ->
+                                          tell
+                                            ("selected "
+                                            ^ String.concat " "
+                                                (Array.to_list keys)))>
+                    (fun () -> Solidtype.Jsx.element (item "bold"))
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>);
+          let user = setup (options ~pointer_events_check:0 ()) in
+          let* () = T.click user (first "[data-key$=bold]") in
+          let* () = settle () in
+          let* () = T.click user (first "[data-key$=copy]") in
+          let* () = settle () in
+          Js.Promise.resolve
+            E.(
+              expect (List.rev !told)
+              |> toEqual [ "selected bold"; "action copy" ]));
       Jest.testPromise "opens on a long press, as React's" (fun () ->
           let* r = both ~long_press:true `actions in
           same r);

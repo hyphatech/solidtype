@@ -9,7 +9,11 @@ module Label = Solidtype_heroui.Label
 module Number_field = Solidtype_heroui.Number_field
 module Radio = Solidtype_heroui.Radio
 module Radio_group = Solidtype_heroui.Radio_group
+module Autocomplete = Solidtype_heroui.Autocomplete
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
 module Text_field = Solidtype_heroui.Text_field
+module Time_field = Solidtype_heroui.Time_field
 module S = Solidtype.Solid
 module E = Jest.Expect
 module T = Testing
@@ -36,6 +40,13 @@ end
 
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 external active : Dom.element = "activeElement" [@@mel.scope "document"]
+
+external closest_js : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+let closest e selector =
+  Option.is_some (Js.Null.toOption (closest_js e selector))
+
 external text : Dom.element -> string = "textContent" [@@mel.get]
 external event_type : Dom.event -> string = "type" [@@mel.get]
 
@@ -162,6 +173,72 @@ let () =
           Js.Promise.resolve
             E.(
               expect (!told, active == input ()) |> toEqual ([ "invalid" ], true)));
+      Jest.testPromise "focuses an invalid time field's first segment"
+        (fun () ->
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Time_field name="start" is_invalid=true>
+                  <Label>"Start"</Label>
+                  <Time_field.Group>
+                    <Time_field.Input>
+                      (fun segment ->
+                        <Time_field.Segment segment=(fun () -> S.get segment) />)
+                    </Time_field.Input>
+                  </Time_field.Group>
+                </Time_field>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(
+              expect (T.attribute active "data-slot")
+              |> toEqual (Some "date-input-group-segment")));
+      Jest.testPromise "focuses an invalid select's trigger" (fun () ->
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Select name="state" is_invalid=true placeholder="Pick">
+                  <Label>"State"</Label>
+                  <Select.Trigger>
+                    <Select.Value /> <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <List_box>
+                      <List_box.Item id="utah" text_value="Utah">
+                        "Utah"
+                      </List_box.Item>
+                    </List_box>
+                  </Select.Popover>
+                </Select>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(
+              expect (T.attribute active "data-slot")
+              |> toEqual (Some "select-trigger")));
+      Jest.testPromise "focuses an invalid autocomplete's trigger" (fun () ->
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Autocomplete name="state" is_invalid=true placeholder="Pick">
+                  <Label>"State"</Label>
+                  <Autocomplete.Trigger>
+                    <Autocomplete.Value /> <Autocomplete.Indicator />
+                  </Autocomplete.Trigger>
+                  <Autocomplete.Popover>
+                    <List_box>
+                      <List_box.Item id="utah" text_value="Utah">
+                        "Utah"
+                      </List_box.Item>
+                    </List_box>
+                  </Autocomplete.Popover>
+                </Autocomplete>
+                <button data_slot="button" type_=`submit>"Save"</button>
+              </Form>);
+          let* () = submit (T.setup ()) in
+          Js.Promise.resolve
+            E.(
+              expect (closest active "[data-slot=autocomplete-trigger]")
+              |> toEqual true));
       Jest.testPromise "focuses nothing once on_invalid prevents it" (fun () ->
           T.render (fun () ->
               <Form on_submit=prevent_default on_invalid=prevent_default>

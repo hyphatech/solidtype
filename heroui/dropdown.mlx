@@ -129,6 +129,7 @@ external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
 
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
       ~(children : Jsx.content) () =
     let d = within "Dropdown.Trigger" in
     let i = Interaction.create () in
@@ -138,6 +139,7 @@ module Trigger = struct
       ?aria_describedby=(fun () ->
                           Option.map (fun l -> l.description) d.long_press)
       ref=(fun e ->
+            ignore (given_ref e : unit option);
             Interaction.watch i e;
             Option.iter (fun l -> l.listen (as_element e)) d.long_press)
       data_slot="dropdown-trigger"
@@ -148,11 +150,15 @@ module Trigger = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Trigger>
+  [@@element button]
 end
 
 module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ?(on_focus : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) ()
+      =
     let d = within "Dropdown.Popover" in
     let classes () = after (Styles.Dropdown.popover d.slots) (class_ ()) in
     let items () =
@@ -172,11 +178,15 @@ module Popover = struct
           <Kobalte.Portal>
             <Kobalte.SubContent
               class_=(fun () -> classes ())
-              style="--trigger-anchor-point: \
-                     var(--kb-menu-content-transform-origin);"
+              style=(fun () ->
+                      "--trigger-anchor-point: \
+                       var(--kb-menu-content-transform-origin);"
+                      ^ match style () with Some s -> " " ^ s | None -> "")
               ref=(fun e ->
+                    ignore (given_ref e : unit option);
                     Overlay.watch o e;
                     watch_side e)
+              on_focus=(fun e -> ignore (on_focus e : unit option))
               data_slot="dropdown-popover"
               data_placement=(fun () -> Jsx.data (side ()))
               data_entering=(fun () -> Jsx.flag (Overlay.entering o))
@@ -228,14 +238,19 @@ module Popover = struct
           <Kobalte.Portal>
             <Kobalte.Content
               class_=(fun () -> classes ())
-              style="--trigger-anchor-point: \
-                     var(--kb-menu-content-transform-origin);"
+              style=(fun () ->
+                      "--trigger-anchor-point: \
+                       var(--kb-menu-content-transform-origin);"
+                      ^ match style () with Some s -> " " ^ s | None -> "")
               ref=(fun e ->
+                    ignore (given_ref e : unit option);
                     content := Some (as_element e);
                     Overlay.watch o e;
                     watch_side e)
               on_open_auto_focus=(fun _ -> opening := true)
-              on_focus=focus_item
+              on_focus=(fun e ->
+                         ignore (on_focus e : unit option);
+                         focus_item e)
               data_slot="dropdown-popover"
               data_placement=(fun () -> Jsx.data (side ()))
               data_entering=(fun () -> Jsx.flag (Overlay.entering o))
@@ -245,6 +260,7 @@ module Popover = struct
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>
+  [@@element div]
 end
 
 (* The keys a selection holds after [key] is chosen: in a selection of one, the
@@ -316,6 +332,7 @@ module Menu = struct
         </Selection.Provider>
       </Separator.Element.Provider>
     </div>
+  [@@element div]
 end
 
 (* Kobalte's group as the [<section>] React Aria's menu section is. *)
@@ -385,6 +402,7 @@ module Section = struct
         </Selection.Provider>
       </Header.Slot.Provider>
     </As_section>
+  [@@element section]
 end
 
 (* Kobalte's item description as the [<span>] HeroUI's Description is. *)
@@ -418,6 +436,8 @@ module Item = struct
   let%component make ~(id : string) ?(text_value : string option)
       ?(is_disabled : bool = false)
       ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ~(children : Jsx.content) () =
     let d = within "Dropdown.Item" in
     let s = Selection.use () in
@@ -448,6 +468,8 @@ module Item = struct
         </Description.Slot.Provider>
       </Item_context.Provider>
     in
+    (* Kobalte's [on_select] and [on_change] share a DOM attribute's name, so
+       they follow the rest, which a caller's attribute of the name is in. *)
     match (sub, mode) with
     | Some sub_open, (`none | `single | `multiple) ->
         <Kobalte.SubTrigger
@@ -455,7 +477,10 @@ module Item = struct
           ?text_value=(fun () -> text_value ())
           disabled=(fun () -> disabled ())
           class_=(fun () -> classes ())
-          ref=(fun e -> Interaction.watch i e)
+          on_key_down=(fun e -> ignore (on_key_down e : unit option))
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                Interaction.watch i e)
           data_slot="menu-item"
           data_has_submenu=(fun () -> Jsx.flag true)
           data_open=(fun () -> Jsx.flag (sub_open ()))
@@ -471,16 +496,19 @@ module Item = struct
           id=(fun () -> unique ())
           ?text_value=(fun () -> text_value ())
           disabled=(fun () -> disabled ())
-          on_select=act
           class_=(fun () -> classes ())
-          ref=(fun e -> Interaction.watch i e)
+          on_key_down=(fun e -> ignore (on_key_down e : unit option))
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                Interaction.watch i e)
           data_slot="menu-item"
           data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
           data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
           data_focused=(fun () -> Jsx.flag (Interaction.focused i))
           data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
           data_disabled=(fun () -> Jsx.flag (disabled ()))
-          props=(Props.others props)>
+          props=(Props.others props)
+          on_select=act>
           (fun () -> Jsx.element (content ()))
         </Kobalte.Item>
     | None, ((`single | `multiple) as mode) ->
@@ -489,14 +517,12 @@ module Item = struct
           ?text_value=(fun () -> text_value ())
           disabled=(fun () -> disabled ())
           checked=(fun () -> selected ())
-          on_change=(fun _ ->
-                      match s with Some s -> s.toggle (id ()) | None -> ())
-          on_select=act
           close_on_select=(fun () ->
                             match mode with
                             | `single -> true
                             | `multiple -> false)
           on_key_down=(fun e ->
+                        ignore (on_key_down e : unit option);
                         (* Enter closes a menu of many, as React Aria's does,
                            where Space and a press keep it open. *)
                         match (mode, key e) with
@@ -507,7 +533,9 @@ module Item = struct
                  | `single -> `menuitemradio
                  | `multiple -> `menuitemcheckbox)
           class_=(fun () -> classes ())
-          ref=(fun e -> Interaction.watch i e)
+          ref=(fun e ->
+                ignore (given_ref e : unit option);
+                Interaction.watch i e)
           data_slot="menu-item"
           data_selection_mode=(fun () ->
                                 Jsx.data
@@ -520,9 +548,13 @@ module Item = struct
           data_focused=(fun () -> Jsx.flag (Interaction.focused i))
           data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
           data_disabled=(fun () -> Jsx.flag (disabled ()))
-          props=(Props.others props)>
+          props=(Props.others props)
+          on_change=(fun _ ->
+                      match s with Some s -> s.toggle (id ()) | None -> ())
+          on_select=act>
           (fun () -> Jsx.element (content ()))
         </Kobalte.CheckboxItem>
+  [@@element div]
 end
 
 let within_item part =

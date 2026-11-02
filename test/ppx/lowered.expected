@@ -376,6 +376,43 @@ module Removable =
         let component = Solidtype.Jsx.component make
       end
   end
+module Measured =
+  struct
+    include
+      struct
+        module Props =
+          struct
+            [@@@ocaml.warning "-32-37"]
+            type t
+            external get_ref :
+              t -> ((Dom.htmlDivElement -> unit)[@u ]) option = "ref"
+            [@@mel.get ]
+            external make :
+              ?ref:(Dom.htmlDivElement -> unit) -> unit -> t = ""[@@mel.obj ]
+            let check ?ref:(_ : (Dom.htmlDivElement -> unit) option)
+              ?props:(_ : t Solidtype.Solid.rest option) () = ()
+            let others (props : t) : _ Solidtype.Solid.rest=
+              Solidtype.Solid.others props [|"ref"|]
+            type name =
+              | Ref 
+            let omit (props : t) (names : name array) :
+              t Solidtype.Solid.rest=
+              Solidtype.Solid.omit props
+                (Array.map (function | Ref -> "ref") names)
+          end
+        let make (props : Props.t) =
+          let given solidtype__0 =
+            match Props.get_ref props with
+            | Some f -> Some ((f solidtype__0)[@u ])
+            | None -> None[@@inline ][@@ocaml.warning "-26-27"] in
+          let seen = ref 0 in
+          Solidtype.Jsx.el "div"
+            [|(Solidtype.Jsx.s "ref"
+                 (fun e -> incr seen; ignore (given e : unit option) : 
+                 Solidtype.Html.Div.ref))|] [||]
+        let component = Solidtype.Jsx.component make
+      end
+  end
 let optional_attribute =
   Solidtype.Jsx.el "a"
     [|(Solidtype.Jsx.d "title"

@@ -3,6 +3,7 @@
    typed, cleared by Escape and by its button, and submitted by Enter. *)
 
 module Description = Solidtype_heroui.Description
+module Form = Solidtype_heroui.Form
 module Label = Solidtype_heroui.Label
 module Search_field = Solidtype_heroui.Search_field
 module E = Jest.Expect
@@ -53,6 +54,7 @@ external parent : Dom.element -> Dom.element Js.null = "parentElement"
 [@@mel.get]
 
 external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
 external by_id : string -> Dom.element Js.null = "getElementById"
 [@@mel.scope "document"]
@@ -207,7 +209,23 @@ let () =
           same r);
       Jest.testPromise "is invalid, as React's is" (fun () ->
           let* r = both ~is_invalid:true () in
-          same r))
+          same r);
+      Jest.test "passes a caller's attributes to an icon of its own" (fun () ->
+          T.render (fun () ->
+              <Search_field>
+                <Label>"Search"</Label>
+                <Search_field.Group>
+                  <Search_field.Search_icon data_testid="icon" style="--x: 1">
+                    "/"
+                  </Search_field.Search_icon>
+                  <Search_field.Input />
+                </Search_field.Group>
+              </Search_field>);
+          E.(
+            expect
+              (Option.bind (T.query "[data-testid=icon]") (fun e ->
+                   T.attribute e "data-slot"))
+            |> toEqual (Some "search-field-search-icon"))))
 
 let () =
   Jest.describe "Search_field, left" (fun () ->
@@ -260,3 +278,102 @@ let () =
               (T.query "[data-slot=search-field-clear-button]")
           in
           E.(expect drawn |> toEqual (Some (true, false)))))
+
+let () =
+  Jest.describe "Search_field, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref and handlers \
+         beside their own" (fun () ->
+          let told = ref [] in
+          let tell name = told := name :: !told in
+          T.render (fun () ->
+              <Form on_submit=prevent_default>
+                <Search_field
+                  name="query"
+                  is_invalid=true
+                  title="Search"
+                  style="--x: 1"
+                  ref=(fun _ -> tell "field ref")
+                  on_focus_out=(fun _ -> tell "field focus out")
+                  on_blur=(fun _ -> tell "field blur")>
+                  <Label>"Search"</Label>
+                  <Search_field.Group>
+                    <Search_field.Input
+                      title="Query"
+                      ref=(fun _ -> tell "input ref")
+                      on_key_down=(fun _ -> tell "input key down")
+                    />
+                    <Search_field.Clear_button
+                      title="Clear"
+                      ref=(fun _ -> tell "clear ref")
+                      on_pointer_down=(fun _ -> tell "clear pointer down")
+                      on_click=(fun _ -> tell "clear click")
+                    />
+                  </Search_field.Group>
+                </Search_field>
+                <button data_slot="submit" type_=`submit>"Save"</button>
+              </Form>);
+          let user = T.setup () in
+          let part slot =
+            Option.value (T.query ("[data-slot=" ^ slot ^ "]")) ~default:T.body
+          in
+          let input = part "search-field-input" in
+          let clear = part "search-field-clear-button" in
+          (* The input's ref watches the pointer, and its keys clear it. *)
+          let* () = T.click user input in
+          let* () = T.keyboard user "ab{Escape}" in
+          let escaped = (value_of input, T.attribute input "data-hovered") in
+          (* The clear button's ref watches the pointer, and a press clears the
+             input and keeps the focus in it. *)
+          let* () = T.keyboard user "cd" in
+          let* () = T.click user clear in
+          let cleared =
+            (value_of input, focused (), T.attribute clear "data-hovered")
+          in
+          (* The form focuses the invalid field it finds by the field's ref. *)
+          let* () = T.click user (part "submit") in
+          let submitted = focused () in
+          let* () = T.click user T.body in
+          let root = part "search-field" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute root "title", T.attribute root "style"),
+                  (T.attribute input "title", T.attribute clear "title"),
+                  (escaped, cleared, submitted),
+                  Array.of_list (List.sort_uniq String.compare !told) )
+              |> toEqual
+                   ( (Some "Search", Some "--x: 1;"),
+                     (Some "Query", Some "Clear"),
+                     ( ("", Some "true"),
+                       ("", "search-field-input", Some "true"),
+                       "search-field-input" ),
+                     [|
+                       "clear click";
+                       "clear pointer down";
+                       "clear ref";
+                       "field blur";
+                       "field focus out";
+                       "field ref";
+                       "input key down";
+                       "input ref";
+                     |] ))))
+
+let () =
+  Jest.describe "Search_field's clear button, given attributes" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "stays disabled in a disabled field" (fun () ->
+          T.render (fun () ->
+              <Search_field default_value="query" is_disabled=true>
+                <Label>"Search"</Label>
+                <Search_field.Group>
+                  <Search_field.Input />
+                  <Search_field.Clear_button disabled=false />
+                </Search_field.Group>
+              </Search_field>);
+          E.(
+            expect
+              (Option.bind (T.query "[data-slot=search-field-clear-button]")
+                 (fun b -> T.attribute b "disabled"))
+            |> toEqual (Some ""))))

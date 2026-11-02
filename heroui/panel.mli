@@ -20,12 +20,15 @@ val create : expanded:(unit -> bool) -> expand:(unit -> unit) -> unit -> t
 
 val watch : t -> _ Dom.element_like -> unit
 (** [watch p element] sizes [element], shows and hides it, and listens for find
-    in page on it: the content's [ref]. *)
+    in page on it: the content's [ref]. Watching its element again does nothing,
+    as Kobalte hands it to its ref again while its props change. *)
 
 val hidden : t -> string option
 (** Its [hidden] attribute as it is first rendered, ["until-found"] while
     collapsed, which a prerendered page holds; {!watch} changes it after. *)
 
 val style : t -> string
-(** The sizes HeroUI's styles animate, its [style] attribute as it is first
-    rendered; {!watch} changes them after. *)
+(** The sizes HeroUI's styles animate, as {!watch} last set them, else as it is
+    first rendered: its [style] attribute, which a caller's declarations follow.
+    It is read untracked by what changes it, so the attribute is written again
+    only as a caller's style changes, keeping the sizes. *)

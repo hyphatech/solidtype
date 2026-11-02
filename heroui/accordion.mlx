@@ -51,7 +51,8 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Item = struct
   let%component make ?(id : string option) ?(is_disabled : bool = false)
       ?(on_expanded_change : (bool -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ?(on_focus_in : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
+      () =
     let a = within "Accordion.Item" in
     let key =
       match id () with Some k -> k | None -> Solid.create_unique_id ()
@@ -69,7 +70,8 @@ module Item = struct
     let list =
       Types.AccordionContextValue.list_state (Kobalte.use_accordion_context ())
     in
-    let focus_in (_ : Dom.focusEvent) =
+    let focus_in e =
+      ignore (on_focus_in e : unit option);
       Types.SelectionManager.set_focused
         (Solid.get (Types.ListState.selection_manager (Solid.get list)))
         true
@@ -102,6 +104,7 @@ module Item = struct
         (fun () -> children ())
       </Item_context.Provider>
     </Kobalte.Item>
+  [@@element div]
 end
 
 module Heading = struct
@@ -129,6 +132,7 @@ module Heading = struct
         (fun () -> children ())
       </Button.Trigger.Provider>
     </Kobalte.Header>
+  [@@element h3]
 end
 
 external queue_microtask : (unit -> unit) -> unit = "queueMicrotask"
@@ -139,6 +143,10 @@ external repeat : Dom.keyboardEvent -> bool = "repeat" [@@mel.get]
 module Trigger = struct
   let%component make ?(on_press : (unit -> unit) option)
       ?(is_disabled : bool = false) ?(class_ : string option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+      ?(on_key_up : (Dom.keyboardEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
       ~(children : Jsx.content) () =
     let a, i = within_item "Accordion.Trigger" in
     let disabled () = i.item_disabled () || is_disabled () in
@@ -151,13 +159,17 @@ module Trigger = struct
     let key_down = ref None in
     <Kobalte.Trigger
       disabled=(fun () -> disabled ())
-      on_click=(fun e -> if detail e > 0 then queue_microtask press)
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 if detail e > 0 then queue_microtask press)
       on_key_down=(fun e ->
+                    ignore (on_key_down e : unit option);
                     match key e with
                     | ("Enter" | " ") as k when not (repeat e) ->
                         key_down := Some k
                     | _ -> ())
       on_key_up=(fun e ->
+                  ignore (on_key_up e : unit option);
                   match !key_down with
                   | Some k when String.equal k (key e) ->
                       key_down := None;
@@ -167,7 +179,9 @@ module Trigger = struct
                after (Styles.Accordion.trigger (a.slots ())) (class_ ()))
       aria_controls=(fun () -> i.content_id)
       slot="trigger"
-      ref=(fun b -> Interaction.watch n b)
+      ref=(fun b ->
+            ignore (given_ref b : unit option);
+            Interaction.watch n b)
       data_slot="accordion-trigger"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed n))
@@ -177,6 +191,7 @@ module Trigger = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Trigger>
+  [@@element button]
 end
 
 module Indicator = struct
@@ -220,10 +235,13 @@ module Indicator = struct
         (fun () -> match children () with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
+  [@@element svg]
 end
 
 module Panel = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.content) () =
     let a, i = within_item "Accordion.Panel" in
     let panel =
       Panel.create ~expanded:i.expanded ~expand:(fun () -> a.expand i.key) ()
@@ -232,13 +250,19 @@ module Panel = struct
       class_=(fun () -> after (Styles.Accordion.panel (a.slots ())) (class_ ()))
       aria_hidden=(fun () -> not (i.expanded ()))
       ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))
-      style=(fun () -> Panel.style panel)
-      ref=(fun e -> Panel.watch panel e)
+      style=(fun () ->
+              match style () with
+              | Some s -> Panel.style panel ^ "; " ^ s
+              | None -> Panel.style panel)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (i.expanded ()))
       data_slot="accordion-panel"
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Content>
+  [@@element div]
 end
 
 module Body = struct
@@ -311,14 +335,16 @@ let%component make ?(expanded_keys : string array option)
      where it is shown, so it reads the surface given there. *)
   let accordion () =
     <Kobalte.Root
-      value=(fun () -> keys ())
-      on_change=change
-      multiple=(fun () -> allows_multiple_expanded ())
-      collapsible=true
       class_=(fun () -> after (Styles.Accordion.base (a.slots ())) (class_ ()))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_slot="accordion"
-      props=(Props.others props)>
+      props=(Props.others props)
+            (* Kobalte's options come after the rest, which may hold a DOM
+         attribute of the same name, on_change, that would replace them. *)
+      value=(fun () -> keys ())
+      on_change=change
+      multiple=(fun () -> allows_multiple_expanded ())
+      collapsible=true>
       <Context.Provider value=(fun () -> a)>
         (fun () -> children ())
       </Context.Provider>
@@ -334,3 +360,4 @@ let%component make ?(expanded_keys : string array option)
       (fun () -> Jsx.element (accordion ()))
     </Surface.Context.Provider>
   </Show>
+[@@element div]

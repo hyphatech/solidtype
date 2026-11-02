@@ -5,6 +5,7 @@
 
 module Checkbox = Solidtype_heroui.Checkbox
 module Label = Solidtype_heroui.Label
+module Form = Solidtype_heroui.Form
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -39,6 +40,8 @@ end
 
 external tag_name : Dom.element -> string = "tagName" [@@mel.get]
 external checked : Dom.element -> bool = "checked" [@@mel.get]
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
 
 let part slot =
   match T.query ("[data-slot=" ^ slot ^ "]") with
@@ -181,4 +184,59 @@ let () =
                      ~name:"terms" ~on_blur ()))
           in
           Twin.cleanup ();
-          E.(expect (solidtype, react) |> toEqual (1, 1))))
+          E.(expect (solidtype, react) |> toEqual (1, 1)));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's refs and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and outs = ref 0 in
+          let content_refs = ref 0 and clicks = ref 0 in
+          let blurs =
+            T.blurs ~root:"[data-slot=checkbox]" (fun on_blur ->
+                T.render (fun () ->
+                    <Form on_submit=prevent_default>
+                      <Checkbox
+                        name="terms"
+                        is_invalid=true
+                        on_blur
+                        title="Terms"
+                        style="--x: 1"
+                        ref=(fun _ -> incr refs)
+                        on_focus_out=(fun _ -> incr outs)>
+                        <Checkbox.Content
+                          title="Accepts"
+                          style="--y: 2"
+                          ref=(fun _ -> incr content_refs)
+                          on_click=(fun _ -> incr clicks)>
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                          <Label>"Accept terms"</Label>
+                        </Checkbox.Content>
+                      </Checkbox>
+                      <button data_slot="button" type_=`submit>"Save"</button>
+                    </Form>))
+          in
+          (* Counted before the checkbox is checked: Kobalte's parts give
+             their ref again as their state changes. *)
+          let left = !outs and given = (!refs, !content_refs) in
+          let user = T.setup () in
+          let root = part "checkbox" and content = part "checkbox-content" in
+          let* () = T.hover user content in
+          let hovered = T.attribute content "data-hovered" in
+          let* () = T.click user content in
+          let selected = T.attribute root "data-selected" in
+          let* () = T.click user (part "button") in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute root "title", T.attribute root "style"),
+                  (T.attribute content "title", T.attribute content "style"),
+                  (blurs, left, given, active == T.by_role "checkbox"),
+                  (hovered, selected, !clicks) )
+              |> toEqual
+                   ( (Some "Terms", Some "--x: 1;"),
+                     (Some "Accepts", Some "--y: 2;"),
+                     (1, 1, (1, 1), true),
+                     (* The label's click, and its input's, which bubbles
+                        through the label. *)
+                     (Some "true", Some "true", 2) ))))

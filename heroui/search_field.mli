@@ -62,9 +62,10 @@ module Input : sig
     val check :
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?on_key_down:(Dom.keyboardEvent -> unit) ->
+      ?ref:(Dom.htmlInputElement -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Input.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -81,9 +82,11 @@ module Clear_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?on_pointer_down:(Dom.pointerEvent -> unit) ->
+      ?on_click:(Dom.mouseEvent -> unit) ->
+      ?ref:(Dom.htmlButtonElement -> unit) ->
       ?props:t Solidtype.Solid.rest ->
-      unit ->
-      unit
+      (unit -> unit) Solidtype.Html.Button.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -109,10 +112,11 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_blur:(Dom.focusEvent -> unit) ->
+    ?on_focus_out:(Dom.focusEvent -> unit) ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

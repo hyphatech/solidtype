@@ -5,6 +5,9 @@
 module Tabs = Solidtype_heroui.Tabs
 module E = Jest.Expect
 module T = Testing
+
+external tag : Dom.htmlElement -> string = "localName" [@@mel.get]
+
 open Testing.Syntax
 
 type props
@@ -228,6 +231,31 @@ let both ?selected_key ?default_selected_key ?orientation ?variant ?align
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
 
+(* What scrolls a list container: as wide as it says, its list five times
+   that, and each scroll it is asked for counted, as jsdom has no layout. *)
+type descriptor
+
+external number : value:float -> descriptor = "" [@@mel.obj]
+external counted : value:((_ -> unit)[@u]) -> descriptor = "" [@@mel.obj]
+
+external define : Dom.element -> string -> descriptor -> unit = "defineProperty"
+[@@mel.scope "Object"]
+
+external first_child : Dom.element -> Dom.element = "firstElementChild"
+[@@mel.get]
+
+external set_attribute : Dom.element -> string -> string -> unit
+  = "setAttribute"
+[@@mel.send]
+
+let scrolled_by_chevron container =
+  let scroller = first_child container in
+  let scrolls = ref 0 in
+  set_attribute scroller "data-client-width" "100";
+  define scroller "scrollWidth" (number ~value:500.);
+  define scroller "scrollTo" (counted ~value:(fun[@u] _ -> incr scrolls));
+  scrolls
+
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
@@ -237,6 +265,33 @@ let () =
       Jest.testPromise "selects as React's does" (fun () ->
           let* r = both () in
           same r);
+      Jest.test
+        "keeps its tab controlling its panel, given aria-controls, and hands a \
+         ref its button" (fun () ->
+          let given = ref "" in
+          T.render (fun () ->
+              <Tabs>
+                <Tabs.List_container>
+                  <Tabs.List aria_label="Options">
+                    <Tabs.Tab
+                      id="one"
+                      aria_controls="elsewhere"
+                      ref=(fun e -> given := tag e)>
+                      "One"
+                    </Tabs.Tab>
+                  </Tabs.List>
+                </Tabs.List_container>
+                <Tabs.Panel id="one">"First."</Tabs.Panel>
+              </Tabs>);
+          let controlled =
+            Option.bind
+              (T.attribute (T.by_role "tab") "aria-controls")
+              (fun id -> T.query ("#" ^ id))
+            |> Option.map (fun e -> T.attribute e "role")
+          in
+          E.(
+            expect (controlled, !given)
+            |> toEqual (Some (Some "tabpanel"), "button")));
       Jest.testPromise "is selected at first as its key says, as React's"
         (fun () ->
           let* r = both ~default_selected_key:"analytics" () in
@@ -297,6 +352,71 @@ let () =
             (fun _ -> ());
           Js.Promise.resolve
             E.(expect (selected ()) |> toEqual (Some "analytics")));
+      Jest.testPromise
+        "takes its parts' attributes, calling a caller's ref and handlers \
+         beside its own" (fun () ->
+          let refs = ref 0 and keys_down = ref 0 and told = ref [] in
+          T.render (fun () ->
+              <Tabs
+                title="Options"
+                style="--x: 1"
+                on_selection_change=(fun key -> told := key :: !told)
+                on_change=(fun _ -> ())>
+                <Tabs.List_container
+                  title="Scrolls" style="--y: 2" ref=(fun _ -> incr refs)>
+                  <Tabs.List aria_label="Options" title="List">
+                    <Tabs.Tab
+                      id="overview"
+                      title="Overview"
+                      style="--z: 3"
+                      ref=(fun _ -> incr refs)
+                      on_key_down=(fun _ -> incr keys_down)>
+                      "overview"
+                    </Tabs.Tab>
+                    <Tabs.Tab id="analytics">"analytics"</Tabs.Tab>
+                  </Tabs.List>
+                </Tabs.List_container>
+                <Tabs.Panel id="overview" title="Panel">"About."</Tabs.Panel>
+              </Tabs>);
+          let user = T.setup () in
+          let first = tab T.body 0 in
+          let* () = T.hover user first in
+          let hovered = T.attribute first "data-hovered" in
+          let* () = T.click user first in
+          let* () = T.keyboard user "{ArrowRight}" in
+          let container =
+            Option.value
+              (T.query "[data-slot=tabs-list-container]")
+              ~default:T.body
+          in
+          let scrolls = scrolled_by_chevron container in
+          let* () =
+            T.click user
+              (Option.value
+                 (T.query "[aria-label=\"Scroll tabs right\"]")
+                 ~default:T.body)
+          in
+          let titled slot =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e "title")
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( List.map titled
+                    [ "tabs"; "tabs-list-container"; "tabs-list"; "tabs-panel" ],
+                  (T.attribute first "title", T.attribute first "style"),
+                  ( hovered,
+                    selected (),
+                    (match !told with last :: _ -> Some last | [] -> None),
+                    !scrolls ),
+                  (!refs, !keys_down) )
+              |> toEqual
+                   ( [ Some "Options"; Some "Scrolls"; Some "List"; None ],
+                     (Some "Overview", Some "--z: 3;"),
+                     (Some "true", Some "analytics", Some "analytics", 1),
+                     (2, 1) )));
       Jest.testPromise "keeps a disabled link from being followed" (fun () ->
           render ~disabled:"analytics" ~container:false ~links:true (fun _ ->
               ());

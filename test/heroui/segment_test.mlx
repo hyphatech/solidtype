@@ -281,6 +281,39 @@ let () =
           E.(
             expect (inputs () |> Array.map name)
             |> toEqual [| "Light"; "Dark" |]));
+      Jest.testPromise
+        "takes its element's attributes, a change among them, and still selects"
+        (fun () ->
+          let changes = ref 0 and told = ref [||] in
+          T.render (fun () ->
+              <Segment
+                default_selected_key="dashboard"
+                on_selection_change=(fun key ->
+                                      told := Array.append !told [| key |])
+                aria_label="View"
+                title="Views"
+                style="--x: 1"
+                on_change=(fun _ -> incr changes)>
+                <Segment.Item id="dashboard" title="Home">
+                  "Dashboard"
+                </Segment.Item>
+                <Segment.Item id="reports">"Reports"</Segment.Item>
+              </Segment>);
+          let user = T.setup () in
+          let* () = T.click user (item "Reports") in
+          let group = T.by_role "radiogroup" in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( (T.attribute group "title", T.attribute group "style"),
+                  T.attribute (item "Dashboard") "title",
+                  !told,
+                  chosen () )
+              |> toEqual
+                   ( (Some "Views", Some "--x: 1;"),
+                     Some "Home",
+                     [| "reports" |],
+                     [ "reports" ] )));
       Jest.testPromise "has no violation axe finds" (fun () ->
           segment ~default_selected_key:"dashboard" ~analytics_disabled:true ();
           let* found = T.accessibility_violations () in

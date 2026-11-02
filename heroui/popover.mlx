@@ -70,6 +70,7 @@ module Trigger = struct
       props=(Props.others props)>
       (fun () -> children ())
     </As_div>
+  [@@element div]
 end
 
 (* A button only a reader finds, which closes the popover, as React Aria
@@ -91,6 +92,8 @@ let dismiss close =
 module Content = struct
   let%component make ?(placement : placement option) ?(offset : float option)
       ?(should_flip : bool = true) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     let p = within "Popover.Content" in
     S.create_computed (fun () ->
@@ -138,9 +141,12 @@ module Content = struct
       <Kobalte.Portal>
         <Kobalte.Content
           class_=(fun () -> after (Styles.Popover.base p.slots) (class_ ()))
-          style="--trigger-anchor-point: \
-                 var(--kb-popover-content-transform-origin);"
+          style=(fun () ->
+                  "--trigger-anchor-point: \
+                   var(--kb-popover-content-transform-origin);"
+                  ^ match style () with Some s -> " " ^ s | None -> "")
           ref=(fun e ->
+                ignore (given_ref e : unit option);
                 content := Some (as_element e);
                 Overlay.watch o e;
                 watch_side e)
@@ -157,6 +163,7 @@ module Content = struct
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>
+  [@@element div]
 end
 
 module Dialog = struct
@@ -183,11 +190,12 @@ module Heading = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Title>
+  [@@element h2]
 end
 
 module Arrow = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
-      () =
+  let%component make ?(class_ : string option) ?(style : string option)
+      ?(children : Jsx.content option) () =
     let p = within "Popover.Arrow" in
     p.set_arrow true;
     S.on_cleanup (fun () -> p.set_arrow false);
@@ -199,7 +207,9 @@ module Arrow = struct
         />;
         <div
           ?class_=(fun () -> class_ ())
-          style=(fun () -> "position: absolute; " ^ position ())
+          style=(fun () ->
+                  "position: absolute; " ^ position ()
+                  ^ match style () with Some s -> " " ^ s | None -> "")
           data_placement=(fun () -> Jsx.data (p.side ()))
           data_slot="popover-overlay-arrow-group"
           props=(Props.others props)>

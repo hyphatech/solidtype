@@ -67,7 +67,7 @@ let content (o : option_) = o.content ()
 type hosted = {
   options : unit -> option_ list;
   draw : node Types.Collection.t S.accessor -> Jsx.element;
-  list_ref : Dom.element -> unit;
+  list_ref : Dom.htmlDivElement -> unit;
   scroll_to_item : string -> unit;
   empty : unit -> bool;
   classes : unit -> string;
@@ -150,6 +150,9 @@ module Item = struct
   let%component make ~(id : string) ?(text_value : string option)
       ?(is_disabled : bool = false)
       ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?(on_key_down : (Dom.keyboardEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     within "List_box.Item";
     let others = Props.others props in
@@ -192,9 +195,14 @@ module Item = struct
         item=(fun () -> S.get node)
         class_=(fun () ->
                  after (Styles.ListboxItem.item (item_slots ())) (class_ ()))
-        ref=(fun e -> Interaction.watch i e)
-        on_click=(fun _ -> act ())
+        ref=(fun e ->
+              ignore (given_ref e : unit option);
+              Interaction.watch i e)
+        on_click=(fun e ->
+                   ignore (on_click e : unit option);
+                   act ())
         on_key_down=(fun e ->
+                      ignore (on_key_down e : unit option);
                       match pressed e with "Enter" -> act () | _ -> ())
         data_slot="list-box-item"
         data_selection_mode=(fun () ->
@@ -238,6 +246,7 @@ module Item = struct
       }
     in
     Entry.element (Option option_)
+  [@@element div]
 end
 
 module Item_indicator = struct
@@ -378,6 +387,7 @@ module Section = struct
       </section>
     in
     Entry.element (Section { options; draw })
+  [@@element section]
 end
 
 (* Kobalte's list as the [<div>] React Aria's list box is, of options alone.
@@ -422,6 +432,7 @@ let%component make ?(aria_label : string option)
     ?(on_action : (string -> unit) option)
     ?(render_empty_state : (unit -> Jsx.element) option)
     ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(children : Jsx.content option) () =
   let entries =
     resolving (fun () ->
@@ -449,6 +460,10 @@ let%component make ?(aria_label : string option)
     match layout with Some l -> l.orientation | None -> `vertical
   in
   let list_element = ref None in
+  let list_ref e =
+    ignore (given_ref e : unit option);
+    list_element := Some (as_element e)
+  in
   let placed = ref (fun (_ : string) -> false) in
   let scroll_to_item key =
     if not (!placed key) then
@@ -628,7 +643,7 @@ let%component make ?(aria_label : string option)
           classes;
           aria_label = (fun () -> aria_label ());
           others = Props.others props;
-          list_ref = (fun e -> list_element := Some e);
+          list_ref;
           scroll_to_item;
         } [@u]
   | None ->
@@ -636,10 +651,6 @@ let%component make ?(aria_label : string option)
         as_="div"
         ?aria_label
         value=(fun () -> selected ())
-        on_change=(fun keys ->
-                    let keys = set_to_array keys in
-                    S.set set_kept keys;
-                    ignore (on_selection_change keys : unit option))
         options=(fun () ->
                   Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> o.key)
@@ -648,16 +659,21 @@ let%component make ?(aria_label : string option)
         selection_mode=(fun () -> selection_mode ())
         virtualized=true
         scroll_to_item
-        ref=(fun e -> list_element := Some (as_element e))
+        ref=list_ref
         aria_orientation=`vertical
         class_=(fun () -> classes ())
         data_slot="list-box"
         data_layout="stack"
         data_orientation="vertical"
         data_empty=(fun () -> Jsx.flag (S.get empty))
-        props=(Props.others props)>
+        props=(Props.others props)
+        on_change=(fun keys ->
+                    let keys = set_to_array keys in
+                    S.set set_kept keys;
+                    ignore (on_selection_change keys : unit option))>
         (fun collection ->
           <Listing.Provider value=(fun () -> l)>
             (fun () -> Jsx.element (draw collection))
           </Listing.Provider>)
       </As_list>
+[@@element div]

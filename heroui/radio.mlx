@@ -32,6 +32,7 @@ module Content = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Field_content>
+  [@@element label]
 end
 
 module Control = struct
@@ -58,6 +59,7 @@ module Indicator = struct
       (fun () ->
         match children () with Some given -> given | None -> Jsx.string "")
     </span>
+  [@@element span]
 end
 
 (* A description in a radio is the radio's: Kobalte's, which its input is
@@ -122,3 +124,4 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
       </Description.Slot.Provider>
     </Kobalte.Item>
   </Context.Provider>
+[@@element div]

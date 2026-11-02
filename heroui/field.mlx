@@ -166,13 +166,19 @@ module Content (K : Kobalte) = struct
   end
 
   let%component make ~(field : state) ~(slot : string) ~(class_ : string)
-      ~(children : Jsx.content) () =
+      ?ref:(given_ref : (Dom.htmlLabelElement -> unit) option)
+      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) ()
+      =
     let f = field () in
     let i = f.interaction in
     <Kobalte_label
       class_=(fun () -> class_ ())
-      ref=(fun l -> Interaction.watch i l)
-      on_click=(fun e -> if Interaction.pointer_inert i then prevent_default e)
+      ref=(fun l ->
+            ignore (given_ref l : unit option);
+            Interaction.watch i l)
+      on_click=(fun e ->
+                 ignore (on_click e : unit option);
+                 if Interaction.pointer_inert i then prevent_default e)
       data_slot=(fun () -> Jsx.data (slot ()))
       data_selected=(fun () -> Jsx.flag (f.selected ()))
       data_indeterminate=(fun () -> Jsx.flag (f.indeterminate ()))
@@ -193,4 +199,5 @@ module Content (K : Kobalte) = struct
         (fun () -> children ())
       </Label.Slot.Provider>
     </Kobalte_label>
+  [@@element label]
 end

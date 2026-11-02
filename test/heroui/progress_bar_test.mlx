@@ -171,3 +171,32 @@ let () =
       Jest.test "is indeterminate, as React's is" (fun () ->
           let solidtype, react = both ~is_indeterminate:true () in
           E.(expect solidtype |> toEqual react)))
+
+let () =
+  Jest.describe "Progress_bar, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "take their elements' attributes, a style after their own"
+        (fun () ->
+          T.render (fun () ->
+              <Progress_bar value=40. aria_label="Loading" title="Loading">
+                <Progress_bar.Output title="Done" />
+                <Progress_bar.Track title="Track">
+                  <Progress_bar.Fill title="Fill" style="--y: 2" />
+                </Progress_bar.Track>
+              </Progress_bar>);
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          E.(
+            expect
+              ( read "progress-bar" "title",
+                read "progress-bar-output" "title",
+                read "progress-bar-fill" "title",
+                read "progress-bar-fill" "style" )
+            |> toEqual
+                 ( Some "Loading",
+                   Some "Done",
+                   Some "Fill",
+                   Some "width: 40%; --y: 2;" ))))

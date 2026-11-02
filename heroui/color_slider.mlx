@@ -142,16 +142,17 @@ module Track = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Track>
+  [@@element div]
 end
 
 module Thumb = struct
   let%component make ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option)
       ?(children : Jsx.content option) () =
     let s = within "Color_slider.Thumb" in
     let context = Kobalte.use_color_slider_context () in
     let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
     <Kobalte.Thumb
-      id=(fun () -> s.thumb_id)
       class_=(fun () ->
                after (Styles.ColorSlider.thumb (s.slots ())) (class_ ()))
       style=(fun () ->
@@ -188,17 +189,21 @@ module Thumb = struct
                       ~format:`css ()
               in
               with_style (place ^ painted) (style ()))
-      ref=(fun e -> Interaction.watch i e)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_dragging=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_slot="color-slider-thumb"
-      props=(Props.others props)>
+      props=(Props.others props)
+      id=(fun () -> s.thumb_id)>
       <Kobalte.Input />
       (fun () -> match children () with Some c -> c | None -> Jsx.string "")
     </Kobalte.Thumb>
+  [@@element span]
 end
 
 let%component make ~(channel : channel)
@@ -208,6 +213,8 @@ let%component make ~(channel : channel)
     ?(orientation : [ `horizontal | `vertical ] = `horizontal)
     ?(is_disabled : bool option) ?(name : string option)
     ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(class_ : string option) ~(children : Jsx.content) () =
   (* A slider is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
@@ -243,10 +250,16 @@ let%component make ~(channel : channel)
                after (Styles.ColorSlider.base (s.slots ())) (class_ ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="color-slider"
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
@@ -254,3 +267,4 @@ let%component make ~(channel : channel)
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

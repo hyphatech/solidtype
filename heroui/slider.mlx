@@ -48,6 +48,9 @@ let fill_span s =
       let first = if n > 1 then s.percent values.(0) else 0. in
       (Float.min first last, Float.max first last)
 
+(* A caller's style, after a part's own, which ends its last declaration. *)
+let with_style own = function Some s -> own ^ " " ^ s | None -> own
+
 (* A label in a slider is Kobalte's, which names it and its thumbs. *)
 let label id : Label.slot =
  fun[@u] classes others children ->
@@ -87,7 +90,8 @@ module Output = struct
 end
 
 module Track = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ?(style : string option)
+      ~(children : Jsx.content) () =
     let s = within "Slider.Track" in
     let filled () =
       let start, stop = fill_span s in
@@ -97,7 +101,7 @@ module Track = struct
     in
     <Kobalte.Track
       class_=(fun () -> after (Styles.Slider.track (s.slots ())) (class_ ()))
-      style="position: relative;"
+      style=(fun () -> with_style "position: relative;" (style ()))
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_fill_start=(fun () -> Jsx.flag (fst (filled ())))
       data_fill_end=(fun () -> Jsx.flag (snd (filled ())))
@@ -107,24 +111,28 @@ module Track = struct
       props=(Props.others props)>
       (fun () -> children ())
     </Kobalte.Track>
+  [@@element div]
 end
 
 module Fill = struct
-  let%component make ?(class_ : string option) () =
+  let%component make ?(class_ : string option) ?(style : string option) () =
     let s = within "Slider.Fill" in
     <div
       class_=(fun () -> after (Styles.Slider.fill (s.slots ())) (class_ ()))
       style=(fun () ->
               let start, stop = fill_span s in
-              match s.orientation () with
-              | `horizontal ->
-                  "left: " ^ percent start ^ "; width: "
-                  ^ percent (stop -. start)
-                  ^ ";"
-              | `vertical ->
-                  "bottom: " ^ percent start ^ "; height: "
-                  ^ percent (stop -. start)
-                  ^ ";")
+              let own =
+                match s.orientation () with
+                | `horizontal ->
+                    "left: " ^ percent start ^ "; width: "
+                    ^ percent (stop -. start)
+                    ^ ";"
+                | `vertical ->
+                    "bottom: " ^ percent start ^ "; height: "
+                    ^ percent (stop -. start)
+                    ^ ";"
+              in
+              with_style own (style ()))
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_slot="slider-fill"
       props=(Props.others props)
@@ -134,6 +142,8 @@ end
 
 module Thumb = struct
   let%component make ?(index : int = 0) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option)
       ?(children : Jsx.content option) () =
     let s = within "Slider.Thumb" in
     let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
@@ -150,7 +160,6 @@ module Thumb = struct
       else default ()
     in
     <Kobalte.Thumb
-      id=(fun () -> s.thumb_id (index ()))
       aria_valuemin=(fun () -> Js.Float.toString (bound (-1) s.min_value ()))
       aria_valuemax=(fun () -> Js.Float.toString (bound 1 s.max_value ()))
       aria_valuetext=(fun () ->
@@ -172,19 +181,25 @@ module Thumb = struct
               in
               (* Shown as HeroUI's styles show it: Kobalte hides a thumb until
                  it is mounted, so a prerendered page would show none. *)
-              "display: flex; position: absolute; " ^ edge
-              ^ "; transform: translate(-50%, -50%);")
-      ref=(fun e -> Interaction.watch i e)
+              with_style
+                ("display: flex; position: absolute; " ^ edge
+               ^ "; transform: translate(-50%, -50%);")
+                (style ()))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_dragging=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_slot="slider-thumb"
-      props=(Props.others props)>
+      props=(Props.others props)
+      id=(fun () -> s.thumb_id (index ()))>
       <Kobalte.Input />
       (fun () -> match children () with Some c -> c | None -> Jsx.string "")
     </Kobalte.Thumb>
+  [@@element span]
 end
 
 let%component make ?(value : float array option)
@@ -196,7 +211,10 @@ let%component make ?(value : float array option)
     ?(is_disabled : bool option) ?(name : string option)
     ?(aria_label : string option) ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
-    ?(on_blur : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : Jsx.content) () =
   (* Each value as HeroUI's formatOptions asks, a decimal by default, in
      Kobalte's locale: Kobalte formats a thumb's value as a decimal alone. *)
   let formatter =
@@ -264,10 +282,16 @@ let%component make ?(value : float array option)
       class_=(fun () -> after (Styles.Slider.base (s.slots ())) (class_ ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
-      ref=(fun e -> in_form.root e)
-      on_focus_out=(Field.on_leave (fun e ->
-                        in_form.left ();
-                        on_blur e))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            in_form.root e)
+      on_focus_out=(fun e ->
+                     ignore (on_focus_out e : unit option);
+                     Field.on_leave
+                       (fun e ->
+                         in_form.left ();
+                         on_blur e)
+                       e)
       data_slot="slider"
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label label_id)>
@@ -275,3 +299,4 @@ let%component make ?(value : float array option)
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]

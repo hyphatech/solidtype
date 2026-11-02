@@ -25,8 +25,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?style:string Solidtype.Check.value ->
     ?props:t Solidtype.Solid.rest ->
-    unit ->
-    unit
+    (unit -> unit) Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

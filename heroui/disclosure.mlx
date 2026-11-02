@@ -51,15 +51,27 @@ module Heading = struct
   [@@element h3]
 end
 
+(* Kobalte's trigger is its button, its props the button's, though Kobalte
+   declares it a div's. *)
+module Collapsible_trigger = struct
+  module Props = Solidtype_kobalte.Button.Root.Props
+
+  let component = Collapsible.Trigger.component
+end
+
 module Trigger = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ~(children : Jsx.content) () =
     let d = within "Disclosure.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> d.disabled ()) () in
-    <Collapsible.Trigger
+    <Collapsible_trigger
       class_=(fun () -> after (Styles.Disclosure.trigger d.slots) (class_ ()))
       aria_controls=(fun () -> d.content_id)
       slot="trigger"
-      ref=(fun b -> Interaction.watch i b)
+      ref=(fun b ->
+            ignore (given_ref b : unit option);
+            Interaction.watch i b)
       data_slot="disclosure-trigger"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
@@ -68,7 +80,8 @@ module Trigger = struct
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
       props=(Props.others props)>
       (fun () -> children ())
-    </Collapsible.Trigger>
+    </Collapsible_trigger>
+  [@@element button]
 end
 
 module Indicator = struct
@@ -99,23 +112,33 @@ module Indicator = struct
 end
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.content) () =
     let d = within "Disclosure.Content" in
     let panel =
       Panel.create ~expanded:d.expanded ~expand:(fun () -> d.expand true) ()
     in
     <Collapsible.Content
-      id=(fun () -> d.content_id)
       class_=(fun () -> after (Styles.Disclosure.content d.slots) (class_ ()))
-      aria_hidden=(fun () -> not (d.expanded ()))
-      ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))
-      style=(fun () -> Panel.style panel)
-      ref=(fun e -> Panel.watch panel e)
+      style=(fun () ->
+              match style () with
+              | Some s -> Panel.style panel ^ "; " ^ s
+              | None -> Panel.style panel)
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (d.expanded ()))
       data_slot="disclosure-content"
-      props=(Props.others props)>
+      props=(Props.others props)
+            (* What the trigger names it by, and whether it is shown, are the
+         disclosure's, which an attribute in the rest must not replace. *)
+      id=(fun () -> d.content_id)
+      aria_hidden=(fun () -> not (d.expanded ()))
+      ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))>
       (fun () -> children ())
     </Collapsible.Content>
+  [@@element div]
 end
 
 module Body = struct
@@ -187,3 +210,4 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
       (fun () -> children ())
     </Context.Provider>
   </Collapsible.Root>
+[@@element div]

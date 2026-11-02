@@ -110,6 +110,7 @@ module Item = struct
         </Field_content>
       </Kobalte.Item>
     </Item_context.Provider>
+  [@@element label]
 
   let is_selected () =
     match Item_context.use () with
@@ -155,7 +156,6 @@ let%component make ?(variant : variant = `default) ?(size : size = `md)
   <Context.Provider value=(fun () -> s)>
     <Kobalte.Root
       value=(fun () -> Option.value (chosen ()) ~default:"")
-      on_change=(fun key -> choose (Some key))
       disabled=(fun () -> is_disabled ())
       ?name
       ?aria_label=(fun () -> aria_label ())
@@ -163,7 +163,9 @@ let%component make ?(variant : variant = `default) ?(size : size = `md)
       class_=(fun () -> after (root_classes (variant ()) (size ())) (class_ ()))
       data_slot="segment"
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      props=(Props.others props)>
+      props=(Props.others props)
+      on_change=(fun key -> choose (Some key))>
       (fun () -> children ())
     </Kobalte.Root>
   </Context.Provider>
+[@@element div]
