@@ -348,6 +348,22 @@ let focused () =
 let () =
   Jest.describe "Autocomplete, beyond React's" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.test "describes its button by no description it lacks" (fun () ->
+          T.render (fun () -> states (fun () -> <span />));
+          let described =
+            match
+              T.query "[data-slot=autocomplete-trigger] button[aria-haspopup]"
+            with
+            | Some button -> (
+                match T.attribute button "aria-describedby" with
+                | Some id -> (
+                    match T.query ("#" ^ id) with
+                    | Some _ -> "by " ^ id
+                    | None -> "by a missing element")
+                | None -> "by nothing")
+            | None -> "no button"
+          in
+          E.(expect described |> toEqual "by nothing"));
       Jest.testPromise
         "opens by its button's keys, its search focused, and gives the button \
          the focus back as it closes" (fun () ->

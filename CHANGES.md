@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Autocomplete`'s button is described only by a
+  description it has, where it named one it lacked.
+
 - `Solidtype_heroui.Checkbox_group` is named by its label and described by its
   description in a page rendered on the server, and once it hydrates, where it
   wrote neither, since it made its element before its label.

@@ -1,5 +1,9 @@
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
 module Show = Solidtype.Show
 module For = Solidtype.For
 module Kobalte = Solidtype_kobalte.Combobox
@@ -48,6 +52,10 @@ type autocomplete = {
   label_id : string;
   value_id : string;
   description_id : string;
+  described : unit -> bool;
+      (* Whether a description is there to describe the button by: taken as
+         one until the autocomplete is on the page, where it is looked for,
+         so the server's page and the browser's agree as it hydrates. *)
   listbox_id : unit -> string option;
   indicator : Dom.element option ref;
   set_indicator : Interaction.t -> unit;
@@ -149,7 +157,8 @@ module Indicator = struct
       aria_expanded=(fun () -> a.is_open ())
       ?aria_controls=(fun () -> if a.is_open () then a.listbox_id () else None)
       aria_labelledby=(fun () -> a.value_id ^ " " ^ a.label_id)
-      aria_describedby=(fun () -> a.description_id)
+      ?aria_describedby=(fun () ->
+                          if a.described () then Some a.description_id else None)
       disabled=(fun () -> a.disabled ())
       ref=(fun e ->
             a.indicator := Some (as_element e);
@@ -583,6 +592,11 @@ let%component make ?(placeholder : string = "Select an item")
     | Some i -> Interaction.focused i
     | None -> false
   in
+  let description_id = S.create_unique_id () in
+  let described, set_described = S.create_signal true in
+  S.on_mount (fun () ->
+      S.set set_described
+        (Option.is_some (Js.Null.toOption (by_id description_id))));
   let a =
     {
       slots =
@@ -626,7 +640,8 @@ let%component make ?(placeholder : string = "Select an item")
           | `right -> "right");
       label_id = S.create_unique_id ();
       value_id = S.create_unique_id ();
-      description_id = S.create_unique_id ();
+      description_id;
+      described = (fun () -> S.get described);
       listbox_id =
         (fun () ->
           match !kobalte with
