@@ -1,0 +1,56 @@
+(* A text shimmer as a caller meets it: its text read once, its highlight a
+   copy hidden from a reader and kept from focus, hidden under reduced motion,
+   a class given merged over its own, and no violation axe finds. *)
+
+module Text_shimmer = Solidtype_heroui.Text_shimmer
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external query_all_js : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+let all selector = Js.Array.from (query_all_js selector)
+let first selector = match all selector with [||] -> T.body | a -> a.(0)
+
+let has e classes =
+  let own =
+    String.split_on_char ' ' (Option.value (T.attribute e "class") ~default:"")
+  in
+  List.for_all (fun c -> List.exists (String.equal c) own) classes
+
+let () =
+  Jest.describe "Text_shimmer" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.test "shows its text, and a copy hidden from a reader" (fun () ->
+          T.render (fun () -> <Text_shimmer>"Thinking..."</Text_shimmer>);
+          let root = first "[data-slot=text-shimmer]" in
+          let label = first "[data-slot=text-shimmer-text]" in
+          let highlight = first "[data-slot=text-shimmer-highlight]" in
+          E.(
+            expect
+              ( has root [ "text-shimmer" ],
+                (text label, has label [ "text-shimmer__text" ]),
+                ( text highlight,
+                  T.attribute highlight "aria-hidden",
+                  T.attribute highlight "inert",
+                  has highlight
+                    [ "text-shimmer__highlight"; "motion-reduce:hidden" ] ) )
+            |> toEqual
+                 ( true,
+                   ("Thinking...", true),
+                   ("Thinking...", Some "true", Some "", true) )));
+      Jest.test "merges a class given over its own" (fun () ->
+          T.render (fun () ->
+              <Text_shimmer class_="text-muted">"Thinking..."</Text_shimmer>);
+          E.(
+            expect (has (first "[data-slot=text-shimmer]") [ "text-muted" ])
+            |> toEqual true));
+      Jest.testPromise "has no violation axe finds" (fun () ->
+          T.render (fun () ->
+              <Text_shimmer>"Generating response..."</Text_shimmer>);
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

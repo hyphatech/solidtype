@@ -1,0 +1,41 @@
+---
+title: TextShimmer
+description: Text with a highlight sweeping across it, for a label of work under way.
+---
+
+import Example from "@components/Example.astro";
+import * as Usage from "@islands/text_shimmer_usage.jsx";
+import UsageCode from "@islands/text_shimmer_usage.mlx?raw";
+import * as Color from "@islands/text_shimmer_color.jsx";
+import ColorCode from "@islands/text_shimmer_color.mlx?raw";
+
+A label of work under way, a highlight sweeping across it. A clean
+reimplementation of HeroUI Pro's
+[TextShimmer](https://heroui.pro/docs/react/components/text-shimmer). Its
+classes need the `@source` [Segment](/solidtype/heroui/segment/#setup)
+describes. Under reduced motion the text is still.
+
+## Usage
+
+<Example code={UsageCode} title="text_shimmer_usage.mlx"><Usage.make client:visible /></Example>
+
+## Color
+
+The shimmer is drawn in the text's colour, so a colour class keeps it.
+
+<Example code={ColorCode} title="text_shimmer_color.mlx"><Color.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.text-shimmer`
+- `.text-shimmer__text`
+- `.text-shimmer__highlight`
+
+## API Reference
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after its own classes |
+| `children` | `children` | elements | Its text |

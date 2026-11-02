@@ -59,6 +59,7 @@ module Scroll_shadow = H.Scroll_shadow
 module Search_field = H.Search_field
 module Segment = H.Segment
 module Trend_chip = H.Trend_chip
+module Text_shimmer = H.Text_shimmer
 module Separator = H.Separator
 module Skeleton = H.Skeleton
 module Slider = H.Slider
@@ -568,6 +569,9 @@ let () =
                     <Segment.Separator data_testid="Segment.Separator" /> "Year"
                   </Segment.Item>
                 </Segment>
+                <Text_shimmer data_testid="Text_shimmer">
+                  "Working"
+                </Text_shimmer>
                 <Trend_chip data_testid="Trend_chip">
                   <Trend_chip.Indicator data_testid="Trend_chip.Indicator" />
                   <Trend_chip.Prefix data_testid="Trend_chip.Prefix">
@@ -800,6 +804,7 @@ let () =
                    ("Segment", "[data-slot=segment]");
                    ("Segment.Item", "[data-slot=segment-item]");
                    ("Segment.Separator", "[data-slot=segment-separator]");
+                   ("Text_shimmer", "[data-slot=text-shimmer]");
                    ("Trend_chip", "[data-trend]");
                    ("Trend_chip.Indicator", "[data-slot=trend-chip-indicator]");
                    ("Trend_chip.Prefix", "[data-slot=trend-chip-prefix]");

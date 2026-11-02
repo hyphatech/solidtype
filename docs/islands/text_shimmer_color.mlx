@@ -1,0 +1,4 @@
+module Text_shimmer = Solidtype_heroui.Text_shimmer
+
+let make () =
+  <Text_shimmer class_="text-sm text-muted">"Thinking..."</Text_shimmer>

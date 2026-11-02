@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Text_shimmer`, a clean reimplementation of HeroUI Pro's
+  TextShimmer.
+
 - `Solidtype_heroui.Trend_chip`, a clean reimplementation of HeroUI Pro's
   TrendChip.
 

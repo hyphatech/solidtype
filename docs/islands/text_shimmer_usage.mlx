@@ -1,0 +1,7 @@
+module Text_shimmer = Solidtype_heroui.Text_shimmer
+
+let make () =
+  <div class_="flex flex-col gap-4 text-sm">
+    <Text_shimmer>"Thinking..."</Text_shimmer>
+    <Text_shimmer>"Generating response..."</Text_shimmer>
+  </div>
