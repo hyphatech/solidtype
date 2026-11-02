@@ -763,3 +763,71 @@ let () =
                        "data-key=5 aria-level=1 aria-posinset=2 aria-setsize=2 \
                         aria-expanded=false";
                      |] ))))
+
+module Virtualizer = Solidtype_headless.Virtualizer
+
+let () =
+  Jest.describe "Table, virtualized" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "draws the rows in view, reaches those it does not by the keys, and \
+         loads more after the last" (fun () ->
+          H.render (fun () ->
+              <Virtualizer
+                layout=(fun () ->
+                         Virtualizer.table_layout ~heading_size:40.
+                           ~row_size:40. ())>
+                <Table.Root
+                  aria_label="Many"
+                  data_client_height="200"
+                  data_client_width="400">
+                  <Table.Header>
+                    <Table.Column id="name" is_row_header=true>
+                      "Name"
+                    </Table.Column>
+                  </Table.Header>
+                  <Table.Body>
+                    <For each=(fun () -> Array.init 100 (fun i -> i + 1))>
+                      (fun n _ ->
+                        <Table.Row id=(fun () -> string_of_int n)>
+                          <Table.Cell>
+                            (fun () -> Jsx.string ("Row " ^ string_of_int n))
+                          </Table.Cell>
+                        </Table.Row>)
+                    </For>
+                    <Table.Load_more is_loading=(fun () -> true)>
+                      "Loading"
+                    </Table.Load_more>
+                  </Table.Body>
+                </Table.Root>
+              </Virtualizer>);
+          let drawn () =
+            H.all_by_role "row" |> Array.to_list
+            |> List.filter_map (fun r -> H.attribute r "data-key")
+            |> Array.of_list
+          in
+          let at_rest = drawn () in
+          let loader =
+            match Js.Null.toOption (H.parent (H.by_text "Loading")) with
+            | Some row -> (
+                match Js.Null.toOption (H.parent row) with
+                | Some wrapper -> H.attribute wrapper "style"
+                | None -> None)
+            | None -> None
+          in
+          let user = H.setup () in
+          H.focus (row "Row 1");
+          let* () = H.keyboard user "{End}" in
+          let last = where () in
+          let* () = H.keyboard user "{Home}" in
+          Js.Promise.resolve
+            E.(
+              expect (at_rest, loader, last, where ())
+              |> toEqual
+                   ( [| "1"; "2"; "3"; "4"; "5"; "6"; "7" |],
+                     Some
+                       "position: absolute; overflow: visible; opacity: 1; \
+                        z-index: 0; contain: size layout style; top: 4000px; \
+                        left: 0px; width: 400px; height: 40px;",
+                     "row:Row 100",
+                     "row:Row 1" ))))

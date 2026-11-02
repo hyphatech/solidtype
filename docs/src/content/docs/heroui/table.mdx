@@ -14,6 +14,8 @@ import * as ExColumnResizing from "@islands/table_column_resizing.jsx";
 import ExColumnResizingCode from "@islands/table_column_resizing.mlx?raw";
 import * as ExExpandableRows from "@islands/table_expandable_rows.jsx";
 import ExExpandableRowsCode from "@islands/table_expandable_rows.mlx?raw";
+import * as ExVirtualization from "@islands/table_virtualization.jsx";
+import ExVirtualizationCode from "@islands/table_virtualization.mlx?raw";
 import * as ExSorting from "@islands/table_sorting.jsx";
 import ExSortingCode from "@islands/table_sorting.mlx?raw";
 import * as ExCustomCells from "@islands/table_custom_cells.jsx";
@@ -46,8 +48,8 @@ in the header. A column that allows sorting is pressed, or given Enter or Space,
 sorted by. `Table.Load_more` loads more rows as the table's end scrolls into
 view. In a `Table.Resizable_container`, a `Table.Column_resizer` resizes its
 column. Given a `tree_column`, rows hold rows, expanded and collapsed by a
-chevron or the arrow keys. Virtualization is being ported, in a stage of its
-own; its example is added with it.
+chevron or the arrow keys. Inside a `Virtualizer` given
+`Virtualizer.table_layout`, only the rows in view are drawn.
 
 ## Usage
 
@@ -161,6 +163,19 @@ Any element in a cell: here a selection, sorting, HeroUI's `Avatar`, `Chip`
 and `Button`, together.
 
 <Example code={ExCustomCellsCode} title="table_custom_cells.mlx"><ExCustomCells.make client:visible /></Example>
+
+### Virtualization
+
+A `Virtualizer` given `Virtualizer.table_layout`, HeroUI's `TableLayout`, draws
+only the rows in view of the table and a third more beyond, and the focused
+row wherever it is: each part is a `<div>` of its role, placed as React Aria's
+TableLayout places it, the header kept over the rows as they scroll, the
+columns as wide as they ask within the table's width. The table is what
+scrolls: its class gives it its height and its overflow. The keys reach every
+row, drawn or not, and the one they move to is scrolled into view below the
+header. A table whose rows hold rows is not virtualized yet.
+
+<Example code={ExVirtualizationCode} title="table_virtualization.mlx"><ExVirtualization.make client:visible /></Example>
 
 ### TanStack Table
 
@@ -313,6 +328,19 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | `onLoadMore` | `on_load_more` | `unit -> unit` | | Called as its sentinel comes into view, never while loading |
 | `scrollOffset` | `scroll_offset` | `float` | `1.` | How many heights of the view before the end it asks |
 | `className` | `class_` | `string` | | Added after HeroUI's class, on the loading row |
+
+### TableLayout
+
+`Virtualizer.table_layout`, each option in pixels.
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `rowHeight` | `row_size` | `float` | `48.` | Each row's height |
+| `headingHeight` | `heading_size` | `float` | its row's | The header's height |
+| `loaderHeight` | `loader_size` | `float` | its row's | What loads more's height while it loads |
+| `gap` | `gap` | `float` | `0.` | Between the rows |
+| `padding` | `padding` | `float` | `0.` | Around the table |
+| `estimatedRowHeight`, `estimatedHeadingHeight` | — | | | A virtualized table's rows are as high as `row_size` |
 
 ### Table.LoadMoreContent
 

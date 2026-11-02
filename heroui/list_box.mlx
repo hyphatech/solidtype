@@ -437,9 +437,14 @@ let%component make ?(aria_label : string option)
   (* The option the keys move to is brought into view of what scrolls the
      list, as Kobalte asks of a list it does not draw: where it is drawn, by
      its element; where a virtualizer has not drawn it, by its place. *)
-  let layout = Virtualizer.use () in
+  (* A list is laid out by a list's layout, never a table's. *)
+  let layout =
+    match Virtualizer.use () with
+    | Some (List l) -> Some l
+    | Some (Table _) | None -> None
+  in
   let orientation =
-    match layout with Some (List l) -> l.orientation | None -> `vertical
+    match layout with Some l -> l.orientation | None -> `vertical
   in
   let list_element = ref None in
   let placed = ref (fun (_ : string) -> false) in
@@ -506,7 +511,7 @@ let%component make ?(aria_label : string option)
                     (fun () -> Jsx.element (s.draw option_))
                   </Show>)
           </For>
-      | Some (List l) ->
+      | Some l ->
           let shown = function
             | Option o -> Option.is_some (node o ())
             | Section s -> shows s.options ()

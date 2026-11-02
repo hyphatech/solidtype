@@ -1,0 +1,117 @@
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module Virtualizer = Solidtype_heroui.Virtualizer
+
+type user = { id : int; name : string; role : string; email : string }
+
+let roles =
+  [|
+    "Software Engineer";
+    "Senior Engineer";
+    "Staff Engineer";
+    "Product Manager";
+    "Designer";
+    "Data Analyst";
+    "QA Engineer";
+    "DevOps Engineer";
+    "Marketing Manager";
+    "Sales Representative";
+  |]
+
+let first_names =
+  [|
+    "Emma";
+    "Liam";
+    "Olivia";
+    "Noah";
+    "Ava";
+    "James";
+    "Sophia";
+    "Oliver";
+    "Isabella";
+    "Lucas";
+    "Mia";
+    "Ethan";
+    "Charlotte";
+    "Mason";
+    "Amelia";
+    "Logan";
+    "Harper";
+    "Alexander";
+    "Ella";
+    "Benjamin";
+  |]
+
+let last_names =
+  [|
+    "Smith";
+    "Johnson";
+    "Williams";
+    "Brown";
+    "Jones";
+    "Garcia";
+    "Miller";
+    "Davis";
+    "Rodriguez";
+    "Martinez";
+    "Anderson";
+    "Taylor";
+    "Thomas";
+    "Jackson";
+    "White";
+    "Harris";
+    "Clark";
+    "Lewis";
+    "Robinson";
+    "Walker";
+  |]
+
+(* HeroUI's example's thousand users, made as its generateUsers makes them. *)
+let users =
+  Array.init 1000 (fun i ->
+      let first = first_names.(i mod Array.length first_names) in
+      let last =
+        last_names.(i / Array.length first_names mod Array.length last_names)
+      in
+      {
+        id = i + 1;
+        name = first ^ " " ^ last;
+        role = roles.(i mod Array.length roles);
+        email =
+          String.lowercase_ascii first
+          ^ "."
+          ^ String.lowercase_ascii last
+          ^ "@acme.com";
+      })
+
+let make () =
+  <Virtualizer
+    layout=(fun () ->
+             Virtualizer.table_layout ~heading_size:42. ~row_size:42. ())>
+    <Table>
+      <Table.Scroll_container>
+        <Table.Content
+          aria_label="Virtualized table with 1000 rows"
+          class_="h-[300px] min-w-[700px] overflow-auto">
+          <Table.Header class_="h-full w-full">
+            <Table.Column is_row_header=true id="name" min_width=160.>
+              "Name"
+            </Table.Column>
+            <Table.Column id="role" min_width=220.>"Role"</Table.Column>
+            <Table.Column id="email" min_width=240.>"Email"</Table.Column>
+          </Table.Header>
+          <Table.Body>
+            <For each=(fun () -> users)>
+              (fun user _ ->
+                <Table.Row id=(fun () -> string_of_int user.id)>
+                  <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
+                  <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
+                  <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+                </Table.Row>)
+            </For>
+          </Table.Body>
+        </Table.Content>
+      </Table.Scroll_container>
+    </Table>
+  </Virtualizer>

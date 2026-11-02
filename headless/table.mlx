@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
+module Dynamic = Solidtype.Dynamic
 module For = Solidtype.For
 module Selection = Solidtype_kobalte.Selection
 module Types = Solidtype_kobalte.Types
@@ -116,7 +117,7 @@ type cell = { is_tree_column : unit -> bool; column_index : unit -> int }
    on the page, and where it is in the tree. *)
 type listed = {
   key : string;
-  element : Dom.htmlTableRowElement;
+  element : Dom.element;
   parent : string option;
   has_children : unit -> bool;
 }
@@ -261,11 +262,11 @@ module Container_context = Solidtype.Context.Make_optional (struct
   type t = container
 end)
 
-(* A column as the table lays it out: its key, its element, which says where
-   it is, and the sizes it asks for. *)
+(* A column as the table lays it out: its key, its place, known as it is
+   made, and the sizes it asks for. *)
 type column_spec = {
   column_key : string;
-  header : Dom.htmlTableCellElement;
+  column_index : unit -> int;
   width : unit -> column_size option;
   default_width : column_size option;
   min_width : unit -> float option;
@@ -285,9 +286,43 @@ type sizing = {
   told : container;
 }
 
+(* What the parts of a virtualized table read of its layout, React Aria's
+   TableLayout: where each column is, how many rows the body holds, and which
+   of them are drawn. *)
+type virtualized = {
+  options : Virtualizer.table_layout;
+  column_box : int -> float * float;  (** A column's left and width. *)
+  column_count : unit -> int;
+  content_width : unit -> float;
+  body_height : unit -> float;
+  row_count : unit -> int;
+  set_rows : string array -> unit;  (** The keys of all the body's rows. *)
+  window : unit -> int * int;
+      (** The first row drawn and the last; none while the last is before the
+          first. *)
+  focused_row : unit -> int option;
+      (** The focused row, drawn wherever it is. *)
+  scrolling : unit -> bool;
+}
+
+let px n = Js.Float.toString n ^ "px"
+
+(* A virtualized part's place, the style React Aria's VirtualizerItem writes
+   from its layout. *)
+let placed ?(sticky = false) ~overflow ~z ~top ~left ~width ~height () =
+  (if sticky then "position: sticky; display: inline-block; "
+   else "position: absolute; ")
+  ^ "overflow: " ^ overflow ^ "; opacity: 1; z-index: " ^ string_of_int z
+  ^ "; contain: size layout style; top: " ^ px top ^ "; left: " ^ px left
+  ^ "; width: " ^ px width ^ "; height: " ^ px height ^ ";"
+
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+(* An element of any kind, as the element it is: a part's is a [<div>] while
+   it is virtualized, its table element otherwise. *)
+
 (* What the parts read of their table beside what a style reads: its rows in
    the page's order, Kobalte's selection of them, its columns, and their
-   layout where it is resizable. *)
+   layout where it is resizable or virtualized. *)
 type table = {
   context : context;
   rows : unit -> listed list;
@@ -298,10 +333,11 @@ type table = {
   set_row_header : (unit -> int) option -> unit;
   tree_index : unit -> int option;
   set_tree_index : (unit -> int) option -> unit;
-  columns : Dom.htmlTableCellElement placing;
+  columns : Dom.element placing;
   add_column : column_spec -> unit;
   remove_column : string -> unit;
   sizing : sizing option;
+  virtualized : virtualized option;
 }
 
 module Table_context = Solidtype.Context.Make_optional (struct
@@ -317,7 +353,7 @@ let use_context () = (in_table "Table.use_context").context
 
 (* What a row's cells, and the rows nested in it, read of it: where its cells
    are, and its state. *)
-type row_cells = { cells : Dom.htmlTableCellElement placing; state : row }
+type row_cells = { cells : Dom.element placing; state : row }
 
 module Row_context = Solidtype.Context.Make_optional (struct
   type t = row_cells
@@ -342,7 +378,8 @@ let use_cell_context () =
    [<tr>] cannot hold one. Its place among those beside it is then known, on
    the server as in the browser. *)
 type nested = {
-  draw : position:int S.accessor -> size:(unit -> int) -> Jsx.element;
+  row_key : string;
+  draw : position:(unit -> int) -> size:(unit -> int) -> Jsx.element;
 }
 
 module Nested = Jsx.Token (struct
@@ -432,11 +469,14 @@ let from_row row k =
 let max_safe = 9007199254740991.
 
 external shift_key : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
-external focus_row : Dom.htmlTableRowElement -> unit = "focus" [@@mel.send]
 
 external query_in : _ Dom.element_like -> string -> Dom.element Js.null
   = "querySelector"
 [@@mel.send]
+
+(* A part's tag: its table element's, or a <div> while virtualized. *)
+let tag (t : virtualized option) name =
+  match t with Some _ -> "div" | None -> name
 
 let tabindex = function Some i -> Js.Float.toString i | None -> "-1"
 
@@ -448,6 +488,20 @@ let state on = if on then Jsx.data "" else Jsx.flag false
 let call f x = match f with Some f -> f x [@u] | None -> ()
 
 external client_width : _ Dom.element_like -> float = "clientWidth" [@@mel.get]
+
+external client_height : _ Dom.element_like -> float = "clientHeight"
+[@@mel.get]
+
+external scroll_top : Dom.element -> float = "scrollTop" [@@mel.get]
+external set_scroll_top : Dom.element -> float -> unit = "scrollTop" [@@mel.set]
+
+external listen : Dom.element -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+external unlisten : Dom.element -> string -> (Dom.event -> unit) -> unit
+  = "removeEventListener"
+[@@mel.send]
 
 external same : _ Dom.element_like -> _ Dom.element_like -> bool = "isSameNode"
 [@@mel.send]
@@ -633,8 +687,9 @@ module Root = struct
 
     external children : t -> Jsx.content = "children" [@@mel.get]
 
-    external ref : t -> ((Dom.htmlTableElement -> unit)[@u]) option = "ref"
-    [@@mel.get]
+    (* A virtualized table's element is a <div>: what it is given is an
+       element, of whichever kind. *)
+    external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
       = "onKeyDown"
@@ -687,10 +742,22 @@ module Root = struct
         (fun a b -> if position a.element b.element land 4 <> 0 then -1 else 1)
         (S.get rows)
     in
+    (* A table a virtualizer lays out, as React Aria's TableLayout does. *)
+    let layout =
+      match Virtualizer.use () with
+      | Some (Table l) -> Some l
+      | Some (List _) | None -> None
+    in
+    (* Its rows' keys: those on the page, or, virtualized, all the body
+       holds, drawn or not, so the keys reach every row. *)
+    let body_keys, set_body_keys = S.create_signal None in
     let keys =
       S.create_memo (fun () ->
-          Array.of_list (List.map (fun r -> r.key) (ordered ())))
+          match S.get body_keys with
+          | Some all -> all
+          | None -> Array.of_list (List.map (fun r -> r.key) (ordered ())))
     in
+    let scroll_to = ref (fun (_ : string) -> ()) in
     let disabled k =
       match Props.disabled_keys props with
       | Some keys -> Array.exists (String.equal k) keys
@@ -734,7 +801,11 @@ module Root = struct
       Selection.create_selectable_list
         (Types.CreateSelectableListProps.make
            ~collection:(List_state.collection state)
-           ~selection_manager:(Either.right manager) ())
+           ~selection_manager:(Either.right manager)
+           ?is_virtualized:(Option.map (fun _ -> Either.left true) layout)
+           ?scroll_to_key:
+             (Option.map (fun _ -> Either.left (fun k -> !scroll_to k)) layout)
+           ())
         element ()
     in
     let row_header, set_row_header = S.create_signal None in
@@ -767,7 +838,7 @@ module Root = struct
     let specs, set_specs = S.create_signal [] in
     let ordered_columns () =
       List.sort
-        (fun a b -> if position a.header b.header land 4 <> 0 then -1 else 1)
+        (fun a b -> Int.compare (a.column_index ()) (b.column_index ()))
         (S.get specs)
     in
     let sizing =
@@ -864,6 +935,160 @@ module Root = struct
           })
         (Container_context.use ())
     in
+    (* What scrolls a virtualized table is the table: its size, where it is
+       scrolled, whether up, and whether it is scrolling. Until it is measured
+       -- on the server, and in the browser until it has hydrated -- it is
+       taken as no wider than its columns and 400 pixels high, so a page is
+       prerendered with its first rows. *)
+    let virtualized =
+      Option.map
+        (fun (l : Virtualizer.table_layout) ->
+          let size, set_size = S.create_signal (0., 400.) in
+          let scroll, set_scroll = S.create_signal 0. in
+          let up, set_up = S.create_signal false in
+          let scrolling, set_scrolling = S.create_signal false in
+          let settle = ref None in
+          let scrolled at =
+            S.batch (fun () ->
+                S.set set_up (at < S.untrack (fun () -> S.get scroll));
+                S.set set_scroll at;
+                S.set set_scrolling true);
+            Option.iter Js.Global.clearTimeout !settle;
+            (* Scrolling ends 300 milliseconds after its last step, as React
+               Aria's ScrollView ends it. *)
+            settle :=
+              Some
+                (Js.Global.setTimeout
+                   ~f:(fun () -> S.set set_scrolling false)
+                   300)
+          in
+          S.on_mount (fun () ->
+              Option.iter
+                (fun g ->
+                  let measure () =
+                    S.set set_size (client_width g, client_height g)
+                  in
+                  measure ();
+                  let o = resize_observer measure in
+                  watch_size o g;
+                  let on_scroll (_ : Dom.event) = scrolled (scroll_top g) in
+                  listen g "scroll" on_scroll;
+                  S.on_cleanup (fun () ->
+                      stop_watching o;
+                      unlisten g "scroll" on_scroll;
+                      Option.iter Js.Global.clearTimeout !settle))
+                (S.get element));
+          let asked c =
+            match c.width () with
+            | Some w -> w
+            | None -> Option.value c.default_width ~default:(Fraction 1.)
+          in
+          let widths =
+            S.create_memo (fun () ->
+                let columns = Array.of_list (ordered_columns ()) in
+                match sizing with
+                | Some z -> Array.map (fun c -> z.width_of c.column_key) columns
+                | None ->
+                    column_widths
+                      ~available:(fst (S.get size) -. (2. *. l.padding))
+                      (Array.map
+                         (fun c ->
+                           ( asked c,
+                             Option.value (c.min_width ()) ~default:75.,
+                             Option.value (c.max_width ()) ~default:max_safe ))
+                         columns))
+          in
+          let column_box i =
+            let w = S.get widths in
+            if i < 0 || i >= Array.length w then (0., 0.)
+            else
+              let left = ref 0. in
+              for j = 0 to i - 1 do
+                left := !left +. w.(j)
+              done;
+              (!left, w.(i))
+          in
+          let content_width () = Array.fold_left ( +. ) 0. (S.get widths) in
+          let row_count () =
+            match S.get body_keys with Some k -> Array.length k | None -> 0
+          in
+          let step = l.row_size +. l.gap in
+          let body_top = l.padding +. l.heading_size +. l.gap in
+          let body_height () =
+            match row_count () with
+            | 0 -> Float.max 0. (snd (S.get size) -. l.heading_size)
+            | n -> (Float.of_int n *. step) -. l.gap
+          in
+          (* As React Aria draws them: what is in view and a third more below,
+             or above while it scrolls up, in whole rows. *)
+          let window () =
+            let n = row_count () and _, high = S.get size in
+            if n = 0 || high <= 0. then (0, -1)
+            else
+              let from =
+                if S.get up then S.get scroll -. (high /. 3.) else S.get scroll
+              in
+              let y = Float.floor (from /. l.row_size) *. l.row_size in
+              let h =
+                Float.ceil (high *. 4. /. 3. /. l.row_size) *. l.row_size
+              in
+              let row at =
+                max 0
+                  (min (n - 1)
+                     (int_of_float (Float.floor ((at -. body_top) /. step))))
+              in
+              (row y, row (y +. h))
+          in
+          let index_of k =
+            match S.get body_keys with
+            | Some all ->
+                let rec find i =
+                  if i >= Array.length all then None
+                  else if String.equal all.(i) k then Some i
+                  else find (i + 1)
+                in
+                find 0
+            | None -> None
+          in
+          let focused_row () =
+            Option.bind (S.get (Manager.focused_key (S.get manager))) index_of
+          in
+          (* A row the keys move to is brought into view below the header,
+             which stays over the rows. *)
+          (scroll_to :=
+             fun k ->
+               match (index_of k, S.untrack (fun () -> S.get element)) with
+               | Some i, Some g ->
+                   let top = body_top +. (Float.of_int i *. step) in
+                   let now = scroll_top g
+                   and _, high = S.untrack (fun () -> S.get size) in
+                   let covered = l.padding +. l.heading_size in
+                   let target =
+                     if top -. covered < now then Some (top -. covered)
+                     else if top +. l.row_size > now +. high then
+                       Some (top +. l.row_size -. high)
+                     else None
+                   in
+                   Option.iter
+                     (fun at ->
+                       set_scroll_top g at;
+                       scrolled at)
+                     target
+               | _ -> ());
+          {
+            options = l;
+            column_box;
+            column_count = (fun () -> Array.length (S.get widths));
+            content_width;
+            body_height;
+            row_count;
+            set_rows = (fun keys -> S.set set_body_keys (Some keys));
+            window;
+            focused_row;
+            scrolling = (fun () -> S.get scrolling);
+          })
+        layout
+    in
     let t =
       {
         context =
@@ -921,6 +1146,7 @@ module Root = struct
                  (fun c -> not (String.equal c.column_key k))
                  (S.get specs)));
         sizing;
+        virtualized;
       }
     in
     (* The arrows across a row and through its cells are the table's, which
@@ -995,16 +1221,48 @@ module Root = struct
           Option.iter focus target
       | `row target ->
           prevent_default e;
-          focus_row target
+          focus target
       | `own -> ()
       | `list -> Selectable_list.on_key_down list e
     in
+    let content () =
+      match virtualized with
+      | None -> Props.children props
+      | Some v ->
+          let l = v.options in
+          Jsx.element
+            <div
+              role=`presentation
+              style=(fun () ->
+                      "width: "
+                      ^ px (v.content_width () +. (2. *. l.padding))
+                      ^ "; height: "
+                      ^ px
+                          (l.padding +. l.heading_size +. l.gap
+                         +. v.body_height () +. l.padding)
+                      ^ "; pointer-events: "
+                      ^ (if v.scrolling () then "none" else "auto")
+                      ^ "; position: relative;")>
+              (fun () -> Props.children props)
+            </div>
+    in
     <Table_context.Provider value=(fun () -> t)>
-      <table
+      <Dynamic.Element
+        component=(fun () ->
+                    match virtualized with Some _ -> "div" | None -> "table")
         role=(fun () -> if tree () then `treegrid else `grid)
         ref=(fun e ->
+              let e = as_element e in
               S.set set_element (Some e);
               call (Props.ref props) e)
+        ?aria_rowcount=(fun () ->
+                         Option.map
+                           (fun v -> string_of_int (v.row_count () + 1))
+                           virtualized)
+        ?aria_colcount=(fun () ->
+                         Option.map
+                           (fun v -> string_of_int (v.column_count ()))
+                           virtualized)
         ?aria_multiselectable=(fun () ->
                                 match selection_mode () with
                                 | `multiple -> Some true
@@ -1037,8 +1295,8 @@ module Root = struct
                        call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
         props=(S.omit props own)>
-        (fun () -> Props.children props)
-      </table>
+        (fun () -> content ())
+      </Dynamic.Element>
     </Table_context.Provider>
 
   let component = Jsx.component make
@@ -1058,10 +1316,28 @@ module Header = struct
   end
 
   let make (props : Props.t) =
-    let (_ : table) = in_table "Table.Header" in
-    <thead role=`rowgroup props=(S.omit props [| "children" |])>
-      <tr role=`row>(fun () -> Props.children props)</tr>
-    </thead>
+    let t = in_table "Table.Header" in
+    match t.virtualized with
+    | None ->
+        <thead role=`rowgroup props=(S.omit props [| "children" |])>
+          <tr role=`row>(fun () -> Props.children props)</tr>
+        </thead>
+    | Some v ->
+        (* Its row stays over the rows as they scroll, as React Aria's
+           sticky header does. *)
+        let l = v.options in
+        <div
+          role=`presentation
+          style=(fun () ->
+                  placed ~sticky:true ~overflow:"hidden" ~z:1 ~top:l.padding
+                    ~left:l.padding ~width:(v.content_width ())
+                    ~height:l.heading_size ())>
+          <div role=`rowgroup props=(S.omit props [| "children" |])>
+            <div role=`row aria_rowindex="1">
+              (fun () -> Props.children props)
+            </div>
+          </div>
+        </div>
 
   let component = Jsx.component make
 end
@@ -1117,9 +1393,7 @@ module Column = struct
     external min_width : t -> float option = "minWidth" [@@mel.get]
     external max_width : t -> float option = "maxWidth" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
-
-    external ref : t -> ((Dom.htmlTableCellElement -> unit)[@u]) option = "ref"
-    [@@mel.get]
+    external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
     [@@mel.get]
@@ -1179,20 +1453,17 @@ module Column = struct
        sorted by. *)
     let press () = if sortable () then t.context.sort_by key in
     let header_id = S.create_unique_id () in
-    (* A resizable table lays its columns out once they are on the page. *)
-    S.on_mount (fun () ->
-        Option.iter
-          (fun header ->
-            t.add_column
-              {
-                column_key = key;
-                header;
-                width = (fun () -> Props.width props);
-                default_width = S.untrack (fun () -> Props.default_width props);
-                min_width = (fun () -> Props.min_width props);
-                max_width = (fun () -> Props.max_width props);
-              })
-          (S.get element));
+    (* A table laid out by its columns' sizes knows them as they are made, so
+       the server lays it out as the browser does. *)
+    t.add_column
+      {
+        column_key = key;
+        column_index = index;
+        width = (fun () -> Props.width props);
+        default_width = S.untrack (fun () -> Props.default_width props);
+        min_width = (fun () -> Props.min_width props);
+        max_width = (fun () -> Props.max_width props);
+      };
     S.on_cleanup (fun () -> t.remove_column key);
     let resizing () =
       match t.sizing with
@@ -1202,50 +1473,68 @@ module Column = struct
           | None -> false)
       | None -> false
     in
-    <Column_context.Provider value=(fun () -> { direction; resizing })>
-      <Resized_context.Provider
-        value=(fun () -> { resized_key = key; header_id })>
-        <th
-          role=`columnheader
-          id=(fun () -> header_id)
-          tabindex="-1"
-          aria_colindex=(fun () -> string_of_int (index () + 1))
-          ?style=(fun () ->
-                   Option.map
-                     (fun s ->
-                       "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
-                     t.sizing)
-          data_resizing=(fun () -> state (resizing ()))
-          ref=(fun e ->
-                S.set set_element (Some e);
-                call (Props.ref props) e)
-          ?aria_sort=(fun () ->
-                       if sortable () then
-                         Some
-                           (match direction () with
-                           | Some `ascending -> `ascending
-                           | Some `descending -> `descending
-                           | None -> `none)
-                       else None)
-          on_click=(fun e ->
-                     call (Props.on_click props) e;
-                     press ())
-          on_key_down=(fun e ->
-                        call (Props.on_key_down props) e;
-                        (* A key in a part inside it, a resizer's, is the
+    let drawn =
+      <Column_context.Provider value=(fun () -> { direction; resizing })>
+        <Resized_context.Provider
+          value=(fun () -> { resized_key = key; header_id })>
+          <Dynamic.Element
+            component=(fun () -> tag t.virtualized "th")
+            role=`columnheader
+            id=(fun () -> header_id)
+            tabindex="-1"
+            aria_colindex=(fun () -> string_of_int (index () + 1))
+            ?style=(fun () ->
+                     Option.map
+                       (fun s ->
+                         "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
+                       t.sizing)
+            data_resizing=(fun () -> state (resizing ()))
+            ref=(fun e ->
+                  let e = as_element e in
+                  S.set set_element (Some e);
+                  call (Props.ref props) e)
+            ?aria_sort=(fun () ->
+                         if sortable () then
+                           Some
+                             (match direction () with
+                             | Some `ascending -> `ascending
+                             | Some `descending -> `descending
+                             | None -> `none)
+                         else None)
+            on_click=(fun e ->
+                       call (Props.on_click props) e;
+                       press ())
+            on_key_down=(fun e ->
+                          call (Props.on_key_down props) e;
+                          (* A key in a part inside it, a resizer's, is the
                          part's. *)
-                        match key_name e with
-                        | ("Enter" | " ")
-                          when sortable ()
-                               && has_role (event_target e) "columnheader" ->
-                            prevent_default e;
-                            press ()
-                        | _ -> ())
-          props=(S.omit props own)>
-          (fun () -> Props.children props)
-        </th>
-      </Resized_context.Provider>
-    </Column_context.Provider>
+                          match key_name e with
+                          | ("Enter" | " ")
+                            when sortable ()
+                                 && has_role (event_target e) "columnheader" ->
+                              prevent_default e;
+                              press ()
+                          | _ -> ())
+            props=(S.omit props own)>
+            (fun () -> Props.children props)
+          </Dynamic.Element>
+        </Resized_context.Provider>
+      </Column_context.Provider>
+    in
+    match t.virtualized with
+    | None -> drawn
+    | Some v ->
+        (* Each column before the next in the stack, as React Aria's are. *)
+        <div
+          role=`presentation
+          style=(fun () ->
+                  let i = index () in
+                  let left, width = v.column_box i in
+                  placed ~overflow:"visible"
+                    ~z:(v.column_count () - i + 1)
+                    ~top:0. ~left ~width ~height:v.options.heading_size ())>
+          (fun () -> Jsx.element drawn)
+        </div>
 
   let component = Jsx.component make
 end
@@ -1267,30 +1556,76 @@ module Body = struct
 
   let make (props : Props.t) =
     let t = in_table "Table.Body" in
-    let empty () =
-      match t.rows () with [] -> Props.empty_state props | _ :: _ -> None
-    in
     (* Its rows read first, then drawn, each knowing its place among them. *)
     let resolved = S.children (fun () -> Props.children props) in
     let all () = S.to_array (S.get resolved) in
     let rows = S.create_memo (fun () -> Nested.read (all ())) in
-    <tbody role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
-      <For each=(fun () -> S.get rows)>
-        (fun n position ->
-          n.draw ~position ~size:(fun () -> Array.length (S.get rows)))
-      </For>
-      (fun () -> Jsx.element (Jsx.fragment (Nested.others (all ()))))
-      <Show.Some some=(fun () -> empty ())>
-        (fun shown ->
-          <tr role=`row>
-            <td
-              role=`rowheader
-              colspan=(fun () -> string_of_int (count t.columns ()))>
-              (fun () -> Jsx.element (S.get shown))
-            </td>
-          </tr>)
-      </Show.Some>
-    </tbody>
+    let empty () =
+      if Array.length (S.get rows) = 0 then Props.empty_state props else None
+    in
+    let size () = Array.length (S.get rows) in
+    let others () = Jsx.element (Jsx.fragment (Nested.others (all ()))) in
+    match t.virtualized with
+    | None ->
+        <tbody
+          role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
+          <For each=(fun () -> S.get rows)>
+            (fun n position ->
+              n.draw ~position:(fun () -> S.get position) ~size)
+          </For>
+          (fun () -> others ())
+          <Show.Some some=(fun () -> empty ())>
+            (fun shown ->
+              <tr role=`row>
+                <td
+                  role=`rowheader
+                  colspan=(fun () -> string_of_int (count t.columns ()))>
+                  (fun () -> Jsx.element (S.get shown))
+                </td>
+              </tr>)
+          </Show.Some>
+        </tbody>
+    | Some v ->
+        let l = v.options in
+        S.create_computed (fun () ->
+            v.set_rows (Array.map (fun n -> n.row_key) (S.get rows)));
+        (* The rows in view, and the focused one wherever it is, in order. *)
+        let drawn () =
+          let rows = S.get rows in
+          let first, last = v.window () in
+          let shown i =
+            (i >= first && i <= last)
+            || match v.focused_row () with Some f -> f = i | None -> false
+          in
+          Js.Array.filteri ~f:(fun _ i -> shown i) rows
+        in
+        let index_of n = Js.Array.indexOf ~value:n (S.get rows) in
+        <div
+          role=`presentation
+          style=(fun () ->
+                  placed ~overflow:"hidden" ~z:0
+                    ~top:(l.padding +. l.heading_size +. l.gap)
+                    ~left:l.padding ~width:(v.content_width ())
+                    ~height:(v.body_height ()) ())>
+          <div
+            role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
+            <For each=(fun () -> drawn ())>
+              (fun n _ -> n.draw ~position:(fun () -> index_of n) ~size)
+            </For>
+            (fun () -> others ())
+            <Show.Some some=(fun () -> empty ())>
+              (fun shown ->
+                <div role=`row style="display: contents">
+                  <div
+                    role=`rowheader
+                    aria_colspan=(fun () -> string_of_int (v.column_count ()))
+                    style="display: contents">
+                    (fun () -> Jsx.element (S.get shown))
+                  </div>
+                </div>)
+            </Show.Some>
+          </div>
+        </div>
 
   let component = Jsx.component make
 end
@@ -1308,9 +1643,7 @@ module Row = struct
 
     external id : t -> string = "id" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
-
-    external ref : t -> ((Dom.htmlTableRowElement -> unit)[@u]) option = "ref"
-    [@@mel.get]
+    external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
       = "onPointerDown"
@@ -1379,7 +1712,7 @@ module Row = struct
             is_selected = selected;
             is_disabled = disabled;
             toggle_expanded = (fun () -> t.context.toggle_expanded key);
-            focus = (fun () -> Option.iter focus_row (S.get element));
+            focus = (fun () -> Option.iter focus (S.get element));
             header_id;
           };
       }
@@ -1413,69 +1746,93 @@ module Row = struct
         let all () = S.to_array (S.get resolved) in
         let rows = S.create_memo (fun () -> Nested.read (all ())) in
         (nested := fun () -> S.get rows);
+        let drawn =
+          <Dynamic.Element
+            component=(fun () -> tag t.virtualized "tr")
+            role=`row
+            ref=(fun e ->
+                  let e = as_element e in
+                  S.set set_element (Some e);
+                  call (Props.ref props) e)
+            ?aria_rowindex=(fun () ->
+                             match t.virtualized with
+                             | Some _ when not (tree ()) ->
+                                 Some (string_of_int (position () + 2))
+                             | Some _ | None -> None)
+            tabindex=(fun () ->
+                       tabindex (S.get (Selectable_item.tab_index item)))
+            aria_labelledby=(fun () -> header_id)
+            ?aria_selected=(fun () ->
+                             match t.context.selection_mode () with
+                             | `none -> None
+                             | `single | `multiple -> Some (selected ()))
+            ?aria_disabled=(fun () -> if disabled () then Some true else None)
+            ?aria_expanded=(fun () ->
+                             if tree () && has_child_items () then
+                               Some (expanded ())
+                             else None)
+            ?aria_level=(fun () ->
+                          if tree () then Some (string_of_int level) else None)
+            ?aria_posinset=(fun () ->
+                             if tree () then
+                               Some (string_of_int (position () + 1))
+                             else None)
+            ?aria_setsize=(fun () ->
+                            if tree () then Some (string_of_int (size ()))
+                            else None)
+            data_key=(fun () -> Jsx.data key)
+            data_selected=(fun () -> state (selected ()))
+            data_disabled=(fun () -> state (disabled ()))
+            data_expanded=(fun () ->
+                            state (tree () && has_child_items () && expanded ()))
+            on_pointer_down=(pressed
+                               (Props.on_pointer_down props)
+                               (Selectable_item.on_pointer_down item))
+            on_pointer_up=(pressed
+                             (Props.on_pointer_up props)
+                             (Selectable_item.on_pointer_up item))
+            on_click=(pressed (Props.on_click props)
+                        (Selectable_item.on_click item))
+            on_key_down=(pressed (Props.on_key_down props)
+                           (Selectable_item.on_key_down item))
+            on_mouse_down=(fun e ->
+                            call (Props.on_mouse_down props) e;
+                            Selectable_item.on_mouse_down item e)
+            on_focus=(fun e ->
+                       call (Props.on_focus props) e;
+                       Selectable_item.on_focus item e)
+            props=(S.omit props own)>
+            <For each=(fun () -> Cells.read (all ()))>
+              (fun c _ -> c.draw_cell ())
+            </For>
+          </Dynamic.Element>
+        in
+        let row =
+          match t.virtualized with
+          | None -> drawn
+          | Some v ->
+              let l = v.options in
+              <div
+                role=`presentation
+                style=(fun () ->
+                        placed ~overflow:"visible" ~z:0
+                          ~top:
+                            (Float.of_int (position ()) *. (l.row_size +. l.gap))
+                          ~left:0. ~width:(v.content_width ())
+                          ~height:l.row_size ())>
+                (fun () -> Jsx.element drawn)
+              </div>
+        in
         Jsx.element
         @@ Jsx.fragment
              [|
-               <tr
-                 role=`row
-                 ref=(fun e ->
-                       S.set set_element (Some e);
-                       call (Props.ref props) e)
-                 tabindex=(fun () ->
-                            tabindex (S.get (Selectable_item.tab_index item)))
-                 aria_labelledby=(fun () -> header_id)
-                 ?aria_selected=(fun () ->
-                                  match t.context.selection_mode () with
-                                  | `none -> None
-                                  | `single | `multiple -> Some (selected ()))
-                 ?aria_disabled=(fun () ->
-                                  if disabled () then Some true else None)
-                 ?aria_expanded=(fun () ->
-                                  if tree () && has_child_items () then
-                                    Some (expanded ())
-                                  else None)
-                 ?aria_level=(fun () ->
-                               if tree () then Some (string_of_int level)
-                               else None)
-                 ?aria_posinset=(fun () ->
-                                  if tree () then
-                                    Some (string_of_int (S.get position + 1))
-                                  else None)
-                 ?aria_setsize=(fun () ->
-                                 if tree () then Some (string_of_int (size ()))
-                                 else None)
-                 data_key=(fun () -> Jsx.data key)
-                 data_selected=(fun () -> state (selected ()))
-                 data_disabled=(fun () -> state (disabled ()))
-                 data_expanded=(fun () ->
-                                 state
-                                   (tree () && has_child_items () && expanded ()))
-                 on_pointer_down=(pressed
-                                    (Props.on_pointer_down props)
-                                    (Selectable_item.on_pointer_down item))
-                 on_pointer_up=(pressed
-                                  (Props.on_pointer_up props)
-                                  (Selectable_item.on_pointer_up item))
-                 on_click=(pressed (Props.on_click props)
-                             (Selectable_item.on_click item))
-                 on_key_down=(pressed (Props.on_key_down props)
-                                (Selectable_item.on_key_down item))
-                 on_mouse_down=(fun e ->
-                                 call (Props.on_mouse_down props) e;
-                                 Selectable_item.on_mouse_down item e)
-                 on_focus=(fun e ->
-                            call (Props.on_focus props) e;
-                            Selectable_item.on_focus item e)
-                 props=(S.omit props own)>
-                 <For each=(fun () -> Cells.read (all ()))>
-                   (fun c _ -> c.draw_cell ())
-                 </For>
-               </tr>;
+               row;
                <Show when_=(fun () -> expanded ())>
                  <For each=(fun () -> !nested ())>
                    (fun n position ->
-                     n.draw ~position ~size:(fun () ->
-                         Array.length (!nested ())))
+                     n.draw
+                       ~position:(fun () -> S.get position)
+                       ~size:(fun () -> Array.length (!nested ())))
                  </For>
                </Show>;
              |])
@@ -1489,6 +1846,7 @@ module Row = struct
     let owner = S.get_owner () in
     Nested.element
       {
+        row_key = S.untrack (fun () -> Props.id props);
         draw =
           (fun ~position ~size ->
             let drawn, dispose =
@@ -1513,9 +1871,7 @@ module Cell = struct
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external children : t -> Jsx.content = "children" [@@mel.get]
-
-    external ref : t -> ((Dom.htmlTableCellElement -> unit)[@u]) option = "ref"
-    [@@mel.get]
+    external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
   end
 
   let draw t r (props : Props.t) =
@@ -1525,21 +1881,40 @@ module Cell = struct
     let is_tree_column () =
       match t.tree_index () with Some i -> index () = i | None -> false
     in
-    <Cell_context.Provider
-      value=(fun () -> { is_tree_column; column_index = index })>
-      <td
-        role=(fun () -> if names_row () then `rowheader else `gridcell)
-        ?id=(fun () -> if names_row () then Some r.state.header_id else None)
-        tabindex="-1"
-        data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
-        data_tree_column=(fun () -> state (is_tree_column ()))
-        ref=(fun e ->
-              S.set set_element (Some e);
-              call (Props.ref props) e)
-        props=(S.omit props [| "children"; "ref" |])>
-        (fun () -> Props.children props)
-      </td>
-    </Cell_context.Provider>
+    let drawn =
+      <Cell_context.Provider
+        value=(fun () -> { is_tree_column; column_index = index })>
+        <Dynamic.Element
+          component=(fun () -> tag t.virtualized "td")
+          role=(fun () -> if names_row () then `rowheader else `gridcell)
+          ?id=(fun () -> if names_row () then Some r.state.header_id else None)
+          ?aria_colindex=(fun () ->
+                           Option.map
+                             (fun _ -> string_of_int (index () + 1))
+                             t.virtualized)
+          tabindex="-1"
+          data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
+          data_tree_column=(fun () -> state (is_tree_column ()))
+          ref=(fun e ->
+                let e = as_element e in
+                S.set set_element (Some e);
+                call (Props.ref props) e)
+          props=(S.omit props [| "children"; "ref" |])>
+          (fun () -> Props.children props)
+        </Dynamic.Element>
+      </Cell_context.Provider>
+    in
+    match t.virtualized with
+    | None -> drawn
+    | Some v ->
+        <div
+          role=`presentation
+          style=(fun () ->
+                  let left, width = v.column_box (index ()) in
+                  placed ~overflow:"visible" ~z:1 ~top:0. ~left ~width
+                    ~height:v.options.row_size ())>
+          (fun () -> Jsx.element drawn)
+        </div>
 
   let make (props : Props.t) =
     let t = in_table "Table.Cell" in
@@ -1578,37 +1953,70 @@ module Load_more = struct
   let make (props : Props.t) =
     let t = in_table "Table.Load_more" in
     let is_loading () = Option.value (Props.is_loading props) ~default:false in
-    (* The sentinel's row has no height and is out of the page's reach, so it
-       moves nothing and nothing reaches it; the loading row joins no list, so
-       no key reaches it either. *)
-    Jsx.fragment
-      [|
-        <tr style="height: 0px;" inert=true>
-          <td style="padding: 0px; border: 0px;">
-            <Load_more_sentinel
-              is_loading=(fun () -> is_loading ())
-              on_load_more=(fun _ ->
-                             match Props.on_load_more props with
-                             | Some f -> f () [@u]
-                             | None -> ())
-              ?scroll_offset=(fun () -> Props.scroll_offset props)
-              style="position: relative; height: 1px; width: 1px;"
-            />
-          </td>
-        </tr>;
-        <Show when_=(fun () -> is_loading ())>
-          <tr
-            role=`row
-            props=(S.omit props
-                     [| "isLoading"; "onLoadMore"; "scrollOffset"; "children" |])>
-            <td
-              role=`rowheader
-              colspan=(fun () -> string_of_int (count t.columns ()))>
-              (fun () -> Props.children props)
-            </td>
-          </tr>
-        </Show>;
-      |]
+    let sentinel () =
+      <Load_more_sentinel
+        is_loading=(fun () -> is_loading ())
+        on_load_more=(fun _ ->
+                       match Props.on_load_more props with
+                       | Some f -> f () [@u]
+                       | None -> ())
+        ?scroll_offset=(fun () -> Props.scroll_offset props)
+        style="position: relative; height: 1px; width: 1px;"
+      />
+    in
+    let rest () =
+      S.omit props [| "isLoading"; "onLoadMore"; "scrollOffset"; "children" |]
+    in
+    match t.virtualized with
+    | None ->
+        (* The sentinel's row has no height and is out of the page's reach,
+           so it moves nothing and nothing reaches it; the loading row joins
+           no list, so no key reaches it either. *)
+        Jsx.fragment
+          [|
+            <tr style="height: 0px;" inert=true>
+              <td style="padding: 0px; border: 0px;">
+                (fun () -> Jsx.element (sentinel ()))
+              </td>
+            </tr>;
+            <Show when_=(fun () -> is_loading ())>
+              <tr role=`row props=(rest ())>
+                <td
+                  role=`rowheader
+                  colspan=(fun () -> string_of_int (count t.columns ()))>
+                  (fun () -> Props.children props)
+                </td>
+              </tr>
+            </Show>;
+          |]
+    | Some v ->
+        (* After the body's last row, as high as a loader while it loads and
+           no higher otherwise, as React Aria places it. *)
+        let l = v.options in
+        <div
+          role=`presentation
+          style=(fun () ->
+                  placed ~overflow:"visible" ~z:0
+                    ~top:(Float.of_int (v.row_count ()) *. (l.row_size +. l.gap))
+                    ~left:0. ~width:(v.content_width ())
+                    ~height:(if is_loading () then l.loader_size else 0.)
+                    ())>
+          <div style="height: 0px;" inert=true>
+            <div style="padding: 0px; border: 0px;">
+              (fun () -> Jsx.element (sentinel ()))
+            </div>
+          </div>
+          <Show when_=(fun () -> is_loading ())>
+            <div role=`row props=(rest ())>
+              <div
+                role=`rowheader
+                aria_colspan=(fun () -> string_of_int (v.column_count ()))
+                style="display: contents">
+                (fun () -> Props.children props)
+              </div>
+            </div>
+          </Show>
+        </div>
 
   let component = Jsx.component make
 end

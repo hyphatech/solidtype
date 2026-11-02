@@ -488,7 +488,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Table's expandable rows, a tree grid in the headless table, a row's
   cells and rows tokens it draws once read, and the chevron slot of HeroUI's
   button
-- [ ] Table's virtualization
+- [x] Table's virtualization, the headless table laid out as React Aria's
+  TableLayout by the Virtualizer, moved into solidtype-headless for it
+- [ ] Table's rows that hold rows, virtualized
 - [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
   DatePicker, DateRangePicker
 

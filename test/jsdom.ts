@@ -13,13 +13,19 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 };
-// Nor a width: an element is as wide as a test says by its
-// data-client-width, as a table's resizable container measures itself, and
-// else none, as jsdom has it.
+// Nor a size: an element is as wide and as high as a test says by its
+// data-client-width and data-client-height, as a table's resizable container
+// and a virtualized table measure themselves, and else none, as jsdom has it.
 Object.defineProperty(HTMLElement.prototype, "clientWidth", {
   configurable: true,
   get(this: HTMLElement) {
     return Number(this.getAttribute("data-client-width") ?? 0);
+  },
+});
+Object.defineProperty(HTMLElement.prototype, "clientHeight", {
+  configurable: true,
+  get(this: HTMLElement) {
+    return Number(this.getAttribute("data-client-height") ?? 0);
   },
 });
 // Nor an IntersectionObserver, by which a load-more sentinel sees it is in

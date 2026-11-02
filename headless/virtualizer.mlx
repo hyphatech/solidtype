@@ -12,7 +12,26 @@ type list_layout = {
   padding : float;
 }
 
-type layout = List of list_layout
+type table_layout = {
+  row_size : float;
+  heading_size : float;
+  loader_size : float;
+  gap : float;
+  padding : float;
+}
+
+type layout = List of list_layout | Table of table_layout
+
+let table_layout ?(row_size = 48.) ?heading_size ?loader_size ?(gap = 0.)
+    ?(padding = 0.) () =
+  Table
+    {
+      row_size;
+      heading_size = Option.value heading_size ~default:row_size;
+      loader_size = Option.value loader_size ~default:row_size;
+      gap;
+      padding;
+    }
 
 let list_layout ?(orientation = `vertical) ?row_size ?estimated_row_size
     ?heading_size ?estimated_heading_size ?(loader_size = 48.) ?(gap = 0.)

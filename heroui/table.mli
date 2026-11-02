@@ -29,7 +29,10 @@
     ]}
 
     Rows given by data are Solid's [For] inside {!Body}, as HeroUI's are its
-    body's [items] and a render function. A part is used inside a [Table], and a
+    body's [items] and a render function. Inside a {!Virtualizer} given
+    {!Virtualizer.val-table_layout}, HeroUI's [TableLayout], only the rows in view
+    are drawn, each part a [<div>] placed as React Aria places it, the header
+    kept over the rows as they scroll. A part is used inside a [Table], and a
     row's or a cell's inside a {!Content}: elsewhere it raises
     [Invalid_argument] as it is made. *)
 

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- A `Solidtype_heroui.Table`, and a `Solidtype_headless.Table`, inside a
+  `Virtualizer` given `Virtualizer.table_layout`, HeroUI's `TableLayout`, draws
+  only the rows in view and a third more, the focused row wherever it is, each
+  part a `<div>` placed as React Aria's TableLayout places it, the header kept
+  over the rows; the keys reach every row, scrolled into view below the
+  header. HeroUI's Virtualization example. A table's columns are laid out from
+  their sizes as they are made, so a prerendered page lays a resizable table
+  out as the browser does.
+
 - `Solidtype_headless.Virtualizer`, React Aria's Virtualizer, behaviour alone:
   what `Solidtype_heroui.Virtualizer` was, which is now it, unchanged.
 

@@ -1,0 +1,191 @@
+(* HeroUI's Table virtualized, beside the same table in React, both measured
+   at the same size: the grid, its block, its sticky header, and each row and
+   cell drawn and where it is placed, at rest, scrolled, and after the keys
+   take the focus to the last row. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module Virtualizer = Solidtype_heroui.Virtualizer
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+module Twin = struct
+  external render : unit -> Dom.element = "render"
+  [@@mel.module "./twins/TableVirtualized.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableVirtualized.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableVirtualized.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+external focus : Dom.element -> unit = "focus" [@@mel.send]
+external active : Dom.element = "activeElement" [@@mel.scope "document"]
+
+(* jsdom scrolls nothing: where the grid is scrolled is given, and told, as a
+   browser would. *)
+type descriptor
+
+external descriptor : value:'a -> writable:bool -> unit -> descriptor = ""
+[@@mel.obj]
+
+external define : Dom.element -> string -> descriptor -> unit = "defineProperty"
+[@@mel.scope "Object"]
+
+external scroll_top : Dom.element -> float = "scrollTop" [@@mel.get]
+external set_scroll_top : Dom.element -> float -> unit = "scrollTop" [@@mel.set]
+
+type event
+
+external event : string -> event = "Event" [@@mel.new]
+external dispatch : Dom.element -> event -> bool = "dispatchEvent" [@@mel.send]
+
+let users =
+  Array.init 1000 (fun i ->
+      let n = string_of_int (i + 1) in
+      (n, "User " ^ n, "user" ^ n ^ "@acme.com"))
+
+(* What a reader reaches and where each part is drawn. Ids, keys of cells,
+   and what each framework writes for itself are left out. *)
+let state =
+  [
+    "data-slot";
+    "role";
+    "style";
+    "aria-rowcount";
+    "aria-colcount";
+    "aria-rowindex";
+    "aria-colindex";
+    "data-column-index";
+  ]
+
+let shown host =
+  Js.Array.from (query_all host "[role]")
+  |> Array.map (fun e ->
+      String.concat " "
+        (tag_name e
+        :: List.filter_map
+             (fun name ->
+               match T.attribute e name with
+               | Some "" | None -> None
+               | Some v when String.equal name "style" ->
+                   Some
+                     (name ^ "="
+                     ^ String.concat ""
+                         (String.split_on_char ' '
+                            (String.concat "" (String.split_on_char ';' v))))
+               | Some v -> Some (name ^ "=" ^ v))
+             state))
+
+let grid host =
+  match Js.Null.toOption (query host "[role=grid]") with
+  | Some g -> g
+  | None -> Js.Exn.raiseError "no grid"
+
+let rows host =
+  Js.Array.from (query_all host "[data-slot=table-row]")
+  |> Array.map (fun r ->
+      Option.value (T.attribute r "aria-rowindex") ~default:"")
+
+(* The table at rest, and scrolled 1000 pixels down. *)
+let walk ~step host =
+  let g = grid host in
+  define g "scrollTop" (descriptor ~value:0. ~writable:true ());
+  let at_rest = shown host in
+  let* () =
+    step (fun () ->
+        set_scroll_top g 1000.;
+        ignore (dispatch g (event "scroll") : bool);
+        Js.Promise.resolve ())
+  in
+  Js.Promise.resolve (at_rest, shown host)
+
+(* Its first row drawn given the focus and taken to the last by End: drawn,
+   focused, and scrolled into view below the header. React Aria scrolls to a
+   row from an animation frame, which this test's steps do not reach, so the
+   port's is held to what a browser shows. *)
+let to_the_end host =
+  let g = grid host in
+  let user = T.setup () in
+  (match Js.Array.from (query_all host "[data-slot=table-row]") with
+  | [||] -> ()
+  | drawn -> focus drawn.(0));
+  let* () = T.keyboard user "{End}" in
+  let drawn = rows host in
+  Js.Promise.resolve
+    ( drawn.(Array.length drawn - 1),
+      T.attribute active "aria-rowindex",
+      scroll_top g )
+
+let () =
+  Jest.describe "Table, virtualized" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "draws the rows in view, placed, as React's does"
+        (fun () ->
+          T.render (fun () ->
+              <Virtualizer
+                layout=(fun () ->
+                         Virtualizer.table_layout ~heading_size:42.
+                           ~row_size:42. ())>
+                <Table>
+                  <Table.Scroll_container>
+                    <Table.Content
+                      aria_label="Virtualized table with 1000 rows"
+                      class_="h-[300px] min-w-[700px] overflow-auto"
+                      data_client_height="300"
+                      data_client_width="700">
+                      <Table.Header class_="h-full w-full">
+                        <Table.Column
+                          is_row_header=true id="name" min_width=160.>
+                          "Name"
+                        </Table.Column>
+                        <Table.Column id="role" min_width=220.>
+                          "Role"
+                        </Table.Column>
+                        <Table.Column id="email" min_width=240.>
+                          "Email"
+                        </Table.Column>
+                      </Table.Header>
+                      <Table.Body>
+                        <For each=(fun () -> users)>
+                          (fun (id, name, email) _ ->
+                            <Table.Row id=(fun () -> id)>
+                              <Table.Cell>
+                                (fun () -> Jsx.string name)
+                              </Table.Cell>
+                              <Table.Cell>"Engineer"</Table.Cell>
+                              <Table.Cell>
+                                (fun () -> Jsx.string email)
+                              </Table.Cell>
+                            </Table.Row>)
+                        </For>
+                      </Table.Body>
+                    </Table.Content>
+                  </Table.Scroll_container>
+                </Table>
+              </Virtualizer>);
+          let* solidtype = walk ~step:(fun action -> action ()) T.body in
+          let* ended = to_the_end T.body in
+          T.cleanup ();
+          let host = Twin.render () in
+          let* react = walk ~step:Twin.step host in
+          Twin.cleanup ();
+          Js.Promise.resolve
+            E.(
+              expect (solidtype, ended)
+              |> toEqual
+                   (react, ("1001", Some "1001", 42. +. (1000. *. 42.) -. 300.)))))

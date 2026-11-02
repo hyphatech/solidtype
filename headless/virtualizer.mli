@@ -32,7 +32,18 @@ type list_layout = {
 }
 (** React Aria's ListLayout's options, in pixels. *)
 
-type layout = List of list_layout  (** React Aria's [ListLayout]. *)
+type table_layout = {
+  row_size : float;
+  heading_size : float;
+  loader_size : float;
+  gap : float;
+  padding : float;
+}
+(** React Aria's TableLayout's options, in pixels. *)
+
+type layout =
+  | List of list_layout  (** React Aria's [ListLayout]. *)
+  | Table of table_layout  (** React Aria's [TableLayout]. *)
 
 val list_layout :
   ?orientation:[ `vertical | `horizontal ] ->
@@ -54,6 +65,20 @@ val list_layout :
     its options until it is; a separator likewise, taken as 1; what loads more
     [loader_size], 48 by default. A section is drawn whole while any of it is in
     view. *)
+
+val table_layout :
+  ?row_size:float ->
+  ?heading_size:float ->
+  ?loader_size:float ->
+  ?gap:float ->
+  ?padding:float ->
+  unit ->
+  layout
+(** React Aria's TableLayout, for a table: its header [heading_size] high, else
+    as high as a row, and below it its rows, each [row_size] high, 48 by
+    default, [gap] between them and [padding] around them, 0 by default, and
+    what loads more [loader_size] high, else as high as a row. A list ignores
+    it. *)
 
 val use : unit -> layout option
 (** The layout of the virtualizer around, [None] with none. *)
