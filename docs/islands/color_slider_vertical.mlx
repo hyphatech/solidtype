@@ -1,0 +1,32 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  <div class_="flex h-48 gap-4">
+    <Color_slider
+      channel=`hue
+      default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+      aria_label="Hue"
+      orientation=`vertical>
+      <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+    </Color_slider>
+    <Color_slider
+      channel=`saturation
+      default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+      aria_label="Saturation"
+      orientation=`vertical>
+      <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+    </Color_slider>
+    <Color_slider
+      channel=`lightness
+      default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+      aria_label="Lightness"
+      orientation=`vertical>
+      <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+    </Color_slider>
+  </div>

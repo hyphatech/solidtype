@@ -40,6 +40,7 @@ module Kbd = H.Kbd
 module Table = H.Table
 module Color_swatch = H.Color_swatch
 module Color_area = H.Color_area
+module Color_slider = H.Color_slider
 module Label = H.Label
 module Link = H.Link
 module Select = H.Select
@@ -369,6 +370,18 @@ let () =
                                   Solidtype_kobalte.Colors.parse_color "#0485F7")>
                   <Color_area.Thumb data_testid="Color_area.Thumb" />
                 </Color_area>
+                <Color_slider
+                  data_testid="Color_slider"
+                  aria_label="Hue"
+                  channel=`hue
+                  default_value=(fun () ->
+                                  Solidtype_kobalte.Colors.parse_color
+                                    "hsl(0, 100%, 50%)")>
+                  <Color_slider.Output data_testid="Color_slider.Output" />
+                  <Color_slider.Track data_testid="Color_slider.Track">
+                    <Color_slider.Thumb data_testid="Color_slider.Thumb" />
+                  </Color_slider.Track>
+                </Color_slider>
                 <Color_swatch
                   data_testid="Color_swatch"
                   color=(fun () ->
@@ -663,6 +676,10 @@ let () =
                    ("Empty_state", "[data-slot=empty-state]");
                    ("Color_area", "[data-slot=color-area]");
                    ("Color_area.Thumb", "[data-slot=color-area-thumb]");
+                   ("Color_slider", "[data-slot=color-slider]");
+                   ("Color_slider.Output", "[data-slot=color-slider-output]");
+                   ("Color_slider.Track", "[data-slot=color-slider-track]");
+                   ("Color_slider.Thumb", "[data-slot=color-slider-thumb]");
                    ("Color_swatch", "[data-slot=color-swatch]");
                    ("Table", "[data-slot=table]");
                    ( "Table.Scroll_container",

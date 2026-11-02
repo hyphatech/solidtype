@@ -1,0 +1,24 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  <Color_slider
+    channel=`hue
+    class_="w-full max-w-sm"
+    default_value=(fun () -> Colors.parse_color "hsl(220, 70%, 50%)")>
+    <Label class_="font-medium text-foreground">"Hue"</Label>
+    <Color_slider.Output class_="text-muted tabular-nums" />
+    <Color_slider.Track
+      class_="h-4! rounded-none! ring-1 ring-border [&::after]:rounded-r-sm! \
+              [&::before]:rounded-l-sm!">
+      <Color_slider.Thumb
+        class_="size-4 rounded-sm! border-2 border-background shadow-md ring-1 \
+                ring-black/10 dark:ring-white/20"
+      />
+    </Color_slider.Track>
+  </Color_slider>

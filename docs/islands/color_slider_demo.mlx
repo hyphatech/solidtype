@@ -1,0 +1,66 @@
+module S = Solidtype.Solid
+module Color_slider = Solidtype_heroui.Color_slider
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Select = Controls.Select
+module Toggle = Controls.Toggle
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let channels =
+  [|
+    (`hue, "hue");
+    (`saturation, "saturation");
+    (`lightness, "lightness");
+    (`alpha, "alpha");
+  |]
+
+let orientations = [| (`horizontal, "horizontal"); (`vertical, "vertical") |]
+
+let make () =
+  let channel, set_channel = S.create_signal (`hue, "hue") in
+  let orientation, set_orientation =
+    S.create_signal (`horizontal, "horizontal")
+  in
+  let is_disabled, set_is_disabled = S.create_signal false in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="channel"
+        choices=(fun () -> channels)
+        picked=(fun () -> S.get channel)
+        on_pick=(Controls.choose channels set_channel)
+      />
+      <Select
+        label="orientation"
+        choices=(fun () -> orientations)
+        picked=(fun () -> S.get orientation)
+        on_pick=(Controls.choose orientations set_orientation)
+      />
+      <Toggle
+        label="disabled"
+        on=(fun () -> S.get is_disabled)
+        on_toggle=(S.set set_is_disabled)
+      />
+    </div>
+    <Side_by_side
+      solidtype=(<Color_slider
+                   channel=(fun () -> fst (S.get channel))
+                   class_="h-48 w-full max-w-xs"
+                   default_value=(fun () ->
+                                   Colors.parse_color "hsla(0, 100%, 50%, 0.5)")
+                   orientation=(fun () -> fst (S.get orientation))
+                   is_disabled=(fun () -> S.get is_disabled)>
+                   <Label>"Color"</Label>
+                   <Color_slider.Output />
+                   <Color_slider.Track>
+                     <Color_slider.Thumb />
+                   </Color_slider.Track>
+                 </Color_slider>)
+      react=(fun host ->
+              Heroui_react.color_slider host
+                (Heroui_react.color_slider_props
+                   ~channel:(snd (S.get channel))
+                   ~orientation:(snd (S.get orientation))
+                   ~is_disabled:(S.get is_disabled) ()))
+    />
+  </section>

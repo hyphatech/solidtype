@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Color_slider`, HeroUI's ColorSlider on Kobalte's: one
+  channel of a colour along a track of its range, over a checkerboard, its ends
+  capped, horizontal or vertical, value controlled or kept, a channel asked of
+  a space without it corrected as HeroUI corrects it. HeroUI's examples.
+  `Solidtype_headless.Color_slider` beneath it, Kobalte's fixed: paged by the
+  colour's page, its value told with the colour's name in lower case,
+  `on_change` told only a change, and no `pagesize` attribute on its element.
+
 - A `Solidtype_heroui.Table`, and a `Solidtype_headless.Table`, inside a
   `Virtualizer` given `Virtualizer.table_layout`, HeroUI's `TableLayout`, draws
   only the rows in view and a third more, the focused row wherever it is, each

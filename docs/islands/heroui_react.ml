@@ -640,6 +640,20 @@ external color_area : Dom.htmlDivElement -> color_area_props -> unit
   = "colorArea"
 [@@mel.module "./react/heroui.tsx"]
 
+type color_slider_props
+
+external color_slider_props :
+  channel:string ->
+  orientation:string ->
+  is_disabled:(bool[@mel.as "isDisabled"]) ->
+  unit ->
+  color_slider_props = ""
+[@@mel.obj]
+
+external color_slider : Dom.htmlDivElement -> color_slider_props -> unit
+  = "colorSlider"
+[@@mel.module "./react/heroui.tsx"]
+
 type table_props
 
 external table_props : variant:string -> unit -> table_props = "" [@@mel.obj]

@@ -1,0 +1,17 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  <Color_slider
+    channel=`alpha
+    class_="w-full max-w-xs"
+    default_value=(fun () -> Colors.parse_color "hsla(0, 100%, 50%, 0.5)")>
+    <Label>"Alpha"</Label>
+    <Color_slider.Output />
+    <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+  </Color_slider>

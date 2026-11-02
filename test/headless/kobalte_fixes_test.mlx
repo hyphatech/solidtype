@@ -92,3 +92,80 @@ let () =
               />);
           let* found = H.accessibility_violations () in
           Js.Promise.resolve E.(expect found |> toEqual [||])))
+
+module Color_slider = Solidtype_headless.Color_slider
+module Kobalte_slider = Solidtype_kobalte.ColorSlider
+module Color = Solidtype_kobalte.Types.Color
+
+(* A hue slider, the fixed one or Kobalte's own, at a red, told each change;
+   its thumb placed by a plain left, since Kobalte places it by a calc() jsdom
+   cannot read. *)
+let hue ~fixed told =
+  let value () = Colors.parse_color "hsl(0, 100%, 50%)" in
+  let on_change c = told := Color.to_string c ~format:`css () :: !told in
+  H.render (fun () ->
+      if fixed then
+        <Color_slider.Root
+          aria_label="Hue"
+          channel=(fun () -> `hue)
+          default_value=(fun () -> value ())
+          on_change>
+          <Color_slider.Track>
+            <Color_slider.Thumb style="left: 0%">
+              <Color_slider.Input />
+            </Color_slider.Thumb>
+          </Color_slider.Track>
+        </Color_slider.Root>
+      else
+        <Kobalte_slider.Root
+          aria_label="Hue"
+          channel=(fun () -> `hue)
+          default_value=(fun () -> value ())
+          on_change>
+          <Kobalte_slider.Track>
+            <Kobalte_slider.Thumb style="left: 0%">
+              <Kobalte_slider.Input />
+            </Kobalte_slider.Thumb>
+          </Kobalte_slider.Track>
+        </Kobalte_slider.Root>)
+
+(* What the thumb tells, after a key at the start, a page up and a page
+   down: its value, and how many changes were told. *)
+let paged ~fixed =
+  let told = ref [] in
+  hue ~fixed told;
+  let thumb = query "[role=slider]" in
+  let user = H.setup () in
+  H.focus thumb;
+  let* () = H.keyboard user "{ArrowLeft}" in
+  let at_start = List.length !told in
+  let* () = H.keyboard user "{PageUp}" in
+  let up = H.attribute thumb "aria-valuetext" in
+  let* () = H.keyboard user "{PageDown}" in
+  Js.Promise.resolve
+    ( at_start,
+      up,
+      H.attribute thumb "aria-valuetext",
+      H.attribute (query "[role=group]") "pagesize" )
+
+let () =
+  Jest.describe "Kobalte's colour slider, fixed" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "pages by the colour's page, names it in lower case, tells only a \
+         change, and writes no page on its element" (fun () ->
+          let* fixed = paged ~fixed:true in
+          H.cleanup ();
+          let* own = paged ~fixed:false in
+          Js.Promise.resolve
+            E.(
+              expect (fixed, own)
+              |> toEqual
+                   ( ( 0,
+                       Some {js|15°, red orange|js},
+                       Some {js|0°, red|js},
+                       None ),
+                     ( 1,
+                       Some {js|36°, orange|js},
+                       Some {js|0°, Red|js},
+                       Some "15" ) ))))

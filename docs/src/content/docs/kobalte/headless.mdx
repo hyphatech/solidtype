@@ -104,3 +104,7 @@ one module. HeroUI's ports dress these, never Kobalte's.
 | `Color_swatch` | a colour less than opaque is written for CSS as `rgb(4, 133, 247 / 0.5)`, which no browser reads, so it paints nothing | the background is written as `rgba` |
 | `Color_area` | the root takes `disabled` for itself, so its state never learns it: the thumb stays in the page's order and its inputs enabled | `Root` keeps `disabled` for its parts: `Thumb` is out of the page's order, `HiddenInputX` and `HiddenInputY` disabled, and the root, `Background` and `Thumb` `data-disabled` |
 | `Color_area` | the thumb's `--kb-color-current` is written as the swatch's is | written as `rgba` |
+| `Color_slider` | Page Up and Page Down step by a tenth of the channel's range, the colour's own page left out | they step by the colour's page, 15 degrees of a hue |
+| `Color_slider` | its thumb's value capitalizes the colour's name mid-phrase, `0°, Red` | in lower case, `0°, red`, as React Aria tells it |
+| `Color_slider` | `on_change` is told at a channel's end, where nothing moved | told only a colour other than the slider's |
+| `Color_slider` | its element has a `pagesize` attribute, from the channel's range spread on the slider | none |

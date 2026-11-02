@@ -1,0 +1,29 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+
+let make () =
+  let color, set_color =
+    S.create_signal (Colors.parse_color "hsl(200, 100%, 50%)")
+  in
+  <div class_="flex w-full max-w-xs flex-col gap-4">
+    <Color_slider
+      channel=`hue value=(fun () -> S.get color) on_change=(S.set set_color)>
+      <Label>"Hue"</Label>
+      <Color_slider.Output />
+      <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+    </Color_slider>
+    <div class_="flex items-center gap-2">
+      <Color_swatch color=(fun () -> S.get color) size=`sm />
+      <p class_="text-sm text-muted">
+        "Current color: "
+        <code class_="font-mono">
+          (fun () -> Jsx.string (Color.to_string (S.get color) ~format:`hsl ()))
+        </code>
+      </p>
+    </div>
+  </div>

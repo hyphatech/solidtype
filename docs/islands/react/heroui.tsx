@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorSlider, ColorSwatch, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1119,6 +1119,27 @@ export function colorArea(host: HTMLElement, props: ColorAreaProps): void {
       <ColorArea {...props} defaultValue="rgb(116, 52, 255)">
         <ColorArea.Thumb />
       </ColorArea>,
+    ),
+  );
+}
+
+type ColorSliderProps = {
+  channel: "hue" | "saturation" | "lightness" | "alpha";
+  orientation: "horizontal" | "vertical";
+  isDisabled: boolean;
+};
+
+// A slider of a red half opaque, kept by itself, as the port's demo shows it.
+export function colorSlider(host: HTMLElement, props: ColorSliderProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ColorSlider {...props} className="h-48 w-full max-w-xs" defaultValue="hsla(0, 100%, 50%, 0.5)">
+        <Label>Color</Label>
+        <ColorSlider.Output />
+        <ColorSlider.Track>
+          <ColorSlider.Thumb />
+        </ColorSlider.Track>
+      </ColorSlider>,
     ),
   );
 }

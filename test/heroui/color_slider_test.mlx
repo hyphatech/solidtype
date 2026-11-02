@@ -1,0 +1,227 @@
+(* HeroUI's ColorSlider on Kobalte's, beside the same slider in React: every
+   part, its role, classes, style and state, and the colour told, as the keys
+   walk it. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Color_slider = Solidtype_heroui.Color_slider
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  channel:string ->
+  default_value:(string[@mel.as "defaultValue"]) ->
+  ?label:string ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?orientation:string ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/ColorSlider.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ColorSlider.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/ColorSlider.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external text : Dom.element -> string = "textContent" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+(* A colour however it is spelt: Kobalte writes [hsla(0 100% 50% / 1)] and
+   [rgb(255 100 50)], React Aria [hsla(0, 100%, 50%, 1)] and
+   [rgba(255, 100, 50, 1)], one colour each. *)
+let colour s =
+  let s =
+    Js.String.replaceByRe
+      ~regexp:[%re "/rgba\\(([^,()]+),([^,()]+),([^,()]+),\\s*1\\)/g"]
+      ~replacement:"rgb($1,$2,$3)" s
+  in
+  String.concat ""
+    (String.split_on_char ' '
+       (String.concat ""
+          (String.split_on_char ','
+             (String.concat "" (String.split_on_char '/' s)))))
+
+(* A style as its declarations in order of name, its colours as values;
+   Kobalte's own variable, which no style of HeroUI's reads, and the port's
+   undoing of Kobalte's vertical edge, [bottom: auto], left out. *)
+let style_of e =
+  match T.attribute e "style" with
+  | None -> ""
+  | Some style ->
+      String.split_on_char ';' style
+      |> List.map String.trim
+      |> List.filter (fun d ->
+          not
+            (String.equal d ""
+            || String.equal d "bottom: auto"
+            || Js.String.startsWith ~prefix:"--kb-" d))
+      |> List.map colour |> List.sort String.compare |> String.concat "; "
+
+(* What HeroUI's styles read of each part, and what a reader reaches of the
+   thumb: React Aria's is a range input, Kobalte's a slider in a group, each
+   an accessible pattern, so the thumb is compared by its value. *)
+let state =
+  [
+    "data-slot";
+    "class";
+    "data-orientation";
+    "data-disabled";
+    "data-dragging";
+    "data-focus-visible";
+  ]
+
+let shown host =
+  let parts =
+    Js.Array.from (query_all host "[data-slot]")
+    |> Array.map (fun e ->
+        (* Kobalte's thumb writes its orientation, which React Aria's does
+           not and no style of HeroUI's reads. *)
+        let thumb =
+          Option.equal String.equal
+            (T.attribute e "data-slot")
+            (Some "color-slider-thumb")
+        in
+        String.concat " "
+          (List.filter_map
+             (fun name ->
+               match T.attribute e name with
+               | Some "" | None -> None
+               | Some _ when thumb && String.equal name "data-orientation" ->
+                   None
+               | Some v -> Some (name ^ "=" ^ v))
+             state)
+        ^ " style=" ^ style_of e
+        ^
+        match T.attribute e "data-slot" with
+        | Some ("label" | "color-slider-output") -> " " ^ text e
+        | _ -> "")
+  in
+  let thumbs =
+    Js.Array.from (query_all host "[role=slider], input[type=range]")
+    |> Array.to_list
+    (* Kobalte's form input, inside its slider, is not one a reader reaches. *)
+    |> List.filter (fun e ->
+        not
+          (Option.is_some (Js.Null.toOption (closest e "[role=slider] input"))))
+    |> List.map (fun e ->
+        let attribute name ~react =
+          match T.attribute e name with
+          | Some v -> v
+          | None -> Option.value (T.attribute e react) ~default:"-"
+        in
+        "thumb value="
+        ^ attribute "aria-valuenow" ~react:"value"
+        ^ " min="
+        ^ attribute "aria-valuemin" ~react:"min"
+        ^ " max="
+        ^ attribute "aria-valuemax" ~react:"max"
+        ^ " text="
+        ^ attribute "aria-valuetext" ~react:"aria-valuetext"
+        ^ " orientation="
+        ^ attribute "aria-orientation" ~react:"aria-orientation")
+    |> Array.of_list
+  in
+  Array.append parts thumbs
+
+let walk ~step host told =
+  let user = T.setup () in
+  let seen = ref [ (shown host, colour !told) ] in
+  let after keys =
+    let* () = step (fun () -> T.keyboard user keys) in
+    seen := (shown host, colour !told) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = step (fun () -> T.tab user) in
+  seen := (shown host, colour !told) :: !seen;
+  let* () = after "{ArrowRight}" in
+  let* () = after "{PageUp}" in
+  let* () = after "{End}" in
+  let* () = after "{Home}" in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ~channel ~value ?label ?(is_disabled = false) ?orientation () =
+  let told = ref "" in
+  T.render (fun () ->
+      <Color_slider
+        ?aria_label=(fun () ->
+                      match label with
+                      | Some _ -> None
+                      | None -> Some (Option.value channel ~default:""))
+        channel=(fun () ->
+                  match channel with
+                  | Some "saturation" -> `saturation
+                  | Some "lightness" -> `lightness
+                  | Some "alpha" -> `alpha
+                  | Some "red" -> `red
+                  | Some _ | None -> `hue)
+        class_="w-full max-w-xs"
+        default_value=(fun () -> Colors.parse_color value)
+        is_disabled=(fun () -> is_disabled)
+        ?orientation=(fun () ->
+                       Option.map
+                         (function "vertical" -> `vertical | _ -> `horizontal)
+                         orientation)
+        on_change=(fun c -> told := Color.to_string c ~format:`css ())>
+        (fun () ->
+          match label with
+          | Some l ->
+              Jsx.element
+                (Jsx.fragment
+                   [|
+                     <Label>(fun () -> Jsx.string l)</Label>;
+                     <Color_slider.Output />;
+                   |])
+          | None -> Jsx.string "")
+        <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+      </Color_slider>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref "" in
+  let host =
+    Twin.render
+      (props
+         ~channel:(Option.value channel ~default:"hue")
+         ~default_value:value ?label ~is_disabled ?orientation ())
+      (fun c -> told' := c)
+  in
+  let* react = walk ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Color_slider" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "is a hue, labelled, as React's is" (fun () ->
+          both ~channel:(Some "hue") ~value:"hsl(0, 100%, 50%)" ~label:"Hue" ());
+      Jest.testPromise "is disabled, as React's is" (fun () ->
+          both ~channel:(Some "hue") ~value:"hsl(200, 100%, 50%)" ~label:"Hue"
+            ~is_disabled:true ());
+      Jest.testPromise "is vertical, as React's is" (fun () ->
+          both ~channel:(Some "saturation") ~value:"hsl(0, 100%, 50%)"
+            ~orientation:"vertical" ());
+      Jest.testPromise "is an alpha, as React's is" (fun () ->
+          both ~channel:(Some "alpha") ~value:"hsla(0, 100%, 50%, 0.5)"
+            ~label:"Alpha" ());
+      Jest.testPromise "is a red, as React's is" (fun () ->
+          both ~channel:(Some "red") ~value:"rgb(255, 100, 50)" ~label:"Red" ()))

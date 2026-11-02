@@ -1,0 +1,255 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_headless.Color_slider
+module Types = Solidtype_kobalte.Types
+module Color = Types.Color
+module Range = Types.ColorChannelRange
+module Slider_context = Types.ColorSliderContextValue
+
+type channel =
+  [ `hue
+  | `saturation
+  | `brightness
+  | `lightness
+  | `red
+  | `green
+  | `blue
+  | `alpha ]
+
+(* What a slider's parts read of it: its channel, its classes, its state. *)
+type slider = {
+  channel : unit -> channel;
+  slots : unit -> Styles.ColorSlider.slots;
+  disabled : unit -> bool;
+  orientation : unit -> [ `horizontal | `vertical ];
+  thumb_id : string;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = slider
+end)
+
+let within part =
+  match Context.use () with
+  | Some s -> s
+  | None -> invalid_arg (part ^ " is used inside a Color_slider")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+let with_style own = function Some s -> own ^ "; " ^ s | None -> own
+let percent p = Js.Float.toString (p *. 100.) ^ "%"
+
+let orientation_name = function
+  | `horizontal -> "horizontal"
+  | `vertical -> "vertical"
+
+(* The space a channel is in, where the one asked has none of it: red, green
+   and blue are RGB's, lightness HSL's, brightness HSB's, and hue and
+   saturation HSL's or HSB's, as HeroUI corrects them. *)
+let space_for channel space =
+  match (channel, space) with
+  | (`red | `green | `blue), Some (`hsl | `hsb) -> Some `rgb
+  | `lightness, Some (`rgb | `hsb) -> Some `hsl
+  | `brightness, Some (`rgb | `hsl) -> Some `hsb
+  | (`hue | `saturation), Some `rgb -> Some `hsl
+  | _, space -> space
+
+(* A label in a color slider is Kobalte's, which names it and its thumb. *)
+let label : Label.slot =
+ fun[@u] classes others children ->
+  <Kobalte.Label class_=(fun () -> classes ()) data_slot="label" props=others>
+    (fun () -> children ())
+  </Kobalte.Label>
+
+module Output = struct
+  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+      () =
+    let s = within "Color_slider.Output" in
+    let context = Kobalte.use_color_slider_context () in
+    <output
+      for_=(fun () -> s.thumb_id)
+      aria_live=`off
+      class_=(fun () ->
+               after (Styles.ColorSlider.output (s.slots ())) (class_ ()))
+      data_orientation=(fun () ->
+                         Jsx.data (orientation_name (s.orientation ())))
+      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      data_slot="color-slider-output"
+      props=(Props.others props)>
+      (fun () ->
+        match children () with
+        | Some given -> given
+        | None ->
+            Jsx.string
+              (Color.format_channel_value
+                 (S.get (Slider_context.value context))
+                 (s.channel ())))
+    </output>
+end
+
+module Track = struct
+  let%component make ?(class_ : string option) ?(style : string option)
+      ~(children : Jsx.content) () =
+    let s = within "Color_slider.Track" in
+    let context = Kobalte.use_color_slider_context () in
+    (* The channel's range, as Kobalte draws it, over HeroUI's checkerboard,
+       which shows through a colour less than opaque; and the colours at its
+       ends, which HeroUI's styles cap the track with. Kobalte's background
+       is replaced, so it is drawn here as Kobalte draws it. *)
+    let drawn () =
+      let color = Slider_context.get_display_color context () in
+      let channel = s.channel () in
+      let range = Color.get_channel_range color channel in
+      let at v =
+        Color.to_string
+          (Color.with_channel_value color channel v)
+          ~format:`css ()
+      in
+      let low = Range.min_value range and high = Range.max_value range in
+      let stops =
+        match channel with
+        | `hue ->
+            List.map (fun h -> at h) [ 0.; 60.; 120.; 180.; 240.; 300.; 360. ]
+        | `lightness -> [ at low; at ((high -. low) /. 2.); at high ]
+        | `saturation | `brightness | `red | `green | `blue | `alpha ->
+            [ at low; at high ]
+      in
+      let towards =
+        match s.orientation () with
+        | `vertical -> "top"
+        | `horizontal -> "right"
+      in
+      ( "linear-gradient(to " ^ towards ^ ", " ^ String.concat ", " stops ^ ")",
+        at low,
+        at high )
+    in
+    <Kobalte.Track
+      class_=(fun () ->
+               after (Styles.ColorSlider.track (s.slots ())) (class_ ()))
+      style=(fun () ->
+              let gradient, start, end_ = drawn () in
+              with_style
+                ("position: relative; background: " ^ gradient
+               ^ ", repeating-conic-gradient(#efefef 0% 25%, #f7f7f7 0% \
+                  50%)                   50% / 16px 16px; --track-end-color: "
+               ^ end_ ^ "; --track-start-color: " ^ start)
+                (style ()))
+      data_orientation=(fun () ->
+                         Jsx.data (orientation_name (s.orientation ())))
+      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      data_slot="color-slider-track"
+      props=(Props.others props)>
+      (fun () -> children ())
+    </Kobalte.Track>
+end
+
+module Thumb = struct
+  let%component make ?(class_ : string option) ?(style : string option)
+      ?(children : Jsx.content option) () =
+    let s = within "Color_slider.Thumb" in
+    let context = Kobalte.use_color_slider_context () in
+    let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    <Kobalte.Thumb
+      id=(fun () -> s.thumb_id)
+      class_=(fun () ->
+               after (Styles.ColorSlider.thumb (s.slots ())) (class_ ()))
+      style=(fun () ->
+              (* Placed as React Aria places it, at the channel's value along
+                 the track, where Kobalte's would be measured. *)
+              let color = S.get (Slider_context.value context) in
+              let channel = s.channel () in
+              let range = Color.get_channel_range color channel in
+              let span = Range.max_value range -. Range.min_value range in
+              let at =
+                if span <= 0. then 0.
+                else
+                  (Color.get_channel_value color channel
+                  -. Range.min_value range)
+                  /. span
+              in
+              let place =
+                match s.orientation () with
+                | `horizontal ->
+                    "position: absolute; left: " ^ percent at
+                    ^ "; transform: translate(-50%, -50%)"
+                | `vertical ->
+                    (* Kobalte holds a vertical thumb by its bottom. *)
+                    "position: absolute; top: "
+                    ^ percent (1. -. at)
+                    ^ "; bottom: auto; transform: translate(-50%, -50%)"
+              in
+              let painted =
+                if s.disabled () then ""
+                else
+                  "; background-color: "
+                  ^ Color.to_string
+                      (Slider_context.get_display_color context ())
+                      ~format:`css ()
+              in
+              with_style (place ^ painted) (style ()))
+      ref=(fun e -> Interaction.watch i e)
+      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      data_dragging=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_slot="color-slider-thumb"
+      props=(Props.others props)>
+      <Kobalte.Input />
+      (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+    </Kobalte.Thumb>
+end
+
+let%component make ~(channel : channel)
+    ?(color_space : [ `rgb | `hsl | `hsb ] option) ?(value : Color.t option)
+    ?(default_value : Color.t option) ?(on_change : (Color.t -> unit) option)
+    ?(on_change_end : (Color.t -> unit) option)
+    ?(orientation : [ `horizontal | `vertical ] = `horizontal)
+    ?(is_disabled : bool option) ?(name : string option)
+    ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
+    ?(class_ : string option) ~(children : Jsx.content) () =
+  (* A slider is disabled as it says, else as its fieldset is. *)
+  let in_fieldset = Fieldset.disabled () in
+  let disabled () =
+    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  in
+  let in_form = Form.field ~name ~invalid:(fun () -> false) in
+  let s =
+    {
+      channel = (fun () -> channel ());
+      slots =
+        (fun () -> Styles.ColorSlider.slots (Styles.ColorSlider.options ()));
+      disabled;
+      orientation = (fun () -> orientation ());
+      thumb_id = S.create_unique_id ();
+    }
+  in
+  <Context.Provider value=(fun () -> s)>
+    <Kobalte.Root
+      channel=(fun () -> channel ())
+      ?color_space=(fun () -> space_for (channel ()) (color_space ()))
+      ?value
+      ?default_value
+      on_change=(fun c ->
+                  in_form.changed ();
+                  ignore (on_change c : unit option))
+      on_change_end=(fun c -> ignore (on_change_end c : unit option))
+      orientation=(fun () -> orientation ())
+      disabled=(fun () -> disabled ())
+      ?name
+      ?aria_label
+      class_=(fun () ->
+               after (Styles.ColorSlider.base (s.slots ())) (class_ ()))
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
+      ref=(fun e -> in_form.root e)
+      on_focus_out=(Field.on_leave (fun e ->
+                        in_form.left ();
+                        on_blur e))
+      data_slot="color-slider"
+      props=(Props.others props)>
+      <Label.Slot.Provider value=(fun () -> label)>
+        (fun () -> children ())
+      </Label.Slot.Provider>
+    </Kobalte.Root>
+  </Context.Provider>

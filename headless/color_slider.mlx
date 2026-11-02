@@ -1,0 +1,170 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.ColorSlider
+module Types = Solidtype_kobalte.Types
+module Color = Types.Color
+module Range = Types.ColorChannelRange
+module Slider_context = Types.ColorSliderContextValue
+
+type channel =
+  [ `hue
+  | `saturation
+  | `brightness
+  | `lightness
+  | `red
+  | `green
+  | `blue
+  | `alpha ]
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external prevent : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+external stop : Dom.keyboardEvent -> unit = "stopPropagation" [@@mel.send]
+
+external listen_capture :
+  Dom.htmlDivElement ->
+  (_[@mel.as "keydown"]) ->
+  ((Dom.keyboardEvent -> unit)[@mel.uncurry]) ->
+  (_[@mel.as {json|true|json}]) ->
+  unit = "addEventListener"
+[@@mel.send]
+
+module Root = struct
+  module Props = struct
+    include Kobalte.Root.Props
+
+    type t
+
+    external channel : t -> channel = "channel" [@@mel.get]
+    external value : t -> Color.t option = "value" [@@mel.get]
+    external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
+
+    external on_change : t -> ((Color.t -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external on_change_end : t -> ((Color.t -> unit)[@u]) option = "onChangeEnd"
+    [@@mel.get]
+
+    external disabled : t -> bool option = "disabled" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    (* No page on the element: Kobalte spreads the channel's range on its
+       slider, which writes the page it does not take as an attribute; a
+       null after it is no attribute. *)
+    external no_page :
+      page_size:(string Js.null[@mel.as "pageSize"]) -> unit -> t = ""
+    [@@mel.obj]
+  end
+
+  let call f x = match f with Some f -> f x [@u] | None -> ()
+
+  let make (props : Props.t) =
+    (* Its colour, kept here so a page can move it: [value] while it is given
+       one, else the one it keeps. *)
+    let kept, set_kept =
+      S.create_signal (S.untrack (fun () -> Props.default_value props))
+    in
+    let current () =
+      match Props.value props with Some c -> Some c | None -> S.get kept
+    in
+    (* Kobalte tells a change at a channel's end too, where nothing moved:
+       only a colour other than this one is a change. *)
+    let changed c =
+      let same =
+        match current () with
+        | Some now ->
+            String.equal
+              (Color.to_string now ~format:`css ())
+              (Color.to_string c ~format:`css ())
+        | None -> false
+      in
+      if not same then begin
+        S.set set_kept (Some c);
+        call (Props.on_change props) c
+      end
+    in
+    (* Kobalte's slider pages by a tenth of its range, whatever the colour's
+       page: the keys that page are taken before its thumb hears them. *)
+    let paged e =
+      let by =
+        match key e with "PageUp" -> 1. | "PageDown" -> -1. | _ -> 0.
+      in
+      match current () with
+      | Some color
+        when by <> 0.
+             && not (Option.value (Props.disabled props) ~default:false) ->
+          prevent e;
+          stop e;
+          let channel = Props.channel props in
+          let range = Color.get_channel_range color channel in
+          let now = Color.get_channel_value color channel in
+          let next =
+            Float.max (Range.min_value range)
+              (Float.min (Range.max_value range)
+                 (now +. (by *. Range.page_size range)))
+          in
+          if not (Float.equal next now) then begin
+            let c = Color.with_channel_value color channel next in
+            changed c;
+            call (Props.on_change_end props) c
+          end
+      | Some _ | None -> ()
+    in
+    <Kobalte.Root
+      channel=(fun () -> Props.channel props)
+      ?value=(fun () -> current ())
+      on_change=changed
+      on_change_end=(fun c -> call (Props.on_change_end props) c)
+      ref=(fun e ->
+            listen_capture e paged;
+            call (Props.ref props) e)
+      props=(S.omit
+               (S.merge_props [| props; Props.no_page ~page_size:Js.null () |])
+               [| "value"; "defaultValue"; "onChange"; "onChangeEnd"; "ref" |])
+    />
+
+  let component = Jsx.component make
+end
+
+module Thumb = struct
+  module Props = struct
+    include Kobalte.Thumb.Props
+
+    type t
+  end
+
+  let make (props : Props.t) =
+    let context = Kobalte.use_color_slider_context () in
+    (* The value and the colour's name, the end of a phrase, in lower case. *)
+    let told () =
+      let channel = S.get (Slider_context.channel context) in
+      let value =
+        Color.format_channel_value
+          (S.get (Slider_context.value context))
+          channel
+      in
+      let shown = Slider_context.get_display_color context () in
+      let names = S.get (Slider_context.translations context) in
+      match channel with
+      | `hue ->
+          value ^ ", " ^ String.lowercase_ascii (Color.get_hue_name shown names)
+      | `alpha -> value
+      | `saturation | `brightness | `lightness | `red | `green | `blue ->
+          value ^ ", "
+          ^ String.lowercase_ascii (Color.get_color_name shown names)
+    in
+    <Kobalte.Thumb aria_valuetext=(fun () -> told ()) props=(S.omit props [||])
+    />
+
+  let component = Jsx.component make
+end
+
+module Track = Kobalte.Track
+module Input = Kobalte.Input
+module Label = Kobalte.Label
+module ValueLabel = Kobalte.ValueLabel
+module Description = Kobalte.Description
+module ErrorMessage = Kobalte.ErrorMessage
+
+let use_color_slider_context = Kobalte.use_color_slider_context

@@ -1,0 +1,154 @@
+---
+title: ColorSlider
+description: One channel of a colour, slid along a track of its range.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/color_slider_usage.jsx";
+import ExUsageCode from "@islands/color_slider_usage.mlx?raw";
+import * as ExDisabled from "@islands/color_slider_disabled.jsx";
+import ExDisabledCode from "@islands/color_slider_disabled.mlx?raw";
+import * as ExVertical from "@islands/color_slider_vertical.jsx";
+import ExVerticalCode from "@islands/color_slider_vertical.mlx?raw";
+import * as ExControlled from "@islands/color_slider_controlled.jsx";
+import ExControlledCode from "@islands/color_slider_controlled.mlx?raw";
+import * as ExHslChannels from "@islands/color_slider_hsl_channels.jsx";
+import ExHslChannelsCode from "@islands/color_slider_hsl_channels.mlx?raw";
+import * as ExAlphaChannel from "@islands/color_slider_alpha_channel.jsx";
+import ExAlphaChannelCode from "@islands/color_slider_alpha_channel.mlx?raw";
+import * as ExRgbChannels from "@islands/color_slider_rgb_channels.jsx";
+import ExRgbChannelsCode from "@islands/color_slider_rgb_channels.mlx?raw";
+import * as ExCustomStyles from "@islands/color_slider_custom_styles.jsx";
+import ExCustomStylesCode from "@islands/color_slider_custom_styles.mlx?raw";
+import * as Demo from "@islands/color_slider_demo.jsx";
+
+`Solidtype_heroui.Color_slider` is Kobalte's `ColorSlider`, fixed in
+`solidtype-headless`, with the classes HeroUI's own `colorSliderVariants`
+gives: one channel of a colour, slid along a track drawn as the channel's
+range, over a checkerboard that shows through a colour less than opaque, its
+thumb painted the colour. Its thumb is pressed and dragged, or stepped by the
+arrow keys, by the channel's page by Page Up and Page Down -- 15 degrees of a
+hue, 10 of a saturation, 17 of a red -- and to its ends by Home and End.
+
+Its value is Kobalte's `Types.Color`, read from any CSS colour by
+`Solidtype_kobalte.Colors.parse_color`. `on_change` is told each colour other
+than the slider's, and `on_change_end` the last. A channel asked of a space
+that has none of it -- red in HSL, hue in RGB -- is read in the space it is
+in, as HeroUI corrects it.
+
+Kobalte's slider is its accessible pattern: the slider a group, its thumb the
+element of role `slider` that a reader reaches and the keys move, where React
+Aria's thumb holds a range input. Its value is told as React Aria tells it,
+`0°, red`.
+
+## Usage
+
+HeroUI's examples.
+
+<Example code={ExUsageCode} title="color_slider_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Color_slider channel=`hue default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")>
+  <Label>"Hue"</Label>
+  <Color_slider.Output />
+  <Color_slider.Track>
+    <Color_slider.Thumb />
+  </Color_slider.Track>
+</Color_slider>
+```
+
+## Examples
+
+### Disabled
+
+<Example code={ExDisabledCode} title="color_slider_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Vertical
+
+<Example code={ExVerticalCode} title="color_slider_vertical.mlx"><ExVertical.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ExControlledCode} title="color_slider_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### HSL Channels
+
+Sliders of one colour's channels, each given it and told its change.
+
+<Example code={ExHslChannelsCode} title="color_slider_hsl_channels.mlx"><ExHslChannels.make client:visible /></Example>
+
+### Alpha Channel
+
+<Example code={ExAlphaChannelCode} title="color_slider_alpha_channel.mlx"><ExAlphaChannel.make client:visible /></Example>
+
+### RGB Channels
+
+<Example code={ExRgbChannelsCode} title="color_slider_rgb_channels.mlx"><ExRgbChannels.make client:visible /></Example>
+
+### Render Function
+
+HeroUI's Render Function example gives the slider `render`, React's way to swap the element it renders, which a Solid component has no need of.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on each part.
+
+<Example code={ExCustomStylesCode} title="color_slider_custom_styles.mlx"><ExCustomStyles.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.color-slider`, `.color-slider__output`, `.color-slider__track`,
+  `.color-slider__thumb`
+- the track's ends, `--track-start-color` and `--track-end-color`
+
+### Interactive States
+
+- the slider: `[data-disabled="true"]`, `[data-orientation]`
+- the thumb: `[data-hovered="true"]`, `[data-focus-visible="true"]`,
+  `[data-dragging="true"]`, `[data-disabled="true"]`
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### ColorSlider
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `channel` | `channel` | `Color_slider.channel` | | The channel it slides |
+| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The space the channel is of |
+| `value` | `value` | `Types.Color.t` | | Its colour, controlled |
+| `defaultValue` | `default_value` | `Types.Color.t` | | Its colour at first, kept by itself |
+| `onChange` | `on_change` | `Types.Color.t -> unit` | | Called with each colour other than its own |
+| `onChangeEnd` | `on_change_end` | `Types.Color.t -> unit` | | Called with the last, once it stops |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its direction |
+| `isDisabled` | `is_disabled` | `bool` | its fieldset's | Whether it is disabled |
+| `name` | `name` | `string` | | The channel's name in a form |
+| `aria-label` | `aria_label` | `string` | | Its name, where no label names it |
+| `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called as focus leaves it |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+| `render` | — | | | React's way to swap its element |
+
+### ColorSlider.Output, ColorSlider.Track, ColorSlider.Thumb
+
+Each takes `class_`, added after HeroUI's class; the track and the thumb
+`style`, after their own, a function of their state in React; the output and
+the thumb their `children`, the output's in place of the channel's value.
+
+## Beside React
+
+Original HeroUI documentation: [ColorSlider](https://heroui.com/en/docs/react/components/color-slider).
+
+The same HeroUI ColorSlider twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two sliders:
+a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>

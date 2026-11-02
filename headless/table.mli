@@ -42,11 +42,11 @@
     [aria-disabled] and [data-disabled], present and empty as Kobalte's state
     is.
 
-    Inside a {!Virtualizer} given {!Virtualizer.val-table_layout}, it is laid out as
-    React Aria's TableLayout lays one out: each part a [<div>] of its role in
-    place of its table element, in a [<div>] that places it, the header kept
-    over the rows as they scroll, the columns as wide as they ask within the
-    table's width, and only the rows in view drawn, and a third more beyond,
+    Inside a {!Virtualizer} given {!Virtualizer.val-table_layout}, it is laid
+    out as React Aria's TableLayout lays one out: each part a [<div>] of its
+    role in place of its table element, in a [<div>] that places it, the header
+    kept over the rows as they scroll, the columns as wide as they ask within
+    the table's width, and only the rows in view drawn, and a third more beyond,
     with the focused one wherever it is; the keys reach every row, the one they
     move to drawn and scrolled into view below the header. The table is what
     scrolls, so a style gives it its height and its overflow. A [ref] is given

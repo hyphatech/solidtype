@@ -463,7 +463,9 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] ColorArea, on Kobalte's, its background filling the area; disabled
   in the port's layer, since Kobalte's root keeps `disabled` from its form
   control
-- [ ] ColorSlider, ColorField, ColorSwatchPicker, ColorPicker
+- [x] ColorSlider, on Kobalte's, fixed in solidtype-headless: paged by the
+  colour's page, its name in lower case, a change told only where it is one
+- [ ] ColorField, ColorSwatchPicker, ColorPicker
 
 ### Group 7: built from Kobalte's primitives
 - [x] Kobalte's list hooks bound, as `Selection`: `createListState`,
