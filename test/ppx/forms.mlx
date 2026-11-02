@@ -22,6 +22,16 @@ let%component make ~(text : string) ?(count : int = 0)
     () =
   <p>(fun () -> Solidtype.Jsx.int (count ()))</p>
 
+module Given_its_element = struct
+  let%component make ?(variant : [ `a | `b ] option) ?(class_ : string option)
+      () =
+    <button
+      class_=(fun () -> Option.value (class_ ()) ~default:"")
+      props=(Props.others props)
+    />
+  [@@element button]
+end
+
 let names =
   <input
     read_only=true

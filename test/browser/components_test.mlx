@@ -47,6 +47,27 @@ module Loaded = struct
     <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
 end
 
+(* A button that takes every attribute of its <button>: its class after its
+   own, a click beside its own, and the rest passed on as they are. *)
+module Save = struct
+  let%component make ?(class_ : string option)
+      ?(on_click : (Dom.mouseEvent -> unit) option) ~(saved : unit -> unit)
+      ~(children : Jsx.content) () =
+    <button
+      class_=(fun () ->
+               match class_ () with Some c -> "save " ^ c | None -> "save")
+      on_click=(fun e ->
+                 saved ();
+                 ignore (on_click e : unit option))
+      props=(Props.others props)>
+      (fun () -> children ())
+    </button>
+  [@@element button]
+end
+
+external attribute : Dom.element -> string -> string Js.null = "getAttribute"
+[@@mel.send]
+
 external button_by_text : string -> Dom.element = "getByText"
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
 
@@ -69,6 +90,29 @@ let () =
           E.(
             expect [| before; zero; T.page () |]
             |> toEqual [| "none"; "0"; "7" |]));
+      Jest.test
+        "a component given its element takes the element's attributes, a class \
+         and a click beside its own" (fun () ->
+          let saved = ref 0 and clicked = ref 0 in
+          T.render (fun () ->
+              <Save
+                saved=(fun _ -> incr saved)
+                class_="wide"
+                on_click=(fun _ -> incr clicked)
+                style="color: red"
+                title="Save the draft">
+                "Save"
+              </Save>);
+          let b = button_by_text "Save" in
+          T.click b;
+          E.(
+            expect
+              ( T.class_name b,
+                Js.Null.toOption (attribute b "style"),
+                T.title b,
+                !saved,
+                !clicked )
+            |> toEqual ("save wide", Some "color: red;", "Save the draft", 1, 1)));
       Jest.test "Match.Keyed gives its case the value itself" (fun () ->
           let value, set_value = S.create_signal (Some "a") in
           T.render (fun () ->

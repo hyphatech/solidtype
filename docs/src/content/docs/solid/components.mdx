@@ -107,11 +107,32 @@ A function prop that takes nothing is written `(fun _ -> ...)`, as
 `on_close` is above, which hides the panel and shows a button in its place: `(fun () -> ...)` is a thunk, which would be read as a
 value.
 
+## A component given its element
+
+A component that draws an element and passes on every attribute it does
+not name, as a HeroUI part does, names the element after its body. Its
+check then takes the element's attributes after its own props, and
+`Props.others` passes them on. A prop the element also names, `class_`
+here, is the component's own and takes the attribute's place, as TSX's
+`Omit` does: a switch's `on_change` can take its state, not the DOM's
+event.
+
+```ocaml
+let%component make ?(class_ : string option) () =
+  <input
+    class_=(fun () -> "field " ^ Option.value (class_ ()) ~default:"")
+    props=(Props.others props) />
+[@@element input]
+```
+
+`<Field style="width: 8rem" placeholder="Name" />` compiles, and both reach
+the `<input>`; an attribute an `<input>` does not take does not.
+
 ## Props written by hand
 
 Besides a root, one kind of component is written without
 `let%component`: a component
-that passes its props on whole, as a spread, writes its `Props` by hand,
+that passes its props on whole to another component, as a spread, writes its `Props` by hand,
 its check's labels named as solidtype names a prop, and spreads them with
 the attribute `props`:
 

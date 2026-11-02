@@ -770,7 +770,7 @@ let is_nodes p = String.equal p.label "children" && p.arity = 0
 (* The props module: an abstract type, one getter per prop -- a live read of
    Solid's props object, so Solid tracks it -- and the check. A function prop
    is read uncurried, the call Solid's JSX makes. *)
-let props_module ~loc props =
+let props_module ~loc ~element props =
   let vars =
     List.fold_left
       (fun acc v -> if List.mem v acc then acc else acc @ [ v ])
@@ -848,14 +848,15 @@ let props_module ~loc props =
     B.pstr_primitive ~loc
       { description with pval_attributes = [ attribute ~loc "mel.obj" ] }
   in
+  let checked p =
+    if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
+    else if String.equal p.label "children" then
+      [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
+    else if p.arity > 0 then p.typ
+    else [%type: [%t p.typ] Solidtype.Check.value]
+  in
   let check_param p =
-    let checked =
-      if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
-      else if String.equal p.label "children" then
-        [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
-      else if p.arity > 0 then p.typ
-      else [%type: [%t p.typ] Solidtype.Check.value]
-    in
+    let checked = checked p in
     let any typ = B.ppat_constraint ~loc (B.ppat_any ~loc) typ in
     match p.presence with
     | Required -> B.pparam_val ~loc (Labelled p.label) None (any checked)
@@ -863,7 +864,7 @@ let props_module ~loc props =
         B.pparam_val ~loc (Optional p.label) None
           (any [%type: [%t checked] option])
   in
-  let check =
+  let check_fun =
     B.pexp_function ~loc
       (List.map check_param props
       @ [
@@ -874,6 +875,59 @@ let props_module ~loc props =
         ])
       None
       (Pfunction_body [%expr ()])
+  in
+  (* Given its element, the check takes the element's attributes after the
+     component's own props, as a part that passes them on, but those its own
+     props name: an own prop is the component's, whatever the element means
+     by the name, as TSX types a part [Omit<DOM, keyof Own> & Own]. Each is
+     typed by the element's [Solidtype.Html] module. A check of a hundred
+     labels is a type a [fun] cannot be written for, so an external, which
+     only the check under [if false] names. *)
+  let check =
+    match element with
+    | None -> [%stri let check = [%e check_fun]]
+    | Some (path, attributes) ->
+        let arrow p rest =
+          match p.presence with
+          | Required -> B.ptyp_arrow ~loc (Labelled p.label) (checked p) rest
+          | Optional | Default _ ->
+              B.ptyp_arrow ~loc (Optional p.label) (checked p) rest
+        in
+        let element_attribute (name, handler) rest =
+          let typ = B.ptyp_constr ~loc { txt = Ldot (path, name); loc } [] in
+          let typ =
+            if handler then typ else [%type: [%t typ] Solidtype.Check.value]
+          in
+          B.ptyp_arrow ~loc (Optional name) typ rest
+        in
+        let own name = List.exists (fun p -> String.equal p.label name) props in
+        let type_ =
+          List.fold_right arrow props
+            (B.ptyp_arrow ~loc (Optional spread)
+               [%type: [%t t] Solidtype.Solid.rest]
+               (List.fold_right element_attribute
+                  (List.filter (fun (name, _) -> not (own name)) attributes)
+                  [%type: unit -> unit]))
+        in
+        let description =
+          B.value_description ~loc ~name:{ txt = "check"; loc } ~type_
+            ~prim:[ "check" ]
+        in
+        B.pstr_primitive ~loc
+          {
+            description with
+            pval_attributes =
+              [
+                attribute ~loc "mel.module"
+                  ~payload:
+                    (PStr
+                       [
+                         B.pstr_eval ~loc
+                           (B.estring ~loc "vite-plugin-solidtype/markers")
+                           [];
+                       ]);
+              ];
+          }
   in
   (* [omit props [| Text |]] names the props it leaves out by a variant of
      the component's own, so a misspelt one does not compile; [others props]
@@ -938,7 +992,7 @@ let props_module ~loc props =
   ( vars,
     B.pmod_structure ~loc
       ((generated :: type_t :: List.map getter props)
-      @ [ constructor; [%stri let check = [%e check]]; others ]
+      @ [ constructor; check; others ]
       @ omit) )
 
 (* Each prop is read where it is used: a value through a thunk, [text ()], a
@@ -1004,13 +1058,66 @@ let reader ~loc p =
       ];
   }
 
+(* [[@@element button]]: the element a component draws and passes the rest of
+   its props to, whose attributes its check then takes; its [Solidtype.Html]
+   module and its attributes' names. *)
+let element_of (vb : value_binding) =
+  match
+    List.filter
+      (fun (a : attribute) -> String.equal a.attr_name.txt "element")
+      vb.pvb_attributes
+  with
+  | [] -> Ok None
+  | [
+   {
+     attr_payload =
+       PStr
+         [
+           {
+             pstr_desc =
+               Pstr_eval
+                 ({ pexp_desc = Pexp_ident { txt = Lident tag; _ }; _ }, _);
+             _;
+           };
+         ];
+     attr_loc = loc;
+     _;
+   };
+  ] -> (
+      let attributes =
+        match List.assoc_opt tag Html_attributes.elements with
+        | None -> None
+        | Some interface -> (
+            match List.assoc_opt interface Html_attributes.interfaces with
+            | Some (true, own) -> Some (own @ Html_attributes.common)
+            | Some (false, own) -> Some own
+            | None -> None)
+      in
+      match attributes with
+      | Some attributes ->
+          Ok
+            (Some
+               ( Ldot
+                   ( Ldot (Lident "Solidtype", "Html"),
+                     String.capitalize_ascii tag ),
+                 attributes ))
+      | None ->
+          Error
+            (loc, Printf.sprintf "[@@element %s] names no element <%s>" tag tag)
+      )
+  | a :: _ ->
+      Error
+        ( a.attr_loc,
+          "[@@element tag] names one element, by its tag: [@@element button]" )
+
 let component_of (vb : value_binding) =
   let loc = vb.pvb_loc in
   match (vb.pvb_pat.ppat_desc, vb.pvb_expr.pexp_desc) with
   | ( Ppat_var { txt = "make"; _ },
       Pexp_function (params, None, Pfunction_body body) ) ->
-      let+ props = props_of ~loc params in
-      let vars, props_module = props_module ~loc props in
+      let* props = props_of ~loc params in
+      let+ element = element_of vb in
+      let vars, props_module = props_module ~loc ~element props in
       let props_t =
         B.ptyp_constr ~loc
           { txt = Ldot (Lident "Props", "t"); loc }

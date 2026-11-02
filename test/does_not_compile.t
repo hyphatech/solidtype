@@ -691,3 +691,63 @@ An optional handler, which an element's handler cannot be.
                                       ^^^^^^^^^^^^^^^^
   Error: ?on_click takes a value, not a handler
   [1]
+
+A component given its element takes the element's attributes beside its own
+props, and passes them on.
+
+  $ cat > save.mlx <<'EOF'
+  > let%component make ?(class_ : string option) ~(children : Solidtype.Jsx.content) () =
+  >   ignore class_;
+  >   <button props=(Props.others props)>(fun () -> children ())</button>
+  > [@@element button]
+  > EOF
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Save class_="wide" style="color: red" title="Save">"Save"</Save>
+  > EOF
+  $ build
+
+An attribute its element does not take.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Save href="/x">"Save"</Save>
+  > EOF
+  $ brief
+  File "case.mlx", line 1, characters 25-29:
+  1 | let make () = <Save href="/x">"Save"</Save>
+                               ^^^^
+  This argument cannot be applied with label ~href
+
+A prop its element also names is the component's, whatever the element means
+by it, as TSX's Omit types a part: a switch's change is its state.
+
+  $ cat > toggle.mlx <<'EOF'
+  > let%component make ?(on_change : (bool -> unit) option) () =
+  >   <button on_click=(fun _ -> ignore (on_change true : unit option)) props=(Props.others props) />
+  > [@@element button]
+  > EOF
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Toggle on_change=(fun (_ : Dom.event) -> ()) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 32-59:
+  1 | let make () = <Toggle on_change=(fun (_ : Dom.event) -> ()) />
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: The value solidtype__on_change has type Dom.event -> unit
+         but an expression was expected of type bool -> unit
+         Type Dom.event = Dom._baseClass Dom.event_like
+         is not compatible with type bool
+  [1]
+  $ rm toggle.mlx
+
+An element there is none of.
+
+  $ cat > case.mlx <<'EOF'
+  > let%component make () = <button props=(Props.others props) /> [@@element buton]
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 62-79:
+  1 | let%component make () = <button props=(Props.others props) /> [@@element buton]
+                                                                    ^^^^^^^^^^^^^^^^^
+  Error: [@@element buton] names no element <buton>
+  [1]
+  $ rm save.mlx

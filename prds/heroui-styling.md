@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Draft** — nothing accepted; it revises `heroui.md`'s exclusion of HeroUI's render props and `render`.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so; whether `as_` is typed by its element is open; stage 1 has landed.
 Date: 2026-11-02
 
 ## The problem
@@ -28,6 +28,15 @@ switches and motion apply unchanged. What falls short is what a part takes:
 - **Nothing switches the theme.** HeroUI's `useTheme` keeps the choice --
   light, dark, system, or a theme of the application's own -- and writes it
   on `<html>`; an application here writes its own script.
+- **The components in HeroUI Pro's shape cannot be restyled by their
+  class.** HeroUI's look is a stylesheet of BEM rules in Tailwind's
+  `components` layer, and an application restyles a component by writing
+  its own rule for the class, `.radio { ... }`. `Segment`, `Trend_chip` and
+  `Text_shimmer` write their look on the element as utilities beside the
+  class -- `segment__item rounded-3xl h-8 px-4` -- and a utility is in a
+  later layer, so `.segment__item { border-radius: ... }` loses whatever it
+  says. An application using them found this; it also has to point
+  Tailwind at the library as Melange compiled it.
 - **A toast's own motion ignores `data-reduce-motion`**, which HeroUI's
   styles honour beside `prefers-reduced-motion`
   (`heroui/toast.mlx`, `reduced_motion`).
@@ -89,6 +98,9 @@ function of state.
 - **FR-5** The theme is chosen, resolved, written and kept as HeroUI's
   `useTheme` does.
 - **FR-6** A toast's motion honours `data-reduce-motion`.
+- **FR-7** Every component's look is a rule for its BEM class in the
+  `components` layer, so a rule of the application's for the class
+  restyles it, and a utility given in `class_` wins over it.
 
 ## Design
 
@@ -102,22 +114,27 @@ let%component make ?(variant : variant = `primary) ?(on_click : ...) ...
 [@@element button]
 ```
 
-Its `Props.check` then ends in that element's check, `Html.Button.check`,
-as `Input`'s hand-written one does today. An own parameter whose name is
-one of the element's attributes -- `class_`, `id`, `on_click` -- is read
-from that tail, not added before it, since a label cannot appear twice; its
-getter takes the attribute's type from `Html`, so a port cannot narrow it
-unseen. `generate/html.ts` writes the ppx a table of each element's
-attribute names, `ppx/html_attributes.ml`, as it writes `html_names.ml`.
+Its `Props.check` then takes that element's attributes after its own
+props, each typed by `Html.Button`, but those its own props name: an own
+prop is the component's, whatever the element means by the name, as HeroUI
+types a part, `Omit<DOMProps, keyof OwnProps> & OwnProps`. A switch's
+`on_change` takes its state and a part's `size` its variant, where the
+element's would take an event and a string; some twenty ports have such a
+prop, so a rule that held an own prop to the element's type would leave
+them out. The ppx writes the attributes itself, since `Html.Button.check`
+is a type that cannot drop a label, from a table `generate/html.ts`
+writes, `ppx/html_attributes.ml`: each element's attributes and which are
+handlers.
 
 A part that sets a handler or a `ref` on its element names it as its own
 parameter and calls the caller's beside its own, as the headless parts do
 by hand; `Props.others` spreads the rest after the part's attributes, which
-already happens in 68 of 70 modules. A HeroUI prop whose name is an
-attribute of another meaning -- none today; `<input size>` would be one --
-is a compile error at the check, and decided where it arises.
+already happens in 68 of 70 modules. A port that means the element's
+own attribute by its prop, `class_`, passes it on itself.
 
-Rejected: **writing each check by hand**, as the headless parts are -- some
+Rejected: **an own prop held to the element's type**, the first shape built
+-- some twenty ports, every field with a typed `on_change`, could not use it;
+**writing each check by hand**, as the headless parts are -- some
 260 parts, each a copy of its element's attributes the generator already
 writes; **a `style` prop alone** -- HeroUI's parts take every DOM prop, and
 `title`, `tab_index` and the handlers are asked for as often; **an
@@ -165,6 +182,24 @@ application, as HeroUI says of its own.
 
 Rejected: **a theme context** -- the state is `<html>`'s, one per page.
 
+### A Pro-shaped component's look, a stylesheet
+
+`Segment`, `Trend_chip` and `Text_shimmer` each move their utilities into a
+stylesheet of rules for their BEM classes, `heroui/segment.css` and the
+others, written as HeroUI writes `@heroui/styles/components/*.css`:
+`@apply` of the same utilities on HeroUI's tokens, a state by its data
+attribute, `.segment__item[data-selected="true"]`. The element carries its
+BEM classes alone, and `class_` after them. The library ships the files
+beside its JavaScript, `melange.runtime_deps`, and an application imports
+them into the `components` layer as it imports HeroUI's,
+`@import ".../solidtype-heroui/segment.css" layer(components)`; the
+`@source` of the compiled library is no longer needed.
+
+Rejected: **utilities marked important or in a lower layer** -- the first
+beats an application's rule too, and Tailwind decides the second; **a
+caller's override by `class_` alone** -- HeroUI's model is the rule for the
+class, which restyles every instance at once.
+
 ## Rules it adds
 
 - **A port's part takes every attribute of its element** (revises "A
@@ -174,25 +209,39 @@ Rejected: **a theme context** -- the state is `<html>`'s, one per page.
   HeroUI's parts take every DOM prop, and an attribute a port refuses is
   one an application cannot set. Test: `test/heroui/attributes_test.mlx`,
   every part given a style, a title, a handler and a `ref`.
+- **A component in HeroUI Pro's shape has its look in a stylesheet**
+  (revises "A component in HeroUI Pro's shape is made here", which writes
+  its look as utilities on its parts): rules for its BEM classes, in
+  `heroui/<name>.css`, imported into the `components` layer. Why: every
+  component is restyled alike, by a rule for its class, which a utility on
+  the element would beat. Test: a test that a rule for each Pro-shaped
+  part's class, in the `components` layer, changes its computed style.
 - **A part takes `as_`, Kobalte's `as`** (revises "Kobalte's building
   blocks ... polymorphic ... are not bound"). Why: HeroUI's `render`, a
   router's link in a link's place. Test: each port's `as_` in its test.
 
 ## Stages
 
-- [ ] 1. `[@@element]` in the ppx and the attribute table from
-  `generate/html.ts`; `test/ppx` and `test/does_not_compile.t` for a label
-  given twice and a narrowed type.
-- [ ] 2. Every port's part given its element, handlers composed,
+- [x] 1. `[@@element]` in the ppx and the attribute table from
+  `generate/html.ts`; `test/ppx` for the check, `test/does_not_compile.t`
+  for an attribute the element lacks, an own prop shadowing the element's,
+  and an unknown element.
+- [ ] 2. `Segment`, `Trend_chip` and `Text_shimmer`'s look in stylesheets,
+  shipped and imported into the `components` layer; the Theming page's
+  `@source` of the library goes.
+- [ ] 3. Every port's part given its element, handlers composed,
   `Close_button.Icon` and `List_box.Load_more_item` given `class_`; the
   attributes test over every part. Styling's "Not yet" goes.
-- [ ] 3. `as_` in the Kobalte binding and on every port's part; a
+- [ ] 4. `as_` in the Kobalte binding and on every port's part; a
   router-link example on Link's and Button's pages. Composition's "Not yet"
   goes.
-- [ ] 4. Children of state on each part HeroUI gives a render function,
+- [ ] 5. Children of state on each part HeroUI gives a render function,
   tested against the React twin's render function.
-- [ ] 5. `Theme`, its example on the Theming page, tested in jsdom.
-- [ ] 6. A toast's motion under `data-reduce-motion`.
+- [ ] 6. `Theme`, its example on the Theming page, tested in jsdom.
+- [ ] 7. A toast's motion under `data-reduce-motion`.
+- [ ] 8. Every component checked alike: each part's look a rule for its
+  class, restyled by one; each takes its element's attributes, `class_`
+  and `as_`.
 
 ## Verification
 
@@ -202,12 +251,10 @@ state child and `Theme` built and seen in a browser beside heroui.com's.
 
 ## Open
 
-- **The spelling of the element**: `[@@element button]` beside the
-  function, or a parameter of the extension. Blocks stage 1.
 - **Whether `as_` is typed by its element**, a component of a `<button>`'s
   props for a button, or of any props. A typed one refuses an `<a>` where a
   `<button>` belongs, as HeroUI only warns; it needs the element's props as
-  a type, which `Html` does not yet give. Blocks stage 3.
+  a type, which `Html` does not yet give. Blocks stage 4.
 
 ## Where the facts go
 

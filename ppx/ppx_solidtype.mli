@@ -47,5 +47,13 @@
     one giving [Some] of its result or [None]: each is a live read of Solid's
     props, so Solid tracks it.
 
+    Given the element it draws, [let%component make ... [@@element button]], its
+    [check] takes each of that element's attributes after its own props, typed
+    as [Solidtype.Html.Button] types them, for [others] to pass on. A prop the
+    element also names is the component's own, whatever the element means by it,
+    and the element's attribute of that name is not taken, as TSX types a part
+    [Omit<DOM, keyof Own> & Own]: a switch's [on_change] takes its state, not
+    the DOM's event.
+
     [-internal] lowers JSX inside solidtype itself, naming its modules without
     [Solidtype.]. *)
