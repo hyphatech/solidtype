@@ -251,7 +251,10 @@ module Action_button : sig
       ?on_press:(unit -> unit) ->
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Button.state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -262,6 +265,15 @@ end
 
 (** HeroUI's {!Close_button}, which closes the toast its [key] names. *)
 module Close_button : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -270,6 +282,10 @@ module Close_button : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?on_click:(Dom.mouseEvent -> unit) ->
+      ?children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -277,6 +293,14 @@ module Close_button : sig
   val make : Props.t -> Solidtype.Jsx.element
   val component : Props.t Solidtype.Jsx.component
 end
+
+type state = {
+  toast : queued;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+}
+(** What a toast's children are drawn of, given as a function, as HeroUI's
+    render props are: the toast, and its focus read where Solid tracks it. *)
 
 (** A toast of a {!Provider}'s stack, Kobalte's, given the toast its render
     function was given: its place in the stack and its state, as HeroUI's styles
@@ -290,7 +314,10 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?style:string Solidtype.Check.value ->
     ?ref:(Dom.element -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Li.check
 end

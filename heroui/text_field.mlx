@@ -19,6 +19,14 @@ module Parts = Field.Slots (struct
   let error = Kobalte.ErrorMessage.component
 end)
 
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = {
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(value : string option)
     ?(default_value : string option) ?(on_change : (string -> unit) option)
@@ -28,7 +36,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let f =
@@ -73,7 +81,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_required=(fun () -> Jsx.flag (is_required ()))
       props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>(fun () -> children ())</Parts>
+        <Parts>
+          (fun () ->
+            Jsx.draw (children ())
+              {
+                is_disabled = (fun[@u] () -> is_disabled ());
+                is_invalid = (fun[@u] () -> invalid ());
+                is_read_only = (fun[@u] () -> is_read_only ());
+                is_required = (fun[@u] () -> is_required ());
+              })
+        </Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

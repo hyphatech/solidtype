@@ -31,9 +31,15 @@ let slots () = Styles.Breadcrumbs.slots (Styles.Breadcrumbs.options ())
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Item = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_current : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(id : string option) ?(href : string option)
       ?(is_disabled : bool = false) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let t =
       match Context.use () with
       | Some t -> t
@@ -72,7 +78,12 @@ module Item = struct
             data_focus_visible=(fun () ->
                                  Jsx.flag (Interaction.focus_visible i))
             data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
-            (fun () -> children ())
+            (fun () ->
+              Jsx.draw (children ())
+                {
+                  is_current = (fun[@u] () -> current ());
+                  is_disabled = (fun[@u] () -> disabled ());
+                })
           </Link.Root>
           <Show when_=(fun () -> not (current ()))>
             (fun () ->

@@ -28,6 +28,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Disclosure.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Disclosure.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Disclosure.tsx"]
 end
@@ -182,9 +185,137 @@ let both ?is_expanded ?default_expanded ?is_disabled ?(button = false) () =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The walk on the trigger of a disclosure whose root and trigger draw their
+   children of their state, as words: what each part's function was given of
+   its focus and the trigger's interaction, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Disclosure is_disabled=(fun () -> disabled)>
+        (fun d ->
+          Solidtype.Jsx.fragment
+            [|
+              words "disclosure"
+                [
+                  ("focus-visible-within", d.is_focus_visible_within);
+                  ("disabled", d.is_disabled);
+                ];
+              <Disclosure.Heading>
+                <Disclosure.Trigger>
+                  (fun t ->
+                    words "trigger"
+                      [
+                        ("hovered", t.is_hovered);
+                        ("pressed", t.is_pressed);
+                        ("focused", t.is_focused);
+                        ("focus-visible", t.is_focus_visible);
+                        ("disabled", t.is_disabled);
+                      ])
+                </Disclosure.Trigger>
+              </Disclosure.Heading>;
+              <Disclosure.Content>
+                "Orders ship within 2 business days."
+              </Disclosure.Content>;
+            |])
+      </Disclosure>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.by_role "button")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Disclosure" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its expansion, as it changes"
+        (fun () ->
+          T.render (fun () ->
+              <Disclosure>
+                (fun d ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      <span data_words="disclosure">
+                        (fun () ->
+                          Solidtype.Jsx.string
+                            (T.words [ ("expanded", d.is_expanded) ]))
+                      </span>;
+                      <Disclosure.Heading>
+                        <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
+                      </Disclosure.Heading>;
+                    |])
+              </Disclosure>);
+          let root = T.query "[data-slot=disclosure]" in
+          (* Whether its words and its data-expanded say the same. *)
+          let agree _ =
+            let said =
+              String.equal (T.words_shown T.body) "disclosure: expanded"
+            in
+            let shown =
+              match
+                Option.bind root (fun r -> T.attribute r "data-expanded")
+              with
+              | Some _ -> true
+              | None -> false
+            in
+            if Bool.equal said shown then "agree" else "differ"
+          in
+          let* walked =
+            T.walk ~read:agree ~step:(fun f -> f ()) (T.by_role "button")
+          in
+          Js.Promise.resolve
+            E.(
+              expect (Array.map snd walked)
+              |> toEqual (Array.make (Array.length walked) "agree")));
+      Jest.testPromise "draws its content's children of the focus within it"
+        (fun () ->
+          T.render (fun () ->
+              <Disclosure default_expanded=true>
+                <Disclosure.Heading>
+                  <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
+                </Disclosure.Heading>
+                <Disclosure.Content>
+                  (fun c ->
+                    Solidtype.Jsx.fragment
+                      [|
+                        <span data_words="content">
+                          (fun () ->
+                            Solidtype.Jsx.string
+                              (T.words
+                                 [
+                                   ( "focus-visible-within",
+                                     c.is_focus_visible_within );
+                                 ]))
+                        </span>;
+                        <button>"Track"</button>;
+                      |])
+                </Disclosure.Content>
+              </Disclosure>);
+          let user = T.setup () in
+          let before = T.words_shown T.body in
+          let* () = T.tab user in
+          let on_trigger = T.words_shown T.body in
+          let* () = T.tab user in
+          Js.Promise.resolve
+            E.(
+              expect (before, on_trigger, T.words_shown T.body)
+              |> toEqual
+                   ("content: ", "content: ", "content: focus-visible-within")));
       Jest.testPromise "expands and collapses, as React's does" (fun () ->
           let* r = both () in
           same r);

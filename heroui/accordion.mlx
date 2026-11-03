@@ -49,10 +49,17 @@ let within_item part =
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Item = struct
+  type state = {
+    is_expanded : bool Solid.accessor;
+    is_focus_visible_within : bool Solid.accessor;
+    is_disabled : bool Solid.accessor;
+  }
+
   let%component make ?(id : string option) ?(is_disabled : bool = false)
       ?(on_expanded_change : (bool -> unit) option) ?(class_ : string option)
-      ?(on_focus_in : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
-      () =
+      ?(on_focus_in : (Dom.focusEvent -> unit) option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : state Jsx.children) () =
     let a = within "Accordion.Item" in
     let key =
       match id () with Some k -> k | None -> Solid.create_unique_id ()
@@ -77,6 +84,8 @@ module Item = struct
         true
     in
     let trigger_disabled, disable_trigger = Solid.create_signal false in
+    (* Its focus, within it, whether or not it is disabled. *)
+    let focus = Interaction.create () in
     let i =
       {
         key;
@@ -99,9 +108,19 @@ module Item = struct
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_hide_separator=(fun () -> Jsx.flag (a.hide_separator ()))
       data_slot="accordion-item"
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch focus e)
       props=(Props.others props)>
       <Item_context.Provider value=(fun () -> i)>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            {
+              is_expanded = (fun[@u] () -> i.expanded ());
+              is_focus_visible_within =
+                (fun[@u] () -> Interaction.focus_visible focus);
+              is_disabled = (fun[@u] () -> disabled ());
+            })
       </Item_context.Provider>
     </Kobalte.Item>
   [@@element div]
@@ -141,13 +160,21 @@ external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
 external repeat : Dom.keyboardEvent -> bool = "repeat" [@@mel.get]
 
 module Trigger = struct
+  type state = {
+    is_hovered : bool Solid.accessor;
+    is_pressed : bool Solid.accessor;
+    is_focused : bool Solid.accessor;
+    is_focus_visible : bool Solid.accessor;
+    is_disabled : bool Solid.accessor;
+  }
+
   let%component make ?(on_press : (unit -> unit) option)
       ?(is_disabled : bool = false) ?(class_ : string option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ?(on_key_up : (Dom.keyboardEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let a, i = within_item "Accordion.Trigger" in
     let disabled () = i.item_disabled () || is_disabled () in
     Solid.create_computed (fun () -> i.disable_trigger (is_disabled ()));
@@ -189,7 +216,15 @@ module Trigger = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered n);
+            is_pressed = (fun[@u] () -> Interaction.pressed n);
+            is_focused = (fun[@u] () -> Interaction.focused n);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
+            is_disabled = (fun[@u] () -> Interaction.disabled n);
+          })
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -239,10 +274,14 @@ module Indicator = struct
 end
 
 module Panel = struct
+  type state = { is_focus_visible_within : bool Solid.accessor }
+
   let%component make ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let a, i = within_item "Accordion.Panel" in
+    (* Its focus, within it. *)
+    let focus = Interaction.create () in
     let panel =
       Panel.create ~expanded:i.expanded ~expand:(fun () -> a.expand i.key) ()
     in
@@ -256,11 +295,17 @@ module Panel = struct
               | None -> Panel.style panel)
       ref=(fun e ->
             ignore (given_ref e : unit option);
+            Interaction.watch focus e;
             Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (i.expanded ()))
       data_slot="accordion-panel"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_focus_visible_within =
+              (fun[@u] () -> Interaction.focus_visible focus);
+          })
     </Kobalte.Content>
   [@@element div]
 end
@@ -281,13 +326,15 @@ module Body = struct
   [@@element div]
 end
 
+type state = { is_disabled : bool Solid.accessor }
+
 let%component make ?(expanded_keys : string array option)
     ?(default_expanded_keys : string array = [||])
     ?(on_expanded_change : (string array -> unit) option)
     ?(allows_multiple_expanded : bool = false) ?(is_disabled : bool = false)
     ?(variant : [ `default | `surface ] = `default)
     ?(hide_separator : bool = false) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   let keys, set_keys =
     Field.controlled ~value:expanded_keys ~default:(default_expanded_keys ())
       ~on_change:(fun k -> on_expanded_change k)
@@ -346,7 +393,9 @@ let%component make ?(expanded_keys : string array option)
       multiple=(fun () -> allows_multiple_expanded ())
       collapsible=true>
       <Context.Provider value=(fun () -> a)>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            { is_disabled = (fun[@u] () -> is_disabled ()) })
       </Context.Provider>
     </Kobalte.Root>
   in

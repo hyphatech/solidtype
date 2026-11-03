@@ -2,6 +2,17 @@ module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.ToggleButton
 module Item = Solidtype_kobalte.ToggleGroup.Item
 
+(* What a toggle button's children are drawn of: React Aria's render props
+   for a toggle button. *)
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_pressed : bool Solidtype.Solid.accessor;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_selected : bool Solidtype.Solid.accessor;
+}
+
 let%component make ?(variant : [ `default | `ghost ] option)
     ?(size : Toggle_button_group.size option) ?(is_icon_only : bool = false)
     ?(id : string option) ?(is_selected : bool option)
@@ -9,7 +20,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
     ?(is_disabled : bool option) ?(on_click : (Dom.mouseEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
     ?(aria_label : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   let group = Toggle_button_group.Context.use () in
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
@@ -46,6 +57,17 @@ let%component make ?(variant : [ `default | `ghost ] option)
     ignore (given_ref b : unit option);
     Interaction.watch i b
   in
+  let draw selected () =
+    Jsx.draw (children ())
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> Interaction.pressed i);
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> Interaction.disabled i);
+        is_selected = (fun[@u] () -> selected ());
+      }
+  in
   match group with
   | None ->
       let selected, set_selected =
@@ -68,7 +90,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
         on_click
         props=(Props.others props)
         disabled=(fun () -> disabled ())>
-        (fun () -> children ())
+        (fun () -> draw selected ())
       </Kobalte.Root>
   | Some g -> (
       match id () with
@@ -91,6 +113,6 @@ let%component make ?(variant : [ `default | `ghost ] option)
             props=(Props.others props)
             value=(fun () -> key)
             disabled=(fun () -> disabled ())>
-            (fun () -> children ())
+            (fun () -> draw (fun () -> g.is_selected key) ())
           </Item>)
 [@@element button]

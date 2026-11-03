@@ -29,6 +29,10 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/InputGroup.tsx"]
 
+  external render_of_state : bool -> bool -> bool -> bool -> Dom.element
+    = "renderOfState"
+  [@@mel.module "./twins/InputGroup.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/InputGroup.tsx"]
 end
@@ -181,8 +185,81 @@ let both ?variant ?full_width ~in_field ~multiline () =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* A field whose root and group draw their children of their state, as
+   words. *)
+let draw_of_state ~disabled ~read_only ~invalid ~required =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Text_field
+        aria_label="Field"
+        is_disabled=(fun () -> disabled)
+        is_read_only=(fun () -> read_only)
+        is_invalid=(fun () -> invalid)
+        is_required=(fun () -> required)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "field"
+                [
+                  ("disabled", r.is_disabled);
+                  ("invalid", r.is_invalid);
+                  ("read-only", r.is_read_only);
+                  ("required", r.is_required);
+                ];
+              <Input_group>
+                (fun g ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      words "group"
+                        [
+                          ("hovered", g.is_hovered);
+                          ("focus-within", g.is_focus_within);
+                          ("focus-visible", g.is_focus_visible);
+                          ("disabled", g.is_disabled);
+                          ("invalid", g.is_invalid);
+                        ];
+                      <Input_group.Input />;
+                    |])
+              </Input_group>;
+            |])
+      </Text_field>)
+
+(* What it writes, beside React's, then a glance at its group. *)
+let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
+    ?(required = false) () =
+  draw_of_state ~disabled ~read_only ~invalid ~required;
+  let* solidtype =
+    T.glance ~read:T.words_shown ~step:Twin.step (T.slot "input-group")
+  in
+  T.cleanup ();
+  let* react =
+    T.glance ~read:T.words_shown ~step:Twin.step
+      (Twin.render_of_state disabled read_only invalid required)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Input_group" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "draws its parts' children of their state, read-only, invalid, required"
+        (fun () ->
+          let* solidtype, react =
+            of_state ~read_only:true ~invalid:true ~required:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "is an input with its prefix and suffix, as React's"
         (fun () ->

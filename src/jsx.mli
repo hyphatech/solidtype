@@ -35,6 +35,16 @@ type 'state children
     [<Button>"Save"</Button>] or
     [<Button>(fun s -> if S.get s.is_pressed then ... else ...)</Button>]. *)
 
+external of_content : content -> element = "%identity"
+(** [of_content c] is [c] where an element is taken, as Solid takes text and a
+    number wherever it takes an element: what a function child gives of {!draw}.
+*)
+
+val is_function : 'state children -> bool
+(** Whether [children] are a function of their state rather than elements: a
+    component that shows something else in place of its elements still calls a
+    function with it. *)
+
 val draw : 'state children -> 'state -> content
 (** [draw children state] is [children] as they are, or what their function
     draws of [state], read where it is written: in a thunk, Solid tracks both

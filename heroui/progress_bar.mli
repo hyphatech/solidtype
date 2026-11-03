@@ -74,6 +74,17 @@ module Fill : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type state = {
+  percentage : float option Solidtype.Solid.accessor;
+      (** Its value's share of its range, from 0 to 100, while it is not
+          indeterminate. *)
+  value_text : string option Solidtype.Solid.accessor;
+      (** Its value as it is shown, while it is not indeterminate. *)
+  is_indeterminate : bool Solidtype.Solid.accessor;
+}
+(** What its children are drawn of, given as a function, as HeroUI's render
+    props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -90,7 +101,10 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

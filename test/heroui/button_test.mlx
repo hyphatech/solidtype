@@ -16,9 +16,41 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Button.tsx"]
 
+  external render_of_state : bool -> bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Button.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Button.tsx"]
 end
+
+(* The same walk on a button whose children are drawn of its state, which
+   writes the state as words: what each side's function was given. *)
+let of_state ?(pending = false) ~disabled () =
+  T.render (fun () ->
+      <Button is_disabled=(fun () -> disabled) is_pending=(fun () -> pending)>
+        (fun s ->
+          <span>
+            (fun () ->
+              Solidtype.Jsx.string
+                (T.words
+                   [
+                     ("hovered", s.is_hovered);
+                     ("pressed", s.is_pressed);
+                     ("focused", s.is_focused);
+                     ("focus-visible", s.is_focus_visible);
+                     ("disabled", s.is_disabled);
+                     ("pending", s.is_pending);
+                   ]))
+          </span>)
+      </Button>);
+  let read = T.text_content in
+  let* solidtype = T.walk ~read ~step:Twin.step (T.by_role "button") in
+  T.cleanup ();
+  let* react =
+    T.walk ~read ~step:Twin.step (Twin.render_of_state disabled pending)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
 
 (* The walk on HeroUI's Button in solidtype, then in React, each alone on
    the page, so Tab reaches it. *)
@@ -126,6 +158,18 @@ let () =
       Jest.testPromise "shows focus alone while pending, as React Aria does"
         (fun () ->
           let* solidtype, react = both ~pending:true ~disabled:false () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state, as React's function"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state while pending"
+        (fun () ->
+          let* solidtype, react = of_state ~pending:true ~disabled:false () in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise
         "is not clicked while pending, nor submits, though it is focusable"

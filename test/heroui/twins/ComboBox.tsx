@@ -6,6 +6,7 @@
 import { ComboBox, Description, Input, Label, ListBox } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -73,6 +74,78 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A combo box of several options chosen whose value draws its children of
+// them, the text it is given.
+export function renderValueOfState(multiple: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <ComboBox
+        aria-label="Animal"
+        selectionMode={multiple ? "multiple" : "single"}
+        defaultValue={multiple ? ["cat", "panda"] : "cat"}
+      >
+        <ComboBox.InputGroup>
+          <Input />
+          <ComboBox.Trigger />
+        </ComboBox.InputGroup>
+        <ComboBox.Value>{(s) => <span data-words="value">{s.selectedText}</span>}</ComboBox.Value>
+        <ComboBox.Popover>
+          <ListBox selectionMode={multiple ? "multiple" : "single"}>
+            <ListBox.Item id="cat" textValue="Cat">Cat</ListBox.Item>
+            <ListBox.Item id="panda" textValue="Panda">Panda</ListBox.Item>
+          </ListBox>
+        </ComboBox.Popover>
+      </ComboBox>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
+}
+
+// A combo box whose root draws its children of its state, as words in an
+// element marked with its name.
+export function renderRootOfState(
+  isDisabled: boolean,
+  isReadOnly: boolean,
+  isInvalid: boolean,
+  isRequired: boolean,
+): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <ComboBox aria-label="Animal" isDisabled={isDisabled} isReadOnly={isReadOnly} isInvalid={isInvalid} isRequired={isRequired}>
+        {(r) => (
+          <>
+            <span data-words="combo-box">
+              {words([
+                ["open", r.isOpen],
+                ["disabled", r.isDisabled],
+                ["invalid", r.isInvalid],
+                ["required", r.isRequired],
+                ["read-only", r.isReadOnly],
+              ])}
+            </span>
+            <ComboBox.InputGroup>
+              <Input />
+              <ComboBox.Trigger />
+            </ComboBox.InputGroup>
+            <ComboBox.Popover>
+              <ListBox>
+                <ListBox.Item id="cat">Cat</ListBox.Item>
+              </ListBox>
+            </ComboBox.Popover>
+          </>
+        )}
+      </ComboBox>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
 }
 
 export function cleanup(): void {

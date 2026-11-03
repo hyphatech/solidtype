@@ -63,10 +63,10 @@ let make () =
     <Label>"User"</Label>
     <Select.Trigger>
       <Select.Value>
-        (fun keys ->
+        (fun s ->
           <span class_="contents">
             (fun () ->
-              match S.get keys with
+              match S.get s.selected_keys with
               | [| key |] -> (
                   match
                     Array.find_opt

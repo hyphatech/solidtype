@@ -48,10 +48,19 @@ external stop_click : Dom.mouseEvent -> unit = "stopPropagation" [@@mel.send]
 external prevent_click : Dom.mouseEvent -> unit = "preventDefault" [@@mel.send]
 
 module Trigger = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(class_ : string option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let s = within "Select.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
     <Kobalte.Trigger
@@ -79,14 +88,29 @@ module Trigger = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_pressed = (fun[@u] () -> Interaction.pressed i);
+            is_focused = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+            is_disabled = (fun[@u] () -> s.disabled ());
+          })
     </Kobalte.Trigger>
   [@@element button]
 end
 
 module Value = struct
+  (* What its children are drawn of while an option is chosen: React Aria's
+     render props for a value, its keys and its text. *)
+  type state = {
+    selected_keys : string array S.accessor;
+    selected_text : string S.accessor;
+  }
+
   let%component make ?(class_ : string option)
-      ?(children : (string array S.accessor -> Jsx.element) option) () =
+      ?(children : state Jsx.children option) () =
     let s = within "Select.Value" in
     let keys =
       S.create_memo (fun () ->
@@ -97,14 +121,20 @@ module Value = struct
       data_slot="select-value"
       data_placeholder=(fun () -> Jsx.flag (s.is_empty ()))
       props=(Props.others props)>
-      (fun _ ->
-        match children keys with
-        | Some drawn -> drawn
+      (fun () ->
+        match children () with
+        | Some c ->
+            Jsx.draw c
+              {
+                selected_keys = (fun[@u] () -> S.get keys);
+                selected_text = (fun[@u] () -> List_box.listed (s.selected ()));
+              }
         | None ->
             (* React Aria's value is the options chosen, each as it is drawn
                in the list. *)
-            Jsx.fragment
-              (Array.of_list (List.map List_box.content (s.selected ()))))
+            Jsx.element
+              (Jsx.fragment
+                 (Array.of_list (List.map List_box.content (s.selected ())))))
     </Kobalte.Value>
   [@@element span]
 end
@@ -297,6 +327,16 @@ module Parts = Field.Slots (struct
   let error = Kobalte.ErrorMessage.component
 end)
 
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = {
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_open : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
 let%component make ?(placeholder : string = "Select an item")
     ?(selection_mode : [ `single | `multiple ] = `single)
     ?(value : string array option) ?(default_value : string array option)
@@ -308,8 +348,8 @@ let%component make ?(placeholder : string = "Select an item")
     ?(name : string option) ?(full_width : bool = false)
     ?(variant : [ `primary | `secondary ] = `primary) ?(class_ : string option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
-    () =
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -407,7 +447,21 @@ let%component make ?(placeholder : string = "Select an item")
                  Jsx.nothing)>
         <List_box.Listing.Provider value=(fun () -> listing)>
           <Field_error.Message.Provider value=(fun () -> in_form.error)>
-            <Parts>(fun () -> children ()) <Kobalte.HiddenSelect /></Parts>
+            <Parts>
+              (fun () ->
+                Jsx.draw (children ())
+                  {
+                    is_focused =
+                      (fun[@u] () -> Interaction.focused i || opened ());
+                    is_focus_visible =
+                      (fun[@u] () -> Interaction.focus_visible i);
+                    is_disabled = (fun[@u] () -> is_disabled ());
+                    is_open = (fun[@u] () -> opened ());
+                    is_invalid = (fun[@u] () -> invalid ());
+                    is_required = (fun[@u] () -> is_required ());
+                  })
+              <Kobalte.HiddenSelect />
+            </Parts>
           </Field_error.Message.Provider>
         </List_box.Listing.Provider>
       </List_box.Host.Provider>

@@ -34,6 +34,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/ColorSlider.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/ColorSlider.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/ColorSlider.tsx"]
 end
@@ -212,8 +215,99 @@ let both ~channel ~value ?label ?(is_disabled = false) ?orientation () =
   Twin.cleanup ();
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The walk on the thumb of a hue slider whose parts draw their children of
+   their state, as words, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  let vertical o =
+   fun[@u] () ->
+    match Solidtype.Solid.get o with `vertical -> true | `horizontal -> false
+  in
+  T.render (fun () ->
+      <Color_slider
+        aria_label="Hue"
+        channel=`hue
+        default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+        is_disabled=(fun () -> disabled)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "slider"
+                [
+                  ("vertical", vertical r.orientation);
+                  ("disabled", r.is_disabled);
+                ];
+              <Color_slider.Output>
+                (fun o ->
+                  words "output"
+                    [
+                      ("vertical", vertical o.orientation);
+                      ("disabled", o.is_disabled);
+                    ])
+              </Color_slider.Output>;
+              <Color_slider.Track>
+                (fun t ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      words "track"
+                        [
+                          ("vertical", vertical t.orientation);
+                          ("disabled", t.is_disabled);
+                          ("hovered", t.is_hovered);
+                        ];
+                      <Color_slider.Thumb>
+                        (fun h ->
+                          <span data_words="thumb">
+                            (fun () ->
+                              Solidtype.Jsx.string
+                                (T.words
+                                   [
+                                     ("dragging", h.is_dragging);
+                                     ("hovered", h.is_hovered);
+                                     ("focused", h.is_focused);
+                                     ("focus-visible", h.is_focus_visible);
+                                     ("disabled", h.is_disabled);
+                                   ]
+                                ^ " "
+                                ^ Color.to_string
+                                    (Solidtype.Solid.get h.color)
+                                    ~format:`hex ()))
+                          </span>)
+                      </Color_slider.Thumb>;
+                    |])
+              </Color_slider.Track>;
+            |])
+      </Color_slider>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.slot "color-slider-thumb")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Color_slider" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          (* React Aria hovers a disabled thumb and track, which no other part
+             of it does; the port's are not hovered, as a disabled button is
+             not. *)
+          Js.Promise.resolve
+            E.(
+              expect (solidtype, T.without "hovered" solidtype)
+              |> toEqual (T.without "hovered" react, T.without "hovered" react)));
       Jest.afterEach T.cleanup;
       Jest.testPromise "is a hue, labelled, as React's is" (fun () ->
           both ~channel:(Some "hue") ~value:"hsl(0, 100%, 50%)" ~label:"Hue" ());

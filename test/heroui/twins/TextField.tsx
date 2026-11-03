@@ -2,9 +2,10 @@
 // TextArea alone, which the solidtype port's test renders under the same
 // props, to compare every element, and walks as it walks the port's.
 
-import { Description, FieldError, Input, Label, TextArea, TextField } from "@heroui/react";
+import { Description, FieldError, Form, Input, Label, TextArea, TextField } from "@heroui/react";
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -63,6 +64,30 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A field a form gives an error, whose error draws its children of its state,
+// as text in an element marked with its name.
+export function renderErrorOfState(_: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Form validationErrors={{ email: "Too short." }}>
+        <TextField name="email">
+          <Label>Email</Label>
+          <Input />
+          <FieldError>
+            {(s) => (
+              <span data-words="error">{`${s.isInvalid}|${s.validationErrors.join(",")}`}</span>
+            )}
+          </FieldError>
+        </TextField>
+      </Form>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
 }
 
 export function cleanup(): void {

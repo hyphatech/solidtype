@@ -33,6 +33,10 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Switch.tsx"]
 
+  external render_of_state : bool -> bool -> bool -> bool -> Dom.element
+    = "renderOfState"
+  [@@mel.module "./twins/Switch.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Switch.tsx"]
 end
@@ -107,8 +111,82 @@ let both ?(read_only = false) ?(required = false) ?(invalid = false) ?aria_label
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
 
+(* The walk on the content of a switch whose root and content draw their
+   children of their state, as words, beside React's. *)
+let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
+    ?(required = false) () =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Switch
+        is_disabled=(fun () -> disabled)
+        is_read_only=(fun () -> read_only)
+        is_invalid=(fun () -> invalid)
+        is_required=(fun () -> required)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "switch"
+                [
+                  ("selected", r.is_selected);
+                  ("disabled", r.is_disabled);
+                  ("read-only", r.is_read_only);
+                  ("invalid", r.is_invalid);
+                  ("required", r.is_required);
+                ];
+              <Switch.Content>
+                (fun c ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      <Switch.Control><Switch.Thumb /></Switch.Control>;
+                      <Label>"Wi-Fi"</Label>;
+                      words "content"
+                        [
+                          ("selected", c.is_selected);
+                          ("hovered", c.is_hovered);
+                          ("pressed", c.is_pressed);
+                          ("focused", c.is_focused);
+                          ("focus-visible", c.is_focus_visible);
+                          ("disabled", c.is_disabled);
+                          ("read-only", c.is_read_only);
+                          ("invalid", c.is_invalid);
+                          ("required", c.is_required);
+                        ];
+                    |])
+              </Switch.Content>;
+            |])
+      </Switch>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.slot "switch-content")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step
+      (Twin.render_of_state disabled read_only invalid required)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Switch" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "draws its parts' children of their state, read-only, invalid, required"
+        (fun () ->
+          let* solidtype, react =
+            of_state ~read_only:true ~invalid:true ~required:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is HeroUI's switch, off, and walked as React Aria's"
         (fun () ->
           let* solidtype, react =

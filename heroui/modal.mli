@@ -76,7 +76,10 @@ module Backdrop : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -99,7 +102,10 @@ module Container : sig
       ?size:[ `xs | `sm | `md | `lg | `cover | `full ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -118,7 +124,10 @@ module Dialog : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlElement -> unit) ->
       ?on_focus_out:(Dom.focusEvent -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Dialog_frame.dialog_state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Section.check
   end
@@ -215,6 +224,10 @@ module Close_trigger : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
+      ?children:
+        ( Close_button.state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end

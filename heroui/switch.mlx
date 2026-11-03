@@ -23,14 +23,43 @@ module Field_content = Field.Content (struct
 end)
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  (* What its children are drawn of: React Aria's render props for it, made
+     of its field's state and its interaction. *)
+  type state = {
+    is_selected : bool Solidtype.Solid.accessor;
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_read_only : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+    is_required : bool Solidtype.Solid.accessor;
+  }
+
+  let state_of (f : Field.state) =
+    let i = f.interaction in
+    {
+      is_selected = (fun[@u] () -> f.selected ());
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_pressed = (fun[@u] () -> Interaction.pressed i);
+      is_focused = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> f.disabled ());
+      is_read_only = (fun[@u] () -> f.read_only ());
+      is_invalid = (fun[@u] () -> f.invalid ());
+      is_required = (fun[@u] () -> f.required ());
+    }
+
+  let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      () =
     let s = within "Switch.Content" in
     <Field_content
       field=(fun () -> s.field)
       slot="switch-content"
       class_=(fun () -> after (Styles.Switch.content (s.slots ())) (class_ ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> Jsx.draw (children ()) (state_of s.field))
     </Field_content>
   [@@element label]
 end
@@ -58,6 +87,25 @@ module Thumb = struct
   [@@element span]
 end
 
+(* What its children are drawn of: React Aria's render props for it,
+   made of its state as a field. *)
+type state = {
+  is_selected : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
+let state_of (f : Field.state) =
+  {
+    is_selected = (fun[@u] () -> f.selected ());
+    is_disabled = (fun[@u] () -> f.disabled ());
+    is_read_only = (fun[@u] () -> f.read_only ());
+    is_invalid = (fun[@u] () -> f.invalid ());
+    is_required = (fun[@u] () -> f.required ());
+  }
+
 let%component make ?(size : [ `lg | `md | `sm ] = `md)
     ?(is_selected : bool option) ?(default_selected : bool = false)
     ?(on_change : (bool -> unit) option) ?(is_disabled : bool = false)
@@ -66,8 +114,8 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
     ?(value : string option) ?(aria_label : string option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
-    () =
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   (* The state is the switch's, read by Kobalte and by every part alike. *)
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
@@ -129,7 +177,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> Jsx.draw (children ()) (state_of s.field))
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

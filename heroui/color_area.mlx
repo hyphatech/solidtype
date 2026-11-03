@@ -1,9 +1,7 @@
-module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Headless = Solidtype_headless.Color_area
 module Color = Solidtype_kobalte.Types.Color
 module Area = Solidtype_kobalte.Types.ColorAreaContextValue
-module State = Solidtype_kobalte.Types.ColorAreaState
 
 type channel =
   [ `hue
@@ -33,15 +31,25 @@ let painted color style =
   ^ match style with Some s -> "; " ^ s | None -> ""
 
 module Thumb = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    color : Solidtype_kobalte.Types.Color.t Solidtype.Solid.accessor;
+    is_dragging : bool Solidtype.Solid.accessor;
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(class_ : string option) ?(style : string option)
-      ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option) () =
+      ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option)
+      ?(children : state Jsx.children option) () =
     let { slots; disabled } =
       match Area_context.use () with
       | Some a -> a
       | None -> invalid_arg "Color_area.Thumb is used inside a Color_area"
     in
     let area = Headless.use_color_area_context () in
-    let state = Area.state area in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
     (* HeroUI's disabled style stops the pointer. *)
     <Headless.Thumb
@@ -52,13 +60,30 @@ module Thumb = struct
       style=(fun () -> painted (Area.get_display_color area ()) (style ()))
       data_slot="color-area-thumb"
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_dragging=(fun () -> Jsx.flag (S.get (State.is_dragging state)))
+      data_dragging=(fun () -> Jsx.flag (Interaction.dragged i))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       props=(Props.others props)>
-      <Headless.HiddenInputX /> <Headless.HiddenInputY />
+      <Headless.HiddenInputX />
+      <Headless.HiddenInputY />
+      (fun () ->
+        match children () with
+        | Some c ->
+            Jsx.draw c
+              {
+                color = (fun[@u] () -> Area.get_display_color area ());
+                is_dragging = (fun[@u] () -> Interaction.dragged i);
+                is_hovered = (fun[@u] () -> Interaction.hovered i);
+                is_focused = (fun[@u] () -> Interaction.focused i);
+                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+                is_disabled = (fun[@u] () -> disabled ());
+              }
+        | None -> Jsx.string "")
     </Headless.Thumb>
   [@@element span]
 end
+
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = { is_disabled : bool Solidtype.Solid.accessor }
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(on_change : (Color.t -> unit) option)
@@ -66,7 +91,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(y_channel : channel option) ?(color_space : [ `rgb | `hsl | `hsb ] option)
     ?(x_name : string option) ?(y_name : string option)
     ?(is_disabled : bool = false) ?(show_dots : bool option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : state Jsx.children) () =
   let slots () =
     Styles.ColorArea.slots
       (Styles.ColorArea.options ?show_dots:(show_dots ()) ())
@@ -94,7 +119,9 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       <Headless.Background
         style="position: absolute; inset: 0; border-radius: inherit; \
                box-shadow: inherit">
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            { is_disabled = (fun[@u] () -> is_disabled ()) })
       </Headless.Background>
     </Headless.Root>
   </Area_context.Provider>

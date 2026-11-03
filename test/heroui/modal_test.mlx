@@ -39,6 +39,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Modal.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Modal.tsx"]
+
   external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Modal.tsx"]
 end
 
@@ -239,8 +242,83 @@ let focused () =
   | Some e -> T.attribute e "data-slot"
   | None -> None
 
+(* What an open modal whose parts draw their children of their state writes,
+   then whether its dialog's close, given its children, closed it. *)
+let of_state () =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  let look () =
+    (* Once what entering waits for has settled, on each side. *)
+    let* () = Twin.step (fun () -> Js.Promise.resolve ()) in
+    let opened = T.words_shown T.body in
+    let* () =
+      Twin.step (fun () ->
+          match T.query "[data-testid=done]" with
+          | Some done_ -> T.click (T.setup ()) done_
+          | None -> Js.Promise.resolve ())
+    in
+    Js.Promise.resolve (opened, Option.is_some (T.query "[role=dialog]"))
+  in
+  T.render (fun () ->
+      <Modal default_open=true>
+        <Modal.Backdrop>
+          (fun b ->
+            Solidtype.Jsx.fragment
+              [|
+                words "backdrop"
+                  [ ("entering", b.is_entering); ("exiting", b.is_exiting) ];
+                <Modal.Container>
+                  (fun c ->
+                    Solidtype.Jsx.fragment
+                      [|
+                        words "container"
+                          [
+                            ("entering", c.is_entering);
+                            ("exiting", c.is_exiting);
+                          ];
+                        <Modal.Dialog>
+                          (fun d ->
+                            Solidtype.Jsx.fragment
+                              [|
+                                <Modal.Close_trigger>
+                                  (fun s ->
+                                    words "close"
+                                      [
+                                        ("hovered", s.is_hovered);
+                                        ("pressed", s.is_pressed);
+                                        ("disabled", s.is_disabled);
+                                      ])
+                                </Modal.Close_trigger>;
+                                <Modal.Heading>"Welcome"</Modal.Heading>;
+                                <button
+                                  type_=`button
+                                  data_testid="done"
+                                  on_click=(fun _ -> d.close ())>
+                                  "Done"
+                                </button>;
+                              |])
+                        </Modal.Dialog>;
+                      |])
+                </Modal.Container>;
+              |])
+        </Modal.Backdrop>
+      </Modal>);
+  let* solidtype = look () in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_of_state false in
+  let* react = look () in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Modal" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "opens, and closes each way, as React's does" (fun () ->
           let* r = both () in

@@ -4,6 +4,7 @@
 import { Label, ProgressBar } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -29,6 +30,26 @@ export function render(props: Props): HTMLElement {
         <ProgressBar.Track>
           <ProgressBar.Fill />
         </ProgressBar.Track>
+      </ProgressBar>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
+}
+
+// The bar whose children are drawn of its state, as text in an element
+// marked state.
+export function renderOfState(indeterminate: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <ProgressBar aria-label="Loading" value={40} isIndeterminate={indeterminate}>
+        {(s) => (
+          <span data-words="state">
+            {`${s.percentage}|${s.valueText}|${s.isIndeterminate}`}
+          </span>
+        )}
       </ProgressBar>,
     ),
   );

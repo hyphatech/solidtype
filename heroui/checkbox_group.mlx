@@ -27,6 +27,15 @@ let named () =
   in
   (id, here, fun () -> if S.get count > 0 then Some id else None)
 
+(* What its children are drawn of: React Aria's render props for a
+   checkbox group. *)
+type state = {
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
+  is_invalid : bool S.accessor;
+}
+
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(value : string list option) ?(default_value : string list = [])
     ?(on_change : (string list -> unit) option) ?(is_disabled : bool option)
@@ -34,8 +43,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(is_required : bool = false) ?(name : string option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
-    () =
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -97,7 +106,15 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     <Label.Slot.Provider value=(fun () -> label)>
       <Description.Slot.Provider value=(fun () -> description)>
         (fun () ->
-          let resolved = S.children (fun () -> children ()) in
+          let state =
+            {
+              is_disabled = (fun[@u] () -> disabled ());
+              is_read_only = (fun[@u] () -> is_read_only ());
+              is_required = (fun[@u] () -> is_required ());
+              is_invalid = (fun[@u] () -> invalid ());
+            }
+          in
+          let resolved = S.children (fun () -> Jsx.draw (children ()) state) in
           Jsx.element
             <div
               role=`group

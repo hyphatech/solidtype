@@ -63,6 +63,16 @@ let key (o : option_) = o.key
 let text (o : option_) = o.text ()
 let content (o : option_) = o.content ()
 
+type list_format
+
+external list_format : unit -> list_format = "ListFormat"
+[@@mel.new] [@@mel.scope "Intl"]
+
+external format : list_format -> string array -> string = "format" [@@mel.send]
+
+let listed options =
+  format (list_format ()) (Array.of_list (List.map text options))
+
 (* What a part that holds a list takes of it, to draw it as its own. *)
 type hosted = {
   options : unit -> option_ list;
@@ -147,13 +157,24 @@ end
 external pressed : Dom.keyboardEvent -> string = "key" [@@mel.get]
 
 module Item = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    selection_mode : [ `none | `single | `multiple ] S.accessor;
+  }
+
   let%component make ~(id : string) ?(text_value : string option)
       ?(is_disabled : bool = false)
       ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     within "List_box.Item";
     let others = Props.others props in
     let key_ = S.untrack id in
@@ -219,7 +240,17 @@ module Item = struct
         props=others>
         <Item_context.Provider value=(fun () -> { item_slots; selected })>
           <Description.Slot.Provider value=(fun () -> description)>
-            (fun () -> children ())
+            (fun () ->
+              Jsx.draw (children ())
+                {
+                  is_hovered = (fun[@u] () -> Interaction.hovered i);
+                  is_pressed = (fun[@u] () -> Interaction.pressed i);
+                  is_selected = (fun[@u] () -> selected ());
+                  is_focused = (fun[@u] () -> focused ());
+                  is_focus_visible = (fun[@u] () -> focus_visible ());
+                  is_disabled = (fun[@u] () -> disabled ());
+                  selection_mode = (fun[@u] () -> l.mode ());
+                })
           </Description.Slot.Provider>
         </Item_context.Provider>
       </As_option>
@@ -231,9 +262,20 @@ module Item = struct
         Styles.ListboxItem.slots
           (Styles.ListboxItem.options ~variant:(variant ()) ())
       in
+      let no = fun[@u] () -> false in
       <Item_context.Provider
         value=(fun () -> { item_slots; selected = (fun () -> false) })>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            {
+              is_hovered = no;
+              is_pressed = no;
+              is_selected = no;
+              is_focused = no;
+              is_focus_visible = no;
+              is_disabled = no;
+              selection_mode = (fun[@u] () -> `none);
+            })
       </Item_context.Provider>
     in
     let option_ =

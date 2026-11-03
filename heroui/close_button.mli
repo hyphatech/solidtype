@@ -24,6 +24,17 @@ module Icon : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_pressed : bool Solidtype.Solid.accessor;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+}
+(** What a close button's children are drawn of, given as a function, as
+    HeroUI's render props are, each read where Solid tracks it. A function draws
+    the cross itself where it wants it, {!Icon}. *)
+
 module Props : sig
   type t
 
@@ -34,7 +45,10 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
     ?ref:(Dom.htmlButtonElement -> unit) ->
-    ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Button.check
 end

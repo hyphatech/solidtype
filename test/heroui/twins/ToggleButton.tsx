@@ -5,6 +5,7 @@
 import { ToggleButton, ToggleButtonGroup } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -30,6 +31,51 @@ export function render(props: Button): HTMLElement {
   const host = mount(<ToggleButton {...props}>Like</ToggleButton>);
   const button = host.querySelector("button");
   if (!button) throw new Error("HeroUI's ToggleButton rendered no button");
+  return button;
+}
+
+// The button whose children are its render function's, its state as words:
+// the interaction's, since Kobalte's button turns on Enter going down, as a
+// native button clicks, where React Aria's turns as it goes up.
+export function renderOfState(props: Button): HTMLElement {
+  const host = mount(
+    <ToggleButton {...props}>
+      {(s) =>
+        words([
+          ["hovered", s.isHovered],
+          ["pressed", s.isPressed],
+          ["focused", s.isFocused],
+          ["focus-visible", s.isFocusVisible],
+          ["disabled", s.isDisabled],
+        ])
+      }
+    </ToggleButton>,
+  );
+  const button = host.querySelector("button");
+  if (!button) throw new Error("HeroUI's ToggleButton rendered no button");
+  return button;
+}
+
+// A vertical group of one button whose group draws its children of its
+// state, as words in an element marked with its name; its button, to walk.
+export function renderGroupOfState(isDisabled: boolean): HTMLElement {
+  const host = mount(
+    <ToggleButtonGroup aria-label="Alignment" orientation="vertical" isDisabled={isDisabled}>
+      {(g) => (
+        <>
+          <span data-words="group">
+            {words([
+              ["vertical", g.orientation === "vertical"],
+              ["disabled", g.isDisabled],
+            ])}
+          </span>
+          <ToggleButton id="left">Left</ToggleButton>
+        </>
+      )}
+    </ToggleButtonGroup>,
+  );
+  const button = host.querySelector("button");
+  if (!button) throw new Error("HeroUI's ToggleButtonGroup rendered no button");
   return button;
 }
 

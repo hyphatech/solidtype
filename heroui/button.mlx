@@ -111,6 +111,17 @@ let announce labelled_by =
     (Js.Global.setTimeout ~f:(fun () -> remove message) 7000
       : Js.Global.timeoutId)
 
+(* What a button's children are drawn of: React Aria's render props for a
+   button, each read where Solid tracks it. *)
+type state = {
+  is_hovered : bool S.accessor;
+  is_pressed : bool S.accessor;
+  is_focused : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_pending : bool S.accessor;
+}
+
 let%component make
     ?(variant :
        [ `primary
@@ -128,7 +139,8 @@ let%component make
     ?(on_click : (Dom.mouseEvent -> unit) option)
     ?(on_focus : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-    ?(aria_label : string option) ~(children : Solidtype.Jsx.content) () =
+    ?(aria_label : string option) ~(children : state Solidtype.Jsx.children) ()
+    =
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
   let group = Button_group.Context.use () in
@@ -212,6 +224,25 @@ let%component make
       ~no_hover:(fun[@u] () -> pending ())
       ()
   in
+  (* Pressed as it is, or as its trigger shows it, and never while pending. *)
+  let pressed () =
+    (not (pending ()))
+    && (Interaction.pressed i
+       ||
+       match Option.bind trigger (fun (t : trigger) -> t.pressed) with
+       | Some shown -> shown ()
+       | None -> false)
+  in
+  let state =
+    {
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_pressed = (fun[@u] () -> pressed ());
+      is_focused = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> Interaction.disabled i);
+      is_pending = (fun[@u] () -> pending ());
+    }
+  in
   (* A reader is told as it comes to be pending, or stops, while it has the
      focus, as React Aria tells it. *)
   S.create_computed_from ~init:(S.untrack pending) (fun was ->
@@ -275,16 +306,7 @@ let%component make
                Option.iter (fun c -> c.focus_row ()) chevron)
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
-    data_pressed=(fun () ->
-                   Solidtype.Jsx.flag
-                     ((not (pending ()))
-                     && (Interaction.pressed i
-                        ||
-                        match
-                          Option.bind trigger (fun (t : trigger) -> t.pressed)
-                        with
-                        | Some shown -> shown ()
-                        | None -> false)))
+    data_pressed=(fun () -> Solidtype.Jsx.flag (pressed ()))
     data_focused=(fun () -> Solidtype.Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () ->
                          Solidtype.Jsx.flag (Interaction.focus_visible i))
@@ -301,7 +323,7 @@ let%component make
                Option.iter (fun c -> c.toggle ()) chevron)
     props=(Props.others props)>
     <Spinner.Progress.Provider value=(fun () -> progress_id)>
-      (fun () -> children ())
+      (fun () -> Solidtype.Jsx.draw (children ()) state)
     </Spinner.Progress.Provider>
   </Root>
 [@@element button]

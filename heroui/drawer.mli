@@ -33,6 +33,15 @@
     hovered, pressed and focused as React Aria's is, and pressed while the
     drawer is open. A {!Button} inside a drawer opens it too. *)
 module Trigger : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -40,7 +49,10 @@ module Trigger : sig
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -67,7 +79,10 @@ module Backdrop : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -86,7 +101,10 @@ module Content : sig
       ?placement:[ `top | `bottom | `left | `right ] Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -105,7 +123,10 @@ module Dialog : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlElement -> unit) ->
       ?on_focus_out:(Dom.focusEvent -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( Dialog_frame.dialog_state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Section.check
   end
@@ -202,6 +223,10 @@ module Close_trigger : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
+      ?children:
+        ( Close_button.state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end

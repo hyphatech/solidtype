@@ -23,14 +23,43 @@ module Field_content = Field.Content (struct
 end)
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  (* What its children are drawn of: React Aria's render props for it, made
+     of its field's state and its interaction. *)
+  type state = {
+    is_selected : bool Solidtype.Solid.accessor;
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_read_only : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+    is_required : bool Solidtype.Solid.accessor;
+  }
+
+  let state_of (f : Field.state) =
+    let i = f.interaction in
+    {
+      is_selected = (fun[@u] () -> f.selected ());
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_pressed = (fun[@u] () -> Interaction.pressed i);
+      is_focused = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> f.disabled ());
+      is_read_only = (fun[@u] () -> f.read_only ());
+      is_invalid = (fun[@u] () -> f.invalid ());
+      is_required = (fun[@u] () -> f.required ());
+    }
+
+  let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      () =
     let r = within "Radio.Content" in
     <Field_content
       field=(fun () -> r.field)
       slot="radio-content"
       class_=(fun () -> after (Styles.Radio.content (r.slots ())) (class_ ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> Jsx.draw (children ()) (state_of r.field))
     </Field_content>
   [@@element label]
 end
@@ -74,9 +103,28 @@ let description : Description.slot =
     (fun () -> children ())
   </Kobalte.ItemDescription>
 
+(* What its children are drawn of: React Aria's render props for it,
+   made of its state as a field. *)
+type state = {
+  is_selected : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
+let state_of (f : Field.state) =
+  {
+    is_selected = (fun[@u] () -> f.selected ());
+    is_disabled = (fun[@u] () -> f.disabled ());
+    is_read_only = (fun[@u] () -> f.read_only ());
+    is_invalid = (fun[@u] () -> f.invalid ());
+    is_required = (fun[@u] () -> f.required ());
+  }
+
 let%component make ~(value : string) ?(is_disabled : bool = false)
     ?(aria_label : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   let g =
     match Radio_group.Context.use () with
     | Some g -> g
@@ -120,7 +168,7 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
       data_required=(fun () -> Jsx.flag (g.required ()))
       props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
-        (fun () -> children ())
+        (fun () -> Jsx.draw (children ()) (state_of r.field))
       </Description.Slot.Provider>
     </Kobalte.Item>
   </Context.Provider>

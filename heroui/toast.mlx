@@ -484,8 +484,8 @@ end
 module Action_button = struct
   let%component make ?(variant : button_variant = `tertiary)
       ?(on_press : (unit -> unit) option) ?(class_ : string option)
-      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) ()
-      =
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ~(children : Button.state Jsx.children) () =
     let slots = slots_of "Toast.Action_button" in
     <Button
       variant=(fun () -> variant ())
@@ -495,7 +495,7 @@ module Action_button = struct
                  ignore (on_press () : unit option))
       data_slot="toast-action-button"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun s -> Jsx.of_content (Jsx.draw (children ()) s))
     </Button>
   [@@element button]
 end
@@ -504,9 +504,19 @@ end
    names its own slot over the toast's, [toast-close], that HeroUI's styles
    read. *)
 module Close_button = struct
+  (* What its children are drawn of: React Aria's render props for a
+     button. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(key : key option) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(on_click : (Dom.mouseEvent -> unit) option) () =
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?(children : state Jsx.children option) () =
     let s = in_stack "Toast.Close_button" in
     let slots = slots_of "Toast.Close_button" in
     let i = Interaction.create () in
@@ -530,7 +540,17 @@ module Close_button = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       props=(Props.others props)>
-      <Close_button.Icon />
+      (fun () ->
+        match children () with
+        | Some c ->
+            Jsx.draw c
+              {
+                is_hovered = (fun[@u] () -> Interaction.hovered i);
+                is_pressed = (fun[@u] () -> Interaction.pressed i);
+                is_focused = (fun[@u] () -> Interaction.focused i);
+                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+              }
+        | None -> Jsx.element <Close_button.Icon />)
     </Solidtype_kobalte.Button.Root>
   [@@element button]
 end
@@ -544,10 +564,18 @@ let placement_name = function
   | `bottom_end -> "bottom end"
 
 module Item = struct
+  (* What its children are drawn of: React Aria's render props for a toast,
+     the toast itself and its focus. *)
+  type state = {
+    toast : queued;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ~(toast : queued) ?(variant : variant option)
       ?(class_ : string option) ?(style : string option)
-      ?ref:(given_ref : (Dom.element -> unit) option) ~(children : Jsx.content)
-      () =
+      ?ref:(given_ref : (Dom.element -> unit) option)
+      ~(children : state Jsx.children) () =
     let s = in_stack "Toast" in
     let e = toast () in
     let variant () =
@@ -670,6 +698,8 @@ module Item = struct
           disconnect sizes;
           s.forget_height e.key)
     in
+    (* Its focus, which its function child is given. *)
+    let focus = Interaction.create () in
     <Slots.Provider value=(fun () -> slots)>
       <Kobalte.Root
         toast_id=(fun () -> e.kobalte)
@@ -678,6 +708,7 @@ module Item = struct
         on_escape_key_down=(fun ev -> prevent_default ev)
         ref=(fun el ->
               ignore (given_ref el : unit option);
+              Interaction.watch focus el;
               watch el)
         class_=(fun () -> after (Styles.Toast.toast (slots ())) (class_ ()))
         style=(fun () ->
@@ -700,7 +731,13 @@ module Item = struct
         data_placement=(fun () -> Jsx.data (placement_name (s.placement ())))
         data_slot="toast"
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            {
+              toast = e;
+              is_focused = (fun[@u] () -> Interaction.focused focus);
+              is_focus_visible = (fun[@u] () -> Interaction.focus_visible focus);
+            })
       </Kobalte.Root>
     </Slots.Provider>
   [@@element li]

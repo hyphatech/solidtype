@@ -261,6 +261,51 @@ let walk ~step ~show ~update ~close () =
 
 let () =
   Jest.describe "Toast" (fun () ->
+      Jest.testPromise
+        "draws its parts' children of their state, the toast's own" (fun () ->
+          let words name flags =
+            <span data_words=(fun () -> Solidtype.Jsx.data name)>
+              (fun () -> Solidtype.Jsx.string (T.words flags))
+            </span>
+          in
+          T.render (fun () ->
+              <Toast.Provider>
+                (fun t ->
+                  <Toast toast=(fun () -> t)>
+                    (fun s ->
+                      Solidtype.Jsx.fragment
+                        [|
+                          <span data_words="toast">
+                            (fun () ->
+                              Solidtype.Jsx.string
+                                (Toast.title s.toast ^ " "
+                                ^ T.words
+                                    [
+                                      ("focused", s.is_focused);
+                                      ("focus-visible", s.is_focus_visible);
+                                    ]))
+                          </span>;
+                          <Toast.Action_button>
+                            (fun b ->
+                              words "action" [ ("pressed", b.is_pressed) ])
+                          </Toast.Action_button>;
+                          <Toast.Close_button key=(fun () -> Toast.key t)>
+                            (fun c ->
+                              words "close" [ ("hovered", c.is_hovered) ])
+                          </Toast.Close_button>;
+                        |])
+                  </Toast>)
+              </Toast.Provider>);
+          (* The toasts an earlier test cleared leave as they exit. *)
+          let* () = wait 400 in
+          let (_ : Toast.key) = Toast.show ~timeout_ms:0. "Saved" in
+          let* () = wait 50 in
+          let shown = T.words_shown T.body in
+          Toast.clear ();
+          (* Gone before the next test counts its own. *)
+          let* () = wait 400 in
+          Js.Promise.resolve
+            E.(expect shown |> toBe "toast: Saved  | action:  | close: "));
       Jest.afterEach (fun () ->
           Toast.clear ();
           T.cleanup ());

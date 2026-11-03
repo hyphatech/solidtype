@@ -19,16 +19,32 @@ module Message = Solidtype.Context.Make_optional (struct
   type t = unit -> string option
 end)
 
-let%component make ?(class_ : string option) ?(children : Jsx.content option) ()
-    =
+(* What its children are drawn of: React Aria's render props for a field's
+   error, which shows only while the field is invalid. *)
+type state = {
+  is_invalid : bool Solidtype.Solid.accessor;
+  validation_errors : string array Solidtype.Solid.accessor;
+}
+
+let%component make ?(class_ : string option)
+    ?(children : state Jsx.children option) () =
   let classes () =
     Styles.FieldError.classes (Styles.FieldError.options ?class_:(class_ ()) ())
   in
   let message = Option.value (Message.use ()) ~default:(fun () -> None) in
   let content () =
+    let state =
+      {
+        is_invalid = (fun[@u] () -> true);
+        validation_errors =
+          (fun[@u] () ->
+            match message () with Some m -> [| m |] | None -> [||]);
+      }
+    in
     match (message (), children ()) with
+    | _, Some c when Jsx.is_function c -> Jsx.draw c state
     | Some m, _ -> Jsx.string m
-    | None, Some c -> c
+    | None, Some c -> Jsx.draw c state
     | None, None -> Jsx.string ""
   in
   match Slot.use () with

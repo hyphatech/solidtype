@@ -60,7 +60,17 @@ module Parts = Field.Slots (struct
 end)
 
 module Group = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+
+  let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      () =
     let f = within "Search_field.Group" in
     (* Hovered, focused within and focus-visible as React Aria's group is,
        which HeroUI's styles ring. *)
@@ -82,7 +92,20 @@ module Group = struct
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_focus_within =
+              (fun[@u] () -> Interaction.focused i && not (elsewhere f));
+            is_focus_visible =
+              (fun[@u] () ->
+                (Interaction.focus_visible i
+                || (Interaction.focused i && returned f))
+                && not (elsewhere f));
+            is_disabled = (fun[@u] () -> f.disabled ());
+            is_invalid = (fun[@u] () -> f.invalid ());
+          })
     </div>
   [@@element div]
 end
@@ -197,7 +220,17 @@ module Input = struct
 end
 
 module Clear_button = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+
+  let%component make ?(class_ : string option)
+      ?(children : state Jsx.children option)
       ?(on_pointer_down : (Dom.pointerEvent -> unit) option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
@@ -235,11 +268,28 @@ module Clear_button = struct
       disabled=(fun () -> disabled ())>
       (fun () ->
         match children () with
-        | Some c -> c
+        | Some c ->
+            Jsx.draw c
+              {
+                is_hovered = (fun[@u] () -> Interaction.hovered i);
+                is_pressed = (fun[@u] () -> Interaction.pressed i);
+                is_focused = (fun[@u] () -> Interaction.focused i);
+                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+                is_disabled = (fun[@u] () -> Interaction.disabled i);
+              }
         | None -> Jsx.element <Close_button.Icon />)
     </Kobalte_button.Root>
   [@@element button]
 end
+
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = {
+  is_empty : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
 
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(value : string option)
@@ -251,7 +301,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -322,7 +372,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_required=(fun () -> Jsx.flag (is_required ()))
       props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>(fun () -> children ())</Parts>
+        <Parts>
+          (fun () ->
+            Jsx.draw (children ())
+              {
+                is_empty = (fun[@u] () -> String.equal (current ()) "");
+                is_disabled = (fun[@u] () -> disabled ());
+                is_invalid = (fun[@u] () -> invalid ());
+                is_read_only = (fun[@u] () -> is_read_only ());
+                is_required = (fun[@u] () -> is_required ());
+              })
+        </Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

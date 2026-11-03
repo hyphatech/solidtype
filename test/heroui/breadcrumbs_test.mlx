@@ -132,6 +132,32 @@ let same (solidtype, react) =
 
 let () =
   Jest.describe "Breadcrumbs" (fun () ->
+      Jest.test "draws its items' children of whether each is current"
+        (fun () ->
+          (* HeroUI's React item calls its function with nothing; React
+             Aria's Breadcrumb gives it isCurrent and isDisabled, as the
+             port does. *)
+          let item id =
+            <Breadcrumbs.Item id=(fun () -> id)>
+              (fun s ->
+                <span data_words=(fun () -> Jsx.data id)>
+                  (fun () ->
+                    Jsx.string
+                      (T.words
+                         [
+                           ("current", s.is_current); ("disabled", s.is_disabled);
+                         ]))
+                </span>)
+            </Breadcrumbs.Item>
+          in
+          T.render (fun () ->
+              <Breadcrumbs>
+                (fun () -> Jsx.element (item "home"))
+                (fun () -> Jsx.element (item "tabs"))
+              </Breadcrumbs>);
+          E.(
+            expect (T.words_shown T.body)
+            |> toBe "home:  | tabs: current disabled"));
       Jest.afterEach T.cleanup;
       Jest.testPromise "marks the last item the page, as React's does"
         (fun () ->

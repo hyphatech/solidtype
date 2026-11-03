@@ -65,10 +65,10 @@ let make () =
     <Label>"User"</Label>
     <Autocomplete.Trigger>
       <Autocomplete.Value>
-        (fun keys ->
+        (fun s ->
           <span class_="contents">
             (fun () ->
-              match S.get keys with
+              match S.get s.selected_keys with
               | [| key |] -> (
                   match
                     Array.find_opt

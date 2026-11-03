@@ -35,6 +35,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Slider.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Slider.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Slider.tsx"]
 end
@@ -258,8 +261,91 @@ let both ~default_value ?min_value ?max_value ?step ?orientation ?is_disabled
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The walk on the thumb of a slider whose parts draw their children of their
+   state, as words, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  let vertical o =
+   fun[@u] () ->
+    match Solidtype.Solid.get o with `vertical -> true | `horizontal -> false
+  in
+  T.render (fun () ->
+      <Slider
+        aria_label="Volume"
+        default_value=(fun () -> [| 30. |])
+        is_disabled=(fun () -> disabled)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "slider"
+                [
+                  ("vertical", vertical r.orientation);
+                  ("disabled", r.is_disabled);
+                ];
+              <Slider.Output>
+                (fun o ->
+                  words "output"
+                    [
+                      ("vertical", vertical o.orientation);
+                      ("disabled", o.is_disabled);
+                    ])
+              </Slider.Output>;
+              <Slider.Track>
+                (fun t ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      words "track"
+                        [
+                          ("vertical", vertical t.orientation);
+                          ("disabled", t.is_disabled);
+                          ("hovered", t.is_hovered);
+                        ];
+                      <Slider.Fill />;
+                      <Slider.Thumb>
+                        (fun h ->
+                          words "thumb"
+                            [
+                              ("dragging", h.is_dragging);
+                              ("hovered", h.is_hovered);
+                              ("focused", h.is_focused);
+                              ("focus-visible", h.is_focus_visible);
+                              ("disabled", h.is_disabled);
+                            ])
+                      </Slider.Thumb>;
+                    |])
+              </Slider.Track>;
+            |])
+      </Slider>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.slot "slider-thumb")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Slider" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          (* React Aria hovers a disabled thumb and track, which no other part
+             of it does; the port's are not hovered, as a disabled button is
+             not. *)
+          Js.Promise.resolve
+            E.(
+              expect (solidtype, T.without "hovered" solidtype)
+              |> toEqual (T.without "hovered" react, T.without "hovered" react)));
       Jest.afterEach T.cleanup;
       Jest.testPromise "steps its value, as React's does" (fun () ->
           let* r = both ~default_value:[| 30. |] () in

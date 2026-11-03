@@ -6,6 +6,7 @@
 import { Button, Drawer } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -63,6 +64,42 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A drawer whose trigger draws its children of its state, as words in an
+// element marked with its name; that trigger, to glance at.
+export function renderOfState(_: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Drawer>
+        <Drawer.Trigger aria-label="Open">
+          {(s) => (
+            <span data-words="trigger">
+              {words([
+                ["hovered", s.isHovered],
+                ["pressed", s.isPressed],
+                ["focused", s.isFocused],
+                ["focus-visible", s.isFocusVisible],
+              ])}
+            </span>
+          )}
+        </Drawer.Trigger>
+        <Drawer.Backdrop>
+          <Drawer.Content>
+            <Drawer.Dialog>
+              <Drawer.Heading>Drawer</Drawer.Heading>
+            </Drawer.Dialog>
+          </Drawer.Content>
+        </Drawer.Backdrop>
+      </Drawer>,
+    ),
+  );
+  mounted = { root, host };
+  const trigger = host.querySelector("[data-slot=drawer-trigger]");
+  if (!(trigger instanceof HTMLElement)) throw new Error("HeroUI's Drawer rendered no trigger");
+  return trigger;
 }
 
 export function cleanup(): void {

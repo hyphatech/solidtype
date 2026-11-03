@@ -73,6 +73,17 @@ end
     the [Tabs]' [selected_key] names, as a router says which route is open. A
     disabled link has no [href], so nothing follows it. *)
 module Tab : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -82,7 +93,10 @@ module Tab : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.A.check
   end

@@ -47,6 +47,7 @@ type autocomplete = {
   placeholder : unit -> string;
   clear : unit -> unit;
   disabled : unit -> bool;
+  invalid : unit -> bool;
   set_placement : placement -> unit;
   placement : unit -> string;
   label_id : string;
@@ -95,10 +96,19 @@ external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
 external body : Dom.element = "body" [@@mel.scope "document"]
 
 module Trigger = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(class_ : string option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let a = within "Autocomplete.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> a.disabled ()) () in
     (* A press anywhere on it opens or closes the list, as HeroUI's does. *)
@@ -117,14 +127,29 @@ module Trigger = struct
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
       data_disabled=(fun () -> Jsx.flag (a.disabled ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_focus_within = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+            is_disabled = (fun[@u] () -> a.disabled ());
+            is_invalid = (fun[@u] () -> a.invalid ());
+          })
     </Kobalte.Control>
   [@@element div]
 end
 
 module Value = struct
+  (* What its children are drawn of while an option is chosen: React Aria's
+     render props for a value, its keys and its text. *)
+  type state = {
+    selected_keys : string array S.accessor;
+    selected_text : string S.accessor;
+  }
+
   let%component make ?(class_ : string option)
-      ?(children : (string array S.accessor -> Jsx.element) option) () =
+      ?(children : state Jsx.children option) () =
     let a = within "Autocomplete.Value" in
     let keys =
       S.create_memo (fun () ->
@@ -138,8 +163,13 @@ module Value = struct
       data_placeholder=(fun () -> Jsx.flag (a.is_empty ()))
       props=(Props.others props)>
       (fun () ->
-        match (children keys, a.is_empty ()) with
-        | Some drawn, false -> Jsx.element drawn
+        match (children (), a.is_empty ()) with
+        | Some c, false ->
+            Jsx.draw c
+              {
+                selected_keys = (fun[@u] () -> S.get keys);
+                selected_text = (fun[@u] () -> List_box.listed (a.selected ()));
+              }
         | (Some _ | None), true -> Jsx.string (a.placeholder ())
         | None, false ->
             (* React Aria's value is the options chosen, each as it is drawn
@@ -416,6 +446,17 @@ let focused_key kobalte () =
   | Some m -> Types.SelectionManager.focused_key m ()
   | None -> None
 
+(* What its children are drawn of: React Aria's render props for a select,
+   which an autocomplete is. *)
+type state = {
+  is_focused : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_open : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_required : bool S.accessor;
+}
+
 let%component make ?(placeholder : string = "Select an item")
     ?(selection_mode : [ `single | `multiple ] = `single)
     ?(value : string array option) ?(default_value : string array option)
@@ -428,8 +469,8 @@ let%component make ?(placeholder : string = "Select an item")
     ?(name : string option) ?(full_width : bool = false)
     ?(variant : [ `primary | `secondary ] = `primary) ?(class_ : string option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
-    () =
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -653,6 +694,7 @@ let%component make ?(placeholder : string = "Select an item")
           change [||];
           ignore (on_clear () : unit option));
       disabled = is_disabled;
+      invalid;
       set_placement = S.set set_placement;
       placement =
         (fun () ->
@@ -752,7 +794,20 @@ let%component make ?(placeholder : string = "Select an item")
             <Label.Slot.Provider value=(fun () -> label)>
               <Description.Slot.Provider value=(fun () -> description)>
                 <Field_error.Slot.Provider value=(fun () -> error)>
-                  (fun () -> children ())
+                  (fun () ->
+                    Jsx.draw (children ())
+                      {
+                        is_focused = (fun[@u] () -> focused ());
+                        is_focus_visible =
+                          (fun[@u] () ->
+                            match S.get indicator_i with
+                            | Some i -> Interaction.focus_visible i
+                            | None -> false);
+                        is_disabled = (fun[@u] () -> is_disabled ());
+                        is_open = (fun[@u] () -> opened ());
+                        is_invalid = (fun[@u] () -> invalid ());
+                        is_required = (fun[@u] () -> is_required ());
+                      })
                   <For each=(fun () -> sent_keys ())>
                     (fun key _ ->
                       <input type_="hidden" ?name=(fun () -> name ()) value=key

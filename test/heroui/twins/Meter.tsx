@@ -4,6 +4,7 @@
 import { Label, Meter } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -28,6 +29,22 @@ export function render(props: Props): HTMLElement {
         <Meter.Track>
           <Meter.Fill />
         </Meter.Track>
+      </Meter>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
+}
+
+// The meter whose children are drawn of its state, as text in an element
+// marked state.
+export function renderOfState(_: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Meter aria-label="Storage" value={40}>
+        {(s) => <span data-words="state">{`${s.percentage}|${s.valueText}|false`}</span>}
       </Meter>,
     ),
   );

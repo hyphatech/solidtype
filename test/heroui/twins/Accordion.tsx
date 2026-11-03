@@ -5,6 +5,7 @@
 import { Accordion, Button } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -71,6 +72,60 @@ export function render(
   );
   mounted = { root, host };
   return host;
+}
+
+// An accordion of one item whose accordion, item and trigger draw their
+// children of their state, each as words in an element marked with its name;
+// its trigger, to walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Accordion isDisabled={disabled}>
+        {(a) => (
+          <>
+            <span data-words="accordion">{words([["disabled", a.isDisabled]])}</span>
+            <Accordion.Item id="shipping">
+              {(i) => (
+                <>
+                  <span data-words="item">
+                    {words([
+                      ["expanded", i.isExpanded],
+                      ["focus-visible-within", i.isFocusVisibleWithin],
+                      ["disabled", i.isDisabled],
+                    ])}
+                  </span>
+                  <Accordion.Heading>
+                    <Accordion.Trigger>
+                      {(t) => (
+                        <span data-words="trigger">
+                          {words([
+                            ["hovered", t.isHovered],
+                            ["pressed", t.isPressed],
+                            ["focused", t.isFocused],
+                            ["focus-visible", t.isFocusVisible],
+                            ["disabled", t.isDisabled],
+                          ])}
+                        </span>
+                      )}
+                    </Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>
+                    <Accordion.Body>About shipping.</Accordion.Body>
+                  </Accordion.Panel>
+                </>
+              )}
+            </Accordion.Item>
+          </>
+        )}
+      </Accordion>,
+    ),
+  );
+  mounted = { root, host };
+  const trigger = host.querySelector("button");
+  if (!trigger) throw new Error("HeroUI's Accordion rendered no trigger");
+  return trigger;
 }
 
 export async function step(action: () => Promise<unknown>): Promise<void> {

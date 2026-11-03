@@ -5,6 +5,7 @@
 import { ColorSlider, Label } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -49,6 +50,56 @@ export function render(
 
 export async function step(action: () => Promise<void>): Promise<void> {
   await act(action);
+}
+
+// A hue slider whose parts draw their children of their state, as words in
+// an element marked with each one's name; its thumb, to walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <ColorSlider aria-label="Hue" channel="hue" defaultValue="hsl(0, 100%, 50%)" isDisabled={disabled}>
+        {(r) => (
+          <>
+            <span data-words="slider">
+                {words([["vertical", r.orientation === "vertical"], ["disabled", r.isDisabled]])}
+              </span>
+            <ColorSlider.Output>{(o) => <span data-words="output">
+                {words([["vertical", o.orientation === "vertical"], ["disabled", o.isDisabled]])}
+              </span>}</ColorSlider.Output>
+            <ColorSlider.Track>
+              {(t) => (
+                <>
+                  <span data-words="track">
+                    {words([
+                      ["vertical", t.orientation === "vertical"],
+                      ["disabled", t.isDisabled],
+                      ["hovered", t.isHovered],
+                    ])}
+                  </span>
+                  <ColorSlider.Thumb>{(h) => <span data-words="thumb">
+                        {words([
+                          ["dragging", h.isDragging],
+                          ["hovered", h.isHovered],
+                          ["focused", h.isFocused],
+                          ["focus-visible", h.isFocusVisible],
+                          ["disabled", h.isDisabled],
+                        ])}
+                        {" " + h.color.toString("hex")}
+                      </span>}</ColorSlider.Thumb>
+                </>
+              )}
+            </ColorSlider.Track>
+          </>
+        )}
+      </ColorSlider>,
+    ),
+  );
+  mounted = { root, host };
+  const thumb = host.querySelector("[data-slot=color-slider-thumb]");
+  if (!(thumb instanceof HTMLElement)) throw new Error("no thumb was rendered");
+  return thumb;
 }
 
 export function cleanup(): void {

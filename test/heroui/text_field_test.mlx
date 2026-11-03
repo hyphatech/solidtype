@@ -52,6 +52,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/TextField.tsx"]
 
+  external render_error_of_state : bool -> Dom.element = "renderErrorOfState"
+  [@@mel.module "./twins/TextField.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/TextField.tsx"]
 end
@@ -243,6 +246,35 @@ let same (solidtype, react) =
 
 let () =
   Jest.describe "Text_field" (fun () ->
+      Jest.test "draws its error's children of the form's error, as React's"
+        (fun () ->
+          T.render (fun () ->
+              <Form
+                on_submit=prevent_default
+                validation_errors=(fun () -> [ ("email", "Too short.") ])>
+                <Text_field name="email">
+                  <Label>"Email"</Label>
+                  <Input />
+                  <Field_error>
+                    (fun s ->
+                      <span data_words="error">
+                        (fun () ->
+                          Solidtype.Jsx.string
+                            (string_of_bool (Solidtype.Solid.get s.is_invalid)
+                            ^ "|"
+                            ^ String.concat ","
+                                (Array.to_list
+                                   (Solidtype.Solid.get s.validation_errors))))
+                      </span>)
+                  </Field_error>
+                </Text_field>
+              </Form>);
+          let solidtype = T.words_shown T.body in
+          T.cleanup ();
+          let (_ : Dom.element) = Twin.render_error_of_state false in
+          let react = T.words_shown T.body in
+          Twin.cleanup ();
+          E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "is an input alone, as React's is" (fun () ->
           let* r = both_alone () in

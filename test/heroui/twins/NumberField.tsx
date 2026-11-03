@@ -5,6 +5,7 @@
 import { Description, FieldError, Label, NumberField } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -48,6 +49,56 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A field whose root and group draw their children of their state, as words
+// in an element marked with each one's name; its group, to glance at.
+export function renderOfState(
+  isDisabled: boolean,
+  isReadOnly: boolean,
+  isInvalid: boolean,
+  isRequired: boolean,
+): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <NumberField aria-label="Field" isDisabled={isDisabled} isReadOnly={isReadOnly} isInvalid={isInvalid} isRequired={isRequired}>
+        {(r) => (
+          <>
+            <span data-words="field">
+              {words([
+                ["disabled", r.isDisabled],
+                ["invalid", r.isInvalid],
+                ["read-only", r.isReadOnly],
+                ["required", r.isRequired],
+              ])}
+            </span>
+            <NumberField.Group>
+              {(g) => (
+                <>
+                  <span data-words="group">
+                  {words([
+                    ["hovered", g.isHovered],
+                    ["focus-within", g.isFocusWithin],
+                    ["focus-visible", g.isFocusVisible],
+                    ["disabled", g.isDisabled],
+                    ["invalid", g.isInvalid],
+                  ])}
+                </span>
+                  <NumberField.Input />
+                </>
+              )}
+            </NumberField.Group>
+          </>
+        )}
+      </NumberField>,
+    ),
+  );
+  mounted = { root, host };
+  const group = host.querySelector("[data-slot=number-field-group]");
+  if (!(group instanceof HTMLElement)) throw new Error("HeroUI's field rendered no group");
+  return group;
 }
 
 export function cleanup(): void {

@@ -122,39 +122,41 @@ module Trigger = struct
   [@@element button]
 end
 
-type list_format
-
-external list_format : unit -> list_format = "ListFormat"
-[@@mel.new] [@@mel.scope "Intl"]
-
-external format : list_format -> string array -> string = "format" [@@mel.send]
-
 module Value = struct
+  (* What its children are drawn of while an option is chosen: React Aria's
+     render props for a value, its keys and its text. *)
+  type state = {
+    selected_keys : string array S.accessor;
+    selected_text : string S.accessor;
+  }
+
   let%component make ?(placeholder : string option) ?(class_ : string option)
-      ?(children : (string array S.accessor -> Jsx.element) option) () =
+      ?(children : state Jsx.children option) () =
     let c = within "Combo_box.Value" in
     let keys =
       S.create_memo (fun () ->
           Array.of_list (List.map List_box.key (c.selected ())))
     in
     let empty () = match c.selected () with [] -> true | _ :: _ -> false in
-    (* React Aria lists the texts chosen as the reader's language lists them. *)
-    let listed () =
-      format (list_format ())
-        (Array.of_list (List.map List_box.text (c.selected ())))
-    in
     <div
       class_=(fun () -> after (Styles.ComboBox.value (c.slots ())) (class_ ()))
       data_slot="combo-box-value"
       data_placeholder=(fun () -> Jsx.flag (empty ()))
       props=(Props.others props)>
       (fun () ->
-        match children keys with
-        | Some drawn when not (empty ()) -> Jsx.element drawn
+        match children () with
+        | Some given when not (empty ()) ->
+            Jsx.draw given
+              {
+                selected_keys = (fun[@u] () -> S.get keys);
+                selected_text = (fun[@u] () -> List_box.listed (c.selected ()));
+              }
         | Some _ | None ->
+            (* React Aria lists the texts chosen as the reader's language
+               lists them. *)
             Jsx.string
               (if empty () then Option.value (placeholder ()) ~default:""
-               else listed ()))
+               else List_box.listed (c.selected ())))
     </div>
   [@@element div]
 end
@@ -293,6 +295,16 @@ external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
 
 module For = Solidtype.For
 
+(* What its children are drawn of: React Aria's render props for a combo
+   box. *)
+type state = {
+  is_open : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_required : bool S.accessor;
+  is_read_only : bool S.accessor;
+}
+
 let%component make ?(selection_mode : [ `single | `multiple ] = `single)
     ?(value : string array option) ?(default_value : string array option)
     ?(on_change : (string array -> unit) option) ?(input_value : string option)
@@ -313,8 +325,8 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(on_focus_in : (Dom.focusEvent -> unit) option)
     ?(on_key_down : (Dom.keyboardEvent -> unit) option)
-    ?(on_focus_out : (Dom.focusEvent -> unit) option) ~(children : Jsx.content)
-    () =
+    ?(on_focus_out : (Dom.focusEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -519,7 +531,15 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
           <List_box.Listing.Provider value=(fun () -> listing)>
             <Field_error.Message.Provider value=(fun () -> in_form.error)>
               <Parts>
-                (fun () -> children ())
+                (fun () ->
+                  Jsx.draw (children ())
+                    {
+                      is_open = (fun[@u] () -> S.get opened);
+                      is_disabled = (fun[@u] () -> is_disabled ());
+                      is_invalid = (fun[@u] () -> invalid ());
+                      is_required = (fun[@u] () -> is_required ());
+                      is_read_only = (fun[@u] () -> is_read_only ());
+                    })
                 <For each=(fun () -> sent_keys ())>
                   (fun key _ ->
                     <input type_="hidden" ?name=(fun () -> name ()) value=key />)

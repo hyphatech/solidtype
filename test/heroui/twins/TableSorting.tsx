@@ -5,6 +5,7 @@
 import { Table, type SortDescriptor } from "@heroui/react";
 import { act, useMemo, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -78,6 +79,66 @@ export function render(told: (s: string) => void): HTMLElement {
 
 export async function step(action: () => Promise<void>): Promise<void> {
   await act(action);
+}
+
+// A table sorted by its name, whose columns and cells draw their children of
+// their state, as words in an element marked with each one's name.
+export function renderOfState(_: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  const column = (id: string) => (
+    <Table.Column allowsSorting isRowHeader={id === "name"} id={id}>
+      {(s) => (
+        <span data-words={id}>
+          {words([
+            ["hovered", s.isHovered],
+            ["focus-visible", s.isFocusVisible],
+            ["sorting", s.allowsSorting],
+            ["ascending", s.sortDirection === "ascending"],
+            ["descending", s.sortDirection === "descending"],
+            ["resizing", s.isResizing],
+          ])}
+        </span>
+      )}
+    </Table.Column>
+  );
+  const cell = (name: string) => (
+    <Table.Cell>
+      {(s) => (
+        <span data-words={name}>
+          {words([
+            ["selected", s.isSelected],
+            ["tree", s.isTreeColumn],
+            ["expanded", s.isExpanded],
+            ["children", s.hasChildItems],
+          ])}
+          {` ${s.columnIndex} ${s.level}`}
+        </span>
+      )}
+    </Table.Cell>
+  );
+  act(() =>
+    root.render(
+      <Table>
+        <Table.ScrollContainer>
+          <Table.Content aria-label="Sorted" sortDescriptor={{ column: "name", direction: "ascending" }}>
+            <Table.Header>
+              {column("name")}
+              {column("role")}
+            </Table.Header>
+            <Table.Body>
+              <Table.Row id="1">
+                {cell("first")}
+                {cell("second")}
+              </Table.Row>
+            </Table.Body>
+          </Table.Content>
+        </Table.ScrollContainer>
+      </Table>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
 }
 
 export function cleanup(): void {

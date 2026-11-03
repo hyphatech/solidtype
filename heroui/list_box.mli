@@ -39,6 +39,10 @@ val key : option_ -> string
 val text : option_ -> string
 (** Its [text_value], else its [id]. *)
 
+val listed : option_ list -> string
+(** The options' {!text}s, as the reader's language lists them: one alone as it
+    is, several joined, ["Florida, Texas, and Utah"]. *)
+
 val content : option_ -> Solidtype.Jsx.element
 (** Its children, drawn again outside the list, as a select's value shows the
     option chosen; an indicator inside them is drawn as not selected, as React
@@ -124,6 +128,18 @@ end
 (** An option, known by its [id], typed to by its [text_value]: Kobalte's item,
     a [<div>] with the role [option], selected while its id is. *)
 module Item : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    selection_mode : [ `none | `single | `multiple ] Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -136,7 +152,10 @@ module Item : sig
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end

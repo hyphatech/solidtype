@@ -5,6 +5,7 @@
 import { Label, Slider } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -50,6 +51,56 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A slider whose parts draw their children of their state, as words in an
+// element marked with each one's name; its thumb, to walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Slider aria-label="Volume" defaultValue={30} isDisabled={disabled}>
+        {(r) => (
+          <>
+            <span data-words="slider">
+                {words([["vertical", r.orientation === "vertical"], ["disabled", r.isDisabled]])}
+              </span>
+            <Slider.Output>{(o) => <span data-words="output">
+                {words([["vertical", o.orientation === "vertical"], ["disabled", o.isDisabled]])}
+              </span>}</Slider.Output>
+            <Slider.Track>
+              {(t) => (
+                <>
+                  <span data-words="track">
+                    {words([
+                      ["vertical", t.orientation === "vertical"],
+                      ["disabled", t.isDisabled],
+                      ["hovered", t.isHovered],
+                    ])}
+                  </span>
+                  <Slider.Fill />
+                  <Slider.Thumb>{(h) => <span data-words="thumb">
+                        {words([
+                          ["dragging", h.isDragging],
+                          ["hovered", h.isHovered],
+                          ["focused", h.isFocused],
+                          ["focus-visible", h.isFocusVisible],
+                          ["disabled", h.isDisabled],
+                        ])}
+                      </span>}</Slider.Thumb>
+                </>
+              )}
+            </Slider.Track>
+          </>
+        )}
+      </Slider>,
+    ),
+  );
+  mounted = { root, host };
+  const thumb = host.querySelector("[data-slot=slider-thumb]");
+  if (!(thumb instanceof HTMLElement)) throw new Error("no thumb was rendered");
+  return thumb;
 }
 
 export function cleanup(): void {

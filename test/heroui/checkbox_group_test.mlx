@@ -35,6 +35,10 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/CheckboxGroup.tsx"]
 
+  external render_of_state : bool -> bool -> bool -> bool -> Dom.element
+    = "renderOfState"
+  [@@mel.module "./twins/CheckboxGroup.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/CheckboxGroup.tsx"]
 end
@@ -212,8 +216,68 @@ let both ?variant ?is_disabled ?is_invalid ?is_read_only ?is_required () =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The walk on the content of a group of one checkbox whose group draws its
+   children of its state, as words, beside React's. *)
+let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
+    ?(required = false) () =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Checkbox_group
+        aria_label="Interests"
+        is_disabled=(fun () -> disabled)
+        is_read_only=(fun () -> read_only)
+        is_invalid=(fun () -> invalid)
+        is_required=(fun () -> required)>
+        (fun g ->
+          Solidtype.Jsx.fragment
+            [|
+              words "group"
+                [
+                  ("disabled", g.is_disabled);
+                  ("read-only", g.is_read_only);
+                  ("required", g.is_required);
+                  ("invalid", g.is_invalid);
+                ];
+              <Checkbox value="coding">
+                <Checkbox.Content>
+                  <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                  "Coding"
+                </Checkbox.Content>
+              </Checkbox>;
+            |])
+      </Checkbox_group>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.slot "checkbox-content")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step
+      (Twin.render_of_state disabled read_only invalid required)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Checkbox_group" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise
+        "draws its parts' children of their state, read-only, invalid, required"
+        (fun () ->
+          let* solidtype, react =
+            of_state ~read_only:true ~invalid:true ~required:true ()
+          in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "checks the values clicked, as React's does" (fun () ->
           let* r = both () in

@@ -29,6 +29,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Drawer.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Drawer.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Drawer.tsx"]
 end
@@ -279,6 +282,43 @@ let focused () =
 
 let () =
   Jest.describe "Drawer" (fun () ->
+      Jest.testPromise "draws its trigger's children of its state, as React's"
+        (fun () ->
+          T.render (fun () ->
+              <Drawer>
+                <Drawer.Trigger aria_label="Open">
+                  (fun s ->
+                    <span data_words="trigger">
+                      (fun () ->
+                        Solidtype.Jsx.string
+                          (T.words
+                             [
+                               ("hovered", s.is_hovered);
+                               ("pressed", s.is_pressed);
+                               ("focused", s.is_focused);
+                               ("focus-visible", s.is_focus_visible);
+                             ]))
+                    </span>)
+                </Drawer.Trigger>
+                <Drawer.Backdrop>
+                  <Drawer.Content>
+                    <Drawer.Dialog>
+                      <Drawer.Heading>"Drawer"</Drawer.Heading>
+                    </Drawer.Dialog>
+                  </Drawer.Content>
+                </Drawer.Backdrop>
+              </Drawer>);
+          let* solidtype =
+            T.glance ~read:T.words_shown ~step:Twin.step
+              (T.slot "drawer-trigger")
+          in
+          T.cleanup ();
+          let* react =
+            T.glance ~read:T.words_shown ~step:Twin.step
+              (Twin.render_of_state false)
+          in
+          Twin.cleanup ();
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "opens, and closes each way, as React's does" (fun () ->
           let* r = both () in

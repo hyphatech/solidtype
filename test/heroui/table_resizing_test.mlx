@@ -188,6 +188,51 @@ let resizable name ~id ~min =
 let () =
   Jest.describe "Table, its columns resized" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its resizer's children of its state as it resizes"
+        (fun () ->
+          T.render (fun () ->
+              <Table>
+                <Table.Resizable_container data_client_width="700">
+                  <Table.Content aria_label="Resizable">
+                    <Table.Header>
+                      <Table.Column
+                        is_row_header=true
+                        default_width=(fun () -> Table.Fraction 1.)
+                        id="name">
+                        "Name"
+                        <Table.Column_resizer>
+                          (fun s ->
+                            <span data_words="resizer">
+                              (fun () ->
+                                Jsx.string
+                                  (T.words
+                                     [
+                                       ("focused", s.is_focused);
+                                       ("resizing", s.is_resizing);
+                                     ]))
+                            </span>)
+                        </Table.Column_resizer>
+                      </Table.Column>
+                      <Table.Column id="role">"Role"</Table.Column>
+                    </Table.Header>
+                    <Table.Body>
+                      <Table.Row id="1">
+                        <Table.Cell>"Ada"</Table.Cell>
+                        <Table.Cell>"Admin"</Table.Cell>
+                      </Table.Row>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Resizable_container>
+              </Table>);
+          let before = T.words_shown T.body in
+          (match T.query "[data-slot=table-column-resizer] input" with
+          | Some input -> T.focus input
+          | None -> ());
+          let* () = T.keyboard (T.setup ()) "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (before, T.words_shown T.body)
+              |> toEqual ("resizer: ", "resizer: focused resizing")));
       Jest.testPromise "is resized by the keys and a drag, as React's is"
         (fun () ->
           let ended = ref [||] in

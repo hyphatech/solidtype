@@ -43,6 +43,15 @@
 
 (** One section: Kobalte's item, a [<div>]. *)
 module Item : sig
+  type state = {
+    is_expanded : bool Solidtype.Solid.accessor;
+    is_focus_visible_within : bool Solidtype.Solid.accessor;
+        (** Whether an element inside it has the focus, shown by a key. *)
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -52,7 +61,11 @@ module Item : sig
       ?on_expanded_change:(bool -> unit) ->
       ?class_:string Solidtype.Check.value ->
       ?on_focus_in:(Dom.focusEvent -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -82,6 +95,16 @@ end
     and the arrows then pass it by. [on_press] is called as it is pressed, by a
     pointer, Enter or Space, after its item's state has changed. *)
 module Trigger : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -93,7 +116,10 @@ module Trigger : sig
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
       ?on_key_up:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -122,6 +148,13 @@ end
 
 (** What an item shows and hides: Kobalte's content, a [<div>]. *)
 module Panel : sig
+  type state = {
+    is_focus_visible_within : bool Solidtype.Solid.accessor;
+        (** Whether an element inside it has the focus, shown by a key. *)
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -129,7 +162,10 @@ module Panel : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -154,6 +190,10 @@ module Body : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type state = { is_disabled : bool Solidtype.Solid.accessor }
+(** What an accordion's children are drawn of, given as a function, as HeroUI's
+    render props are, read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -166,7 +206,10 @@ module Props : sig
     ?variant:[ `default | `surface ] Solidtype.Check.value ->
     ?hide_separator:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

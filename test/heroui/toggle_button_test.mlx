@@ -44,13 +44,50 @@ module Twin = struct
   external render_group : group -> Dom.element = "renderGroup"
   [@@mel.module "./twins/ToggleButton.tsx"]
 
+  external render_group_of_state : bool -> Dom.element = "renderGroupOfState"
+  [@@mel.module "./twins/ToggleButton.tsx"]
+
   external step :
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/ToggleButton.tsx"]
+
+  external render_of_state : button -> Dom.element = "renderOfState"
   [@@mel.module "./twins/ToggleButton.tsx"]
 
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/ToggleButton.tsx"]
 end
+
+(* The walk on a button whose children are drawn of its state, as words:
+   what each side's function was given of the interaction. Its selection is
+   Kobalte's, which turns on Enter going down, as a native button clicks. *)
+let of_state ?(disabled = false) () =
+  T.render (fun () ->
+      <Toggle_button is_disabled=(fun () -> disabled)>
+        (fun s ->
+          <span>
+            (fun () ->
+              Solidtype.Jsx.string
+                (T.words
+                   [
+                     ("hovered", s.is_hovered);
+                     ("pressed", s.is_pressed);
+                     ("focused", s.is_focused);
+                     ("focus-visible", s.is_focus_visible);
+                     ("disabled", s.is_disabled);
+                   ]))
+          </span>)
+      </Toggle_button>);
+  let* solidtype =
+    T.walk ~read:T.text_content ~step:Twin.step (T.by_role "button")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.text_content ~step:Twin.step
+      (Twin.render_of_state (button ~is_disabled:disabled ()))
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
 
 (* Kobalte marks a button that is on with an empty data-pressed, which
    HeroUI's styles, reading data-pressed="true" for a press, never match; a
@@ -215,9 +252,71 @@ let grouped ?(selection_mode = `single) ?(default_selected_keys = [||])
   Twin.cleanup ();
   Js.Promise.resolve (solidtype, react)
 
+(* The walk on the button of a vertical group of one, whose group draws its
+   children of its state, as words, beside React's. *)
+let group_of_state ~disabled =
+  T.render (fun () ->
+      <Toggle_button_group
+        aria_label="Alignment"
+        orientation=`vertical
+        is_disabled=(fun () -> disabled)>
+        (fun g ->
+          Solidtype.Jsx.fragment
+            [|
+              <span data_words="group">
+                (fun () ->
+                  Solidtype.Jsx.string
+                    (T.words
+                       [
+                         ( "vertical",
+                           fun[@u] () ->
+                             match S.get g.orientation with
+                             | `vertical -> true
+                             | `horizontal -> false );
+                         ("disabled", g.is_disabled);
+                       ]))
+              </span>;
+              <Toggle_button id="left">"Left"</Toggle_button>;
+            |])
+      </Toggle_button_group>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.by_role "button")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step
+      (Twin.render_group_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Toggle_button" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its children of its state, as React's" (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its selection, as it turns"
+        (fun () ->
+          T.render (fun () ->
+              <Toggle_button>
+                (fun s ->
+                  <span>
+                    (fun () ->
+                      Solidtype.Jsx.string (T.words [ ("on", s.is_selected) ]))
+                  </span>)
+              </Toggle_button>);
+          let b = T.by_role "button" in
+          let before = (T.text_content b, T.attribute b "data-selected") in
+          let* () = T.click (T.setup ()) b in
+          Js.Promise.resolve
+            E.(
+              expect (before, (T.text_content b, T.attribute b "data-selected"))
+              |> toEqual (("", None), ("on", Some "true"))));
       Jest.testPromise "is shown, walked and toggled as React's" (fun () ->
           let* solidtype, react = alone () in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
@@ -308,6 +407,13 @@ let () =
                     </Toggle_button_group>))
             |> toThrow)));
   Jest.describe "Toggle_button_group" (fun () ->
+      Jest.testPromise "draws its children of its state, as React's" (fun () ->
+          let* solidtype, react = group_of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state while disabled"
+        (fun () ->
+          let* solidtype, react = group_of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "selects one button at a time, as React's" (fun () ->
           let* solidtype, react =

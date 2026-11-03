@@ -74,10 +74,20 @@ module Text_area = struct
   let component = Jsx.component make
 end
 
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_focus_within : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+}
+
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(is_disabled : bool option)
     ?(is_invalid : bool option) ?(class_ : string option)
-    ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(on_click : (Dom.mouseEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   let field = Text_field.Context.use () in
   let disabled () =
     match (is_disabled (), field) with
@@ -138,7 +148,15 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_focus_within = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+            is_disabled = (fun[@u] () -> disabled ());
+            is_invalid = (fun[@u] () -> invalid ());
+          })
     </div>
   </Context.Provider>
 [@@element div]

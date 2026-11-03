@@ -35,6 +35,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Accordion.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Accordion.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Accordion.tsx"]
 end
@@ -240,9 +243,107 @@ let same (solidtype, react) =
 let focused () =
   match Js.Null.toOption active with Some e -> text e | None -> ""
 
+(* The walk on the trigger of a one-item accordion whose accordion, item and
+   trigger draw their children of their state, as words: what each part's
+   function was given, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Accordion is_disabled=(fun () -> disabled)>
+        (fun a ->
+          Solidtype.Jsx.fragment
+            [|
+              words "accordion" [ ("disabled", a.is_disabled) ];
+              <Accordion.Item id="shipping">
+                (fun i ->
+                  Solidtype.Jsx.fragment
+                    [|
+                      words "item"
+                        [
+                          ("expanded", i.is_expanded);
+                          ("focus-visible-within", i.is_focus_visible_within);
+                          ("disabled", i.is_disabled);
+                        ];
+                      <Accordion.Heading>
+                        <Accordion.Trigger>
+                          (fun t ->
+                            words "trigger"
+                              [
+                                ("hovered", t.is_hovered);
+                                ("pressed", t.is_pressed);
+                                ("focused", t.is_focused);
+                                ("focus-visible", t.is_focus_visible);
+                                ("disabled", t.is_disabled);
+                              ])
+                        </Accordion.Trigger>
+                      </Accordion.Heading>;
+                      <Accordion.Panel>
+                        <Accordion.Body>"About shipping."</Accordion.Body>
+                      </Accordion.Panel>;
+                    |])
+              </Accordion.Item>;
+            |])
+      </Accordion>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.by_role "button")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Accordion" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its panel's children of the focus within it"
+        (fun () ->
+          T.render (fun () ->
+              <Accordion default_expanded_keys=(fun () -> [| "shipping" |])>
+                <Accordion.Item id="shipping">
+                  <Accordion.Heading>
+                    <Accordion.Trigger>"Shipping"</Accordion.Trigger>
+                  </Accordion.Heading>
+                  <Accordion.Panel>
+                    (fun p ->
+                      Solidtype.Jsx.fragment
+                        [|
+                          <span data_words="panel">
+                            (fun () ->
+                              Solidtype.Jsx.string
+                                (T.words
+                                   [
+                                     ( "focus-visible-within",
+                                       p.is_focus_visible_within );
+                                   ]))
+                          </span>;
+                          <button>"Track"</button>;
+                        |])
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>);
+          let user = T.setup () in
+          let before = T.words_shown T.body in
+          let* () = T.tab user in
+          let on_trigger = T.words_shown T.body in
+          let* () = T.tab user in
+          Js.Promise.resolve
+            E.(
+              expect (before, on_trigger, T.words_shown T.body)
+              |> toEqual ("panel: ", "panel: ", "panel: focus-visible-within")));
       Jest.testPromise "expands one at a time, as React's does" (fun () ->
           let* r = both () in
           same r);

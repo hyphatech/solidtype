@@ -25,6 +25,12 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Select.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Select.tsx"]
+
+  external render_value_of_state : bool -> Dom.element = "renderValueOfState"
+  [@@mel.module "./twins/Select.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Select.tsx"]
 end
@@ -247,8 +253,109 @@ let both ~multiple =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The walk on the trigger of a select whose root and trigger draw their
+   children of their state, as words, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Select aria_label="State" is_disabled=(fun () -> disabled)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "select"
+                [
+                  ("focused", r.is_focused);
+                  ("focus-visible", r.is_focus_visible);
+                  ("disabled", r.is_disabled);
+                  ("open", r.is_open);
+                  ("invalid", r.is_invalid);
+                  ("required", r.is_required);
+                ];
+              <Select.Trigger>
+                (fun s ->
+                  words "trigger"
+                    [
+                      ("hovered", s.is_hovered);
+                      ("pressed", s.is_pressed);
+                      ("focused", s.is_focused);
+                      ("focus-visible", s.is_focus_visible);
+                      ("disabled", s.is_disabled);
+                    ])
+              </Select.Trigger>;
+              <Select.Popover>
+                <List_box>
+                  <List_box.Item id="florida">"Florida"</List_box.Item>
+                  <List_box.Item id="texas">"Texas"</List_box.Item>
+                </List_box>
+              </Select.Popover>;
+            |])
+      </Select>);
+  let* solidtype =
+    T.glance ~read:T.words_shown ~step:Twin.step (T.by_role "button")
+  in
+  T.cleanup ();
+  let* react =
+    T.glance ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+(* The words a select of options chosen draws in its value, beside React's. *)
+let value_of_state ~multiple =
+  T.render (fun () ->
+      <Select
+        aria_label="State"
+        selection_mode=(fun () -> if multiple then `multiple else `single)
+        default_value=(fun () ->
+                        if multiple then [| "florida"; "utah" |]
+                        else [| "florida" |])>
+        <Select.Trigger>
+          <Select.Value>
+            (fun s ->
+              <span data_words="value">
+                (fun () ->
+                  Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
+              </span>)
+          </Select.Value>
+        </Select.Trigger>
+        <Select.Popover>
+          <List_box>
+            <List_box.Item id="florida" text_value="Florida">
+              "Florida"
+            </List_box.Item>
+            <List_box.Item id="utah" text_value="Utah">"Utah"</List_box.Item>
+          </List_box>
+        </Select.Popover>
+      </Select>);
+  let solidtype = T.words_shown T.body in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_value_of_state multiple in
+  let react = T.words_shown T.body in
+  Twin.cleanup ();
+  (solidtype, react)
+
 let () =
   Jest.describe "Select" (fun () ->
+      Jest.test "draws its value's children of the options chosen, as React's"
+        (fun () ->
+          let solidtype, react = value_of_state ~multiple:false in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its value's children of several options, as React's"
+        (fun () ->
+          let solidtype, react = value_of_state ~multiple:true in
+          E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "chooses one, as React's does" (fun () ->
           let* r = both ~multiple:false in
@@ -326,12 +433,13 @@ let () =
                 default_value=(fun () -> [| "florida"; "utah" |])>
                 <Select.Trigger>
                   <Select.Value>
-                    (fun keys ->
+                    (fun s ->
                       <span>
                         (fun () ->
                           Solidtype.Jsx.string
                             (string_of_int
-                               (Array.length (Solidtype.Solid.get keys))
+                               (Array.length
+                                  (Solidtype.Solid.get s.selected_keys))
                             ^ " states"))
                       </span>)
                   </Select.Value>

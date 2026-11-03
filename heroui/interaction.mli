@@ -61,6 +61,10 @@ val hovered : t -> bool
 val pressed : t -> bool
 (** Whether it is pressed, and not disabled. *)
 
+val dragged : t -> bool
+(** Whether a pointer pressed it and is not yet let go, wherever it has moved
+    since: a thumb dragged. A key presses it but drags nothing. *)
+
 val focused : t -> bool
 (** Whether it has the focus, and is not disabled. *)
 

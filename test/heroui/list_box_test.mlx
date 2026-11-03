@@ -26,6 +26,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/ListBox.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/ListBox.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/ListBox.tsx"]
 end
@@ -275,8 +278,58 @@ let both (list : list) =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The walk on the first option of a list of single selection, whose
+   children are drawn of its state, as words, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <List_box
+        aria_label="Fruits"
+        selection_mode=`single
+        disabled_keys=(fun () -> if disabled then [| "apple" |] else [||])>
+        <List_box.Item id="apple" text_value="Apple">
+          (fun s ->
+            words "apple"
+              [
+                ("hovered", s.is_hovered);
+                ("pressed", s.is_pressed);
+                ("focused", s.is_focused);
+                ("focus-visible", s.is_focus_visible);
+                ("selected", s.is_selected);
+                ("disabled", s.is_disabled);
+                ( "single",
+                  fun[@u] () ->
+                    match Solidtype.Solid.get s.selection_mode with
+                    | `single -> true
+                    | `none | `multiple -> false );
+              ])
+        </List_box.Item>
+        <List_box.Item id="banana">"Banana"</List_box.Item>
+      </List_box>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.nth "[role=option]" 0)
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "List_box" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "selects one, as React's does" (fun () ->
           let* r = both `single in

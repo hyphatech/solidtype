@@ -46,6 +46,15 @@ type selection_mode = [ `none | `single | `multiple ]
 (** A trigger of anything that is not a {!Button}: Kobalte's trigger, a
     [<button>]. *)
 module Trigger : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -53,7 +62,10 @@ module Trigger : sig
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -141,6 +153,20 @@ end
     submenu inside a {!Submenu_trigger}. A {!Description} inside it describes
     it. *)
 module Item : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    selection_mode : [ `none | `single | `multiple ] Solidtype.Solid.accessor;
+    has_submenu : bool Solidtype.Solid.accessor;
+    is_open : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -152,7 +178,10 @@ module Item : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end

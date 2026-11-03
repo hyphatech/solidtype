@@ -27,6 +27,13 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Autocomplete.tsx"]
 
+  external render_value_of_state : bool -> Dom.element = "renderValueOfState"
+  [@@mel.module "./twins/Autocomplete.tsx"]
+
+  external render_root_of_state : bool -> bool -> bool -> bool -> Dom.element
+    = "renderRootOfState"
+  [@@mel.module "./twins/Autocomplete.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Autocomplete.tsx"]
 end
@@ -295,8 +302,141 @@ let both ~multiple =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The words an autocomplete of options chosen draws in its value, beside
+   React's. *)
+let value_of_state ~multiple =
+  T.render (fun () ->
+      <Autocomplete
+        aria_label="State"
+        selection_mode=(fun () -> if multiple then `multiple else `single)
+        default_value=(fun () ->
+                        if multiple then [| "florida"; "utah" |]
+                        else [| "florida" |])>
+        <Autocomplete.Trigger>
+          <Autocomplete.Value>
+            (fun s ->
+              <span data_words="value">
+                (fun () ->
+                  Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
+              </span>)
+          </Autocomplete.Value>
+        </Autocomplete.Trigger>
+        <Autocomplete.Popover>
+          <List_box>
+            <List_box.Item id="florida" text_value="Florida">
+              "Florida"
+            </List_box.Item>
+            <List_box.Item id="utah" text_value="Utah">"Utah"</List_box.Item>
+          </List_box>
+        </Autocomplete.Popover>
+      </Autocomplete>);
+  let solidtype = T.words_shown T.body in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_value_of_state multiple in
+  let react = T.words_shown T.body in
+  Twin.cleanup ();
+  (solidtype, react)
+
+(* An autocomplete whose root and trigger draw their children of their state,
+   as words. *)
+let draw_of_state ~disabled ~invalid ~required =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Autocomplete
+        aria_label="State"
+        is_disabled=(fun () -> disabled)
+        is_invalid=(fun () -> invalid)
+        is_required=(fun () -> required)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "autocomplete"
+                [
+                  ("focused", r.is_focused);
+                  ("focus-visible", r.is_focus_visible);
+                  ("disabled", r.is_disabled);
+                  ("open", r.is_open);
+                  ("invalid", r.is_invalid);
+                  ("required", r.is_required);
+                ];
+              <Autocomplete.Trigger>
+                (fun t ->
+                  words "trigger"
+                    [
+                      ("hovered", t.is_hovered);
+                      ("focus-within", t.is_focus_within);
+                      ("focus-visible", t.is_focus_visible);
+                      ("disabled", t.is_disabled);
+                      ("invalid", t.is_invalid);
+                    ])
+              </Autocomplete.Trigger>;
+              <Autocomplete.Popover>
+                <List_box>
+                  <List_box.Item id="florida">"Florida"</List_box.Item>
+                </List_box>
+              </Autocomplete.Popover>;
+            |])
+      </Autocomplete>)
+
+(* What it writes, beside React's. *)
+let root_of_state ?(disabled = false) ?(invalid = false) ?(required = false) ()
+    =
+  draw_of_state ~disabled ~invalid ~required;
+  let solidtype = T.words_shown T.body in
+  T.cleanup ();
+  let (_ : Dom.element) =
+    Twin.render_root_of_state disabled false invalid required
+  in
+  let react = T.words_shown T.body in
+  Twin.cleanup ();
+  (solidtype, react)
+
+(* A glance at its trigger, beside React's. *)
+let trigger_of_state () =
+  draw_of_state ~disabled:false ~invalid:false ~required:false;
+  let* solidtype =
+    T.glance ~read:T.words_shown ~step:Twin.step (T.slot "autocomplete-trigger")
+  in
+  T.cleanup ();
+  let* react =
+    T.glance ~read:T.words_shown ~step:Twin.step
+      (Twin.render_root_of_state false false false false)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Autocomplete" (fun () ->
+      Jest.test "draws its children of its state, as React's" (fun () ->
+          let solidtype, react = root_of_state () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its children of its state while disabled" (fun () ->
+          let solidtype, react = root_of_state ~disabled:true () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its children of its state, invalid and required"
+        (fun () ->
+          let solidtype, react =
+            root_of_state ~invalid:true ~required:true ()
+          in
+          (* HeroUI gives its trigger's group nothing of the autocomplete's
+             invalid state; the port's trigger tells it. *)
+          E.(expect solidtype |> toEqual (react ^ "invalid")));
+      Jest.testPromise "draws its trigger's children of its state, as React's"
+        (fun () ->
+          let* solidtype, react = trigger_of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.test "draws its value's children of the options chosen, as React's"
+        (fun () ->
+          let solidtype, react = value_of_state ~multiple:false in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its value's children of several options, as React's"
+        (fun () ->
+          let solidtype, react = value_of_state ~multiple:true in
+          E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "chooses one, as React's does" (fun () ->
           let* r = both ~multiple:false in

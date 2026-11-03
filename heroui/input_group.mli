@@ -66,6 +66,16 @@ module Text_area : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_focus_within : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+}
+(** What its children are drawn of, given as a function, as HeroUI's render
+    props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -76,7 +86,10 @@ module Props : sig
     ?is_invalid:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

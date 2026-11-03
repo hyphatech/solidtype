@@ -6,6 +6,7 @@
 import { Description, Header, Label, ListBox, Separator } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -90,6 +91,39 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A list of single selection whose first option's children are drawn of its
+// state, as words in an element marked with its id; that option, to walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <ListBox aria-label="Fruits" selectionMode="single" disabledKeys={disabled ? ["apple"] : []}>
+        <ListBox.Item id="apple" textValue="Apple">
+          {(s) => (
+            <span data-words="apple">
+              {words([
+            ["hovered", s.isHovered],
+            ["pressed", s.isPressed],
+            ["focused", s.isFocused],
+            ["focus-visible", s.isFocusVisible],
+                ["selected", s.isSelected],
+                ["disabled", s.isDisabled],
+                ["single", s.selectionMode === "single"],
+              ])}
+            </span>
+          )}
+        </ListBox.Item>
+        <ListBox.Item id="banana">Banana</ListBox.Item>
+      </ListBox>,
+    ),
+  );
+  mounted = { root, host };
+  const option = host.querySelector("[role=option]");
+  if (!(option instanceof HTMLElement)) throw new Error("HeroUI's ListBox rendered no option");
+  return option;
 }
 
 export function cleanup(): void {

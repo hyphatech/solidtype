@@ -27,6 +27,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/TableSorting.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/TableSorting.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/TableSorting.tsx"]
 end
@@ -104,6 +107,87 @@ let sorted ({ column; direction } : Table.sort_descriptor) =
 
 let () =
   Jest.describe "Table, sorted" (fun () ->
+      Jest.test
+        "draws its columns' and cells' children of their state, as React's"
+        (fun () ->
+          let column id =
+            <Table.Column
+              allows_sorting=true
+              is_row_header=(fun () -> String.equal id "name")
+              id=(fun () -> id)>
+              (fun s ->
+                <span data_words=(fun () -> Jsx.data id)>
+                  (fun () ->
+                    Jsx.string
+                      (T.words
+                         [
+                           ("hovered", s.is_hovered);
+                           ("focus-visible", s.is_focus_visible);
+                           ("sorting", s.allows_sorting);
+                           ( "ascending",
+                             fun[@u] () ->
+                               match S.get s.sort_direction with
+                               | Some `ascending -> true
+                               | Some `descending | None -> false );
+                           ( "descending",
+                             fun[@u] () ->
+                               match S.get s.sort_direction with
+                               | Some `descending -> true
+                               | Some `ascending | None -> false );
+                           ("resizing", s.is_resizing);
+                         ]))
+                </span>)
+            </Table.Column>
+          in
+          let cell name =
+            <Table.Cell>
+              (fun s ->
+                <span data_words=(fun () -> Jsx.data name)>
+                  (fun () ->
+                    Jsx.string
+                      (T.words
+                         [
+                           ("selected", s.is_selected);
+                           ("tree", s.is_tree_column);
+                           ("expanded", s.is_expanded);
+                           ("children", s.has_child_items);
+                         ]
+                      ^ " "
+                      ^ string_of_int (S.get s.column_index)
+                      ^ " "
+                      ^ string_of_int (S.get s.level)))
+                </span>)
+            </Table.Cell>
+          in
+          T.render (fun () ->
+              <Table>
+                <Table.Scroll_container>
+                  <Table.Content
+                    aria_label="Sorted"
+                    sort_descriptor=(fun () ->
+                                      {
+                                        Table.column = "name";
+                                        direction = `ascending;
+                                      })>
+                    <Table.Header>
+                      (fun () -> Jsx.element (column "name"))
+                      (fun () -> Jsx.element (column "role"))
+                    </Table.Header>
+                    <Table.Body>
+                      <Table.Row id="1">
+                        (fun () -> Jsx.element (cell "first"))
+                        (fun () -> Jsx.element (cell "second"))
+                      </Table.Row>
+                    </Table.Body>
+                  </Table.Content>
+                </Table.Scroll_container>
+              </Table>);
+          let solidtype = T.words_shown T.body in
+          T.cleanup ();
+          let (_ : Dom.element) = Twin.render_of_state false in
+          let react = T.words_shown T.body in
+          Twin.cleanup ();
+          E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "is sorted by its columns, as React's is" (fun () ->
           let told = ref "" in

@@ -54,12 +54,25 @@ module Slot : sig
   val use : unit -> slot option
 end
 
+type state = {
+  is_invalid : bool Solidtype.Solid.accessor;
+      (** Whether its field is invalid, which it is wherever it shows. *)
+  validation_errors : string array Solidtype.Solid.accessor;
+      (** The errors a form gives the field, its server's. *)
+}
+(** What its children are drawn of, given as a function, as HeroUI's render
+    props are: a function is called with the form's error where elements give
+    way to it. *)
+
 module Props : sig
   type t
 
   val check :
     ?class_:string Solidtype.Check.value ->
-    ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Span.check
 end

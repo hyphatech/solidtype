@@ -5,6 +5,7 @@
 import { Button, Disclosure } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -48,6 +49,52 @@ export function render(
   );
   mounted = { root, host };
   return host;
+}
+
+// The disclosure whose root and trigger draw their children of their state,
+// each as words in an element marked with its name: its focus and the
+// trigger's interaction, since Kobalte's trigger turns on Space let go, as a
+// native button clicks, where React Aria's turns as it goes down. Its
+// trigger, to walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Disclosure isDisabled={disabled}>
+        {(d) => (
+          <>
+            <span data-words="disclosure">
+              {words([
+                ["focus-visible-within", d.isFocusVisibleWithin],
+                ["disabled", d.isDisabled],
+              ])}
+            </span>
+            <Disclosure.Heading>
+              <Disclosure.Trigger>
+                {(t) => (
+                  <span data-words="trigger">
+                    {words([
+                      ["hovered", t.isHovered],
+                      ["pressed", t.isPressed],
+                      ["focused", t.isFocused],
+                      ["focus-visible", t.isFocusVisible],
+                      ["disabled", t.isDisabled],
+                    ])}
+                  </span>
+                )}
+              </Disclosure.Trigger>
+            </Disclosure.Heading>
+            <Disclosure.Content>Orders ship within 2 business days.</Disclosure.Content>
+          </>
+        )}
+      </Disclosure>,
+    ),
+  );
+  mounted = { root, host };
+  const trigger = host.querySelector("button");
+  if (!trigger) throw new Error("HeroUI's Disclosure rendered no trigger");
+  return trigger;
 }
 
 export async function step(action: () => Promise<unknown>): Promise<void> {

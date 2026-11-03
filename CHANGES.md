@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Every HeroUI port's part that HeroUI gives a render function takes its
+  children as a function of its state, a record named as HeroUI's render
+  props are: `<Button>(fun s -> ... S.get s.is_pressed ...)</Button>`. The
+  close triggers and Toast's close button take children too, HeroUI's cross
+  where they are given none. Breaking: `Select.Value`, `Combo_box.Value` and
+  `Autocomplete.Value` give their function a record, `s.selected_keys` and
+  `s.selected_text`, in place of the keys alone.
+
+- A slider's, a colour slider's and a colour area's thumb is dragged only
+  while a pointer holds it, as React Aria's is: Enter or Space held marked it
+  `data-dragging`, and a released drag could leave it so.
+
+- `Link` takes `aria_current` and writes `data-current`, as React Aria's
+  does.
+
+- `Jsx.of_content` gives content where an element is taken, and
+  `Jsx.is_function` tells children that are a function of state.
+
 - A component may take children of either kind, elements or a function of
   its state, `~(children : state Jsx.children)`, and draws them with
   `Jsx.draw`.

@@ -60,9 +60,17 @@ module Collapsible_trigger = struct
 end
 
 module Trigger = struct
+  type state = {
+    is_hovered : bool Solid.accessor;
+    is_pressed : bool Solid.accessor;
+    is_focused : bool Solid.accessor;
+    is_focus_visible : bool Solid.accessor;
+    is_disabled : bool Solid.accessor;
+  }
+
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let d = within "Disclosure.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> d.disabled ()) () in
     <Collapsible_trigger
@@ -79,7 +87,15 @@ module Trigger = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_pressed = (fun[@u] () -> Interaction.pressed i);
+            is_focused = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+            is_disabled = (fun[@u] () -> Interaction.disabled i);
+          })
     </Collapsible_trigger>
   [@@element button]
 end
@@ -112,10 +128,14 @@ module Indicator = struct
 end
 
 module Content = struct
+  type state = { is_focus_visible_within : bool Solid.accessor }
+
   let%component make ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let d = within "Disclosure.Content" in
+    (* Its focus, within it, whether or not the disclosure is disabled. *)
+    let i = Interaction.create () in
     let panel =
       Panel.create ~expanded:d.expanded ~expand:(fun () -> d.expand true) ()
     in
@@ -127,6 +147,7 @@ module Content = struct
               | None -> Panel.style panel)
       ref=(fun e ->
             ignore (given_ref e : unit option);
+            Interaction.watch i e;
             Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (d.expanded ()))
       data_slot="disclosure-content"
@@ -136,7 +157,12 @@ module Content = struct
       id=(fun () -> d.content_id)
       aria_hidden=(fun () -> not (d.expanded ()))
       ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_focus_visible_within =
+              (fun[@u] () -> Interaction.focus_visible i);
+          })
     </Collapsible.Content>
   [@@element div]
 end
@@ -157,10 +183,18 @@ module Body = struct
   [@@element div]
 end
 
+type state = {
+  is_expanded : bool Solid.accessor;
+  is_focus_visible_within : bool Solid.accessor;
+  is_disabled : bool Solid.accessor;
+}
+
 let%component make ?(id : string option) ?(is_expanded : bool option)
     ?(default_expanded : bool = false)
     ?(on_expanded_change : (bool -> unit) option) ?(is_disabled : bool = false)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : state Jsx.children) () =
   (* In a group, expanded as the group holds its id, and its own change still
      told, as React Aria's disclosure is. *)
   let group = Disclosure_group.Context.use () in
@@ -194,6 +228,8 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
       content_id = Solid.create_unique_id ();
     }
   in
+  (* Its focus, within it, whether or not it is disabled. *)
+  let focus = Interaction.create () in
   (* Kobalte's content is kept on the page while collapsed, which HeroUI's
      styles shrink to nothing and find in page reaches. *)
   <Collapsible.Root
@@ -205,9 +241,19 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
     data_expanded=(fun () -> Jsx.flag (expanded ()))
     data_disabled=(fun () -> Jsx.flag (is_disabled ()))
     data_slot="disclosure"
+    ref=(fun e ->
+          ignore (given_ref e : unit option);
+          Interaction.watch focus e)
     props=(Props.others props)>
     <Context.Provider value=(fun () -> d)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_expanded = (fun[@u] () -> expanded ());
+            is_focus_visible_within =
+              (fun[@u] () -> Interaction.focus_visible focus);
+            is_disabled = (fun[@u] () -> is_disabled ());
+          })
     </Context.Provider>
   </Collapsible.Root>
 [@@element div]

@@ -52,9 +52,18 @@ module Parts = Field.Slots (struct
 end)
 
 module Group = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(variant : [ `primary | `secondary ] option)
       ?(full_width : bool option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let f = within "Time_field.Group" in
     (* A group is as wide as it says, else as its field is. *)
     let full_width () =
@@ -79,7 +88,15 @@ module Group = struct
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
         data_disabled=(fun () -> Jsx.flag (f.disabled ()))
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            {
+              is_hovered = (fun[@u] () -> Interaction.hovered i);
+              is_focus_within = (fun[@u] () -> Interaction.focused i);
+              is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+              is_disabled = (fun[@u] () -> f.disabled ());
+              is_invalid = (fun[@u] () -> f.invalid ());
+            })
       </div>
     </Group_context.Provider>
   [@@element div]
@@ -327,6 +344,15 @@ let zoned_kind =
 
 (* The field each root is, given its kind of value and what a time typed is
    put on while it has none. *)
+(* What its children are drawn of: React Aria's render props for a time
+   field. *)
+type state = {
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
 let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
     ~(value : unit -> v Js.Nullable.t option)
     ~(default_value : unit -> v option) ~(on_change : v option -> unit option)
@@ -580,7 +606,16 @@ let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
       data_required=(fun () -> Jsx.flag (is_required ()))
       props=others>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>(fun () -> children ())</Parts>
+        <Parts>
+          (fun () ->
+            Jsx.draw (children ())
+              {
+                is_disabled = (fun[@u] () -> is_disabled ());
+                is_invalid = (fun[@u] () -> invalid ());
+                is_read_only = (fun[@u] () -> is_read_only ());
+                is_required = (fun[@u] () -> is_required ());
+              })
+        </Parts>
       </Field_error.Message.Provider>
       (* The value as @internationalized/date writes it, whole: Kobalte's own
          input sends a clock's text, and React Aria's the time without the
@@ -609,7 +644,7 @@ let%component make ?(value : Time.t Js.Nullable.t option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   field ~kind:time_kind
     ~fallback:(fun () ->
       Option.value (placeholder_value ()) ~default:(Time.make ()))
@@ -636,7 +671,7 @@ module Date_time = struct
       ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
       ?(on_focus_out : (Dom.focusEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     field ~kind:date_time_kind ~fallback:placeholder_value ~value ~default_value
       ~on_change
       ~placeholder_value:(fun () -> Some (placeholder_value ()))
@@ -665,7 +700,7 @@ module Zoned = struct
       ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
       ?(on_focus_out : (Dom.focusEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     field ~kind:zoned_kind ~fallback:placeholder_value ~value ~default_value
       ~on_change
       ~placeholder_value:(fun () -> Some (placeholder_value ()))

@@ -26,6 +26,13 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/ComboBox.tsx"]
 
+  external render_value_of_state : bool -> Dom.element = "renderValueOfState"
+  [@@mel.module "./twins/ComboBox.tsx"]
+
+  external render_root_of_state : bool -> bool -> bool -> bool -> Dom.element
+    = "renderRootOfState"
+  [@@mel.module "./twins/ComboBox.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/ComboBox.tsx"]
 end
@@ -277,8 +284,103 @@ let both ~multiple =
 let same (solidtype, react) =
   Js.Promise.resolve E.(expect solidtype |> toEqual react)
 
+(* The words a combo box of several options chosen draws in its value,
+   beside React's. *)
+let value_of_state ~multiple =
+  T.render (fun () ->
+      <Combo_box
+        aria_label="Animal"
+        selection_mode=(fun () -> if multiple then `multiple else `single)
+        default_value=(fun () ->
+                        if multiple then [| "cat"; "panda" |] else [| "cat" |])>
+        <Combo_box.Input_group>
+          <Input /> <Combo_box.Trigger />
+        </Combo_box.Input_group>
+        <Combo_box.Value>
+          (fun s ->
+            <span data_words="value">
+              (fun () ->
+                Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
+            </span>)
+        </Combo_box.Value>
+        <Combo_box.Popover>
+          <List_box>
+            <List_box.Item id="cat" text_value="Cat">"Cat"</List_box.Item>
+            <List_box.Item id="panda" text_value="Panda">"Panda"</List_box.Item>
+          </List_box>
+        </Combo_box.Popover>
+      </Combo_box>);
+  let solidtype = T.words_shown T.body in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_value_of_state multiple in
+  let react = T.words_shown T.body in
+  Twin.cleanup ();
+  (solidtype, react)
+
+(* What a combo box whose root draws its children of its state writes, beside
+   React's. *)
+let root_of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
+    ?(required = false) () =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Combo_box
+        aria_label="Animal"
+        is_disabled=(fun () -> disabled)
+        is_read_only=(fun () -> read_only)
+        is_invalid=(fun () -> invalid)
+        is_required=(fun () -> required)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "combo-box"
+                [
+                  ("open", r.is_open);
+                  ("disabled", r.is_disabled);
+                  ("invalid", r.is_invalid);
+                  ("required", r.is_required);
+                  ("read-only", r.is_read_only);
+                ];
+              <Combo_box.Input_group>
+                <Input /> <Combo_box.Trigger />
+              </Combo_box.Input_group>;
+              <Combo_box.Popover>
+                <List_box>
+                  <List_box.Item id="cat">"Cat"</List_box.Item>
+                </List_box>
+              </Combo_box.Popover>;
+            |])
+      </Combo_box>);
+  let solidtype = T.words_shown T.body in
+  T.cleanup ();
+  let (_ : Dom.element) =
+    Twin.render_root_of_state disabled read_only invalid required
+  in
+  let react = T.words_shown T.body in
+  Twin.cleanup ();
+  (solidtype, react)
+
 let () =
   Jest.describe "Combo_box" (fun () ->
+      Jest.test "draws its children of its state, as React's" (fun () ->
+          let solidtype, react = root_of_state () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its children of its state while disabled" (fun () ->
+          let solidtype, react = root_of_state ~disabled:true () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its children of its state, read-only, invalid, required"
+        (fun () ->
+          let solidtype, react =
+            root_of_state ~read_only:true ~invalid:true ~required:true ()
+          in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its value's children of the options chosen, as React's"
+        (fun () ->
+          let solidtype, react = value_of_state ~multiple:true in
+          E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "chooses one, as React's does" (fun () ->
           let* r = both ~multiple:false in

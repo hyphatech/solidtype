@@ -5,6 +5,7 @@
 import { Disclosure, DisclosureGroup } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -45,6 +46,35 @@ export function render(
   );
   mounted = { root, host };
   return host;
+}
+
+// A group of one disclosure whose group draws its children of its state, as
+// words in an element marked with its name; the disclosure's trigger, to
+// walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <DisclosureGroup isDisabled={disabled}>
+        {(g) => (
+          <>
+            <span data-words="group">{words([["disabled", g.isDisabled]])}</span>
+            <Disclosure id="shipping">
+              <Disclosure.Heading>
+                <Disclosure.Trigger>Shipping</Disclosure.Trigger>
+              </Disclosure.Heading>
+              <Disclosure.Content>About shipping.</Disclosure.Content>
+            </Disclosure>
+          </>
+        )}
+      </DisclosureGroup>,
+    ),
+  );
+  mounted = { root, host };
+  const trigger = host.querySelector("button");
+  if (!trigger) throw new Error("HeroUI's DisclosureGroup rendered no trigger");
+  return trigger;
 }
 
 export async function step(action: () => Promise<unknown>): Promise<void> {

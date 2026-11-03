@@ -22,12 +22,22 @@
 
 (** The values as text, joined by an en dash, or the children it is given. *)
 module Output : sig
+  type state = {
+    orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Output.check
   end
@@ -38,13 +48,25 @@ end
 
 (** The line the thumbs move along, Kobalte's. *)
 module Track : sig
+  type state = {
+    orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_hovered : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
     val check :
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?ref:(Dom.htmlDivElement -> unit) ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -73,6 +95,16 @@ end
 (** A thumb, Kobalte's, with the input a keyboard and a reader reach: the
     [index]th, 0 the default, of the slider's values. *)
 module Thumb : sig
+  type state = {
+    is_dragging : bool Solidtype.Solid.accessor;
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -81,7 +113,10 @@ module Thumb : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlSpanElement -> unit) ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
@@ -89,6 +124,13 @@ module Thumb : sig
   val make : Props.t -> Solidtype.Jsx.element
   val component : Props.t Solidtype.Jsx.component
 end
+
+type state = {
+  orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+}
+(** What its children are drawn of, given as a function, as HeroUI's render
+    props are, each read where Solid tracks it. *)
 
 module Props : sig
   type t
@@ -111,7 +153,10 @@ module Props : sig
     ?on_blur:(Dom.focusEvent -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     ?ref:(Dom.htmlDivElement -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

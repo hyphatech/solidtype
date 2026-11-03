@@ -67,11 +67,13 @@ let navigation ?(allows_multiple_expanded = false) ~expanded_keys ~item_ids
         if i >= 0 && i < count - 1 then expand (i + 1));
   }
 
+type state = { is_disabled : bool Solidtype.Solid.accessor }
+
 let%component make ?(expanded_keys : string array option)
     ?(default_expanded_keys : string array = [||])
     ?(on_expanded_change : (string array -> unit) option)
     ?(allows_multiple_expanded : bool = false) ?(is_disabled : bool = false)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : state Jsx.children) () =
   let keys, set_keys =
     Field.controlled ~value:expanded_keys ~default:(default_expanded_keys ())
       ~on_change:(fun k -> on_expanded_change k)
@@ -104,7 +106,8 @@ let%component make ?(expanded_keys : string array option)
     data_slot="disclosure-group"
     props=(Props.others props)>
     <Context.Provider value=(fun () -> group)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ()) { is_disabled = (fun[@u] () -> is_disabled ()) })
     </Context.Provider>
   </div>
 [@@element div]

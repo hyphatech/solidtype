@@ -32,6 +32,17 @@ type channel =
     one per channel. It declares [data-focus-visible], [data-dragging] while it
     is dragged, and [data-disabled]. *)
 module Thumb : sig
+  type state = {
+    color : Solidtype_kobalte.Types.Color.t Solidtype.Solid.accessor;
+    is_dragging : bool Solidtype.Solid.accessor;
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -39,6 +50,10 @@ module Thumb : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlSpanElement -> unit) ->
+      ?children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
@@ -46,6 +61,10 @@ module Thumb : sig
   val make : Props.t -> Solidtype.Jsx.element
   val component : Props.t Solidtype.Jsx.component
 end
+
+type state = { is_disabled : bool Solidtype.Solid.accessor }
+(** What its children are drawn of, given as a function, as HeroUI's render
+    props are, read where Solid tracks it. *)
 
 module Props : sig
   type t
@@ -63,7 +82,10 @@ module Props : sig
     ?is_disabled:bool Solidtype.Check.value ->
     ?show_dots:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

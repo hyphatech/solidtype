@@ -145,10 +145,19 @@ module Input = struct
 end
 
 module Group = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(variant : [ `primary | `secondary ] option)
       ?(full_width : bool option) ?(class_ : string option)
-      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) ()
-      =
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ~(children : state Jsx.children) () =
     let f = within "Color_field.Group" in
     let slots () =
       Styles.ColorInputGroup.slots
@@ -184,11 +193,27 @@ module Group = struct
         data_disabled=(fun () -> Jsx.flag (f.disabled ()))
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            {
+              is_hovered = (fun[@u] () -> Interaction.hovered i);
+              is_focus_within = (fun[@u] () -> Interaction.focused i);
+              is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+              is_disabled = (fun[@u] () -> f.disabled ());
+              is_invalid = (fun[@u] () -> f.invalid ());
+            })
       </div>
     </Group_context.Provider>
   [@@element div]
 end
+
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = {
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
 
 let%component make ?(value : Color.t Js.Nullable.t option)
     ?(default_value : Color.t option)
@@ -200,7 +225,7 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : state Jsx.children) () =
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
     match is_disabled () with Some d -> d | None -> in_fieldset ()
@@ -261,7 +286,16 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               data_readonly=(fun () -> Jsx.flag (is_read_only ()))
               props=(Props.others props)>
               <Field_error.Message.Provider value=(fun () -> in_form.error)>
-                <Channel_parts>(fun () -> children ())</Channel_parts>
+                <Channel_parts>
+                  (fun () ->
+                    Jsx.draw (children ())
+                      {
+                        is_disabled = (fun[@u] () -> disabled ());
+                        is_invalid = (fun[@u] () -> invalid ());
+                        is_read_only = (fun[@u] () -> is_read_only ());
+                        is_required = (fun[@u] () -> is_required ());
+                      })
+                </Channel_parts>
               </Field_error.Message.Provider>
             </Channel.Root>
       | None ->
@@ -289,7 +323,16 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               data_readonly=(fun () -> Jsx.flag (is_read_only ()))
               props=(Props.others props)>
               <Field_error.Message.Provider value=(fun () -> in_form.error)>
-                <Hex_parts>(fun () -> children ())</Hex_parts>
+                <Hex_parts>
+                  (fun () ->
+                    Jsx.draw (children ())
+                      {
+                        is_disabled = (fun[@u] () -> disabled ());
+                        is_invalid = (fun[@u] () -> invalid ());
+                        is_read_only = (fun[@u] () -> is_read_only ());
+                        is_required = (fun[@u] () -> is_required ());
+                      })
+                </Hex_parts>
               </Field_error.Message.Provider>
             </Hex.Root>)
   </Context.Provider>

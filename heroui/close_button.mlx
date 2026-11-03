@@ -1,5 +1,4 @@
 module Jsx = Solidtype.Jsx
-module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Button
 
 (* HeroUI's cross, which a close button draws where it is given nothing. *)
@@ -27,11 +26,21 @@ module Icon = struct
   [@@element svg]
 end
 
+(* What a close button's children are drawn of: React Aria's render props
+   for a button. *)
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_pressed : bool Solidtype.Solid.accessor;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+}
+
 let%component make ?(variant : [ `default ] = `default)
     ?(is_disabled : bool = false) ?(aria_label : string = "Close")
     ?(class_ : string option) ?(on_click : (Dom.mouseEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-    ?(children : Jsx.content option) () =
+    ?(children : state Jsx.children option) () =
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
   <Kobalte.Root
     aria_label=(fun () -> aria_label ())
@@ -52,10 +61,17 @@ let%component make ?(variant : [ `default ] = `default)
     type_=`button
     on_click=(fun e -> ignore (on_click e : unit option))
     props=(Props.others props)>
-    <Show
-      when_=(fun () -> Option.is_some (children ()))
-      fallback=(fun () -> <Icon />)>
-      (fun () -> match children () with Some c -> c | None -> Jsx.string "")
-    </Show>
+    (fun () ->
+      match children () with
+      | Some c ->
+          Jsx.draw c
+            {
+              is_hovered = (fun[@u] () -> Interaction.hovered i);
+              is_pressed = (fun[@u] () -> Interaction.pressed i);
+              is_focused = (fun[@u] () -> Interaction.focused i);
+              is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+              is_disabled = (fun[@u] () -> Interaction.disabled i);
+            }
+      | None -> Jsx.element <Icon />)
   </Kobalte.Root>
 [@@element button]

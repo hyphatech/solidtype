@@ -31,6 +31,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/ColorArea.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/ColorArea.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/ColorArea.tsx"]
 end
@@ -135,8 +138,70 @@ let inputs_disabled () =
   Js.Array.from (query_all T.body "input[type=range]")
   |> Array.map (fun e -> Option.is_some (T.attribute e "disabled"))
 
+(* The walk on the thumb of an area whose root and thumb draw their children
+   of their state, as words, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Color_area
+        aria_label="Colour"
+        default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+        is_disabled=(fun () -> disabled)>
+        (fun r ->
+          Solidtype.Jsx.fragment
+            [|
+              words "area" [ ("disabled", r.is_disabled) ];
+              <Color_area.Thumb>
+                (fun h ->
+                  <span data_words="thumb">
+                    (fun () ->
+                      Solidtype.Jsx.string
+                        (T.words
+                           [
+                             ("dragging", h.is_dragging);
+                             ("hovered", h.is_hovered);
+                             ("focused", h.is_focused);
+                             ("focus-visible", h.is_focus_visible);
+                             ("disabled", h.is_disabled);
+                           ]
+                        ^ " "
+                        ^ Color.to_string
+                            (Solidtype.Solid.get h.color)
+                            ~format:`hex ()))
+                  </span>)
+              </Color_area.Thumb>;
+            |])
+      </Color_area>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.slot "color-area-thumb")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Color_area" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          (* React Aria hovers a disabled thumb and track, which no other part
+             of it does; the port's are not hovered, as a disabled button is
+             not. *)
+          Js.Promise.resolve
+            E.(
+              expect (solidtype, T.without "hovered" solidtype)
+              |> toEqual (T.without "hovered" react, T.without "hovered" react)));
       Jest.afterEach T.cleanup;
       Jest.testPromise "is an area and its thumb, stepped, as React's is"
         (fun () -> both ~default_value:"rgb(116, 52, 255)" ());

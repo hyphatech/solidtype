@@ -85,7 +85,17 @@ module Parts = Field.Slots (struct
 end)
 
 module Group = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+
+  let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      () =
     let f = within "Number_field.Group" in
     (* Hovered and focused within as React Aria's group is, which HeroUI's
        styles ring. *)
@@ -102,7 +112,15 @@ module Group = struct
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_focus_within = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+            is_disabled = (fun[@u] () -> f.disabled ());
+            is_invalid = (fun[@u] () -> f.invalid ());
+          })
     </div>
   [@@element div]
 end
@@ -238,6 +256,14 @@ module Decrement_button = struct
   [@@element button]
 end
 
+(* What its children are drawn of: React Aria's render props for it. *)
+type state = {
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+
 let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(value : float option)
     ?(default_value : float option) ?(on_change : (float -> unit) option)
@@ -251,7 +277,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : Jsx.content) () =
+    ~(children : state Jsx.children) () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -369,7 +395,16 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       props=(Props.others props)>
       <Kobalte.HiddenInput />
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts label_id=(fun () -> label_id)>(fun () -> children ())</Parts>
+        <Parts label_id=(fun () -> label_id)>
+          (fun () ->
+            Jsx.draw (children ())
+              {
+                is_disabled = (fun[@u] () -> disabled ());
+                is_invalid = (fun[@u] () -> invalid ());
+                is_read_only = (fun[@u] () -> is_read_only ());
+                is_required = (fun[@u] () -> is_required ());
+              })
+        </Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

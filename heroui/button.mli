@@ -125,6 +125,24 @@ module Trigger : sig
   val use : unit -> trigger option
 end
 
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_pressed : bool Solidtype.Solid.accessor;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_pending : bool Solidtype.Solid.accessor;
+}
+(** What a button's children are drawn of, given as a function, as HeroUI's
+    render props are: each read where Solid tracks it, as its [data-] attribute
+    says it.
+
+    {[
+      <Button>
+        (fun s -> if S.get s.is_pressed then "Saving" else "Save")
+      </Button>
+    ]} *)
+
 module Props : sig
   type t
 
@@ -151,7 +169,10 @@ module Props : sig
     ?on_focus:(Dom.focusEvent -> unit) ->
     ?ref:(Dom.htmlButtonElement -> unit) ->
     ?aria_label:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Button.check
 end

@@ -63,21 +63,80 @@ let state e =
     "data-focus-visible";
     "data-disabled";
     "data-pending";
+    "data-dragging";
   ]
   |> List.filter_map (fun name ->
       Option.map (fun v -> name ^ "=" ^ v) (attribute e name))
   |> String.concat " "
 
+external text_content : Dom.element -> string = "textContent" [@@mel.get]
+
+external all_with : string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.scope "document"]
+
+external attribute_or_null : Dom.element -> string -> string Js.null
+  = "getAttribute"
+[@@mel.send]
+
+(* What every part on the page wrote of its state, each in an element marked
+   [data-words] with the part's name: a walk's [read] for a component of
+   several parts, whatever element it walks. *)
+let words_shown (_ : Dom.element) =
+  Js.Array.from (all_with "[data-words]")
+  |> Array.to_list
+  |> List.map (fun e ->
+      Option.value
+        (Js.Null.toOption (attribute_or_null e "data-words"))
+        ~default:""
+      ^ ": " ^ text_content e)
+  |> String.concat " | "
+
+(* The [n]th element on the page that [selector] finds, from 0, which a test
+   has just drawn. *)
+let nth selector n =
+  match
+    Array.to_list (Js.Array.from (all_with selector))
+    |> List.filteri (fun i _ -> i = n)
+  with
+  | e :: _ -> e
+  | [] -> invalid_arg ("no element " ^ string_of_int n ^ " of " ^ selector)
+
+(* A walk with [word] taken out of what each step read. *)
+let without word walked =
+  Array.map
+    (fun (step, read) ->
+      ( step,
+        String.split_on_char ' ' read
+        |> List.filter (fun w -> not (String.equal w word || String.equal w ""))
+        |> String.concat " " ))
+    walked
+
+(* The part on the page of the slot [name], which a test has just drawn. *)
+let slot name =
+  match query ("[data-slot=" ^ name ^ "]") with
+  | Some e -> e
+  | None -> invalid_arg ("no part of the slot " ^ name ^ " is on the page")
+
+(* A part's state as words, the true ones alone, in the order given: what a
+   test compares with the React twin's render function. *)
+let words flags =
+  flags
+  |> List.filter_map (fun (word, holds) ->
+      if Solidtype.Solid.get holds then Some word else None)
+  |> String.concat " "
+
 (* An element hovered, pressed and let go by the mouse, left, then reached by
-   Tab and pressed by Enter, then by Space: its state after each step, by the
-   step's name. Each step runs through [step], a twin's act, which React asks
-   of a test and Solid's side does not mind. *)
-let walk ~step e =
+   Tab and pressed by Enter, then by Space: what [read] reads of it after each
+   step, its state by default, by the step's name. Each step runs through
+   [step], a twin's act, which React asks of a test and Solid's side does not
+   mind. *)
+let walk ?(read = state) ~step e =
   let user = setup () in
   let seen = ref [] in
   let after name action =
     let* () = step action in
-    seen := (name, state e) :: !seen;
+    seen := (name, read e) :: !seen;
     Js.Promise.resolve ()
   in
   let pointer keys () =
@@ -98,6 +157,27 @@ let walk ~step e =
   let* () = after "Enter let go" (fun () -> keyboard user "{/Enter}") in
   let* () = after "Space held" (fun () -> keyboard user "[Space>]") in
   let* () = after "Space let go" (fun () -> keyboard user "[/Space]") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+(* What [read] reads of an element hovered, left, then reached by Tab, after
+   each step, by its name: a walk with no press, for a trigger whose press
+   opens an overlay that takes the page's pointer. *)
+let glance ~read ~step e =
+  let user = setup () in
+  let seen = ref [] in
+  let after name action =
+    let* () = step action in
+    seen := (name, read e) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let* () = after "rendered" Js.Promise.resolve in
+  let* () = after "hovered" (fun () -> hover user e) in
+  let* () = after "left" (fun () -> unhover user e) in
+  let* () =
+    after "tabbed to" (fun () ->
+        let* () = click user body in
+        tab user)
+  in
   Js.Promise.resolve (Array.of_list (List.rev !seen))
 
 external attribute_names : Dom.element -> string array = "getAttributeNames"

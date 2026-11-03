@@ -16,8 +16,45 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Link.tsx"]
 
+  external render_of_state : bool -> bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Link.tsx"]
+
   external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Link.tsx"]
 end
+
+(* The walk on a link whose children are drawn of its state, as words, and
+   whether it is marked current: what each side's function was given. *)
+let of_state ~disabled ~current =
+  T.render (fun () ->
+      <Link
+        href="#top"
+        is_disabled=(fun () -> disabled)
+        ?aria_current=(fun () -> if current then Some "page" else None)>
+        (fun s ->
+          <span>
+            (fun () ->
+              Solidtype.Jsx.string
+                (T.words
+                   [
+                     ("current", s.is_current);
+                     ("hovered", s.is_hovered);
+                     ("pressed", s.is_pressed);
+                     ("focused", s.is_focused);
+                     ("focus-visible", s.is_focus_visible);
+                     ("disabled", s.is_disabled);
+                   ]))
+          </span>)
+      </Link>);
+  let marked link = T.attribute link "data-current" in
+  let link = T.by_role "link" in
+  let* solidtype = T.walk ~read:T.text_content ~step:Twin.step link in
+  let solidtype = (solidtype, marked link) in
+  T.cleanup ();
+  let link = Twin.render_of_state disabled current in
+  let* react = T.walk ~read:T.text_content ~step:Twin.step link in
+  let react = (react, marked link) in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
 
 (* What HeroUI's styles read of the link and of its icon. *)
 let shown link =
@@ -56,6 +93,17 @@ let () =
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "is disabled as React Aria's is" (fun () ->
           let* solidtype, react = both ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state, as React's" (fun () ->
+          let* solidtype, react = of_state ~disabled:false ~current:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "is current as its aria-current says, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false ~current:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its children of its state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true ~current:false in
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise
         "takes its element's attributes, calling a caller's ref beside its own"

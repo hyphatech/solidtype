@@ -50,13 +50,26 @@ end
 (** The button that expands and collapses the content: Kobalte's trigger, a
     [<button>]. *)
 module Trigger : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+  (** What the trigger's children are drawn of, given as a function, as HeroUI's
+      render props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
     val check :
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -82,6 +95,13 @@ end
 
 (** What the disclosure shows and hides: Kobalte's content, a [<div>]. *)
 module Content : sig
+  type state = {
+    is_focus_visible_within : bool Solidtype.Solid.accessor;
+        (** Whether an element inside it has the focus, shown by a key. *)
+  }
+  (** What the content's children are drawn of, given as a function, as HeroUI's
+      render props are, read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -89,7 +109,10 @@ module Content : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -114,6 +137,15 @@ module Body : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type state = {
+  is_expanded : bool Solidtype.Solid.accessor;
+  is_focus_visible_within : bool Solidtype.Solid.accessor;
+      (** Whether an element inside it has the focus, shown by a key. *)
+  is_disabled : bool Solidtype.Solid.accessor;
+}
+(** What a disclosure's children are drawn of, given as a function, as HeroUI's
+    render props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -124,7 +156,11 @@ module Props : sig
     ?on_expanded_change:(bool -> unit) ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?ref:(Dom.htmlDivElement -> unit) ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

@@ -7,6 +7,7 @@
 import { Button, Description, Dropdown, Header, Kbd, Label, Separator } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -132,6 +133,53 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// A dropdown whose trigger draws its children of its state, as words in an
+// element marked with its name, and whose item does so too; its trigger, to
+// walk.
+export function renderOfState(): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Dropdown>
+        <Dropdown.Trigger aria-label="Actions">
+          {(s) => (
+            <span data-words="trigger">
+              {words([
+            ["hovered", s.isHovered],
+            ["pressed", s.isPressed],
+            ["focused", s.isFocused],
+            ["focus-visible", s.isFocusVisible],
+              ])}
+            </span>
+          )}
+        </Dropdown.Trigger>
+        <Dropdown.Popover>
+          <Dropdown.Menu aria-label="Actions">
+            <Dropdown.Item id="new" textValue="New file">
+              {(s) => (
+                <span data-words="item">
+                  {words([
+                    ["focused", s.isFocused],
+                    ["selected", s.isSelected],
+                    ["disabled", s.isDisabled],
+                    ["submenu", s.hasSubmenu],
+                    ["open", s.isOpen],
+                  ])}
+                </span>
+              )}
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>,
+    ),
+  );
+  mounted = { root, host };
+  const trigger = host.querySelector("button");
+  if (!trigger) throw new Error("HeroUI's Dropdown rendered no trigger");
+  return trigger;
 }
 
 export function cleanup(): void {

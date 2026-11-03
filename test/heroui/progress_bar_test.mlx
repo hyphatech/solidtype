@@ -26,6 +26,9 @@ module Twin = struct
   external render : props -> Dom.element = "render"
   [@@mel.module "./twins/ProgressBar.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/ProgressBar.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/ProgressBar.tsx"]
 end
@@ -135,8 +138,42 @@ let both ?value ?is_indeterminate ?min_value ?max_value ?color ?size
   Twin.cleanup ();
   (solidtype, react)
 
+(* What a bar whose children are drawn of its state writes, beside React's. *)
+let of_state ~indeterminate =
+  T.render (fun () ->
+      <Progress_bar
+        aria_label="Loading"
+        value=40.
+        is_indeterminate=(fun () -> indeterminate)>
+        (fun s ->
+          <span data_words="state">
+            (fun () ->
+              let shown = function Some v -> v | None -> "undefined" in
+              Solidtype.Jsx.string
+                (shown
+                   (Option.map Js.Float.toString
+                      (Solidtype.Solid.get s.percentage))
+                ^ "|"
+                ^ shown (Solidtype.Solid.get s.value_text)
+                ^ "|"
+                ^ string_of_bool (Solidtype.Solid.get s.is_indeterminate)))
+          </span>)
+      </Progress_bar>);
+  let solidtype = T.words_shown T.body in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_of_state indeterminate in
+  let react = T.words_shown T.body in
+  Twin.cleanup ();
+  (solidtype, react)
+
 let () =
   Jest.describe "Progress_bar" (fun () ->
+      Jest.test "draws its children of its value, as React's" (fun () ->
+          let solidtype, react = of_state ~indeterminate:false in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "draws its children of its state while indeterminate" (fun () ->
+          let solidtype, react = of_state ~indeterminate:true in
+          E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.test "is a bar of its value, as React's is" (fun () ->
           let solidtype, react = both ~value:60. () in

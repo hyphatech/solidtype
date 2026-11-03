@@ -34,6 +34,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/Dropdown.tsx"]
 
+  external render_of_state : unit -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/Dropdown.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Dropdown.tsx"]
 end
@@ -366,8 +369,61 @@ let given ?(own = "--x: 1") selector =
 let first selector =
   match all selector with [||] -> T.body | found -> found.(0)
 
+(* The walk on the trigger of a dropdown whose trigger and item draw their
+   children of their state, as words, beside React's. *)
+let of_state () =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Dropdown>
+        <Dropdown.Trigger aria_label="Actions">
+          (fun s ->
+            words "trigger"
+              [
+                ("hovered", s.is_hovered);
+                ("pressed", s.is_pressed);
+                ("focused", s.is_focused);
+                ("focus-visible", s.is_focus_visible);
+              ])
+        </Dropdown.Trigger>
+        <Dropdown.Popover>
+          <Dropdown.Menu aria_label="Actions">
+            <Dropdown.Item id="new" text_value="New file">
+              (fun s ->
+                words "item"
+                  [
+                    ("focused", s.is_focused);
+                    ("selected", s.is_selected);
+                    ("disabled", s.is_disabled);
+                    ("submenu", s.has_submenu);
+                    ("open", s.is_open);
+                  ])
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>);
+  (* A glance at the trigger, then a press that opens the menu, its item's
+     words read after it. *)
+  let look trigger =
+    let* glanced = T.glance ~read:T.words_shown ~step:Twin.step trigger in
+    let* () = Twin.step (fun () -> T.click (T.setup ()) trigger) in
+    Js.Promise.resolve (glanced, T.words_shown T.body)
+  in
+  let* solidtype = look (T.by_role "button") in
+  T.cleanup ();
+  let* react = look (Twin.render_of_state ()) in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Dropdown" (fun () ->
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.afterEach T.cleanup;
       Jest.testPromise "acts on an item, as React's does" (fun () ->
           let* r = both `actions in

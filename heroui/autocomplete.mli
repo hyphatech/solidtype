@@ -77,6 +77,16 @@ end
 (** Its trigger: a [<div role="group">] that opens the list as it is pressed,
     and anchors the popover. *)
 module Trigger : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -84,7 +94,10 @@ module Trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -97,14 +110,24 @@ end
     another, else the autocomplete's placeholder; or, while one is chosen, what
     [children] draws, given a read of the ids chosen. *)
 module Value : sig
+  type state = {
+    selected_keys : string array Solidtype.Solid.accessor;
+        (** The options chosen, by their ids. *)
+    selected_text : string Solidtype.Solid.accessor;
+        (** Their texts, as the reader's language lists them. *)
+  }
+  (** What its children are drawn of while an option is chosen, given as a
+      function, as HeroUI's render props are; while none is, it shows the
+      placeholder. *)
+
   module Props : sig
     type t
 
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( string array Solidtype.Solid.accessor -> Solidtype.Jsx.element,
-          [ `render ] )
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
@@ -198,6 +221,17 @@ end
     [on_change] with them, and clearing calls [on_clear] too. An option whose id
     [disabled_keys] holds is disabled. The list opens while the search shows no
     option only by [allows_empty_collection]. *)
+type state = {
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_open : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+(** What an autocomplete's children are drawn of, given as a function, as
+    HeroUI's render props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -222,7 +256,10 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

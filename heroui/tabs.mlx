@@ -214,10 +214,20 @@ end
 external as_html : Dom.htmlAnchorElement -> Dom.htmlElement = "%identity"
 
 module Tab = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ~(id : string) ?(href : string option)
       ?(is_disabled : bool = false) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let t = within "Tabs.Tab" in
     let k = Kobalte.use_tabs_context () in
     let selected () =
@@ -265,7 +275,16 @@ module Tab = struct
                        if selected () then Some (t.tab_id (id ()) ^ "-panel")
                        else None)>
       <Tab_context.Provider value=(fun () -> { selected })>
-        (fun () -> children ())
+        (fun () ->
+          Jsx.draw (children ())
+            {
+              is_hovered = (fun[@u] () -> Interaction.hovered n);
+              is_pressed = (fun[@u] () -> Interaction.pressed n);
+              is_focused = (fun[@u] () -> Interaction.focused n);
+              is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
+              is_selected = (fun[@u] () -> selected ());
+              is_disabled = (fun[@u] () -> Interaction.disabled n);
+            })
       </Tab_context.Provider>
     </As_tab>
   [@@element a]

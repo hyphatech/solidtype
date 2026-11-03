@@ -148,12 +148,24 @@ module Header = struct
 end
 
 module Column = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    allows_sorting : bool Solidtype.Solid.accessor;
+    sort_direction :
+      [ `ascending | `descending ] option Solidtype.Solid.accessor;
+    is_resizing : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(id : string option) ?(allows_sorting : bool = false)
       ?(is_row_header : bool option) ?(width : column_size option)
       ?(default_width : column_size option) ?(min_width : float option)
       ?(max_width : float option) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlTableCellElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let slots = in_table "Table.Column" in
     let t = Headless.use_context () in
     let i = Interaction.create () in
@@ -180,7 +192,23 @@ module Column = struct
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_pressed = (fun[@u] () -> Interaction.pressed i);
+            is_focused = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+            allows_sorting = (fun[@u] () -> allows_sorting ());
+            sort_direction =
+              (fun[@u] () ->
+                match t.sort () with
+                | Some (d : Headless.sort_descriptor)
+                  when Option.equal String.equal (Some d.column) (id ()) ->
+                    Some d.direction
+                | Some _ | None -> None);
+            is_resizing = (fun[@u] () -> resizing ());
+          })
     </Headless.Column>
   [@@element th]
 end
@@ -188,8 +216,18 @@ end
 (* HeroUI's styles read React Aria's state: the handle hovered, and its
    input focused. *)
 module Column_resizer = struct
+  (* What its children are drawn of: React Aria's render props for a column's
+     resizer. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_resizing : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option) () =
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ?(children : state Jsx.children option) () =
     let slots = in_table "Table.Column_resizer" in
     let column = Headless.use_column_context () in
     let handle = Interaction.create () in
@@ -209,8 +247,20 @@ module Column_resizer = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused input))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible input))
       data_resizing=(fun () -> Jsx.flag (column.resizing ()))
-      props=(Props.others props)
-    />
+      props=(Props.others props)>
+      (fun () ->
+        match children () with
+        | Some c ->
+            Jsx.draw c
+              {
+                is_hovered = (fun[@u] () -> Interaction.hovered handle);
+                is_focused = (fun[@u] () -> Interaction.focused input);
+                is_focus_visible =
+                  (fun[@u] () -> Interaction.focus_visible input);
+                is_resizing = (fun[@u] () -> column.resizing ());
+              }
+        | None -> Jsx.string "")
+    </Headless.Column_resizer>
   [@@element div]
 end
 
@@ -347,9 +397,23 @@ module Row = struct
 end
 
 module Cell = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    column_index : int Solidtype.Solid.accessor;
+    is_tree_column : bool Solidtype.Solid.accessor;
+    is_expanded : bool Solidtype.Solid.accessor;
+    has_child_items : bool Solidtype.Solid.accessor;
+    level : int Solidtype.Solid.accessor;
+  }
+
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlTableCellElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let slots = in_table "Table.Cell" in
     let i = Interaction.create () in
     (* Its row's state and its column's, which the headless cell gives the
@@ -381,7 +445,27 @@ module Cell = struct
                       focus_row = r.focus;
                       labelled_by = r.header_id;
                     })>
-            (fun () -> children ())
+            (fun () ->
+              Jsx.draw (children ())
+                {
+                  is_hovered = (fun[@u] () -> Interaction.hovered i);
+                  is_pressed = (fun[@u] () -> Interaction.pressed i);
+                  is_focused = (fun[@u] () -> Interaction.focused i);
+                  is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+                  is_selected = (fun[@u] () -> (row ()).is_selected ());
+                  column_index =
+                    (fun[@u] () ->
+                      (Headless.use_cell_context ()).column_index ());
+                  is_tree_column =
+                    (fun[@u] () ->
+                      (Headless.use_cell_context ()).is_tree_column ());
+                  is_expanded =
+                    (fun[@u] () ->
+                      let r = row () in
+                      r.has_child_items () && r.is_expanded ());
+                  has_child_items = (fun[@u] () -> (row ()).has_child_items ());
+                  level = (fun[@u] () -> (row ()).level);
+                })
           </Button.Chevron.Provider>)
     </Headless.Cell>
   [@@element td]

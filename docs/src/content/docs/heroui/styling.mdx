@@ -43,9 +43,18 @@ Tailwind's data variants read it:
 The part beneath is Kobalte's, which writes its own state too, present and
 empty: `data-expanded`, `data-checked`.
 
-HeroUI's render props -- a class or children given as a function of
-`isPressed`, `isSelected` -- are the state attributes above, or a read of
-what you give the port: a controlled `is_selected` is yours to read.
+A part HeroUI gives a render function takes its children as a function of
+its state, as HeroUI's render props are: a record of reads named as they
+are, `is_pressed`, `is_selected`. Each part's `.mli` lists its fields.
+
+```ocaml
+<Button>
+  (fun s -> <span>(fun () -> Jsx.string (if S.get s.is_pressed then "Saving" else "Save"))</span>)
+</Button>
+```
+
+A class as a function of state is the state attributes above, which a
+Tailwind data variant reads.
 
 ## HeroUI's classes
 

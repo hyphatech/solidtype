@@ -5,6 +5,7 @@
 import { Tabs } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -68,6 +69,43 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// Two tabs whose children are drawn of their state, as words in an element
+// marked with each one's id; the second, to walk.
+export function renderOfState(disabled: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Tabs>
+        <Tabs.List aria-label="Options">
+          {["overview", "analytics"].map((key) => (
+            <Tabs.Tab key={key} id={key} isDisabled={key === "analytics" && disabled ? true : undefined}>
+              {(s) => (
+                <span data-words={key}>
+                  {words([
+            ["hovered", s.isHovered],
+            ["pressed", s.isPressed],
+            ["focused", s.isFocused],
+            ["focus-visible", s.isFocusVisible],
+                    ["selected", s.isSelected],
+                    ["disabled", s.isDisabled],
+                  ])}
+                </span>
+              )}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+        <Tabs.Panel id="overview">About overview.</Tabs.Panel>
+        <Tabs.Panel id="analytics">About analytics.</Tabs.Panel>
+      </Tabs>,
+    ),
+  );
+  mounted = { root, host };
+  const tab = host.querySelectorAll("[role=tab]")[1];
+  if (!(tab instanceof HTMLElement)) throw new Error("HeroUI's Tabs rendered no second tab");
+  return tab;
 }
 
 export function cleanup(): void {

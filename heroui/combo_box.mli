@@ -109,6 +109,16 @@ end
     "Cat, Dog, and Panda", else [placeholder]; or, while one is chosen, what
     [children] draws, given a read of the ids chosen. *)
 module Value : sig
+  type state = {
+    selected_keys : string array Solidtype.Solid.accessor;
+        (** The options chosen, by their ids. *)
+    selected_text : string Solidtype.Solid.accessor;
+        (** Their texts, as the reader's language lists them. *)
+  }
+  (** What its children are drawn of while an option is chosen, given as a
+      function, as HeroUI's render props are; while none is, it shows the
+      placeholder. *)
+
   module Props : sig
     type t
 
@@ -116,8 +126,8 @@ module Value : sig
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( string array Solidtype.Solid.accessor -> Solidtype.Jsx.element,
-          [ `render ] )
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -167,6 +177,16 @@ end
     value a form is sent, as it is by [form_value=`text]; else a form is sent
     the ids chosen, under [name]. An option whose id [disabled_keys] holds is
     disabled. *)
+type state = {
+  is_open : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+}
+(** What a combo box's children are drawn of, given as a function, as HeroUI's
+    render props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -199,7 +219,10 @@ module Props : sig
     ?on_focus_in:(Dom.focusEvent -> unit) ->
     ?on_key_down:(Dom.keyboardEvent -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

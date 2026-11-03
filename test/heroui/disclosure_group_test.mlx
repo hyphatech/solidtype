@@ -29,6 +29,9 @@ module Twin = struct
     ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
   [@@mel.module "./twins/DisclosureGroup.tsx"]
 
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/DisclosureGroup.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/DisclosureGroup.tsx"]
 end
@@ -216,9 +219,49 @@ let navigated ?allows_multiple_expanded start presses =
        presses
   |> Array.of_list
 
+(* The walk on the trigger of a group of one disclosure whose group draws its
+   children of its state, as words, beside React's. *)
+let of_state ~disabled =
+  let words name flags =
+    <span data_words=(fun () -> Solidtype.Jsx.data name)>
+      (fun () -> Solidtype.Jsx.string (T.words flags))
+    </span>
+  in
+  T.render (fun () ->
+      <Disclosure_group is_disabled=(fun () -> disabled)>
+        (fun g ->
+          Solidtype.Jsx.fragment
+            [|
+              words "group" [ ("disabled", g.is_disabled) ];
+              <Disclosure id="shipping">
+                <Disclosure.Heading>
+                  <Disclosure.Trigger>"Shipping"</Disclosure.Trigger>
+                </Disclosure.Heading>
+                <Disclosure.Content>"About shipping."</Disclosure.Content>
+              </Disclosure>;
+            |])
+      </Disclosure_group>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.by_role "button")
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
 let () =
   Jest.describe "Disclosure_group" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its parts' children of their state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its parts' children of their state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "expands one at a time, as React's does" (fun () ->
           let* r = both () in
           same r);

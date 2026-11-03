@@ -33,6 +33,16 @@ type segment = [ `hour | `minute | `second | `dayPeriod ]
 (** The box the input sits in, React Aria's group, with HeroUI's
     {!Styles.DateInputGroup}: a [<div role="group">]. *)
 module Group : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focus_within : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    is_invalid : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -40,7 +50,10 @@ module Group : sig
       ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
       ?full_width:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -125,6 +138,15 @@ module Segment : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
+type state = {
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_invalid : bool Solidtype.Solid.accessor;
+  is_read_only : bool Solidtype.Solid.accessor;
+  is_required : bool Solidtype.Solid.accessor;
+}
+(** What a time field's children are drawn of, given as a function, as HeroUI's
+    render props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -155,7 +177,10 @@ module Props : sig
     ?on_blur:(Dom.focusEvent -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     ?ref:(Dom.htmlDivElement -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
@@ -204,7 +229,10 @@ module Date_time : sig
       ?on_blur:(Dom.focusEvent -> unit) ->
       ?on_focus_out:(Dom.focusEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -257,7 +285,10 @@ module Zoned : sig
       ?on_blur:(Dom.focusEvent -> unit) ->
       ?on_focus_out:(Dom.focusEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end

@@ -71,6 +71,10 @@ val navigation :
     [allows_multiple_expanded], next expands the one after the last expanded and
     previous the one before the first, so each press reaches another. *)
 
+type state = { is_disabled : bool Solidtype.Solid.accessor }
+(** What a group's children are drawn of, given as a function, as HeroUI's
+    render props are, read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -81,7 +85,10 @@ module Props : sig
     ?allows_multiple_expanded:bool Solidtype.Check.value ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

@@ -70,6 +70,13 @@ end
     [on_selection_change] with them all. [disallow_empty_selection] keeps the
     last selected button from being unselected. It is named by [aria_label] or
     [aria_labelledby]. *)
+type state = {
+  orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+}
+(** What a group's children are drawn of, given as a function, as HeroUI's
+    render props are, each read where Solid tracks it. *)
+
 module Props : sig
   type t
 
@@ -87,7 +94,10 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

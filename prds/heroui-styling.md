@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a and 3b have landed, and stage 4's ground, `Jsx.children` and a function child typed by its check, has.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a, 3b and 4 have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -301,7 +301,7 @@ class, which restyles every instance at once.
   that draw one of several elements, and those that set a handler on their
   element, each handler composed with the caller's; the attributes test
   over every part. Styling's "Not yet" goes.
-- [ ] 4. Children of state on each part HeroUI gives a render function,
+- [x] 4. Children of state on each part HeroUI gives a render function,
   tested against the React twin's render function.
 - [ ] 5. `Html`'s `props` per element; `as_` in the Kobalte binding and on
   every port's part, given the state of stage 4 where the part has it;

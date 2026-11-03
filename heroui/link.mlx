@@ -44,16 +44,34 @@ module Icon = struct
   [@@element span]
 end
 
+(* What a link's children are drawn of: React Aria's render props for a
+   link. *)
+type state = {
+  is_current : bool Solidtype.Solid.accessor;
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_pressed : bool Solidtype.Solid.accessor;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+}
+
 let%component make ~(href : string) ?(is_disabled : bool option)
     ?(class_ : string option)
     ?ref:(given_ref : (Dom.htmlAnchorElement -> unit) option)
-    ~(children : Jsx.content) () =
+    ?(aria_current : string option) ~(children : state Jsx.children) () =
   (* A link is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
     match is_disabled () with Some d -> d | None -> in_fieldset ()
   in
   let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  (* Current while it says it is, any aria-current at all, as React Aria
+     reads it. *)
+  let current () =
+    match aria_current () with
+    | Some c -> not (String.equal c "")
+    | None -> false
+  in
   <Kobalte.Root
     href=(fun () -> href ())
     disabled=(fun () -> is_disabled ())
@@ -70,7 +88,18 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     data_focused=(fun () -> Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+    data_current=(fun () -> Jsx.flag (current ()))
+    ?aria_current
     props=(Props.others props)>
-    (fun () -> children ())
+    (fun () ->
+      Jsx.draw (children ())
+        {
+          is_current = (fun[@u] () -> current ());
+          is_hovered = (fun[@u] () -> Interaction.hovered i);
+          is_pressed = (fun[@u] () -> Interaction.pressed i);
+          is_focused = (fun[@u] () -> Interaction.focused i);
+          is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+          is_disabled = (fun[@u] () -> Interaction.disabled i);
+        })
   </Kobalte.Root>
 [@@element a]

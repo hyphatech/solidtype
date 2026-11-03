@@ -9,8 +9,19 @@
     its [id], selected as the group holds it; its own [is_selected],
     [default_selected] and [on_change] are not read there. It shows the state
     HeroUI's styles read, [data-selected] and the hover, press and focus React
-    Aria shows. A function of its state as its children, React's render prop, is
-    not taken: a page reads the state it gives. *)
+    Aria shows, and draws its children of that state where they are a function
+    of it. *)
+
+type state = {
+  is_hovered : bool Solidtype.Solid.accessor;
+  is_pressed : bool Solidtype.Solid.accessor;
+  is_focused : bool Solidtype.Solid.accessor;
+  is_focus_visible : bool Solidtype.Solid.accessor;
+  is_disabled : bool Solidtype.Solid.accessor;
+  is_selected : bool Solidtype.Solid.accessor;
+}
+(** What a toggle button's children are drawn of, given as a function, as
+    HeroUI's render props are, each read where Solid tracks it. *)
 
 module Props : sig
   type t
@@ -28,7 +39,10 @@ module Props : sig
     ?ref:(Dom.htmlButtonElement -> unit) ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:
+      ( state -> Solidtype.Jsx.element,
+        [ `nodes | `render ] )
+      Solidtype.Check.children ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Button.check
 end

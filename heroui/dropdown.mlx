@@ -128,9 +128,17 @@ external query : Dom.element -> string -> Dom.element Js.null = "querySelector"
 [@@mel.send]
 
 module Trigger = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(aria_label : string option) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let d = within "Dropdown.Trigger" in
     let i = Interaction.create () in
     <Kobalte.Trigger
@@ -148,7 +156,14 @@ module Trigger = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_pressed = (fun[@u] () -> Interaction.pressed i || d.is_open ());
+            is_focused = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+          })
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -433,12 +448,25 @@ let description : Description.slot =
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
 
 module Item = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+    selection_mode : [ `none | `single | `multiple ] Solidtype.Solid.accessor;
+    has_submenu : bool Solidtype.Solid.accessor;
+    is_open : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ~(id : string) ?(text_value : string option)
       ?(is_disabled : bool = false)
       ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let d = within "Dropdown.Item" in
     let s = Selection.use () in
     let sub = Submenu.use () in
@@ -464,7 +492,21 @@ module Item = struct
     let content () =
       <Item_context.Provider value=(fun () -> context)>
         <Description.Slot.Provider value=(fun () -> description)>
-          (fun () -> children ())
+          (fun () ->
+            Jsx.draw (children ())
+              {
+                is_hovered = (fun[@u] () -> Interaction.hovered i);
+                is_pressed = (fun[@u] () -> Interaction.pressed i);
+                is_focused = (fun[@u] () -> Interaction.focused i);
+                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+                is_selected = (fun[@u] () -> selected ());
+                is_disabled = (fun[@u] () -> disabled ());
+                selection_mode = (fun[@u] () -> mode);
+                has_submenu = (fun[@u] () -> Option.is_some sub);
+                is_open =
+                  (fun[@u] () ->
+                    match sub with Some o -> o () | None -> false);
+              })
         </Description.Slot.Provider>
       </Item_context.Provider>
     in

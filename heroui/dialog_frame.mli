@@ -35,6 +35,18 @@ val overlay : t -> Overlay.t
 val dismissable : t -> bool
 (** Whether a press outside closes it, as its backdrop says. *)
 
+type overlay_state = {
+  is_entering : bool Solidtype.Solid.accessor;
+  is_exiting : bool Solidtype.Solid.accessor;
+}
+(** What a backdrop's and a container's children are drawn of, given as a
+    function, as HeroUI's render props are: whether it is entering or exiting,
+    as its styles animate it. *)
+
+type dialog_state = { close : unit -> unit }
+(** What a dialog's children are drawn of, given as a function, as HeroUI's
+    render props are: what closes it. *)
+
 val root :
   is_open:(unit -> bool option) ->
   default_open:(unit -> bool option) ->
@@ -64,7 +76,7 @@ val backdrop :
   default_open:(unit -> bool option) ->
   on_open_change:(bool -> unit) ->
   others:_ Solidtype.Solid.rest ->
-  (unit -> Solidtype.Jsx.content) ->
+  (overlay_state -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
 (** A press on it closes the dialog while [dismissable], and Escape while
     [keyboard_dismissable]; [is_open], [default_open] and [on_open_change] are
@@ -78,7 +90,7 @@ val container :
   placement:(unit -> string) ->
   ref:(Dom.htmlDivElement -> unit option) ->
   others:_ Solidtype.Solid.rest ->
-  (unit -> Solidtype.Jsx.content) ->
+  (overlay_state -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
 (** A [<div>] that enters and exits with the backdrop. *)
 
@@ -92,7 +104,7 @@ val dialog :
   ref:(Dom.htmlElement -> unit option) ->
   on_focus_out:(Dom.focusEvent -> unit option) ->
   others:_ Solidtype.Solid.rest ->
-  (unit -> Solidtype.Jsx.content) ->
+  (dialog_state -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
 (** [on_element] is given the dialog's element as it is made, for a part that
     does more with it, as a drawer is dragged. *)
@@ -111,5 +123,7 @@ val close_trigger :
   class_:(unit -> string) ->
   on_click:(Dom.mouseEvent -> unit option) ->
   others:Close_button.Props.t Solidtype.Solid.rest ->
+  children:(unit -> Close_button.state Solidtype.Jsx.children option) ->
   Solidtype.Jsx.element
-(** HeroUI's close button, which closes the dialog. *)
+(** HeroUI's close button, which closes the dialog: HeroUI's cross, or the
+    children it is given. *)

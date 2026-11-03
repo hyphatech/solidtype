@@ -6,6 +6,7 @@
 import { Button, Modal } from "@heroui/react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { words } from "./words";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -65,6 +66,67 @@ export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();
   });
+}
+
+// An open modal whose backdrop, container, dialog and close trigger draw their
+// children of their state, as words in an element marked with each one's
+// name, the dialog a button that closes it.
+export function renderOfState(_: boolean): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Modal defaultOpen>
+        <Modal.Backdrop>
+          {(b) => (
+            <>
+              <span data-words="backdrop">
+                {words([
+                  ["entering", b.isEntering],
+                  ["exiting", b.isExiting],
+                ])}
+              </span>
+              <Modal.Container>
+                {(c) => (
+                  <>
+                    <span data-words="container">
+                      {words([
+                        ["entering", c.isEntering],
+                        ["exiting", c.isExiting],
+                      ])}
+                    </span>
+                    <Modal.Dialog>
+                      {(d) => (
+                        <>
+                          <Modal.CloseTrigger>
+                            {(s) => (
+                              <span data-words="close">
+                                {words([
+                                  ["hovered", s.isHovered],
+                                  ["pressed", s.isPressed],
+                                  ["disabled", s.isDisabled],
+                                ])}
+                              </span>
+                            )}
+                          </Modal.CloseTrigger>
+                          <Modal.Heading>Welcome</Modal.Heading>
+                          <button type="button" data-testid="done" onClick={d.close}>
+                            Done
+                          </button>
+                        </>
+                      )}
+                    </Modal.Dialog>
+                  </>
+                )}
+              </Modal.Container>
+            </>
+          )}
+        </Modal.Backdrop>
+      </Modal>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
 }
 
 export function cleanup(): void {

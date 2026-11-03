@@ -176,6 +176,19 @@ end
     else [default_width] until resized, within [min_width] and [max_width]. It
     declares [data-allows-sorting], [data-hovered] and [data-focus-visible]. *)
 module Column : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    allows_sorting : bool Solidtype.Solid.accessor;
+    sort_direction :
+      [ `ascending | `descending ] option Solidtype.Solid.accessor;
+    is_resizing : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -189,7 +202,10 @@ module Column : sig
       ?max_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlTableCellElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Th.check
   end
@@ -207,6 +223,15 @@ end
     [data-resizable-direction]. It is used in a column of a table in a
     {!Resizable_container}. *)
 module Column_resizer : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_resizing : bool Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
@@ -214,6 +239,10 @@ module Column_resizer : sig
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
+      ?children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -290,13 +319,31 @@ end
     It declares [data-focus-visible], its row's [data-level], [data-expanded]
     and [data-has-child-items], and [data-tree-column] in a tree's column. *)
 module Cell : sig
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_selected : bool Solidtype.Solid.accessor;
+    column_index : int Solidtype.Solid.accessor;
+    is_tree_column : bool Solidtype.Solid.accessor;
+    is_expanded : bool Solidtype.Solid.accessor;
+    has_child_items : bool Solidtype.Solid.accessor;
+    level : int Solidtype.Solid.accessor;
+  }
+  (** What its children are drawn of, given as a function, as HeroUI's render
+      props are, each read where Solid tracks it. *)
+
   module Props : sig
     type t
 
     val check :
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlTableCellElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:
+        ( state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Td.check
   end

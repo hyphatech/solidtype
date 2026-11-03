@@ -131,6 +131,8 @@ type t = {
   set_hover : bool S.setter;
   press : bool S.accessor;
   set_press : bool S.setter;
+  drag : bool S.accessor;
+  set_drag : bool S.setter;
   focus : bool S.accessor;
   set_focus : bool S.setter;
   mutable watched : Dom.element option;
@@ -141,6 +143,7 @@ type t = {
 let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
   let hover, set_hover = S.create_signal false in
   let press, set_press = S.create_signal false in
+  let drag, set_drag = S.create_signal false in
   let focus, set_focus = S.create_signal false in
   (* A hover or a press ends as the element is disabled, as React Aria ends
      them, so one enabled again under a resting pointer shows neither until
@@ -150,7 +153,8 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
       S.create_computed (fun () ->
           if S.get off then begin
             S.set set_hover false;
-            S.set set_press false
+            S.set set_press false;
+            S.set set_drag false
           end))
     disabled;
   {
@@ -162,6 +166,8 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
     set_hover;
     press;
     set_press;
+    drag;
+    set_drag;
     focus;
     set_focus;
     watched = None;
@@ -176,6 +182,7 @@ let pointer_inert i = holds i.no_pointer_press
    Next, keeps the focus with no blur told. *)
 let hovered i = S.get i.hover && not (disabled i || holds i.no_hover)
 let pressed i = S.get i.press && not (disabled i)
+let dragged i = S.get i.drag && not (disabled i)
 let focused i = S.get i.focus && not (disabled i)
 let focus_visible i = focused i && by_keyboard ()
 
@@ -200,16 +207,19 @@ let listen i element =
   on_pointer element "pointerdown" (fun e ->
       if button e = 0 && not (disabled i || pointer_inert i) then begin
         down := true;
+        S.set i.set_drag true;
         press true
       end);
   (* A pointer is let go wherever it is, so the page hears it. *)
   on_pointer document "pointerup" (fun _ ->
       if !down then begin
         down := false;
+        S.set i.set_drag false;
         press false
       end);
   on_pointer document "pointercancel" (fun _ ->
       down := false;
+      S.set i.set_drag false;
       press false);
   on_key element "keydown" (fun e ->
       if pressing e && not (repeat e) then press true);

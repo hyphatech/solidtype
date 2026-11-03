@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.RadioGroup
 
@@ -99,6 +100,16 @@ let description : Description.slot =
     (fun () -> children ())
   </Kobalte.Description>
 
+(* What its children are drawn of: React Aria's render props for a radio
+   group. *)
+type state = {
+  orientation : [ `horizontal | `vertical ] S.accessor;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
+  is_invalid : bool S.accessor;
+}
+
 let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(value : string option) ?(default_value : string option)
     ?(on_change : (string -> unit) option)
@@ -110,7 +121,8 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?(on_key_down : (Dom.keyboardEvent -> unit) option)
-    ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) () =
+    ?(on_click : (Dom.mouseEvent -> unit) option)
+    ~(children : state Jsx.children) () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -181,7 +193,15 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
-          (fun () -> children ())
+          (fun () ->
+            Jsx.draw (children ())
+              {
+                orientation = (fun[@u] () -> orientation ());
+                is_disabled = (fun[@u] () -> is_disabled ());
+                is_read_only = (fun[@u] () -> is_read_only ());
+                is_required = (fun[@u] () -> is_required ());
+                is_invalid = (fun[@u] () -> invalid ());
+              })
         </Description.Slot.Provider>
       </Label.Slot.Provider>
     </Kobalte.Root>

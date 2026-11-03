@@ -177,9 +177,17 @@ let draggable f ~placement el =
 module Trigger = struct
   (* HeroUI's drawer trigger is a button, not the [<div>] a modal's is: React
      Aria's, its state its own, pressed while the drawer is open. *)
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+  }
+
   let%component make ?(aria_label : string option) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : state Jsx.children) () =
     let k = Solidtype_kobalte.Dialog.use_dialog_context () in
     let open_ = Solidtype_kobalte.Types.DialogContextValue.is_open k in
     let i = Interaction.create () in
@@ -195,7 +203,14 @@ module Trigger = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () ->
+        Jsx.draw (children ())
+          {
+            is_hovered = (fun[@u] () -> Interaction.hovered i);
+            is_pressed = (fun[@u] () -> Interaction.pressed i || S.get open_);
+            is_focused = (fun[@u] () -> Interaction.focused i);
+            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+          })
     </Solidtype_kobalte.Dialog.Trigger>
   [@@element button]
 end
@@ -207,7 +222,7 @@ module Backdrop = struct
       ?(default_open : bool option) ?(on_open_change : (bool -> unit) option)
       ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Dialog_frame.overlay_state Jsx.children) () =
     Dialog_frame.backdrop ~slot:"drawer-backdrop"
       ~portal_container:(fun () -> None)
       ~class_:(fun () ->
@@ -218,7 +233,8 @@ module Backdrop = struct
       ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
       ~is_open ~default_open
       ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-      ~style ~ref:given_ref ~others:(Props.others props) children
+      ~style ~ref:given_ref ~others:(Props.others props)
+      (fun s -> Jsx.draw (children ()) s)
   [@@element div]
 end
 
@@ -226,7 +242,7 @@ module Content = struct
   let%component make ?(placement : placement = `bottom)
       ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Dialog_frame.overlay_state Jsx.children) () =
     let f = within "Drawer.Content" in
     Dialog_frame.container f ~slot:"drawer-content"
       ~class_:(fun () ->
@@ -235,10 +251,10 @@ module Content = struct
           (class_ ()))
       ~placement:(fun () -> placement_name (placement ()))
       ~ref:given_ref ~others:(Props.others props)
-      (fun () ->
+      (fun s ->
         Jsx.element
           <Content_context.Provider value=(fun () -> placement)>
-            (fun () -> children ())
+            (fun () -> Jsx.draw (children ()) s)
           </Content_context.Provider>)
   [@@element div]
 end
@@ -247,7 +263,7 @@ module Dialog = struct
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlElement -> unit) option)
       ?(on_focus_out : (Dom.focusEvent -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Dialog_frame.dialog_state Jsx.children) () =
     let f = within "Drawer.Dialog" in
     let placement = placement () in
     Dialog_frame.dialog f ~slot:"drawer-dialog" ~role:`dialog
@@ -257,7 +273,8 @@ module Dialog = struct
           (Styles.Drawer.dialog (slots ~placement:(placement ()) ()))
           (class_ ()))
       ~placement:(fun () -> placement_name (placement ()))
-      ~ref:given_ref ~on_focus_out ~others:(Props.others props) children
+      ~ref:given_ref ~on_focus_out ~others:(Props.others props)
+      (fun s -> Jsx.draw (children ()) s)
   [@@element section]
 end
 
@@ -316,12 +333,13 @@ end
 
 module Close_trigger = struct
   let%component make ?(class_ : string option)
-      ?(on_click : (Dom.mouseEvent -> unit) option) () =
+      ?(on_click : (Dom.mouseEvent -> unit) option)
+      ?(children : Close_button.state Jsx.children option) () =
     let f = within "Drawer.Close_trigger" in
     Dialog_frame.close_trigger f ~slot:"drawer-close-trigger"
       ~class_:(fun () ->
         after (Styles.Drawer.close_trigger (slots ())) (class_ ()))
-      ~on_click ~others:(Props.others props)
+      ~on_click ~others:(Props.others props) ~children
   [@@element button]
 end
 
