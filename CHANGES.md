@@ -8,6 +8,9 @@
   A part given none draws its element as before. Kobalte's parts and those of
   `solidtype-headless` take it too, a function of their props.
 
+- `Segment.Item`'s wrapping element has its look in `segment.css`,
+  `.segment__item-control`, where it wrote a utility.
+
 - `let%component ... [@@element button]` gives the component `as_`, and
   `Html.Button.props` is what its function is given; `Dynamic.Drawn` is an
   element drawn by a tag or a function, `Jsx.drawn_as`.

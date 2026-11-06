@@ -1,8 +1,9 @@
 (* Each part of each port takes every attribute of its element and passes it
    on, as HeroUI's React components spread the rest of their props on theirs:
-   each part is given [data-testid], [title], [style], a [ref] and an
+   each part is given [data-testid], [class_], [title], [style], a [ref] and an
    [on_key_down], which must reach the element its selector finds -- the ref
-   handed it, the handler called on it -- beside the part's own. An svg takes
+   handed it, the handler called on it -- beside the part's own; and then each
+   is drawn by an [as_], and all of it must reach what that draws. An svg takes
    no [title]. An avatar's image, which shows only once it has loaded, is
    checked by the avatar's own test. *)
 
@@ -152,6 +153,9 @@ let drawn name tag () =
         />)
   else None
 
+(* The parts whose class goes on the element inside them, as HeroUI's do. *)
+let classed_within = [ "Accordion.Body"; "Disclosure.Body" ]
+
 (* What the attributes test names that is no part of its own, but what a
    part's given content or a part beneath it draws. *)
 let drawn_within =
@@ -166,6 +170,13 @@ let is_drawn name e =
   match Js.Null.toOption (get_attribute e "data-drawn") with
   | Some n -> String.equal n name
   | None -> false
+
+type class_list
+
+external class_list : Dom.element -> class_list = "classList" [@@mel.get]
+external contains : class_list -> string -> bool = "contains" [@@mel.send]
+
+let class_list_has e name = contains (class_list e) name
 
 (* What of a part's attributes is not on its element: its title, which an svg
    does not take, its style, its ref and its handler, told a key no part acts
@@ -185,6 +196,10 @@ let unattributed name e =
     List.exists (fun x -> x == e) (Hashtbl.find_all table name)
   in
   [
+    ( class_list_has e "given-class"
+      || List.exists (String.equal name) drawn_within
+      || List.exists (String.equal name) classed_within,
+      "class_" );
     (title, "title");
     (String.equal (property (style_of e) "--part") "1", "style");
     (same refs, "ref");
@@ -227,6 +242,7 @@ let () =
                     <Alert
                       ?as_=(drawn "Alert" "div")
                       data_testid="Alert"
+                      class_="given-class"
                       title="Alert"
                       style="--part: 1"
                       ref=(fun e -> seen "Alert" e)
@@ -234,6 +250,7 @@ let () =
                       <Alert.Indicator
                         ?as_=(drawn "Alert.Indicator" "div")
                         data_testid="Alert.Indicator"
+                        class_="given-class"
                         title="Alert.Indicator"
                         style="--part: 1"
                         ref=(fun e -> seen "Alert.Indicator" e)
@@ -242,6 +259,7 @@ let () =
                       <Alert.Content
                         ?as_=(drawn "Alert.Content" "div")
                         data_testid="Alert.Content"
+                        class_="given-class"
                         title="Alert.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Alert.Content" e)
@@ -249,6 +267,7 @@ let () =
                         <Alert.Title
                           ?as_=(drawn "Alert.Title" "p")
                           data_testid="Alert.Title"
+                          class_="given-class"
                           title="Alert.Title"
                           style="--part: 1"
                           ref=(fun e -> seen "Alert.Title" e)
@@ -258,6 +277,7 @@ let () =
                         <Alert.Description
                           ?as_=(drawn "Alert.Description" "span")
                           data_testid="Alert.Description"
+                          class_="given-class"
                           title="Alert.Description"
                           style="--part: 1"
                           ref=(fun e -> seen "Alert.Description" e)
@@ -269,6 +289,7 @@ let () =
                     <Avatar_group
                       ?as_=(drawn "Avatar_group" "div")
                       data_testid="Avatar_group"
+                      class_="given-class"
                       title="Avatar_group"
                       style="--part: 1"
                       ref=(fun e -> seen "Avatar_group" e)
@@ -276,6 +297,7 @@ let () =
                       <Avatar
                         ?as_=(drawn "Avatar" "span")
                         data_testid="Avatar"
+                        class_="given-class"
                         title="Avatar"
                         style="--part: 1"
                         ref=(fun e -> seen "Avatar" e)
@@ -283,6 +305,7 @@ let () =
                         <Avatar.Fallback
                           ?as_=(drawn "Avatar.Fallback" "span")
                           data_testid="Avatar.Fallback"
+                          class_="given-class"
                           title="Avatar.Fallback"
                           style="--part: 1"
                           ref=(fun e -> seen "Avatar.Fallback" e)
@@ -293,6 +316,7 @@ let () =
                       <Avatar_group.Count
                         ?as_=(drawn "Avatar_group.Count" "span")
                         data_testid="Avatar_group.Count"
+                        class_="given-class"
                         title="Avatar_group.Count"
                         style="--part: 1"
                         ref=(fun e -> seen "Avatar_group.Count" e)
@@ -303,6 +327,7 @@ let () =
                     <Badge.Anchor
                       ?as_=(drawn "Badge.Anchor" "span")
                       data_testid="Badge.Anchor"
+                      class_="given-class"
                       title="Badge.Anchor"
                       style="--part: 1"
                       ref=(fun e -> seen "Badge.Anchor" e)
@@ -310,6 +335,7 @@ let () =
                       <Badge
                         ?as_=(drawn "Badge" "span")
                         data_testid="Badge"
+                        class_="given-class"
                         title="Badge"
                         style="--part: 1"
                         ref=(fun e -> seen "Badge" e)
@@ -317,6 +343,7 @@ let () =
                         <Badge.Label
                           ?as_=(drawn "Badge.Label" "span")
                           data_testid="Badge.Label"
+                          class_="given-class"
                           title="Badge.Label"
                           style="--part: 1"
                           ref=(fun e -> seen "Badge.Label" e)
@@ -328,6 +355,7 @@ let () =
                     <Breadcrumbs
                       ?as_=(drawn "Breadcrumbs" "ol")
                       data_testid="Breadcrumbs"
+                      class_="given-class"
                       title="Breadcrumbs"
                       style="--part: 1"
                       ref=(fun e -> seen "Breadcrumbs" e)
@@ -335,6 +363,7 @@ let () =
                       <Breadcrumbs.Item
                         ?as_=(drawn "Breadcrumbs.Item" "li")
                         data_testid="Breadcrumbs.Item"
+                        class_="given-class"
                         title="Breadcrumbs.Item"
                         style="--part: 1"
                         ref=(fun e -> seen "Breadcrumbs.Item" e)
@@ -345,6 +374,7 @@ let () =
                     <Pagination
                       ?as_=(drawn "Pagination" "nav")
                       data_testid="Pagination"
+                      class_="given-class"
                       title="Pagination"
                       style="--part: 1"
                       ref=(fun e -> seen "Pagination" e)
@@ -352,6 +382,7 @@ let () =
                       <Pagination.Summary
                         ?as_=(drawn "Pagination.Summary" "div")
                         data_testid="Pagination.Summary"
+                        class_="given-class"
                         title="Pagination.Summary"
                         style="--part: 1"
                         ref=(fun e -> seen "Pagination.Summary" e)
@@ -361,6 +392,7 @@ let () =
                       <Pagination.Content
                         ?as_=(drawn "Pagination.Content" "ul")
                         data_testid="Pagination.Content"
+                        class_="given-class"
                         title="Pagination.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Pagination.Content" e)
@@ -368,6 +400,7 @@ let () =
                         <Pagination.Item
                           ?as_=(drawn "Pagination.Item" "li")
                           data_testid="Pagination.Item"
+                          class_="given-class"
                           title="Pagination.Item"
                           style="--part: 1"
                           ref=(fun e -> seen "Pagination.Item" e)
@@ -375,6 +408,7 @@ let () =
                           <Pagination.Previous
                             ?as_=(drawn "Pagination.Previous" "button")
                             data_testid="Pagination.Previous"
+                            class_="given-class"
                             title="Pagination.Previous"
                             style="--part: 1"
                             ref=(fun e -> seen "Pagination.Previous" e)
@@ -382,6 +416,7 @@ let () =
                             <Pagination.Previous_icon
                               ?as_=(drawn "Pagination.Previous_icon" "span")
                               data_testid="Pagination.Previous_icon"
+                              class_="given-class"
                               title="Pagination.Previous_icon"
                               style="--part: 1"
                               ref=(fun e -> seen "Pagination.Previous_icon" e)
@@ -394,6 +429,7 @@ let () =
                           <Pagination.Link
                             ?as_=(drawn "Pagination.Link" "button")
                             data_testid="Pagination.Link"
+                            class_="given-class"
                             title="Pagination.Link"
                             style="--part: 1"
                             ref=(fun e -> seen "Pagination.Link" e)
@@ -405,6 +441,7 @@ let () =
                           <Pagination.Ellipsis
                             ?as_=(drawn "Pagination.Ellipsis" "span")
                             data_testid="Pagination.Ellipsis"
+                            class_="given-class"
                             title="Pagination.Ellipsis"
                             style="--part: 1"
                             ref=(fun e -> seen "Pagination.Ellipsis" e)
@@ -415,6 +452,7 @@ let () =
                           <Pagination.Next
                             ?as_=(drawn "Pagination.Next" "button")
                             data_testid="Pagination.Next"
+                            class_="given-class"
                             title="Pagination.Next"
                             style="--part: 1"
                             ref=(fun e -> seen "Pagination.Next" e)
@@ -422,6 +460,7 @@ let () =
                             <Pagination.Next_icon
                               ?as_=(drawn "Pagination.Next_icon" "span")
                               data_testid="Pagination.Next_icon"
+                              class_="given-class"
                               title="Pagination.Next_icon"
                               style="--part: 1"
                               ref=(fun e -> seen "Pagination.Next_icon" e)
@@ -436,6 +475,7 @@ let () =
                       <Tooltip.Trigger
                         ?as_=(drawn "Tooltip.Trigger" "div")
                         data_testid="Tooltip.Trigger"
+                        class_="given-class"
                         title="Tooltip.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Tooltip.Trigger" e)
@@ -445,6 +485,7 @@ let () =
                       <Tooltip.Content
                         ?as_=(drawn "Tooltip.Content" "div")
                         data_testid="Tooltip.Content"
+                        class_="given-class"
                         title="Tooltip.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Tooltip.Content" e)
@@ -452,6 +493,7 @@ let () =
                         <Tooltip.Arrow
                           ?as_=(drawn "Tooltip.Arrow" "div")
                           data_testid="Tooltip.Arrow"
+                          class_="given-class"
                           title="Tooltip.Arrow"
                           style="--part: 1"
                           ref=(fun e -> seen "Tooltip.Arrow" e)
@@ -464,6 +506,7 @@ let () =
                       <Popover.Trigger
                         ?as_=(drawn "Popover.Trigger" "div")
                         data_testid="Popover.Trigger"
+                        class_="given-class"
                         title="Popover.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Popover.Trigger" e)
@@ -473,6 +516,7 @@ let () =
                       <Popover.Content
                         ?as_=(drawn "Popover.Content" "div")
                         data_testid="Popover.Content"
+                        class_="given-class"
                         title="Popover.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Popover.Content" e)
@@ -480,6 +524,7 @@ let () =
                         <Popover.Dialog
                           ?as_=(drawn "Popover.Dialog" "section")
                           data_testid="Popover.Dialog"
+                          class_="given-class"
                           title="Popover.Dialog"
                           style="--part: 1"
                           ref=(fun e -> seen "Popover.Dialog" e)
@@ -487,6 +532,7 @@ let () =
                           <Popover.Arrow
                             ?as_=(drawn "Popover.Arrow" "div")
                             data_testid="Popover.Arrow"
+                            class_="given-class"
                             title="Popover.Arrow"
                             style="--part: 1"
                             ref=(fun e -> seen "Popover.Arrow" e)
@@ -495,6 +541,7 @@ let () =
                           <Popover.Heading
                             ?as_=(drawn "Popover.Heading" "h2")
                             data_testid="Popover.Heading"
+                            class_="given-class"
                             title="Popover.Heading"
                             style="--part: 1"
                             ref=(fun e -> seen "Popover.Heading" e)
@@ -508,6 +555,7 @@ let () =
                       <Alert_dialog.Trigger
                         ?as_=(drawn "Alert_dialog.Trigger" "div")
                         data_testid="Alert_dialog.Trigger"
+                        class_="given-class"
                         title="Alert_dialog.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Alert_dialog.Trigger" e)
@@ -517,6 +565,7 @@ let () =
                       <Alert_dialog.Backdrop
                         ?as_=(drawn "Alert_dialog.Backdrop" "div")
                         data_testid="Alert_dialog.Backdrop"
+                        class_="given-class"
                         title="Alert_dialog.Backdrop"
                         style="--part: 1"
                         ref=(fun e -> seen "Alert_dialog.Backdrop" e)
@@ -524,6 +573,7 @@ let () =
                         <Alert_dialog.Container
                           ?as_=(drawn "Alert_dialog.Container" "div")
                           data_testid="Alert_dialog.Container"
+                          class_="given-class"
                           title="Alert_dialog.Container"
                           style="--part: 1"
                           ref=(fun e -> seen "Alert_dialog.Container" e)
@@ -532,6 +582,7 @@ let () =
                           <Alert_dialog.Dialog
                             ?as_=(drawn "Alert_dialog.Dialog" "section")
                             data_testid="Alert_dialog.Dialog"
+                            class_="given-class"
                             title="Alert_dialog.Dialog"
                             style="--part: 1"
                             ref=(fun e -> seen "Alert_dialog.Dialog" e)
@@ -539,6 +590,7 @@ let () =
                             <Alert_dialog.Close_trigger
                               ?as_=(drawn "Alert_dialog.Close_trigger" "button")
                               data_testid="Alert_dialog.Close_trigger"
+                              class_="given-class"
                               title="Alert_dialog.Close_trigger"
                               style="--part: 1"
                               ref=(fun e -> seen "Alert_dialog.Close_trigger" e)
@@ -548,6 +600,7 @@ let () =
                             <Alert_dialog.Header
                               ?as_=(drawn "Alert_dialog.Header" "div")
                               data_testid="Alert_dialog.Header"
+                              class_="given-class"
                               title="Alert_dialog.Header"
                               style="--part: 1"
                               ref=(fun e -> seen "Alert_dialog.Header" e)
@@ -556,6 +609,7 @@ let () =
                               <Alert_dialog.Icon
                                 ?as_=(drawn "Alert_dialog.Icon" "div")
                                 data_testid="Alert_dialog.Icon"
+                                class_="given-class"
                                 title="Alert_dialog.Icon"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Alert_dialog.Icon" e)
@@ -565,6 +619,7 @@ let () =
                               <Alert_dialog.Heading
                                 ?as_=(drawn "Alert_dialog.Heading" "h2")
                                 data_testid="Alert_dialog.Heading"
+                                class_="given-class"
                                 title="Alert_dialog.Heading"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Alert_dialog.Heading" e)
@@ -576,6 +631,7 @@ let () =
                             <Alert_dialog.Body
                               ?as_=(drawn "Alert_dialog.Body" "div")
                               data_testid="Alert_dialog.Body"
+                              class_="given-class"
                               title="Alert_dialog.Body"
                               style="--part: 1"
                               ref=(fun e -> seen "Alert_dialog.Body" e)
@@ -585,6 +641,7 @@ let () =
                             <Alert_dialog.Footer
                               ?as_=(drawn "Alert_dialog.Footer" "div")
                               data_testid="Alert_dialog.Footer"
+                              class_="given-class"
                               title="Alert_dialog.Footer"
                               style="--part: 1"
                               ref=(fun e -> seen "Alert_dialog.Footer" e)
@@ -600,6 +657,7 @@ let () =
                       <Dropdown.Trigger
                         ?as_=(drawn "Dropdown.Trigger" "button")
                         data_testid="Dropdown.Trigger"
+                        class_="given-class"
                         title="Dropdown.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Dropdown.Trigger" e)
@@ -609,6 +667,7 @@ let () =
                       <Dropdown.Popover
                         ?as_=(drawn "Dropdown.Popover" "div")
                         data_testid="Dropdown.Popover"
+                        class_="given-class"
                         title="Dropdown.Popover"
                         style="--part: 1"
                         ref=(fun e -> seen "Dropdown.Popover" e)
@@ -616,6 +675,7 @@ let () =
                         <Dropdown.Menu
                           ?as_=(drawn "Dropdown.Menu" "div")
                           data_testid="Dropdown.Menu"
+                          class_="given-class"
                           title="Dropdown.Menu"
                           style="--part: 1"
                           ref=(fun e -> seen "Dropdown.Menu" e)
@@ -624,6 +684,7 @@ let () =
                           <Dropdown.Section
                             ?as_=(drawn "Dropdown.Section" "section")
                             data_testid="Dropdown.Section"
+                            class_="given-class"
                             title="Dropdown.Section"
                             style="--part: 1"
                             ref=(fun e -> seen "Dropdown.Section" e)
@@ -631,6 +692,7 @@ let () =
                             <Header
                               ?as_=(drawn "Header" "header")
                               data_testid="Header"
+                              class_="given-class"
                               title="Header"
                               style="--part: 1"
                               ref=(fun e -> seen "Header" e)
@@ -641,6 +703,7 @@ let () =
                               id="bold"
                               ?as_=(drawn "Dropdown.Item" "div")
                               data_testid="Dropdown.Item"
+                              class_="given-class"
                               title="Dropdown.Item"
                               style="--part: 1"
                               ref=(fun e -> seen "Dropdown.Item" e)
@@ -648,6 +711,7 @@ let () =
                               <Dropdown.Item_indicator
                                 ?as_=(drawn "Dropdown.Item_indicator" "span")
                                 data_testid="Dropdown.Item_indicator"
+                                class_="given-class"
                                 title="Dropdown.Item_indicator"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Dropdown.Item_indicator" e)
@@ -663,6 +727,7 @@ let () =
                               <Dropdown.Submenu_indicator
                                 ?as_=(drawn "Dropdown.Submenu_indicator" "span")
                                 data_testid="Dropdown.Submenu_indicator"
+                                class_="given-class"
                                 title="Dropdown.Submenu_indicator"
                                 style="--part: 1"
                                 ref=(fun e ->
@@ -687,6 +752,7 @@ let () =
                       aria_label="Users"
                       ?as_=(drawn "List_box" "div")
                       data_testid="List_box"
+                      class_="given-class"
                       title="List_box"
                       style="--part: 1"
                       ref=(fun e -> seen "List_box" e)
@@ -694,6 +760,7 @@ let () =
                       <List_box.Section
                         ?as_=(drawn "List_box.Section" "section")
                         data_testid="List_box.Section"
+                        class_="given-class"
                         title="List_box.Section"
                         style="--part: 1"
                         ref=(fun e -> seen "List_box.Section" e)
@@ -702,6 +769,7 @@ let () =
                           id="bob"
                           ?as_=(drawn "List_box.Item" "div")
                           data_testid="List_box.Item"
+                          class_="given-class"
                           title="List_box.Item"
                           style="--part: 1"
                           ref=(fun e -> seen "List_box.Item" e)
@@ -710,6 +778,7 @@ let () =
                           <List_box.Item_indicator
                             ?as_=(drawn "List_box.Item_indicator" "span")
                             data_testid="List_box.Item_indicator"
+                            class_="given-class"
                             title="List_box.Item_indicator"
                             style="--part: 1"
                             ref=(fun e -> seen "List_box.Item_indicator" e)
@@ -723,6 +792,7 @@ let () =
                       default_open=true
                       ?as_=(drawn "Select" "div")
                       data_testid="Select"
+                      class_="given-class"
                       title="Select"
                       style="--part: 1"
                       ref=(fun e -> seen "Select" e)
@@ -730,6 +800,7 @@ let () =
                       <Select.Trigger
                         ?as_=(drawn "Select.Trigger" "button")
                         data_testid="Select.Trigger"
+                        class_="given-class"
                         title="Select.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Select.Trigger" e)
@@ -737,6 +808,7 @@ let () =
                         <Select.Value
                           ?as_=(drawn "Select.Value" "span")
                           data_testid="Select.Value"
+                          class_="given-class"
                           title="Select.Value"
                           style="--part: 1"
                           ref=(fun e -> seen "Select.Value" e)
@@ -745,6 +817,7 @@ let () =
                         <Select.Clear_button
                           ?as_=(drawn "Select.Clear_button" "span")
                           data_testid="Select.Clear_button"
+                          class_="given-class"
                           title="Select.Clear_button"
                           style="--part: 1"
                           ref=(fun e -> seen "Select.Clear_button" e)
@@ -753,6 +826,7 @@ let () =
                         <Select.Indicator
                           ?as_=(drawn "Select.Indicator" "svg")
                           data_testid="Select.Indicator"
+                          class_="given-class"
                           style="--part: 1"
                           ref=(fun e -> seen "Select.Indicator" e)
                           on_key_down=(fun e -> heard "Select.Indicator" e)
@@ -761,6 +835,7 @@ let () =
                       <Select.Popover
                         ?as_=(drawn "Select.Popover" "div")
                         data_testid="Select.Popover"
+                        class_="given-class"
                         title="Select.Popover"
                         style="--part: 1"
                         ref=(fun e -> seen "Select.Popover" e)
@@ -773,6 +848,7 @@ let () =
                     <Combo_box
                       ?as_=(drawn "Combo_box" "div")
                       data_testid="Combo_box"
+                      class_="given-class"
                       title="Combo_box"
                       style="--part: 1"
                       ref=(fun e -> seen "Combo_box" e)
@@ -780,6 +856,7 @@ let () =
                       <Combo_box.Input_group
                         ?as_=(drawn "Combo_box.Input_group" "div")
                         data_testid="Combo_box.Input_group"
+                        class_="given-class"
                         title="Combo_box.Input_group"
                         style="--part: 1"
                         ref=(fun e -> seen "Combo_box.Input_group" e)
@@ -788,6 +865,7 @@ let () =
                         <Combo_box.Trigger
                           ?as_=(drawn "Combo_box.Trigger" "button")
                           data_testid="Combo_box.Trigger"
+                          class_="given-class"
                           title="Combo_box.Trigger"
                           style="--part: 1"
                           ref=(fun e -> seen "Combo_box.Trigger" e)
@@ -797,6 +875,7 @@ let () =
                       <Combo_box.Value
                         ?as_=(drawn "Combo_box.Value" "div")
                         data_testid="Combo_box.Value"
+                        class_="given-class"
                         title="Combo_box.Value"
                         style="--part: 1"
                         ref=(fun e -> seen "Combo_box.Value" e)
@@ -812,6 +891,7 @@ let () =
                       default_open=true
                       ?as_=(drawn "Autocomplete" "div")
                       data_testid="Autocomplete"
+                      class_="given-class"
                       title="Autocomplete"
                       style="--part: 1"
                       ref=(fun e -> seen "Autocomplete" e)
@@ -819,6 +899,7 @@ let () =
                       <Autocomplete.Trigger
                         ?as_=(drawn "Autocomplete.Trigger" "div")
                         data_testid="Autocomplete.Trigger"
+                        class_="given-class"
                         title="Autocomplete.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Autocomplete.Trigger" e)
@@ -826,6 +907,7 @@ let () =
                         <Autocomplete.Value
                           ?as_=(drawn "Autocomplete.Value" "span")
                           data_testid="Autocomplete.Value"
+                          class_="given-class"
                           title="Autocomplete.Value"
                           style="--part: 1"
                           ref=(fun e -> seen "Autocomplete.Value" e)
@@ -834,6 +916,7 @@ let () =
                         <Autocomplete.Clear_button
                           ?as_=(drawn "Autocomplete.Clear_button" "button")
                           data_testid="Autocomplete.Clear_button"
+                          class_="given-class"
                           title="Autocomplete.Clear_button"
                           style="--part: 1"
                           ref=(fun e -> seen "Autocomplete.Clear_button" e)
@@ -843,6 +926,7 @@ let () =
                         <Autocomplete.Indicator
                           ?as_=(drawn "Autocomplete.Indicator" "svg")
                           data_testid="Autocomplete.Indicator"
+                          class_="given-class"
                           style="--part: 1"
                           ref=(fun e -> seen "Autocomplete.Indicator" e)
                           on_key_down=(fun e ->
@@ -852,6 +936,7 @@ let () =
                       <Autocomplete.Popover
                         ?as_=(drawn "Autocomplete.Popover" "div")
                         data_testid="Autocomplete.Popover"
+                        class_="given-class"
                         title="Autocomplete.Popover"
                         style="--part: 1"
                         ref=(fun e -> seen "Autocomplete.Popover" e)
@@ -872,6 +957,7 @@ let () =
                       <Drawer.Trigger
                         ?as_=(drawn "Drawer.Trigger" "button")
                         data_testid="Drawer.Trigger"
+                        class_="given-class"
                         title="Drawer.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Drawer.Trigger" e)
@@ -881,6 +967,7 @@ let () =
                       <Drawer.Backdrop
                         ?as_=(drawn "Drawer.Backdrop" "div")
                         data_testid="Drawer.Backdrop"
+                        class_="given-class"
                         title="Drawer.Backdrop"
                         style="--part: 1"
                         ref=(fun e -> seen "Drawer.Backdrop" e)
@@ -888,6 +975,7 @@ let () =
                         <Drawer.Content
                           ?as_=(drawn "Drawer.Content" "div")
                           data_testid="Drawer.Content"
+                          class_="given-class"
                           title="Drawer.Content"
                           style="--part: 1"
                           ref=(fun e -> seen "Drawer.Content" e)
@@ -895,6 +983,7 @@ let () =
                           <Drawer.Dialog
                             ?as_=(drawn "Drawer.Dialog" "section")
                             data_testid="Drawer.Dialog"
+                            class_="given-class"
                             title="Drawer.Dialog"
                             style="--part: 1"
                             ref=(fun e -> seen "Drawer.Dialog" e)
@@ -902,6 +991,7 @@ let () =
                             <Drawer.Handle
                               ?as_=(drawn "Drawer.Handle" "div")
                               data_testid="Drawer.Handle"
+                              class_="given-class"
                               title="Drawer.Handle"
                               style="--part: 1"
                               ref=(fun e -> seen "Drawer.Handle" e)
@@ -910,6 +1000,7 @@ let () =
                             <Drawer.Close_trigger
                               ?as_=(drawn "Drawer.Close_trigger" "button")
                               data_testid="Drawer.Close_trigger"
+                              class_="given-class"
                               title="Drawer.Close_trigger"
                               style="--part: 1"
                               ref=(fun e -> seen "Drawer.Close_trigger" e)
@@ -919,6 +1010,7 @@ let () =
                             <Drawer.Header
                               ?as_=(drawn "Drawer.Header" "div")
                               data_testid="Drawer.Header"
+                              class_="given-class"
                               title="Drawer.Header"
                               style="--part: 1"
                               ref=(fun e -> seen "Drawer.Header" e)
@@ -926,6 +1018,7 @@ let () =
                               <Drawer.Heading
                                 ?as_=(drawn "Drawer.Heading" "h2")
                                 data_testid="Drawer.Heading"
+                                class_="given-class"
                                 title="Drawer.Heading"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Drawer.Heading" e)
@@ -936,6 +1029,7 @@ let () =
                             <Drawer.Body
                               ?as_=(drawn "Drawer.Body" "div")
                               data_testid="Drawer.Body"
+                              class_="given-class"
                               title="Drawer.Body"
                               style="--part: 1"
                               ref=(fun e -> seen "Drawer.Body" e)
@@ -945,6 +1039,7 @@ let () =
                             <Drawer.Footer
                               ?as_=(drawn "Drawer.Footer" "div")
                               data_testid="Drawer.Footer"
+                              class_="given-class"
                               title="Drawer.Footer"
                               style="--part: 1"
                               ref=(fun e -> seen "Drawer.Footer" e)
@@ -959,6 +1054,7 @@ let () =
                       <Modal.Trigger
                         ?as_=(drawn "Modal.Trigger" "div")
                         data_testid="Modal.Trigger"
+                        class_="given-class"
                         title="Modal.Trigger"
                         style="--part: 1"
                         ref=(fun e -> seen "Modal.Trigger" e)
@@ -968,6 +1064,7 @@ let () =
                       <Modal.Backdrop
                         ?as_=(drawn "Modal.Backdrop" "div")
                         data_testid="Modal.Backdrop"
+                        class_="given-class"
                         title="Modal.Backdrop"
                         style="--part: 1"
                         ref=(fun e -> seen "Modal.Backdrop" e)
@@ -975,6 +1072,7 @@ let () =
                         <Modal.Container
                           ?as_=(drawn "Modal.Container" "div")
                           data_testid="Modal.Container"
+                          class_="given-class"
                           title="Modal.Container"
                           style="--part: 1"
                           ref=(fun e -> seen "Modal.Container" e)
@@ -982,6 +1080,7 @@ let () =
                           <Modal.Dialog
                             ?as_=(drawn "Modal.Dialog" "section")
                             data_testid="Modal.Dialog"
+                            class_="given-class"
                             title="Modal.Dialog"
                             style="--part: 1"
                             ref=(fun e -> seen "Modal.Dialog" e)
@@ -989,6 +1088,7 @@ let () =
                             <Modal.Close_trigger
                               ?as_=(drawn "Modal.Close_trigger" "button")
                               data_testid="Modal.Close_trigger"
+                              class_="given-class"
                               title="Modal.Close_trigger"
                               style="--part: 1"
                               ref=(fun e -> seen "Modal.Close_trigger" e)
@@ -998,6 +1098,7 @@ let () =
                             <Modal.Header
                               ?as_=(drawn "Modal.Header" "div")
                               data_testid="Modal.Header"
+                              class_="given-class"
                               title="Modal.Header"
                               style="--part: 1"
                               ref=(fun e -> seen "Modal.Header" e)
@@ -1005,6 +1106,7 @@ let () =
                               <Modal.Icon
                                 ?as_=(drawn "Modal.Icon" "div")
                                 data_testid="Modal.Icon"
+                                class_="given-class"
                                 title="Modal.Icon"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Modal.Icon" e)
@@ -1014,6 +1116,7 @@ let () =
                               <Modal.Heading
                                 ?as_=(drawn "Modal.Heading" "h2")
                                 data_testid="Modal.Heading"
+                                class_="given-class"
                                 title="Modal.Heading"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Modal.Heading" e)
@@ -1024,6 +1127,7 @@ let () =
                             <Modal.Body
                               ?as_=(drawn "Modal.Body" "div")
                               data_testid="Modal.Body"
+                              class_="given-class"
                               title="Modal.Body"
                               style="--part: 1"
                               ref=(fun e -> seen "Modal.Body" e)
@@ -1033,6 +1137,7 @@ let () =
                             <Modal.Footer
                               ?as_=(drawn "Modal.Footer" "div")
                               data_testid="Modal.Footer"
+                              class_="given-class"
                               title="Modal.Footer"
                               style="--part: 1"
                               ref=(fun e -> seen "Modal.Footer" e)
@@ -1046,6 +1151,7 @@ let () =
                     <Button_group
                       ?as_=(drawn "Button_group" "div")
                       data_testid="Button_group"
+                      class_="given-class"
                       title="Button_group"
                       style="--part: 1"
                       ref=(fun e -> seen "Button_group" e)
@@ -1053,6 +1159,7 @@ let () =
                       <Button
                         ?as_=(drawn "Button" "button")
                         data_testid="Button"
+                        class_="given-class"
                         title="Button"
                         style="--part: 1"
                         ref=(fun e -> seen "Button" e)
@@ -1063,6 +1170,7 @@ let () =
                         <Button_group.Separator
                           ?as_=(drawn "Button_group.Separator" "span")
                           data_testid="Button_group.Separator"
+                          class_="given-class"
                           title="Button_group.Separator"
                           style="--part: 1"
                           ref=(fun e -> seen "Button_group.Separator" e)
@@ -1075,6 +1183,7 @@ let () =
                     <Card
                       ?as_=(drawn "Card" "div")
                       data_testid="Card"
+                      class_="given-class"
                       title="Card"
                       style="--part: 1"
                       ref=(fun e -> seen "Card" e)
@@ -1082,6 +1191,7 @@ let () =
                       <Card.Header
                         ?as_=(drawn "Card.Header" "div")
                         data_testid="Card.Header"
+                        class_="given-class"
                         title="Card.Header"
                         style="--part: 1"
                         ref=(fun e -> seen "Card.Header" e)
@@ -1089,6 +1199,7 @@ let () =
                         <Card.Title
                           ?as_=(drawn "Card.Title" "h3")
                           data_testid="Card.Title"
+                          class_="given-class"
                           title="Card.Title"
                           style="--part: 1"
                           ref=(fun e -> seen "Card.Title" e)
@@ -1098,6 +1209,7 @@ let () =
                         <Card.Description
                           ?as_=(drawn "Card.Description" "p")
                           data_testid="Card.Description"
+                          class_="given-class"
                           title="Card.Description"
                           style="--part: 1"
                           ref=(fun e -> seen "Card.Description" e)
@@ -1108,6 +1220,7 @@ let () =
                       <Card.Content
                         ?as_=(drawn "Card.Content" "div")
                         data_testid="Card.Content"
+                        class_="given-class"
                         title="Card.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Card.Content" e)
@@ -1117,6 +1230,7 @@ let () =
                       <Card.Footer
                         ?as_=(drawn "Card.Footer" "div")
                         data_testid="Card.Footer"
+                        class_="given-class"
                         title="Card.Footer"
                         style="--part: 1"
                         ref=(fun e -> seen "Card.Footer" e)
@@ -1127,6 +1241,7 @@ let () =
                     <Chip
                       ?as_=(drawn "Chip" "span")
                       data_testid="Chip"
+                      class_="given-class"
                       title="Chip"
                       style="--part: 1"
                       ref=(fun e -> seen "Chip" e)
@@ -1134,6 +1249,7 @@ let () =
                       <Chip.Label
                         ?as_=(drawn "Chip.Label" "span")
                         data_testid="Chip.Label"
+                        class_="given-class"
                         title="Chip.Label"
                         style="--part: 1"
                         ref=(fun e -> seen "Chip.Label" e)
@@ -1144,6 +1260,7 @@ let () =
                     <Close_button
                       ?as_=(drawn "Close_button" "button")
                       data_testid="Close_button"
+                      class_="given-class"
                       title="Close_button"
                       style="--part: 1"
                       ref=(fun e -> seen "Close_button" e)
@@ -1151,6 +1268,7 @@ let () =
                       <Close_button.Icon
                         ?as_=(drawn "Close_button.Icon" "svg")
                         data_testid="Close_button.Icon"
+                        class_="given-class"
                         style="--part: 1"
                         ref=(fun e -> seen "Close_button.Icon" e)
                         on_key_down=(fun e -> heard "Close_button.Icon" e)
@@ -1159,6 +1277,7 @@ let () =
                     <Empty_state
                       ?as_=(drawn "Empty_state" "div")
                       data_testid="Empty_state"
+                      class_="given-class"
                       title="Empty_state"
                       style="--part: 1"
                       ref=(fun e -> seen "Empty_state" e)
@@ -1168,6 +1287,7 @@ let () =
                     <Color_area
                       ?as_=(drawn "Color_area" "div")
                       data_testid="Color_area"
+                      class_="given-class"
                       title="Color_area"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_area" e)
@@ -1178,6 +1298,7 @@ let () =
                       <Color_area.Thumb
                         ?as_=(drawn "Color_area.Thumb" "span")
                         data_testid="Color_area.Thumb"
+                        class_="given-class"
                         title="Color_area.Thumb"
                         style="--part: 1"
                         ref=(fun e -> seen "Color_area.Thumb" e)
@@ -1187,6 +1308,7 @@ let () =
                     <Color_field
                       ?as_=(drawn "Color_field" "div")
                       data_testid="Color_field"
+                      class_="given-class"
                       title="Color_field"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_field" e)
@@ -1198,6 +1320,7 @@ let () =
                       <Color_field.Group
                         ?as_=(drawn "Color_field.Group" "div")
                         data_testid="Color_field.Group"
+                        class_="given-class"
                         title="Color_field.Group"
                         style="--part: 1"
                         ref=(fun e -> seen "Color_field.Group" e)
@@ -1205,6 +1328,7 @@ let () =
                         <Color_field.Prefix
                           ?as_=(drawn "Color_field.Prefix" "div")
                           data_testid="Color_field.Prefix"
+                          class_="given-class"
                           title="Color_field.Prefix"
                           style="--part: 1"
                           ref=(fun e -> seen "Color_field.Prefix" e)
@@ -1214,6 +1338,7 @@ let () =
                         <Color_field.Input
                           ?as_=(drawn "Color_field.Input" "input")
                           data_testid="Color_field.Input"
+                          class_="given-class"
                           title="Color_field.Input"
                           style="--part: 1"
                           ref=(fun e -> seen "Color_field.Input" e)
@@ -1222,6 +1347,7 @@ let () =
                         <Color_field.Suffix
                           ?as_=(drawn "Color_field.Suffix" "div")
                           data_testid="Color_field.Suffix"
+                          class_="given-class"
                           title="Color_field.Suffix"
                           style="--part: 1"
                           ref=(fun e -> seen "Color_field.Suffix" e)
@@ -1233,6 +1359,7 @@ let () =
                     <Color_slider
                       ?as_=(drawn "Color_slider" "div")
                       data_testid="Color_slider"
+                      class_="given-class"
                       title="Color_slider"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_slider" e)
@@ -1245,6 +1372,7 @@ let () =
                       <Color_slider.Output
                         ?as_=(drawn "Color_slider.Output" "output")
                         data_testid="Color_slider.Output"
+                        class_="given-class"
                         title="Color_slider.Output"
                         style="--part: 1"
                         ref=(fun e -> seen "Color_slider.Output" e)
@@ -1253,6 +1381,7 @@ let () =
                       <Color_slider.Track
                         ?as_=(drawn "Color_slider.Track" "div")
                         data_testid="Color_slider.Track"
+                        class_="given-class"
                         title="Color_slider.Track"
                         style="--part: 1"
                         ref=(fun e -> seen "Color_slider.Track" e)
@@ -1260,6 +1389,7 @@ let () =
                         <Color_slider.Thumb
                           ?as_=(drawn "Color_slider.Thumb" "span")
                           data_testid="Color_slider.Thumb"
+                          class_="given-class"
                           title="Color_slider.Thumb"
                           style="--part: 1"
                           ref=(fun e -> seen "Color_slider.Thumb" e)
@@ -1270,6 +1400,7 @@ let () =
                     <Color_swatch
                       ?as_=(drawn "Color_swatch" "div")
                       data_testid="Color_swatch"
+                      class_="given-class"
                       title="Color_swatch"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_swatch" e)
@@ -1280,6 +1411,7 @@ let () =
                     <Color_swatch_picker
                       ?as_=(drawn "Color_swatch_picker" "div")
                       data_testid="Color_swatch_picker"
+                      class_="given-class"
                       title="Color_swatch_picker"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_swatch_picker" e)
@@ -1287,6 +1419,7 @@ let () =
                       <Color_swatch_picker.Item
                         ?as_=(drawn "Color_swatch_picker.Item" "div")
                         data_testid="Color_swatch_picker.Item"
+                        class_="given-class"
                         title="Color_swatch_picker.Item"
                         style="--part: 1"
                         ref=(fun e -> seen "Color_swatch_picker.Item" e)
@@ -1297,6 +1430,7 @@ let () =
                         <Color_swatch_picker.Swatch
                           ?as_=(drawn "Color_swatch_picker.Swatch" "div")
                           data_testid="Color_swatch_picker.Swatch"
+                          class_="given-class"
                           title="Color_swatch_picker.Swatch"
                           style="--part: 1"
                           ref=(fun e -> seen "Color_swatch_picker.Swatch" e)
@@ -1306,6 +1440,7 @@ let () =
                         <Color_swatch_picker.Indicator
                           ?as_=(drawn "Color_swatch_picker.Indicator" "span")
                           data_testid="Color_swatch_picker.Indicator"
+                          class_="given-class"
                           title="Color_swatch_picker.Indicator"
                           style="--part: 1"
                           ref=(fun e -> seen "Color_swatch_picker.Indicator" e)
@@ -1317,6 +1452,7 @@ let () =
                     <Table
                       ?as_=(drawn "Table" "div")
                       data_testid="Table"
+                      class_="given-class"
                       title="Table"
                       style="--part: 1"
                       ref=(fun e -> seen "Table" e)
@@ -1324,6 +1460,7 @@ let () =
                       <Table.Scroll_container
                         ?as_=(drawn "Table.Scroll_container" "div")
                         data_testid="Table.Scroll_container"
+                        class_="given-class"
                         title="Table.Scroll_container"
                         style="--part: 1"
                         ref=(fun e -> seen "Table.Scroll_container" e)
@@ -1331,6 +1468,7 @@ let () =
                         <Table.Content
                           ?as_=(drawn "Table.Content" "table")
                           data_testid="Table.Content"
+                          class_="given-class"
                           title="Table.Content"
                           style="--part: 1"
                           ref=(fun e -> seen "Table.Content" e)
@@ -1339,6 +1477,7 @@ let () =
                           <Table.Header
                             ?as_=(drawn "Table.Header" "thead")
                             data_testid="Table.Header"
+                            class_="given-class"
                             title="Table.Header"
                             style="--part: 1"
                             ref=(fun e -> seen "Table.Header" e)
@@ -1346,6 +1485,7 @@ let () =
                             <Table.Column
                               ?as_=(drawn "Table.Column" "th")
                               data_testid="Table.Column"
+                              class_="given-class"
                               title="Table.Column"
                               style="--part: 1"
                               ref=(fun e -> seen "Table.Column" e)
@@ -1357,6 +1497,7 @@ let () =
                                 ?as_=(drawn "Table.Sortable_column_header"
                                         "span")
                                 data_testid="Table.Sortable_column_header"
+                                class_="given-class"
                                 title="Table.Sortable_column_header"
                                 style="--part: 1"
                                 ref=(fun e ->
@@ -1371,6 +1512,7 @@ let () =
                           <Table.Body
                             ?as_=(drawn "Table.Body" "tbody")
                             data_testid="Table.Body"
+                            class_="given-class"
                             title="Table.Body"
                             style="--part: 1"
                             ref=(fun e -> seen "Table.Body" e)
@@ -1378,6 +1520,7 @@ let () =
                             <Table.Row
                               ?as_=(drawn "Table.Row" "tr")
                               data_testid="Table.Row"
+                              class_="given-class"
                               title="Table.Row"
                               style="--part: 1"
                               ref=(fun e -> seen "Table.Row" e)
@@ -1385,6 +1528,7 @@ let () =
                               <Table.Cell
                                 ?as_=(drawn "Table.Cell" "td")
                                 data_testid="Table.Cell"
+                                class_="given-class"
                                 title="Table.Cell"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Table.Cell" e)
@@ -1395,6 +1539,7 @@ let () =
                             <Table.Load_more
                               ?as_=(drawn "Table.Load_more" "tr")
                               data_testid="Table.Load_more"
+                              class_="given-class"
                               title="Table.Load_more"
                               style="--part: 1"
                               ref=(fun e -> seen "Table.Load_more" e)
@@ -1403,6 +1548,7 @@ let () =
                               <Table.Load_more_content
                                 ?as_=(drawn "Table.Load_more_content" "div")
                                 data_testid="Table.Load_more_content"
+                                class_="given-class"
                                 title="Table.Load_more_content"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Table.Load_more_content" e)
@@ -1417,6 +1563,7 @@ let () =
                       <Table.Footer
                         ?as_=(drawn "Table.Footer" "div")
                         data_testid="Table.Footer"
+                        class_="given-class"
                         title="Table.Footer"
                         style="--part: 1"
                         ref=(fun e -> seen "Table.Footer" e)
@@ -1428,6 +1575,7 @@ let () =
                       <Table.Resizable_container
                         ?as_=(drawn "Table.Resizable_container" "div")
                         data_testid="Table.Resizable_container"
+                        class_="given-class"
                         title="Table.Resizable_container"
                         style="--part: 1"
                         ref=(fun e -> seen "Table.Resizable_container" e)
@@ -1440,6 +1588,7 @@ let () =
                               <Table.Column_resizer
                                 ?as_=(drawn "Table.Column_resizer" "div")
                                 data_testid="Table.Column_resizer"
+                                class_="given-class"
                                 title="Table.Column_resizer"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Table.Column_resizer" e)
@@ -1459,6 +1608,7 @@ let () =
                     <Kbd
                       ?as_=(drawn "Kbd" "kbd")
                       data_testid="Kbd"
+                      class_="given-class"
                       title="Kbd"
                       style="--part: 1"
                       ref=(fun e -> seen "Kbd" e)
@@ -1466,6 +1616,7 @@ let () =
                       <Kbd.Abbr
                         ?as_=(drawn "Kbd.Abbr" "abbr")
                         data_testid="Kbd.Abbr"
+                        class_="given-class"
                         title="Kbd.Abbr"
                         style="--part: 1"
                         ref=(fun e -> seen "Kbd.Abbr" e)
@@ -1475,6 +1626,7 @@ let () =
                       <Kbd.Content
                         ?as_=(drawn "Kbd.Content" "span")
                         data_testid="Kbd.Content"
+                        class_="given-class"
                         title="Kbd.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Kbd.Content" e)
@@ -1485,6 +1637,7 @@ let () =
                     <Link
                       ?as_=(drawn "Link" "a")
                       data_testid="Link"
+                      class_="given-class"
                       title="Link"
                       style="--part: 1"
                       ref=(fun e -> seen "Link" e)
@@ -1494,6 +1647,7 @@ let () =
                       <Link.Icon
                         ?as_=(drawn "Link.Icon" "span")
                         data_testid="Link.Icon"
+                        class_="given-class"
                         title="Link.Icon"
                         style="--part: 1"
                         ref=(fun e -> seen "Link.Icon" e)
@@ -1503,6 +1657,7 @@ let () =
                     <Scroll_shadow
                       ?as_=(drawn "Scroll_shadow" "div")
                       data_testid="Scroll_shadow"
+                      class_="given-class"
                       title="Scroll_shadow"
                       style="--part: 1"
                       ref=(fun e -> seen "Scroll_shadow" e)
@@ -1512,6 +1667,7 @@ let () =
                     <Disclosure
                       ?as_=(drawn "Disclosure" "div")
                       data_testid="Disclosure"
+                      class_="given-class"
                       title="Disclosure"
                       style="--part: 1"
                       ref=(fun e -> seen "Disclosure" e)
@@ -1519,6 +1675,7 @@ let () =
                       <Disclosure.Heading
                         ?as_=(drawn "Disclosure.Heading" "h3")
                         data_testid="Disclosure.Heading"
+                        class_="given-class"
                         title="Disclosure.Heading"
                         style="--part: 1"
                         ref=(fun e -> seen "Disclosure.Heading" e)
@@ -1526,6 +1683,7 @@ let () =
                         <Disclosure.Trigger
                           ?as_=(drawn "Disclosure.Trigger" "button")
                           data_testid="Disclosure.Trigger"
+                          class_="given-class"
                           title="Disclosure.Trigger"
                           style="--part: 1"
                           ref=(fun e -> seen "Disclosure.Trigger" e)
@@ -1534,6 +1692,7 @@ let () =
                           <Disclosure.Indicator
                             ?as_=(drawn "Disclosure.Indicator" "svg")
                             data_testid="Disclosure.Indicator"
+                            class_="given-class"
                             style="--part: 1"
                             ref=(fun e -> seen "Disclosure.Indicator" e)
                             on_key_down=(fun e ->
@@ -1544,6 +1703,7 @@ let () =
                       <Disclosure.Content
                         ?as_=(drawn "Disclosure.Content" "div")
                         data_testid="Disclosure.Content"
+                        class_="given-class"
                         title="Disclosure.Content"
                         style="--part: 1"
                         ref=(fun e -> seen "Disclosure.Content" e)
@@ -1551,6 +1711,7 @@ let () =
                         <Disclosure.Body
                           ?as_=(drawn "Disclosure.Body" "div")
                           data_testid="Disclosure.Body"
+                          class_="given-class"
                           title="Disclosure.Body"
                           style="--part: 1"
                           ref=(fun e -> seen "Disclosure.Body" e)
@@ -1563,6 +1724,7 @@ let () =
                       <Disclosure.Heading>
                         <Button
                           data_testid="Button.trigger"
+                          class_="given-class"
                           title="Button.trigger"
                           style="--part: 1"
                           ref=(fun e -> seen "Button.trigger" e)
@@ -1576,6 +1738,7 @@ let () =
                     <Disclosure_group
                       ?as_=(drawn "Disclosure_group" "div")
                       data_testid="Disclosure_group"
+                      class_="given-class"
                       title="Disclosure_group"
                       style="--part: 1"
                       ref=(fun e -> seen "Disclosure_group" e)
@@ -1592,6 +1755,7 @@ let () =
                     <Accordion
                       ?as_=(drawn "Accordion" "div")
                       data_testid="Accordion"
+                      class_="given-class"
                       title="Accordion"
                       style="--part: 1"
                       ref=(fun e -> seen "Accordion" e)
@@ -1599,6 +1763,7 @@ let () =
                       <Accordion.Item
                         ?as_=(drawn "Accordion.Item" "div")
                         data_testid="Accordion.Item"
+                        class_="given-class"
                         title="Accordion.Item"
                         style="--part: 1"
                         ref=(fun e -> seen "Accordion.Item" e)
@@ -1607,6 +1772,7 @@ let () =
                         <Accordion.Heading
                           ?as_=(drawn "Accordion.Heading" "h3")
                           data_testid="Accordion.Heading"
+                          class_="given-class"
                           title="Accordion.Heading"
                           style="--part: 1"
                           ref=(fun e -> seen "Accordion.Heading" e)
@@ -1614,6 +1780,7 @@ let () =
                           <Accordion.Trigger
                             ?as_=(drawn "Accordion.Trigger" "button")
                             data_testid="Accordion.Trigger"
+                            class_="given-class"
                             title="Accordion.Trigger"
                             style="--part: 1"
                             ref=(fun e -> seen "Accordion.Trigger" e)
@@ -1622,6 +1789,7 @@ let () =
                             <Accordion.Indicator
                               ?as_=(drawn "Accordion.Indicator" "svg")
                               data_testid="Accordion.Indicator"
+                              class_="given-class"
                               style="--part: 1"
                               ref=(fun e -> seen "Accordion.Indicator" e)
                               on_key_down=(fun e ->
@@ -1632,6 +1800,7 @@ let () =
                         <Accordion.Panel
                           ?as_=(drawn "Accordion.Panel" "div")
                           data_testid="Accordion.Panel"
+                          class_="given-class"
                           title="Accordion.Panel"
                           style="--part: 1"
                           ref=(fun e -> seen "Accordion.Panel" e)
@@ -1639,6 +1808,7 @@ let () =
                           <Accordion.Body
                             ?as_=(drawn "Accordion.Body" "div")
                             data_testid="Accordion.Body"
+                            class_="given-class"
                             title="Accordion.Body"
                             style="--part: 1"
                             ref=(fun e -> seen "Accordion.Body" e)
@@ -1667,6 +1837,7 @@ let () =
                     <Tabs
                       ?as_=(drawn "Tabs" "div")
                       data_testid="Tabs"
+                      class_="given-class"
                       title="Tabs"
                       style="--part: 1"
                       ref=(fun e -> seen "Tabs" e)
@@ -1674,6 +1845,7 @@ let () =
                       <Tabs.List_container
                         ?as_=(drawn "Tabs.List_container" "div")
                         data_testid="Tabs.List_container"
+                        class_="given-class"
                         title="Tabs.List_container"
                         style="--part: 1"
                         ref=(fun e -> seen "Tabs.List_container" e)
@@ -1681,6 +1853,7 @@ let () =
                         <Tabs.List
                           ?as_=(drawn "Tabs.List" "div")
                           data_testid="Tabs.List"
+                          class_="given-class"
                           title="Tabs.List"
                           style="--part: 1"
                           ref=(fun e -> seen "Tabs.List" e)
@@ -1689,6 +1862,7 @@ let () =
                           <Tabs.Tab
                             ?as_=(drawn "Tabs.Tab" "a")
                             data_testid="Tabs.Tab"
+                            class_="given-class"
                             title="Tabs.Tab"
                             style="--part: 1"
                             ref=(fun e -> seen "Tabs.Tab" e)
@@ -1698,6 +1872,7 @@ let () =
                             <Tabs.Indicator
                               ?as_=(drawn "Tabs.Indicator" "div")
                               data_testid="Tabs.Indicator"
+                              class_="given-class"
                               title="Tabs.Indicator"
                               style="--part: 1"
                               ref=(fun e -> seen "Tabs.Indicator" e)
@@ -1708,6 +1883,7 @@ let () =
                             <Tabs.Separator
                               ?as_=(drawn "Tabs.Separator" "span")
                               data_testid="Tabs.Separator"
+                              class_="given-class"
                               title="Tabs.Separator"
                               style="--part: 1"
                               ref=(fun e -> seen "Tabs.Separator" e)
@@ -1720,6 +1896,7 @@ let () =
                       <Tabs.Panel
                         ?as_=(drawn "Tabs.Panel" "div")
                         data_testid="Tabs.Panel"
+                        class_="given-class"
                         title="Tabs.Panel"
                         style="--part: 1"
                         ref=(fun e -> seen "Tabs.Panel" e)
@@ -1732,6 +1909,7 @@ let () =
                     <Segment
                       ?as_=(drawn "Segment" "div")
                       data_testid="Segment"
+                      class_="given-class"
                       title="Segment"
                       style="--part: 1"
                       ref=(fun e -> seen "Segment" e)
@@ -1741,6 +1919,7 @@ let () =
                       <Segment.Item
                         ?as_=(drawn "Segment.Item" "label")
                         data_testid="Segment.Item"
+                        class_="given-class"
                         title="Segment.Item"
                         style="--part: 1"
                         ref=(fun e -> seen "Segment.Item" e)
@@ -1752,6 +1931,7 @@ let () =
                         <Segment.Separator
                           ?as_=(drawn "Segment.Separator" "span")
                           data_testid="Segment.Separator"
+                          class_="given-class"
                           title="Segment.Separator"
                           style="--part: 1"
                           ref=(fun e -> seen "Segment.Separator" e)
@@ -1763,6 +1943,7 @@ let () =
                     <Text_shimmer
                       ?as_=(drawn "Text_shimmer" "span")
                       data_testid="Text_shimmer"
+                      class_="given-class"
                       title="Text_shimmer"
                       style="--part: 1"
                       ref=(fun e -> seen "Text_shimmer" e)
@@ -1772,6 +1953,7 @@ let () =
                     <Trend_chip
                       ?as_=(drawn "Trend_chip" "span")
                       data_testid="Trend_chip"
+                      class_="given-class"
                       title="Trend_chip"
                       style="--part: 1"
                       ref=(fun e -> seen "Trend_chip" e)
@@ -1779,6 +1961,7 @@ let () =
                       <Trend_chip.Indicator
                         ?as_=(drawn "Trend_chip.Indicator" "span")
                         data_testid="Trend_chip.Indicator"
+                        class_="given-class"
                         title="Trend_chip.Indicator"
                         style="--part: 1"
                         ref=(fun e -> seen "Trend_chip.Indicator" e)
@@ -1787,6 +1970,7 @@ let () =
                       <Trend_chip.Prefix
                         ?as_=(drawn "Trend_chip.Prefix" "span")
                         data_testid="Trend_chip.Prefix"
+                        class_="given-class"
                         title="Trend_chip.Prefix"
                         style="--part: 1"
                         ref=(fun e -> seen "Trend_chip.Prefix" e)
@@ -1797,6 +1981,7 @@ let () =
                       <Trend_chip.Suffix
                         ?as_=(drawn "Trend_chip.Suffix" "span")
                         data_testid="Trend_chip.Suffix"
+                        class_="given-class"
                         title="Trend_chip.Suffix"
                         style="--part: 1"
                         ref=(fun e -> seen "Trend_chip.Suffix" e)
@@ -1807,6 +1992,7 @@ let () =
                     <Separator
                       ?as_=(drawn "Separator" "div")
                       data_testid="Separator"
+                      class_="given-class"
                       title="Separator"
                       style="--part: 1"
                       ref=(fun e -> seen "Separator" e)
@@ -1815,6 +2001,7 @@ let () =
                     <Skeleton
                       ?as_=(drawn "Skeleton" "div")
                       data_testid="Skeleton"
+                      class_="given-class"
                       title="Skeleton"
                       style="--part: 1"
                       ref=(fun e -> seen "Skeleton" e)
@@ -1823,6 +2010,7 @@ let () =
                     <Spinner
                       ?as_=(drawn "Spinner" "span")
                       data_testid="Spinner"
+                      class_="given-class"
                       title="Spinner"
                       style="--part: 1"
                       ref=(fun e -> seen "Spinner" e)
@@ -1831,6 +2019,7 @@ let () =
                     <Surface
                       ?as_=(drawn "Surface" "div")
                       data_testid="Surface"
+                      class_="given-class"
                       title="Surface"
                       style="--part: 1"
                       ref=(fun e -> seen "Surface" e)
@@ -1840,6 +2029,7 @@ let () =
                     <Toggle_button
                       ?as_=(drawn "Toggle_button" "button")
                       data_testid="Toggle_button"
+                      class_="given-class"
                       title="Toggle_button"
                       style="--part: 1"
                       ref=(fun e -> seen "Toggle_button" e)
@@ -1849,6 +2039,7 @@ let () =
                     <Toggle_button_group
                       ?as_=(drawn "Toggle_button_group" "div")
                       data_testid="Toggle_button_group"
+                      class_="given-class"
                       title="Toggle_button_group"
                       style="--part: 1"
                       ref=(fun e -> seen "Toggle_button_group" e)
@@ -1856,6 +2047,7 @@ let () =
                       aria_label="Alignment">
                       <Toggle_button
                         data_testid="Toggle_button.Item"
+                        class_="given-class"
                         title="Toggle_button.Item"
                         style="--part: 1"
                         ref=(fun e -> seen "Toggle_button.Item" e)
@@ -1867,6 +2059,7 @@ let () =
                         <Toggle_button_group.Separator
                           ?as_=(drawn "Toggle_button_group.Separator" "span")
                           data_testid="Toggle_button_group.Separator"
+                          class_="given-class"
                           title="Toggle_button_group.Separator"
                           style="--part: 1"
                           ref=(fun e -> seen "Toggle_button_group.Separator" e)
@@ -1879,6 +2072,7 @@ let () =
                     <Typography
                       ?as_=(drawn "Typography" "p")
                       data_testid="Typography"
+                      class_="given-class"
                       title="Typography"
                       style="--part: 1"
                       ref=(fun e -> seen "Typography" e)
@@ -1888,6 +2082,7 @@ let () =
                     <Typography.Heading
                       ?as_=(drawn "Typography.Heading" "h2")
                       data_testid="Typography.Heading"
+                      class_="given-class"
                       title="Typography.Heading"
                       style="--part: 1"
                       ref=(fun e -> seen "Typography.Heading" e)
@@ -1898,6 +2093,7 @@ let () =
                     <Typography.Paragraph
                       ?as_=(drawn "Typography.Paragraph" "p")
                       data_testid="Typography.Paragraph"
+                      class_="given-class"
                       title="Typography.Paragraph"
                       style="--part: 1"
                       ref=(fun e -> seen "Typography.Paragraph" e)
@@ -1907,6 +2103,7 @@ let () =
                     <Typography.Code
                       ?as_=(drawn "Typography.Code" "code")
                       data_testid="Typography.Code"
+                      class_="given-class"
                       title="Typography.Code"
                       style="--part: 1"
                       ref=(fun e -> seen "Typography.Code" e)
@@ -1916,6 +2113,7 @@ let () =
                     <Typography.Prose
                       ?as_=(drawn "Typography.Prose" "div")
                       data_testid="Typography.Prose"
+                      class_="given-class"
                       title="Typography.Prose"
                       style="--part: 1"
                       ref=(fun e -> seen "Typography.Prose" e)
@@ -2152,6 +2350,7 @@ let () =
                   <Form
                     ?as_=(drawn "Form" "form")
                     data_testid="Form"
+                    class_="given-class"
                     title="Form"
                     style="--part: 1"
                     ref=(fun e -> seen "Form" e)
@@ -2159,6 +2358,7 @@ let () =
                     <Fieldset
                       ?as_=(drawn "Fieldset" "fieldset")
                       data_testid="Fieldset"
+                      class_="given-class"
                       title="Fieldset"
                       style="--part: 1"
                       ref=(fun e -> seen "Fieldset" e)
@@ -2166,6 +2366,7 @@ let () =
                       <Fieldset.Legend
                         ?as_=(drawn "Fieldset.Legend" "legend")
                         data_testid="Fieldset.Legend"
+                        class_="given-class"
                         title="Fieldset.Legend"
                         style="--part: 1"
                         ref=(fun e -> seen "Fieldset.Legend" e)
@@ -2175,6 +2376,7 @@ let () =
                       <Fieldset.Group
                         ?as_=(drawn "Fieldset.Group" "div")
                         data_testid="Fieldset.Group"
+                        class_="given-class"
                         title="Fieldset.Group"
                         style="--part: 1"
                         ref=(fun e -> seen "Fieldset.Group" e)
@@ -2182,6 +2384,7 @@ let () =
                         <Text_field
                           ?as_=(drawn "Text_field" "div")
                           data_testid="Text_field"
+                          class_="given-class"
                           title="Text_field"
                           style="--part: 1"
                           ref=(fun e -> seen "Text_field" e)
@@ -2190,6 +2393,7 @@ let () =
                           <Label
                             ?as_=(drawn "Label" "label")
                             data_testid="Label"
+                            class_="given-class"
                             title="Label"
                             style="--part: 1"
                             ref=(fun e -> seen "Label" e)
@@ -2199,6 +2403,7 @@ let () =
                           <Input
                             ?as_=(drawn "Input" "input")
                             data_testid="Input"
+                            class_="given-class"
                             title="Input"
                             style="--part: 1"
                             ref=(fun e -> seen "Input" e)
@@ -2207,6 +2412,7 @@ let () =
                           <Description
                             ?as_=(drawn "Description" "span")
                             data_testid="Description"
+                            class_="given-class"
                             title="Description"
                             style="--part: 1"
                             ref=(fun e -> seen "Description" e)
@@ -2216,6 +2422,7 @@ let () =
                           <Field_error
                             ?as_=(drawn "Field_error" "span")
                             data_testid="Field_error"
+                            class_="given-class"
                             title="Field_error"
                             style="--part: 1"
                             ref=(fun e -> seen "Field_error" e)
@@ -2228,6 +2435,7 @@ let () =
                           <Text_area
                             ?as_=(drawn "Text_area" "textarea")
                             data_testid="Text_area"
+                            class_="given-class"
                             title="Text_area"
                             style="--part: 1"
                             ref=(fun e -> seen "Text_area" e)
@@ -2239,6 +2447,7 @@ let () =
                           <Input_group
                             ?as_=(drawn "Input_group" "div")
                             data_testid="Input_group"
+                            class_="given-class"
                             title="Input_group"
                             style="--part: 1"
                             ref=(fun e -> seen "Input_group" e)
@@ -2246,6 +2455,7 @@ let () =
                             <Input_group.Prefix
                               ?as_=(drawn "Input_group.Prefix" "div")
                               data_testid="Input_group.Prefix"
+                              class_="given-class"
                               title="Input_group.Prefix"
                               style="--part: 1"
                               ref=(fun e -> seen "Input_group.Prefix" e)
@@ -2255,6 +2465,7 @@ let () =
                             </Input_group.Prefix>
                             <Input_group.Input
                               data_testid="Input_group.Input"
+                              class_="given-class"
                               title="Input_group.Input"
                               style="--part: 1"
                               ref=(fun e -> seen "Input_group.Input" e)
@@ -2263,6 +2474,7 @@ let () =
                             <Input_group.Suffix
                               ?as_=(drawn "Input_group.Suffix" "div")
                               data_testid="Input_group.Suffix"
+                              class_="given-class"
                               title="Input_group.Suffix"
                               style="--part: 1"
                               ref=(fun e -> seen "Input_group.Suffix" e)
@@ -2275,6 +2487,7 @@ let () =
                         <Checkbox_group
                           ?as_=(drawn "Checkbox_group" "div")
                           data_testid="Checkbox_group"
+                          class_="given-class"
                           title="Checkbox_group"
                           style="--part: 1"
                           ref=(fun e -> seen "Checkbox_group" e)
@@ -2283,6 +2496,7 @@ let () =
                           <Checkbox
                             ?as_=(drawn "Checkbox" "div")
                             data_testid="Checkbox"
+                            class_="given-class"
                             title="Checkbox"
                             style="--part: 1"
                             ref=(fun e -> seen "Checkbox" e)
@@ -2291,6 +2505,7 @@ let () =
                             <Checkbox.Content
                               ?as_=(drawn "Checkbox.Content" "label")
                               data_testid="Checkbox.Content"
+                              class_="given-class"
                               title="Checkbox.Content"
                               style="--part: 1"
                               ref=(fun e -> seen "Checkbox.Content" e)
@@ -2298,6 +2513,7 @@ let () =
                               <Checkbox.Control
                                 ?as_=(drawn "Checkbox.Control" "span")
                                 data_testid="Checkbox.Control"
+                                class_="given-class"
                                 title="Checkbox.Control"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Checkbox.Control" e)
@@ -2306,6 +2522,7 @@ let () =
                                 <Checkbox.Indicator
                                   ?as_=(drawn "Checkbox.Indicator" "span")
                                   data_testid="Checkbox.Indicator"
+                                  class_="given-class"
                                   title="Checkbox.Indicator"
                                   style="--part: 1"
                                   ref=(fun e -> seen "Checkbox.Indicator" e)
@@ -2320,6 +2537,7 @@ let () =
                         <Radio_group
                           ?as_=(drawn "Radio_group" "div")
                           data_testid="Radio_group"
+                          class_="given-class"
                           title="Radio_group"
                           style="--part: 1"
                           ref=(fun e -> seen "Radio_group" e)
@@ -2328,6 +2546,7 @@ let () =
                           <Radio
                             ?as_=(drawn "Radio" "div")
                             data_testid="Radio"
+                            class_="given-class"
                             title="Radio"
                             style="--part: 1"
                             ref=(fun e -> seen "Radio" e)
@@ -2336,6 +2555,7 @@ let () =
                             <Radio.Content
                               ?as_=(drawn "Radio.Content" "label")
                               data_testid="Radio.Content"
+                              class_="given-class"
                               title="Radio.Content"
                               style="--part: 1"
                               ref=(fun e -> seen "Radio.Content" e)
@@ -2343,6 +2563,7 @@ let () =
                               <Radio.Control
                                 ?as_=(drawn "Radio.Control" "span")
                                 data_testid="Radio.Control"
+                                class_="given-class"
                                 title="Radio.Control"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Radio.Control" e)
@@ -2350,6 +2571,7 @@ let () =
                                 <Radio.Indicator
                                   ?as_=(drawn "Radio.Indicator" "span")
                                   data_testid="Radio.Indicator"
+                                  class_="given-class"
                                   title="Radio.Indicator"
                                   style="--part: 1"
                                   ref=(fun e -> seen "Radio.Indicator" e)
@@ -2364,6 +2586,7 @@ let () =
                         <Switch_group
                           ?as_=(drawn "Switch_group" "div")
                           data_testid="Switch_group"
+                          class_="given-class"
                           title="Switch_group"
                           style="--part: 1"
                           ref=(fun e -> seen "Switch_group" e)
@@ -2371,6 +2594,7 @@ let () =
                           <Switch
                             ?as_=(drawn "Switch" "div")
                             data_testid="Switch"
+                            class_="given-class"
                             title="Switch"
                             style="--part: 1"
                             ref=(fun e -> seen "Switch" e)
@@ -2378,6 +2602,7 @@ let () =
                             <Switch.Content
                               ?as_=(drawn "Switch.Content" "label")
                               data_testid="Switch.Content"
+                              class_="given-class"
                               title="Switch.Content"
                               style="--part: 1"
                               ref=(fun e -> seen "Switch.Content" e)
@@ -2385,6 +2610,7 @@ let () =
                               <Switch.Control
                                 ?as_=(drawn "Switch.Control" "span")
                                 data_testid="Switch.Control"
+                                class_="given-class"
                                 title="Switch.Control"
                                 style="--part: 1"
                                 ref=(fun e -> seen "Switch.Control" e)
@@ -2392,6 +2618,7 @@ let () =
                                 <Switch.Thumb
                                   ?as_=(drawn "Switch.Thumb" "span")
                                   data_testid="Switch.Thumb"
+                                  class_="given-class"
                                   title="Switch.Thumb"
                                   style="--part: 1"
                                   ref=(fun e -> seen "Switch.Thumb" e)
@@ -2405,6 +2632,7 @@ let () =
                         <Number_field
                           ?as_=(drawn "Number_field" "div")
                           data_testid="Number_field"
+                          class_="given-class"
                           title="Number_field"
                           style="--part: 1"
                           ref=(fun e -> seen "Number_field" e)
@@ -2414,6 +2642,7 @@ let () =
                           <Number_field.Group
                             ?as_=(drawn "Number_field.Group" "div")
                             data_testid="Number_field.Group"
+                            class_="given-class"
                             title="Number_field.Group"
                             style="--part: 1"
                             ref=(fun e -> seen "Number_field.Group" e)
@@ -2422,6 +2651,7 @@ let () =
                               ?as_=(drawn "Number_field.Decrement_button"
                                       "button")
                               data_testid="Number_field.Decrement_button"
+                              class_="given-class"
                               title="Number_field.Decrement_button"
                               style="--part: 1"
                               ref=(fun e ->
@@ -2433,6 +2663,7 @@ let () =
                             <Number_field.Input
                               ?as_=(drawn "Number_field.Input" "input")
                               data_testid="Number_field.Input"
+                              class_="given-class"
                               title="Number_field.Input"
                               style="--part: 1"
                               ref=(fun e -> seen "Number_field.Input" e)
@@ -2443,6 +2674,7 @@ let () =
                               ?as_=(drawn "Number_field.Increment_button"
                                       "button")
                               data_testid="Number_field.Increment_button"
+                              class_="given-class"
                               title="Number_field.Increment_button"
                               style="--part: 1"
                               ref=(fun e ->
@@ -2456,6 +2688,7 @@ let () =
                         <Search_field
                           ?as_=(drawn "Search_field" "div")
                           data_testid="Search_field"
+                          class_="given-class"
                           title="Search_field"
                           style="--part: 1"
                           ref=(fun e -> seen "Search_field" e)
@@ -2464,6 +2697,7 @@ let () =
                           <Search_field.Group
                             ?as_=(drawn "Search_field.Group" "div")
                             data_testid="Search_field.Group"
+                            class_="given-class"
                             title="Search_field.Group"
                             style="--part: 1"
                             ref=(fun e -> seen "Search_field.Group" e)
@@ -2471,6 +2705,7 @@ let () =
                             <Search_field.Search_icon
                               ?as_=(drawn "Search_field.Search_icon" "svg")
                               data_testid="Search_field.Search_icon"
+                              class_="given-class"
                               style="--part: 1"
                               ref=(fun e -> seen "Search_field.Search_icon" e)
                               on_key_down=(fun e ->
@@ -2479,6 +2714,7 @@ let () =
                             <Search_field.Input
                               ?as_=(drawn "Search_field.Input" "input")
                               data_testid="Search_field.Input"
+                              class_="given-class"
                               title="Search_field.Input"
                               style="--part: 1"
                               ref=(fun e -> seen "Search_field.Input" e)
@@ -2488,6 +2724,7 @@ let () =
                             <Search_field.Clear_button
                               ?as_=(drawn "Search_field.Clear_button" "button")
                               data_testid="Search_field.Clear_button"
+                              class_="given-class"
                               title="Search_field.Clear_button"
                               style="--part: 1"
                               ref=(fun e -> seen "Search_field.Clear_button" e)
@@ -2499,6 +2736,7 @@ let () =
                         <Slider
                           ?as_=(drawn "Slider" "div")
                           data_testid="Slider"
+                          class_="given-class"
                           title="Slider"
                           style="--part: 1"
                           ref=(fun e -> seen "Slider" e)
@@ -2508,6 +2746,7 @@ let () =
                           <Slider.Output
                             ?as_=(drawn "Slider.Output" "output")
                             data_testid="Slider.Output"
+                            class_="given-class"
                             title="Slider.Output"
                             style="--part: 1"
                             ref=(fun e -> seen "Slider.Output" e)
@@ -2516,6 +2755,7 @@ let () =
                           <Slider.Track
                             ?as_=(drawn "Slider.Track" "div")
                             data_testid="Slider.Track"
+                            class_="given-class"
                             title="Slider.Track"
                             style="--part: 1"
                             ref=(fun e -> seen "Slider.Track" e)
@@ -2523,6 +2763,7 @@ let () =
                             <Slider.Fill
                               ?as_=(drawn "Slider.Fill" "div")
                               data_testid="Slider.Fill"
+                              class_="given-class"
                               title="Slider.Fill"
                               style="--part: 1"
                               ref=(fun e -> seen "Slider.Fill" e)
@@ -2531,6 +2772,7 @@ let () =
                             <Slider.Thumb
                               ?as_=(drawn "Slider.Thumb" "span")
                               data_testid="Slider.Thumb"
+                              class_="given-class"
                               title="Slider.Thumb"
                               style="--part: 1"
                               ref=(fun e -> seen "Slider.Thumb" e)
@@ -2541,6 +2783,7 @@ let () =
                         <Time_field
                           ?as_=(drawn "Time_field" "div")
                           data_testid="Time_field"
+                          class_="given-class"
                           title="Time_field"
                           style="--part: 1"
                           ref=(fun e -> seen "Time_field" e)
@@ -2549,6 +2792,7 @@ let () =
                           <Time_field.Group
                             ?as_=(drawn "Time_field.Group" "div")
                             data_testid="Time_field.Group"
+                            class_="given-class"
                             title="Time_field.Group"
                             style="--part: 1"
                             ref=(fun e -> seen "Time_field.Group" e)
@@ -2556,6 +2800,7 @@ let () =
                             <Time_field.Prefix
                               ?as_=(drawn "Time_field.Prefix" "div")
                               data_testid="Time_field.Prefix"
+                              class_="given-class"
                               title="Time_field.Prefix"
                               style="--part: 1"
                               ref=(fun e -> seen "Time_field.Prefix" e)
@@ -2565,6 +2810,7 @@ let () =
                             <Time_field.Input
                               ?as_=(drawn "Time_field.Input" "div")
                               data_testid="Time_field.Input"
+                              class_="given-class"
                               title="Time_field.Input"
                               style="--part: 1"
                               ref=(fun e -> seen "Time_field.Input" e)
@@ -2573,6 +2819,7 @@ let () =
                                 <Time_field.Segment
                                   ?as_=(drawn "Time_field.Segment" "div")
                                   data_testid="Time_field.Segment"
+                                  class_="given-class"
                                   title="Time_field.Segment"
                                   style="--part: 1"
                                   ref=(fun e -> seen "Time_field.Segment" e)
@@ -2585,6 +2832,7 @@ let () =
                             <Time_field.Suffix
                               ?as_=(drawn "Time_field.Suffix" "div")
                               data_testid="Time_field.Suffix"
+                              class_="given-class"
                               title="Time_field.Suffix"
                               style="--part: 1"
                               ref=(fun e -> seen "Time_field.Suffix" e)
@@ -2597,6 +2845,7 @@ let () =
                           <Time_field.Date_time
                             ?as_=(drawn "Time_field.Date_time" "div")
                             data_testid="Time_field.Date_time"
+                            class_="given-class"
                             title="Time_field.Date_time"
                             style="--part: 1"
                             ref=(fun e -> seen "Time_field.Date_time" e)
@@ -2612,6 +2861,7 @@ let () =
                           <Time_field.Zoned
                             ?as_=(drawn "Time_field.Zoned" "div")
                             data_testid="Time_field.Zoned"
+                            class_="given-class"
                             title="Time_field.Zoned"
                             style="--part: 1"
                             ref=(fun e -> seen "Time_field.Zoned" e)
@@ -2624,6 +2874,7 @@ let () =
                       <Fieldset.Actions
                         ?as_=(drawn "Fieldset.Actions" "div")
                         data_testid="Fieldset.Actions"
+                        class_="given-class"
                         title="Fieldset.Actions"
                         style="--part: 1"
                         ref=(fun e -> seen "Fieldset.Actions" e)
@@ -2705,6 +2956,7 @@ let () =
                     <Meter
                       ?as_=(drawn "Meter" "div")
                       data_testid="Meter"
+                      class_="given-class"
                       title="Meter"
                       style="--part: 1"
                       ref=(fun e -> seen "Meter" e)
@@ -2714,6 +2966,7 @@ let () =
                       <Meter.Output
                         ?as_=(drawn "Meter.Output" "span")
                         data_testid="Meter.Output"
+                        class_="given-class"
                         title="Meter.Output"
                         style="--part: 1"
                         ref=(fun e -> seen "Meter.Output" e)
@@ -2722,6 +2975,7 @@ let () =
                       <Meter.Track
                         ?as_=(drawn "Meter.Track" "div")
                         data_testid="Meter.Track"
+                        class_="given-class"
                         title="Meter.Track"
                         style="--part: 1"
                         ref=(fun e -> seen "Meter.Track" e)
@@ -2729,6 +2983,7 @@ let () =
                         <Meter.Fill
                           ?as_=(drawn "Meter.Fill" "div")
                           data_testid="Meter.Fill"
+                          class_="given-class"
                           title="Meter.Fill"
                           style="--part: 1"
                           ref=(fun e -> seen "Meter.Fill" e)
@@ -2739,6 +2994,7 @@ let () =
                     <Progress_bar
                       ?as_=(drawn "Progress_bar" "div")
                       data_testid="Progress_bar"
+                      class_="given-class"
                       title="Progress_bar"
                       style="--part: 1"
                       ref=(fun e -> seen "Progress_bar" e)
@@ -2748,6 +3004,7 @@ let () =
                       <Progress_bar.Output
                         ?as_=(drawn "Progress_bar.Output" "span")
                         data_testid="Progress_bar.Output"
+                        class_="given-class"
                         title="Progress_bar.Output"
                         style="--part: 1"
                         ref=(fun e -> seen "Progress_bar.Output" e)
@@ -2756,6 +3013,7 @@ let () =
                       <Progress_bar.Track
                         ?as_=(drawn "Progress_bar.Track" "div")
                         data_testid="Progress_bar.Track"
+                        class_="given-class"
                         title="Progress_bar.Track"
                         style="--part: 1"
                         ref=(fun e -> seen "Progress_bar.Track" e)
@@ -2763,6 +3021,7 @@ let () =
                         <Progress_bar.Fill
                           ?as_=(drawn "Progress_bar.Fill" "div")
                           data_testid="Progress_bar.Fill"
+                          class_="given-class"
                           title="Progress_bar.Fill"
                           style="--part: 1"
                           ref=(fun e -> seen "Progress_bar.Fill" e)
@@ -2773,6 +3032,7 @@ let () =
                     <Progress_circle
                       ?as_=(drawn "Progress_circle" "div")
                       data_testid="Progress_circle"
+                      class_="given-class"
                       title="Progress_circle"
                       style="--part: 1"
                       ref=(fun e -> seen "Progress_circle" e)
@@ -2782,12 +3042,14 @@ let () =
                       <Progress_circle.Track
                         ?as_=(drawn "Progress_circle.Track" "svg")
                         data_testid="Progress_circle.Track"
+                        class_="given-class"
                         style="--part: 1"
                         ref=(fun e -> seen "Progress_circle.Track" e)
                         on_key_down=(fun e -> heard "Progress_circle.Track" e)>
                         <Progress_circle.Track_circle
                           ?as_=(drawn "Progress_circle.Track_circle" "circle")
                           data_testid="Progress_circle.Track_circle"
+                          class_="given-class"
                           style="--part: 1"
                           ref=(fun e -> seen "Progress_circle.Track_circle" e)
                           on_key_down=(fun e ->
@@ -2796,6 +3058,7 @@ let () =
                         <Progress_circle.Fill_circle
                           ?as_=(drawn "Progress_circle.Fill_circle" "circle")
                           data_testid="Progress_circle.Fill_circle"
+                          class_="given-class"
                           style="--part: 1"
                           ref=(fun e -> seen "Progress_circle.Fill_circle" e)
                           on_key_down=(fun e ->
@@ -2806,6 +3069,7 @@ let () =
                     <Toast.Provider
                       ?as_=(drawn "Toast.Provider" "div")
                       data_testid="Toast.Provider"
+                      class_="given-class"
                       title="Toast.Provider"
                       style="--part: 1"
                       ref=(fun e -> seen "Toast.Provider" e)
@@ -2814,6 +3078,7 @@ let () =
                         <Toast
                           ?as_=(drawn "Toast" "li")
                           data_testid="Toast"
+                          class_="given-class"
                           title="Toast"
                           style="--part: 1"
                           ref=(fun e -> seen "Toast" e)
@@ -2822,6 +3087,7 @@ let () =
                           <Toast.Indicator
                             ?as_=(drawn "Toast.Indicator" "div")
                             data_testid="Toast.Indicator"
+                            class_="given-class"
                             title="Toast.Indicator"
                             style="--part: 1"
                             ref=(fun e -> seen "Toast.Indicator" e)
@@ -2830,6 +3096,7 @@ let () =
                           <Toast.Content
                             ?as_=(drawn "Toast.Content" "div")
                             data_testid="Toast.Content"
+                            class_="given-class"
                             title="Toast.Content"
                             style="--part: 1"
                             ref=(fun e -> seen "Toast.Content" e)
@@ -2837,6 +3104,7 @@ let () =
                             <Toast.Title
                               ?as_=(drawn "Toast.Title" "div")
                               data_testid="Toast.Title"
+                              class_="given-class"
                               title="Toast.Title"
                               style="--part: 1"
                               ref=(fun e -> seen "Toast.Title" e)
@@ -2846,6 +3114,7 @@ let () =
                             <Toast.Description
                               ?as_=(drawn "Toast.Description" "div")
                               data_testid="Toast.Description"
+                              class_="given-class"
                               title="Toast.Description"
                               style="--part: 1"
                               ref=(fun e -> seen "Toast.Description" e)
@@ -2856,6 +3125,7 @@ let () =
                           <Toast.Action_button
                             ?as_=(drawn "Toast.Action_button" "button")
                             data_testid="Toast.Action_button"
+                            class_="given-class"
                             title="Toast.Action_button"
                             style="--part: 1"
                             ref=(fun e -> seen "Toast.Action_button" e)
@@ -2865,6 +3135,7 @@ let () =
                           <Toast.Close_button
                             ?as_=(drawn "Toast.Close_button" "button")
                             data_testid="Toast.Close_button"
+                            class_="given-class"
                             title="Toast.Close_button"
                             style="--part: 1"
                             ref=(fun e -> seen "Toast.Close_button" e)

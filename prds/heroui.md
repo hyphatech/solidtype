@@ -18,8 +18,7 @@ module of `solidtype-heroui` with its interface, its test against HeroUI's
 React component and its documentation page. It touches this repository
 alone.
 
-It does not cover HeroUI Native, HeroUI's React-only machinery (render
-props, `asChild`, `render`), a form's state -- its values, rules, touched
+It does not cover HeroUI Native, a form's state -- its values, rules, touched
 fields and slow checks, which an application keeps in Solid's store,
 bound as `Store` -- or changes to Kobalte: no fork, no patch, no
 upstream work. A component Kobalte lacks is built in this repository from

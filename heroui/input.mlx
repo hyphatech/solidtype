@@ -9,6 +9,7 @@ module Props = struct
   external check :
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
     ?full_width:bool Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
     ?props:'spread Solidtype.Solid.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Input.check = "check"
@@ -117,7 +118,8 @@ let input ~classes ~slot (props : Props.t) =
       />
   | Alone ->
       <input
-        props=rest
+        ?as_=(fun () -> S.drawn_as props)
+        props=(S.undrawn rest)
         class_=(fun () -> classes ())
         ?title=(fun () -> Props.title props)
         ref=(fun e ->

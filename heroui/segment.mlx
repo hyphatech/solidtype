@@ -96,7 +96,7 @@ module Item = struct
       <Kobalte.Item
         value=(fun () -> id ())
         disabled=(fun () -> is_disabled ())
-        class_="contents">
+        class_="segment__item-control">
         <Field_content
           field=(fun () -> field)
           slot="segment-item"

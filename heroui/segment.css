@@ -70,3 +70,8 @@
 .segment__separator {
   @apply absolute start-0 top-1/4 h-1/2 w-px rounded-sm bg-muted/25 transition-opacity duration-150 ease-smooth in-data-[selected=true]:opacity-0 [[data-checked]+*_&]:opacity-0 [:first-child>*>&]:opacity-0 motion-reduce:transition-none;
 }
+
+/* What holds an item, which lays nothing out itself. */
+.segment__item-control {
+  @apply contents;
+}

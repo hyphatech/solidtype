@@ -16,6 +16,7 @@ module Props : sig
   val check :
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
     ?full_width:bool Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Textarea.props -> Solidtype.Jsx.element) ->
     ?props:'spread Solidtype.Solid.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Textarea.check
