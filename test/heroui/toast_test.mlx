@@ -309,6 +309,21 @@ let () =
       Jest.afterEach (fun () ->
           Toast.clear ();
           T.cleanup ());
+      Jest.testPromise
+        "exits at once under data-reduce-motion, as its styles do" (fun () ->
+          (* The toasts an earlier test cleared leave as they exit. *)
+          let* () = wait 400 in
+          T.render (fun () ->
+              <div data_reduce_motion="true"><Toast.Provider /></div>);
+          let key = Toast.show ~timeout_ms:0. "Saved" in
+          let* () = wait 50 in
+          let count () =
+            Array.length (Js.Array.from (query_all "[data-slot=toast]"))
+          in
+          let shown = count () in
+          Toast.close key;
+          let left = count () in
+          Js.Promise.resolve E.(expect (shown, left) |> toEqual (1, 0)));
       Jest.testPromise "is HeroUI's stack, shown, hovered, closed, updated"
         (fun () ->
           T.render (fun () -> <Toast.Provider />);

@@ -149,7 +149,9 @@ val promise :
     closing itself after 4000 ms. *)
 
 val close : ?queue:Queue.t -> key -> unit
-(** Closes the toast, its exit played, [on_close] called as it begins. *)
+(** Closes the toast, its exit played, [on_close] called as it begins. Under
+    [data-reduce-motion="true"] on it or an ancestor, or the reader's
+    [prefers-reduced-motion], it plays none and is gone at once. *)
 
 val clear : ?queue:Queue.t -> unit -> unit
 (** Closes every toast. *)

@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a, 3b and 4 have landed.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a, 3b, 4 and 7 have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -308,7 +308,7 @@ class, which restyles every instance at once.
   Motion's button on Button's page, beside React's. Composition's "Not yet"
   goes, and it says a router's link needs none.
 - [ ] 6. `Theme`, its example on the Theming page, tested in jsdom.
-- [ ] 7. A toast's motion under `data-reduce-motion`.
+- [x] 7. A toast's motion under `data-reduce-motion`.
 - [ ] 8. Every component checked alike: each part's look a rule for its
   class, restyled by one; each takes its element's attributes, `class_`
   and `as_`.

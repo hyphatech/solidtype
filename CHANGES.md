@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A toast closed under `data-reduce-motion="true"` is gone at once, as it is
+  under `prefers-reduced-motion`, where it stayed for an exit that HeroUI's
+  styles do not play.
+
 - Every HeroUI port's part that HeroUI gives a render function takes its
   children as a function of its state, a record named as HeroUI's render
   props are: `<Button>(fun s -> ... S.get s.is_pressed ...)</Button>`. The

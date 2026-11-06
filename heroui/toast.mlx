@@ -61,6 +61,7 @@ type queued = {
   set_exiting : bool S.setter;
   mutable on_close : (unit -> unit) option;
   mutable timer : timer option;
+  mutable element : Dom.element option;
 }
 
 module Queue = struct
@@ -166,7 +167,18 @@ external media_unlisten : media -> string -> (Dom.event -> unit) -> unit
   = "removeEventListener"
 [@@mel.send]
 
-let reduced_motion () = matches (match_media "(prefers-reduced-motion: reduce)")
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+(* As HeroUI's [motion-reduce] variant reads it: "true" on the element or an
+   ancestor, else the reader's own setting. *)
+let reduced_motion element =
+  (match element with
+    | Some e ->
+        Option.is_some
+          (Js.Null.toOption (closest e "[data-reduce-motion=\"true\"]"))
+    | None -> false)
+  || matches (match_media "(prefers-reduced-motion: reduce)")
 
 let close ?queue key =
   let q = queue_of queue in
@@ -175,7 +187,7 @@ let close ?queue key =
       Option.iter stop e.timer;
       let on_close = e.on_close in
       e.on_close <- None;
-      if q.exit_duration_ms > 0. && not (reduced_motion ()) then (
+      if q.exit_duration_ms > 0. && not (reduced_motion e.element) then (
         S.set e.set_exiting true;
         ignore
           (set_timeout
@@ -210,6 +222,7 @@ let add (q : Queue.t) content ~timeout_ms ~on_close =
     {
       key;
       kobalte = 0.;
+      element = None;
       content;
       set_content;
       exiting;
@@ -656,6 +669,7 @@ module Item = struct
       s.set_height e.key height
     in
     let watch el =
+      e.element <- Some el;
       ignore
         (request_frame (fun _ ->
              ignore (request_frame (fun _ -> S.set set_entering false) : int))
