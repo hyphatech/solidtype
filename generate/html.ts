@@ -162,7 +162,7 @@ const sharesCommon = (ms: Members) => [...common].every(([k, v]) => ms.get(k) ==
 // argument before ['r]: the tail of a component's props check, for a
 // component that passes them to this element, as Kobalte's parts do.
 function signature(ms: Members, include: boolean, root = false): string {
-  const lines = include ? ["  include Dom_attributes"] : ["  type element"];
+  const lines = include ? ["  include Dom_attributes"] : ["  type element\n  type props = element Solid.rest"];
   const sorted = [...ms].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
   const own = sorted.filter(([k]) => !(include && common.has(k)));
   for (const [k, v] of own) lines.push(`  type ${k} = ${v}`);

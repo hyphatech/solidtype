@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Every HeroUI port's part that draws an element takes `as_`, HeroUI's `render`:
+  a function of the part's props and, where the part has a state record, its
+  state, which draws what takes the part's place, `<Button as_=(fun p s -> ...)>`.
+  A part given none draws its element as before. Kobalte's parts and those of
+  `solidtype-headless` take it too, a function of their props.
+
+- `let%component ... [@@element button]` gives the component `as_`, and
+  `Html.Button.props` is what its function is given; `Dynamic.Drawn` is an
+  element drawn by a tag or a function, `Jsx.drawn_as`.
+
 - `Solidtype_heroui.Theme.use`, HeroUI's `useTheme`: the chosen theme, the one
   shown, and a setter that writes `<html>`'s class and `data-theme` and keeps
   the choice under `heroui-theme`.

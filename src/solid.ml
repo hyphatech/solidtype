@@ -489,3 +489,20 @@ external split_others : 'props -> string array -> 'props * 'other rest
 [@@mel.module "solid-js"]
 
 let others props names = snd (split_others props names)
+
+external drawn_as : 'rest -> ('drawn -> Jsx.element) option = "as" [@@mel.get]
+
+let undrawn rest = others rest [| "as" |]
+
+type 'drawn drawn_rest
+
+external drawn_rest :
+  as_:(('drawn -> Jsx.element)[@mel.as "as"]) -> 'drawn drawn_rest = ""
+[@@mel.obj]
+
+external merged : 'rest -> 'drawn drawn_rest -> 'rest = "mergeProps"
+[@@mel.module "solid-js"]
+
+let with_drawn rest = function
+  | Some f -> merged rest (drawn_rest ~as_:f)
+  | None -> rest

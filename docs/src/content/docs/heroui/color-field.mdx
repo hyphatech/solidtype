@@ -131,7 +131,7 @@ pushes the `%` after it out of a field 100 pixels wide.
 
 ### Render Function
 
-HeroUI's Render Function example gives the field `render`, React's way to swap the element it renders, which a Solid component has no need of.
+`as_` draws another element in its place, given its props and its state, as [Composition](/solidtype/heroui/composition/#custom-dom-element) shows.
 
 ## Customization
 
@@ -188,7 +188,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `aria-label` | `aria_label` | `string` | | Its name, where no label names it |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called as focus leaves it |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-| `render` | — | | | React's way to swap its element |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 Any other attribute, `id` or `aria_describedby`, is the field's element's.
 

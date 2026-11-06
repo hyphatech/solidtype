@@ -51,7 +51,9 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
     ?(size : size option) ?(is_detached : bool = false)
     ?(full_width : bool = false) ?(is_disabled : bool option)
     ?(aria_label : string option) ?(aria_labelledby : string option)
-    ?(class_ : string option) ~(children : state Jsx.children) () =
+    ?(class_ : string option) ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* The selection is kept here and Kobalte's group controlled by it, so a
      change that would leave none selected is refused, which Kobalte's group
      cannot do. *)
@@ -124,6 +126,7 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
                   class_=(fun () -> class_ ())
                   data_slot="toggle-button-group"
                   data_disabled=(fun () -> Jsx.flag (disabled ()))
+                  ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
                   props=(Props.others props)
                   on_change=(fun v ->
                               change
@@ -142,6 +145,7 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         class_=(fun () -> class_ ())
         data_slot="toggle-button-group"
         data_disabled=(fun () -> Jsx.flag (disabled ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
         props=(Props.others props)
         on_change=change>
         (fun () -> Jsx.draw (children ()) state)

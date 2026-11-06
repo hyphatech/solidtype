@@ -152,38 +152,70 @@ module Given_its_element =
             external get_variant : t -> [ `a  | `b ] option = "variant"
             [@@mel.get ]
             external get_class_ : t -> string option = "class"[@@mel.get ]
+            external get_as_ :
+              t ->
+                (Solidtype.Html.Button.props -> Solidtype.Jsx.element) option
+                = "as"[@@mel.get ]
             external make :
               ?variant:[ `a  | `b ] ->
-                ?class_:((string)[@mel.as "class"]) -> unit -> t = ""
-            [@@mel.obj ]
+                ?class_:((string)[@mel.as "class"]) ->
+                  ?as_:((Solidtype.Html.Button.props -> Solidtype.Jsx.element)
+                    [@mel.as "as"]) -> unit -> t = ""[@@mel.obj ]
             external check :
               ?variant:[ `a  | `b ] Solidtype.Check.value ->
                 ?class_:string Solidtype.Check.value ->
-                  ?props:t Solidtype.Solid.rest ->
-                    (unit -> unit) Solidtype.Html.Button.check = "check"
+                  ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element)
+                    ->
+                    ?props:t Solidtype.Solid.rest ->
+                      (unit -> unit) Solidtype.Html.Button.check = "check"
             [@@mel.module "vite-plugin-solidtype/markers"]
             let others (props : t) : _ Solidtype.Solid.rest=
               Solidtype.Solid.others props [|"variant";"class"|]
+            let drawn_others (props : t) : _ Solidtype.Solid.rest=
+              Solidtype.Solid.others (others props) [|"as"|]
             type name =
               | Variant 
               | Class_ 
+              | As_ 
             let omit (props : t) (names : name array) :
               t Solidtype.Solid.rest=
               Solidtype.Solid.omit props
                 (Array.map
-                   (function | Variant -> "variant" | Class_ -> "class")
-                   names)
+                   (function
+                    | Variant -> "variant"
+                    | Class_ -> "class"
+                    | As_ -> "as") names)
           end
         let make (props : Props.t) =
           let variant () = Props.get_variant props[@@inline ][@@ocaml.warning
                                                                "-26-27"]
           and class_ () = Props.get_class_ props[@@inline ][@@ocaml.warning
-                                                             "-26-27"] in
-          Solidtype.Jsx.el "button"
-            [|(Solidtype.Jsx.d "class"
-                 (fun () -> Option.value (class_ ()) ~default:"" : unit ->
-                                                                    Solidtype.Html.Button.class_));(
-              Solidtype.Jsx.spread (Props.others props))|] [||]
+                                                             "-26-27"]
+          and as_ () = Props.get_as_ props[@@inline ][@@ocaml.warning
+                                                       "-26-27"] in
+          Solidtype.Jsx.c Solidtype.Show.component
+            [|(Solidtype.Jsx.d "when"
+                 (fun () -> Option.is_some ((fun () -> as_ ()) ())));(
+              Solidtype.Jsx.s "fallback"
+                (Solidtype.Jsx.el "button"
+                   [|(Solidtype.Jsx.d "class"
+                        (fun () -> Option.value (class_ ()) ~default:"" : 
+                        unit -> Solidtype.Html.Button.class_));(Solidtype.Jsx.spread
+                                                                  (Props.drawn_others
+                                                                    props))|]
+                   [||]))|]
+            [|(Solidtype.Jsx.node
+                 (Solidtype.Jsx.c Solidtype.Dynamic.component
+                    [|(Solidtype.Jsx.d "component"
+                         (fun () ->
+                            Solidtype.Jsx.drawn_as ((fun () -> as_ ()) ())
+                              "button"));(Solidtype.Jsx.d "class"
+                                            (fun () ->
+                                               Option.value (class_ ())
+                                                 ~default:"" : unit ->
+                                                                 Solidtype.Html.Button.class_));(
+                      Solidtype.Jsx.spread (Props.drawn_others props))|] 
+                    [||]))|]
         let component = Solidtype.Jsx.component make
       end
   end
@@ -454,3 +486,104 @@ let named_render =
        [|(Solidtype.Jsx.d "each" solidtype__each)|]
        [|(Solidtype.Jsx.render solidtype__children)|]) row
     (fun () -> items ())
+module Part =
+  struct
+    include
+      struct
+        module Props =
+          struct
+            [@@@ocaml.warning "-32-37"]
+            type t
+            external get_class_ : t -> string option = "class"[@@mel.get ]
+            external get_as_ :
+              t ->
+                (Solidtype.Html.Button.props -> Solidtype.Jsx.element) option
+                = "as"[@@mel.get ]
+            external make :
+              ?class_:((string)[@mel.as "class"]) ->
+                ?as_:((Solidtype.Html.Button.props -> Solidtype.Jsx.element)
+                  [@mel.as "as"]) -> unit -> t = ""[@@mel.obj ]
+            external check :
+              ?class_:string Solidtype.Check.value ->
+                ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element)
+                  ->
+                  ?props:t Solidtype.Solid.rest ->
+                    (unit -> unit) Solidtype.Html.Button.check = "check"
+            [@@mel.module "vite-plugin-solidtype/markers"]
+            let others (props : t) : _ Solidtype.Solid.rest=
+              Solidtype.Solid.others props [|"class"|]
+            let drawn_others (props : t) : _ Solidtype.Solid.rest=
+              Solidtype.Solid.others (others props) [|"as"|]
+            type name =
+              | Class_ 
+              | As_ 
+            let omit (props : t) (names : name array) :
+              t Solidtype.Solid.rest=
+              Solidtype.Solid.omit props
+                (Array.map (function | Class_ -> "class" | As_ -> "as") names)
+          end
+        let make (props : Props.t) =
+          let class_ () = Props.get_class_ props[@@inline ][@@ocaml.warning
+                                                             "-26-27"]
+          and as_ () = Props.get_as_ props[@@inline ][@@ocaml.warning
+                                                       "-26-27"] in
+          Solidtype.Jsx.c Solidtype.Show.component
+            [|(Solidtype.Jsx.d "when"
+                 (fun () -> Option.is_some ((fun () -> as_ ()) ())));(
+              Solidtype.Jsx.s "fallback"
+                (Solidtype.Jsx.el "button"
+                   [|(Solidtype.Jsx.d "class"
+                        (fun () -> Option.value (class_ ()) ~default:"" : 
+                        unit -> Solidtype.Html.Button.class_));(Solidtype.Jsx.s
+                                                                  "ref"
+                                                                  (fun _ ->
+                                                                    () : 
+                                                                  Solidtype.Html.Button.ref));(
+                     Solidtype.Jsx.spread (Props.drawn_others props))|] 
+                   [||]))|]
+            [|(Solidtype.Jsx.node
+                 (let solidtype__rest = Props.drawn_others props in
+                  Solidtype.Jsx.c Solidtype.Dynamic.component
+                    [|(Solidtype.Jsx.d "component"
+                         (fun () ->
+                            Solidtype.Jsx.drawn_as ((fun () -> as_ ()) ())
+                              "button"));(Solidtype.Jsx.d "class"
+                                            (fun () ->
+                                               Option.value (class_ ())
+                                                 ~default:"" : unit ->
+                                                                 Solidtype.Html.Button.class_));(
+                      Solidtype.Jsx.spread solidtype__rest);(Solidtype.Jsx.s
+                                                               "ref"
+                                                               (fun
+                                                                  solidtype__e
+                                                                  ->
+                                                                  Solidtype.Jsx.ref_beside
+                                                                    (
+                                                                    fun _ ->
+                                                                    ())
+                                                                    solidtype__rest
+                                                                    solidtype__e : 
+                                                               Solidtype.Html.Button.ref))|]
+                    [||]))|]
+        let component = Solidtype.Jsx.component make
+      end
+  end
+let drawn_as =
+  Solidtype.Jsx.c Solidtype.Show.component
+    [|(Solidtype.Jsx.d "when"
+         (fun () -> Option.is_some ((fun () -> None) ())));(Solidtype.Jsx.s
+                                                              "fallback"
+                                                              (Solidtype.Jsx.el
+                                                                 "button"
+                                                                 [|(Solidtype.Jsx.s
+                                                                    "class"
+                                                                    ({js|x|js} : 
+                                                                    Solidtype.Html.Button.class_))|]
+                                                                 [||]))|]
+    [|(Solidtype.Jsx.node
+         (Solidtype.Jsx.c Solidtype.Dynamic.component
+            [|(Solidtype.Jsx.d "component"
+                 (fun () ->
+                    Solidtype.Jsx.drawn_as ((fun () -> None) ()) "button"));(
+              Solidtype.Jsx.s "class"
+                ({js|x|js} : Solidtype.Html.Button.class_))|] [||]))|]

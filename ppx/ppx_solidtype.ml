@@ -370,6 +370,14 @@ let passed_on ~loc label (value : expression) =
            element's attribute" )
 
 let element map ~loc name args =
+  (* [<button ?as_=(fun () -> o)>]: the element, or what [o] draws in its place,
+     by Solid's [Show], one marker that defers both as any JSX is deferred. The
+     element stays Solid's compiled template: [Dynamic] given a tag has none to
+     fall back on while hydrating, so it throws on an element only the browser
+     draws, where given a function it only calls it. *)
+  let drawn_as, args =
+    List.partition (function Optional "as_", _ -> true | _ -> false) args
+  in
   let prop (label, (value : expression)) =
     let loc = value.pexp_loc in
     match label with
@@ -408,17 +416,90 @@ let element map ~loc name args =
         | (Literal | Element | Function), None ->
             [%expr Solidtype.Jsx.s [%e js] [%e value]])
   in
-  match split args with
-  | Error (loc, m) -> error ~loc m
-  | Ok (props, children) -> (
+  let lowered args =
+    match split args with
+    | Error e -> Error e
+    | Ok (props, children) -> (
+        match
+          (all (List.map prop props), all (List.map (child map) children))
+        with
+        | Error e, _ | _, Error e -> Error e
+        | Ok props, Ok children -> Ok (props, children))
+  in
+  let plain args =
+    match lowered args with
+    | Error (loc, m) -> error ~loc m
+    | Ok (props, children) ->
+        [%expr
+          Solidtype.Jsx.el [%e B.estring ~loc name] [%e B.pexp_array ~loc props]
+            [%e B.pexp_array ~loc children]]
+  in
+  (* Solid calls a written [ref] and a spread's both on a plain element;
+     [Dynamic]'s spread would replace the first, so it comes after the spread
+     and calls the spread's. *)
+  let drawn ~given args =
+    let rest =
       match
-        (all (List.map prop props), all (List.map (child map) children))
+        ( List.find_opt (function Labelled "ref", _ -> true | _ -> false) args,
+          List.find_opt
+            (function Labelled l, _ -> String.equal l spread | _ -> false)
+            args )
       with
-      | Error (loc, m), _ | _, Error (loc, m) -> error ~loc m
-      | Ok props, Ok children ->
+      | Some (_, written), Some (_, given) -> Some (written, given)
+      | _ -> None
+    in
+    let args =
+      match rest with
+      | None -> args
+      | Some (written, _) ->
+          let rest = B.evar ~loc "solidtype__rest" in
+          List.concat_map
+            (function
+              | Labelled "ref", _ -> []
+              | (Labelled l as label), _ when String.equal l spread ->
+                  [
+                    (label, rest);
+                    ( Labelled "ref",
+                      [%expr
+                        fun solidtype__e ->
+                          Solidtype.Jsx.ref_beside [%e written] [%e rest]
+                            solidtype__e] );
+                  ]
+              | a -> [ a ])
+            args
+    in
+    match lowered args with
+    | Error (loc, m) -> error ~loc m
+    | Ok (props, children) -> (
+        let component =
           [%expr
-            Solidtype.Jsx.el [%e B.estring ~loc name]
-              [%e B.pexp_array ~loc props] [%e B.pexp_array ~loc children]])
+            Solidtype.Jsx.d "component" (fun () ->
+                Solidtype.Jsx.drawn_as ([%e given] ()) [%e B.estring ~loc name])]
+        in
+        let made =
+          [%expr
+            Solidtype.Jsx.c Solidtype.Dynamic.component
+              [%e B.pexp_array ~loc (component :: props)]
+              [%e B.pexp_array ~loc children]]
+        in
+        match rest with
+        | Some (_, given) ->
+            [%expr
+              let solidtype__rest = [%e map given] in
+              [%e made]]
+        | None -> made)
+  in
+  match drawn_as with
+  | [] -> plain args
+  | (_, given) :: _ ->
+      let given = map given in
+      [%expr
+        Solidtype.Jsx.c Solidtype.Show.component
+          [|
+            Solidtype.Jsx.d "when" (fun () -> Option.is_some ([%e given] ()));
+            Solidtype.Jsx.s "fallback" [%e plain args];
+          |]
+          [| Solidtype.Jsx.node [%e drawn ~given args] |]]
 
 (* A component's element also applies the component's [Props.check] to its
    props under [if false]: the compiler checks the application and Melange
@@ -457,6 +538,11 @@ let component map ~loc path args =
             (None, None, [%expr Solidtype.Jsx.s [%e js] ([%e v] : [%t t])]))
     | Labelled l when starts_with ~prefix:"data_" l ->
         Ok (None, None, data ~loc l (map value))
+    | Optional "as_" ->
+        Ok
+          ( None,
+            None,
+            [%expr Solidtype.Jsx.d "as" [%e absent_or ~loc (map value)]] )
     | Optional l ->
         let+ value = optional ~loc l value in
         let x = B.evar ~loc (bound l) in
@@ -730,7 +816,11 @@ let prop_of (p : function_param) =
            give this one another name" )
     else
       Result.map
-        (fun arity -> { label; var = var.txt; typ; presence; arity })
+        (fun arity ->
+          (* [as_] is handed on or drawn, never called by the body, so it is
+             read whole. *)
+          let arity = if String.equal label "as_" then 0 else arity in
+          { label; var = var.txt; typ; presence; arity })
         (arity typ)
   in
   match p.pparam_desc with
@@ -804,7 +894,7 @@ let is_nodes p =
 (* The props module: an abstract type, one getter per prop -- a live read of
    Solid's props object, so Solid tracks it -- and the check. A function prop
    is read uncurried, the call Solid's JSX makes. *)
-let props_module ~loc ~element props =
+let props_module ~loc ~element ~drawn props =
   let vars =
     List.fold_left
       (fun acc v -> if List.mem v acc then acc else acc @ [ v ])
@@ -893,7 +983,7 @@ let props_module ~loc ~element props =
         if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
         else if String.equal p.label "children" then
           [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
-        else if p.arity > 0 then p.typ
+        else if p.arity > 0 || String.equal p.label "as_" then p.typ
         else [%type: [%t p.typ] Solidtype.Check.value]
   in
   let check_param p =
@@ -1007,14 +1097,26 @@ let props_module ~loc ~element props =
               Solidtype.Solid.omit props (Array.map [%e js] names)];
         ]
   in
+  (* The rest keeps an [as_] the ppx gave the component, for the part or port
+     beneath it, which draws it; [drawn_others] leaves it out, for a plain
+     element, which [Dynamic] draws by it. *)
   let others =
     let own =
       B.pexp_array ~loc
-        (List.map (fun p -> B.estring ~loc (js_name p.label)) props)
+        (List.filter_map
+           (fun p ->
+             if drawn && String.equal p.label "as_" then None
+             else Some (B.estring ~loc (js_name p.label)))
+           props)
     in
     [%stri
       let others (props : [%t t]) : _ Solidtype.Solid.rest =
         Solidtype.Solid.others props [%e own]]
+  in
+  let drawn_others =
+    [%stri
+      let drawn_others (props : [%t t]) : _ Solidtype.Solid.rest =
+        Solidtype.Solid.others (others props) [| "as" |]]
   in
   (* An interface may export the component without its [omit] and [others]. *)
   let generated =
@@ -1026,6 +1128,7 @@ let props_module ~loc ~element props =
     B.pmod_structure ~loc
       ((generated :: type_t :: List.map getter props)
       @ [ constructor; check; others ]
+      @ (if drawn then [ drawn_others ] else [])
       @ omit) )
 
 (* Each prop is read where it is used: a value through a thunk, [text ()], a
@@ -1124,6 +1227,56 @@ let element_of (vb : value_binding) =
         ( a.attr_loc,
           "[@@element tag] names one element, by its tag: [@@element button]" )
 
+(* A plain element a part spreads the rest of its props on is the element the
+   part draws, so it draws what [as_] draws in its place. *)
+let draw_by_as =
+  object
+    inherit Ast_traverse.map as super
+
+    method! expression e =
+      let e = super#expression e in
+      match e.pexp_desc with
+      | Pexp_apply
+          (({ pexp_desc = Pexp_ident { txt = Lident _; _ }; _ } as f), args)
+        when is_jsx e
+             && List.exists
+                  (function
+                    | ( Labelled "props",
+                        {
+                          pexp_desc =
+                            Pexp_apply
+                              ( {
+                                  pexp_desc =
+                                    Pexp_ident
+                                      {
+                                        txt = Ldot (Lident "Props", "others");
+                                        _;
+                                      };
+                                  _;
+                                },
+                                _ );
+                          _;
+                        } ) ->
+                        true
+                    | _ -> false)
+                  args ->
+          let loc = e.pexp_loc in
+          let args =
+            List.map
+              (function
+                | Labelled "props", _ ->
+                    (Labelled "props", [%expr Props.drawn_others props])
+                | a -> a)
+              args
+          in
+          {
+            e with
+            pexp_desc =
+              Pexp_apply (f, (Optional "as_", [%expr fun () -> as_ ()]) :: args);
+          }
+      | _ -> e
+  end
+
 let component_of (vb : value_binding) =
   let loc = vb.pvb_loc in
   match (vb.pvb_pat.ppat_desc, vb.pvb_expr.pexp_desc) with
@@ -1131,7 +1284,31 @@ let component_of (vb : value_binding) =
       Pexp_function (params, None, Pfunction_body body) ) ->
       let* props = props_of ~loc params in
       let+ element = element_of vb in
-      let vars, props_module = props_module ~loc ~element props in
+      let drawn =
+        Option.is_some element
+        && not (List.exists (fun p -> String.equal p.label "as_") props)
+      in
+      let props =
+        match element with
+        | Some path when drawn ->
+            let typ =
+              [%type:
+                [%t B.ptyp_constr ~loc { txt = Ldot (path, "props"); loc } []] ->
+                Solidtype.Jsx.element]
+            in
+            props
+            @ [
+                {
+                  label = "as_";
+                  var = "as_";
+                  typ;
+                  presence = Optional;
+                  arity = 0;
+                };
+              ]
+        | Some _ | None -> props
+      in
+      let vars, props_module = props_module ~loc ~element ~drawn props in
       let props_t =
         B.ptyp_constr ~loc
           { txt = Ldot (Lident "Props", "t"); loc }
@@ -1182,9 +1359,27 @@ let mapper =
           ( ( { txt = "component"; _ },
               PStr [ { pstr_desc = Pstr_value (Nonrecursive, [ vb ]); _ } ] ),
             _ ) -> (
-          match
-            component_of { vb with pvb_expr = self#expression vb.pvb_expr }
-          with
+          let drawn =
+            List.exists
+              (fun (a : attribute) -> String.equal a.attr_name.txt "element")
+              vb.pvb_attributes
+            &&
+            match vb.pvb_expr.pexp_desc with
+            | Pexp_function (params, _, _) ->
+                not
+                  (List.exists
+                     (fun (p : function_param) ->
+                       match p.pparam_desc with
+                       | Pparam_val ((Labelled "as_" | Optional "as_"), _, _) ->
+                           true
+                       | _ -> false)
+                     params)
+            | _ -> false
+          in
+          let body =
+            if drawn then draw_by_as#expression vb.pvb_expr else vb.pvb_expr
+          in
+          match component_of { vb with pvb_expr = self#expression body } with
           | Ok item -> item
           | Error (loc, m) ->
               B.pstr_extension ~loc (Location.error_extensionf ~loc "%s" m) [])

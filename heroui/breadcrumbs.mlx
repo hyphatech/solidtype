@@ -39,7 +39,10 @@ module Item = struct
 
   let%component make ?(id : string option) ?(href : string option)
       ?(is_disabled : bool = false) ?(class_ : string option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Li.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let t =
       match Context.use () with
       | Some t -> t
@@ -49,12 +52,19 @@ module Item = struct
     t.join (fun ~current ->
         let disabled () = is_disabled () || t.disabled () || current () in
         let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+        let state =
+          {
+            is_current = (fun[@u] () -> current ());
+            is_disabled = (fun[@u] () -> disabled ());
+          }
+        in
         <li
           class_=(fun () ->
                    after (Styles.Breadcrumbs.item (slots ())) (class_ ()))
           data_slot="breadcrumbs-item"
           data_current=(fun () -> Jsx.flag (current ()))
           data_disabled=(fun () -> Jsx.flag (t.disabled () || current ()))
+          ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
           props=others>
           (* Kobalte's breadcrumb link takes no disabled of its own, so the
              port marks the page on Kobalte's link, as that one does. *)
@@ -78,12 +88,7 @@ module Item = struct
             data_focus_visible=(fun () ->
                                  Jsx.flag (Interaction.focus_visible i))
             data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
-            (fun () ->
-              Jsx.draw (children ())
-                {
-                  is_current = (fun[@u] () -> current ());
-                  is_disabled = (fun[@u] () -> disabled ());
-                })
+            (fun () -> Jsx.draw (children ()) state)
           </Link.Root>
           <Show when_=(fun () -> not (current ()))>
             (fun () ->

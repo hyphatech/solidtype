@@ -143,7 +143,7 @@ let description : Description.slot =
 module As_option = struct
   module Props = struct
     external check :
-      ?as_:string Solidtype.Check.value ->
+      ?as_:Jsx.drawn Solidtype.Check.value ->
       item:node Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
@@ -174,7 +174,10 @@ module Item = struct
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     within "List_box.Item";
     let others = Props.others props in
     let key_ = S.untrack id in
@@ -211,8 +214,20 @@ module Item = struct
         | `none -> if not (disabled ()) then l.act key_
         | `single | `multiple -> ()
       in
+      let state =
+        {
+          is_hovered = (fun[@u] () -> Interaction.hovered i);
+          is_pressed = (fun[@u] () -> Interaction.pressed i);
+          is_selected = (fun[@u] () -> selected ());
+          is_focused = (fun[@u] () -> focused ());
+          is_focus_visible = (fun[@u] () -> focus_visible ());
+          is_disabled = (fun[@u] () -> disabled ());
+          selection_mode = (fun[@u] () -> l.mode ());
+        }
+      in
       <As_option
-        as_="div"
+        as_=(fun () ->
+              Jsx.drawn_as (Option.map (fun f p -> f p state) (as_ ())) "div")
         item=(fun () -> S.get node)
         class_=(fun () ->
                  after (Styles.ListboxItem.item (item_slots ())) (class_ ()))
@@ -240,17 +255,7 @@ module Item = struct
         props=others>
         <Item_context.Provider value=(fun () -> { item_slots; selected })>
           <Description.Slot.Provider value=(fun () -> description)>
-            (fun () ->
-              Jsx.draw (children ())
-                {
-                  is_hovered = (fun[@u] () -> Interaction.hovered i);
-                  is_pressed = (fun[@u] () -> Interaction.pressed i);
-                  is_selected = (fun[@u] () -> selected ());
-                  is_focused = (fun[@u] () -> focused ());
-                  is_focus_visible = (fun[@u] () -> focus_visible ());
-                  is_disabled = (fun[@u] () -> disabled ());
-                  selection_mode = (fun[@u] () -> l.mode ());
-                })
+            (fun () -> Jsx.draw (children ()) state)
           </Description.Slot.Provider>
         </Item_context.Provider>
       </As_option>
@@ -418,7 +423,8 @@ module Section = struct
         role=`group
         ?aria_labelledby=(fun () ->
                            Option.map (fun _ -> header_id) (S.get header))
-        props=others>
+        ?as_=(fun () -> S.drawn_as others)
+        props=(S.undrawn others)>
         (fun () ->
           match S.get header with
           | Some drawn -> Jsx.element (drawn header_id)

@@ -115,3 +115,15 @@ let optional_attribute = <a title=(fun () -> "x") ?href=(fun () -> link ()) />
 let optional_prop = <Label text=(fun () -> "x") ?count=(fun () -> count ()) />
 let optional_name = <Label text=(fun () -> "x") ?count />
 let named_render = <For each=(fun () -> items ()) render=row />
+
+module Part = struct
+  let%component make ?(class_ : string option) () =
+    <button
+      class_=(fun () -> Option.value (class_ ()) ~default:"")
+      ref=(fun _ -> ())
+      props=(Props.others props)
+    />
+  [@@element button]
+end
+
+let drawn_as = <button ?as_=(fun () -> None) class_="x" />

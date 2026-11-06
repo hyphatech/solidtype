@@ -32,6 +32,7 @@ module Heading : sig
       ?element_type:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Element.check
   end
@@ -54,6 +55,7 @@ module Paragraph : sig
       ?element_type:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Element.check
   end
@@ -75,6 +77,7 @@ module Code : sig
       ?element_type:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Element.check
   end
@@ -92,6 +95,7 @@ module Prose : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -112,6 +116,7 @@ module Props : sig
     ?element_type:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Element.check
 end

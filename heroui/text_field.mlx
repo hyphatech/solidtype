@@ -36,7 +36,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let f =
@@ -46,6 +48,14 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       invalid;
       read_only = (fun () -> is_read_only ());
       required = (fun () -> is_required ());
+    }
+  in
+  let state () =
+    {
+      is_disabled = (fun[@u] () -> is_disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+      is_required = (fun[@u] () -> is_required ());
     }
   in
   <Context.Provider value=(fun () -> f)>
@@ -79,18 +89,10 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>
-          (fun () ->
-            Jsx.draw (children ())
-              {
-                is_disabled = (fun[@u] () -> is_disabled ());
-                is_invalid = (fun[@u] () -> invalid ());
-                is_read_only = (fun[@u] () -> is_read_only ());
-                is_required = (fun[@u] () -> is_required ());
-              })
-        </Parts>
+        <Parts>(fun () -> Jsx.draw (children ()) (state ()))</Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

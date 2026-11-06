@@ -58,7 +58,9 @@ type state = {
 let%component make ~(href : string) ?(is_disabled : bool option)
     ?(class_ : string option)
     ?ref:(given_ref : (Dom.htmlAnchorElement -> unit) option)
-    ?(aria_current : string option) ~(children : state Jsx.children) () =
+    ?(aria_current : string option) ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.A.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A link is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -71,6 +73,16 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     match aria_current () with
     | Some c -> not (String.equal c "")
     | None -> false
+  in
+  let state () =
+    {
+      is_current = (fun[@u] () -> current ());
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_pressed = (fun[@u] () -> Interaction.pressed i);
+      is_focused = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> Interaction.disabled i);
+    }
   in
   <Kobalte.Root
     href=(fun () -> href ())
@@ -90,16 +102,8 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
     data_current=(fun () -> Jsx.flag (current ()))
     ?aria_current
+    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
     props=(Props.others props)>
-    (fun () ->
-      Jsx.draw (children ())
-        {
-          is_current = (fun[@u] () -> current ());
-          is_hovered = (fun[@u] () -> Interaction.hovered i);
-          is_pressed = (fun[@u] () -> Interaction.pressed i);
-          is_focused = (fun[@u] () -> Interaction.focused i);
-          is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-          is_disabled = (fun[@u] () -> Interaction.disabled i);
-        })
+    (fun () -> Jsx.draw (children ()) (state ()))
   </Kobalte.Root>
 [@@element a]

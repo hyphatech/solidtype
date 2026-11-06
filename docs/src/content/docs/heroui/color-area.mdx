@@ -71,7 +71,7 @@ HeroUI's examples.
 
 ### Render Function
 
-HeroUI's Render Function example gives the area and its thumb `render`, React's way to swap the element each renders, which a Solid component has no need of.
+`as_` draws another element in its place, given its props and its state, as [Composition](/solidtype/heroui/composition/#custom-dom-element) shows.
 
 ## Customization
 
@@ -113,7 +113,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
 | `showDots` | `show_dots` | `bool` | `false` | Whether dots are drawn over it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `render` | — | | | React's way to swap its element |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 ### ColorArea.Thumb
 
@@ -121,7 +121,7 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|---|
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `style` | `style` | `string` | | Added after its colour; a function of its state in React |
-| `render` | — | | | React's way to swap its element |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 ## Beside React
 

@@ -55,6 +55,15 @@
     expects it before it is bound, so it reads a record's fields by their names,
     [s.is_pressed], though the record's module is not open.
 
+    Given the element it draws, [let%component make ... [@@element button]], the
+    component also takes [as_], a function of [Html.Button.props] that draws in
+    the element's place, unless it names [as_] itself, as a part does to give
+    the function its state too. A plain element it spreads [Props.others props]
+    on is given that function, and a rest spread on a component carries [as_] to
+    it. [<tag ?as_=(fun () -> o)>] is that element while [o] is [None], Solid's
+    compiled template as ever, and otherwise what Solid's [Dynamic] draws by the
+    function, its written [ref] called beside the spread's.
+
     Given the element it draws, [let%component make ... [@@element button]], its
     [check] takes each of that element's attributes after its own props, typed
     as [Solidtype.Html.Button] types them, for [others] to pass on. A prop the

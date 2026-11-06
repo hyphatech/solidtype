@@ -17,7 +17,9 @@ module Icon : sig
     type t
 
     val check :
-      ?props:t Solidtype.Solid.rest -> (unit -> unit) Solidtype.Html.Svg.check
+      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
+      ?props:t Solidtype.Solid.rest ->
+      (unit -> unit) Solidtype.Html.Svg.check
   end
 
   val make : Props.t -> Solidtype.Jsx.element
@@ -49,6 +51,7 @@ module Props : sig
       ( state -> Solidtype.Jsx.element,
         [ `nodes | `render ] )
       Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Button.check
 end

@@ -122,7 +122,9 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?(on_key_down : (Dom.keyboardEvent -> unit) option)
     ?(on_click : (Dom.mouseEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
@@ -148,6 +150,15 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       invalid;
       read_only = (fun () -> is_read_only ());
       required = (fun () -> is_required ());
+    }
+  in
+  let state () =
+    {
+      orientation = (fun[@u] () -> orientation ());
+      is_disabled = (fun[@u] () -> is_disabled ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+      is_required = (fun[@u] () -> is_required ());
+      is_invalid = (fun[@u] () -> invalid ());
     }
   in
   <Context.Provider value=(fun () -> g)>
@@ -190,18 +201,11 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
-          (fun () ->
-            Jsx.draw (children ())
-              {
-                orientation = (fun[@u] () -> orientation ());
-                is_disabled = (fun[@u] () -> is_disabled ());
-                is_read_only = (fun[@u] () -> is_read_only ());
-                is_required = (fun[@u] () -> is_required ());
-                is_invalid = (fun[@u] () -> invalid ());
-              })
+          (fun () -> Jsx.draw (children ()) (state ()))
         </Description.Slot.Provider>
       </Label.Slot.Provider>
     </Kobalte.Root>

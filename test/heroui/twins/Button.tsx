@@ -55,6 +55,23 @@ export function renderOfState(disabled: boolean, pending: boolean): HTMLElement 
   return button;
 }
 
+// The button HeroUI's Render Function example draws.
+export function renderFunction(): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Button render={(props, { isPressed }) => <button {...props} data-custom={isPressed ? "pressed" : "bar"} />}>
+        Press me
+      </Button>,
+    ),
+  );
+  mounted = { root, host };
+  const button = host.querySelector("button");
+  if (!button) throw new Error("HeroUI's Button rendered no button");
+  return button;
+}
+
 export async function step(action: () => Promise<unknown>): Promise<void> {
   await act(async () => {
     await action();

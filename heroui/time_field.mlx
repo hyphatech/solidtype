@@ -63,7 +63,10 @@ module Group = struct
 
   let%component make ?(variant : [ `primary | `secondary ] option)
       ?(full_width : bool option) ?(class_ : string option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let f = within "Time_field.Group" in
     (* A group is as wide as it says, else as its field is. *)
     let full_width () =
@@ -74,6 +77,15 @@ module Group = struct
       Styles.DateInputGroup.slots
         (Styles.DateInputGroup.options ?full_width:(full_width ())
            ?variant:(variant ()) ())
+    in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_focus_within = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> f.disabled ());
+        is_invalid = (fun[@u] () -> f.invalid ());
+      }
     in
     <Group_context.Provider value=(fun () -> slots)>
       <div
@@ -87,16 +99,9 @@ module Group = struct
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
         data_disabled=(fun () -> Jsx.flag (f.disabled ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
         props=(Props.others props)>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              is_hovered = (fun[@u] () -> Interaction.hovered i);
-              is_focus_within = (fun[@u] () -> Interaction.focused i);
-              is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-              is_disabled = (fun[@u] () -> f.disabled ());
-              is_invalid = (fun[@u] () -> f.invalid ());
-            })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </div>
     </Group_context.Provider>
   [@@element div]
@@ -360,7 +365,7 @@ let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
     ~(max_value : unit -> Time.t option) ~(hide_time_zone : unit -> bool)
     ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
     ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width ~class_
-    ~on_blur ~on_focus_out ~given_ref ~children ~others =
+    ~on_blur ~on_focus_out ~given_ref ~children ~as_ ~others =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let current, set =
@@ -563,6 +568,14 @@ let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
       full_width;
     }
   in
+  let state =
+    {
+      is_disabled = (fun[@u] () -> is_disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+      is_required = (fun[@u] () -> is_required ());
+    }
+  in
   <Context.Provider value=(fun () -> f)>
     <Kobalte.Root
       value=(fun () -> Option.value (shown ()) ~default:(Clock.make ()))
@@ -604,18 +617,10 @@ let field (type v) ~(kind : v kind) ~(fallback : unit -> v)
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
       props=others>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>
-          (fun () ->
-            Jsx.draw (children ())
-              {
-                is_disabled = (fun[@u] () -> is_disabled ());
-                is_invalid = (fun[@u] () -> invalid ());
-                is_read_only = (fun[@u] () -> is_read_only ());
-                is_required = (fun[@u] () -> is_required ());
-              })
-        </Parts>
+        <Parts>(fun () -> Jsx.draw (children ()) state)</Parts>
       </Field_error.Message.Provider>
       (* The value as @internationalized/date writes it, whole: Kobalte's own
          input sends a clock's text, and React Aria's the time without the
@@ -644,7 +649,9 @@ let%component make ?(value : Time.t Js.Nullable.t option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   field ~kind:time_kind
     ~fallback:(fun () ->
       Option.value (placeholder_value ()) ~default:(Time.make ()))
@@ -652,7 +659,8 @@ let%component make ?(value : Time.t Js.Nullable.t option)
     ~hide_time_zone:(fun () -> true)
     ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
     ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width ~class_
-    ~on_blur ~on_focus_out ~given_ref ~children ~others:(Props.others props)
+    ~on_blur ~on_focus_out ~given_ref ~children ~as_
+    ~others:(Props.others props)
 [@@element div]
 
 module Date_time = struct
@@ -671,7 +679,10 @@ module Date_time = struct
       ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
       ?(on_focus_out : (Dom.focusEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     field ~kind:date_time_kind ~fallback:placeholder_value ~value ~default_value
       ~on_change
       ~placeholder_value:(fun () -> Some (placeholder_value ()))
@@ -679,7 +690,7 @@ module Date_time = struct
       ~hide_time_zone:(fun () -> true)
       ~granularity ~hour_cycle ~should_force_leading_zeros ~is_required
       ~is_invalid ~is_disabled ~is_read_only ~name ~aria_label ~full_width
-      ~class_ ~on_blur ~on_focus_out ~given_ref ~children
+      ~class_ ~on_blur ~on_focus_out ~given_ref ~children ~as_
       ~others:(Props.others props)
   [@@element div]
 end
@@ -700,13 +711,16 @@ module Zoned = struct
       ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
       ?(on_focus_out : (Dom.focusEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     field ~kind:zoned_kind ~fallback:placeholder_value ~value ~default_value
       ~on_change
       ~placeholder_value:(fun () -> Some (placeholder_value ()))
       ~min_value ~max_value ~hide_time_zone ~granularity ~hour_cycle
       ~should_force_leading_zeros ~is_required ~is_invalid ~is_disabled
       ~is_read_only ~name ~aria_label ~full_width ~class_ ~on_blur ~on_focus_out
-      ~given_ref ~children ~others:(Props.others props)
+      ~given_ref ~children ~as_ ~others:(Props.others props)
   [@@element div]
 end

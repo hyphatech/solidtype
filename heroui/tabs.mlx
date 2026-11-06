@@ -198,7 +198,7 @@ module As_tab = struct
     external check :
       value:string Solidtype.Check.value ->
       ?disabled:bool Solidtype.Check.value ->
-      ?as_:string Solidtype.Check.value ->
+      ?as_:Jsx.drawn Solidtype.Check.value ->
       ?props:'spread Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.A.check = "check"
@@ -227,7 +227,9 @@ module Tab = struct
   let%component make ~(id : string) ?(href : string option)
       ?(is_disabled : bool = false) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ : (Solidtype.Html.A.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let t = within "Tabs.Tab" in
     let k = Kobalte.use_tabs_context () in
     let selected () =
@@ -251,8 +253,21 @@ module Tab = struct
             Hashtbl.replace t.links key ();
             Solid.on_cleanup (fun () -> Hashtbl.remove t.links key)
         | None -> ());
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered n);
+        is_pressed = (fun[@u] () -> Interaction.pressed n);
+        is_focused = (fun[@u] () -> Interaction.focused n);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
+        is_selected = (fun[@u] () -> selected ());
+        is_disabled = (fun[@u] () -> Interaction.disabled n);
+      }
+    in
     <As_tab
-      as_=(fun () -> match link () with Some _ -> "a" | None -> "button")
+      as_=(fun () ->
+            Jsx.drawn_as
+              (Option.map (fun f p -> f p (state ())) (as_ ()))
+              (match link () with Some _ -> "a" | None -> "button"))
       ?href=(fun () -> link ())
       id=(fun () -> t.tab_id (id ()))
       value=(fun () -> id ())
@@ -275,16 +290,7 @@ module Tab = struct
                        if selected () then Some (t.tab_id (id ()) ^ "-panel")
                        else None)>
       <Tab_context.Provider value=(fun () -> { selected })>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              is_hovered = (fun[@u] () -> Interaction.hovered n);
-              is_pressed = (fun[@u] () -> Interaction.pressed n);
-              is_focused = (fun[@u] () -> Interaction.focused n);
-              is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
-              is_selected = (fun[@u] () -> selected ());
-              is_disabled = (fun[@u] () -> Interaction.disabled n);
-            })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </Tab_context.Provider>
     </As_tab>
   [@@element a]

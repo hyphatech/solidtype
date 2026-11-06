@@ -157,7 +157,10 @@ module Group = struct
   let%component make ?(variant : [ `primary | `secondary ] option)
       ?(full_width : bool option) ?(class_ : string option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let f = within "Color_field.Group" in
     let slots () =
       Styles.ColorInputGroup.slots
@@ -176,6 +179,15 @@ module Group = struct
           | Some _ | None -> ())
       | None -> ()
     in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_focus_within = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> f.disabled ());
+        is_invalid = (fun[@u] () -> f.invalid ());
+      }
+    in
     <Group_context.Provider value=(fun () -> slots)>
       (* In a field, the field is the group, as React Aria's is. *)
       <div
@@ -192,16 +204,9 @@ module Group = struct
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_disabled=(fun () -> Jsx.flag (f.disabled ()))
         data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
         props=(Props.others props)>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              is_hovered = (fun[@u] () -> Interaction.hovered i);
-              is_focus_within = (fun[@u] () -> Interaction.focused i);
-              is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-              is_disabled = (fun[@u] () -> f.disabled ());
-              is_invalid = (fun[@u] () -> f.invalid ());
-            })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </div>
     </Group_context.Provider>
   [@@element div]
@@ -225,7 +230,9 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(class_ : string option) ~(children : state Jsx.children) () =
+    ?(class_ : string option) ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
     match is_disabled () with Some d -> d | None -> in_fieldset ()
@@ -256,6 +263,14 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     ignore (given_ref e : unit option);
     in_form.root e
   in
+  let state () =
+    {
+      is_disabled = (fun[@u] () -> disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+      is_required = (fun[@u] () -> is_required ());
+    }
+  in
   <Context.Provider value=(fun () -> f)>
     (fun () ->
       match S.untrack channel with
@@ -284,17 +299,11 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               data_invalid=(fun () -> Jsx.flag (invalid ()))
               data_disabled=(fun () -> Jsx.flag (disabled ()))
               data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+              ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
               props=(Props.others props)>
               <Field_error.Message.Provider value=(fun () -> in_form.error)>
                 <Channel_parts>
-                  (fun () ->
-                    Jsx.draw (children ())
-                      {
-                        is_disabled = (fun[@u] () -> disabled ());
-                        is_invalid = (fun[@u] () -> invalid ());
-                        is_read_only = (fun[@u] () -> is_read_only ());
-                        is_required = (fun[@u] () -> is_required ());
-                      })
+                  (fun () -> Jsx.draw (children ()) (state ()))
                 </Channel_parts>
               </Field_error.Message.Provider>
             </Channel.Root>
@@ -321,6 +330,7 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               data_invalid=(fun () -> Jsx.flag (invalid ()))
               data_disabled=(fun () -> Jsx.flag (disabled ()))
               data_readonly=(fun () -> Jsx.flag (is_read_only ()))
+              ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
               props=(Props.others props)>
               <Field_error.Message.Provider value=(fun () -> in_form.error)>
                 <Hex_parts>

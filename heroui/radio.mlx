@@ -52,12 +52,16 @@ module Content = struct
     }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Label.props -> state -> Solidtype.Jsx.element) option)
       () =
     let r = within "Radio.Content" in
+    let state () = state_of r.field in
     <Field_content
       field=(fun () -> r.field)
       slot="radio-content"
       class_=(fun () -> after (Styles.Radio.content (r.slots ())) (class_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () -> Jsx.draw (children ()) (state_of r.field))
     </Field_content>
@@ -78,12 +82,17 @@ end
 
 module Indicator = struct
   let%component make ?(class_ : string option)
-      ?(children : Content.state Jsx.children option) () =
+      ?(children : Content.state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Span.props -> Content.state -> Solidtype.Jsx.element)
+         option) () =
     let r = within "Radio.Indicator" in
     <span
       aria_hidden=true
       class_=(fun () -> after (Styles.Radio.indicator (r.slots ())) (class_ ()))
       data_slot="radio-indicator"
+      ?as_=(fun () ->
+             Option.map (fun f p -> f p (Content.state_of r.field)) (as_ ()))
       props=(Props.others props)>
       (fun () ->
         match children () with
@@ -126,7 +135,9 @@ let state_of (f : Field.state) =
 
 let%component make ~(value : string) ?(is_disabled : bool = false)
     ?(aria_label : string option) ?(class_ : string option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let g =
     match Radio_group.Context.use () with
     | Some g -> g
@@ -157,6 +168,7 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
         };
     }
   in
+  let state () = state_of r.field in
   <Context.Provider value=(fun () -> r)>
     <Kobalte.Item
       value=(fun () -> value ())
@@ -168,6 +180,7 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
       data_invalid=(fun () -> Jsx.flag (g.invalid ()))
       data_readonly=(fun () -> Jsx.flag (g.read_only ()))
       data_required=(fun () -> Jsx.flag (g.required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
         (fun () -> Jsx.draw (children ()) (state_of r.field))

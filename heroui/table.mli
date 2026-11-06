@@ -68,6 +68,7 @@ module Scroll_container : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -92,6 +93,7 @@ module Resizable_container : sig
       ?on_resize_end:((string * column_size) array -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -146,6 +148,7 @@ module Content : sig
       ?on_expanded_change:(string array -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Table.check
   end
@@ -162,6 +165,7 @@ module Header : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Thead.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Thead.check
   end
@@ -206,6 +210,7 @@ module Column : sig
         ( state -> Solidtype.Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Th.props -> state -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Th.check
   end
@@ -243,6 +248,7 @@ module Column_resizer : sig
         ( state -> Solidtype.Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -267,6 +273,7 @@ module Sortable_column_header : sig
       ?indicator:Solidtype.Jsx.element Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
@@ -284,6 +291,7 @@ module Body : sig
       ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Tbody.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Tbody.check
   end
@@ -307,6 +315,7 @@ module Row : sig
       ?ref:(Dom.htmlTableRowElement -> unit) ->
       ?style:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Tr.check
   end
@@ -344,6 +353,7 @@ module Cell : sig
         ( state -> Solidtype.Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Td.props -> state -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Td.check
   end
@@ -369,6 +379,7 @@ module Load_more : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Tr.check
   end
@@ -385,6 +396,7 @@ module Load_more_content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -401,6 +413,7 @@ module Footer : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -416,6 +429,7 @@ module Props : sig
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

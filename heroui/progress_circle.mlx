@@ -119,7 +119,9 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
     ?(size : [ `sm | `md | `lg ] option) ?(aria_label : string option)
     ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* HeroUI's formatOptions as it reads them, a percent by default: a percent
      is the value's share of its range, any other style the value itself. *)
   let options () =
@@ -162,6 +164,18 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
                  (Float.max 0. ((value () -. min_value ()) /. range *. 100.))));
     }
   in
+  let state () =
+    {
+      percentage = (fun[@u] () -> c.percent ());
+      value_text =
+        (fun[@u] () ->
+          if is_indeterminate () then None
+          else
+            Some
+              (text ~value:(value ()) ~min:(min_value ()) ~max:(max_value ())));
+      is_indeterminate = (fun[@u] () -> is_indeterminate ());
+    }
+  in
   <Context.Provider value=(fun () -> c)>
     <Kobalte.Root
       value=(fun () -> value ())
@@ -173,20 +187,9 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       class_=(fun () ->
                after (Styles.ProgressCircle.base (c.slots ())) (class_ ()))
       data_slot="progress-circle"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            percentage = (fun[@u] () -> c.percent ());
-            value_text =
-              (fun[@u] () ->
-                if is_indeterminate () then None
-                else
-                  Some
-                    (text ~value:(value ()) ~min:(min_value ())
-                       ~max:(max_value ())));
-            is_indeterminate = (fun[@u] () -> is_indeterminate ());
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

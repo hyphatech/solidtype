@@ -34,6 +34,7 @@ module Trigger : sig
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -58,6 +59,7 @@ module Content : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -76,6 +78,7 @@ module Arrow : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end

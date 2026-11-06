@@ -175,7 +175,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `hideSeparator` | `hide_separator` | `bool` | `false` | Whether the line between items is left out |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its items |
-| `render` | — | | | Not yet |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 ### Accordion.Item
 
@@ -187,7 +187,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `isExpanded`, `defaultExpanded` | — | | | An item is expanded as the accordion's keys say: HeroUI's reads neither inside an accordion, and here they are refused |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its heading and panel |
-| `render` | — | | | Not yet |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 ### Accordion.Trigger
 
@@ -197,7 +197,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled, as it is while its item is; the arrows pass it by |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its content |
-| `render` | — | | | Not yet |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 ### Accordion.Heading, Accordion.Panel, Accordion.Body
 
@@ -205,7 +205,7 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | Its content |
-| `render` | — | | Not yet |
+| `render` | `as_` | a function of its props and state | Draws another element in its place |
 
 ### Accordion.Indicator
 

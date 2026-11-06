@@ -73,6 +73,7 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
     "button_loading_state visible",
     "button_full_width visible",
     "button_disabled visible",
+    "button_render_function visible",
     "button_tailwind visible",
     "button_demo load",
   ]);

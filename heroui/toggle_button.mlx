@@ -20,7 +20,10 @@ let%component make ?(variant : [ `default | `ghost ] option)
     ?(is_disabled : bool option) ?(on_click : (Dom.mouseEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
     ?(aria_label : string option) ?(class_ : string option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ :
+       (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let group = Toggle_button_group.Context.use () in
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
@@ -57,16 +60,19 @@ let%component make ?(variant : [ `default | `ghost ] option)
     ignore (given_ref b : unit option);
     Interaction.watch i b
   in
-  let draw selected () =
-    Jsx.draw (children ())
-      {
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_pressed = (fun[@u] () -> Interaction.pressed i);
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> Interaction.disabled i);
-        is_selected = (fun[@u] () -> selected ());
-      }
+  let state selected =
+    {
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_pressed = (fun[@u] () -> Interaction.pressed i);
+      is_focused = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> Interaction.disabled i);
+      is_selected = (fun[@u] () -> selected ());
+    }
+  in
+  let draw selected () = Jsx.draw (children ()) (state selected) in
+  let drawn selected () =
+    Option.map (fun f p -> f p (state selected)) (as_ ())
   in
   match group with
   | None ->
@@ -88,6 +94,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
         on_click
+        ?as_=(drawn selected)
         props=(Props.others props)
         disabled=(fun () -> disabled ())>
         (fun () -> draw selected ())

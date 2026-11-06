@@ -95,11 +95,22 @@ module Group = struct
   }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
-      () =
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let f = within "Number_field.Group" in
     (* Hovered and focused within as React Aria's group is, which HeroUI's
        styles ring. *)
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_focus_within = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> f.disabled ());
+        is_invalid = (fun[@u] () -> f.invalid ());
+      }
+    in
     <div
       role=`group
       ?aria_invalid=(fun () -> if f.invalid () then Some "true" else None)
@@ -111,16 +122,9 @@ module Group = struct
       data_slot="number-field-group"
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-            is_focus_within = (fun[@u] () -> Interaction.focused i);
-            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-            is_disabled = (fun[@u] () -> f.disabled ());
-            is_invalid = (fun[@u] () -> f.invalid ());
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </div>
   [@@element div]
 end
@@ -277,7 +281,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -359,6 +365,14 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       can_decrement = can (fun v -> v -. by ());
     }
   in
+  let state () =
+    {
+      is_disabled = (fun[@u] () -> disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+      is_required = (fun[@u] () -> is_required ());
+    }
+  in
   <Context.Provider value=(fun () -> f)>
     <Kobalte.Root
       raw_value=(fun () -> current ())
@@ -392,18 +406,12 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Kobalte.HiddenInput />
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
         <Parts label_id=(fun () -> label_id)>
-          (fun () ->
-            Jsx.draw (children ())
-              {
-                is_disabled = (fun[@u] () -> disabled ());
-                is_invalid = (fun[@u] () -> invalid ());
-                is_read_only = (fun[@u] () -> is_read_only ());
-                is_required = (fun[@u] () -> is_required ());
-              })
+          (fun () -> Jsx.draw (children ()) (state ()))
         </Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>

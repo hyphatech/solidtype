@@ -131,26 +131,31 @@ module Value = struct
   }
 
   let%component make ?(placeholder : string option) ?(class_ : string option)
-      ?(children : state Jsx.children option) () =
+      ?(children : state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let c = within "Combo_box.Value" in
     let keys =
       S.create_memo (fun () ->
           Array.of_list (List.map List_box.key (c.selected ())))
     in
     let empty () = match c.selected () with [] -> true | _ :: _ -> false in
+    let state () =
+      {
+        selected_keys = (fun[@u] () -> S.get keys);
+        selected_text = (fun[@u] () -> List_box.listed (c.selected ()));
+      }
+    in
     <div
       class_=(fun () -> after (Styles.ComboBox.value (c.slots ())) (class_ ()))
       data_slot="combo-box-value"
       data_placeholder=(fun () -> Jsx.flag (empty ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () ->
         match children () with
-        | Some given when not (empty ()) ->
-            Jsx.draw given
-              {
-                selected_keys = (fun[@u] () -> S.get keys);
-                selected_text = (fun[@u] () -> List_box.listed (c.selected ()));
-              }
+        | Some given when not (empty ()) -> Jsx.draw given (state ())
         | Some _ | None ->
             (* React Aria lists the texts chosen as the reader's language
                lists them. *)
@@ -326,7 +331,9 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
     ?(on_focus_in : (Dom.focusEvent -> unit) option)
     ?(on_key_down : (Dom.keyboardEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -518,6 +525,15 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
   let kobalte_trigger () =
     match menu_trigger () with `focus | `input -> `input | `manual -> `manual
   in
+  let state =
+    {
+      is_open = (fun[@u] () -> S.get opened);
+      is_disabled = (fun[@u] () -> is_disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_required = (fun[@u] () -> is_required ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+    }
+  in
   let parts () =
     inside_root ~kobalte ~text ~quiet ~navigated;
     <Context.Provider value=(fun () -> c)>
@@ -531,15 +547,7 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
           <List_box.Listing.Provider value=(fun () -> listing)>
             <Field_error.Message.Provider value=(fun () -> in_form.error)>
               <Parts>
-                (fun () ->
-                  Jsx.draw (children ())
-                    {
-                      is_open = (fun[@u] () -> S.get opened);
-                      is_disabled = (fun[@u] () -> is_disabled ());
-                      is_invalid = (fun[@u] () -> invalid ());
-                      is_required = (fun[@u] () -> is_required ());
-                      is_read_only = (fun[@u] () -> is_read_only ());
-                    })
+                (fun () -> Jsx.draw (children ()) state)
                 <For each=(fun () -> sent_keys ())>
                   (fun key _ ->
                     <input type_="hidden" ?name=(fun () -> name ()) value=key />)
@@ -643,6 +651,7 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         data_disabled=(fun () -> Jsx.flag (is_disabled ()))
         data_readonly=(fun () -> Jsx.flag (is_read_only ()))
         data_required=(fun () -> Jsx.flag (is_required ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root>
@@ -701,6 +710,7 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         data_disabled=(fun () -> Jsx.flag (is_disabled ()))
         data_readonly=(fun () -> Jsx.flag (is_read_only ()))
         data_required=(fun () -> Jsx.flag (is_required ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root_multiple>

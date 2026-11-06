@@ -70,11 +70,27 @@ module Group = struct
   }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
-      () =
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let f = within "Search_field.Group" in
     (* Hovered, focused within and focus-visible as React Aria's group is,
        which HeroUI's styles ring. *)
     let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_focus_within =
+          (fun[@u] () -> Interaction.focused i && not (elsewhere f));
+        is_focus_visible =
+          (fun[@u] () ->
+            (Interaction.focus_visible i
+            || (Interaction.focused i && returned f))
+            && not (elsewhere f));
+        is_disabled = (fun[@u] () -> f.disabled ());
+        is_invalid = (fun[@u] () -> f.invalid ());
+      }
+    in
     <div
       role=`group
       ref=(fun e -> Interaction.watch i e)
@@ -91,21 +107,9 @@ module Group = struct
                              && not (elsewhere f)))
       data_disabled=(fun () -> Jsx.flag (f.disabled ()))
       data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-            is_focus_within =
-              (fun[@u] () -> Interaction.focused i && not (elsewhere f));
-            is_focus_visible =
-              (fun[@u] () ->
-                (Interaction.focus_visible i
-                || (Interaction.focused i && returned f))
-                && not (elsewhere f));
-            is_disabled = (fun[@u] () -> f.disabled ());
-            is_invalid = (fun[@u] () -> f.invalid ());
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </div>
   [@@element div]
 end
@@ -233,10 +237,22 @@ module Clear_button = struct
       ?(children : state Jsx.children option)
       ?(on_pointer_down : (Dom.pointerEvent -> unit) option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
-      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(as_ :
+         (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let f = within "Search_field.Clear_button" in
     let disabled () = f.disabled () || f.read_only () in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> Interaction.pressed i);
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> Interaction.disabled i);
+      }
+    in
     <Kobalte_button.Root
       aria_label="Close"
       class_=(fun () ->
@@ -264,19 +280,12 @@ module Clear_button = struct
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)
       disabled=(fun () -> disabled ())>
       (fun () ->
         match children () with
-        | Some c ->
-            Jsx.draw c
-              {
-                is_hovered = (fun[@u] () -> Interaction.hovered i);
-                is_pressed = (fun[@u] () -> Interaction.pressed i);
-                is_focused = (fun[@u] () -> Interaction.focused i);
-                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-                is_disabled = (fun[@u] () -> Interaction.disabled i);
-              }
+        | Some c -> Jsx.draw c (state ())
         | None -> Jsx.element <Close_button.Icon />)
     </Kobalte_button.Root>
   [@@element button]
@@ -301,7 +310,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A field is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -341,6 +352,15 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       aria_label = (fun () -> aria_label ());
     }
   in
+  let state () =
+    {
+      is_empty = (fun[@u] () -> String.equal (current ()) "");
+      is_disabled = (fun[@u] () -> disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_read_only = (fun[@u] () -> is_read_only ());
+      is_required = (fun[@u] () -> is_required ());
+    }
+  in
   <Context.Provider value=(fun () -> f)>
     <Kobalte.Root
       value=(fun () -> current ())
@@ -370,19 +390,10 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Field_error.Message.Provider value=(fun () -> in_form.error)>
-        <Parts>
-          (fun () ->
-            Jsx.draw (children ())
-              {
-                is_empty = (fun[@u] () -> String.equal (current ()) "");
-                is_disabled = (fun[@u] () -> disabled ());
-                is_invalid = (fun[@u] () -> invalid ());
-                is_read_only = (fun[@u] () -> is_read_only ());
-                is_required = (fun[@u] () -> is_required ());
-              })
-        </Parts>
+        <Parts>(fun () -> Jsx.draw (children ()) (state ()))</Parts>
       </Field_error.Message.Provider>
     </Kobalte.Root>
   </Context.Provider>

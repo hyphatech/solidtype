@@ -28,5 +28,19 @@ module Element : sig
   val component : unit Jsx.component
 end
 
+(** As {!Element}, drawn by a tag or a function, {!Jsx.drawn_as}: a part given
+    [as_] whose tag is chosen as the page runs. *)
+module Drawn : sig
+  module Props : sig
+    val check :
+      component:Jsx.drawn Check.value ->
+      ?props:'spread Solid.rest ->
+      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      Html.Element.check
+  end
+
+  val component : unit Jsx.component
+end
+
 val create_dynamic : (unit -> 'props Jsx.component) -> 'props -> Jsx.element
 (** [create_dynamic pick props], the function [Dynamic] is made of. *)

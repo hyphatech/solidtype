@@ -40,6 +40,19 @@ external of_content : content -> element = "%identity"
     number wherever it takes an element: what a function child gives of {!draw}.
 *)
 
+type drawn
+(** What a plain element given [as_] draws, the function or its own tag, as
+    Solid's [Dynamic] takes either. *)
+
+val drawn_as : ('props -> element) option -> string -> drawn
+(** [drawn_as given tag], which the ppx writes for [<tag ?as_=(fun () -> o)>].
+*)
+
+val ref_beside : ('e -> unit) -> 'rest -> 'e -> unit
+(** [ref_beside written rest] calls [written] and [rest]'s [ref], which Solid
+    calls alike on a plain element, and [Dynamic]'s spread would replace: the
+    ppx writes it for [<tag ref=f ?as_=... props=rest>]. *)
+
 val is_function : 'state children -> bool
 (** Whether [children] are a function of their state rather than elements: a
     component that shows something else in place of its elements still calls a

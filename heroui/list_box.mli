@@ -156,6 +156,7 @@ module Item : sig
         ( state -> Solidtype.Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -177,6 +178,7 @@ module Item_indicator : sig
         ( bool Solidtype.Solid.accessor -> Solidtype.Jsx.element,
           [ `render ] )
         Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
@@ -199,6 +201,7 @@ module Load_more_item : sig
       ?on_load_more:(unit -> unit) ->
       ?scroll_offset:float Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -216,6 +219,7 @@ module Section : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Section.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Section.check
   end
@@ -246,6 +250,7 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

@@ -28,6 +28,20 @@ type 'state children
 external as_function : 'state children -> ('state -> element[@u]) = "%identity"
 external as_content : 'state children -> content = "%identity"
 
+type drawn
+
+external drawn_by : ('props -> element) -> drawn = "%identity"
+external drawn_tag : string -> drawn = "%identity"
+
+let drawn_as given tag =
+  match given with Some f -> drawn_by f | None -> drawn_tag tag
+
+external rest_ref : 'rest -> (('e -> unit)[@u]) option = "ref" [@@mel.get]
+
+let ref_beside written rest e =
+  written e;
+  match rest_ref rest with Some f -> f e [@u] | None -> ()
+
 let is_function children = String.equal (Js.typeof children) "function"
 
 let draw children state =

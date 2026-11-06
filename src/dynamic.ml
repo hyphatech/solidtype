@@ -24,6 +24,20 @@ module Element = struct
   [@@mel.module "solid-js/web"]
 end
 
+module Drawn = struct
+  module Props = struct
+    external check :
+      component:Jsx.drawn Check.value ->
+      ?props:'spread Solid.rest ->
+      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      Html.Element.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  external component : unit Jsx.component = "Dynamic"
+  [@@mel.module "solid-js/web"]
+end
+
 external create_dynamic :
   ((unit -> 'props Jsx.component)[@mel.uncurry]) -> 'props -> Jsx.element
   = "createDynamic"

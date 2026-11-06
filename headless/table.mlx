@@ -541,6 +541,7 @@ module Resizable_container = struct
       ?on_resize_start:((string * column_size) array -> unit) ->
       ?on_resize:((string * column_size) array -> unit) ->
       ?on_resize_end:((string * column_size) array -> unit) ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
@@ -605,10 +606,16 @@ module Resizable_container = struct
         ref=(fun e ->
               container := Some e;
               call (Props.ref props) e)
-        props=(S.omit props
-                 [|
-                   "onResizeStart"; "onResize"; "onResizeEnd"; "children"; "ref";
-                 |])>
+        ?as_=(fun () -> S.drawn_as props)
+        props=(S.undrawn
+                 (S.omit props
+                    [|
+                      "onResizeStart";
+                      "onResize";
+                      "onResizeEnd";
+                      "children";
+                      "ref";
+                    |]))>
         (fun () -> Props.children props)
       </div>
     </Container_context.Provider>
@@ -634,6 +641,7 @@ module Root = struct
       ?expanded_keys:string array Solidtype.Check.value ->
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
+      ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check = "check"
@@ -1247,9 +1255,12 @@ module Root = struct
             </div>
     in
     <Table_context.Provider value=(fun () -> t)>
-      <Dynamic.Element
+      <Dynamic.Drawn
         component=(fun () ->
-                    match virtualized with Some _ -> "div" | None -> "table")
+                    Solidtype.Jsx.drawn_as (S.drawn_as props)
+                      (match virtualized with
+                      | Some _ -> "div"
+                      | None -> "table"))
         role=(fun () -> if tree () then `treegrid else `grid)
         ref=(fun e ->
               let e = as_element e in
@@ -1294,9 +1305,9 @@ module Root = struct
         on_focus_out=(fun e ->
                        call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
-        props=(S.omit props own)>
+        props=(S.undrawn (S.omit props own))>
         (fun () -> content ())
-      </Dynamic.Element>
+      </Dynamic.Drawn>
     </Table_context.Provider>
 
   let component = Jsx.component make
@@ -1307,6 +1318,7 @@ module Header = struct
     type t
 
     external check :
+      ?as_:(Solidtype.Html.Thead.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Thead.check = "check"
@@ -1319,7 +1331,10 @@ module Header = struct
     let t = in_table "Table.Header" in
     match t.virtualized with
     | None ->
-        <thead role=`rowgroup props=(S.omit props [| "children" |])>
+        <thead
+          role=`rowgroup
+          ?as_=(fun () -> S.drawn_as props)
+          props=(S.undrawn (S.omit props [| "children" |]))>
           <tr role=`row>(fun () -> Props.children props)</tr>
         </thead>
     | Some v ->
@@ -1332,7 +1347,10 @@ module Header = struct
                   placed ~sticky:true ~overflow:"hidden" ~z:1 ~top:l.padding
                     ~left:l.padding ~width:(v.content_width ())
                     ~height:l.heading_size ())>
-          <div role=`rowgroup props=(S.omit props [| "children" |])>
+          <div
+            role=`rowgroup
+            ?as_=(fun () -> S.drawn_as props)
+            props=(S.undrawn (S.omit props [| "children" |]))>
             <div role=`row aria_rowindex="1">
               (fun () -> Props.children props)
             </div>
@@ -1377,6 +1395,7 @@ module Column = struct
       ?default_width:column_size Solidtype.Check.value ->
       ?min_width:float Solidtype.Check.value ->
       ?max_width:float Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Th.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check = "check"
@@ -1477,8 +1496,10 @@ module Column = struct
       <Column_context.Provider value=(fun () -> { direction; resizing })>
         <Resized_context.Provider
           value=(fun () -> { resized_key = key; header_id })>
-          <Dynamic.Element
-            component=(fun () -> tag t.virtualized "th")
+          <Dynamic.Drawn
+            component=(fun () ->
+                        Solidtype.Jsx.drawn_as (S.drawn_as props)
+                          (tag t.virtualized "th"))
             role=`columnheader
             id=(fun () -> header_id)
             tabindex="-1"
@@ -1515,9 +1536,9 @@ module Column = struct
                               prevent_default e;
                               press ()
                           | _ -> ())
-            props=(S.omit props own)>
+            props=(S.undrawn (S.omit props own))>
             (fun () -> Props.children props)
-          </Dynamic.Element>
+          </Dynamic.Drawn>
         </Resized_context.Provider>
       </Column_context.Provider>
     in
@@ -1545,6 +1566,7 @@ module Body = struct
 
     external check :
       ?empty_state:Jsx.element Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Tbody.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tbody.check = "check"
@@ -1568,7 +1590,9 @@ module Body = struct
     match t.virtualized with
     | None ->
         <tbody
-          role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
+          role=`rowgroup
+          ?as_=(fun () -> S.drawn_as props)
+          props=(S.undrawn (S.omit props [| "emptyState"; "children" |]))>
           <For each=(fun () -> S.get rows)>
             (fun n position ->
               n.draw ~position:(fun () -> S.get position) ~size)
@@ -1608,7 +1632,9 @@ module Body = struct
                     ~left:l.padding ~width:(v.content_width ())
                     ~height:(v.body_height ()) ())>
           <div
-            role=`rowgroup props=(S.omit props [| "emptyState"; "children" |])>
+            role=`rowgroup
+            ?as_=(fun () -> S.drawn_as props)
+            props=(S.undrawn (S.omit props [| "emptyState"; "children" |]))>
             <For each=(fun () -> drawn ())>
               (fun n _ -> n.draw ~position:(fun () -> index_of n) ~size)
             </For>
@@ -1636,6 +1662,7 @@ module Row = struct
 
     external check :
       id:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check = "check"
@@ -1747,8 +1774,10 @@ module Row = struct
         let rows = S.create_memo (fun () -> Nested.read (all ())) in
         (nested := fun () -> S.get rows);
         let drawn =
-          <Dynamic.Element
-            component=(fun () -> tag t.virtualized "tr")
+          <Dynamic.Drawn
+            component=(fun () ->
+                        Solidtype.Jsx.drawn_as (S.drawn_as props)
+                          (tag t.virtualized "tr"))
             role=`row
             ref=(fun e ->
                   let e = as_element e in
@@ -1801,11 +1830,11 @@ module Row = struct
             on_focus=(fun e ->
                        call (Props.on_focus props) e;
                        Selectable_item.on_focus item e)
-            props=(S.omit props own)>
+            props=(S.undrawn (S.omit props own))>
             <For each=(fun () -> Cells.read (all ()))>
               (fun c _ -> c.draw_cell ())
             </For>
-          </Dynamic.Element>
+          </Dynamic.Drawn>
         in
         let row =
           match t.virtualized with
@@ -1865,6 +1894,7 @@ module Cell = struct
     type t
 
     external check :
+      ?as_:(Solidtype.Html.Td.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Td.check = "check"
@@ -1884,8 +1914,10 @@ module Cell = struct
     let drawn =
       <Cell_context.Provider
         value=(fun () -> { is_tree_column; column_index = index })>
-        <Dynamic.Element
-          component=(fun () -> tag t.virtualized "td")
+        <Dynamic.Drawn
+          component=(fun () ->
+                      Solidtype.Jsx.drawn_as (S.drawn_as props)
+                        (tag t.virtualized "td"))
           role=(fun () -> if names_row () then `rowheader else `gridcell)
           ?id=(fun () -> if names_row () then Some r.state.header_id else None)
           ?aria_colindex=(fun () ->
@@ -1899,9 +1931,9 @@ module Cell = struct
                 let e = as_element e in
                 S.set set_element (Some e);
                 call (Props.ref props) e)
-          props=(S.omit props [| "children"; "ref" |])>
+          props=(S.undrawn (S.omit props [| "children"; "ref" |]))>
           (fun () -> Props.children props)
-        </Dynamic.Element>
+        </Dynamic.Drawn>
       </Cell_context.Provider>
     in
     match t.virtualized with
@@ -1936,6 +1968,7 @@ module Load_more = struct
       ?is_loading:bool Solidtype.Check.value ->
       ?on_load_more:(unit -> unit) ->
       ?scroll_offset:float Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check = "check"
@@ -1980,7 +2013,10 @@ module Load_more = struct
               </td>
             </tr>;
             <Show when_=(fun () -> is_loading ())>
-              <tr role=`row props=(rest ())>
+              <tr
+                role=`row
+                ?as_=(fun () -> S.drawn_as props)
+                props=(S.undrawn (rest ()))>
                 <td
                   role=`rowheader
                   colspan=(fun () -> string_of_int (count t.columns ()))>
@@ -2007,7 +2043,10 @@ module Load_more = struct
             </div>
           </div>
           <Show when_=(fun () -> is_loading ())>
-            <div role=`row props=(rest ())>
+            <div
+              role=`row
+              ?as_=(fun () -> S.drawn_as props)
+              props=(S.undrawn (rest ()))>
               <div
                 role=`rowheader
                 aria_colspan=(fun () -> string_of_int (v.column_count ()))
@@ -2061,6 +2100,7 @@ module Column_resizer = struct
     type t
 
     external check :
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
@@ -2240,7 +2280,8 @@ module Column_resizer = struct
                  call (Props.on_click props) e;
                  (* A press on the resizer is never its column's. *)
                  stop_propagation e)
-      props=(S.omit props own)>
+      ?as_=(fun () -> S.drawn_as props)
+      props=(S.undrawn (S.omit props own))>
       (fun () -> Props.children props)
       <input
         ref=(fun e -> input := Some e)

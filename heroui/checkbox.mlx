@@ -69,13 +69,17 @@ module Content = struct
     }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Label.props -> state -> Solidtype.Jsx.element) option)
       () =
     let c = within "Checkbox.Content" in
+    let state () = state_of c.field in
     <Field_content
       field=(fun () -> c.field)
       slot="checkbox-content"
       class_=(fun () ->
                after (Styles.Checkbox.content (c.slots ())) (class_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () -> Jsx.draw (children ()) (state_of c.field))
     </Field_content>
@@ -216,7 +220,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(slot : [ `selection ] option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* Given its slot, its state is the selection of the part above it. *)
   let slotted =
     match (slot (), Selection.use ()) with
@@ -323,6 +329,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
         };
     }
   in
+  let state () = state_of c.field in
   <Context.Provider value=(fun () -> c)>
     <Kobalte.Root
       checked=(fun () -> on ())
@@ -352,6 +359,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_readonly=(fun () -> Jsx.flag (read_only ()))
       data_required=(fun () -> Jsx.flag (required ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
         <Field_error.Slot.Provider value=(fun () -> error)>

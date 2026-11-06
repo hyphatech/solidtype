@@ -46,6 +46,7 @@ module Props : sig
     ?for_:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Label.check
 end

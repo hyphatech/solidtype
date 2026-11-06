@@ -115,7 +115,10 @@ let make (props : Props.t) =
     ref=(fun e ->
           sentinel := Some e;
           match Props.ref props with Some f -> f e [@u] | None -> ())
-    props=(S.omit props [| "isLoading"; "onLoadMore"; "scrollOffset"; "ref" |])
+    ?as_=(fun () -> S.drawn_as props)
+    props=(S.undrawn
+             (S.omit props
+                [| "isLoading"; "onLoadMore"; "scrollOffset"; "ref" |]))
   />
 
 let component = Jsx.component make

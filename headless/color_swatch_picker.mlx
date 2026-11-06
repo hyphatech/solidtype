@@ -238,6 +238,7 @@ module Root = struct
       ?default_value:Color.t Solidtype.Check.value ->
       ?on_change:(Color.t -> unit) ->
       ?layout:[ `grid | `stack ] Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
@@ -419,7 +420,8 @@ module Root = struct
         on_focus_out=(fun e ->
                        call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
-        props=(S.omit props own)>
+        ?as_=(fun () -> S.drawn_as props)
+        props=(S.undrawn (S.omit props own))>
         (fun () -> Props.children props)
       </div>
     </Picker_context.Provider>
@@ -434,6 +436,7 @@ module Item = struct
     external check :
       color:Color.t Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
@@ -558,7 +561,8 @@ module Item = struct
         on_focus=(fun e ->
                    call (Props.on_focus props) e;
                    Selectable_item.on_focus item e)
-        props=(S.omit props own)>
+        ?as_=(fun () -> S.drawn_as props)
+        props=(S.undrawn (S.omit props own))>
         (fun () -> Props.children props)
       </div>
     </Item_context.Provider>

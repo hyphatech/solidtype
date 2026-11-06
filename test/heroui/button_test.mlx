@@ -19,6 +19,9 @@ module Twin = struct
   external render_of_state : bool -> bool -> Dom.element = "renderOfState"
   [@@mel.module "./twins/Button.tsx"]
 
+  external render_function : unit -> Dom.element = "renderFunction"
+  [@@mel.module "./twins/Button.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Button.tsx"]
 end
@@ -158,6 +161,32 @@ let () =
       Jest.testPromise "shows focus alone while pending, as React Aria does"
         (fun () ->
           let* solidtype, react = both ~pending:true ~disabled:false () in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws what as_ draws, of its state, as React's render"
+        (fun () ->
+          let read e =
+            String.concat " "
+              [
+                Option.value (T.attribute e "data-custom") ~default:"";
+                T.class_name e;
+              ]
+          in
+          T.render (fun () ->
+              <Button
+                as_=(fun p s ->
+                        <button
+                          data_custom=(fun () ->
+                                        Solidtype.Jsx.data
+                                          (if S.get s.is_pressed then "pressed"
+                                           else "bar"))
+                          props=p
+                        />)>
+                "Press me"
+              </Button>);
+          let* solidtype = T.walk ~read ~step:Twin.step (T.by_role "button") in
+          T.cleanup ();
+          let* react = T.walk ~read ~step:Twin.step (Twin.render_function ()) in
+          Twin.cleanup ();
           Js.Promise.resolve E.(expect solidtype |> toEqual react));
       Jest.testPromise "draws its children of its state, as React's function"
         (fun () ->

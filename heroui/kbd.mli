@@ -46,6 +46,7 @@ module Abbr : sig
     val check :
       key_value:key Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Abbr.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Abbr.check
   end
@@ -62,6 +63,7 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
@@ -77,6 +79,7 @@ module Props : sig
     ?variant:[ `default | `light ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Kbd.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Kbd.check
 end

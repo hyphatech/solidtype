@@ -43,6 +43,7 @@ module Group : sig
         ( state -> Solidtype.Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
@@ -59,6 +60,7 @@ module Search_icon : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
   end
@@ -77,6 +79,7 @@ module Input : sig
       ?class_:string Solidtype.Check.value ->
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlInputElement -> unit) ->
+      ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Input.check
   end
@@ -111,6 +114,7 @@ module Clear_button : sig
       ?on_pointer_down:(Dom.pointerEvent -> unit) ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
+      ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
@@ -154,6 +158,7 @@ module Props : sig
       ( state -> Solidtype.Jsx.element,
         [ `nodes | `render ] )
       Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

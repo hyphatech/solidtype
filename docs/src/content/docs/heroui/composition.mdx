@@ -10,6 +10,8 @@ import * as Variants from "@islands/composition_variants.jsx";
 import variants from "@islands/composition_variants.mlx?raw";
 import * as State from "@islands/composition_state.jsx";
 import state from "@islands/composition_state.mlx?raw";
+import * as Motion from "@islands/composition_motion.jsx";
+import motion from "@islands/composition_motion.mlx?raw";
 
 What HeroUI's [Composition](https://heroui.com/docs/react/getting-started/composition)
 page does in React, in OCaml.
@@ -61,8 +63,16 @@ wins over HeroUI's classes, which are in Tailwind's `components` layer:
 
 <Example code={variants} title="composition_variants.mlx"><Variants.make client:visible /></Example>
 
-## Not yet
+## Custom DOM Element
 
-- **A custom element, HeroUI's `render`.** A part draws its own element; a
-  router's link or an animated one cannot take its place. Kobalte's own
-  parts do this with `as`, which the binding leaves out.
+A part that draws an element takes `as_`, HeroUI's `render`: a function of the
+part's props and, where the part has one, its state. It draws what takes the
+part's place, spreading the props on it, which hold the part's classes,
+attributes and handlers. Draw one element, of the part's kind.
+
+<Example code={motion} title="composition_motion.mlx"><Motion.make client:visible /></Example>
+
+A router's link needs none of this: Solid's router takes every plain same-origin
+`<a>` as its own unless told `explicitLinks`.
+
+Kobalte's parts take `as_` too, a function of their props alone.

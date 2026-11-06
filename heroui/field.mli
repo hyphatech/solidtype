@@ -104,6 +104,7 @@ module Content (_ : Kobalte) : sig
       ?ref:(Dom.htmlLabelElement -> unit) ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Label.check
   end

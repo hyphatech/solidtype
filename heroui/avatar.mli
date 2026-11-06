@@ -27,6 +27,7 @@ module Image : sig
       ?crossorigin:[ `anonymous | `use_credentials ] Solidtype.Check.value ->
       ?loading:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Img.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Img.check
   end
@@ -45,6 +46,7 @@ module Fallback : sig
       ?color:color Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
@@ -63,6 +65,7 @@ module Props : sig
     ?fallback_delay:float Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Span.check
 end

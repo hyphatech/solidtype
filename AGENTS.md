@@ -451,7 +451,8 @@ break.
   caller's functions, and a string beside such a function, a field's name,
   is left for the function; and what a callback gives back as `any`, which
   JavaScript ignores, is `unit`. Kobalte's building blocks, menu, popper,
-  dismissable-layer and polymorphic, are not bound as components; the
+  dismissable-layer and polymorphic, are not bound as components, though a part
+  it draws by polymorphic takes `as`, `as_`, a function of its element's props; the
   hooks its lists are made of are, from its root, as `Selection`. Why:
   Kobalte's parts are hundreds, and a binding by hand would be a second
   copy of its types; a component Kobalte lacks is made of its hooks. Test:
@@ -521,6 +522,20 @@ break.
   breaking the port. Test: `test/heroui/attributes_test.mlx`, every part
   given a style, a title, a handler and a `ref`; each composition in its
   port's test.
+- **A part that draws an element takes `as_`**, HeroUI's `render`: a function of
+  `Html.X.props`, which it spreads on what it draws, and of the part's state
+  where the part has one, which the part's parameter then names, `?(as_ :
+  Html.Button.props -> state -> Jsx.element)`. `[@@element]` gives it: a plain element a part
+  spreads `Props.others props` on stays Solid's template until a part is given
+  one, then is `Dynamic` given the function, never a tag, which throws on an
+  element only the browser draws as a page hydrates; a rest spread on a component
+  carries it to that component. What hands its rest
+  on to a function rather than an element passes `as_` itself, or reads it,
+  `Solid.drawn_as` and `Solid.undrawn`. Why: an animated element in a part's
+  place, typed so that what it draws checks its own props. Test:
+  `test/heroui/attributes_test.mlx`, every part drawn by an `as_`, its attributes
+  found on what it drew; `test/ppx`, the template and the function it chooses
+  between; `test/does_not_compile.t`.
 - **A component HeroUI ships no stylesheet for has one of its own.** It is
   made as every port is, from scratch on Solid and Kobalte with HeroUI's
   look and feel as the reference -- a segmented control, a trend chip, a

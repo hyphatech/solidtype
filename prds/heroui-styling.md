@@ -1,6 +1,6 @@
 # A port styled and composed as HeroUI's
 
-**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a, 3b, 4, 6 and 7 have landed.
+**Status: Accepted** — the whole shape, `[@@element]` spelt so, `as_` a function of the part's props; stages 1, 2, 3a, 3b, 4, 5, 6 and 7 have landed.
 Date: 2026-11-02
 
 ## The problem
@@ -172,19 +172,21 @@ component, written where it is used, as HeroUI's `render` is:
 
 Each element of `Html` gains `props`, its attributes as one value a spread
 takes, generated with the rest. The Kobalte binding takes `as` on every
-part that draws an element, `?as_:(Html.A.props -> Jsx.element)`, and a
-port passes it to the Kobalte part beneath, or, where it draws a plain
-element, draws by Solid's `Dynamic`, given the function or its own tag, as
-Kobalte's parts draw themselves. A port's part that has a state record
+part that draws an element, `?as_:(Html.A.props -> Jsx.element)`. `[@@element]`
+gives a part `as_`: a rest spread on the Kobalte part or port beneath carries
+it there, and the ppx writes a plain element twice, Solid's template while none
+is given and `Dynamic` given the function otherwise. Solid's `Dynamic` given a
+tag has no template while hydrating, and throws on an element only the browser
+draws, as a tab's indicator is. A port's part that has a state record
 (*Children of state*) takes it as the function's second argument, built
 over the props Kobalte gives, as HeroUI gives `render` its render props.
 
 The check types the function, so `p` needs no annotation; `p` is abstract,
 only spread, so nothing reads it outside Solid's tracking; and whatever the
 function draws checks its own props, so a required one left out does not
-compile. Three of HeroUI's rules for `render` stay rules, said in each
-`.mli`, as HeroUI only warns of the first: draw an element of the part's
-kind, draw one, and spread `p` on it.
+compile. Three of HeroUI's rules for `render` stay rules, said on the
+Composition page, as HeroUI only warns of the first: draw an element of the
+part's kind, draw one, and spread `p` on it.
 
 The shapes weighed, each scored 1 to 5 and weighted by the repository's
 own priorities -- type safety 25, ergonomics where it is used 20, parity
@@ -211,9 +213,9 @@ that draws one of two elements, the headless table's body on `<thead>` or a
 virtualized `<div>`, needs its props split or converted, a decision of its
 own; nothing of `as_` changes when it is taken. **`render`, HeroUI's name**
 -- the ppx gives `render=f` to a component's function child already (rhp's
-slat), and a second meaning would be read wrongly. **Two branches in a
-plain part**, its element and a call of the function -- each part's
-attributes written twice.
+slat), and a second meaning would be read wrongly. **Two branches written by hand
+in a plain part** -- each part's attributes written twice, where the ppx writes
+them from one.
 
 ### Children of state
 
@@ -303,7 +305,7 @@ class, which restyles every instance at once.
   over every part. Styling's "Not yet" goes.
 - [x] 4. Children of state on each part HeroUI gives a render function,
   tested against the React twin's render function.
-- [ ] 5. `Html`'s `props` per element; `as_` in the Kobalte binding and on
+- [x] 5. `Html`'s `props` per element; `as_` in the Kobalte binding and on
   every port's part, given the state of stage 4 where the part has it;
   Motion's button on Button's page, beside React's. Composition's "Not yet"
   goes, and it says a router's link needs none.

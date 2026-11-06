@@ -44,7 +44,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -140,6 +142,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
               data_invalid=(fun () -> Jsx.flag (invalid ()))
               data_readonly=(fun () -> Jsx.flag (is_read_only ()))
               data_required=(fun () -> Jsx.flag (is_required ()))
+              ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
               props=(Props.others props)>
               (fun () ->
                 Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))

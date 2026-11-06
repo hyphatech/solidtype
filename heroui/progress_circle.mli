@@ -29,6 +29,7 @@ module Track : sig
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
   end
@@ -48,6 +49,7 @@ module Track_circle : sig
       ?r:float Solidtype.Check.value ->
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Circle.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Circle.check
   end
@@ -69,6 +71,7 @@ module Fill_circle : sig
       ?r:float Solidtype.Check.value ->
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Circle.props -> Solidtype.Jsx.element) ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Circle.check
   end
@@ -108,6 +111,7 @@ module Props : sig
       ( state -> Solidtype.Jsx.element,
         [ `nodes | `render ] )
       Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

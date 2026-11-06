@@ -41,7 +41,8 @@ let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend =
         stroke_linejoin="round"
         stroke_width="2"
         view_box="0 0 24 24"
-        props=others>
+        ?as_=(fun () -> S.drawn_as others)
+        props=(S.undrawn others)>
         <path d=(fun () -> d) />
       </svg>
   | None -> Jsx.nothing

@@ -9,6 +9,7 @@
 
 module type Dom_attributes = sig
   type element
+  type props = element Solid.rest
   type aria_activedescendant = string
   type aria_atomic = bool
   type aria_autocomplete = [ `none | `inline | `list | `both ]

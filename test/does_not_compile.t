@@ -770,3 +770,30 @@ An element there is none of.
   Hint:    Did you mean Solidtype.Html.Button?
   [1]
   $ rm save.mlx
+
+What a part draws in its place checks its own props: a prop that component
+requires, left out, does not compile.
+
+  $ cat > part.mlx <<'EOF'
+  > let%component make ~(children : Solidtype.Jsx.content) () =
+  >   <button props=(Props.others props)>(fun () -> children ())</button>
+  > [@@element button]
+  > EOF
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Part as_=(fun p -> <Label props=p />)>"x"</Part>
+  > EOF
+  $ build | grep -E '^File|^Error|required|text'
+  File "case.mlx", line 1, characters 34-51:
+  Error: This expression has type text:string Solidtype.Check.value -> unit
+  $ rm case.mlx
+
+And [as_] is a function of the part's props: one of anything else does not
+compile.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Part as_=(fun (_ : int) -> Solidtype.Jsx.nothing)>"x"</Part>
+  > EOF
+  $ build | grep -E '^File|^Error'
+  File "case.mlx", line 1, characters 29-38:
+  Error: This pattern matches values of type int
+  $ rm case.mlx part.mlx

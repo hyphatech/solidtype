@@ -43,7 +43,10 @@ module Thumb = struct
 
   let%component make ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option)
-      ?(children : state Jsx.children option) () =
+      ?(children : state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let { slots; disabled } =
       match Area_context.use () with
       | Some a -> a
@@ -52,6 +55,16 @@ module Thumb = struct
     let area = Headless.use_color_area_context () in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
     (* HeroUI's disabled style stops the pointer. *)
+    let state () =
+      {
+        color = (fun[@u] () -> Area.get_display_color area ());
+        is_dragging = (fun[@u] () -> Interaction.dragged i);
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> disabled ());
+      }
+    in
     <Headless.Thumb
       ref=(fun e ->
             ignore (given_ref e : unit option);
@@ -62,21 +75,13 @@ module Thumb = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_dragging=(fun () -> Jsx.flag (Interaction.dragged i))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Headless.HiddenInputX />
       <Headless.HiddenInputY />
       (fun () ->
         match children () with
-        | Some c ->
-            Jsx.draw c
-              {
-                color = (fun[@u] () -> Area.get_display_color area ());
-                is_dragging = (fun[@u] () -> Interaction.dragged i);
-                is_hovered = (fun[@u] () -> Interaction.hovered i);
-                is_focused = (fun[@u] () -> Interaction.focused i);
-                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-                is_disabled = (fun[@u] () -> disabled ());
-              }
+        | Some c -> Jsx.draw c (state ())
         | None -> Jsx.string "")
     </Headless.Thumb>
   [@@element span]
@@ -91,12 +96,15 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(y_channel : channel option) ?(color_space : [ `rgb | `hsl | `hsb ] option)
     ?(x_name : string option) ?(y_name : string option)
     ?(is_disabled : bool = false) ?(show_dots : bool option)
-    ?(class_ : string option) ~(children : state Jsx.children) () =
+    ?(class_ : string option) ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let slots () =
     Styles.ColorArea.slots
       (Styles.ColorArea.options ?show_dots:(show_dots ()) ())
   in
   let a = { slots; disabled = (fun () -> is_disabled ()) } in
+  let state () = { is_disabled = (fun[@u] () -> is_disabled ()) } in
   <Area_context.Provider value=(fun () -> a)>
     <Headless.Root
       ?value
@@ -112,6 +120,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       class_=(fun () -> after (Styles.ColorArea.base (slots ())) (class_ ()))
       data_slot="color-area"
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (* React Aria's area is its own gradient, where Kobalte's draws it on a
          background of its own: it fills the area, rounded and shadowed as the
@@ -119,9 +128,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       <Headless.Background
         style="position: absolute; inset: 0; border-radius: inherit; \
                box-shadow: inherit">
-        (fun () ->
-          Jsx.draw (children ())
-            { is_disabled = (fun[@u] () -> is_disabled ()) })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </Headless.Background>
     </Headless.Root>
   </Area_context.Provider>

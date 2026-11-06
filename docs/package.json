@@ -18,6 +18,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "solid-js": "~1.9.17",
+    "solid-motionone": "~1.0.4",
     "starlight-links-validator": "^0.27.0",
     "starlight-theme-hypha": "github:hyphatech/starlight-theme-hypha#v0.6.2",
     "tailwindcss": "^4.3.3",

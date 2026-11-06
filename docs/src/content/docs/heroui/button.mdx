@@ -20,6 +20,8 @@ import * as LoadingState from "@islands/button_loading_state.jsx";
 import loadingState from "@islands/button_loading_state.mlx?raw";
 import * as FullWidth from "@islands/button_full_width.jsx";
 import fullWidth from "@islands/button_full_width.mlx?raw";
+import * as RenderFunction from "@islands/button_render_function.jsx";
+import renderFunction from "@islands/button_render_function.mlx?raw";
 import * as Disabled from "@islands/button_disabled.jsx";
 import disabled from "@islands/button_disabled.mlx?raw";
 import * as Tailwind from "@islands/button_tailwind.jsx";
@@ -77,10 +79,11 @@ is named with a `Spinner` inside it too. A function child is given
 
 <Example code={disabled} title="button_disabled.mlx"><Disabled.make client:visible /></Example>
 
-### Not yet
+### Render Function
 
-HeroUI's Social Buttons, Render Function and custom variants examples need
-what the port does not take yet: `render`.
+<Example code={renderFunction} title="button_render_function.mlx"><RenderFunction.make client:visible /></Example>
+
+An animated element takes a button's place the same way: see [Composition](/solidtype/heroui/composition/#custom-dom-element).
 
 ## Customization
 
@@ -159,6 +162,7 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 | `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements, or a function of `state` | | Its content |
+| `render` | `as_` | a function of its props and `state` | | Draws another element in its place |
 
 ## Beside React
 

@@ -61,6 +61,7 @@ module Root : sig
       ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
       ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
       ?layout:[ `grid | `stack ] Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
@@ -80,6 +81,7 @@ module Item : sig
     val check :
       color:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check

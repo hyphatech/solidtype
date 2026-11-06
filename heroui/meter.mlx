@@ -97,7 +97,9 @@ let%component make ~(value : float) ?(min_value : float = 0.)
     ?(size : [ `sm | `md | `lg ] option) ?(aria_label : string option)
     ?(class_ : string option)
     ?(format_options : Types.NumberFormatOptions.t option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* HeroUI's formatOptions as it reads them, a percent by default: a percent
      is the value's share of its range, any other style the value itself. *)
   let options () =
@@ -138,6 +140,14 @@ let%component make ~(value : float) ?(min_value : float = 0.)
               (Float.max 0. ((value () -. min_value ()) /. range *. 100.)));
     }
   in
+  let state () =
+    {
+      percentage = (fun[@u] () -> m.percent ());
+      value_text =
+        (fun[@u] () ->
+          text ~value:(value ()) ~min:(min_value ()) ~max:(max_value ()));
+    }
+  in
   <Context.Provider value=(fun () -> m)>
     <Kobalte.Root
       value=(fun () -> value ())
@@ -147,16 +157,10 @@ let%component make ~(value : float) ?(min_value : float = 0.)
       get_value_label=value_label
       class_=(fun () -> after (Styles.Meter.base (m.slots ())) (class_ ()))
       data_slot="meter"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              percentage = (fun[@u] () -> m.percent ());
-              value_text =
-                (fun[@u] () ->
-                  text ~value:(value ()) ~min:(min_value ()) ~max:(max_value ()));
-            })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

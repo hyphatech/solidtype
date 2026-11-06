@@ -1,0 +1,14 @@
+module Button = Solidtype_heroui.Button
+module S = Solidtype.Solid
+
+let make () =
+  <Button
+    as_=(fun p s ->
+            <button
+              data_custom=(fun () ->
+                            Solidtype.Jsx.data
+                              (if S.get s.is_pressed then "pressed" else "bar"))
+              props=p
+            />)>
+    "Press me"
+  </Button>

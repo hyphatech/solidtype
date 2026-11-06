@@ -138,9 +138,20 @@ module Trigger = struct
 
   let%component make ?(aria_label : string option) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let d = within "Dropdown.Trigger" in
     let i = Interaction.create () in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> Interaction.pressed i || d.is_open ());
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      }
+    in
     <Kobalte.Trigger
       ?aria_label
       class_=(fun () -> after (Styles.Dropdown.trigger d.slots) (class_ ()))
@@ -155,15 +166,9 @@ module Trigger = struct
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i || d.is_open ()))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-            is_pressed = (fun[@u] () -> Interaction.pressed i || d.is_open ());
-            is_focused = (fun[@u] () -> Interaction.focused i);
-            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -466,7 +471,10 @@ module Item = struct
       ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let d = within "Dropdown.Item" in
     let s = Selection.use () in
     let sub = Submenu.use () in
@@ -488,25 +496,25 @@ module Item = struct
     let unique () =
       (match s with Some s -> s.id | None -> "") ^ "-" ^ id ()
     in
+    let state =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> Interaction.pressed i);
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_selected = (fun[@u] () -> selected ());
+        is_disabled = (fun[@u] () -> disabled ());
+        selection_mode = (fun[@u] () -> mode);
+        has_submenu = (fun[@u] () -> Option.is_some sub);
+        is_open =
+          (fun[@u] () -> match sub with Some o -> o () | None -> false);
+      }
+    in
     let context = { item_slots; selected; has_submenu = Option.is_some sub } in
     let content () =
       <Item_context.Provider value=(fun () -> context)>
         <Description.Slot.Provider value=(fun () -> description)>
-          (fun () ->
-            Jsx.draw (children ())
-              {
-                is_hovered = (fun[@u] () -> Interaction.hovered i);
-                is_pressed = (fun[@u] () -> Interaction.pressed i);
-                is_focused = (fun[@u] () -> Interaction.focused i);
-                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-                is_selected = (fun[@u] () -> selected ());
-                is_disabled = (fun[@u] () -> disabled ());
-                selection_mode = (fun[@u] () -> mode);
-                has_submenu = (fun[@u] () -> Option.is_some sub);
-                is_open =
-                  (fun[@u] () ->
-                    match sub with Some o -> o () | None -> false);
-              })
+          (fun () -> Jsx.draw (children ()) state)
         </Description.Slot.Provider>
       </Item_context.Provider>
     in
@@ -530,6 +538,7 @@ module Item = struct
           data_focused=(fun () -> Jsx.flag (Interaction.focused i))
           data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
           data_disabled=(fun () -> Jsx.flag (disabled ()))
+          ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
           props=(Props.others props)>
           (fun () -> Jsx.element (content ()))
         </Kobalte.SubTrigger>
@@ -549,6 +558,7 @@ module Item = struct
           data_focused=(fun () -> Jsx.flag (Interaction.focused i))
           data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
           data_disabled=(fun () -> Jsx.flag (disabled ()))
+          ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
           props=(Props.others props)
           on_select=act>
           (fun () -> Jsx.element (content ()))
@@ -590,6 +600,7 @@ module Item = struct
           data_focused=(fun () -> Jsx.flag (Interaction.focused i))
           data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
           data_disabled=(fun () -> Jsx.flag (disabled ()))
+          ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
           props=(Props.others props)
           on_change=(fun _ ->
                       match s with Some s -> s.toggle (id ()) | None -> ())

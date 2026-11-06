@@ -60,9 +60,21 @@ module Trigger = struct
   let%component make ?(class_ : string option)
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let s = within "Select.Trigger" in
     let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> Interaction.pressed i);
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> s.disabled ());
+      }
+    in
     <Kobalte.Trigger
       class_=(fun () -> after (Styles.Select.trigger (s.slots ())) (class_ ()))
       ref=(fun e ->
@@ -87,16 +99,9 @@ module Trigger = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-            is_pressed = (fun[@u] () -> Interaction.pressed i);
-            is_focused = (fun[@u] () -> Interaction.focused i);
-            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-            is_disabled = (fun[@u] () -> s.disabled ());
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -110,25 +115,30 @@ module Value = struct
   }
 
   let%component make ?(class_ : string option)
-      ?(children : state Jsx.children option) () =
+      ?(children : state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let s = within "Select.Value" in
     let keys =
       S.create_memo (fun () ->
           Array.of_list (List.map List_box.key (s.selected ())))
     in
+    let state () =
+      {
+        selected_keys = (fun[@u] () -> S.get keys);
+        selected_text = (fun[@u] () -> List_box.listed (s.selected ()));
+      }
+    in
     <Kobalte.Value
       class_=(fun () -> after (Styles.Select.value (s.slots ())) (class_ ()))
       data_slot="select-value"
       data_placeholder=(fun () -> Jsx.flag (s.is_empty ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () ->
         match children () with
-        | Some c ->
-            Jsx.draw c
-              {
-                selected_keys = (fun[@u] () -> S.get keys);
-                selected_text = (fun[@u] () -> List_box.listed (s.selected ()));
-              }
+        | Some c -> Jsx.draw c (state ())
         | None ->
             (* React Aria's value is the options chosen, each as it is drawn
                in the list. *)
@@ -349,7 +359,9 @@ let%component make ?(placeholder : string = "Select an item")
     ?(variant : [ `primary | `secondary ] = `primary) ?(class_ : string option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
   let hosted, set_hosted = S.create_signal None in
@@ -437,6 +449,16 @@ let%component make ?(placeholder : string = "Select an item")
   (* Its list box is taken once on the page: Kobalte's root is made before it,
      so on the server its hidden select holds no option, and one given as the
      page hydrates would be looked for among the server's nodes. *)
+  let state =
+    {
+      is_focused = (fun[@u] () -> Interaction.focused i || opened ());
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> is_disabled ());
+      is_open = (fun[@u] () -> opened ());
+      is_invalid = (fun[@u] () -> invalid ());
+      is_required = (fun[@u] () -> is_required ());
+    }
+  in
   let parts () =
     <Context.Provider value=(fun () -> s)>
       <List_box.Host.Provider
@@ -448,19 +470,7 @@ let%component make ?(placeholder : string = "Select an item")
         <List_box.Listing.Provider value=(fun () -> listing)>
           <Field_error.Message.Provider value=(fun () -> in_form.error)>
             <Parts>
-              (fun () ->
-                Jsx.draw (children ())
-                  {
-                    is_focused =
-                      (fun[@u] () -> Interaction.focused i || opened ());
-                    is_focus_visible =
-                      (fun[@u] () -> Interaction.focus_visible i);
-                    is_disabled = (fun[@u] () -> is_disabled ());
-                    is_open = (fun[@u] () -> opened ());
-                    is_invalid = (fun[@u] () -> invalid ());
-                    is_required = (fun[@u] () -> is_required ());
-                  })
-              <Kobalte.HiddenSelect />
+              (fun () -> Jsx.draw (children ()) state) <Kobalte.HiddenSelect />
             </Parts>
           </Field_error.Message.Provider>
         </List_box.Listing.Provider>
@@ -528,6 +538,7 @@ let%component make ?(placeholder : string = "Select an item")
         data_invalid=(fun () -> Jsx.flag (invalid ()))
         data_disabled=(fun () -> Jsx.flag (is_disabled ()))
         data_required=(fun () -> Jsx.flag (is_required ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root>
@@ -564,6 +575,7 @@ let%component make ?(placeholder : string = "Select an item")
         data_invalid=(fun () -> Jsx.flag (invalid ()))
         data_disabled=(fun () -> Jsx.flag (is_disabled ()))
         data_required=(fun () -> Jsx.flag (is_required ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root_multiple>

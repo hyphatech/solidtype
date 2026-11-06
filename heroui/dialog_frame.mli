@@ -75,6 +75,9 @@ val backdrop :
   is_open:(unit -> bool option) ->
   default_open:(unit -> bool option) ->
   on_open_change:(bool -> unit) ->
+  as_:
+    (unit ->
+    (Solidtype.Html.Div.props -> overlay_state -> Solidtype.Jsx.element) option) ->
   others:_ Solidtype.Solid.rest ->
   (overlay_state -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
@@ -89,6 +92,9 @@ val container :
   class_:(unit -> string) ->
   placement:(unit -> string) ->
   ref:(Dom.htmlDivElement -> unit option) ->
+  as_:
+    (unit ->
+    (Solidtype.Html.Div.props -> overlay_state -> Solidtype.Jsx.element) option) ->
   others:_ Solidtype.Solid.rest ->
   (overlay_state -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
@@ -103,6 +109,10 @@ val dialog :
   placement:(unit -> string) ->
   ref:(Dom.htmlElement -> unit option) ->
   on_focus_out:(Dom.focusEvent -> unit option) ->
+  as_:
+    (unit ->
+    (Solidtype.Html.Section.props -> dialog_state -> Solidtype.Jsx.element)
+    option) ->
   others:_ Solidtype.Solid.rest ->
   (dialog_state -> Solidtype.Jsx.content) ->
   Solidtype.Jsx.element
@@ -122,6 +132,10 @@ val close_trigger :
   slot:string ->
   class_:(unit -> string) ->
   on_click:(Dom.mouseEvent -> unit option) ->
+  as_:
+    (unit ->
+    (Solidtype.Html.Button.props -> Close_button.state -> Solidtype.Jsx.element)
+    option) ->
   others:Close_button.Props.t Solidtype.Solid.rest ->
   children:(unit -> Close_button.state Solidtype.Jsx.children option) ->
   Solidtype.Jsx.element

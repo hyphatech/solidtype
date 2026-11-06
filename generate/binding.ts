@@ -607,8 +607,11 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
   }
   // A spread, props=p, as TSX's {...p}: the rest of a component's props
   // passed on, its data- attributes, which any part takes.
-  args.push("?props:'spread Solidtype.Solid.rest ->");
   const html = element ? element.charAt(0).toUpperCase() + element.slice(1) : null;
+  // What a part Kobalte draws by its polymorphic `as` draws in its place: a
+  // function of the props it is to spread, which Solid takes for a component.
+  if (polymorphic && html && htmlModules.has(html)) args.push(`?as_:(Solidtype.Html.${html}.props -> Solidtype.Jsx.element) ->`);
+  args.push("?props:'spread Solidtype.Solid.rest ->");
   const tail = `${children} unit -> unit`;
   const check = html && htmlModules.has(html) ? `(${tail}) Solidtype.Html.${html}.check` : tail;
   src.module("    ", "Props", () =>

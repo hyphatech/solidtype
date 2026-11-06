@@ -57,7 +57,12 @@ module Backdrop = struct
       ?(portal_container : _ Dom.element_like option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Dialog_frame.overlay_state Jsx.children) () =
+      ~(children : Dialog_frame.overlay_state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props ->
+         Dialog_frame.overlay_state ->
+         Solidtype.Jsx.element)
+         option) () =
     Dialog_frame.backdrop ~slot:"modal-backdrop" ~portal_container
       ~class_:(fun () ->
         after
@@ -67,7 +72,7 @@ module Backdrop = struct
       ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
       ~is_open ~default_open
       ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-      ~others:(Props.others props)
+      ~as_ ~others:(Props.others props)
       (fun s -> Jsx.draw (children ()) s)
   [@@element div]
 end
@@ -77,7 +82,12 @@ module Container = struct
       ?(scroll : scroll = `inside) ?(size : size = `md)
       ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Dialog_frame.overlay_state Jsx.children) () =
+      ~(children : Dialog_frame.overlay_state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props ->
+         Dialog_frame.overlay_state ->
+         Solidtype.Jsx.element)
+         option) () =
     let f = within "Modal.Container" in
     let c = { placement; scroll; size } in
     Dialog_frame.container f ~slot:"modal-container"
@@ -87,7 +97,7 @@ module Container = struct
              (slots ~scroll:(scroll ()) ~size:(size ()) ()))
           (class_ ()))
       ~placement:(fun () -> placement_name (placement ()))
-      ~ref:given_ref ~others:(Props.others props)
+      ~ref:given_ref ~as_ ~others:(Props.others props)
       (fun s ->
         Jsx.element
           <Container_context.Provider value=(fun () -> c)>
@@ -100,7 +110,12 @@ module Dialog = struct
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlElement -> unit) option)
       ?(on_focus_out : (Dom.focusEvent -> unit) option)
-      ~(children : Dialog_frame.dialog_state Jsx.children) () =
+      ~(children : Dialog_frame.dialog_state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Section.props ->
+         Dialog_frame.dialog_state ->
+         Solidtype.Jsx.element)
+         option) () =
     let f = within "Modal.Dialog" in
     let c = container () in
     Dialog_frame.dialog f ~slot:"modal-dialog" ~role:`dialog
@@ -110,7 +125,7 @@ module Dialog = struct
              (slots ~scroll:(c.scroll ()) ~size:(c.size ()) ()))
           (class_ ()))
       ~placement:(fun () -> placement_name (c.placement ()))
-      ~ref:given_ref ~on_focus_out ~others:(Props.others props)
+      ~ref:given_ref ~on_focus_out ~as_ ~others:(Props.others props)
       (fun s -> Jsx.draw (children ()) s)
   [@@element section]
 end
@@ -174,12 +189,17 @@ end
 module Close_trigger = struct
   let%component make ?(class_ : string option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
-      ?(children : Close_button.state Jsx.children option) () =
+      ?(children : Close_button.state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Button.props ->
+         Close_button.state ->
+         Solidtype.Jsx.element)
+         option) () =
     let f = within "Modal.Close_trigger" in
     Dialog_frame.close_trigger f ~slot:"modal-close-trigger"
       ~class_:(fun () ->
         after (Styles.Modal.close_trigger (slots ())) (class_ ()))
-      ~on_click ~others:(Props.others props) ~children
+      ~on_click ~as_ ~others:(Props.others props) ~children
   [@@element button]
 end
 

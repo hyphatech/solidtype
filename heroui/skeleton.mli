@@ -19,6 +19,7 @@ module Props : sig
   val check :
     ?animation_type:[ `shimmer | `pulse | `none ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

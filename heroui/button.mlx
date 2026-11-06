@@ -139,8 +139,10 @@ let%component make
     ?(on_click : (Dom.mouseEvent -> unit) option)
     ?(on_focus : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-    ?(aria_label : string option) ~(children : state Solidtype.Jsx.children) ()
-    =
+    ?(aria_label : string option) ~(children : state Solidtype.Jsx.children)
+    ?(as_ :
+       (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
   let group = Button_group.Context.use () in
@@ -321,6 +323,7 @@ let%component make
                ignore (on_click e : unit option);
                Option.iter (fun close -> close ()) closes;
                Option.iter (fun c -> c.toggle ()) chevron)
+    ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
     props=(Props.others props)>
     <Spinner.Progress.Provider value=(fun () -> progress_id)>
       (fun () -> Solidtype.Jsx.draw (children ()) state)

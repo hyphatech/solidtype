@@ -42,12 +42,27 @@ module Item = struct
   let%component make ~(color : Color.t) ?(is_disabled : bool option)
       ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let slots = within "Color_swatch_picker.Item" in
     let disabled () = Option.value (is_disabled ()) ~default:false in
     let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
     (* HeroUI's styles border a chosen swatch in its colour, read from a
        variable of their own. *)
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> Interaction.pressed i);
+        is_selected =
+          (fun[@u] () -> (Headless.use_item_context ()).is_selected ());
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> disabled ());
+        color = (fun[@u] () -> color ());
+      }
+    in
     <Headless.Item
       color=(fun () -> color ())
       is_disabled=(fun () -> disabled ())
@@ -68,19 +83,9 @@ module Item = struct
       data_selected=(fun () ->
                       Jsx.flag ((Headless.use_item_context ()).is_selected ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-            is_pressed = (fun[@u] () -> Interaction.pressed i);
-            is_selected =
-              (fun[@u] () -> (Headless.use_item_context ()).is_selected ());
-            is_focused = (fun[@u] () -> Interaction.focused i);
-            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-            is_disabled = (fun[@u] () -> disabled ());
-            color = (fun[@u] () -> color ());
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Headless.Item>
   [@@element div]
 end

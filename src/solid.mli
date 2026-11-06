@@ -275,6 +275,22 @@ val omit : 'props -> string array -> 'props rest
     A component written by [let%component] has [Props.omit], which takes its own
     props' names as a variant. *)
 
+external drawn_as : 'rest -> ('drawn -> Jsx.element) option = "as"
+[@@mel.get]
+(** What a rest given a part's [as_] draws in the element's place, for a plain
+    element drawn apart from the part's [Props.others], in a function a part
+    calls:
+    [<div ?as_=(fun () -> Solid.drawn_as others) props=(Solid.undrawn others)>].
+*)
+
+val with_drawn : 'rest -> ('drawn -> Jsx.element) option -> 'rest
+(** [with_drawn rest given] is [rest] with [as_] [given], for what a part hands
+    its rest to and that draws the part. *)
+
+val undrawn : 'props -> 'other rest
+(** [undrawn rest] is [rest] without [as_], which a plain element would write as
+    an attribute. *)
+
 val others : 'props -> string array -> 'other rest
 (** [others props names] is [props] without [names], its component's own props,
     live, for a spread on any element or component, as TSX passes a component's

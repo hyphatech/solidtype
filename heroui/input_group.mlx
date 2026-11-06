@@ -87,7 +87,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     ?(full_width : bool option) ?(is_disabled : bool option)
     ?(is_invalid : bool option) ?(class_ : string option)
     ?(on_click : (Dom.mouseEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let field = Text_field.Context.use () in
   let disabled () =
     match (is_disabled (), field) with
@@ -129,6 +131,15 @@ let%component make ?(variant : [ `primary | `secondary ] option)
         | Some _ | None -> ())
     | None -> ()
   in
+  let state () =
+    {
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_focus_within = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+      is_disabled = (fun[@u] () -> disabled ());
+      is_invalid = (fun[@u] () -> invalid ());
+    }
+  in
   <Context.Provider value=(fun () -> g)>
     <div
       role=(fun () ->
@@ -147,16 +158,9 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-            is_focus_within = (fun[@u] () -> Interaction.focused i);
-            is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-            is_disabled = (fun[@u] () -> disabled ());
-            is_invalid = (fun[@u] () -> invalid ());
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </div>
   </Context.Provider>
 [@@element div]

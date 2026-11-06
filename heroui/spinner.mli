@@ -40,6 +40,7 @@ module Props : sig
     ?size:[ `sm | `md | `lg | `xl ] Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Span.check
 end

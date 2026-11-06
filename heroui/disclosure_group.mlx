@@ -73,7 +73,9 @@ let%component make ?(expanded_keys : string array option)
     ?(default_expanded_keys : string array = [||])
     ?(on_expanded_change : (string array -> unit) option)
     ?(allows_multiple_expanded : bool = false) ?(is_disabled : bool = false)
-    ?(class_ : string option) ~(children : state Jsx.children) () =
+    ?(class_ : string option) ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let keys, set_keys =
     Field.controlled ~value:expanded_keys ~default:(default_expanded_keys ())
       ~on_change:(fun k -> on_expanded_change k)
@@ -100,14 +102,15 @@ let%component make ?(expanded_keys : string array option)
     in
     match class_ () with Some c -> base ^ " " ^ c | None -> base
   in
+  let state () = { is_disabled = (fun[@u] () -> is_disabled ()) } in
   <div
     class_=(fun () -> classes ())
     data_disabled=(fun () -> Jsx.flag (is_disabled ()))
     data_slot="disclosure-group"
+    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
     props=(Props.others props)>
     <Context.Provider value=(fun () -> group)>
-      (fun () ->
-        Jsx.draw (children ()) { is_disabled = (fun[@u] () -> is_disabled ()) })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Context.Provider>
   </div>
 [@@element div]

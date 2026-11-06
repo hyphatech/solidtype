@@ -1,0 +1,33 @@
+module Button = Solidtype_heroui.Button
+module S = Solidtype.Solid
+
+(* solid-motionone's button, bound by what this page uses of it. *)
+module Motion_button = struct
+  type keyframes
+
+  external keyframes : scale:float -> keyframes = "" [@@mel.obj]
+
+  module Props = struct
+    external check :
+      animate:keyframes Solidtype.Check.value ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Button.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+  end
+
+  external component : unit Solidtype.Jsx.component = "button"
+  [@@mel.module "solid-motionone"] [@@mel.scope "Motion"]
+end
+
+let make () =
+  <Button
+    as_=(fun p s ->
+            <Motion_button
+              animate=(fun () ->
+                        Motion_button.keyframes
+                          ~scale:(if S.get s.is_pressed then 0.9 else 1.))
+              props=p
+            />)>
+    "Press me"
+  </Button>

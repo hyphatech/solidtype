@@ -59,7 +59,10 @@ module Item = struct
       ?(on_expanded_change : (bool -> unit) option) ?(class_ : string option)
       ?(on_focus_in : (Dom.focusEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let a = within "Accordion.Item" in
     let key =
       match id () with Some k -> k | None -> Solid.create_unique_id ()
@@ -97,6 +100,14 @@ module Item = struct
     in
     (* Kobalte's panel is kept on the page while collapsed, which HeroUI's
        styles shrink to nothing and find in page reaches. *)
+    let state () =
+      {
+        is_expanded = (fun[@u] () -> i.expanded ());
+        is_focus_visible_within =
+          (fun[@u] () -> Interaction.focus_visible focus);
+        is_disabled = (fun[@u] () -> disabled ());
+      }
+    in
     <Kobalte.Item
       id=(fun () -> item_id)
       value=(fun () -> key)
@@ -111,16 +122,10 @@ module Item = struct
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch focus e)
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Item_context.Provider value=(fun () -> i)>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              is_expanded = (fun[@u] () -> i.expanded ());
-              is_focus_visible_within =
-                (fun[@u] () -> Interaction.focus_visible focus);
-              is_disabled = (fun[@u] () -> disabled ());
-            })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </Item_context.Provider>
     </Kobalte.Item>
   [@@element div]
@@ -174,7 +179,10 @@ module Trigger = struct
       ?(on_key_down : (Dom.keyboardEvent -> unit) option)
       ?(on_key_up : (Dom.keyboardEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let a, i = within_item "Accordion.Trigger" in
     let disabled () = i.item_disabled () || is_disabled () in
     Solid.create_computed (fun () -> i.disable_trigger (is_disabled ()));
@@ -184,6 +192,15 @@ module Trigger = struct
        Kobalte toggles by as it goes down, keeping the browser's click. *)
     let press () = ignore (on_press () : unit option) in
     let key_down = ref None in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered n);
+        is_pressed = (fun[@u] () -> Interaction.pressed n);
+        is_focused = (fun[@u] () -> Interaction.focused n);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
+        is_disabled = (fun[@u] () -> Interaction.disabled n);
+      }
+    in
     <Kobalte.Trigger
       disabled=(fun () -> disabled ())
       on_click=(fun e ->
@@ -215,16 +232,9 @@ module Trigger = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused n))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible n))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled n))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_hovered = (fun[@u] () -> Interaction.hovered n);
-            is_pressed = (fun[@u] () -> Interaction.pressed n);
-            is_focused = (fun[@u] () -> Interaction.focused n);
-            is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
-            is_disabled = (fun[@u] () -> Interaction.disabled n);
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -278,12 +288,21 @@ module Panel = struct
 
   let%component make ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let a, i = within_item "Accordion.Panel" in
     (* Its focus, within it. *)
     let focus = Interaction.create () in
     let panel =
       Panel.create ~expanded:i.expanded ~expand:(fun () -> a.expand i.key) ()
+    in
+    let state () =
+      {
+        is_focus_visible_within =
+          (fun[@u] () -> Interaction.focus_visible focus);
+      }
     in
     <Kobalte.Content
       class_=(fun () -> after (Styles.Accordion.panel (a.slots ())) (class_ ()))
@@ -299,13 +318,9 @@ module Panel = struct
             Panel.watch panel e)
       data_expanded=(fun () -> Jsx.flag (i.expanded ()))
       data_slot="accordion-panel"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            is_focus_visible_within =
-              (fun[@u] () -> Interaction.focus_visible focus);
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Kobalte.Content>
   [@@element div]
 end
@@ -334,7 +349,9 @@ let%component make ?(expanded_keys : string array option)
     ?(allows_multiple_expanded : bool = false) ?(is_disabled : bool = false)
     ?(variant : [ `default | `surface ] = `default)
     ?(hide_separator : bool = false) ?(class_ : string option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   let keys, set_keys =
     Field.controlled ~value:expanded_keys ~default:(default_expanded_keys ())
       ~on_change:(fun k -> on_expanded_change k)
@@ -378,6 +395,7 @@ let%component make ?(expanded_keys : string array option)
       told;
     }
   in
+  let state () = { is_disabled = (fun[@u] () -> is_disabled ()) } in
   (* Collapsible, since HeroUI's every item collapses as it expands; made
      where it is shown, so it reads the surface given there. *)
   let accordion () =
@@ -385,6 +403,7 @@ let%component make ?(expanded_keys : string array option)
       class_=(fun () -> after (Styles.Accordion.base (a.slots ())) (class_ ()))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
       data_slot="accordion"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)
             (* Kobalte's options come after the rest, which may hold a DOM
          attribute of the same name, on_change, that would replace them. *)
@@ -393,9 +412,7 @@ let%component make ?(expanded_keys : string array option)
       multiple=(fun () -> allows_multiple_expanded ())
       collapsible=true>
       <Context.Provider value=(fun () -> a)>
-        (fun () ->
-          Jsx.draw (children ())
-            { is_disabled = (fun[@u] () -> is_disabled ()) })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </Context.Provider>
     </Kobalte.Root>
   in

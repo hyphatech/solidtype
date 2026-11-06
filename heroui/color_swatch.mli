@@ -24,6 +24,7 @@ module Props : sig
     ?size:[ `xs | `sm | `md | `lg | `xl ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?style:string Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
     ?props:t Solidtype.Solid.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end

@@ -69,9 +69,18 @@ module Output = struct
   }
 
   let%component make ?(class_ : string option)
-      ?(children : state Jsx.children option) () =
+      ?(children : state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Output.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let s = within "Color_slider.Output" in
     let context = Kobalte.use_color_slider_context () in
+    let state () =
+      {
+        orientation = (fun[@u] () -> s.orientation ());
+        is_disabled = (fun[@u] () -> s.disabled ());
+      }
+    in
     <output
       for_=(fun () -> s.thumb_id)
       aria_live=`off
@@ -81,15 +90,11 @@ module Output = struct
                          Jsx.data (orientation_name (s.orientation ())))
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_slot="color-slider-output"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () ->
         match children () with
-        | Some given ->
-            Jsx.draw given
-              {
-                orientation = (fun[@u] () -> s.orientation ());
-                is_disabled = (fun[@u] () -> s.disabled ());
-              }
+        | Some given -> Jsx.draw given (state ())
         | None ->
             Jsx.string
               (Color.format_channel_value
@@ -109,7 +114,10 @@ module Track = struct
 
   let%component make ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : state Jsx.children) () =
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
+      =
     let s = within "Color_slider.Track" in
     let context = Kobalte.use_color_slider_context () in
     (* The channel's range, as Kobalte draws it, over HeroUI's checkerboard,
@@ -144,6 +152,13 @@ module Track = struct
         at high )
     in
     let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    let state () =
+      {
+        orientation = (fun[@u] () -> s.orientation ());
+        is_disabled = (fun[@u] () -> s.disabled ());
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+      }
+    in
     <Kobalte.Track
       ref=(fun e ->
             ignore (given_ref e : unit option);
@@ -162,14 +177,9 @@ module Track = struct
                          Jsx.data (orientation_name (s.orientation ())))
       data_disabled=(fun () -> Jsx.flag (s.disabled ()))
       data_slot="color-slider-track"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
-      (fun () ->
-        Jsx.draw (children ())
-          {
-            orientation = (fun[@u] () -> s.orientation ());
-            is_disabled = (fun[@u] () -> s.disabled ());
-            is_hovered = (fun[@u] () -> Interaction.hovered i);
-          })
+      (fun () -> Jsx.draw (children ()) (state ()))
     </Kobalte.Track>
   [@@element div]
 end
@@ -187,13 +197,26 @@ module Thumb = struct
 
   let%component make ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlSpanElement -> unit) option)
-      ?(children : state Jsx.children option) () =
+      ?(children : state Jsx.children option)
+      ?(as_ :
+         (Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) option)
+      () =
     let s = within "Color_slider.Thumb" in
     let context = Kobalte.use_color_slider_context () in
     let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
     (* Dragged while a pointer holds it, where a key held presses it but drags
        nothing, as React Aria's thumb is. *)
     let dragging () = Interaction.dragged i in
+    let state () =
+      {
+        color = (fun[@u] () -> S.get (Slider_context.value context));
+        is_dragging = (fun[@u] () -> dragging ());
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> s.disabled ());
+      }
+    in
     <Kobalte.Thumb
       class_=(fun () ->
                after (Styles.ColorSlider.thumb (s.slots ())) (class_ ()))
@@ -240,21 +263,13 @@ module Thumb = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_slot="color-slider-thumb"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)
       id=(fun () -> s.thumb_id)>
       <Kobalte.Input />
       (fun () ->
         match children () with
-        | Some c ->
-            Jsx.draw c
-              {
-                color = (fun[@u] () -> S.get (Slider_context.value context));
-                is_dragging = (fun[@u] () -> dragging ());
-                is_hovered = (fun[@u] () -> Interaction.hovered i);
-                is_focused = (fun[@u] () -> Interaction.focused i);
-                is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-                is_disabled = (fun[@u] () -> s.disabled ());
-              }
+        | Some c -> Jsx.draw c (state ())
         | None -> Jsx.string "")
     </Kobalte.Thumb>
   [@@element span]
@@ -275,7 +290,9 @@ let%component make ~(channel : channel)
     ?(aria_label : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(class_ : string option) ~(children : state Jsx.children) () =
+    ?(class_ : string option) ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* A slider is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let disabled () =
@@ -290,6 +307,12 @@ let%component make ~(channel : channel)
       disabled;
       orientation = (fun () -> orientation ());
       thumb_id = S.create_unique_id ();
+    }
+  in
+  let state () =
+    {
+      orientation = (fun[@u] () -> orientation ());
+      is_disabled = (fun[@u] () -> disabled ());
     }
   in
   <Context.Provider value=(fun () -> s)>
@@ -321,14 +344,10 @@ let%component make ~(channel : channel)
                          on_blur e)
                        e)
       data_slot="color-slider"
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              orientation = (fun[@u] () -> orientation ());
-              is_disabled = (fun[@u] () -> disabled ());
-            })
+        (fun () -> Jsx.draw (children ()) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

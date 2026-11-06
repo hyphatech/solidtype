@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type slot =
@@ -27,20 +28,22 @@ type state = {
 }
 
 let%component make ?(class_ : string option)
-    ?(children : state Jsx.children option) () =
+    ?(children : state Jsx.children option)
+    ?(as_ :
+       (Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) option) ()
+    =
   let classes () =
     Styles.FieldError.classes (Styles.FieldError.options ?class_:(class_ ()) ())
   in
   let message = Option.value (Message.use ()) ~default:(fun () -> None) in
+  let state =
+    {
+      is_invalid = (fun[@u] () -> true);
+      validation_errors =
+        (fun[@u] () -> match message () with Some m -> [| m |] | None -> [||]);
+    }
+  in
   let content () =
-    let state =
-      {
-        is_invalid = (fun[@u] () -> true);
-        validation_errors =
-          (fun[@u] () ->
-            match message () with Some m -> [| m |] | None -> [||]);
-      }
-    in
     match (message (), children ()) with
     | _, Some c when Jsx.is_function c -> Jsx.draw c state
     | Some m, _ -> Jsx.string m
@@ -48,6 +51,10 @@ let%component make ?(class_ : string option)
     | None, None -> Jsx.string ""
   in
   match Slot.use () with
-  | Some render -> render classes (Props.others props) content [@u]
+  | Some render ->
+      render classes
+        (S.with_drawn (Props.others props)
+           (Option.map (fun f p -> f p state) (as_ ())))
+        content [@u]
   | None -> invalid_arg "Field_error is used inside a field"
 [@@element span]

@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Dynamic = Solidtype.Dynamic
 
@@ -34,11 +35,12 @@ let name : type_ -> string = function
 (* Text of a type, which every primitive is. *)
 let text ~others ~type_ ~align ~color ~weight ~truncate ~element_type ~class_
     children =
-  <Dynamic.Element
+  <Dynamic.Drawn
     component=(fun () ->
-                match element_type () with
-                | Some tag -> tag
-                | None -> element (type_ ()))
+                Jsx.drawn_as (S.drawn_as others)
+                  (match element_type () with
+                  | Some tag -> tag
+                  | None -> element (type_ ())))
     class_=(fun () ->
              let base =
                Styles.Typography.base
@@ -51,9 +53,9 @@ let text ~others ~type_ ~align ~color ~weight ~truncate ~element_type ~class_
              match class_ () with Some c -> base ^ " " ^ c | None -> base)
     data_slot="typography"
     data_type=(fun () -> Jsx.data (name (type_ ())))
-    props=others>
+    props=(S.undrawn others)>
     (fun () -> children ())
-  </Dynamic.Element>
+  </Dynamic.Drawn>
 
 let%component make ?(type_ : type_ = `body) ?(align : align option)
     ?(color : color option) ?(weight : weight option) ?(truncate : bool option)

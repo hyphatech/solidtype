@@ -60,7 +60,8 @@ Kobalte reads on its root, where Radix takes `delayMs` on the fallback.
 ### Not yet
 
 HeroUI's Custom Image Component example renders another image component in
-place of the `<img>`, by `asChild`, which the port does not take.
+place of the `<img>`; here `Avatar.Image` takes `as_`, as
+[Composition](/solidtype/heroui/composition/#custom-dom-element) shows.
 
 ## Customization
 
@@ -125,7 +126,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `loading` | `loading` | `string` | `"lazy"` or `"eager"` |
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `onLoad`, `onError` | — | | Not yet |
-| `asChild` | — | | Not yet |
+| `asChild` | `as_` | a function of its props | Draws another element in its place |
 
 ### Avatar.Fallback
 

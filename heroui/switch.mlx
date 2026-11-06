@@ -52,12 +52,16 @@ module Content = struct
     }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Label.props -> state -> Solidtype.Jsx.element) option)
       () =
     let s = within "Switch.Content" in
+    let state () = state_of s.field in
     <Field_content
       field=(fun () -> s.field)
       slot="switch-content"
       class_=(fun () -> after (Styles.Switch.content (s.slots ())) (class_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () -> Jsx.draw (children ()) (state_of s.field))
     </Field_content>
@@ -115,7 +119,9 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
     ?(class_ : string option) ?(on_blur : (Dom.focusEvent -> unit) option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
     ?(on_focus_out : (Dom.focusEvent -> unit) option)
-    ~(children : state Jsx.children) () =
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
   (* The state is the switch's, read by Kobalte and by every part alike. *)
   let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
   let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
@@ -149,6 +155,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
         };
     }
   in
+  let state () = state_of s.field in
   <Context.Provider value=(fun () -> s)>
     <Kobalte.Root
       checked=(fun () -> on ())
@@ -176,6 +183,7 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       data_invalid=(fun () -> Jsx.flag (invalid ()))
       data_readonly=(fun () -> Jsx.flag (is_read_only ()))
       data_required=(fun () -> Jsx.flag (is_required ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
       props=(Props.others props)>
       (fun () -> Jsx.draw (children ()) (state_of s.field))
     </Kobalte.Root>
