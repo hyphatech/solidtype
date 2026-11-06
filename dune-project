@@ -175,7 +175,7 @@
 
 (package
  (name solidtype-rhp)
- (synopsis "rhp for solidtype: reactive charts of HTML, typed")
+ (synopsis "Charts for solidtype: rhp's reactive plots of HTML, typed")
  (description
   "The charts of rhp 2.2, reactive HTML plots built on Solid, for OCaml front ends written with solidtype: generated from rhp's own declarations where a rule maps them whole, and ported by hand where none does.")
  (depends
