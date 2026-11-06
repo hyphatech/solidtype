@@ -1,6 +1,11 @@
 # Changes
 
-## Unreleased
+## 0.6.0 (2026-11-06)
+
+- `Solidtype_heroui.Dialog_frame` carries what its parts now take. Breaking:
+  `backdrop`, `container`, `dialog` and `close_trigger` each take `as_`, and
+  `ref`, `style`, `on_focus_out` or `on_click` where the part sets them; the
+  content of `backdrop`, `container` and `dialog` is a function of its state.
 
 - `Solidtype_heroui.Color_picker`, HeroUI's ColorPicker: one colour shared by
   the colour components inside it, controlled or kept, a trigger and a popover,
