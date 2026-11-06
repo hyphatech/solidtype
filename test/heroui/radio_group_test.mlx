@@ -233,7 +233,18 @@ let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
                         (fun c ->
                           Solidtype.Jsx.fragment
                             [|
-                              <Radio.Control><Radio.Indicator /></Radio.Control>;
+                              <Radio.Control>
+                                <Radio.Indicator>
+                                  (* React's indicator is never told its focus, which
+                                     this one is, so that is left out. *)
+                                  (fun i ->
+                                    words "indicator"
+                                      [
+                                        ("selected", i.is_selected);
+                                        ("disabled", i.is_disabled);
+                                      ])
+                                </Radio.Indicator>
+                              </Radio.Control>;
                               Solidtype.Jsx.fragment [||];
                               words "content"
                                 [

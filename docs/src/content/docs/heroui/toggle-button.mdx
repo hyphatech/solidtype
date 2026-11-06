@@ -52,9 +52,9 @@ An icon alone is named by `aria_label`.
 
 ### Controlled
 
-`is_selected` gives its state, and `on_change` is called with the new one. A
-function of its state as its children, React's render prop, is not taken: the
-content reads the signal the page keeps, as here.
+`is_selected` gives its state, and `on_change` is called with the new one. Its
+content reads the signal the page keeps, as here, or is a function of its
+state, `s.is_selected`.
 
 <Example code={ControlledCode} title="toggle_button_controlled.mlx"><Controlled.make client:visible /></Example>
 

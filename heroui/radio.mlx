@@ -77,8 +77,8 @@ module Control = struct
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
-      () =
+  let%component make ?(class_ : string option)
+      ?(children : Content.state Jsx.children option) () =
     let r = within "Radio.Indicator" in
     <span
       aria_hidden=true
@@ -86,7 +86,9 @@ module Indicator = struct
       data_slot="radio-indicator"
       props=(Props.others props)>
       (fun () ->
-        match children () with Some given -> given | None -> Jsx.string "")
+        match children () with
+        | Some given -> Jsx.draw given (Content.state_of r.field)
+        | None -> Jsx.string "")
     </span>
   [@@element span]
 end

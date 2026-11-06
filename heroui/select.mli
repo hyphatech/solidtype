@@ -72,7 +72,7 @@ end
 
 (** The option chosen, as its list draws it, or the options chosen one after
     another, else the select's placeholder; or, while one is chosen, what
-    [children] draws, given a read of the ids chosen. *)
+    [children] draws of its {!state}. *)
 module Value : sig
   type state = {
     selected_keys : string array Solidtype.Solid.accessor;

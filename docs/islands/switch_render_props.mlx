@@ -1,0 +1,15 @@
+module Switch = Solidtype_heroui.Switch
+module Label = Solidtype_heroui.Label
+module S = Solidtype.Solid
+
+let make () =
+  <Switch>
+    (fun s ->
+      <Switch.Content>
+        <Switch.Control><Switch.Thumb /></Switch.Control>
+        <Label>
+          (fun () ->
+            Solidtype.Jsx.string (if S.get s.is_selected then "On" else "Off"))
+        </Label>
+      </Switch.Content>)
+  </Switch>

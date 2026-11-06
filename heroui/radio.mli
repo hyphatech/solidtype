@@ -92,7 +92,7 @@ module Control : sig
 end
 
 (** The dot, which HeroUI's styles draw as the radio is selected, or the
-    children it is given.
+    children it is given, which may be a function of {!Content.state}.
 
     Raises [Invalid_argument] outside a [Radio]. *)
 module Indicator : sig
@@ -101,7 +101,10 @@ module Indicator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:
+        ( Content.state -> Solidtype.Jsx.element,
+          [ `nodes | `render ] )
+        Solidtype.Check.children ->
       ?props:t Solidtype.Solid.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end

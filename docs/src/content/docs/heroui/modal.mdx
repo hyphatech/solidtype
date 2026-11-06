@@ -106,7 +106,7 @@ A signal is Solid's state: each half keeps the modal's open state in one, where 
 
 ### Close Methods
 
-The second half closes the modal from its own state, where HeroUI's reads `close` from the dialog's render props: the page keeps the state, which the modal follows.
+The second half closes the modal from its own state, which the page keeps and the modal follows. A dialog's function child is given `close` too, as HeroUI's render prop is.
 
 <Example code={ExCloseMethodsCode} title="modal_close_methods.mlx"><ExCloseMethods.make client:visible /></Example>
 

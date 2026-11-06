@@ -19,6 +19,8 @@ import * as RadioGroupUncontrolled from "@islands/radio_group_uncontrolled.jsx";
 import RadioGroupUncontrolledCode from "@islands/radio_group_uncontrolled.mlx?raw";
 import * as RadioGroupTailwind from "@islands/radio_group_tailwind.jsx";
 import RadioGroupTailwindCode from "@islands/radio_group_tailwind.mlx?raw";
+import * as RadioGroupCustomIndicator from "@islands/radio_group_custom_indicator.jsx";
+import RadioGroupCustomIndicatorCode from "@islands/radio_group_custom_indicator.mlx?raw";
 
 `Solidtype_heroui.Radio_group` is Kobalte's radio group in HeroUI's anatomy:
 the group, each `Radio`, `Radio.Content`, the clickable label that holds
@@ -54,11 +56,15 @@ radio's content as React Aria's does, though it chooses nothing.
 
 <Example code={RadioGroupUncontrolledCode} title="radio_group_uncontrolled.mlx"><RadioGroupUncontrolled.make client:visible /></Example>
 
+### Custom Indicator
+
+<Example code={RadioGroupCustomIndicatorCode} title="radio_group_custom_indicator.mlx"><RadioGroupCustomIndicator.make client:visible /></Example>
+
 ### Not yet
 
 HeroUI's In Surface, until Surface is ported; Validation and Delivery &
-Payment, which need a form and `FieldError`; Custom Indicator, whose
-indicator is a render prop; and Render Function, which needs `render`.
+Payment, which need a form and `FieldError`; and Render Function, which
+needs `render`.
 
 ## Customization
 
@@ -123,11 +129,10 @@ string React takes.
 | `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
-| `children` | `children` | elements | | Its label, description and radios |
+| `children` | `children` | elements, or a function of `state` | | Its label, description and radios |
 | `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its choice |
 | `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
 | `name` | `name` | `string` | | Its name in a form |
-| render props | — | | | Not yet |
 
 ### Radio
 
@@ -137,8 +142,7 @@ string React takes.
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
 | `aria-label` | `aria_label` | `string` | | Its name where no text names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its content and description |
-| render props | — | | | Not yet |
+| `children` | `children` | elements, or a function of `Radio.state` | | Its content and description |
 
 ### Radio.Content, Radio.Control and Radio.Indicator
 

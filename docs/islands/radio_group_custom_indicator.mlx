@@ -1,0 +1,39 @@
+module S = Solidtype.Solid
+module Radio_group = Solidtype_heroui.Radio_group
+module Radio = Solidtype_heroui.Radio
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+
+let tick (s : Radio.Content.state) =
+  <Solidtype.Show when_=(fun () -> S.get s.is_selected)>
+    <span class_="text-xs leading-none text-background">{js|✓|js}</span>
+  </Solidtype.Show>
+
+let plan ~value ~name ~messages =
+  <Radio value=(fun () -> value)>
+    <Radio.Content>
+      <Radio.Control>
+        <Radio.Indicator>(fun s -> tick s)</Radio.Indicator>
+      </Radio.Control>
+      (fun () -> Solidtype.Jsx.string name)
+    </Radio.Content>
+    <Description>(fun () -> Solidtype.Jsx.string messages)</Description>
+  </Radio>
+
+let make () =
+  <Radio_group default_value="premium" name="plan-custom-indicator">
+    <Label>"Plan selection"</Label>
+    <Description>"Choose the plan that suits you best"</Description>
+    (fun () ->
+      Solidtype.Jsx.element
+        (plan ~value:"basic" ~name:"Basic Plan"
+           ~messages:"Includes 100 messages per month"))
+    (fun () ->
+      Solidtype.Jsx.element
+        (plan ~value:"premium" ~name:"Premium Plan"
+           ~messages:"Includes 200 messages per month"))
+    (fun () ->
+      Solidtype.Jsx.element
+        (plan ~value:"business" ~name:"Business Plan"
+           ~messages:"Unlimited messages"))
+  </Radio_group>

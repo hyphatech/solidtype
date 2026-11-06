@@ -23,6 +23,8 @@ import * as SwitchGroup from "@islands/switch_group.jsx";
 import SwitchGroupCode from "@islands/switch_group.mlx?raw";
 import * as SwitchGroupHorizontal from "@islands/switch_group_horizontal.jsx";
 import SwitchGroupHorizontalCode from "@islands/switch_group_horizontal.mlx?raw";
+import * as SwitchRenderProps from "@islands/switch_render_props.jsx";
+import SwitchRenderPropsCode from "@islands/switch_render_props.mlx?raw";
 
 `Solidtype_heroui.Switch` is Kobalte's switch in HeroUI's anatomy: the field,
 `Switch.Content`, the clickable label that holds Kobalte's input,
@@ -70,10 +72,16 @@ the classes HeroUI's own `switchGroupVariants` gives; each switch is its own.
 
 <Example code={SwitchGroupHorizontalCode} title="switch_group_horizontal.mlx"><SwitchGroupHorizontal.make client:visible /></Example>
 
+### Render Props
+
+A function child is given the switch's state.
+
+<Example code={SwitchRenderPropsCode} title="switch_render_props.mlx"><SwitchRenderProps.make client:visible /></Example>
+
 ### Not yet
 
 HeroUI's With Icons, With Description and Form Integration, until their parts
-are ported; and Render Props and Render Function.
+are ported; and Render Function.
 
 ## Customization
 

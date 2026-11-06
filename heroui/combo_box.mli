@@ -107,7 +107,7 @@ end
 
 (** The options chosen, their texts listed as the reader's language lists them,
     "Cat, Dog, and Panda", else [placeholder]; or, while one is chosen, what
-    [children] draws, given a read of the ids chosen. *)
+    [children] draws of its {!state}. *)
 module Value : sig
   type state = {
     selected_keys : string array Solidtype.Solid.accessor;

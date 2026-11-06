@@ -95,7 +95,16 @@ export function renderOfState(
                     {(c) => (
                       <>
                         <Radio.Control>
-                          <Radio.Indicator />
+                          <Radio.Indicator>
+                            {(i) => (
+                              <span data-words="indicator">
+                                {words([
+                                  ["selected", i.isSelected],
+                                  ["disabled", i.isDisabled],
+                                ])}
+                              </span>
+                            )}
+                          </Radio.Indicator>
                         </Radio.Control>
                         Pro
                         <span data-words="content">
