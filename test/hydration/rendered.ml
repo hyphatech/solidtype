@@ -17,6 +17,9 @@ let time_field () = Solidtype.Server.render_to_string Time_field_island.make
 let checkbox_group () =
   Solidtype.Server.render_to_string Checkbox_group_island.make
 
+(* A theme's reader, as the server renders it, which knows no visitor. *)
+let theme () = Solidtype.Server.render_to_string Theme_island.make
+
 (* The script a page rendered on the server carries in its head, which
    hydration reads. *)
 let script () = Solidtype.Server.generate_hydration_script ()

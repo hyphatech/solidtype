@@ -1,0 +1,17 @@
+module S = Solidtype.Solid
+module Segment = Solidtype_heroui.Segment
+module Theme = Solidtype_heroui.Theme
+
+let make () =
+  let t = Theme.use () in
+  <Segment
+    size=`sm
+    aria_label="Theme"
+    selected_key=(fun () -> S.get t.theme)
+    on_selection_change=t.set_theme>
+    <Segment.Item id="light" aria_label="Light"><Gravity.Sun /></Segment.Item>
+    <Segment.Item id="dark" aria_label="Dark"><Gravity.Moon /></Segment.Item>
+    <Segment.Item id="system" aria_label="System">
+      <Gravity.Display />
+    </Segment.Item>
+  </Segment>

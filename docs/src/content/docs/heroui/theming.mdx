@@ -6,6 +6,8 @@ description: HeroUI's themes, colours and dark mode, as a port takes them.
 import Example from "@components/Example.astro";
 import * as Accent from "@islands/theming_accent.jsx";
 import accent from "@islands/theming_accent.mlx?raw";
+import switchTheme from "@islands/theming_switch.mlx?raw";
+import { Code } from "@astrojs/starlight/components";
 
 A port's classes are HeroUI's own, from `@heroui/styles`, and so are its
 themes: CSS variables and Tailwind's theme, nothing in OCaml. Everything on
@@ -49,9 +51,19 @@ component. Nothing chooses it for you, so set it before the page paints:
 </script>
 ```
 
-A switch changes the same class. A theme of your own is a pair of blocks,
-`[data-theme="ocean"]` and `[data-theme="ocean-dark"]`, imported into the
-`theme` layer as HeroUI's page shows.
+`Theme.use`, HeroUI's `useTheme`, keeps a visitor's choice and writes it on
+`<html>`: its class and `data-theme`. It is shown here, not run, since it would
+set this site's own theme:
+
+<Code code={switchTheme} lang="ocaml" title="theming_switch.mlx" />
+
+Its `resolved` is the system's while `"system"` is chosen, and `None` on the
+server. It reads the stored choice once the page is mounted, so a prerendered
+page hydrates. Call it once per application.
+
+A theme of your own is a pair of blocks, `[data-theme="ocean"]` and
+`[data-theme="ocean-dark"]`, imported into the `theme` layer as HeroUI's page
+shows.
 
 ## Colours
 

@@ -1,0 +1,15 @@
+(* What a page shows of its theme, drawn on the server of the default alone,
+   and hydrated where a visitor has chosen another. *)
+
+module S = Solidtype.Solid
+module Theme = Solidtype_heroui.Theme
+
+let make () =
+  let t = Theme.use () in
+  <div
+    id="theme"
+    data_theme=(fun () -> Solidtype.Jsx.data (S.get t.theme))
+    data_resolved=(fun () ->
+                    Solidtype.Jsx.data
+                      (Option.value ~default:"none" (S.get t.resolved)))
+  />

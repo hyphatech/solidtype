@@ -57,6 +57,7 @@ export default defineConfig({
             },
           },
           globalSetup: ["test/hydration/setup.ts"],
+          setupFiles: ["test/jsdom.ts"],
           globals: true,
           include: ["_build/default/test/hydration/out/test/hydration/*_test.jsx"],
         },

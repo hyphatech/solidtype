@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Theme.use`, HeroUI's `useTheme`: the chosen theme, the one
+  shown, and a setter that writes `<html>`'s class and `data-theme` and keeps
+  the choice under `heroui-theme`.
+
 - A toast closed under `data-reduce-motion="true"` is gone at once, as it is
   under `prefers-reduced-motion`, where it stayed for an exit that HeroUI's
   styles do not play.

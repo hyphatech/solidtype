@@ -1,0 +1,125 @@
+(* The theme hook, beside HeroUI's useTheme in React, through the same steps:
+   what each says is chosen, and what each writes on the page. *)
+
+module S = Solidtype.Solid
+module Theme = Solidtype_heroui.Theme
+module E = Jest.Expect
+module T = Testing
+
+module Twin = struct
+  external reset : unit -> unit = "reset" [@@mel.module "./twins/Theme.tsx"]
+  external restore : unit -> unit = "restore" [@@mel.module "./twins/Theme.tsx"]
+
+  external listening : unit -> int = "listening"
+  [@@mel.module "./twins/Theme.tsx"]
+
+  external set_system_dark : bool -> unit = "setSystemDark"
+  [@@mel.module "./twins/Theme.tsx"]
+
+  external store : string -> unit = "store" [@@mel.module "./twins/Theme.tsx"]
+
+  external page : unit -> string array = "page"
+  [@@mel.module "./twins/Theme.tsx"]
+
+  external mount : ?initial:string -> unit -> unit = "mount"
+  [@@mel.module "./twins/Theme.tsx"]
+
+  external chosen : unit -> string array = "chosen"
+  [@@mel.module "./twins/Theme.tsx"]
+
+  external choose : string -> unit = "choose" [@@mel.module "./twins/Theme.tsx"]
+  external system : bool -> unit = "system" [@@mel.module "./twins/Theme.tsx"]
+  external cleanup : unit -> unit = "cleanup" [@@mel.module "./twins/Theme.tsx"]
+end
+
+let port ?default () =
+  let held = ref None in
+  let holder () =
+    held := Some (Theme.use ?default ());
+    Solidtype.Jsx.nothing
+  in
+  T.render holder;
+  match !held with
+  | Some t -> t
+  | None -> invalid_arg "the port's theme was not held as it rendered"
+
+(* The same steps on each side, read after each. *)
+let walk ~chosen ~choose ~system =
+  let read name = (name, Array.append (chosen ()) (Twin.page ())) in
+  let first = read "mounted" in
+  system true;
+  let dark = read "system dark" in
+  system false;
+  let light = read "system light" in
+  choose "dark";
+  let chose_dark = read "chose dark" in
+  system true;
+  let ignored = read "system ignored" in
+  choose "ocean";
+  let chose_ocean = read "chose a theme of its own" in
+  choose "system";
+  let chose_system = read "chose system" in
+  [ first; dark; light; chose_dark; ignored; chose_ocean; chose_system ]
+
+let port_walk ?default () =
+  let t = port ?default () in
+  walk
+    ~chosen:(fun () ->
+      [| S.get t.theme; Option.value ~default:"" (S.get t.resolved) |])
+    ~choose:t.set_theme ~system:Twin.set_system_dark
+
+let react_walk ?initial () =
+  Twin.mount ?initial ();
+  walk ~chosen:Twin.chosen ~choose:Twin.choose ~system:Twin.system
+
+let both ?default ?stored () =
+  Twin.reset ();
+  Option.iter Twin.store stored;
+  let solidtype = port_walk ?default () in
+  T.cleanup ();
+  Twin.reset ();
+  Option.iter Twin.store stored;
+  let react = react_walk ?initial:default () in
+  Twin.cleanup ();
+  (solidtype, react)
+
+let () =
+  Jest.describe "Theme" (fun () ->
+      Jest.beforeEach Twin.reset;
+      Jest.afterEach (fun () ->
+          T.cleanup ();
+          Twin.cleanup ();
+          Twin.restore ());
+      Jest.test "follows the system by default, as useTheme" (fun () ->
+          let solidtype, react = both () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "says what it chose and writes it on the page" (fun () ->
+          let solidtype, _ = both () in
+          E.(
+            expect solidtype
+            |> toEqual
+                 [
+                   ("mounted", [| "system"; "light"; "light"; "light"; "" |]);
+                   ("system dark", [| "system"; "dark"; "dark"; "dark"; "" |]);
+                   ( "system light",
+                     [| "system"; "light"; "light"; "light"; "" |] );
+                   ("chose dark", [| "dark"; "dark"; "dark"; "dark"; "dark" |]);
+                   ( "system ignored",
+                     [| "dark"; "dark"; "dark"; "dark"; "dark" |] );
+                   ( "chose a theme of its own",
+                     [| "ocean"; "ocean"; "ocean"; "ocean"; "ocean" |] );
+                   ( "chose system",
+                     [| "system"; "dark"; "dark"; "dark"; "system" |] );
+                 ]));
+      Jest.test "starts from the theme it is given, as useTheme" (fun () ->
+          let solidtype, react = both ~default:"dark" () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "keeps a visitor's choice over the default, as useTheme"
+        (fun () ->
+          let solidtype, react = both ~default:"dark" ~stored:"ocean" () in
+          E.(expect solidtype |> toEqual react));
+      Jest.test "stops listening to the system as it is removed" (fun () ->
+          let (_ : Theme.t) = port () in
+          let held = Twin.listening () in
+          T.cleanup ();
+          E.(expect (held, Twin.listening ()) |> toEqual (1, 0))))
