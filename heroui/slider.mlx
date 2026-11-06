@@ -1,6 +1,6 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
-module Kobalte = Solidtype_kobalte.Slider
+module Kobalte = Solidtype_headless.Slider
 module I18n = Solidtype_kobalte.I18n
 module Types = Solidtype_kobalte.Types
 

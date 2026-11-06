@@ -506,4 +506,15 @@ let () =
           let id = read "slider-thumb" "id" in
           E.(
             expect (Option.is_some id, read "slider-output" "for")
-            |> toEqual (true, id))))
+            |> toEqual (true, id)));
+      Jest.test "moves to where its track is pressed" (fun () ->
+          let told = ref [||] in
+          T.render (fun () ->
+              <Slider
+                aria_label="Volume"
+                default_value=(fun () -> [| 10. |])
+                on_change=(fun values -> told := values)>
+                <Slider.Track><Slider.Thumb /></Slider.Track>
+              </Slider>);
+          T.press_track (T.nth "[data-slot=slider-track]" 0) 30.;
+          E.(expect !told |> toEqual [| 30. |])))

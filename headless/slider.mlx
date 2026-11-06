@@ -1,0 +1,39 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Kobalte = Solidtype_kobalte.Slider
+module Context = Solidtype_kobalte.Types.SliderContextValue
+
+external as_html : _ Dom.element_like -> Dom.htmlElement = "%identity"
+
+module Track = struct
+  module Props = struct
+    include Kobalte.Track.Props
+
+    type t
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let context = Kobalte.use_slider_context () in
+    <Kobalte.Track
+      ref=(fun e ->
+            Context.register_track context (as_html e);
+            match Props.ref props with Some f -> f e [@u] | None -> ())
+      props=(S.omit props [| "ref" |])
+    />
+
+  let component = Jsx.component make
+end
+
+module Root = Kobalte.Root
+module Fill = Kobalte.Fill
+module Thumb = Kobalte.Thumb
+module Input = Kobalte.Input
+module Label = Kobalte.Label
+module ValueLabel = Kobalte.ValueLabel
+module Description = Kobalte.Description
+module ErrorMessage = Kobalte.ErrorMessage
+
+let use_slider_context = Kobalte.use_slider_context

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Slider` and `Color_slider` move as their track is pressed
+  and their thumb dragged, which threw since each part took a `ref`: Kobalte's
+  track spreads a `ref` over its own. `Solidtype_headless.Slider`, Kobalte's
+  fixed so, beneath them.
+
 - Every HeroUI port's part that draws an element takes `as_`, HeroUI's `render`:
   a function of the part's props and, where the part has a state record, its
   state, which draws what takes the part's place, `<Button as_=(fun p s -> ...)>`.

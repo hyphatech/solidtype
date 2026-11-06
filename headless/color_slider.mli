@@ -46,7 +46,19 @@ module Thumb : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
-module Track = Solidtype_kobalte.ColorSlider.Track
+(** A track given a [ref] still knows it is the slider's, as {!Slider.Track}
+    does. *)
+module Track : sig
+  module Props : sig
+    include module type of Solidtype_kobalte.ColorSlider.Track.Props
+
+    type t
+  end
+
+  val make : Props.t -> Solidtype.Jsx.element
+  val component : Props.t Solidtype.Jsx.component
+end
+
 module Input = Solidtype_kobalte.ColorSlider.Input
 module Label = Solidtype_kobalte.ColorSlider.Label
 module ValueLabel = Solidtype_kobalte.ColorSlider.ValueLabel

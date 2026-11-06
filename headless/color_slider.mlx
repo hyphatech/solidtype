@@ -28,6 +28,8 @@ external listen_capture :
   unit = "addEventListener"
 [@@mel.send]
 
+let call_ref f e = match f with Some f -> f e [@u] | None -> ()
+
 module Root = struct
   module Props = struct
     include Kobalte.Root.Props
@@ -160,7 +162,30 @@ module Thumb = struct
   let component = Jsx.component make
 end
 
-module Track = Kobalte.Track
+(* Kobalte's slider beneath it spreads a [ref] over its own, by which it knows
+   its track, so a press on it or a drag of its thumb throws. *)
+module Track = struct
+  module Props = struct
+    include Kobalte.Track.Props
+
+    type t
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let slider = Slider.use_slider_context () in
+    <Kobalte.Track
+      ref=(fun e ->
+            Types.SliderContextValue.register_track slider (Slider.as_html e);
+            call_ref (Props.ref props) e)
+      props=(S.omit props [| "ref" |])
+    />
+
+  let component = Jsx.component make
+end
+
 module Input = Kobalte.Input
 module Label = Kobalte.Label
 module ValueLabel = Kobalte.ValueLabel

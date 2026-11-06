@@ -269,3 +269,39 @@ let accessibility_violations () =
       (axe_options ~rules:(rules ~color_contrast:off ~region:off ()) ())
   in
   Js.Promise.resolve (Array.map violation_id (violations results))
+
+type rect
+
+external rect :
+  left:float -> top:float -> width:float -> height:float -> unit -> rect = ""
+[@@mel.obj]
+
+external set_rect : Dom.element -> ((unit -> rect)[@mel.uncurry]) -> unit
+  = "getBoundingClientRect"
+[@@mel.set]
+
+type mouse_init
+
+external mouse_init :
+  bubbles:bool -> client_x:(float[@mel.as "clientX"]) -> unit -> mouse_init = ""
+[@@mel.obj]
+
+type mouse_event
+
+external mouse_event : string -> mouse_init -> mouse_event = "MouseEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> mouse_event -> bool = "dispatchEvent"
+[@@mel.send]
+
+(* A press and release at [x] on a [track] a hundred pixels wide, which jsdom
+   lays out at none. *)
+let press_track track x =
+  set_rect track (fun () -> rect ~left:0. ~top:0. ~width:100. ~height:10. ());
+  List.iter
+    (fun name ->
+      ignore
+        (dispatch track
+           (mouse_event name (mouse_init ~bubbles:true ~client_x:x ()))
+          : bool))
+    [ "pointerdown"; "pointerup" ]

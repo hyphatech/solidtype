@@ -409,4 +409,15 @@ let () =
           let id = read "color-slider-thumb" "id" in
           E.(
             expect (Option.is_some id, read "color-slider-output" "for")
-            |> toEqual (true, id))))
+            |> toEqual (true, id)));
+      Jest.test "moves to where its track is pressed" (fun () ->
+          let told = ref "" in
+          T.render (fun () ->
+              <Color_slider
+                channel=`hue
+                default_value=(fun () -> Colors.parse_color "hsl(0, 100%, 50%)")
+                on_change=(fun c -> told := Color.format_channel_value c `hue)>
+                <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+              </Color_slider>);
+          T.press_track (T.nth "[data-slot=color-slider-track]" 0) 30.;
+          E.(expect !told |> toEqual {js|108°|js})))

@@ -228,7 +228,44 @@ let stepped ~fixed =
       H.attribute input "aria-valuenow",
       H.attribute input "aria-valuetext" )
 
+module Slider = Solidtype_headless.Slider
+module Kobalte_own_slider = Solidtype_kobalte.Slider
+module Slider_context = Solidtype_kobalte.Types.SliderContextValue
+
+(* Whether a slider's track, given a ref, the fixed one or Kobalte's own, is
+   the track its slider presses and drags against, and its ref called. *)
+let track_known ~fixed =
+  let known = ref (fun () -> false) and given = ref false in
+  let watch () =
+    let context = Kobalte_own_slider.use_slider_context () in
+    (known :=
+       fun () -> Option.is_some (S.get (Slider_context.track_ref context)));
+    Jsx.string ""
+  in
+  H.render (fun () ->
+      <Kobalte_own_slider.Root default_value=(fun () -> [| 10. |])>
+        (fun () ->
+          if fixed then
+            Jsx.element
+              <Slider.Track ref=(fun _ -> given := true)>
+                (fun () -> watch ())
+              </Slider.Track>
+          else
+            Jsx.element
+              <Kobalte_own_slider.Track ref=(fun _ -> given := true)>
+                (fun () -> watch ())
+              </Kobalte_own_slider.Track>)
+      </Kobalte_own_slider.Root>);
+  (!known (), !given)
+
 let () =
+  Jest.describe "Kobalte's slider, fixed" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.test "knows its track, given a ref" (fun () ->
+          let fixed = track_known ~fixed:true in
+          H.cleanup ();
+          let own = track_known ~fixed:false in
+          E.(expect (fixed, own) |> toEqual ((true, true), (false, true)))));
   Jest.describe "Kobalte's colour channel field, fixed" (fun () ->
       Jest.afterEach H.cleanup;
       Jest.testPromise
