@@ -67,8 +67,11 @@ module Root = struct
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
     in
+    let picker = Color_picker.use_context () in
     let current () =
-      match Props.value props with Some c -> Some c | None -> S.get kept
+      match Color_picker.value picker (Props.value props) with
+      | Some c -> Some c
+      | None -> S.get kept
     in
     (* Kobalte tells a change at a channel's end too, where nothing moved:
        only a colour other than this one is a change. *)
@@ -83,6 +86,7 @@ module Root = struct
       in
       if not same then begin
         S.set set_kept (Some c);
+        Color_picker.changed picker c;
         call (Props.on_change props) c
       end
     in

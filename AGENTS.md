@@ -68,6 +68,9 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      that loads more, columns laid out and resized as
                      React Stately lays them out, and rows that hold rows,
                      each row's cells and rows tokens it draws once read
+  color_picker       one colour its parts share, as React Aria's: the colour
+                     components below read it, given no value of their own;
+                     it draws nothing
   color_swatch_picker
                      a listbox of colours, each option named by its
                      swatch, walked as a grid by where each option is or

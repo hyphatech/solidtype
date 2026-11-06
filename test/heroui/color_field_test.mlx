@@ -33,6 +33,7 @@ external props :
   ?suffix:string ->
   ?description:string ->
   ?error:string ->
+  ?aria_label:(string[@mel.as "aria-label"]) ->
   unit ->
   props = ""
 [@@mel.obj]
@@ -364,6 +365,37 @@ let () =
           both ~channel:"hue" ~default_value:"#7F007F"
             ~keys:[ "click"; "{ArrowUp}"; "{ArrowUp}"; "{ArrowDown}"; "{Tab}" ]
             ());
+      Jest.testPromise "commits a channel typed, as React's does" (fun () ->
+          both ~channel:"hue" ~default_value:"#7F007F"
+            ~keys:
+              [
+                "click";
+                "{Control>}a{/Control}120";
+                "{Enter}";
+                "{Control>}a{/Control}30";
+                "{Tab}";
+              ]
+            ());
+      Jest.testPromise "tells a channel emptied, as React's does" (fun () ->
+          both ~channel:"hue" ~default_value:"#7F007F"
+            ~keys:[ "click"; "{Control>}a{/Control}{Backspace}"; "{Enter}" ]
+            ());
+      Jest.testPromise "names its input by aria_label, as React's does"
+        (fun () ->
+          let named host = T.attribute (input host) "aria-label" in
+          T.render (fun () ->
+              <Color_field aria_label="Accent">
+                <Color_field.Group><Color_field.Input /></Color_field.Group>
+              </Color_field>);
+          let solidtype = named T.body in
+          T.cleanup ();
+          let host =
+            Twin.render (props ~aria_label:"Accent" ()) (fun _ -> ())
+          in
+          let react = named host in
+          Twin.cleanup ();
+          Js.Promise.resolve
+            E.(expect (solidtype, solidtype) |> toEqual (react, Some "Accent")));
       Jest.testPromise "is disabled, as React's is" (fun () ->
           both ~default_value:"#0485F7" ~is_disabled:true
             ~description:"This color field is disabled" ~keys:[] ());

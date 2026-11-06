@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1131,6 +1131,41 @@ export function colorSwatchPicker(host: HTMLElement, props: ColorSwatchPickerPro
           </ColorSwatchPicker.Item>
         ))}
       </ColorSwatchPicker>,
+    ),
+  );
+}
+
+type ColorPickerProps = { placement: "bottom left" | "bottom" | "top right" | "right" };
+
+// HeroUI's first example, its colour kept by the picker itself, as the port's
+// demo shows it.
+export function colorPicker(host: HTMLElement, props: ColorPickerProps): void {
+  flushSync(() =>
+    rootOf(host).render(
+      <ColorPicker defaultValue="#0485F7">
+        <ColorPicker.Trigger>
+          <ColorSwatch size="lg" />
+          <Label>Pick a color</Label>
+        </ColorPicker.Trigger>
+        <ColorPicker.Popover placement={props.placement}>
+          <ColorArea
+            aria-label="Color area"
+            className="max-w-full"
+            colorSpace="hsb"
+            xChannel="saturation"
+            yChannel="brightness"
+          >
+            <ColorArea.Thumb />
+          </ColorArea>
+          <ColorSlider channel="hue" className="gap-1 px-1" colorSpace="hsb">
+            <Label>Hue</Label>
+            <ColorSlider.Output className="text-muted" />
+            <ColorSlider.Track>
+              <ColorSlider.Thumb />
+            </ColorSlider.Track>
+          </ColorSlider>
+        </ColorPicker.Popover>
+      </ColorPicker>,
     ),
   );
 }

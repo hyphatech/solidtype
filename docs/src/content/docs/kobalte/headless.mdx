@@ -6,6 +6,8 @@ description: Components Kobalte lacks, made as Kobalte makes its own, of its hoo
 import Example from "@components/Example.astro";
 import * as ExTable from "@islands/headless_table.jsx";
 import ExTableCode from "@islands/headless_table.mlx?raw";
+import * as ExColorPicker from "@islands/headless_color_picker.jsx";
+import ExColorPickerCode from "@islands/headless_color_picker.mlx?raw";
 import * as ExPicker from "@islands/headless_color_swatch_picker.jsx";
 import ExPickerCode from "@islands/headless_color_swatch_picker.mlx?raw";
 
@@ -67,6 +69,16 @@ on one, which Solid reads inside it.
 | `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled`; in a tree `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`, `data-expanded`, and the rows written inside it |
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index`, `data-tree-column` |
 | `Table.Load_more` | an inert `<tr>` of no height holding the sentinel, and while loading a `<tr role="row">` across every column | `is_loading`, `on_load_more`, `scroll_offset`; its attributes are the loading row's |
+
+## Color_picker
+
+`Solidtype_headless.Color_picker` is one colour its parts share, as React Aria's
+`ColorPicker` is. It draws nothing. A `Color_area.Root`, `Color_slider.Root`,
+`Color_field.Root`, `Color_channel_field.Root`, `Color_swatch` or
+`Color_swatch_picker.Root` inside it, given no `value`, shows its colour and moves
+it. A part's own `value` wins, and its own `on_change` is called too.
+
+<Example code={ExColorPickerCode} title="headless_color_picker.mlx"><ExColorPicker.make client:visible /></Example>
 
 ## Color_swatch_picker
 
@@ -143,5 +155,6 @@ one module. HeroUI's ports dress these, never Kobalte's.
 | `Color_field` | the wheel does nothing | it steps the hex while the input has the focus, unless `change_on_wheel` is `false` |
 | `Color_channel_field` | its input's `aria-valuenow` is the text it shows once the value changes, `301°` | the channel's number, `301` |
 | `Color_channel_field` | `on_change` is told the field's own colour as it mounts | told only a colour other than its own |
+| `Color_channel_field` | `on_change` is told at every key, a field emptied told a colour with no number | told once committed, by Enter or as the focus leaves; emptied, `None` |
 | `Number_field`, `Color_channel_field` | the wheel turned down steps the number down, the other way from React Aria's | turned down it steps up, as React Aria's |
 | `Number_field`, `Color_channel_field` | the wheel steps a field read-only, a turn mostly sideways, and one with Control held, which zooms the page | it steps none of them |

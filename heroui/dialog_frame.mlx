@@ -269,24 +269,6 @@ let container (f : t) ~slot ~class_ ~placement ~ref:given_ref ~as_ ~others
     (fun () -> children (overlay_state o))
   </div>
 
-(* A button only a reader finds, which closes the dialog, as React Aria puts
-   one for a reader with no Escape key: inside the dialog, since Kobalte hides
-   from a reader all else while a modal is open, where React Aria's is just
-   before it. *)
-let dismiss close =
-  <div
-    style="border: 0px; clip: rect(0px); clip-path: inset(50%); height: 1px; \
-           margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
-           width: 1px; white-space: nowrap;">
-    <button
-      aria_label="Dismiss"
-      style="width: 1px; height: 1px;"
-      tabindex="-1"
-      type_=`button
-      on_click=(fun _ -> close ())
-    />
-  </div>
-
 let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
     ~class_ ~placement ~ref:given_ref ~on_focus_out ~as_ ~others children =
   let content = ref None in
@@ -338,7 +320,9 @@ let dialog ?(on_element = fun (_ : Dom.element) -> ()) (f : t) ~slot ~role
     data_slot=(fun () -> Jsx.data slot)
     props=others>
     (fun () ->
-      if f.dismissable () then Jsx.element (dismiss f.close)
+      (* Inside the dialog, since Kobalte hides from a reader all else while a
+         modal is open, where React Aria's is just before it. *)
+      if f.dismissable () then Jsx.element (Overlay.dismiss f.close)
       else Jsx.element Jsx.nothing)
     <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
       <Button.Close.Provider value=(fun () -> f.close)>

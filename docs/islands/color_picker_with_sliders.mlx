@@ -1,0 +1,84 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module List_box = Solidtype_heroui.List_box
+module Select = Solidtype_heroui.Select
+module Color_area = Solidtype_heroui.Color_area
+module Color_picker = Solidtype_heroui.Color_picker
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+
+(* A colour space, by the name its option has. *)
+let spaces = [| ("hsb", `hsb); ("hsl", `hsl); ("rgb", `rgb) |]
+
+let picked_space id =
+  Array.find_map
+    (fun (name, space) -> if String.equal name id then Some space else None)
+    spaces
+
+let channels = function
+  | `hsb -> [| `hue; `saturation; `brightness; `alpha |]
+  | `hsl -> [| `hue; `saturation; `lightness; `alpha |]
+  | `rgb -> [| `red; `green; `blue; `alpha |]
+
+let name_of = function
+  | `hue -> "hue"
+  | `saturation -> "saturation"
+  | `brightness -> "brightness"
+  | `lightness -> "lightness"
+  | `red -> "red"
+  | `green -> "green"
+  | `blue -> "blue"
+  | `alpha -> "alpha"
+
+let make () =
+  let space_name, set_space_name = S.create_signal "hsl" in
+  let space () = Option.value (picked_space (S.get space_name)) ~default:`hsl in
+  <Color_picker
+    default_value=(fun () -> Colors.parse_color "hsl(219, 58%, 93%)")>
+    <Color_picker.Trigger>
+      <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
+    </Color_picker.Trigger>
+    <Color_picker.Popover class_="max-w-62 gap-2 px-2 py-3">
+      <Select
+        aria_label="Color space"
+        value=(fun () -> [| S.get space_name |])
+        variant=`secondary
+        on_change=(fun ids -> Array.iter (S.set set_space_name) ids)>
+        <Select.Trigger>
+          <Select.Value class_="uppercase" /> <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover>
+          <List_box>
+            <For each=(fun () -> Array.map fst spaces)>
+              (fun name _ ->
+                <List_box.Item
+                  class_="uppercase"
+                  id=(fun () -> name)
+                  text_value=(fun () -> name)>
+                  (fun () -> Jsx.string name) <List_box.Item_indicator />
+                </List_box.Item>)
+            </For>
+          </List_box>
+        </Select.Popover>
+      </Select>
+      <div class_="flex flex-col gap-2">
+        <For each=(fun () -> channels (space ()))>
+          (fun channel _ ->
+            <Color_slider
+              aria_label=(fun () -> name_of channel)
+              channel=(fun () -> channel)
+              class_="gap-1 px-1"
+              color_space=(fun () -> space ())>
+              <Label class_="capitalize">
+                (fun () -> Jsx.string (name_of channel))
+              </Label>
+              <Color_slider.Output class_="text-muted" />
+              <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+            </Color_slider>)
+        </For>
+      </div>
+    </Color_picker.Popover>
+  </Color_picker>

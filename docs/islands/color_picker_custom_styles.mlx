@@ -1,0 +1,29 @@
+module Color_area = Solidtype_heroui.Color_area
+module Color_picker = Solidtype_heroui.Color_picker
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+    <Color_picker.Trigger class_="rounded-xl bg-default-soft px-3 py-2">
+      <Color_swatch size=`lg />
+      <Label class_="font-medium text-foreground">"Theme color"</Label>
+    </Color_picker.Trigger>
+    <Color_picker.Popover class_="bg-surface">
+      <Color_area
+        aria_label="Color area"
+        class_="max-w-full"
+        color_space=`hsb
+        x_channel=`saturation
+        y_channel=`brightness>
+        <Color_area.Thumb />
+      </Color_area>
+      <Color_slider channel=`hue class_="gap-1 px-1" color_space=`hsb>
+        <Label>"Hue"</Label>
+        <Color_slider.Output class_="text-muted" />
+        <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+      </Color_slider>
+    </Color_picker.Popover>
+  </Color_picker>

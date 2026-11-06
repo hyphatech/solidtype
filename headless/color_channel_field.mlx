@@ -1,84 +1,210 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.ColorChannelField
-module Field_context = Solidtype_kobalte.Types.NumberFieldContextValue
-module Color = Solidtype_kobalte.Types.Color
+module Types = Solidtype_kobalte.Types
+module Field_context = Types.NumberFieldContextValue
+module Color = Types.Color
+module Range = Types.ColorChannelRange
 
-(* Whether the wheel steps the field, which its root is told and its input
-   reads, Kobalte's own wheel being off. *)
-module Wheel = Solidtype.Context.Make_optional (struct
-  type t = unit -> bool
+type channel =
+  [ `hue
+  | `saturation
+  | `brightness
+  | `lightness
+  | `red
+  | `green
+  | `blue
+  | `alpha ]
+
+(* What a field's input does to it: marks what comes next as typed, commits
+   what was typed, and reads the colour and whether the wheel steps it. *)
+type field = {
+  typing : bool -> unit;
+  commit : unit -> unit;
+  colour : unit -> Color.t option;
+  channel : unit -> channel;
+  wheel : unit -> bool;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = field
 end)
+
+external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
+
+external listen_capture :
+  Dom.htmlInputElement ->
+  (_[@mel.as "keydown"]) ->
+  ((Dom.keyboardEvent -> unit)[@mel.uncurry]) ->
+  (_[@mel.as {json|true|json}]) ->
+  unit = "addEventListener"
+[@@mel.send]
+
+external listen_blur :
+  Dom.htmlInputElement ->
+  (_[@mel.as "blur"]) ->
+  ((Dom.focusEvent -> unit)[@mel.uncurry]) ->
+  unit = "addEventListener"
+[@@mel.send]
 
 module Root = struct
   module Props = struct
-    include Kobalte.Root.Props
-
     type t
 
-    external channel :
-      t ->
-      [ `hue
-      | `saturation
-      | `brightness
-      | `lightness
-      | `red
-      | `green
-      | `blue
-      | `alpha ] = "channel"
-    [@@mel.get]
+    external check :
+      ?value:Color.t Js.Nullable.t Solidtype.Check.value ->
+      ?default_value:Color.t Solidtype.Check.value ->
+      ?on_change:(Color.t option -> unit) ->
+      channel:channel Solidtype.Check.value ->
+      ?color_space:[ `rgb | `hsl | `hsb ] Solidtype.Check.value ->
+      ?id:string Solidtype.Check.value ->
+      ?disabled:bool Solidtype.Check.value ->
+      ?text_value:string Solidtype.Check.value ->
+      ?translations:
+        Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
+      ?min_value:float Solidtype.Check.value ->
+      ?max_value:float Solidtype.Check.value ->
+      ?step:float Solidtype.Check.value ->
+      ?large_step:float Solidtype.Check.value ->
+      ?change_on_wheel:bool Solidtype.Check.value ->
+      ?format:bool Solidtype.Check.value ->
+      ?name:string Solidtype.Check.value ->
+      ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
+      ?required:bool Solidtype.Check.value ->
+      ?read_only:bool Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external value : t -> Color.t option = "value" [@@mel.get]
+    external channel : t -> channel = "channel" [@@mel.get]
+    external value : t -> Color.t Js.Nullable.t option = "value" [@@mel.get]
     external default_value : t -> Color.t option = "defaultValue" [@@mel.get]
 
-    external on_change : t -> ((Color.t -> unit)[@u]) option = "onChange"
+    external color_space : t -> [ `rgb | `hsl | `hsb ] option = "colorSpace"
+    [@@mel.get]
+
+    external on_change : t -> ((Color.t option -> unit)[@u]) option = "onChange"
     [@@mel.get]
 
     external change_on_wheel : t -> bool option = "changeOnWheel" [@@mel.get]
   end
 
   let make (props : Props.t) =
-    (* Its colour, kept here: [value] while it is given one, else the one it
-       keeps. *)
+    (* Its colour, kept here: [value] while it is given one, else its picker's,
+       else the one it keeps; what it keeps once emptied has no channel's
+       number, which Kobalte reads as empty. *)
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
     in
+    let picker = Color_picker.use_context () in
     let current () =
-      match Props.value props with Some c -> Some c | None -> S.get kept
+      match (Props.value props, picker) with
+      | Some v, _ -> (
+          match Js.Nullable.toOption v with
+          | Some _ as given -> given
+          | None -> S.get kept)
+      | None, Some p -> Some (p.color ())
+      | None, None -> S.get kept
     in
-    (* Kobalte's field tells its own colour as it mounts, in its own space,
-       where nothing changed: only a colour other than this one, read in the
-       same space, is a change. *)
+    let tell c =
+      match Props.on_change props with Some f -> f c [@u] | None -> ()
+    in
+    let emptied = ref false in
+    let settle c =
+      if Float.is_nan (Color.get_channel_value c (Props.channel props)) then
+        (* Told once: Kobalte tells it again as it formats. *)
+        begin if not !emptied then begin
+          emptied := true;
+          S.set set_kept (Some c);
+          tell None
+        end
+        end
+      else
+        (* Kobalte's field tells its own colour as it mounts, in its own space,
+           where nothing changed: only a colour other than this one, read in
+           the same space, is a change. *)
+        let css c = Color.to_string c ~format:`css () in
+        let same =
+          match S.untrack current with
+          | Some now -> (
+              match
+                Color.to_format_opt now
+                  (Color.get_color_space c ()
+                    :> [ `rgb
+                       | `hsl
+                       | `hsb
+                       | `hex
+                       | `hexa
+                       | `rgba
+                       | `hsla
+                       | `hsba ])
+              with
+              | Some now -> String.equal (css now) (css c)
+              | None -> false)
+          | None -> false
+        in
+        if not same then begin
+          emptied := false;
+          S.set set_kept (Some c);
+          Color_picker.changed picker c;
+          tell (Some c)
+        end
+    in
+    (* Kobalte's number field tells each key typed, and nothing typed as a
+       colour with no number. What is typed is held until it is committed, as
+       React Aria's is, so a colour shared follows only what the field settles
+       on. *)
+    let typed = ref false in
+    let held = ref None in
     let changed c =
-      let css c = Color.to_string c ~format:`css () in
-      let same =
-        match S.untrack current with
-        | Some now -> (
-            match
-              Color.to_format_opt now
-                (Color.get_color_space c ()
-                  :> [ `rgb
-                     | `hsl
-                     | `hsb
-                     | `hex
-                     | `hexa
-                     | `rgba
-                     | `hsla
-                     | `hsba ])
-            with
-            | Some now -> String.equal (css now) (css c)
-            | None -> false)
-        | None -> false
-      in
-      if not same then begin
-        S.set set_kept (Some c);
-        match Props.on_change props with Some f -> f c [@u] | None -> ()
+      if !typed then begin
+        typed := false;
+        held := Some c
       end
+      else begin
+        held := None;
+        settle c
+      end
+    in
+    let commit () =
+      match !held with
+      | Some c ->
+          held := None;
+          settle c
+      | None -> ()
     in
     let change_on_wheel () =
       Option.value (Props.change_on_wheel props) ~default:true
     in
-    <Wheel.Provider value=(fun () -> change_on_wheel)>
+    let field =
+      {
+        typing =
+          (fun on ->
+            typed := on;
+            if on then emptied := false);
+        commit;
+        colour =
+          (fun () ->
+            match (current (), Props.color_space props) with
+            | Some c, Some space ->
+                Color.to_format_opt c
+                  (space
+                    :> [ `rgb
+                       | `hsl
+                       | `hsb
+                       | `hex
+                       | `hexa
+                       | `rgba
+                       | `hsla
+                       | `hsba ])
+            | shown, _ -> shown);
+        channel = (fun () -> Props.channel props);
+        wheel = change_on_wheel;
+      }
+    in
+    <Context.Provider value=(fun () -> field)>
       <Kobalte.Root
         channel=(fun () -> Props.channel props)
         ?value=(fun () -> current ())
@@ -93,7 +219,7 @@ module Root = struct
                    "changeOnWheel";
                  |])
       />
-    </Wheel.Provider>
+    </Context.Provider>
 
   let component = Jsx.component make
 end
@@ -106,28 +232,85 @@ module Input = struct
 
     external on_wheel : t -> ((Dom.wheelEvent -> unit)[@u]) option = "onWheel"
     [@@mel.get]
+
+    external on_input : t -> ((Dom.inputEvent -> unit)[@u]) option = "onInput"
+    [@@mel.get]
+
+    external on_change : t -> ((Dom.event -> unit)[@u]) option = "onChange"
+    [@@mel.get]
+
+    external ref : t -> ((Dom.htmlInputElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
   end
+
+  let call f e = match f with Some f -> f e [@u] | None -> ()
 
   let make (props : Props.t) =
     (* Kobalte's channel field is its number field, whose input tells its
        value now as the text it shows once the value changes. *)
-    let field = Number_field.use_number_field_context () in
-    let wheel_on = Wheel.use () in
-    let change_on_wheel () =
-      match wheel_on with Some on -> on () | None -> true
+    let number = Number_field.use_number_field_context () in
+    let f =
+      match Context.use () with
+      | Some f -> f
+      | None ->
+          invalid_arg
+            "Color_channel_field.Input is used inside a \
+             Color_channel_field.Root"
+    in
+    (* Commits what was typed. A field left showing other than its colour, one
+       that stays as a picker's does, or a page that refused it, shows it again:
+       nothing else tells Kobalte's number field, its number unchanged. A
+       number field's numbers are the channel's, a percent's as a fraction, as
+       Kobalte's own are. *)
+    let commit () =
+      f.commit ();
+      match f.colour () with
+      | Some c ->
+          let channel = f.channel () in
+          let percent =
+            match
+              Types.NumberFormatOptions.style
+                (Color.get_channel_format_options c channel)
+            with
+            | Some `percent ->
+                Range.max_value (Color.get_channel_range c channel) = 100.
+            | Some _ | None -> false
+          in
+          let v =
+            Color.get_channel_value c channel /. if percent then 100. else 1.
+          in
+          let shown =
+            S.untrack (fun () -> S.get (Field_context.raw_value number))
+          in
+          if
+            (not (Float.is_nan v))
+            && (Float.is_nan shown || Float.abs (shown -. v) > 1e-9)
+          then Field_context.set_value number (Types.Either.right v);
+          Field_context.format number ()
+      | None -> ()
     in
     <Kobalte.Input
+      ref=(fun e ->
+            listen_capture e (fun k ->
+                f.typing false;
+                if String.equal (key k) "Enter" then commit ());
+            listen_blur e (fun _ -> commit ());
+            call (Props.ref props) e)
+      on_input=(fun e ->
+                 f.typing true;
+                 call (Props.on_input props) e)
+      on_change=(fun e ->
+                  commit ();
+                  call (Props.on_change props) e)
       on_wheel=(fun e ->
-                 Number_field.wheel ~change_on_wheel:(change_on_wheel ()) field
-                   e;
-                 match Props.on_wheel props with
-                 | Some f -> f e [@u]
-                 | None -> ())
+                 f.typing false;
+                 Number_field.wheel ~change_on_wheel:(f.wheel ()) number e;
+                 call (Props.on_wheel props) e)
       ?aria_valuenow=(fun () ->
-                       let v = S.get (Field_context.raw_value field) in
+                       let v = S.get (Field_context.raw_value number) in
                        if Float.is_nan v then None
                        else Some (Js.Float.toString v))
-      props=(S.omit props [| "onWheel" |])
+      props=(S.omit props [| "onWheel"; "onInput"; "onChange"; "ref" |])
     />
 
   let component = Jsx.component make

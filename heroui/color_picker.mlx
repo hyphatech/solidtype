@@ -1,0 +1,301 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Show = Solidtype.Show
+module Kobalte = Solidtype_kobalte.Popover
+module Types = Solidtype_kobalte.Types
+module Headless = Solidtype_headless.Color_picker
+module I18n = Solidtype_kobalte.I18n
+module Color = Types.Color
+
+type placement =
+  [ `bottom
+  | `bottom_left
+  | `bottom_right
+  | `bottom_start
+  | `bottom_end
+  | `top
+  | `top_left
+  | `top_right
+  | `top_start
+  | `top_end
+  | `left
+  | `left_top
+  | `left_bottom
+  | `start
+  | `start_top
+  | `start_bottom
+  | `right
+  | `right_top
+  | `right_bottom
+  | `end_
+  | `end_top
+  | `end_bottom ]
+
+(* Kobalte's placement, its side then [start] or [end], which along a top or a
+   bottom it reads as the page's direction does; React Aria's left and right
+   are the page's whatever its direction. *)
+let kobalte_placement direction : placement -> string =
+  let left_edge, right_edge, start_side, end_side =
+    match direction with
+    | `ltr -> ("start", "end", "left", "right")
+    | `rtl -> ("end", "start", "right", "left")
+  in
+  function
+  | `bottom -> "bottom"
+  | `bottom_left -> "bottom-" ^ left_edge
+  | `bottom_right -> "bottom-" ^ right_edge
+  | `bottom_start -> "bottom-start"
+  | `bottom_end -> "bottom-end"
+  | `top -> "top"
+  | `top_left -> "top-" ^ left_edge
+  | `top_right -> "top-" ^ right_edge
+  | `top_start -> "top-start"
+  | `top_end -> "top-end"
+  | `left -> "left"
+  | `left_top -> "left-start"
+  | `left_bottom -> "left-end"
+  | `start -> start_side
+  | `start_top -> start_side ^ "-start"
+  | `start_bottom -> start_side ^ "-end"
+  | `right -> "right"
+  | `right_top -> "right-start"
+  | `right_bottom -> "right-end"
+  | `end_ -> end_side
+  | `end_top -> end_side ^ "-start"
+  | `end_bottom -> end_side ^ "-end"
+
+(* The side a Kobalte placement is on, until Kobalte has placed it. *)
+let side_of placement =
+  match String.index_opt placement '-' with
+  | Some at -> String.sub placement 0 at
+  | None -> placement
+
+(* What a picker's parts read of it: its classes, whether its popover is open,
+   and the placement, offset and flip its popover asks for. *)
+type picker = {
+  slots : Styles.ColorPicker.slots;
+  is_open : unit -> bool;
+  set_opened : bool -> unit;
+  set_given_open : bool option -> unit;
+  mutable told_open : bool -> unit;
+  placement : unit -> string;
+  set_placement : placement -> unit;
+  set_offset : float -> unit;
+  set_flip : bool -> unit;
+}
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = picker
+end)
+
+let within part =
+  match Context.use () with
+  | Some p -> p
+  | None -> invalid_arg (part ^ " is used inside a Color_picker")
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+external as_element : _ Dom.element_like -> Dom.element = "%identity"
+external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+external id_of : _ Dom.element_like -> string = "id" [@@mel.get]
+external set_id : _ Dom.element_like -> string -> unit = "id" [@@mel.set]
+
+module Trigger = struct
+  (* What its children are drawn of: React Aria's render props for it. *)
+  type state = {
+    is_hovered : bool Solidtype.Solid.accessor;
+    is_pressed : bool Solidtype.Solid.accessor;
+    is_focused : bool Solidtype.Solid.accessor;
+    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_disabled : bool Solidtype.Solid.accessor;
+  }
+
+  let%component make ?(is_disabled : bool = false) ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ~(children : state Jsx.children)
+      ?(as_ :
+         (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
+      () =
+    let p = within "Color_picker.Trigger" in
+    let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+    let pressed () = Interaction.pressed i || p.is_open () in
+    let state () =
+      {
+        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        is_pressed = (fun[@u] () -> pressed ());
+        is_focused = (fun[@u] () -> Interaction.focused i);
+        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_disabled = (fun[@u] () -> is_disabled ());
+      }
+    in
+    <Kobalte.Trigger
+      disabled=(fun () -> is_disabled ())
+      class_=(fun () -> after (Styles.ColorPicker.trigger p.slots) (class_ ()))
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e)
+      data_slot="color-picker-trigger"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (pressed ()))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      props=(Props.others props)>
+      (fun () -> Jsx.draw (children ()) (state ()))
+    </Kobalte.Trigger>
+  [@@element button]
+end
+
+module Popover = struct
+  let%component make ?(is_open : bool option) ?(default_open : bool option)
+      ?(on_open_change : (bool -> unit) option)
+      ?(placement : placement = `bottom_left) ?(offset : float = 8.)
+      ?(should_flip : bool = true) ?(class_ : string option)
+      ?(style : string option)
+      ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+      ~(children : Jsx.content) () =
+    let p = within "Color_picker.Popover" in
+    Option.iter p.set_opened (S.untrack default_open);
+    S.create_computed (fun () -> p.set_given_open (is_open ()));
+    p.told_open <- (fun o -> ignore (on_open_change o : unit option));
+    S.create_computed (fun () -> p.set_placement (placement ()));
+    S.create_computed (fun () -> p.set_offset (offset ()));
+    S.create_computed (fun () -> p.set_flip (should_flip ()));
+    let k = Kobalte.use_popover_context () in
+    let close () = Types.PopoverContextValue.close k () in
+    let o = Overlay.create ~is_open:(fun () -> p.is_open ()) () in
+    let content = ref None in
+    Overlay.return_focus
+      ~is_open:(fun () -> p.is_open ())
+      ~inside:(fun focused ->
+        Option.fold ~none:false ~some:(fun c -> contains c focused) !content)
+      ();
+    let side, watch_side =
+      Overlay.placed_side ~placement:(fun () -> side_of (p.placement ())) ()
+    in
+    (* React Aria's popover takes the focus itself as it opens, where Kobalte's
+       gives it to the first button inside. *)
+    let focus_popover e =
+      match !content with
+      | Some c ->
+          prevent_default e;
+          Overlay.focus c
+      | None -> ()
+    in
+    (* Its trigger names it, as React Aria's dialog trigger gives it an id to:
+       Kobalte's, whichever part or button it is, has none of its own. *)
+    let id = S.create_unique_id () in
+    let named_by () =
+      Option.map
+        (fun trigger ->
+          if String.equal (id_of trigger) "" then set_id trigger id;
+          id_of trigger)
+        (S.get (Types.PopoverContextValue.trigger_ref k))
+    in
+    <Surface.Context.Provider value=(fun () () -> `default)>
+      <Show when_=(fun () -> Overlay.present o)>
+        <Kobalte.Portal>
+          <Kobalte.Content
+            class_=(fun () ->
+                     after (Styles.ColorPicker.popover p.slots) (class_ ()))
+            style=(fun () ->
+                    "--trigger-anchor-point: \
+                     var(--kb-popover-content-transform-origin);"
+                    ^ match style () with Some s -> " " ^ s | None -> "")
+            ref=(fun e ->
+                  ignore (given_ref e : unit option);
+                  content := Some (as_element e);
+                  Overlay.watch o e;
+                  watch_side e)
+            on_open_auto_focus=focus_popover
+            data_slot="color-picker-popover"
+            data_placement=(fun () -> Jsx.data (side ()))
+            data_entering=(fun () -> Jsx.flag (Overlay.entering o))
+            data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+            props=(Props.others props)
+            tabindex="-1"
+            ?aria_labelledby=(fun () -> named_by ())>
+            (fun () -> Jsx.element (Overlay.dismiss close))
+            <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
+              (fun () -> children ())
+            </Button.Trigger.Provider>
+            (fun () -> Jsx.element (Overlay.dismiss close))
+          </Kobalte.Content>
+        </Kobalte.Portal>
+      </Show>
+    </Surface.Context.Provider>
+  [@@element div]
+end
+
+let%component make ?(value : Color.t option) ?(default_value : Color.t option)
+    ?(on_change : (Color.t -> unit) option) ?(class_ : string option)
+    ~(children : Jsx.content) () =
+  (* Open as its popover says, which it is told once the part is made, else as
+     it keeps, so Kobalte's root is always controlled. *)
+  let opened, set_opened = S.create_signal false in
+  let given_open, set_given_open = S.create_signal None in
+  let placement, set_placement = S.create_signal `bottom_left in
+  let offset, set_offset = S.create_signal 8. in
+  let flip, set_flip = S.create_signal true in
+  let locale = I18n.use_locale () in
+  let p =
+    {
+      slots = Styles.ColorPicker.slots (Styles.ColorPicker.options ());
+      is_open =
+        (fun () ->
+          match S.get given_open with Some o -> o | None -> S.get opened);
+      set_opened = S.set set_opened;
+      set_given_open = S.set set_given_open;
+      told_open = ignore;
+      placement =
+        (fun () ->
+          kobalte_placement
+            (Types.I18n_UseLocale.direction locale ())
+            (S.get placement));
+      set_placement = S.set set_placement;
+      set_offset = S.set set_offset;
+      set_flip = S.set set_flip;
+    }
+  in
+  let trigger_for_buttons =
+    {
+      Button.component = Kobalte.Trigger.component;
+      is_disabled = None;
+      controls = None;
+      described_by = None;
+      pressed = Some p.is_open;
+      needs_slot = false;
+      element = None;
+    }
+  in
+  <Headless
+    ?value
+    ?default_value
+    on_change=(fun c -> ignore (on_change c : unit option))>
+    <Kobalte.Root
+      open_=(fun () -> p.is_open ())
+      on_open_change=(fun o ->
+                       S.set set_opened o;
+                       p.told_open o)
+      modal=true
+      placement=(fun () -> p.placement ())
+      gutter=(fun () -> S.get offset)
+      flip=(fun () -> Types.Either.right (S.get flip))
+      force_mount=true>
+      <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
+        <Context.Provider value=(fun () -> p)>
+          <div
+            class_=(fun () ->
+                     after (Styles.ColorPicker.base p.slots) (class_ ()))
+            data_slot="color-picker"
+            props=(Props.others props)>
+            (fun () -> children ())
+          </div>
+        </Context.Provider>
+      </Button.Trigger.Provider>
+    </Kobalte.Root>
+  </Headless>
+[@@element div]

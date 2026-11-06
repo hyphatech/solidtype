@@ -314,8 +314,11 @@ module Root = struct
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
     in
+    let picker = Color_picker.use_context () in
     let current () =
-      match Props.value props with Some c -> Some c | None -> S.get kept
+      match Color_picker.value picker (Props.value props) with
+      | Some c -> Some c
+      | None -> S.get kept
     in
     let chosen () = Option.map key_of (current ()) in
     let choose k =
@@ -323,6 +326,7 @@ module Root = struct
       | Some o when not (Option.equal String.equal (chosen ()) (Some k)) ->
           let c = o.color () in
           S.set set_kept (Some c);
+          Color_picker.changed picker c;
           call (Props.on_change props) c
       | Some _ | None -> ()
     in

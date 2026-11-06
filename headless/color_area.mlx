@@ -27,13 +27,25 @@ module Root = struct
     type t
 
     external disabled : t -> bool option = "disabled" [@@mel.get]
+    external value : t -> Color.t option = "value" [@@mel.get]
+
+    external on_change : t -> ((Color.t -> unit)[@u]) option = "onChange"
+    [@@mel.get]
   end
 
   let make (props : Props.t) =
     let disabled () = Option.value (Props.disabled props) ~default:false in
+    let picker = Color_picker.use_context () in
     <Disabled.Provider value=(fun () -> disabled)>
       <Kobalte.Root
-        data_disabled=(fun () -> state (disabled ())) props=(S.omit props [||])
+        data_disabled=(fun () -> state (disabled ()))
+        ?value=(fun () -> Color_picker.value picker (Props.value props))
+        on_change=(fun c ->
+                    Color_picker.changed picker c;
+                    match Props.on_change props with
+                    | Some f -> f c [@u]
+                    | None -> ())
+        props=(S.omit props [| "value"; "onChange" |])
       />
     </Disabled.Provider>
 

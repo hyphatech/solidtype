@@ -1,0 +1,56 @@
+module For = Solidtype.For
+module Color_swatch_picker = Solidtype_heroui.Color_swatch_picker
+module Color_area = Solidtype_heroui.Color_area
+module Color_picker = Solidtype_heroui.Color_picker
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+
+let presets =
+  [|
+    "#ef4444";
+    "#f97316";
+    "#eab308";
+    "#22c55e";
+    "#06b6d4";
+    "#3b82f6";
+    "#8b5cf6";
+    "#ec4899";
+    "#f43f5e";
+  |]
+
+let make () =
+  <Color_picker default_value=(fun () -> Colors.parse_color "#F43F5E")>
+    <Color_picker.Trigger>
+      <Color_swatch size=`lg /> <Label>"Brand Color"</Label>
+    </Color_picker.Trigger>
+    <Color_picker.Popover>
+      <Color_area
+        aria_label="Color area"
+        class_="max-w-full"
+        color_space=`hsb
+        x_channel=`saturation
+        y_channel=`brightness>
+        <Color_area.Thumb />
+      </Color_area>
+      <Color_slider
+        aria_label="Hue slider"
+        channel=`hue
+        class_="gap-1 px-1"
+        color_space=`hsb>
+        <Label>"Hue"</Label>
+        <Color_slider.Output class_="text-muted" />
+        <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+      </Color_slider>
+      <Color_swatch_picker class_="justify-center px-1" size=`xs>
+        <For each=(fun () -> presets)>
+          (fun preset _ ->
+            <Color_swatch_picker.Item
+              color=(fun () -> Colors.parse_color preset)>
+              <Color_swatch_picker.Swatch />
+            </Color_swatch_picker.Item>)
+        </For>
+      </Color_swatch_picker>
+    </Color_picker.Popover>
+  </Color_picker>

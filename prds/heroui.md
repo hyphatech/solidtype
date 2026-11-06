@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; group 6 has landed but for ColorPicker; dates on `@internationalized/date` are accepted, its binding has landed, and TimeField takes its values.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; group 6 has landed; dates on `@internationalized/date` are accepted, its binding has landed, and TimeField takes its values.
 Date: 2026-10-23
 
 ## The problem
@@ -470,7 +470,10 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] ColorSwatchPicker, which Kobalte lacks: made headless of Kobalte's
   list hooks, a listbox of options named by their swatches, walked as a grid
   by where each is or as a stack
-- [ ] ColorPicker
+- [x] ColorPicker, which Kobalte lacks: one colour in solidtype-headless, which
+  the colour components read given no value of their own, and HeroUI's trigger
+  and popover on Kobalte's; a channel's field fixed, told what is typed once it
+  is committed
 
 ### Group 7: built from Kobalte's primitives
 - [x] Kobalte's list hooks bound, as `Selection`: `createListState`,

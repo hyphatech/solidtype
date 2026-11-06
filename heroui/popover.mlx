@@ -73,22 +73,6 @@ module Trigger = struct
   [@@element div]
 end
 
-(* A button only a reader finds, which closes the popover, as React Aria
-   puts one either side of it for a reader with no Escape key. *)
-let dismiss close =
-  <div
-    style="border: 0px; clip: rect(0px); clip-path: inset(50%); height: 1px; \
-           margin: -1px; overflow: hidden; padding: 0px; position: absolute; \
-           width: 1px; white-space: nowrap;">
-    <button
-      aria_label="Dismiss"
-      style="width: 1px; height: 1px;"
-      tabindex="-1"
-      type_=`button
-      on_click=(fun _ -> close ())
-    />
-  </div>
-
 module Content = struct
   let%component make ?(placement : placement option) ?(offset : float option)
       ?(should_flip : bool = true) ?(class_ : string option)
@@ -155,11 +139,11 @@ module Content = struct
           data_entering=(fun () -> Jsx.flag (Overlay.entering o))
           data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
-          (fun () -> Jsx.element (dismiss close))
+          (fun () -> Jsx.element (Overlay.dismiss close))
           <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
             (fun () -> children ())
           </Button.Trigger.Provider>
-          (fun () -> Jsx.element (dismiss close))
+          (fun () -> Jsx.element (Overlay.dismiss close))
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>

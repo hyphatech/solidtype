@@ -1,14 +1,29 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.ColorSwatch
-module Color = Solidtype_kobalte.Types.Color
+module Colors = Solidtype_kobalte.Colors
+module Types = Solidtype_kobalte.Types
+module Color = Types.Color
+
+let shown picker own =
+  match Color_picker.value picker own with
+  | Some c -> c
+  | None -> Colors.parse_color "#fff0"
 
 module Props = struct
-  include Kobalte.Root.Props
-
   type t
 
-  external value : t -> Color.t = "value" [@@mel.get]
+  external check :
+    ?value:Color.t Solidtype.Check.value ->
+    ?color_name:string Solidtype.Check.value ->
+    ?translations:Types.ColorSwatch_Root_Translations.t Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+    ?props:'spread Solidtype.Solid.rest ->
+    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    Solidtype.Html.Div.check = "check"
+  [@@mel.module "vite-plugin-solidtype/markers"]
+
+  external value : t -> Color.t option = "value" [@@mel.get]
   external style : t -> string option = "style" [@@mel.get]
 end
 
@@ -16,11 +31,13 @@ end
    which no browser reads: the background is written as rgba, before the
    caller's style, which wins. *)
 let make (props : Props.t) =
+  let picker = Color_picker.use_context () in
+  let color () = shown picker (Props.value props) in
   <Kobalte.Root
-    value=(fun () -> Props.value props)
+    value=(fun () -> color ())
     style=(fun () ->
             "background-color: "
-            ^ Color.to_string (Props.value props) ~format:`rgba ()
+            ^ Color.to_string (color ()) ~format:`rgba ()
             ^ match Props.style props with Some s -> "; " ^ s | None -> "")
     props=(S.omit props [| "value"; "style" |])
   />

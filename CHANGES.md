@@ -2,10 +2,29 @@
 
 ## Unreleased
 
+- `Solidtype_heroui.Color_picker`, HeroUI's ColorPicker: one colour shared by
+  the colour components inside it, controlled or kept, a trigger and a popover,
+  placed by React Aria's every placement, open controlled or kept. HeroUI's
+  examples. `Solidtype_headless.Color_picker` beneath it, which Kobalte lacks:
+  `Color_area`, `Color_slider`, `Color_field`, `Color_channel_field`,
+  `Color_swatch` and `Color_swatch_picker` given no value show its colour and
+  move it. `Color_swatch`'s `color` is optional, a swatch with none transparent
+  as React's is.
+
 - `Solidtype_heroui.Slider` and `Color_slider` move as their track is pressed
   and their thumb dragged, which threw since each part took a `ref`: Kobalte's
   track spreads a `ref` over its own. `Solidtype_headless.Slider`, Kobalte's
   fixed so, beneath them.
+
+- `Solidtype_heroui.Color_field`'s `aria_label` names its input, where it named
+  only its root and left the input with no name.
+
+- A `Color_field` on a channel tells what is typed once, as it is committed by
+  Enter or as the focus leaves, and `None` once emptied, as React's does, where
+  it told each key and a colour with no number. A colour a page refuses shows
+  again as it is committed. Breaking: `Solidtype_headless.Color_channel_field`'s
+  `value` is a `Js.Nullable.t` and its `on_change` takes a `Color.t option`, as
+  `Color_field`'s do.
 
 - Every HeroUI port's part that draws an element takes `as_`, HeroUI's `render`:
   a function of the part's props and, where the part has a state record, its

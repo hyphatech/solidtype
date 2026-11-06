@@ -1,0 +1,92 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Color_field = Solidtype_heroui.Color_field
+module Color_swatch_picker = Solidtype_heroui.Color_swatch_picker
+module Color = Solidtype_kobalte.Types.Color
+module Color_area = Solidtype_heroui.Color_area
+module Color_picker = Solidtype_heroui.Color_picker
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+
+let presets =
+  [|
+    "#ef4444";
+    "#f97316";
+    "#eab308";
+    "#22c55e";
+    "#06b6d4";
+    "#3b82f6";
+    "#8b5cf6";
+    "#ec4899";
+    "#f43f5e";
+  |]
+
+let random_colour () =
+  let hue = Js.Math.random_int 0 360
+  and saturation = Js.Math.random_int 50 100
+  and lightness = Js.Math.random_int 40 70 in
+  Colors.parse_color
+    ("hsl(" ^ string_of_int hue ^ ", " ^ string_of_int saturation ^ "%, "
+   ^ string_of_int lightness ^ "%)")
+
+let make () =
+  let color, set_color = S.create_signal (Colors.parse_color "#325578") in
+  <div class_="flex flex-col gap-4">
+    <Color_picker value=(fun () -> S.get color) on_change=(S.set set_color)>
+      <Color_picker.Trigger>
+        <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
+      </Color_picker.Trigger>
+      <Color_picker.Popover class_="gap-2">
+        <Color_swatch_picker class_="justify-center pt-2" size=`xs>
+          <For each=(fun () -> presets)>
+            (fun preset _ ->
+              <Color_swatch_picker.Item
+                color=(fun () -> Colors.parse_color preset)>
+                <Color_swatch_picker.Swatch />
+              </Color_swatch_picker.Item>)
+          </For>
+        </Color_swatch_picker>
+        <Color_area
+          aria_label="Color area"
+          class_="max-w-full"
+          color_space=`hsb
+          x_channel=`saturation
+          y_channel=`brightness>
+          <Color_area.Thumb />
+        </Color_area>
+        <div class_="flex items-center gap-2 px-1">
+          <Color_slider
+            aria_label="Hue slider"
+            channel=`hue
+            class_="flex-1"
+            color_space=`hsb>
+            <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
+          </Color_slider>
+          <Button
+            is_icon_only=true
+            aria_label="Shuffle color"
+            size=`sm
+            variant=`tertiary
+            on_click=(fun _ -> S.set set_color (random_colour ()))>
+            <Icons.Shuffle />
+          </Button>
+        </div>
+        <Color_field aria_label="Color field">
+          <Color_field.Group variant=`secondary>
+            <Color_field.Prefix><Color_swatch size=`xs /></Color_field.Prefix>
+            <Color_field.Input />
+          </Color_field.Group>
+        </Color_field>
+      </Color_picker.Popover>
+    </Color_picker>
+    <p class_="w-60 text-sm text-muted">
+      "Selected: "
+      <span class_="font-medium">
+        (fun () -> Jsx.string (Color.to_string (S.get color) ~format:`hex ()))
+      </span>
+    </p>
+  </div>

@@ -1,0 +1,17 @@
+module S = Solidtype.Solid
+module Picker = Solidtype_headless.Color_picker
+module Swatch = Solidtype_headless.Color_swatch
+module Field = Solidtype_headless.Color_field
+module Colors = Solidtype_kobalte.Colors
+
+let make () =
+  <Picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+    <div class_="flex items-center gap-2">
+      <Swatch class_="size-8 rounded-sm" />
+      <Field.Root class_="flex">
+        <Field.Input
+          aria_label="Hex" class_="w-24 rounded-sm border border-border px-2"
+        />
+      </Field.Root>
+    </div>
+  </Picker>

@@ -228,6 +228,38 @@ let stepped ~fixed =
       H.attribute input "aria-valuenow",
       H.attribute input "aria-valuetext" )
 
+(* How many colours a hue field, the fixed one or Kobalte's own, tells as 120
+   is typed and committed, then as it is emptied and committed. *)
+let typed ~fixed =
+  let value () = Colors.parse_color "hsl(300, 100%, 25%)" in
+  let told = ref 0 in
+  H.render (fun () ->
+      if fixed then
+        <Color_channel_field.Root
+          aria_label="Hue"
+          channel=(fun () -> `hue)
+          default_value=(fun () -> value ())
+          on_change=(fun _ -> incr told)>
+          <Color_channel_field.Input />
+        </Color_channel_field.Root>
+      else
+        <Kobalte_channel_field.Root
+          aria_label="Hue"
+          channel=(fun () -> `hue)
+          default_value=(fun () -> value ())
+          on_change=(fun _ -> incr told)>
+          <Kobalte_channel_field.Input />
+        </Kobalte_channel_field.Root>);
+  let input = query "[role=spinbutton]" in
+  let user = H.setup () in
+  H.focus input;
+  told := 0;
+  let* () = H.keyboard user "{Control>}a{/Control}120{Enter}" in
+  let at_typed = !told in
+  told := 0;
+  let* () = H.keyboard user "{Control>}a{/Control}{Backspace}{Enter}" in
+  Js.Promise.resolve (at_typed, !told)
+
 module Slider = Solidtype_headless.Slider
 module Kobalte_own_slider = Solidtype_kobalte.Slider
 module Slider_context = Solidtype_kobalte.Types.SliderContextValue
@@ -268,6 +300,12 @@ let () =
           E.(expect (fixed, own) |> toEqual ((true, true), (false, true)))));
   Jest.describe "Kobalte's colour channel field, fixed" (fun () ->
       Jest.afterEach H.cleanup;
+      Jest.testPromise "tells what is typed once, as it is committed" (fun () ->
+          let* fixed = typed ~fixed:true in
+          H.cleanup ();
+          let* own = typed ~fixed:false in
+          Js.Promise.resolve
+            E.(expect (fixed, fst own > 1) |> toEqual ((1, 1), true)));
       Jest.testPromise
         "tells no change as it mounts, its value now as a number, and turns \
          the wheel as React Aria's" (fun () ->

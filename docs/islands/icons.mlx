@@ -14,6 +14,21 @@ module Check = struct
     </svg>
 end
 
+module Shuffle = struct
+  let%component make () =
+    <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">
+      <path
+        d="M1.5 4.5H4c1.2 0 2.3.6 3 1.6l2 2.8c.7 1 1.8 1.6 3 1.6h2.5M12.5 \
+           2.5l2 2-2 2M1.5 11H4c.9 0 1.8-.4 2.4-1M9.6 6c.6-.6 1.5-1 \
+           2.4-1h2.5M12.5 9l2 2-2 2"
+        stroke="currentColor"
+        stroke_width="1.5"
+        stroke_linecap="round"
+        stroke_linejoin="round"
+      />
+    </svg>
+end
+
 module Plus = struct
   let%component make () =
     <svg view_box="0 0 16 16" fill="none" aria_hidden=true class_="size-4">

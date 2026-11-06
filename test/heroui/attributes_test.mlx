@@ -41,6 +41,7 @@ module Input = H.Input
 module Input_group = H.Input_group
 module Kbd = H.Kbd
 module Table = H.Table
+module Color_picker = H.Color_picker
 module Color_swatch = H.Color_swatch
 module Color_area = H.Color_area
 module Color_slider = H.Color_slider
@@ -1397,6 +1398,36 @@ let () =
                         />
                       </Color_slider.Track>
                     </Color_slider>
+                    <Color_picker
+                      ?as_=(drawn "Color_picker" "div")
+                      data_testid="Color_picker"
+                      class_="given-class"
+                      title="Color_picker"
+                      style="--part: 1"
+                      ref=(fun e -> seen "Color_picker" e)
+                      on_key_down=(fun e -> heard "Color_picker" e)>
+                      <Color_picker.Trigger
+                        ?as_=(drawn "Color_picker.Trigger" "button")
+                        data_testid="Color_picker.Trigger"
+                        class_="given-class"
+                        title="Color_picker.Trigger"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Color_picker.Trigger" e)
+                        on_key_down=(fun e -> heard "Color_picker.Trigger" e)>
+                        "Pick"
+                      </Color_picker.Trigger>
+                      <Color_picker.Popover
+                        default_open=true
+                        ?as_=(drawn "Color_picker.Popover" "div")
+                        data_testid="Color_picker.Popover"
+                        class_="given-class"
+                        title="Color_picker.Popover"
+                        style="--part: 1"
+                        ref=(fun e -> seen "Color_picker.Popover" e)
+                        on_key_down=(fun e -> heard "Color_picker.Popover" e)>
+                        "Popover"
+                      </Color_picker.Popover>
+                    </Color_picker>
                     <Color_swatch
                       ?as_=(drawn "Color_swatch" "div")
                       data_testid="Color_swatch"
@@ -2269,6 +2300,11 @@ let () =
                        ("Color_slider.Output", "[data-slot=color-slider-output]");
                        ("Color_slider.Track", "[data-slot=color-slider-track]");
                        ("Color_slider.Thumb", "[data-slot=color-slider-thumb]");
+                       ("Color_picker", "[data-slot=color-picker]");
+                       ( "Color_picker.Trigger",
+                         "[data-slot=color-picker-trigger]" );
+                       ( "Color_picker.Popover",
+                         "[data-slot=color-picker-popover]" );
                        ("Color_swatch", "[data-slot=color-swatch]");
                        ("Table", "[data-slot=table]");
                        ( "Table.Scroll_container",

@@ -92,6 +92,7 @@
 @import "@heroui/styles/components/color-area.css" layer(components);
 @import "@heroui/styles/components/color-field.css" layer(components);
 @import "@heroui/styles/components/color-input-group.css" layer(components);
+@import "@heroui/styles/components/color-picker.css" layer(components);
 @import "@heroui/styles/components/color-slider.css" layer(components);
 @import "@heroui/styles/components/color-swatch.css" layer(components);
 @import "@heroui/styles/components/color-swatch-picker.css" layer(components);

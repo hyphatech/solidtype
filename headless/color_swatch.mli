@@ -6,12 +6,30 @@
 
     {[
       <Color_swatch value=(fun () -> Colors.parse_color "#0485F7") />
-    ]} *)
+    ]}
+
+    Given no [value], it is its {!Color_picker}'s colour, as React Aria's is,
+    else transparent. *)
+
+val shown :
+  Color_picker.t option ->
+  Solidtype_kobalte.Types.Color.t option ->
+  Solidtype_kobalte.Types.Color.t
+(** The colour a swatch paints, given its picker and its own [value]. *)
 
 module Props : sig
-  include module type of Solidtype_kobalte.ColorSwatch.Root.Props
-
   type t
+
+  val check :
+    ?value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
+    ?color_name:string Solidtype.Check.value ->
+    ?translations:
+      Solidtype_kobalte.Types.ColorSwatch_Root_Translations.t
+      Solidtype.Check.value ->
+    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+    ?props:'spread Solidtype.Solid.rest ->
+    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    Solidtype.Html.Div.check
 end
 
 val make : Props.t -> Solidtype.Jsx.element

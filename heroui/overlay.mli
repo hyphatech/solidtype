@@ -63,3 +63,7 @@ val return_focus :
     opened, while the focus is [inside] the overlay or nowhere, as React Aria
     does: Kobalte's does as its content unmounts, which waits here for HeroUI's
     exit animation, when the focus has already left. *)
+
+val dismiss : (unit -> unit) -> Solidtype.Jsx.element
+(** A button only a reader finds, which closes an overlay, as React Aria puts
+    one for a reader with no Escape key. *)

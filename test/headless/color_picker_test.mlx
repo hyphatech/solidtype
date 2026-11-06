@@ -1,0 +1,96 @@
+(* The headless ColorPicker as a caller meets it: each part inside it shows its
+   colour and moves it, a part's own value wins and its own on_change is called,
+   and it draws nothing of its own. *)
+
+module S = Solidtype.Solid
+module Picker = Solidtype_headless.Color_picker
+module Swatch = Solidtype_headless.Color_swatch
+module Field = Solidtype_headless.Color_field
+module Channel = Solidtype_headless.Color_channel_field
+module Colors = Solidtype_kobalte.Colors
+module Color = Solidtype_kobalte.Types.Color
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+let hex c = Color.to_string c ~format:`hex ()
+
+external query : string -> Dom.element = "querySelector"
+[@@mel.scope "document"]
+
+external value_of : Dom.element -> string = "value" [@@mel.get]
+external child_count : Dom.element -> int = "childElementCount" [@@mel.get]
+
+external first_child : Dom.element -> Dom.element = "firstElementChild"
+[@@mel.get]
+
+let label_of selector =
+  Option.value (H.attribute (query selector) "aria-label") ~default:""
+
+let () =
+  Jest.describe "Solidtype_headless.Color_picker" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "shares a colour its parts move" (fun () ->
+          let told = ref [] and own = ref [] in
+          H.render (fun () ->
+              <Picker
+                default_value=(fun () -> Colors.parse_color "#ff0000")
+                on_change=(fun c -> told := hex c :: !told)>
+                <Swatch data_testid="swatch" />
+                <Field.Root
+                  on_change=(fun c -> own := Option.map hex c :: !own)>
+                  <Field.Input aria_label="Hex" data_testid="hex" />
+                </Field.Root>
+                <Channel.Root channel=(fun () -> `green)>
+                  <Channel.Input aria_label="Green" data_testid="green" />
+                </Channel.Root>
+              </Picker>);
+          let user = H.setup () in
+          let shown () =
+            ( label_of "[data-testid=swatch]",
+              value_of (query "[data-testid=hex]"),
+              value_of (query "[data-testid=green]") )
+          in
+          let at_first = shown () in
+          H.focus (query "[data-testid=hex]");
+          let* () = H.keyboard user "{Control>}a{/Control}#00ff00{Enter}" in
+          let moved = shown () in
+          let* () = H.keyboard user "{Control>}a{/Control}{Backspace}{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (at_first, moved, shown (), !told, !own)
+              |> toEqual
+                   ( ("vibrant Red", "#FF0000", "0"),
+                     ("very light vibrant Green", "#00FF00", "255"),
+                     ("very light vibrant Green", "#00FF00", "255"),
+                     [ "#00FF00" ],
+                     [ None; Some "#00FF00" ] )));
+      Jest.test "lets a part's own value win" (fun () ->
+          H.render (fun () ->
+              <Picker default_value=(fun () -> Colors.parse_color "#ff0000")>
+                <Field.Root
+                  value=(fun () ->
+                          Js.Nullable.return (Colors.parse_color "#0000ff"))>
+                  <Field.Input aria_label="Hex" data_testid="hex" />
+                </Field.Root>
+              </Picker>);
+          E.(expect (value_of (query "[data-testid=hex]")) |> toEqual "#0000FF"));
+      Jest.test "starts at black, and a swatch alone is transparent" (fun () ->
+          H.render (fun () ->
+              <div>
+                <Picker><Swatch data_testid="in" /></Picker>
+                <Swatch data_testid="alone" />
+              </div>);
+          E.(
+            expect (label_of "[data-testid=in]", label_of "[data-testid=alone]")
+            |> toEqual ("black", "transparent")));
+      Jest.test "draws nothing of its own" (fun () ->
+          H.render (fun () ->
+              <div data_testid="host">
+                <Picker><Swatch data_testid="inner" /></Picker>
+              </div>);
+          let host = query "[data-testid=host]" in
+          E.(
+            expect
+              (child_count host, H.attribute (first_child host) "data-testid")
+            |> toEqual (1, Some "inner"))))

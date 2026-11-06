@@ -26,6 +26,7 @@ external contains : Dom.htmlElement -> Dom.element -> bool = "contains"
 
 (* What a field's parts read of it: its kind and its state. *)
 type field = {
+  aria_label : unit -> string option;
   by_channel : bool;
   disabled : unit -> bool;
   invalid : unit -> bool;
@@ -117,6 +118,7 @@ module Input = struct
     in
     if f.by_channel then
       <Channel.Input
+        ?aria_label=(fun () -> f.aria_label ())
         ?placeholder
         class_=(fun () -> classes ())
         ref=watched
@@ -131,6 +133,7 @@ module Input = struct
       (* React Aria names a hex field's input a text box, as it is. *)
       <Hex.Input
         role=`textbox
+        ?aria_label=(fun () -> f.aria_label ())
         ?placeholder
         class_=(fun () -> classes ())
         ref=watched
@@ -245,7 +248,9 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     ignore (on_change c : unit option)
   in
   let by_channel = Option.is_some (S.untrack channel) in
-  let f = { by_channel; disabled; invalid } in
+  let f =
+    { aria_label = (fun () -> aria_label ()); by_channel; disabled; invalid }
+  in
   let classes () =
     Styles.ColorField.classes
       (Styles.ColorField.options ?full_width:(full_width ()) ?class_:(class_ ())
@@ -279,9 +284,9 @@ let%component make ?(value : Color.t Js.Nullable.t option)
             <Channel.Root
               channel=(fun () -> ch)
               ?color_space
-              ?value=(fun () -> Option.bind (value ()) Js.Nullable.toOption)
+              ?value
               ?default_value
-              on_change=(fun c -> changed (Some c))
+              on_change=changed
               change_on_wheel=(fun () -> not (is_wheel_disabled ()))
               validation_state=(fun () ->
                                  if invalid () then `invalid else `valid)
@@ -289,7 +294,6 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               disabled=(fun () -> disabled ())
               read_only=(fun () -> is_read_only ())
               ?name
-              ?aria_label
               class_=(fun () -> classes ())
               ref=root
               on_focus_out=leave
@@ -320,7 +324,6 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               disabled=(fun () -> disabled ())
               read_only=(fun () -> is_read_only ())
               ?name
-              ?aria_label
               class_=(fun () -> classes ())
               ref=root
               on_focus_out=leave

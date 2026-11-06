@@ -641,6 +641,16 @@ external color_swatch_picker :
   Dom.htmlDivElement -> color_swatch_picker_props -> unit = "colorSwatchPicker"
 [@@mel.module "./react/heroui.tsx"]
 
+type color_picker_props
+
+external color_picker_props : placement:string -> unit -> color_picker_props
+  = ""
+[@@mel.obj]
+
+external color_picker : Dom.htmlDivElement -> color_picker_props -> unit
+  = "colorPicker"
+[@@mel.module "./react/heroui.tsx"]
+
 type color_area_props
 
 external color_area_props :

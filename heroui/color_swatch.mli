@@ -11,13 +11,13 @@
     string by {!Solidtype_kobalte.Colors.parse_color}. A [style] of its own is
     added after the swatch's colour, which it is written from: HeroUI's style
     given as a function of the colour is the caller's colour, already in hand.
-*)
+    Given no [color], it is its {!Color_picker}'s colour, else transparent. *)
 
 module Props : sig
   type t
 
   val check :
-    color:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
+    ?color:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?color_name:string Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?shape:[ `circle | `square ] Solidtype.Check.value ->

@@ -1,0 +1,65 @@
+module S = Solidtype.Solid
+module Color_area = Solidtype_heroui.Color_area
+module Color_picker = Solidtype_heroui.Color_picker
+module Color_slider = Solidtype_heroui.Color_slider
+module Color_swatch = Solidtype_heroui.Color_swatch
+module Label = Solidtype_heroui.Label
+module Colors = Solidtype_kobalte.Colors
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let placements =
+  [|
+    (`bottom_left, "bottom left");
+    (`bottom, "bottom");
+    (`top_right, "top right");
+    (`right, "right");
+  |]
+
+let make () =
+  let placement, set_placement =
+    S.create_signal (`bottom_left, "bottom left")
+  in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="placement"
+        choices=(fun () -> placements)
+        picked=(fun () -> S.get placement)
+        on_pick=(Controls.choose placements set_placement)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=color-picker-trigger]"
+      solidtype=(<Color_picker
+                   default_value=(fun () -> Colors.parse_color "#0485F7")>
+                   <Color_picker.Trigger>
+                     <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
+                   </Color_picker.Trigger>
+                   <Color_picker.Popover
+                     placement=(fun () -> fst (S.get placement))>
+                     <Color_area
+                       aria_label="Color area"
+                       class_="max-w-full"
+                       color_space=`hsb
+                       x_channel=`saturation
+                       y_channel=`brightness>
+                       <Color_area.Thumb />
+                     </Color_area>
+                     <Color_slider
+                       channel=`hue class_="gap-1 px-1" color_space=`hsb>
+                       <Label>"Hue"</Label>
+                       <Color_slider.Output class_="text-muted" />
+                       <Color_slider.Track>
+                         <Color_slider.Thumb />
+                       </Color_slider.Track>
+                     </Color_slider>
+                   </Color_picker.Popover>
+                 </Color_picker>)
+      react=(fun host ->
+              Heroui_react.color_picker host
+                (Heroui_react.color_picker_props
+                   ~placement:(snd (S.get placement))
+                   ()))
+    />
+  </section>

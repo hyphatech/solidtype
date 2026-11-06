@@ -91,14 +91,17 @@ module Root = struct
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
     in
+    let picker = Color_picker.use_context () in
     let colour () =
-      match Props.value props with
-      | Some v -> Js.Nullable.toOption v
-      | None -> S.get kept
+      match (Props.value props, picker) with
+      | Some v, _ -> Js.Nullable.toOption v
+      | None, Some p -> Some (p.color ())
+      | None, None -> S.get kept
     in
     let set c =
       if not (same c (S.untrack colour)) then begin
         S.set set_kept c;
+        Option.iter (Color_picker.changed picker) c;
         match Props.on_change props with Some f -> f c [@u] | None -> ()
       end
     in
