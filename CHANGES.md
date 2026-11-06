@@ -2,6 +2,9 @@
 
 ## 0.6.0 (2026-11-06)
 
+- A prop named `props` is refused at its name, the same on mlx 0.11 and 0.12,
+  which locate a parameter differently.
+
 - `Solidtype_heroui.Dialog_frame` carries what its parts now take. Breaking:
   `backdrop`, `container`, `dialog` and `close_trigger` each take `as_`, and
   `ref`, `style`, `on_focus_out` or `on_click` where the part sets them; the

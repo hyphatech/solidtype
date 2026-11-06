@@ -205,9 +205,9 @@ value, spread.
   >   <span>(fun () -> Solidtype.Jsx.string (props ()))</span>
   > EOF
   $ build
-  File "case.mlx", line 1, characters 21-35:
+  File "case.mlx", line 1, characters 21-26:
   1 | let%component make ~(props : string) () =
-                           ^^^^^^^^^^^^^^
+                           ^^^^^
   Error: props=p spreads a component's props, so no prop is named props: give
          this one another name
   [1]

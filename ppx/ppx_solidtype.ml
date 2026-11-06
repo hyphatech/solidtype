@@ -811,7 +811,7 @@ let prop_of (p : function_param) =
   let prop label (var : string loc) typ presence =
     if String.equal label spread then
       Error
-        ( loc,
+        ( var.loc,
           "props=p spreads a component's props, so no prop is named props: \
            give this one another name" )
     else
