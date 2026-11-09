@@ -1,0 +1,143 @@
+(* HeroUI's Table with an action on each row and on the table, beside the same
+   table in React: the actions a press, Enter, Space and a double press run,
+   and the keys they select, with selection off, [`toggle] and [`replace]. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_heroui.Table
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type user = { id : string; name : string; role : string }
+
+let users =
+  [|
+    { id = "1"; name = "Kate Moore"; role = "CEO" };
+    { id = "2"; name = "John Smith"; role = "CTO" };
+    { id = "3"; name = "Sara Johnson"; role = "CMO" };
+  |]
+
+type props
+
+external props :
+  selection_mode:(string[@mel.as "selectionMode"]) ->
+  ?selection_behavior:(string[@mel.as "selectionBehavior"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render :
+    props ->
+    ((string -> unit)[@mel.uncurry]) ->
+    ((string array -> unit)[@mel.uncurry]) ->
+    Dom.element = "render"
+  [@@mel.module "./twins/TableActions.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TableActions.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TableActions.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+let nth host selector i =
+  match Js.Array.from (query_all host selector) |> Array.to_list with
+  | items when List.length items > i -> List.nth items i
+  | _ -> Js.Exn.raiseError ("no " ^ selector)
+
+(* A row's role cell pressed, the second row given focus and Enter, Space, the
+   third row's role cell pressed twice, and Enter. *)
+let walk ~step host ran selected =
+  let user = T.setup () in
+  let seen = ref [] in
+  let after action =
+    let* () = step action in
+    seen := (!ran, !selected) :: !seen;
+    Js.Promise.resolve ()
+  in
+  let role n = nth host "[data-slot=table-cell]:nth-child(2)" n in
+  let row n = nth host "[data-slot=table-row]" n in
+  let* () = after (fun () -> T.click user (role 0)) in
+  let* () =
+    after (fun () ->
+        T.focus (row 1);
+        T.keyboard user "{Enter}")
+  in
+  let* () = after (fun () -> T.keyboard user " ") in
+  let* () = after (fun () -> T.dbl_click user (role 2)) in
+  let* () = after (fun () -> T.keyboard user "{Enter}") in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let both ~mode ?behavior () =
+  let ran = ref [] and selected = ref [||] in
+  T.render (fun () ->
+      <Table>
+        <Table.Scroll_container>
+          <Table.Content
+            aria_label="Table with actions"
+            selection_mode=(fun () -> mode)
+            ?selection_behavior=(fun () -> behavior)
+            on_selection_change=(fun keys ->
+                                  selected :=
+                                    Array.of_list
+                                      (List.sort String.compare
+                                         (Array.to_list keys)))
+            on_row_action=(fun key -> ran := !ran @ [ "table " ^ key ])>
+            <Table.Header>
+              <Table.Column is_row_header=true>"Name"</Table.Column>
+              <Table.Column>"Role"</Table.Column>
+            </Table.Header>
+            <Table.Body>
+              <For each=(fun () -> users)>
+                (fun u _ ->
+                  <Table.Row
+                    id=(fun () -> u.id)
+                    on_action=(fun _ -> ran := !ran @ [ "row " ^ u.id ])>
+                    <Table.Cell>(fun () -> Jsx.string u.name)</Table.Cell>
+                    <Table.Cell>(fun () -> Jsx.string u.role)</Table.Cell>
+                  </Table.Row>)
+              </For>
+            </Table.Body>
+          </Table.Content>
+        </Table.Scroll_container>
+      </Table>);
+  let* solidtype = walk ~step:(fun action -> action ()) T.body ran selected in
+  T.cleanup ();
+  let ran' = ref [] and selected' = ref [||] in
+  let host =
+    Twin.render
+      (props
+         ~selection_mode:
+           (match mode with
+           | `single -> "single"
+           | `multiple -> "multiple"
+           | `none -> "none")
+         ?selection_behavior:
+           (Option.map
+              (function `toggle -> "toggle" | `replace -> "replace")
+              behavior)
+         ())
+      (fun action -> ran' := !ran' @ [ action ])
+      (fun keys -> selected' := keys)
+  in
+  let* react = walk ~step:Twin.step host ran' selected' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+let () =
+  Jest.describe "Table, with row actions" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "runs them with selection off, as React's does"
+        (fun () -> both ~mode:`none ());
+      Jest.testPromise "runs and selects with [`toggle], as React's does"
+        (fun () -> both ~mode:`multiple ());
+      Jest.testPromise "runs and selects with [`replace], as React's does"
+        (fun () -> both ~mode:`multiple ~behavior:`replace ()))

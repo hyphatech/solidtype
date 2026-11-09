@@ -42,7 +42,10 @@ Page Up and Page Down and typing move between rows, Right and Left along a
 row's cells, and Up and Down between a cell and the one above or below it.
 Its rows are selected as `selection_mode` says, by a press, Space or Enter,
 Shift and the platform's key extending and adding; a press that begins in a
-control inside a row is the control's. A column that `allows_sorting` is
+control inside a row is the control's. A row's action, its `on_action` and
+the root's `on_row_action`, and its link, `href`, run as React Aria runs them:
+Enter, and a press where it cannot select, or a double press with `` `replace``.
+A column that `allows_sorting` is
 `aria-sort`, and pressed, or given Enter or Space, asks for its sort. A cell
 given focus keeps it, and an arrow that reaches no cell moves nothing.
 `Table.Load_more`, after the body's last row, asks for more rows as it comes
@@ -61,12 +64,12 @@ on one, which Solid reads inside it.
 | Part | Element | What it adds |
 |---|---|---|
 | `Table.Resizable_container` | `<div>` | the width the columns share; `on_resize_start`, `on_resize`, `on_resize_end` |
-| `Table.Root` | `<table role="grid">` | the list of rows, their selection: `selection_mode`, `selection_behavior`, `selected_keys`, `default_selected_keys`, `on_selection_change`, `disabled_keys`, `disallow_empty_selection`; its sort: `sort_descriptor`, `on_sort_change` |
+| `Table.Root` | `<table role="grid">` | the list of rows, their selection: `selection_mode`, `selection_behavior`, `selected_keys`, `default_selected_keys`, `on_selection_change`, `disabled_keys`, `disallow_empty_selection`; its sort: `sort_descriptor`, `on_sort_change`; `on_row_action` |
 | `Table.Header` | `<thead>` and its `<tr>` | |
 | `Table.Column` | `<th role="columnheader">` | `aria-colindex`; `id`, the column a sort names; `allows_sorting`, `aria-sort`; `is_row_header`, whose cells name their rows; `width`, `default_width`, `min_width`, `max_width`, `data-resizing` |
 | `Table.Column_resizer` | `<div role="presentation">` and a range `<input>` | `data-resizing`, `data-resizable-direction`; the input named `aria_label` and by its column |
 | `Table.Body` | `<tbody>` | `empty_state`, a row across every column while it has none |
-| `Table.Row` | `<tr role="row">` | `id`, its key; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled`; in a tree `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`, `data-expanded`, and the rows written inside it |
+| `Table.Row` | `<tr role="row">` | `id`, its key; `on_action`, and its link, `href`, `target`, `rel`, `download`, `href_lang`, `ping`, `referrer_policy`; `aria-selected`, `data-selected`, `aria-disabled`, `data-disabled`; in a tree `aria-level`, `aria-posinset`, `aria-setsize`, `aria-expanded`, `data-expanded`, and the rows written inside it |
 | `Table.Cell` | `<td>`, `gridcell` or `rowheader` | `data-column-index`, `data-tree-column` |
 | `Table.Load_more` | an inert `<tr>` of no height holding the sentinel, and while loading a `<tr role="row">` across every column | `is_loading`, `on_load_more`, `scroll_offset`; its attributes are the loading row's |
 

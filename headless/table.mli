@@ -34,13 +34,13 @@
     alone, where they reach none moving nothing.
 
     Rows are selected as the root's [selection_mode] says, by Kobalte's list:
-    pressing a row, Space or Enter toggles it, or with [selection_behavior]
-    [`replace] chooses it alone, Shift and the platform's key extending and
-    adding. A press that begins in a control inside a row -- an input, a button,
-    a link, a label, a checkbox -- is the control's, never the row's. A selected
-    row is [aria-selected], and [data-selected], and a disabled one
-    [aria-disabled] and [data-disabled], present and empty as Kobalte's state
-    is.
+    pressing a row, Space or Enter toggles it, where it runs no action, or with
+    [selection_behavior] [`replace] chooses it alone, Shift and the platform's
+    key extending and adding. A press that begins in a control inside a row --
+    an input, a button, a link, a label, a checkbox -- is the control's, never
+    the row's. A selected row is [aria-selected], and [data-selected], and a
+    disabled one [aria-disabled] and [data-disabled], present and empty as
+    Kobalte's state is.
 
     Inside a {!Virtualizer} given {!Virtualizer.val-table_layout}, it is laid
     out as React Aria's TableLayout lays one out: each part a [<div>] of its
@@ -178,7 +178,10 @@ end
     first; each change calls [on_expanded_change] with them. The arrow forward
     on a row that holds rows expands it, the arrow back collapses it, and on a
     collapsed one reaches the row it is inside, as an accessible tree grid's
-    keys do. *)
+    keys do.
+
+    A row's action, [on_row_action] given its key, runs after the row's own, as
+    React Aria runs one. *)
 module Root : sig
   module Props : sig
     type t
@@ -197,6 +200,7 @@ module Root : sig
       ?expanded_keys:string array Solidtype.Check.value ->
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
+      ?on_row_action:(string -> unit) ->
       ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
@@ -276,13 +280,31 @@ end
     once it is on the page, in the order its body holds it, so rows sorted by
     the [For] that draws them are walked in their new order. Its children are
     its cells, and in a tree the rows it holds, drawn after it while it is
-    expanded, and [data-expanded] while it is. *)
+    expanded, and [data-expanded] while it is.
+
+    Its action, [on_action], then the table's [on_row_action], and its link,
+    [href], opened as a link is with the press's modifiers and [target], [rel],
+    [download], [href_lang], [ping] and [referrer_policy], run as React Aria
+    runs them: Enter runs one, and never selects a row that has one, which Space
+    selects. With selection off, or a row that cannot be selected, a press runs
+    it too; with [`toggle], a press runs it while no row is selected, and
+    selects once one is; with [`replace], a press selects and a double press
+    runs it, and a touch held half a second selects and turns the table to
+    [`toggle], so a tap then selects. A disabled row runs none. *)
 module Row : sig
   module Props : sig
     type t
 
     val check :
       id:string Solidtype.Check.value ->
+      ?on_action:(unit -> unit) ->
+      ?href:string Solidtype.Check.value ->
+      ?target:string Solidtype.Check.value ->
+      ?rel:string Solidtype.Check.value ->
+      ?download:string Solidtype.Check.value ->
+      ?href_lang:string Solidtype.Check.value ->
+      ?ping:string Solidtype.Check.value ->
+      ?referrer_policy:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)

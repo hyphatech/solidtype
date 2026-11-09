@@ -46,6 +46,27 @@ external click : user -> Dom.element -> unit Js.Promise.t = "click" [@@mel.send]
 external keyboard : user -> string -> unit Js.Promise.t = "keyboard"
 [@@mel.send]
 
+external dbl_click : user -> Dom.element -> unit Js.Promise.t = "dblClick"
+[@@mel.send]
+
+type pointer_action
+
+external pointer_action : keys:string -> target:Dom.element -> pointer_action
+  = ""
+[@@mel.obj]
+
+external pointer : user -> pointer_action array -> unit Js.Promise.t = "pointer"
+[@@mel.send]
+
+(* A wait as long as a touch is held. *)
+let sleep ms =
+  Js.Promise.make (fun ~resolve ~reject:_ ->
+      let (_ : Js.Global.timeoutId) =
+        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
+      in
+      ())
+  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+
 external tab_js : user -> unit -> unit Js.Promise.t = "tab" [@@mel.send]
 
 let tab user = tab_js user ()

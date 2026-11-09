@@ -27,6 +27,10 @@ external setup : unit -> user = "setup"
 [@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
 
 external click : user -> Dom.element -> unit Js.Promise.t = "click" [@@mel.send]
+
+external dbl_click : user -> Dom.element -> unit Js.Promise.t = "dblClick"
+[@@mel.send]
+
 external hover : user -> Dom.element -> unit Js.Promise.t = "hover" [@@mel.send]
 
 external unhover : user -> Dom.element -> unit Js.Promise.t = "unhover"

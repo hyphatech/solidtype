@@ -1,0 +1,188 @@
+(* A row's action as a caller meets it, as React Aria runs one: Enter and a
+   press with selection off; with [`toggle] a press until a row is selected,
+   Space selecting; with [`replace] a double press and Enter, a press
+   selecting; a long touch selecting and turning the table to [`toggle];
+   never for a disabled row nor a press in a control; and a row's [href]
+   opened as a link is, its modifiers kept. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Table = Solidtype_headless.Table
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+type member = { id : string; name : string; role : string }
+
+let members =
+  [|
+    { id = "1"; name = "Kate Moore"; role = "CEO" };
+    { id = "2"; name = "John Smith"; role = "CTO" };
+    { id = "3"; name = "Sara Johnson"; role = "CMO" };
+  |]
+
+(* The team, each action it runs told: a row's own, then the table's. *)
+let team ?(mode = `none) ?(behavior = `toggle) ?(disabled = [||])
+    ?(selected = ref [||]) ?(href = fun (_ : member) -> None) actions =
+  H.render (fun () ->
+      <Table.Root
+        aria_label="Team members"
+        selection_mode=(fun () -> mode)
+        selection_behavior=(fun () -> behavior)
+        disabled_keys=(fun () -> disabled)
+        on_selection_change=(fun keys -> selected := keys)
+        on_row_action=(fun key -> actions := !actions @ [ "table " ^ key ])>
+        <Table.Header>
+          <Table.Column is_row_header=true>"Name"</Table.Column>
+          <Table.Column>"Role"</Table.Column>
+          <Table.Column>"Actions"</Table.Column>
+        </Table.Header>
+        <Table.Body>
+          <For each=(fun () -> members)>
+            (fun m _ ->
+              <Table.Row
+                id=(fun () -> m.id)
+                on_action=(fun _ -> actions := !actions @ [ "row " ^ m.id ])
+                ?href=(fun () -> href m)
+                target="_blank">
+                <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
+                <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                <Table.Cell>
+                  <button type_=`button>
+                    (fun () -> Jsx.string ("Edit " ^ m.name))
+                  </button>
+                </Table.Cell>
+              </Table.Row>)
+          </For>
+        </Table.Body>
+      </Table.Root>)
+
+let row name =
+  match
+    Array.to_list (H.all_by_role "row")
+    |> List.filter (fun r -> Js.String.includes ~search:name (H.text r))
+  with
+  | r :: _ -> r
+  | [] -> Js.Exn.raiseError ("no row of " ^ name)
+
+external listen :
+  string -> (Dom.mouseEvent -> unit) -> (_[@mel.as {json|true|json}]) -> unit
+  = "addEventListener"
+[@@mel.scope "document"]
+
+external unlisten :
+  string -> (Dom.mouseEvent -> unit) -> (_[@mel.as {json|true|json}]) -> unit
+  = "removeEventListener"
+[@@mel.scope "document"]
+
+external target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+external ctrl_key : Dom.mouseEvent -> bool = "ctrlKey" [@@mel.get]
+
+external prevent_default : Dom.mouseEvent -> unit = "preventDefault"
+[@@mel.send]
+
+let () =
+  Jest.describe "Table's row actions" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise
+        "runs by Enter and a press with selection off, never by a control's"
+        (fun () ->
+          let actions = ref [] in
+          team actions;
+          let user = H.setup () in
+          H.focus (row "Kate Moore");
+          let* () = H.keyboard user "{Enter}" in
+          let* () = H.click user (H.by_text "CTO") in
+          let* () = H.click user (H.by_text "Edit Sara Johnson") in
+          Js.Promise.resolve
+            E.(
+              expect !actions
+              |> toEqual [ "row 1"; "table 1"; "row 2"; "table 2" ]));
+      Jest.testPromise
+        "runs by a press with [`toggle] until a row is selected, Space \
+         selecting and Enter not" (fun () ->
+          let actions = ref [] and selected = ref [||] in
+          team ~mode:`multiple ~selected actions;
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "CEO") in
+          let* () = H.keyboard user " " in
+          let* () = H.click user (H.by_text "CTO") in
+          let* () = H.keyboard user "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (!actions, !selected)
+              |> toEqual ([ "row 1"; "table 1" ], [| "1"; "2" |])));
+      Jest.testPromise
+        "runs by a double press and Enter with [`replace], a press selecting"
+        (fun () ->
+          let actions = ref [] and selected = ref [||] in
+          team ~mode:`multiple ~behavior:`replace ~selected actions;
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "CEO") in
+          let pressed = !actions in
+          let* () = H.dbl_click user (H.by_text "CTO") in
+          let* () = H.keyboard user "{Enter}" in
+          Js.Promise.resolve
+            E.(
+              expect (pressed, !actions, !selected)
+              |> toEqual
+                   ([], [ "row 2"; "table 2"; "row 2"; "table 2" ], [| "2" |])));
+      Jest.testPromise
+        "selects by a long touch with [`replace], then toggles by a tap"
+        (fun () ->
+          let actions = ref [] and selected = ref [||] in
+          team ~mode:`multiple ~behavior:`replace ~selected actions;
+          let user = H.setup () in
+          let touch keys name =
+            H.pointer user [| H.pointer_action ~keys ~target:(H.by_text name) |]
+          in
+          let* () = touch "[TouchA]" "CMO" in
+          let tapped = !actions in
+          let* () = touch "[TouchA>]" "CEO" in
+          let* () = H.sleep 600 in
+          let* () = touch "[/TouchA]" "CEO" in
+          let* () = touch "[TouchA]" "CTO" in
+          Js.Promise.resolve
+            E.(
+              expect (tapped, !actions, !selected)
+              |> toEqual
+                   ( [ "row 3"; "table 3" ],
+                     [ "row 3"; "table 3" ],
+                     [| "1"; "2" |] )));
+      Jest.testPromise "never runs for a disabled row" (fun () ->
+          let actions = ref [] in
+          team ~disabled:[| "2" |] actions;
+          let user = H.setup () in
+          let* () = H.click user (H.by_text "CTO") in
+          Js.Promise.resolve E.(expect !actions |> toEqual []));
+      Jest.testPromise "opens a row's href as a link, its modifiers kept"
+        (fun () ->
+          let actions = ref [] and opened = ref [] in
+          let open_ e =
+            prevent_default e;
+            let a = target e in
+            opened :=
+              !opened
+              @ [ (H.attribute a "href", H.attribute a "target", ctrl_key e) ]
+          in
+          listen "click" open_;
+          team ~href:(fun m -> Some ("/members/" ^ m.id)) actions;
+          let user = H.setup () in
+          let* () = H.keyboard user "{Control>}" in
+          let* () = H.click user (H.by_text "CEO") in
+          let* () = H.keyboard user "{/Control}" in
+          H.focus (row "John Smith");
+          let* () = H.keyboard user "{Enter}" in
+          unlisten "click" open_;
+          let links =
+            List.filter (fun (href, _, _) -> Option.is_some href) !opened
+          in
+          Js.Promise.resolve
+            E.(
+              expect links
+              |> toEqual
+                   [
+                     (Some "/members/1", Some "_blank", true);
+                     (Some "/members/2", Some "_blank", false);
+                   ])))

@@ -134,7 +134,7 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [Spinner](https://hyphatech.github.io/solidtype/heroui/spinner/): A loading indicator, for a pending state.
 - [Surface](https://hyphatech.github.io/solidtype/heroui/surface/): The background a part of a page stands on.
 - [Switch](https://hyphatech.github.io/solidtype/heroui/switch/): A switch, HeroUI's on Kobalte's.
-- [Table](https://hyphatech.github.io/solidtype/heroui/table/): Rows and columns of data, moved through by the keys.
+- [Table](https://hyphatech.github.io/solidtype/heroui/table/): Rows and columns of data, moved through by the keys, each row's action or link run by Enter or a press.
 - [Tabs](https://hyphatech.github.io/solidtype/heroui/tabs/): Sections of content, one shown at a time, chosen from a list of tabs.
 - [TextArea](https://hyphatech.github.io/solidtype/heroui/text-area/): A multi-line text input.
 - [TextField](https://hyphatech.github.io/solidtype/heroui/text-field/): A field of a label, an input, a description and an error.

@@ -59,6 +59,62 @@ let in_control e =
         [role=button]")
   <> None
 
+external prevent : _ Dom.event_like -> unit = "preventDefault" [@@mel.send]
+external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
+
+(* A press's modifiers, which a link opened by a row's press keeps. *)
+external meta_held : _ Dom.event_like -> bool = "metaKey" [@@mel.get]
+external ctrl_held : _ Dom.event_like -> bool = "ctrlKey" [@@mel.get]
+external alt_held : _ Dom.event_like -> bool = "altKey" [@@mel.get]
+external shift_held : _ Dom.event_like -> bool = "shiftKey" [@@mel.get]
+
+type click_init
+
+external click_init :
+  meta_key:(bool[@mel.as "metaKey"]) ->
+  ctrl_key:(bool[@mel.as "ctrlKey"]) ->
+  alt_key:(bool[@mel.as "altKey"]) ->
+  shift_key:(bool[@mel.as "shiftKey"]) ->
+  click_init = ""
+[@@mel.obj]
+
+external mouse_event : string -> click_init -> Dom.mouseEvent = "MouseEvent"
+[@@mel.new]
+
+external dispatch : Dom.element -> Dom.mouseEvent -> bool = "dispatchEvent"
+[@@mel.send]
+
+external create_element : string -> Dom.element = "createElement"
+[@@mel.scope "document"]
+
+external set_attribute : Dom.element -> string -> string -> unit
+  = "setAttribute"
+[@@mel.send]
+
+external append_child : Dom.element -> Dom.element -> Dom.element
+  = "appendChild"
+[@@mel.send]
+
+external remove_element : Dom.element -> unit = "remove" [@@mel.send]
+
+(* A row's link, opened as React Aria opens one where no router is given: a
+   link made for the moment inside the row, clicked with the press's
+   modifiers, so the browser opens it as it opens any link, in a new tab for
+   one. The click does not bubble, or the row would take it for a press. *)
+let open_link row attributes e =
+  let link = create_element "a" in
+  List.iter
+    (fun (name, value) -> Option.iter (set_attribute link name) value)
+    attributes;
+  ignore (append_child row link : Dom.element);
+  ignore
+    (dispatch link
+       (mouse_event "click"
+          (click_init ~meta_key:(meta_held e) ~ctrl_key:(ctrl_held e)
+             ~alt_key:(alt_held e) ~shift_key:(shift_held e)))
+      : bool);
+  remove_element link
+
 type row = {
   key : string;
   level : int;
@@ -290,6 +346,7 @@ type table = {
   remove : string -> unit;
   set_order : (unit -> string array) option -> unit;
       (** The keys of the body's rows, in the order it holds them. *)
+  row_action : (string -> unit) option;
   manager : Manager.t S.accessor;
   row_header : unit -> int;
   set_row_header : (unit -> int) option -> unit;
@@ -609,6 +666,7 @@ module Root = struct
       ?expanded_keys:string array Solidtype.Check.value ->
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
+      ?on_row_action:(string -> unit) ->
       ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
@@ -661,6 +719,9 @@ module Root = struct
       = "onExpandedChange"
     [@@mel.get]
 
+    external on_row_action : t -> ((string -> unit)[@u]) option = "onRowAction"
+    [@@mel.get]
+
     external children : t -> Jsx.content = "children" [@@mel.get]
 
     (* A virtualized table's element is a <div>: what it is given is an
@@ -700,6 +761,7 @@ module Root = struct
       "expandedKeys";
       "defaultExpandedKeys";
       "onExpandedChange";
+      "onRowAction";
       "children";
       "ref";
       "onKeyDown";
@@ -1119,6 +1181,10 @@ module Root = struct
           };
         rows = ordered;
         add = (fun r -> S.set set_rows (r :: S.get rows));
+        row_action =
+          Option.map
+            (fun f key -> (f key [@u]))
+            (S.untrack (fun () -> Props.on_row_action props));
         remove =
           (fun k ->
             S.set set_rows
@@ -1687,6 +1753,14 @@ module Row = struct
 
     external check :
       id:string Solidtype.Check.value ->
+      ?on_action:(unit -> unit) ->
+      ?href:string Solidtype.Check.value ->
+      ?target:string Solidtype.Check.value ->
+      ?rel:string Solidtype.Check.value ->
+      ?download:string Solidtype.Check.value ->
+      ?href_lang:string Solidtype.Check.value ->
+      ?ping:string Solidtype.Check.value ->
+      ?referrer_policy:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
@@ -1694,8 +1768,35 @@ module Row = struct
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external id : t -> string = "id" [@@mel.get]
+
+    external on_action : t -> ((unit -> unit)[@u]) option = "onAction"
+    [@@mel.get]
+
+    external href : t -> string option = "href" [@@mel.get]
+    external target : t -> string option = "target" [@@mel.get]
+    external rel : t -> string option = "rel" [@@mel.get]
+    external download : t -> string option = "download" [@@mel.get]
+    external href_lang : t -> string option = "hrefLang" [@@mel.get]
+    external ping : t -> string option = "ping" [@@mel.get]
+    external referrer_policy : t -> string option = "referrerPolicy" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
+
+    external on_key_up : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyUp"
+    [@@mel.get]
+
+    external on_dbl_click : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onDblClick"
+    [@@mel.get]
+
+    external on_pointer_cancel : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerCancel"
+    [@@mel.get]
+
+    external on_context_menu : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onContextMenu"
+    [@@mel.get]
 
     external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
       = "onPointerDown"
@@ -1724,14 +1825,26 @@ module Row = struct
   let own =
     [|
       "id";
+      "onAction";
+      "href";
+      "target";
+      "rel";
+      "download";
+      "hrefLang";
+      "ping";
+      "referrerPolicy";
       "children";
       "ref";
       "onPointerDown";
       "onPointerUp";
+      "onPointerCancel";
       "onClick";
+      "onDblClick";
       "onKeyDown";
+      "onKeyUp";
       "onMouseDown";
       "onFocus";
+      "onContextMenu";
     |]
 
   let draw t ~(parent : row option) ~position ~size (props : Props.t) =
@@ -1761,6 +1874,66 @@ module Row = struct
     let selected () = t.context.is_selected key in
     let disabled () = t.context.is_disabled key in
     let header_id = S.create_unique_id () in
+    let m () = S.get t.manager in
+    (* As React Aria runs a row's action: the first a press runs where the row
+       cannot be selected, or with [`toggle] while none is; else, with
+       [`replace], a double press's. Enter runs either; Space then selects. *)
+    let link () =
+      match Props.href props with
+      | Some href ->
+          Some
+            [
+              ("href", Some href);
+              ("target", Props.target props);
+              ("rel", Props.rel props);
+              ("download", Props.download props);
+              ("hreflang", Props.href_lang props);
+              ("ping", Props.ping props);
+              ("referrerpolicy", Props.referrer_policy props);
+            ]
+      | None -> None
+    in
+    let allows_actions () =
+      (Option.is_some (Props.on_action props)
+      || Option.is_some t.row_action
+      || Option.is_some (link ()))
+      && not (disabled ())
+    in
+    let allows_selection () = Selectable_item.allows_selection item () in
+    let replaces () =
+      match S.get (Manager.selection_behavior (m ())) with
+      | `replace -> true
+      | `toggle -> false
+    in
+    let primary () =
+      allows_actions ()
+      &&
+      if replaces () then not (allows_selection ())
+      else (not (allows_selection ())) || S.get (Manager.is_empty (m ()))
+    in
+    let secondary () =
+      allows_actions () && allows_selection () && replaces ()
+    in
+    let has_action () = primary () || secondary () in
+    let act e =
+      Option.iter (fun f -> (f () [@u])) (Props.on_action props);
+      Option.iter (fun f -> f key) t.row_action;
+      match (link (), S.get element) with
+      | Some attributes, Some row -> open_link row attributes e
+      | Some _, None | None, (Some _ | None) -> ()
+    in
+    (* What the press under way began as. *)
+    let pointer = ref "mouse" in
+    let primary_at_down = ref false in
+    let enter_down = ref false in
+    (* A touch held half a second selects, and turns a [`replace] table to
+       [`toggle], so a tap then selects, as React Aria's long press does. *)
+    let long_press = ref None in
+    let long_pressed = ref false in
+    let cancel_long_press () =
+      Option.iter Js.Global.clearTimeout !long_press;
+      long_press := None
+    in
     let r =
       {
         key;
@@ -1843,16 +2016,73 @@ module Row = struct
             data_disabled=(fun () -> state (disabled ()))
             data_expanded=(fun () ->
                             state (tree () && has_child_items () && expanded ()))
-            on_pointer_down=(pressed
-                               (Props.on_pointer_down props)
-                               (Selectable_item.on_pointer_down item))
-            on_pointer_up=(pressed
-                             (Props.on_pointer_up props)
-                             (Selectable_item.on_pointer_up item))
-            on_click=(pressed (Props.on_click props)
-                        (Selectable_item.on_click item))
-            on_key_down=(pressed (Props.on_key_down props)
-                           (Selectable_item.on_key_down item))
+            on_pointer_down=(pressed (Props.on_pointer_down props) (fun e ->
+                                 pointer := pointer_type e;
+                                 primary_at_down := primary ();
+                                 long_pressed := false;
+                                 if
+                                   String.equal !pointer "touch"
+                                   && has_action () && allows_selection ()
+                                 then
+                                   long_press :=
+                                     Some
+                                       (Js.Global.setTimeout
+                                          ~f:(fun () ->
+                                            long_press := None;
+                                            long_pressed := true;
+                                            Manager.toggle_selection (m ()) key;
+                                            Manager.set_selection_behavior
+                                              (m ()) `toggle)
+                                          500);
+                                 (* A mouse selects as it is pressed, unless
+                                    its press runs the action as it ends. *)
+                                 if
+                                   not
+                                     (String.equal !pointer "mouse"
+                                     && !primary_at_down)
+                                 then Selectable_item.on_pointer_down item e))
+            on_pointer_up=(pressed (Props.on_pointer_up props) (fun e ->
+                               cancel_long_press ();
+                               Selectable_item.on_pointer_up item e))
+            on_pointer_cancel=(fun e ->
+                                call (Props.on_pointer_cancel props) e;
+                                cancel_long_press ())
+            on_context_menu=(fun e ->
+                              call (Props.on_context_menu props) e;
+                              (* A long touch's menu would cover what it
+                                 selects. *)
+                              if Option.is_some !long_press || !long_pressed
+                              then prevent e)
+            on_click=(pressed (Props.on_click props) (fun e ->
+                          if !long_pressed then long_pressed := false
+                          else if String.equal !pointer "mouse" then
+                            if !primary_at_down then act e
+                            else Selectable_item.on_click item e
+                          else if has_action () then act e
+                          else Selectable_item.on_click item e))
+            on_dbl_click=(pressed (Props.on_dbl_click props) (fun e ->
+                              if String.equal !pointer "mouse" && secondary ()
+                              then begin
+                                prevent e;
+                                act e
+                              end))
+            on_key_down=(pressed (Props.on_key_down props) (fun e ->
+                             (* Enter is a row's action's, though none runs
+                                while it selects; Space then selects. *)
+                             if
+                               String.equal (key_name e) "Enter"
+                               && allows_actions ()
+                             then begin
+                               prevent_default e;
+                               enter_down := has_action ()
+                             end
+                             else Selectable_item.on_key_down item e))
+            on_key_up=(pressed (Props.on_key_up props) (fun e ->
+                           if String.equal (key_name e) "Enter" && !enter_down
+                           then begin
+                             enter_down := false;
+                             act e
+                           end))
             on_mouse_down=(fun e ->
                             call (Props.on_mouse_down props) e;
                             Selectable_item.on_mouse_down item e)
@@ -2087,11 +2317,9 @@ end
 external stop_propagation : _ Dom.event_like -> unit = "stopPropagation"
 [@@mel.send]
 
-external prevent : _ Dom.event_like -> unit = "preventDefault" [@@mel.send]
 external client_x : Dom.pointerEvent -> float = "clientX" [@@mel.get]
 external button : Dom.pointerEvent -> int = "button" [@@mel.get]
 external pointer_id : Dom.pointerEvent -> int = "pointerId" [@@mel.get]
-external pointer_type : Dom.pointerEvent -> string = "pointerType" [@@mel.get]
 external ctrl_key : Dom.pointerEvent -> bool = "ctrlKey" [@@mel.get]
 external alt_key : Dom.pointerEvent -> bool = "altKey" [@@mel.get]
 external meta_key : Dom.pointerEvent -> bool = "metaKey" [@@mel.get]

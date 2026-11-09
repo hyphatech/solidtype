@@ -10,6 +10,16 @@
   column's header or a control in a cell given it after a row had focus and
   the table was left, where that row took it back.
 
+- `Solidtype_heroui.Table` and `Solidtype_headless.Table` run a row's action,
+  as React Aria runs one: a row's `on_action` and a table's `on_row_action`,
+  and a row's link, `href`, with `target`, `rel`, `download`, `href_lang`,
+  `ping` and `referrer_policy`. Enter runs it; a press runs it where the row
+  cannot be selected, or with `` `toggle`` while no row is; with `` `replace``
+  a double press runs it, and a touch held half a second selects.
+
+- `Solidtype.Solid.pick`, a component's own props handed on as they were
+  given, a function left out absent.
+
 ## 0.6.0 (2026-11-06)
 
 - A prop named `props` is refused at its name, the same on mlx 0.11 and 0.12,

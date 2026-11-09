@@ -490,6 +490,12 @@ external split_others : 'props -> string array -> 'props * 'other rest
 
 let others props names = snd (split_others props names)
 
+external split_picked : 'props -> string array -> 'other rest * 'props
+  = "splitProps"
+[@@mel.module "solid-js"]
+
+let pick props names = fst (split_picked props names)
+
 external drawn_as : 'rest -> ('drawn -> Jsx.element) option = "as" [@@mel.get]
 
 let undrawn rest = others rest [| "as" |]

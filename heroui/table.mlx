@@ -90,7 +90,8 @@ module Content = struct
       ?(tree_column : string option) ?(expanded_keys : string array option)
       ?(default_expanded_keys : string array option)
       ?(on_expanded_change : (string array -> unit) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(on_row_action : (string -> unit) option) ?(class_ : string option)
+      ~(children : Jsx.content) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
       ?aria_label
@@ -112,7 +113,13 @@ module Content = struct
                            ignore (on_expanded_change keys : unit option))
       class_=(fun () -> after (Styles.Table.content (slots ())) (class_ ()))
       data_slot="table-content"
-      props=(Props.others props)>
+      props=(S.merge_props
+               [|
+                 Props.others props;
+                 (* Absent unless given, since a row with an action is pressed
+                    for it rather than selected. *)
+                 S.pick props [| "onRowAction" |];
+               |])>
       (fun () -> children ())
     </Headless.Root>
   [@@element table]
@@ -354,7 +361,11 @@ module Body = struct
 end
 
 module Row = struct
-  let%component make ?(id : string option) ?(class_ : string option)
+  let%component make ?(id : string option) ?(on_action : (unit -> unit) option)
+      ?(href : string option) ?(target : string option) ?(rel : string option)
+      ?(download : string option) ?(href_lang : string option)
+      ?(ping : string option) ?(referrer_policy : string option)
+      ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlTableRowElement -> unit) option)
       ?(style : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Row" in
@@ -382,6 +393,13 @@ module Row = struct
     <Checkbox.Selection.Provider value=(fun () -> one)>
       <Headless.Row
         id=(fun () -> key)
+        ?href
+        ?target
+        ?rel
+        ?download
+        ?href_lang
+        ?ping
+        ?referrer_policy
         ref=(fun e ->
               ignore (given_ref e : unit option);
               Interaction.watch i e)
@@ -398,7 +416,13 @@ module Row = struct
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_selected=(fun () -> Jsx.flag (selected ()))
         data_disabled=(fun () -> Jsx.flag (disabled ()))
-        props=(Props.others props)>
+        props=(S.merge_props
+                 [|
+                   Props.others props;
+                   (* Absent unless given, since a row with an action is
+                      pressed for it rather than selected. *)
+                   S.pick props [| "onAction" |];
+                 |])>
         (fun () -> children ())
       </Headless.Row>
     </Checkbox.Selection.Provider>

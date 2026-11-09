@@ -263,6 +263,7 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | `expandedKeys` | `expanded_keys` | `string array` | | Its rows' keys expanded, controlled |
 | `defaultExpandedKeys` | `default_expanded_keys` | `string array` | | Its rows' keys expanded at first, kept by itself |
 | `onExpandedChange` | `on_expanded_change` | `string array -> unit` | | Called with the keys expanded |
+| `onRowAction` | `on_row_action` | `string -> unit` | | Called with a row's key as its action runs, after the row's own |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Header
@@ -308,6 +309,10 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
 | `id` | `id` | `string` | one of its own | Its key |
+| `onAction` | `on_action` | `unit -> unit` | | Run by Enter, and by a press as the selection lets it |
+| `href` | `href` | `string` | | Opened as its action, as a link is |
+| `target`, `rel`, `download`, `hrefLang`, `ping`, `referrerPolicy` | `target`, `rel`, `download`, `href_lang`, `ping`, `referrer_policy` | `string` | | Its link's |
+| `routerOptions` | — | | | A link opens as the browser opens one |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Cell

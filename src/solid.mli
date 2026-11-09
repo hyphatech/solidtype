@@ -297,3 +297,8 @@ val others : 'props -> string array -> 'other rest
     rest on: what is left is what its check admits besides them, its [data-]
     attributes, which every element and component takes. A component written by
     [let%component] has [Props.others], which leaves out all of its own. *)
+
+val pick : 'props -> string array -> 'other rest
+(** [pick props names] is only those of [props] that are [names], live, for a
+    spread: a component's own props it hands on as they were given, a function
+    left out absent where a [?name=] would give the check a value. *)

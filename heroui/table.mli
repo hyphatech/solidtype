@@ -125,7 +125,10 @@ end
     [expanded_keys] while it is given them, else those it keeps,
     [default_expanded_keys] at first; each change calls [on_expanded_change]
     with them. A {!Button} of [slot=`chevron] in a row expands and collapses it,
-    as do the arrow forward and back on the row. *)
+    as do the arrow forward and back on the row.
+
+    A row's action runs its own [on_action], then [on_row_action] given its key,
+    as {!Solidtype_headless.Table.Row} runs one. *)
 module Content : sig
   module Props : sig
     type t
@@ -146,6 +149,7 @@ module Content : sig
       ?expanded_keys:string array Solidtype.Check.value ->
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
+      ?on_row_action:(string -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
@@ -304,13 +308,26 @@ end
     cell, its [id] its key, else one of its own. In a tree, the rows written
     inside it are drawn after it while it is expanded. It declares
     [data-hovered], [data-focus-visible], [data-level], [data-expanded] and
-    [data-has-child-items]. *)
+    [data-has-child-items].
+
+    Its action, [on_action], and its link, [href] with [target], [rel],
+    [download], [href_lang], [ping] and [referrer_policy], run by Enter and as
+    the selection lets a press run them, as {!Solidtype_headless.Table.Row}'s
+    do. *)
 module Row : sig
   module Props : sig
     type t
 
     val check :
       ?id:string Solidtype.Check.value ->
+      ?on_action:(unit -> unit) ->
+      ?href:string Solidtype.Check.value ->
+      ?target:string Solidtype.Check.value ->
+      ?rel:string Solidtype.Check.value ->
+      ?download:string Solidtype.Check.value ->
+      ?href_lang:string Solidtype.Check.value ->
+      ?ping:string Solidtype.Check.value ->
+      ?referrer_policy:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlTableRowElement -> unit) ->
       ?style:string Solidtype.Check.value ->
