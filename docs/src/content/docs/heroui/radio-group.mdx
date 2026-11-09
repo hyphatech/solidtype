@@ -30,9 +30,25 @@ describes that radio's input. Its state is declared as React Aria writes it:
 Space chooses a radio and the arrow keys move the choice, and Enter presses a
 radio's content as React Aria's does, though it chooses nothing.
 
+Original HeroUI documentation: [Radio Group](https://heroui.com/en/docs/react/components/radio-group).
+
 ## Usage
 
 <Example code={RadioGroupUsageCode} title="radio_group_usage.mlx"><RadioGroupUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI RadioGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two first
+contents: a marked row is one they disagree on, and a dimmed row is a
+framework's own, which no style reads. A description is Kobalte's `<div>`
+where React Aria's is a `<span>`; each is the one its input is described by.
+
+The marked row is Kobalte's: its label names its radio's input by `for`, where React Aria's label holds the input.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Examples
 
@@ -149,19 +165,3 @@ string React takes.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | What it holds; optional on the indicator |
-
-## Beside React
-
-Original HeroUI documentation: [Radio Group](https://heroui.com/en/docs/react/components/radio-group).
-
-The same HeroUI RadioGroup twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two first
-contents: a marked row is one they disagree on, and a dimmed row is a
-framework's own, which no style reads. A description is Kobalte's `<div>`
-where React Aria's is a `<span>`; each is the one its input is described by.
-
-The marked row is Kobalte's: its label names its radio's input by `for`, where React Aria's label holds the input.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

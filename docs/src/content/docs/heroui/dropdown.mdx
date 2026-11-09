@@ -46,9 +46,22 @@ give. A `Button` inside it is its trigger, as in HeroUI; anything else is
 wrapped in `Dropdown.Trigger`. HeroUI's `Label`, `Description`, `Header`,
 `Kbd` and `Separator` go inside its items and sections, as in React.
 
+Original HeroUI documentation: [Dropdown](https://heroui.com/en/docs/react/components/dropdown).
+
 ## Usage
 
 <Example code={ExUsageCode} title="dropdown_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Dropdown twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each trigger: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -314,16 +327,3 @@ Each prop beside the name HeroUI's React component gives it.
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `children` | `children` | elements | The item that opens the submenu, and its popover |
-
-## Beside React
-
-Original HeroUI documentation: [Dropdown](https://heroui.com/en/docs/react/components/dropdown).
-
-The same HeroUI Dropdown twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of each trigger: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

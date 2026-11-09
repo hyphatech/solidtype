@@ -9,8 +9,9 @@
   (package ppx_solidtype)))
 
 ; Every island of the documentation is on one of its pages, every page
-; of rhp's links to the page of rhp's documentation it follows, and llms.txt
-; lists every page, and a page installs the newest release's plugin.
+; of rhp's links to the page of rhp's documentation it follows, and every
+; port's to HeroUI's before its usage; llms.txt lists every page, and a page
+; installs the newest release's plugin.
 
 (test
  (name test_docs)

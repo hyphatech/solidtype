@@ -20,9 +20,24 @@ import * as Demo from "@islands/popover_demo.jsx";
 own `popoverVariants` gives and HeroUI's arrow. A `Button` inside it is its
 trigger, as in HeroUI; anything else is wrapped in `Popover.Trigger`.
 
+Original HeroUI documentation: [Popover](https://heroui.com/en/docs/react/components/popover).
+
 ## Usage
 
 <Example code={ExUsageCode} title="popover_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Popover twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each trigger: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria-haspopup="dialog"`, which React Aria's leaves out.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -158,18 +173,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Its class |
 | `children` | `children` | elements | An arrow of its own, in place of HeroUI's |
-
-## Beside React
-
-Original HeroUI documentation: [Popover](https://heroui.com/en/docs/react/components/popover).
-
-The same HeroUI Popover twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of each trigger: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria-haspopup="dialog"`, which React Aria's leaves out.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

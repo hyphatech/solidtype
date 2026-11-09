@@ -51,11 +51,23 @@ column. Given a `tree_column`, rows hold rows, expanded and collapsed by a
 chevron or the arrow keys. Inside a `Virtualizer` given
 `Virtualizer.table_layout`, only the rows in view are drawn.
 
+Original HeroUI documentation: [Table](https://heroui.com/en/docs/react/components/table).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="table_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Table twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two tables: a marked
+row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -345,15 +357,3 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 ### Table.LoadMoreContent
 
 It takes `class_`, added after HeroUI's class, and its `children`.
-
-## Beside React
-
-Original HeroUI documentation: [Table](https://heroui.com/en/docs/react/components/table).
-
-The same HeroUI Table twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two tables: a marked
-row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

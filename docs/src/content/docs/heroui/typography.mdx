@@ -24,9 +24,21 @@ import * as Demo from "@islands/typography_demo.jsx";
 renders it under HeroUI's. Text has no behaviour, so no Kobalte component
 underlies it.
 
+Original HeroUI documentation: [Typography](https://heroui.com/en/docs/react/components/typography).
+
 ## Usage
 
 <Example code={UsageCode} title="typography_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Typography twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two elements:
+a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -129,15 +141,3 @@ Each takes Typography's props, but `type_`: `Heading` its `level`, 1 to 6,
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | The markup it styles |
-
-## Beside React
-
-Original HeroUI documentation: [Typography](https://heroui.com/en/docs/react/components/typography).
-
-The same HeroUI Typography twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two elements:
-a marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

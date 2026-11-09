@@ -40,9 +40,24 @@ with the classes HeroUI's own `alertDialogVariants` gives. It is a
 its backdrop says a press outside or Escape may; its container takes no
 scroll; and its icon draws HeroUI's icon for its status.
 
+Original HeroUI documentation: [AlertDialog](https://heroui.com/en/docs/react/components/alert-dialog).
+
 ## Usage
 
 <Example code={ExUsageCode} title="alert_dialog_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI AlertDialog twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each trigger: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria-haspopup="dialog"`, which React Aria's leaves out.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -219,18 +234,3 @@ Each prop beside the name HeroUI's React component gives it.
 ### AlertDialog.Dialog, Header, Body, Footer, Heading, CloseTrigger, Trigger
 
 As [Modal's](/solidtype/heroui/modal/#api-reference).
-
-## Beside React
-
-Original HeroUI documentation: [AlertDialog](https://heroui.com/en/docs/react/components/alert-dialog).
-
-The same HeroUI AlertDialog twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of each trigger: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria-haspopup="dialog"`, which React Aria's leaves out.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

@@ -20,10 +20,10 @@ let make () =
       solidtype=(<Breadcrumbs
                    is_disabled=(fun () -> S.get disabled)
                    on_action=(S.set set_told)>
-                   <Breadcrumbs.Item id="home" href="#beside-react">
+                   <Breadcrumbs.Item id="home" href="#parity">
                      "Home"
                    </Breadcrumbs.Item>
-                   <Breadcrumbs.Item id="products" href="#beside-react">
+                   <Breadcrumbs.Item id="products" href="#parity">
                      "Products"
                    </Breadcrumbs.Item>
                    <Breadcrumbs.Item id="laptop">"Laptop"</Breadcrumbs.Item>

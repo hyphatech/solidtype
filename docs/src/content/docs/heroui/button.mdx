@@ -32,9 +32,23 @@ import * as Demo from "@islands/button_demo.jsx";
 the classes HeroUI's own `buttonVariants` gives and the state its styles read,
 declared as React Aria writes it.
 
+Original HeroUI documentation: [Button](https://heroui.com/en/docs/react/components/button).
+
 ## Usage
 
 <Example code={usage} title="button_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Button twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two elements:
+a marked row is one they disagree on, and a dimmed row is a framework's own --
+Solid's hydration key, React Aria's markers and the id it generates -- which no
+style reads. Hover, focus and press them to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Examples
 
@@ -163,17 +177,3 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements, or a function of `state` | | Its content |
 | `render` | `as_` | a function of its props and `state` | | Draws another element in its place |
-
-## Beside React
-
-Original HeroUI documentation: [Button](https://heroui.com/en/docs/react/components/button).
-
-The same HeroUI Button twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two elements:
-a marked row is one they disagree on, and a dimmed row is a framework's own --
-Solid's hydration key, React Aria's markers and the id it generates -- which no
-style reads. Hover, focus and press them to see the state each sets.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

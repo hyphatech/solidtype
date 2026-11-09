@@ -115,7 +115,7 @@ type LinkProps = { isDisabled: boolean; icon: boolean; label: string };
 export function link(host: HTMLElement, { isDisabled, icon, label }: LinkProps): void {
   flushSync(() =>
     rootOf(host).render(
-      <Link href="#beside-react" isDisabled={isDisabled}>
+      <Link href="#parity" isDisabled={isDisabled}>
         {label}
         {icon && <Link.Icon />}
       </Link>,
@@ -660,10 +660,10 @@ export function breadcrumbs(host: HTMLElement, { isDisabled, onAction }: Breadcr
   flushSync(() =>
     rootOf(host).render(
       <Breadcrumbs isDisabled={isDisabled} onAction={(key) => onAction(String(key))}>
-        <Breadcrumbs.Item id="home" href="#beside-react">
+        <Breadcrumbs.Item id="home" href="#parity">
           Home
         </Breadcrumbs.Item>
-        <Breadcrumbs.Item id="products" href="#beside-react">
+        <Breadcrumbs.Item id="products" href="#parity">
           Products
         </Breadcrumbs.Item>
         <Breadcrumbs.Item id="laptop">Laptop</Breadcrumbs.Item>

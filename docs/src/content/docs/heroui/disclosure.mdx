@@ -20,11 +20,26 @@ Its content stays on the page while collapsed, hidden until the browser's find
 in page reaches a word in it, which expands it; it grows and shrinks by
 `--disclosure-panel-height`, the height HeroUI's styles animate.
 
+Original HeroUI documentation: [Disclosure](https://heroui.com/en/docs/react/components/disclosure).
+
 ## Usage
 
 HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons` and Iconify.
 
 <Example code={UsageCode} title="disclosure_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Disclosure twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two triggers:
+a marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads. Each trigger's `aria-controls` names its own content by
+the id its framework made; Kobalte marks the trigger expanded or closed, and
+disabled, with empty attributes, which no style of HeroUI's reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -131,18 +146,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | — | | Not yet: HeroUI's chevron is always drawn |
-
-## Beside React
-
-Original HeroUI documentation: [Disclosure](https://heroui.com/en/docs/react/components/disclosure).
-
-The same HeroUI Disclosure twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two triggers:
-a marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads. Each trigger's `aria-controls` names its own content by
-the id its framework made; Kobalte marks the trigger expanded or closed, and
-disabled, with empty attributes, which no style of HeroUI's reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

@@ -24,9 +24,22 @@ holding Kobalte's link and HeroUI's chevron, with the classes HeroUI's own
 `breadcrumbsVariants` gives. The last item is the page itself: its link is
 `aria-current="page"` and disabled, and no separator follows it.
 
+Original HeroUI documentation: [Breadcrumbs](https://heroui.com/en/docs/react/components/breadcrumbs).
+
 ## Usage
 
 <Example code={ExUsageCode} title="breadcrumbs_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Breadcrumbs twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the first link of
+each: a marked row is one they disagree on, and a dimmed row is a framework's
+own, which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -148,16 +161,3 @@ Each prop beside the name HeroUI's React component gives it.
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether its link is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its text |
-
-## Beside React
-
-Original HeroUI documentation: [Breadcrumbs](https://heroui.com/en/docs/react/components/breadcrumbs).
-
-The same HeroUI Breadcrumbs twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the first link of
-each: a marked row is one they disagree on, and a dimmed row is a framework's
-own, which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

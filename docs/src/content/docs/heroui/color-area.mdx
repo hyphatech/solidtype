@@ -34,11 +34,25 @@ from the form control it makes, so its own area never is. The port takes the
 thumb out of the page's order and disables its inputs, and HeroUI's disabled
 style stops the pointer.
 
+Original HeroUI documentation: [ColorArea](https://heroui.com/en/docs/react/components/color-area).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="color_area_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ColorArea twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two areas: a
+marked row is one they disagree on.
+
+The marked row is where each draws the gradient: Kobalte on a part of its own inside the area, React Aria in the area's own `style`, with its place. The gradient is the same.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -122,17 +136,3 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `style` | `style` | `string` | | Added after its colour; a function of its state in React |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
-
-## Beside React
-
-Original HeroUI documentation: [ColorArea](https://heroui.com/en/docs/react/components/color-area).
-
-The same HeroUI ColorArea twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two areas: a
-marked row is one they disagree on.
-
-The marked row is where each draws the gradient: Kobalte on a part of its own inside the area, React Aria in the area's own `style`, with its place. The gradient is the same.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

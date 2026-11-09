@@ -42,11 +42,27 @@ page reaches a word in it, which expands its item; it grows and shrinks by
 `--disclosure-panel-height`, as a [`Disclosure`](/solidtype/heroui/disclosure/)'s content
 does.
 
+Original HeroUI documentation: [Accordion](https://heroui.com/en/docs/react/components/accordion).
+
 ## Usage
 
 HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="accordion_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Accordion twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two
+accordions: a marked row is one they disagree on, and a dimmed row is a
+framework's own, which no style reads. Each trigger's `aria-controls` names
+its own panel by the id its framework made. Kobalte's panel is a region of the
+page its trigger controls, where React Aria's is a group its trigger names;
+both are accessible, and the port keeps Kobalte's.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -213,19 +229,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | An icon in place of HeroUI's chevron |
-
-## Beside React
-
-Original HeroUI documentation: [Accordion](https://heroui.com/en/docs/react/components/accordion).
-
-The same HeroUI Accordion twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two
-accordions: a marked row is one they disagree on, and a dimmed row is a
-framework's own, which no style reads. Each trigger's `aria-controls` names
-its own panel by the id its framework made. Kobalte's panel is a region of the
-page its trigger controls, where React Aria's is a group its trigger names;
-both are accessible, and the port keeps Kobalte's.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

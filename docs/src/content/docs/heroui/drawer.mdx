@@ -31,9 +31,24 @@ from the edge its `placement` names; its trigger is a button; and while it
 may be dismissed its dialog is dragged toward its edge to close, as HeroUI's
 is.
 
+Original HeroUI documentation: [Drawer](https://heroui.com/en/docs/react/components/drawer).
+
 ## Usage
 
 <Example code={ExUsageCode} title="drawer_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Drawer twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of each trigger: a marked
+row is one they disagree on, and a dimmed row is a framework's own, which no
+style reads.
+
+The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria-haspopup="dialog"`, which React Aria's leaves out.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -179,18 +194,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | What it holds, where it holds any |
-
-## Beside React
-
-Original HeroUI documentation: [Drawer](https://heroui.com/en/docs/react/components/drawer).
-
-The same HeroUI Drawer twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of each trigger: a marked
-row is one they disagree on, and a dimmed row is a framework's own, which no
-style reads.
-
-The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria-haspopup="dialog"`, which React Aria's leaves out.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

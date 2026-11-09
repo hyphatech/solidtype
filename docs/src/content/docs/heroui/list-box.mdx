@@ -27,9 +27,22 @@ own `listboxVariants`, `listboxItemVariants` and `listboxSectionVariants`
 give. HeroUI's `Label`, `Description`, `Header` and `Separator` go inside its
 options and sections, as in React.
 
+Original HeroUI documentation: [ListBox](https://heroui.com/en/docs/react/components/list-box).
+
 ## Usage
 
 <Example code={ExUsageCode} title="list_box_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ListBox twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each list: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -220,16 +233,3 @@ while any of it is in view.
 | `loaderSize` | `loader_size` | `float` | `48.` | What loads more's length |
 | `gap` | `gap` | `float` | `0.` | The space between entries |
 | `padding` | `padding` | `float` | `0.` | The space around them |
-
-## Beside React
-
-Original HeroUI documentation: [ListBox](https://heroui.com/en/docs/react/components/list-box).
-
-The same HeroUI ListBox twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of each list: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

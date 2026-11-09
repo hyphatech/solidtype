@@ -19,9 +19,21 @@ and radio groups inside it the state, as HeroUI's gives React Aria's: the
 browser disables a native button or input inside a disabled fieldset, but
 neither a group nor the state HeroUI's styles read.
 
+Original HeroUI documentation: [Fieldset](https://heroui.com/en/docs/react/components/fieldset).
+
 ## Usage
 
 <Example code={UsageCode} title="fieldset_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Fieldset twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two buttons
+it holds: a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -102,15 +114,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | Its content |
-
-## Beside React
-
-Original HeroUI documentation: [Fieldset](https://heroui.com/en/docs/react/components/fieldset).
-
-The same HeroUI Fieldset twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two buttons
-it holds: a marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

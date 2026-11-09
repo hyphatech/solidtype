@@ -19,9 +19,23 @@ import * as Demo from "@islands/close_button_demo.jsx";
 gives, HeroUI's cross, and the state its styles read, declared as React Aria
 writes it.
 
+Original HeroUI documentation: [CloseButton](https://heroui.com/en/docs/react/components/close-button).
+
 ## Usage
 
 <Example code={usage} title="close_button_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI CloseButton twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two elements:
+a marked row is one they disagree on, and a dimmed row is a framework's own --
+Solid's hydration key, React Aria's markers and the id it generates -- which no
+style reads. Hover, focus and press them to see the state each sets.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Examples
 
@@ -91,17 +105,3 @@ Each prop beside the name HeroUI's React component gives it.
 | `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements, or a function of `state` | HeroUI's cross | Its icon |
-
-## Beside React
-
-Original HeroUI documentation: [CloseButton](https://heroui.com/en/docs/react/components/close-button).
-
-The same HeroUI CloseButton twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two elements:
-a marked row is one they disagree on, and a dimmed row is a framework's own --
-Solid's hydration key, React Aria's markers and the id it generates -- which no
-style reads. Hover, focus and press them to see the state each sets.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

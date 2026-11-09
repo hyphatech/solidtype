@@ -56,11 +56,25 @@ Kobalte's field is its accessible pattern: the field a group, a channel's
 input a spin button, where React Aria's is a text box. A channel's value is
 told as a number, as React Aria tells it.
 
+Original HeroUI documentation: [ColorField](https://heroui.com/en/docs/react/components/color-field).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="color_field_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ColorField twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two fields:
+a marked row is one they disagree on.
+
+The marked row is Kobalte's: its field is a `group` its label names, where React Aria's has no role.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -207,17 +221,3 @@ A press on the group but on its input gives the input the focus.
 Each takes `class_`, added after HeroUI's class, and every attribute of its
 element; the input its `placeholder`, shown while it is empty, the prefix and
 the suffix their `children`.
-
-## Beside React
-
-Original HeroUI documentation: [ColorField](https://heroui.com/en/docs/react/components/color-field).
-
-The same HeroUI ColorField twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two fields:
-a marked row is one they disagree on.
-
-The marked row is Kobalte's: its field is a `group` its label names, where React Aria's has no role.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

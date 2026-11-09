@@ -55,11 +55,23 @@ HeroUI's does, though not a text area. Inside a [TextField](/solidtype/heroui/te
 its input is the field's, which the field's label names, and the group takes
 the field's variant where it sets none. Kobalte has no group.
 
+Original HeroUI documentation: [InputGroup](https://heroui.com/en/docs/react/components/input-group).
+
 ## Usage
 
 HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="input_group_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI InputGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -197,15 +209,3 @@ Each takes every attribute its element takes, as [Input](/solidtype/heroui/input
 ### InputGroup.Prefix, InputGroup.Suffix
 
 Each takes `class_`, added after HeroUI's class, and its children.
-
-## Beside React
-
-Original HeroUI documentation: [InputGroup](https://heroui.com/en/docs/react/components/input-group).
-
-The same HeroUI InputGroup twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two groups: a
-marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

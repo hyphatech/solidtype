@@ -27,9 +27,24 @@ End keys, on its step's grid within its range. Its output and fill are drawn
 from its values as React Aria draws them, and each thumb is placed as React
 Aria places it, centred across the track, which HeroUI's styles count on.
 
+Original HeroUI documentation: [Slider](https://heroui.com/en/docs/react/components/slider).
+
 ## Usage
 
 <Example code={UsageCode} title="slider_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Slider twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two thumbs: a marked
+row is one they disagree on -- Kobalte's thumb is a `slider`, where React
+Aria's holds a range input.
+
+The marked rows are where each puts what a reader reaches: Kobalte's thumb is itself the `slider`, named, valued and reached by Tab, where React Aria's thumb holds a hidden range input that is; and Kobalte writes the thumb's place in a style of its own.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -130,18 +145,3 @@ Each prop beside the name HeroUI's React component gives it.
 
 Each takes `class_`, added after HeroUI's class; the output `children`, in
 place of its values.
-
-## Beside React
-
-Original HeroUI documentation: [Slider](https://heroui.com/en/docs/react/components/slider).
-
-The same HeroUI Slider twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two thumbs: a marked
-row is one they disagree on -- Kobalte's thumb is a `slider`, where React
-Aria's holds a range input.
-
-The marked rows are where each puts what a reader reaches: Kobalte's thumb is itself the `slider`, named, valued and reached by Tab, where React Aria's thumb holds a hidden range input that is; and Kobalte writes the thumb's place in a style of its own.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

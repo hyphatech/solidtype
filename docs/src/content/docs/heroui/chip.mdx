@@ -20,11 +20,24 @@ import * as Demo from "@islands/chip_demo.jsx";
 `chipVariants` gives. Text a chip is given becomes its `Chip.Label`, as in
 React. A chip has no behaviour, so it is HeroUI's spans as they are.
 
+Original HeroUI documentation: [Chip](https://heroui.com/en/docs/react/components/chip).
+
 ## Usage
 
 HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={ExUsageCode} title="chip_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Chip twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two chips: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Examples
 
@@ -92,16 +105,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
 | `children` | `children` | elements | Its text |
-
-## Beside React
-
-Original HeroUI documentation: [Chip](https://heroui.com/en/docs/react/components/chip).
-
-The same HeroUI Chip twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two chips: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

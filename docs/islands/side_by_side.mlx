@@ -207,8 +207,8 @@ let%component make ?(compared : string = ":scope > *")
   <div class_="flex flex-col gap-4">
     <div class_="grid grid-cols-2 gap-4">
       <figure class_="flex flex-col gap-2">
-        <figcaption class_="text-xs font-medium text-muted">
-          "solidtype — OCaml, on Solid and Kobalte"
+        <figcaption class_="font-mono text-xs text-muted">
+          "solidtype-heroui"
         </figcaption>
         <div
           class_="heroui-ground flex min-h-24 items-center justify-center \
@@ -218,8 +218,8 @@ let%component make ?(compared : string = ":scope > *")
         </div>
       </figure>
       <figure class_="flex flex-col gap-2">
-        <figcaption class_="text-xs font-medium text-muted">
-          "React — TypeScript, on React Aria"
+        <figcaption class_="font-mono text-xs text-muted">
+          "@heroui/react"
         </figcaption>
         <div
           class_="heroui-ground flex min-h-24 items-center justify-center \

@@ -23,12 +23,20 @@ say, from its own state, by its `is_invalid`; when its error shows is the
 application's too, from the field's `on_blur`. The form asks the browser to
 validate nothing, `novalidate`, since a field's input may be one Kobalte hides.
 
+Original HeroUI documentation: [Form](https://heroui.com/en/docs/react/components/form).
+
 ## Usage
 
 The rules are the application's, from its signals; each error shows once its
 field is left.
 
 <Example code={UsageCode} title="form_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+HeroUI's Form has no classes and no state of its own to compare; its test runs
+the same server error through the port and HeroUI's React Form, shown, typed
+into and left.
 
 ## Anatomy
 
@@ -110,11 +118,3 @@ from their own components.
 | `className` | `class_` | `string` | | Its classes |
 | `onInvalid` | `on_invalid` | `Dom.event -> unit` | | Called once a submit is refused, before the first invalid field is focused; `preventDefault` keeps the focus where it is |
 | `validationBehavior` | — | | | Left out: a field validates nothing itself, and is invalid as the application says |
-
-## Beside React
-
-Original HeroUI documentation: [Form](https://heroui.com/en/docs/react/components/form).
-
-HeroUI's Form has no classes and no state of its own to compare; its test runs
-the same server error through the port and HeroUI's React Form, shown, typed
-into and left.

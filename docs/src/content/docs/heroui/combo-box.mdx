@@ -56,9 +56,24 @@ input group, and its list the `List_box` inside its popover, as in HeroUI;
 `Label`, `Description` and `Field_error` inside it name, describe and
 qualify it.
 
+Original HeroUI documentation: [ComboBox](https://heroui.com/en/docs/react/components/combo-box).
+
 ## Usage
 
 <Example code={ExUsageCode} title="combo_box_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ComboBox twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of each input: a
+marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+The marked row is Kobalte's: its input says it opens a list, `aria-haspopup="listbox"`, which a combo box means without it and React Aria leaves out.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -317,18 +332,3 @@ Each prop beside the name HeroUI's React component gives it.
 | `placeholder` | `placeholder` | `string` | Shown while nothing is chosen |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | `string array accessor -> element` | What it draws while something is chosen, given the ids chosen |
-
-## Beside React
-
-Original HeroUI documentation: [ComboBox](https://heroui.com/en/docs/react/components/combo-box).
-
-The same HeroUI ComboBox twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of each input: a
-marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-The marked row is Kobalte's: its input says it opens a list, `aria-haspopup="listbox"`, which a combo box means without it and React Aria leaves out.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

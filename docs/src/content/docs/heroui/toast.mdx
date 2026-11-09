@@ -43,11 +43,21 @@ hovered or holds the focus, which also holds every toast's countdown, as does
 the page while it is hidden. Alt and T moves the focus to it, and Escape folds
 it; a closing toast stays for its exit before it is gone.
 
+Original HeroUI documentation: [Toast](https://heroui.com/en/docs/react/components/toast).
+
 ## Usage
 
 HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="toast_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+A toast's region is fixed to the page, so this page shows no two side by side.
+Its test runs the same steps through the port and HeroUI's React Toast --
+three shown, the stack hovered and left, the frontmost closed through its
+exit, one updated, two more than it shows -- and compares the region and every
+toast after each.
 
 ## Anatomy
 
@@ -188,13 +198,3 @@ and on an action's button by `Toast.action`'s.
 
 `Toast.Queue.create ?max_visible_toasts ?exit_duration_ms ()` is a queue of its
 own, shown by a provider given it; each takes `?queue`.
-
-## Beside React
-
-Original HeroUI documentation: [Toast](https://heroui.com/en/docs/react/components/toast).
-
-A toast's region is fixed to the page, so this page shows no two side by side.
-Its test runs the same steps through the port and HeroUI's React Toast --
-three shown, the stack hovered and left, the frontmost closed through its
-exit, one updated, two more than it shows -- and compares the region and every
-toast after each.

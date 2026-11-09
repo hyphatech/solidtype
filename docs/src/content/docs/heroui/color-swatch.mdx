@@ -28,11 +28,23 @@ Its colour is Kobalte's `Types.Color`, read from any CSS colour by
 `Solidtype_kobalte.Colors.parse_color "#0485F7"`, as HeroUI's own colour
 examples read theirs with `parseColor`.
 
+Original HeroUI documentation: [ColorSwatch](https://heroui.com/en/docs/react/components/color-swatch).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="color_swatch_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ColorSwatch twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two swatches:
+a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Examples
 
@@ -94,15 +106,3 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `style` | `style` | `string` | | Added after its colour; a function of the colour in React |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
-
-## Beside React
-
-Original HeroUI documentation: [ColorSwatch](https://heroui.com/en/docs/react/components/color-swatch).
-
-The same HeroUI ColorSwatch twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two swatches:
-a marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

@@ -41,11 +41,25 @@ element of role `slider` that a reader reaches and the keys move, where React
 Aria's thumb holds a range input. Its value is told as React Aria tells it,
 `0°, red`.
 
+Original HeroUI documentation: [ColorSlider](https://heroui.com/en/docs/react/components/color-slider).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="color_slider_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ColorSlider twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two sliders:
+a marked row is one they disagree on.
+
+The marked row is Kobalte's: its slider is a `group` its label names, where React Aria's has no role.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -140,17 +154,3 @@ Each prop beside the name HeroUI's React component gives it.
 Each takes `class_`, added after HeroUI's class; the track and the thumb
 `style`, after their own, a function of their state in React; the output and
 the thumb their `children`, the output's in place of the channel's value.
-
-## Beside React
-
-Original HeroUI documentation: [ColorSlider](https://heroui.com/en/docs/react/components/color-slider).
-
-The same HeroUI ColorSlider twice, under the same props: in solidtype on the
-left, in React on the right. Below them, every attribute of the two sliders:
-a marked row is one they disagree on.
-
-The marked row is Kobalte's: its slider is a `group` its label names, where React Aria's has no role.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

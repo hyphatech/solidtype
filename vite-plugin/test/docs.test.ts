@@ -65,6 +65,7 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
   const islands = [...html.matchAll(/<astro-island [^>]*component-url="\/solidtype\/_astro\/(\w+)\.[^"]*"[^>]*client="(\w+)"/g)].map((m) => `${m[1]} ${m[2]}`);
   expect(islands).toEqual([
     "button_usage visible",
+    "button_demo load",
     "button_variants visible",
     "button_sizes visible",
     "button_icons visible",
@@ -75,11 +76,11 @@ test("Button's page prerenders the port, to hydrate beside HeroUI's", () => {
     "button_disabled visible",
     "button_render_function visible",
     "button_tailwind visible",
-    "button_demo load",
   ]);
-  // Usage's button, then Variants' each.
+  // Usage's button, Parity's, then Variants' each.
   const classes = [...html.matchAll(/<button data-hk="\w+" type="button" class="([^"]*)"/g)].map((m) => m[1]?.trim());
-  expect(classes.slice(0, 8)).toEqual([
+  expect(classes.slice(0, 9)).toEqual([
+    "button button--md button--primary",
     "button button--md button--primary",
     "button button--md button--primary",
     "button button--md button--secondary",

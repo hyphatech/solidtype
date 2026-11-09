@@ -53,12 +53,25 @@ inside its `Autocomplete.Filter`, and its list the `List_box` beside it, as
 in HeroUI; `Label`, `Description` and `Field_error` inside it name, describe
 and qualify it.
 
+Original HeroUI documentation: [Autocomplete](https://heroui.com/en/docs/react/components/autocomplete).
+
 ## Usage
 
 HeroUI's example draws the states chosen as tags, with a TagGroup, which is
 not ported yet; here they are listed as the value draws them.
 
 <Example code={ExUsageCode} title="autocomplete_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Autocomplete twice, under the same props: in solidtype on
+the left, in React on the right. Below them, every attribute of each button:
+a marked row is one they disagree on, and a dimmed row is a framework's own,
+which no style reads.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -309,16 +322,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | `string array accessor -> element` | What it draws while something is chosen, given the ids chosen |
-
-## Beside React
-
-Original HeroUI documentation: [Autocomplete](https://heroui.com/en/docs/react/components/autocomplete).
-
-The same HeroUI Autocomplete twice, under the same props: in solidtype on
-the left, in React on the right. Below them, every attribute of each button:
-a marked row is one they disagree on, and a dimmed row is a framework's own,
-which no style reads.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

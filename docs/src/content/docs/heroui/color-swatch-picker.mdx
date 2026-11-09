@@ -44,11 +44,23 @@ Its colours are Kobalte's `Types.Color`, read from any CSS colour by
 `parseColor`. A value is its swatch's when the two are one colour, however
 each is written: `rgb(139, 92, 246)` chooses `#8B5CF6`.
 
+Original HeroUI documentation: [ColorSwatchPicker](https://heroui.com/en/docs/react/components/color-swatch-picker).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="color_swatch_picker_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI ColorSwatchPicker twice, under the same props: in solidtype
+on the left, in React on the right. Below them, every attribute of the two
+pickers: a marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -175,15 +187,3 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|---|
 | `children` | `children` | nodes | a checkmark | What it shows once its item is chosen |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-
-## Beside React
-
-Original HeroUI documentation: [ColorSwatchPicker](https://heroui.com/en/docs/react/components/color-swatch-picker).
-
-The same HeroUI ColorSwatchPicker twice, under the same props: in solidtype
-on the left, in React on the right. Below them, every attribute of the two
-pickers: a marked row is one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

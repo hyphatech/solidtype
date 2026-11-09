@@ -5,14 +5,16 @@
 
 let read path = In_channel.with_open_bin path In_channel.input_all
 
-let contains s sub =
+let index_of s sub =
   let n = String.length sub in
   let rec at i =
-    i + n <= String.length s
-    && (String.equal (String.sub s i n) sub || at (i + 1))
+    if i + n > String.length s then None
+    else if String.equal (String.sub s i n) sub then Some i
+    else at (i + 1)
   in
   at 0
 
+let contains s sub = Option.is_some (index_of s sub)
 let islands = "../docs/islands"
 
 (* Every page of the site under [dir], each read whole. *)
@@ -149,6 +151,38 @@ let pages_install_the_released_plugin () =
        (fun version -> not (Option.equal String.equal (Some version) released))
        named)
 
+(* As an rhp page does, a port's page names HeroUI's page it follows before
+   its usage, where a reader starts. A port is what the coverage page says is
+   ported. *)
+let every_port_links_to_heroui_first () =
+  let dir = "../docs/src/content/docs/heroui" in
+  let ports =
+    read (Filename.concat dir "coverage.mdx")
+    |> String.split_on_char '\n'
+    |> List.filter_map (fun row ->
+        match String.split_on_char '|' row with
+        | "" :: link :: status :: _
+          when String.starts_with ~prefix:" ported" status -> (
+            match String.split_on_char '/' link with
+            | _ :: "solidtype" :: "heroui" :: slug :: _ -> Some slug
+            | _ -> None)
+        | _ -> None)
+  in
+  Alcotest.(check bool)
+    "the coverage page lists ports" true
+    (List.length ports > 1);
+  Alcotest.(check (list string))
+    "a port with no link to HeroUI's documentation before its usage" []
+    (List.filter
+       (fun slug ->
+         let page = read (Filename.concat dir (slug ^ ".mdx")) in
+         match
+           (index_of page "\nOriginal HeroUI ", index_of page "\n## Usage\n")
+         with
+         | Some link, Some usage -> link > usage
+         | Some _, None | None, _ -> true)
+       ports)
+
 let () =
   Alcotest.run "docs"
     [
@@ -170,5 +204,10 @@ let () =
         [
           Alcotest.test_case "the newest release's plugin" `Quick
             pages_install_the_released_plugin;
+        ] );
+      ( "heroui",
+        [
+          Alcotest.test_case "every port links to HeroUI's first" `Quick
+            every_port_links_to_heroui_first;
         ] );
     ]

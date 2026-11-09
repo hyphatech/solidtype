@@ -17,9 +17,21 @@ as HeroUI's has none. Kobalte's Alert is `role="alert"`, which a reader
 announces as it appears, so the port is HeroUI's `<div>`, and an alert to be
 announced is given the role.
 
+Original HeroUI documentation: [Alert](https://heroui.com/en/docs/react/components/alert).
+
 ## Usage
 
 <Example code={UsageCode} title="alert_usage.mlx"><Usage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI Alert twice, under the same props: in solidtype on the left,
+in React on the right. Below them, every attribute of the two: a marked row is
+one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -86,15 +98,3 @@ Each prop beside the name HeroUI's React component gives it.
 
 Each takes `class_`, added after HeroUI's class, and its children; the
 indicator's take the place of its status's icon.
-
-## Beside React
-
-Original HeroUI documentation: [Alert](https://heroui.com/en/docs/react/components/alert).
-
-The same HeroUI Alert twice, under the same props: in solidtype on the left,
-in React on the right. Below them, every attribute of the two: a marked row is
-one they disagree on.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>

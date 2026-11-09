@@ -29,11 +29,24 @@ A part's own value wins, and its own `on_change` is called too.
 Its value is Kobalte's `Types.Color`, read from any CSS colour by
 `Solidtype_kobalte.Colors.parse_color`.
 
+Original HeroUI documentation: [ColorPicker](https://heroui.com/en/docs/react/components/color-picker).
+
 ## Usage
 
 HeroUI's examples.
 
 <Example code={ExUsageCode} title="color_picker_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same picker twice, each keeping its own colour: in solidtype on the left, in
+React on the right. Below them, every attribute of the two triggers: a marked
+row is one they disagree on: `aria-haspopup="dialog"` is Kobalte's, which says
+what the trigger opens, where React Aria's trigger says nothing.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
 
 ## Anatomy
 
@@ -137,16 +150,3 @@ Each prop beside the name HeroUI's React component gives it.
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `style` | `style` | `string` | | Added after its own |
 | `render` | `as_` | a function of its props | | Draws another element in its place |
-
-## Beside React
-
-Original HeroUI documentation: [ColorPicker](https://heroui.com/en/docs/react/components/color-picker).
-
-The same picker twice, each keeping its own colour: in solidtype on the left, in
-React on the right. Below them, every attribute of the two triggers: a marked
-row is one they disagree on: `aria-haspopup="dialog"` is Kobalte's, which says
-what the trigger opens, where React Aria's trigger says nothing.
-
-<div class="not-content">
-  <Demo.make client:load />
-</div>
