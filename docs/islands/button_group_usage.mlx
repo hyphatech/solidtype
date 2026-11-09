@@ -1,17 +1,54 @@
 module Button = Solidtype_heroui.Button
 module Button_group = Solidtype_heroui.Button_group
 module Chip = Solidtype_heroui.Chip
+module Description = Solidtype_heroui.Description
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
 
-(* HeroUI's split button opens a Dropdown, which comes with its port; here
-   its chevron is the button alone. *)
 let make () =
   <div class_="flex flex-col items-start gap-6">
     <div class_="flex flex-col gap-2">
       <Button_group>
         <Button>"Merge pull request"</Button>
-        <Button is_icon_only=true aria_label="More options">
-          <Button_group.Separator /> <Gravity.Chevron_down />
-        </Button>
+        <Dropdown>
+          <Button is_icon_only=true aria_label="More options">
+            <Button_group.Separator /> <Gravity.Chevron_down />
+          </Button>
+          <Dropdown.Popover class_="max-w-[290px]" placement=`bottom_end>
+            <Dropdown.Menu>
+              <Dropdown.Item
+                class_="flex flex-col items-start gap-1"
+                id="merge"
+                text_value="Create a merge commit">
+                <Label>"Create a merge commit"</Label>
+                <Description>
+                  "All commits from this branch will be added to the base \
+                   branch"
+                </Description>
+              </Dropdown.Item>
+              <Dropdown.Item
+                class_="flex flex-col items-start gap-1"
+                id="squash-and-merge"
+                text_value="Squash and merge">
+                <Label>"Squash and merge"</Label>
+                <Description>
+                  "The 14 commits from this branch will be combined into one \
+                   commit in the base branch"
+                </Description>
+              </Dropdown.Item>
+              <Dropdown.Item
+                class_="flex flex-col items-start gap-1"
+                id="rebase-and-merge"
+                text_value="Rebase and merge">
+                <Label>"Rebase and merge"</Label>
+                <Description>
+                  "The 14 commits from this branch will be rebased and added \
+                   to the base branch"
+                </Description>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>
       </Button_group>
     </div>
     <div class_="flex flex-col gap-2">

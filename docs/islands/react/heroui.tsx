@@ -926,7 +926,7 @@ export function comboBox(host: HTMLElement, { selectionMode, variant, isDisabled
 
 type DropdownProps = {
   selectionMode: "none" | "single" | "multiple";
-  placement: "top" | "bottom" | "left" | "right";
+  placement: "top" | "top start" | "bottom" | "bottom end" | "left" | "right";
   trigger: "press" | "longPress";
 };
 

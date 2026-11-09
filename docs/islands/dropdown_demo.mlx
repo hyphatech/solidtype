@@ -8,7 +8,14 @@ module Select = Controls.Select
 let modes = [| (`none, "none"); (`single, "single"); (`multiple, "multiple") |]
 
 let placements =
-  [| (`top, "top"); (`bottom, "bottom"); (`left, "left"); (`right, "right") |]
+  [|
+    (`top, "top");
+    (`top_start, "top start");
+    (`bottom, "bottom");
+    (`bottom_end, "bottom end");
+    (`left, "left");
+    (`right, "right");
+  |]
 
 let triggers = [| (`press, "press"); (`long_press, "longPress") |]
 
@@ -86,7 +93,7 @@ let make () =
               Heroui_react.dropdown host
                 (Heroui_react.dropdown_props
                    ~selection_mode:(fst (S.get mode))
-                   ~placement:(fst (S.get placement))
+                   ~placement:(snd (S.get placement))
                    ~trigger:(fst (S.get trigger))
                    ()))
     />

@@ -7,68 +7,7 @@ module Headless = Solidtype_headless.Color_picker
 module I18n = Solidtype_kobalte.I18n
 module Color = Types.Color
 
-type placement =
-  [ `bottom
-  | `bottom_left
-  | `bottom_right
-  | `bottom_start
-  | `bottom_end
-  | `top
-  | `top_left
-  | `top_right
-  | `top_start
-  | `top_end
-  | `left
-  | `left_top
-  | `left_bottom
-  | `start
-  | `start_top
-  | `start_bottom
-  | `right
-  | `right_top
-  | `right_bottom
-  | `end_
-  | `end_top
-  | `end_bottom ]
-
-(* Kobalte's placement, its side then [start] or [end], which along a top or a
-   bottom it reads as the page's direction does; React Aria's left and right
-   are the page's whatever its direction. *)
-let kobalte_placement direction : placement -> string =
-  let left_edge, right_edge, start_side, end_side =
-    match direction with
-    | `ltr -> ("start", "end", "left", "right")
-    | `rtl -> ("end", "start", "right", "left")
-  in
-  function
-  | `bottom -> "bottom"
-  | `bottom_left -> "bottom-" ^ left_edge
-  | `bottom_right -> "bottom-" ^ right_edge
-  | `bottom_start -> "bottom-start"
-  | `bottom_end -> "bottom-end"
-  | `top -> "top"
-  | `top_left -> "top-" ^ left_edge
-  | `top_right -> "top-" ^ right_edge
-  | `top_start -> "top-start"
-  | `top_end -> "top-end"
-  | `left -> "left"
-  | `left_top -> "left-start"
-  | `left_bottom -> "left-end"
-  | `start -> start_side
-  | `start_top -> start_side ^ "-start"
-  | `start_bottom -> start_side ^ "-end"
-  | `right -> "right"
-  | `right_top -> "right-start"
-  | `right_bottom -> "right-end"
-  | `end_ -> end_side
-  | `end_top -> end_side ^ "-start"
-  | `end_bottom -> end_side ^ "-end"
-
-(* The side a Kobalte placement is on, until Kobalte has placed it. *)
-let side_of placement =
-  match String.index_opt placement '-' with
-  | Some at -> String.sub placement 0 at
-  | None -> placement
+type placement = Overlay.placement
 
 (* What a picker's parts read of it: its classes, whether its popover is open,
    and the placement, offset and flip its popover asks for. *)
@@ -174,7 +113,9 @@ module Popover = struct
         Option.fold ~none:false ~some:(fun c -> contains c focused) !content)
       ();
     let side, watch_side =
-      Overlay.placed_side ~placement:(fun () -> side_of (p.placement ())) ()
+      Overlay.placed_side
+        ~placement:(fun () -> Overlay.side_of (p.placement ()))
+        ()
     in
     (* React Aria's popover takes the focus itself as it opens, where Kobalte's
        gives it to the first button inside. *)
@@ -252,7 +193,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       told_open = ignore;
       placement =
         (fun () ->
-          kobalte_placement
+          Overlay.kobalte_placement
             (Types.I18n_UseLocale.direction locale ())
             (S.get placement));
       set_placement = S.set set_placement;

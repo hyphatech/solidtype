@@ -20,6 +20,7 @@ type props
 external props :
   menu:menu ->
   ?custom:bool ->
+  ?placement:string ->
   long_press:(bool[@mel.as "longPress"]) ->
   told:(string -> unit) ->
   unit ->
@@ -317,7 +318,7 @@ let items (menu : menu) tell =
         </Dropdown.Submenu_trigger>
       </Dropdown.Menu>
 
-let both ?(custom = false) ?(long_press = false) (menu : menu) =
+let both ?(custom = false) ?(long_press = false) ?placement (menu : menu) =
   let told = ref [] in
   let tell said = told := said :: !told in
   T.render (fun () ->
@@ -334,7 +335,7 @@ let both ?(custom = false) ?(long_press = false) (menu : menu) =
             else
               Solidtype.Jsx.element
                 <Button aria_label="Menu" variant=`secondary>"Actions"</Button>)
-          <Dropdown.Popover>
+          <Dropdown.Popover ?placement=(fun () -> Option.map fst placement)>
             (fun () -> Solidtype.Jsx.element (items menu tell))
           </Dropdown.Popover>
         </Dropdown>
@@ -345,7 +346,9 @@ let both ?(custom = false) ?(long_press = false) (menu : menu) =
   T.cleanup ();
   told := [];
   let (_ : Dom.element) =
-    Twin.render (props ~menu ~custom ~long_press ~told:tell ())
+    Twin.render
+      (props ~menu ~custom ?placement:(Option.map snd placement) ~long_press
+         ~told:tell ())
   in
   let* react = walk ~step:Twin.step ~told ~long_press menu in
   Twin.cleanup ();
@@ -428,6 +431,11 @@ let () =
       Jest.testPromise "acts on an item, as React's does" (fun () ->
           let* r = both `actions in
           same r);
+      Jest.testPromise "sits where it is placed, as React's" (fun () ->
+          let* compared =
+            both ~placement:(`bottom_end, "bottom end") `actions
+          in
+          same compared);
       Jest.testPromise "opens on a trigger of its own, as React's" (fun () ->
           let* r = both ~custom:true `actions in
           same r);

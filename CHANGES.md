@@ -20,6 +20,13 @@
 - `Solidtype.Solid.pick`, a component's own props handed on as they were
   given, a function left out absent.
 
+- `Solidtype_heroui.Dropdown.Popover` takes React Aria's every placement,
+  `` `bottom_end `` and the others, as `Color_picker.Popover` does, from the
+  type they now share, `Solidtype_heroui.Overlay.placement`.
+
+- ButtonGroup's Usage and Tailwind CSS examples open HeroUI's Dropdown from
+  the split button's chevron, placed `` `bottom_end ``, as HeroUI's do.
+
 ## 0.6.0 (2026-11-06)
 
 - A prop named `props` is refused at its name, the same on mlx 0.11 and 0.12,

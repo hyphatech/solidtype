@@ -67,3 +67,38 @@ val return_focus :
 val dismiss : (unit -> unit) -> Solidtype.Jsx.element
 (** A button only a reader finds, which closes an overlay, as React Aria puts
     one for a reader with no Escape key. *)
+
+type placement =
+  [ `bottom
+  | `bottom_left
+  | `bottom_right
+  | `bottom_start
+  | `bottom_end
+  | `top
+  | `top_left
+  | `top_right
+  | `top_start
+  | `top_end
+  | `left
+  | `left_top
+  | `left_bottom
+  | `start
+  | `start_top
+  | `start_bottom
+  | `right
+  | `right_top
+  | `right_bottom
+  | `end_
+  | `end_top
+  | `end_bottom ]
+(** Where an overlay sits beside its trigger, as React Aria names it: its side,
+    then where along that side. [start] and [end] are as the page's direction
+    reads them, [left] and [right] whatever it is. *)
+
+val kobalte_placement : [ `ltr | `rtl ] -> placement -> string
+(** [kobalte_placement direction p] is [p] as Kobalte's popper names it, its
+    side then [start] or [end], read in the page's [direction]. *)
+
+val side_of : string -> string
+(** The side a Kobalte placement is on, ["bottom"] of ["bottom-end"], as an
+    overlay names it until Kobalte has placed it. *)

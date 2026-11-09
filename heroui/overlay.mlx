@@ -207,3 +207,66 @@ let dismiss close =
       on_click=(fun _ -> close ())
     />
   </div>
+
+type placement =
+  [ `bottom
+  | `bottom_left
+  | `bottom_right
+  | `bottom_start
+  | `bottom_end
+  | `top
+  | `top_left
+  | `top_right
+  | `top_start
+  | `top_end
+  | `left
+  | `left_top
+  | `left_bottom
+  | `start
+  | `start_top
+  | `start_bottom
+  | `right
+  | `right_top
+  | `right_bottom
+  | `end_
+  | `end_top
+  | `end_bottom ]
+
+(* Kobalte's placement, its side then [start] or [end], which along a top or a
+   bottom it reads as the page's direction does; React Aria's left and right
+   are the page's whatever its direction. *)
+let kobalte_placement direction : placement -> string =
+  let left_edge, right_edge, start_side, end_side =
+    match direction with
+    | `ltr -> ("start", "end", "left", "right")
+    | `rtl -> ("end", "start", "right", "left")
+  in
+  function
+  | `bottom -> "bottom"
+  | `bottom_left -> "bottom-" ^ left_edge
+  | `bottom_right -> "bottom-" ^ right_edge
+  | `bottom_start -> "bottom-start"
+  | `bottom_end -> "bottom-end"
+  | `top -> "top"
+  | `top_left -> "top-" ^ left_edge
+  | `top_right -> "top-" ^ right_edge
+  | `top_start -> "top-start"
+  | `top_end -> "top-end"
+  | `left -> "left"
+  | `left_top -> "left-start"
+  | `left_bottom -> "left-end"
+  | `start -> start_side
+  | `start_top -> start_side ^ "-start"
+  | `start_bottom -> start_side ^ "-end"
+  | `right -> "right"
+  | `right_top -> "right-start"
+  | `right_bottom -> "right-end"
+  | `end_ -> end_side
+  | `end_top -> end_side ^ "-start"
+  | `end_bottom -> end_side ^ "-end"
+
+(* The side a Kobalte placement is on, until Kobalte has placed it. *)
+let side_of placement =
+  match String.index_opt placement '-' with
+  | Some at -> String.sub placement 0 at
+  | None -> placement

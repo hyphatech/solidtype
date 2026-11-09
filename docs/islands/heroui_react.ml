@@ -522,7 +522,7 @@ type dropdown_props
 
 external dropdown_props :
   selection_mode:([ `none | `single | `multiple ][@mel.as "selectionMode"]) ->
-  placement:([ `top | `bottom | `left | `right ][@mel.as "placement"]) ->
+  placement:string ->
   trigger:([ `press | `long_press [@mel.as "longPress"] ][@mel.as "trigger"]) ->
   unit ->
   dropdown_props = ""

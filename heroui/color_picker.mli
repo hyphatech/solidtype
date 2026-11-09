@@ -76,32 +76,8 @@ module Trigger : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
-type placement =
-  [ `bottom
-  | `bottom_left
-  | `bottom_right
-  | `bottom_start
-  | `bottom_end
-  | `top
-  | `top_left
-  | `top_right
-  | `top_start
-  | `top_end
-  | `left
-  | `left_top
-  | `left_bottom
-  | `start
-  | `start_top
-  | `start_bottom
-  | `right
-  | `right_top
-  | `right_bottom
-  | `end_
-  | `end_top
-  | `end_bottom ]
-(** Where the popover sits beside its trigger, as React Aria names it: its side,
-    then where along that side. [start] and [end] are as the page's direction
-    reads them, [left] and [right] whatever it is. *)
+type placement = Overlay.placement
+(** Where the popover sits beside its trigger, as React Aria names it. *)
 
 (** The popover: Kobalte's content, a dialog its trigger names, [placement]
     beside its trigger, [`bottom_left] by default, [offset] pixels from it, 8 by

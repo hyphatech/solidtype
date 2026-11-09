@@ -84,7 +84,7 @@ module Popover : sig
     type t
 
     val check :
-      ?placement:[ `top | `bottom | `left | `right ] Solidtype.Check.value ->
+      ?placement:Overlay.placement Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->

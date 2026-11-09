@@ -2,8 +2,10 @@ module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.DropdownMenu
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
 
-type placement = [ `top | `bottom | `left | `right ]
+type placement = Overlay.placement
 type selection_mode = [ `none | `single | `multiple ]
 
 external listen :
@@ -253,7 +255,11 @@ module Popover = struct
             | Some item, _ | None, Some item -> Overlay.focus item
             | None, None -> ())
         in
-        let side, watch_side = Overlay.placed_side ~placement:d.placement () in
+        let side, watch_side =
+          Overlay.placed_side
+            ~placement:(fun () -> Overlay.side_of (d.placement ()))
+            ()
+        in
         <Show when_=(fun () -> Overlay.present o)>
           <Kobalte.Portal>
             <Kobalte.Content
@@ -756,17 +762,16 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
     | None -> change o
   in
   let placement, set_placement = S.create_signal `bottom in
+  let locale = I18n.use_locale () in
   let d =
     {
       slots = Styles.Dropdown.slots (Styles.Dropdown.options ());
       set_placement = S.set set_placement;
       placement =
         (fun () ->
-          match S.get placement with
-          | `top -> "top"
-          | `bottom -> "bottom"
-          | `left -> "left"
-          | `right -> "right");
+          Overlay.kobalte_placement
+            (Types.I18n_UseLocale.direction locale ())
+            (S.get placement));
       is_open = opened;
       close = (fun () -> change false);
       long_press = pressed;

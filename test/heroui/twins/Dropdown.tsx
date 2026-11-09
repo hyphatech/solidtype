@@ -19,6 +19,8 @@ type Props = {
   menu: "actions" | "single" | "multiple" | "sections" | "submenu";
   // A Dropdown.Trigger of its own around a span, where none is a Button.
   custom?: boolean;
+  // Where its popover sits, React Aria's name for it.
+  placement?: "bottom end";
   // Opened by a long press, or Alt and an arrow, rather than a press.
   longPress?: boolean;
   // What the menu tells, written into the page as it is told.
@@ -103,7 +105,7 @@ function items(menu: Props["menu"], told: Props["told"]) {
   }
 }
 
-export function render({ menu, custom, longPress, told }: Props): HTMLElement {
+export function render({ menu, custom, placement, longPress, told }: Props): HTMLElement {
   const host = document.body.appendChild(document.createElement("div"));
   const root = createRoot(host);
   act(() =>
@@ -120,7 +122,7 @@ export function render({ menu, custom, longPress, told }: Props): HTMLElement {
               Actions
             </Button>
           )}
-          <Dropdown.Popover>{items(menu, told)}</Dropdown.Popover>
+          <Dropdown.Popover placement={placement}>{items(menu, told)}</Dropdown.Popover>
         </Dropdown>
       </div>,
     ),
