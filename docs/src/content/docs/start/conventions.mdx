@@ -81,9 +81,9 @@ does not name, on its element, after its own attributes:
 ## Values given to a component
 
 A literal is given as it is, and anything that may change as a thunk,
-`(fun () -> ...)`. A constant held in a name is passed as the thunk it is
-read by, `class_=(fun () -> item)`: a name alone is passed as it is, which a
-component's check takes only for a function.
+`(fun () -> ...)`. A name is passed as it is, read once: a constant may be,
+`class_=item`, but a signal's accessor is refused where its value belongs,
+`text=count`, since it changes and is read by `(fun () -> S.get count)`.
 
 An optional prop, one a component may leave out, is passed on as it is
 with OCaml's own `?`: present while its option is `Some`, absent while it
@@ -94,8 +94,10 @@ such an option, so it passes on by its name.
 |---|---|
 | `title={note()}` | `?title=(fun () -> note ())` |
 | `name={props.name}` | `?name` |
+| `onRemove={editable ? remove : undefined}` | `?on_remove=(fun () -> if editable then Some remove else None)` |
 
-The compiler refuses `?` on a prop that is not optional.
+A function prop is given or left out so too. The compiler refuses `?` on a
+prop that is not optional.
 
 ## Spreads
 

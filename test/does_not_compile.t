@@ -176,7 +176,7 @@ A required prop left out.
   File "case.mlx", line 1, characters 14-23:
   1 | let make () = <Label />
                     ^^^^^^^^^
-  Error: This expression has type text:string Solidtype.Check.value -> unit
+  Error: This expression has type text:string -> unit
          but an expression was expected of type unit
          because it is in the result of a conditional with no else branch
   Hint: This function application is partial, maybe some arguments are missing.
@@ -192,8 +192,7 @@ A prop the component does not take.
   1 | let make () = <Label text=(fun () -> "x") colour="red" />
                                                        ^^^^^
   Error: The function applied to this argument has type
-           ?count:int Solidtype.Check.value ->
-           ?props:Label.Props.t Solidtype.Solid.rest -> unit
+           ?count:int -> ?props:Label.Props.t Solidtype.Solid.rest -> unit
   This argument cannot be applied with label ~colour
   [1]
 
@@ -222,8 +221,7 @@ Children given to a component that takes none.
   1 | let make () = <Label text=(fun () -> "x")>"more"</Label>
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Error: The function applied to this argument has type
-           ?count:int Solidtype.Check.value ->
-           ?props:Label.Props.t Solidtype.Solid.rest -> unit
+           ?count:int -> ?props:Label.Props.t Solidtype.Solid.rest -> unit
   This argument cannot be applied with label ~children
   [1]
 
@@ -464,9 +462,8 @@ A Dynamic element given an attribute of the wrong type.
   File "case.mlx", line 1, characters 76-78:
   1 | let make () = <Solidtype.Dynamic.Element component=(fun () -> "div") class_=42 />
                                                                                   ^^
-  Error: This expression has type int Solidtype.Check.value
-         but an expression was expected of type string Solidtype.Check.value
-         Type int is not compatible with type string
+  Error: This expression has type int but an expression was expected of type
+           string
   [1]
 
 A swipe event built by hand: Kobalte hands one to a toast's handlers, and an
@@ -555,8 +552,7 @@ A function given where a thunk belongs, which cannot be called as one.
   File "case.mlx", line 1, characters 26-38:
   1 | let make () = <Label text=(fun s -> s) />
                                 ^^^^^^^^^^^^
-  Error: This expression should not be a function, the expected type is
-         string Solidtype.Check.value
+  Error: This expression should not be a function, the expected type is string
   [1]
 
 A changing value passed by its name where a thunk belongs: a name is passed
@@ -572,7 +568,8 @@ as it is, so its type, a function, is not the value's.
   3 |   <Label text=count />
                     ^^^^^
   Error: The value count has type unit -> string
-         but an expression was expected of type string Solidtype.Check.value
+         but an expression was expected of type string
+         Hint: Did you forget to provide () as argument?
   [1]
 
 A Switch over a match that leaves a case out.
@@ -650,7 +647,7 @@ A Select of many values without multiple, which Kobalte reads to choose.
   File "case.mlx", line 3, characters 2-92:
   3 |   <Select.Root_multiple options=(fun () -> [| Solidtype_kobalte.Types.Either.left "a" |]) />
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type multiple:bool Solidtype.Check.value -> unit
+  Error: This expression has type multiple:bool -> unit
          but an expression was expected of type unit
          because it is in the result of a conditional with no else branch
   Hint: This function application is partial, maybe some arguments are missing.
@@ -670,8 +667,8 @@ An optional prop given where the prop is required, which may then be absent.
   File "case.mlx", line 1, characters 27-47:
   1 | let make () = <Label ?text=(fun () -> Some "x") />
                                  ^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type 'a Solidtype.Check.value option
-         but an expression was expected of type string Solidtype.Check.value
+  Error: This expression has type 'a option
+         but an expression was expected of type string
   [1]
 
 An optional prop given a thunk of a value that is no option.
@@ -784,7 +781,7 @@ requires, left out, does not compile.
   > EOF
   $ build | grep -E '^File|^Error|required|text'
   File "case.mlx", line 1, characters 34-51:
-  Error: This expression has type text:string Solidtype.Check.value -> unit
+  Error: This expression has type text:string -> unit
   $ rm case.mlx
 
 And [as_] is a function of the part's props: one of anything else does not

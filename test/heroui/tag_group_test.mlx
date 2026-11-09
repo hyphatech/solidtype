@@ -206,33 +206,19 @@ let both ?selection_mode ?selected_keys ?default_selected_keys ?disabled_keys
   in
   let selected keys = told := ("selected " ^ told_of keys) :: !told in
   T.render (fun () ->
-      if removable then
-        <Tag_group
-          ?aria_label=(fun () -> aria_label)
-          ?selection_mode=(fun () -> selection_mode)
-          ?selected_keys=(fun () -> selected_keys)
-          ?default_selected_keys=(fun () -> default_selected_keys)
-          ?disabled_keys=(fun () -> disabled_keys)
-          ?is_disabled=(fun () -> is_disabled)
-          ?size=(fun () -> size)
-          ?variant=(fun () -> variant)
-          on_selection_change=selected
-          on_remove=remove>
-          (fun () -> Jsx.element (content ()))
-        </Tag_group>
-      else
-        <Tag_group
-          ?aria_label=(fun () -> aria_label)
-          ?selection_mode=(fun () -> selection_mode)
-          ?selected_keys=(fun () -> selected_keys)
-          ?default_selected_keys=(fun () -> default_selected_keys)
-          ?disabled_keys=(fun () -> disabled_keys)
-          ?is_disabled=(fun () -> is_disabled)
-          ?size=(fun () -> size)
-          ?variant=(fun () -> variant)
-          on_selection_change=selected>
-          (fun () -> Jsx.element (content ()))
-        </Tag_group>);
+      <Tag_group
+        ?aria_label=(fun () -> aria_label)
+        ?selection_mode=(fun () -> selection_mode)
+        ?selected_keys=(fun () -> selected_keys)
+        ?default_selected_keys=(fun () -> default_selected_keys)
+        ?disabled_keys=(fun () -> disabled_keys)
+        ?is_disabled=(fun () -> is_disabled)
+        ?size=(fun () -> size)
+        ?variant=(fun () -> variant)
+        on_selection_change=selected
+        ?on_remove=(fun () -> if removable then Some remove else None)>
+        (fun () -> Jsx.element (content ()))
+      </Tag_group>);
   let* solidtype = walk ~steps ~step:(fun action -> action ()) T.body told in
   T.cleanup ();
   let told' = ref [] in

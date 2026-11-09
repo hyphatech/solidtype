@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- An optional function prop is given or left out as an optional value prop
+  is, `?on_remove=(fun () -> if editable then Some remove else None)`, on any
+  component, where it did not compile. A component's check now types a value
+  prop as the value itself, so a hand-written check's `'a Check.value` reads
+  as `'a` in an error.
+
 - HeroUI's TagGroup, `Solidtype_heroui.Tag_group` and `Tag`, on
   `Solidtype_headless.Tag_group`, a grid of tags made of Kobalte's list hooks:
   tags chosen none, one or many, walked by the keys, removed by their button

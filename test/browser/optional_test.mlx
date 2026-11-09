@@ -1,6 +1,6 @@
 (* An optional prop passed on as it is, [?name=o]: present while [o] is
    [Some], absent while it is [None], on an element and through a component
-   that may leave it out. *)
+   that may leave it out, a value or a function alike. *)
 
 module S = Solidtype.Solid
 module E = Jest.Expect
@@ -10,6 +10,21 @@ module T = Testing
 module Noted = struct
   let%component make ?(note : string option) () =
     <span ?title=note>"noted"</span>
+end
+
+(* A button that picks while it is given what to call, and says whether its
+   last press was taken. *)
+module Picker = struct
+  let%component make ?(on_pick : (string -> unit) option) () =
+    let taken, set_taken = S.create_signal "none" in
+    <button
+      on_click=(fun _ ->
+                 S.set set_taken
+                   (match on_pick "x" with
+                   | Some () -> "taken"
+                   | None -> "not taken"))>
+      (fun () -> Solidtype.Jsx.string (S.get taken))
+    </button>
 end
 
 external attribute : Dom.element -> string -> string Js.null = "getAttribute"
@@ -43,4 +58,23 @@ let () =
           let empty = title "span" in
           E.(
             expect [| first; none; empty; title "span + span" |]
-            |> toEqual [| Some "first"; None; Some ""; None |])))
+            |> toEqual [| Some "first"; None; Some ""; None |]));
+      Jest.test "a component is given a function prop or not by one option"
+        (fun () ->
+          let picked = ref [] in
+          let given, set_given = S.create_signal true in
+          T.render (fun () ->
+              <Picker
+                ?on_pick=(fun () ->
+                             if S.get given then
+                               Some (fun v -> picked := v :: !picked)
+                             else None)
+              />);
+          let button = T.query "button" in
+          T.click button;
+          let with_it = T.text button in
+          S.set set_given false;
+          T.click button;
+          E.(
+            expect (with_it, T.text button, !picked)
+            |> toEqual ("taken", "not taken", [ "x" ]))))

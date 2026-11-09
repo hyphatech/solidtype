@@ -1,4 +1,4 @@
-type 'a value
+type 'a value = 'a
 type ('f, 'kind) children
 
 external literal : 'a -> 'a value = "%identity"

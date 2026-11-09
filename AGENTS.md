@@ -343,7 +343,10 @@ break.
   `if false`, so it writes nothing. Why: a prop left out, a prop the
   component does not take, and two props of one type variable that
   disagree are compile errors, as in TSX, and a function given where a
-  thunk belongs cannot be called as one. Test: `test/does_not_compile.t`.
+  thunk belongs cannot be called as one. A `Check.value` is the value
+  itself, a thunk read for its result, so an optional prop, a value or a
+  function alike, is given or left out by one form, `?name=(fun () -> o)`.
+  Test: `test/does_not_compile.t`, `test/browser/optional_test.mlx`.
 - **Only the ppx writes a marker, and the plugin reads only markers.**
   The plugin finds them by their import alone. It reads Melange's shapes
   only to put a function back where it is used -- a thunk's returned
