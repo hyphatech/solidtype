@@ -1,5 +1,11 @@
 let static = <div class_="x" />
 let handler = <button on_click=(fun _ -> ()) />
+let handler_made = <button on_click=(remove (id ())) />
+
+let component_handler_made =
+  <Remove on_click=(remove (id ())) props=(rest ()) />
+
+let component_handler_of_unit = <Remove on_remove=(fun () -> close ()) />
 let dynamic = <div class_=(fun () -> cls ()) />
 let spread = <input props=attrs />
 let text = <p>"hello"</p>

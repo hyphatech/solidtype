@@ -1,5 +1,13 @@
 # Changes
 
+## Unreleased
+
+- A handler an expression makes, `on_click=(remove (id_of (S.get task)))`,
+  and a spread, `props=(...)`, are made when their element is: inside a
+  `Show`, only once it shows. They were made as the enclosing component ran,
+  before the `Show` decided, so a value the `Show` guarded raised, and a
+  component's handler read its signal once.
+
 ## 0.7.0 (2026-11-09)
 
 - An optional function prop is given or left out as an optional value prop

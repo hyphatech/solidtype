@@ -45,10 +45,21 @@ function make() {
 test("a binding that is not a function stays", async () => {
   const code = await written(`
 function make() {
-  const p = props;
-  return Markers.c(Field.component, [Markers.spread(p)], []);
+  const p = props.rest;
+  return Markers.c(Field.component, [Markers.spread(function (param) { return p; })], []);
 }`);
+  expect(code).toContain("const p = props.rest");
   expect(code).toContain("{...p}");
+});
+
+test("a spread bound once, for a component's check, goes back where it is used", async () => {
+  const code = await written(`
+function make() {
+  const solidtype__props = function (param) { return others(props); };
+  return Markers.c(Field.component, [Markers.spread(solidtype__props)], []);
+}`);
+  expect(code).toContain("{...others(props)}");
+  expect(code).not.toContain("solidtype__props");
 });
 
 test("an element given as a prop's value is rewritten too", async () => {

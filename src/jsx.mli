@@ -122,7 +122,7 @@ external s : string -> 'a -> prop = "s"
 external d : string -> (unit -> 'a) -> prop = "d"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
-external spread : 'props -> prop = "spread"
+external spread : (unit -> 'props) -> prop = "spread"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 external text : string -> child = "%identity"

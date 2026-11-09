@@ -137,8 +137,8 @@ function attribute(node: t.Expression, namespace: string): t.JSXAttribute | t.JS
       return t.jsxAttribute(attributeName(stringOf(name)), t.jsxExpressionContainer(unwrap(thunk)));
     }
     case "spread": {
-      const [props] = argsOf(node, 1) as [t.Expression];
-      return t.jsxSpreadAttribute(props);
+      const [thunk] = argsOf(node, 1) as [t.Expression];
+      return t.jsxSpreadAttribute(unwrap(thunk));
     }
     default:
       throw new MarkerError("a prop is written by Jsx.s, Jsx.d or Jsx.spread");
@@ -243,6 +243,10 @@ function markersPlugin(): PluginObj {
             if (marker === "s" || marker === "d") {
               const value = args[1];
               if (value) inlineBound(value);
+            }
+            if (marker === "spread") {
+              const thunk = args[0];
+              if (thunk) inlineBound(thunk);
             }
             if (marker === "el" || marker === "c") {
               const children = args[2];

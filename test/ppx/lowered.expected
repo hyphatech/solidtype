@@ -6,11 +6,34 @@ let handler =
   Solidtype.Jsx.el "button"
     [|(Solidtype.Jsx.s "onClick"
          (fun _ -> () : Solidtype.Html.Button.on_click))|] [||]
+let handler_made =
+  Solidtype.Jsx.el "button"
+    [|(Solidtype.Jsx.d "onClick"
+         (fun () -> (remove (id ()) : Solidtype.Html.Button.on_click)))|]
+    [||]
+let component_handler_made =
+  (fun (solidtype__props : unit -> _) (solidtype__on_click : unit -> _) ->
+     if false
+     then
+       Remove.Props.check
+         ~on_click:(Solidtype.Check.thunk solidtype__on_click)
+         ~props:(solidtype__props ()) ();
+     Solidtype.Jsx.c Remove.component
+       [|(Solidtype.Jsx.d "onClick" solidtype__on_click);(Solidtype.Jsx.spread
+                                                            solidtype__props)|]
+       [||]) (fun () -> rest ()) (fun () -> remove (id ()))
+let component_handler_of_unit =
+  (fun solidtype__on_remove ->
+     if false then Remove.Props.check ~on_remove:solidtype__on_remove ();
+     Solidtype.Jsx.c Remove.component
+       [|(Solidtype.Jsx.s "onRemove" solidtype__on_remove)|] [||])
+    (fun () -> close ())
 let dynamic =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.d "class"
          (fun () -> cls () : unit -> Solidtype.Html.Div.class_))|] [||]
-let spread = Solidtype.Jsx.el "input" [|(Solidtype.Jsx.spread attrs)|] [||]
+let spread =
+  Solidtype.Jsx.el "input" [|(Solidtype.Jsx.spread (fun () -> attrs))|] [||]
 let text = Solidtype.Jsx.el "p" [||] [|(Solidtype.Jsx.text {js|hello|js})|]
 let nested =
   Solidtype.Jsx.el "ul" [||]
@@ -201,7 +224,8 @@ module Given_its_element =
                    [|(Solidtype.Jsx.d "class"
                         (fun () -> Option.value (class_ ()) ~default:"" : 
                         unit -> Solidtype.Html.Button.class_));(Solidtype.Jsx.spread
-                                                                  (Props.drawn_others
+                                                                  (fun () ->
+                                                                    Props.drawn_others
                                                                     props))|]
                    [||]))|]
             [|(Solidtype.Jsx.node
@@ -214,8 +238,8 @@ module Given_its_element =
                                                Option.value (class_ ())
                                                  ~default:"" : unit ->
                                                                  Solidtype.Html.Button.class_));(
-                      Solidtype.Jsx.spread (Props.drawn_others props))|] 
-                    [||]))|]
+                      Solidtype.Jsx.spread
+                        (fun () -> Props.drawn_others props))|] [||]))|]
         let component = Solidtype.Jsx.component make
       end
   end
@@ -539,10 +563,10 @@ module Part =
                                                                   (fun _ ->
                                                                     () : 
                                                                   Solidtype.Html.Button.ref));(
-                     Solidtype.Jsx.spread (Props.drawn_others props))|] 
-                   [||]))|]
+                     Solidtype.Jsx.spread
+                       (fun () -> Props.drawn_others props))|] [||]))|]
             [|(Solidtype.Jsx.node
-                 (let solidtype__rest = Props.drawn_others props in
+                 (let solidtype__rest () = Props.drawn_others props in
                   Solidtype.Jsx.c Solidtype.Dynamic.component
                     [|(Solidtype.Jsx.d "component"
                          (fun () ->
@@ -552,18 +576,11 @@ module Part =
                                                Option.value (class_ ())
                                                  ~default:"" : unit ->
                                                                  Solidtype.Html.Button.class_));(
-                      Solidtype.Jsx.spread solidtype__rest);(Solidtype.Jsx.s
-                                                               "ref"
-                                                               (fun
-                                                                  solidtype__e
-                                                                  ->
-                                                                  Solidtype.Jsx.ref_beside
-                                                                    (
-                                                                    fun _ ->
-                                                                    ())
-                                                                    solidtype__rest
-                                                                    solidtype__e : 
-                                                               Solidtype.Html.Button.ref))|]
+                      Solidtype.Jsx.spread (fun () -> solidtype__rest ()));(
+                      Solidtype.Jsx.s "ref"
+                        (fun solidtype__e ->
+                           Solidtype.Jsx.ref_beside (fun _ -> ())
+                             (solidtype__rest ()) solidtype__e : Solidtype.Html.Button.ref))|]
                     [||]))|]
         let component = Solidtype.Jsx.component make
       end

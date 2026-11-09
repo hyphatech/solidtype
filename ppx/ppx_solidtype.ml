@@ -141,6 +141,16 @@ let kind_of ~handler (e : expression) =
   | _ when handler || is_function e -> Function
   | _ -> Thunk
 
+(* A handler an expression makes, [on_click=(remove id)], is made as its
+   element is, and so is a spread: Melange evaluates an expression before the
+   element it is written in, outside a branch Solid has not yet drawn, unless
+   it is in a thunk, which Melange never moves out of and the plugin unwraps.
+   A name or a function literal makes nothing. *)
+let is_made (e : expression) =
+  match e.pexp_desc with Pexp_ident _ | Pexp_function _ -> false | _ -> true
+
+let thunk ~loc (e : expression) = [%expr fun () -> [%e e]]
+
 let error ~loc message =
   B.pexp_extension ~loc (Location.error_extensionf ~loc "%s" message)
 
@@ -382,7 +392,7 @@ let element map ~loc name args =
     let loc = value.pexp_loc in
     match label with
     | Labelled l when String.equal l spread ->
-        Ok [%expr Solidtype.Jsx.spread [%e map value]]
+        Ok [%expr Solidtype.Jsx.spread [%e thunk ~loc (map value)]]
     | Labelled l
       when starts_with ~prefix:"data_" l && Option.is_none (wrapped value) ->
         Ok (data ~loc l (map value))
@@ -408,6 +418,10 @@ let element map ~loc name args =
         let js = B.estring ~loc js in
         let value = js_string (map value) in
         match (kind_of ~handler value, t) with
+        | Function, Some t when is_made value ->
+            [%expr Solidtype.Jsx.d [%e js] (fun () -> ([%e value] : [%t t]))]
+        | Function, None when is_made value ->
+            [%expr Solidtype.Jsx.d [%e js] [%e thunk ~loc value]]
         | Thunk, Some t ->
             [%expr Solidtype.Jsx.d [%e js] ([%e value] : unit -> [%t t])]
         | Thunk, None -> [%expr Solidtype.Jsx.d [%e js] [%e value]]
@@ -452,7 +466,7 @@ let element map ~loc name args =
       match rest with
       | None -> args
       | Some (written, _) ->
-          let rest = B.evar ~loc "solidtype__rest" in
+          let rest = [%expr solidtype__rest ()] in
           List.concat_map
             (function
               | Labelled "ref", _ -> []
@@ -485,7 +499,7 @@ let element map ~loc name args =
         match rest with
         | Some (_, given) ->
             [%expr
-              let solidtype__rest = [%e map given] in
+              let solidtype__rest () = [%e map given] in
               [%e made]]
         | None -> made)
   in
@@ -514,8 +528,9 @@ let component map ~loc path args =
     | Labelled l when String.equal l spread ->
         let x = B.evar ~loc (bound spread) in
         Ok
-          ( Some (bound spread, (None, map value)),
-            Some (Labelled spread, x),
+          ( Some
+              (bound spread, (Some [%type: unit -> _], thunk ~loc (map value))),
+            Some (Labelled spread, [%expr [%e x] ()]),
             [%expr Solidtype.Jsx.spread [%e x]] )
     | Optional l when Option.is_some (wrapped value) ->
         let* js, t, v = passed_on ~loc l value in
@@ -566,6 +581,11 @@ let component map ~loc path args =
             ( None,
               Some (Labelled label, [%expr Solidtype.Check.element ()]),
               [%expr Solidtype.Jsx.s [%e name] [%e map value]] )
+        | Function when is_made value ->
+            ( Some
+                (bound label, (Some [%type: unit -> _], thunk ~loc (map value))),
+              Some (Labelled label, [%expr Solidtype.Check.thunk [%e x]]),
+              [%expr Solidtype.Jsx.d [%e name] [%e x]] )
         | Function ->
             ( Some (bound label, (None, map value)),
               Some (Labelled label, x),

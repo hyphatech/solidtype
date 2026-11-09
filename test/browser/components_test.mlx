@@ -5,6 +5,7 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Switch = Solidtype.Switch
 module Match = Solidtype.Match
+module Show = Solidtype.Show
 module ErrorBoundary = Solidtype.ErrorBoundary
 module Dynamic = Solidtype.Dynamic
 module Suspense = Solidtype.Suspense
@@ -33,6 +34,15 @@ module Removable = struct
       (fun () -> Solidtype.Jsx.string (title ()))
     </button>
 end
+
+(* A button whose handler its caller makes. *)
+module Remove = struct
+  let%component make ~(on_click : Dom.mouseEvent -> unit) () =
+    <button on_click>"remove"</button>
+end
+
+(* A task's id, which there is none of until a task is chosen. *)
+let id_of = function Some id -> id | None -> raise Broken
 
 (* A field that reports what is typed, its callback any name. *)
 module Field = struct
@@ -175,6 +185,48 @@ let () =
               <Removable title="card" on_remove=(fun _ -> incr removed) />);
           T.click (button_by_text "card");
           E.(expect !removed |> toBe 1));
+      Jest.test "a handler made in a branch is made as the branch is drawn"
+        (fun () ->
+          let removed = ref 0 in
+          let remove id (_ : Dom.mouseEvent) = removed := id in
+          let task, set_task = S.create_signal None in
+          T.render (fun () ->
+              <Show when_=(fun () -> Option.is_some (S.get task))>
+                <button on_click=(remove (id_of (S.get task)))>"remove"</button>
+              </Show>);
+          S.set set_task (Some 7);
+          T.click (button_by_text "remove");
+          E.(expect !removed |> toBe 7));
+      Jest.test "a component's handler made in a branch is made as it is drawn"
+        (fun () ->
+          let removed = ref 0 in
+          let remove id (_ : Dom.mouseEvent) = removed := id in
+          let task, set_task = S.create_signal None in
+          T.render (fun () ->
+              <Show when_=(fun () -> Option.is_some (S.get task))>
+                <Remove on_click=(remove (id_of (S.get task))) />
+              </Show>);
+          S.set set_task (Some 7);
+          T.click (button_by_text "remove");
+          E.(expect !removed |> toBe 7));
+      Jest.test "a component's spread made in a branch is made as it is drawn"
+        (fun () ->
+          let removed = ref 0 in
+          let rest_of id =
+            S.pick
+              (Remove.Props.make ~on_click:(fun _ -> removed := id) ())
+              [| "onClick" |]
+          in
+          let task, set_task = S.create_signal None in
+          T.render (fun () ->
+              <Show when_=(fun () -> Option.is_some (S.get task))>
+                <Remove
+                  on_click=(fun _ -> ()) props=(rest_of (id_of (S.get task)))
+                />
+              </Show>);
+          S.set set_task (Some 7);
+          T.click (button_by_text "remove");
+          E.(expect !removed |> toBe 7));
       Jest.test "a callback in a variable is passed by its name, any name"
         (fun () ->
           let got = ref "" in
