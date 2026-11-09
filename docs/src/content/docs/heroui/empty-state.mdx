@@ -7,11 +7,8 @@ import Example from "@components/Example.astro";
 import * as Usage from "@islands/empty_state_usage.jsx";
 import UsageCode from "@islands/empty_state_usage.mlx?raw";
 
-`Solidtype_heroui.Empty_state` is a `<div>` with the class HeroUI's own
-`emptyStateVariants` gives, which a list, a table or a select shows where it
-has nothing to show. It says "No results found" unless it is given children.
-HeroUI keeps it for its lists and gives it no page of its own; it has no
-behaviour, so no Kobalte component underlies it.
+What a list, a table or a select shows where it has nothing to show. It says
+"No results found" unless it is given children.
 
 Original HeroUI source: [EmptyState](https://github.com/heroui-inc/heroui/tree/v3/packages/react/src/components/empty-state), which heroui.com has no page for.
 
@@ -23,11 +20,11 @@ Original HeroUI source: [EmptyState](https://github.com/heroui-inc/heroui/tree/v
 
 ### CSS Classes
 
-- `.empty-state`
+- `.empty-state` - Base empty state container
 
 ## API Reference
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-| `children` | `children` | elements | "No results found" | What it says |
+| `children` | `children` | elements | "No results found" | Its content |

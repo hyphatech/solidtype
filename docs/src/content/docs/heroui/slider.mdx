@@ -1,6 +1,6 @@
 ---
 title: Slider
-description: A value, or a range of two, chosen along a track.
+description: A slider allows a user to select one or more values within a range.
 ---
 
 import Example from "@components/Example.astro";
@@ -19,13 +19,6 @@ import CustomOutputCode from "@islands/slider_custom_output.mlx?raw";
 import * as Format from "@islands/slider_format.jsx";
 import FormatCode from "@islands/slider_format.mlx?raw";
 import * as Demo from "@islands/slider_demo.jsx";
-
-`Solidtype_heroui.Slider` is Kobalte's `Slider.Root`, with the classes
-HeroUI's own `sliderVariants` gives. Its values -- one, or two for a range --
-are chosen by its thumbs, Kobalte's, by a pointer or the arrow, page, Home and
-End keys, on its step's grid within its range. Its output and fill are drawn
-from its values as React Aria draws them, and each thumb is placed as React
-Aria places it, centred across the track, which HeroUI's styles count on.
 
 Original HeroUI documentation: [Slider](https://heroui.com/en/docs/react/components/slider).
 
@@ -78,37 +71,60 @@ Each thumb of a range is bounded, for a reader, by its neighbours.
 
 ### Controlled Value
 
+Control the value with `value` and `on_change`.
+
 <Example code={ControlledCode} title="slider_controlled.mlx"><Controlled.make client:visible /></Example>
 
 ### Custom Output
 
-`Slider.Output`'s children take the place of its values.
+Customize `Slider.Output` to control how the selected values are shown: its
+children take the place of its values.
 
 <Example code={CustomOutputCode} title="slider_custom_output.mlx"><CustomOutput.make client:visible /></Example>
 
 ### Custom Value Formatting
 
-`format_options` formats each value the output shows and each thumb tells a
-reader, by Kobalte's number formatter in the reader's locale, a decimal by
-default.
+Use `format_options` to format the displayed value. This example formats it
+as USD. Each thumb tells a reader its value in the same format, in the
+reader's locale.
 
 <Example code={FormatCode} title="slider_format.mlx"><Format.make client:visible /></Example>
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.slider`, `.slider__output`, `.slider__track`, `.slider__fill`,
-  `.slider__thumb`
+#### Base Classes
+
+- `.slider` - Base slider container
+- `.slider__output` - Output element displaying current value(s)
+- `.slider__track` - Track element containing fill and thumbs
+- `.slider__fill` - Fill element showing selected range
+- `.slider__thumb` - Individual thumb element
+
+#### State Classes
+
+- `.slider[data-disabled="true"]` - Disabled slider state
+- `.slider[data-orientation="vertical"]` - Vertical orientation
+- `.slider__thumb[data-dragging="true"]` - Thumb being dragged
+- `.slider__thumb[data-focus-visible="true"]` - Thumb keyboard focused
+- `.slider__thumb[data-disabled="true"]` - Disabled thumb state
+- `.slider__track[data-fill-start="true"]` - Fill starts at beginning
+- `.slider__track[data-fill-end="true"]` - Fill ends at end
 
 ### Interactive States
 
-- **Orientation**: `[data-orientation="horizontal"]`,
-  `[data-orientation="vertical"]`
-- **Disabled**: `[data-disabled="true"]`
-- **Filled**: `[data-fill-start="true"]`, `[data-fill-end="true"]` on the track
-- **Thumb**: `[data-focused="true"]`, `[data-focus-visible="true"]`,
-  `[data-hovered="true"]`, `[data-dragging="true"]`
+The component supports both CSS pseudo-classes and data attributes for
+flexibility:
+
+- **Hover**: `:hover` or `[data-hovered="true"]` on thumb
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on thumb, and
+  `[data-focused="true"]`
+- **Dragging**: `[data-dragging="true"]` on thumb
+- **Disabled**: `[data-disabled="true"]` on slider or thumb
 
 ## API Reference
 
@@ -118,30 +134,41 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `float array` | | Its values, controlled |
-| `defaultValue` | `default_value` | `float array` | `[\| min_value \|]` | Its values at first, kept by itself |
-| `onChange` | `on_change` | `float array -> unit` | | Told its values as they change |
-| `onChangeEnd` | `on_change_end` | `float array -> unit` | | Told its values as a drag ends |
-| `minValue` | `min_value` | `float` | `0.` | The least value |
-| `maxValue` | `max_value` | `float` | `100.` | The greatest value |
-| `step` | `step` | `float` | `1.` | How far a key steps |
-| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its direction |
-| `isDisabled` | `is_disabled` | `bool` | | Whether it is disabled, else as its fieldset is |
-| `name` | `name` | `string` | | Its name in a form |
-| `aria-label` | `aria_label` | `string` | | Its name where no label names it |
+| `value` | `value` | `float array` | | The current value (controlled) |
+| `defaultValue` | `default_value` | `float array` | `[\| min_value \|]` | The default value (uncontrolled) |
+| `onChange` | `on_change` | `float array -> unit` | | Handler called when the value changes |
+| `onChangeEnd` | `on_change_end` | `float array -> unit` | | Handler called when dragging ends |
+| `minValue` | `min_value` | `float` | `0.` | The slider's minimum value |
+| `maxValue` | `max_value` | `float` | `100.` | The slider's maximum value |
+| `step` | `step` | `float` | `1.` | Value increment |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | The orientation of the slider |
+| `isDisabled` | `is_disabled` | `bool` | | Whether the slider is disabled; else as its fieldset is |
+| `name` | `name` | `string` | | The name of the input, used when submitting an HTML form |
+| `aria-label` | `aria_label` | `string` | | Accessibility label for the slider |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves its thumbs for an element outside it; React's Slider has none |
-| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | a decimal | How its values are shown |
+| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | a decimal | The display format of the value label |
 
 ### Slider.Thumb
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `index` | `index` | `int` | `0` | Which value it moves |
+| `index` | `index` | `int` | `0` | Index of the thumb within the slider |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-| `children` | `children` | elements | | Drawn inside it |
+| `children` | `children` | elements | | Thumb content |
 
 ### Slider.Output, Slider.Track, Slider.Fill
 
 Each takes `class_`, added after HeroUI's class; the output `children`, in
 place of its values.
+
+## Accessibility
+
+The Slider component implements the ARIA slider pattern and provides:
+
+- Full keyboard navigation support (Arrow keys, Home, End, Page Up/Down)
+- Screen reader announcements for value changes
+- Proper focus management
+- Support for disabled states
+- HTML form integration via hidden input elements
+- Internationalization support with locale-aware value formatting

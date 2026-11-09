@@ -1,6 +1,6 @@
 ---
 title: Table
-description: Rows and columns of data, moved through by the keys.
+description: Tables display structured data in rows and columns with support for sorting, selection, column resizing, and infinite scrolling.
 ---
 
 import Example from "@components/Example.astro";
@@ -30,26 +30,10 @@ import * as ExTailwind from "@islands/table_tailwind.jsx";
 import ExTailwindCode from "@islands/table_tailwind.mlx?raw";
 import * as Demo from "@islands/table_demo.jsx";
 
-`Solidtype_heroui.Table` is HeroUI's Table, its classes HeroUI's own
-`tableVariants`, around a `<table role="grid">` moved through by the keys as
-React Aria's grid is. Kobalte has no table: its rows are a list of Kobalte's,
-made of the hooks Kobalte's own lists are, `Solidtype_kobalte.Selection`,
-which focus a row and move between rows by the arrow keys, Home and End, Page
-Up and Page Down and typing; the port moves along a row's cells and between a
-cell and the cell above or below it.
-
-Rows given by data are Solid's `For` inside `Table.Body`, as HeroUI's are its
-body's `items` and a render function; columns and cells given by data are a
-`For` too, as HeroUI's are its header's `columns` and `Table.Collection`.
-
-Its rows are selected by Kobalte's list, one or many, by a press, Space or
-Enter, or a `Checkbox` of `slot=`selection` in a row, and all of them by one
-in the header. A column that allows sorting is pressed, or given Enter or Space, to be
-sorted by. `Table.Load_more` loads more rows as the table's end scrolls into
-view. In a `Table.Resizable_container`, a `Table.Column_resizer` resizes its
-column. Given a `tree_column`, rows hold rows, expanded and collapsed by a
-chevron or the arrow keys. Inside a `Virtualizer` given
-`Virtualizer.table_layout`, only the rows in view are drawn.
+Rows, columns and cells given by data are Solid's `For`, where HeroUI's take
+`items`, `columns` and `Table.Collection`.
+The arrow keys, Home, End, Page Up, Page Down and typing move between rows,
+and the arrows along a row's cells.
 
 Original HeroUI documentation: [Table](https://heroui.com/en/docs/react/components/table).
 
@@ -99,101 +83,100 @@ row is one they disagree on.
 
 ### Async Loading
 
-`Table.Load_more` at the end of `Table.Body` calls `on_load_more` as it comes
-within `scroll_offset` heights of the view of what scrolls the table, and
-again as loading ends with it still in view; while `is_loading` it draws a row
-across every column holding its `Table.Load_more_content`. It never asks while
-loading, so the application keeps no guard of its own, where HeroUI's example
-keeps one in a ref, since React Aria asks again while the rows load.
+Use `Table.Load_more` at the end of `Table.Body` for infinite scrolling. It
+renders a sentinel row that triggers `on_load_more` when scrolled into view,
+and again as loading ends with it still in view. While `is_loading`, it draws
+a row across every column holding its `Table.Load_more_content`. It never asks
+while loading, so the application keeps no guard of its own.
 
 <Example code={ExAsyncLoadingCode} title="table_async_loading.mlx"><ExAsyncLoading.make client:visible /></Example>
 
 ### Sorting
 
-`allows_sorting` and `id` on a `Table.Column`, and `sort_descriptor` and
-`on_sort_change` on `Table.Content`, sort it; the rows' order is the
-application's. `Table.Sortable_column_header` draws HeroUI's chevron for its
-column's direction, which it reads from its column: HeroUI's is given it by
-the column's render function.
+Columns can be made sortable using the `allows_sorting` and `id` props on
+`Table.Column`. Use `sort_descriptor` and `on_sort_change` on `Table.Content`
+to manage sort state; the rows' order is the application's. Wrap the label in
+`Table.Sortable_column_header` to render the default ascending/descending
+indicator: it reads its column's direction itself.
+A sortable column is sorted by a press, Enter or Space.
 
 <Example code={ExSortingCode} title="table_sorting.mlx"><ExSorting.make client:visible /></Example>
 
 ### Selection
 
-`selection_mode` on `Table.Content` selects its rows. A `Checkbox` of
-`slot=`selection` stands for its row, and in the header for every row.
+Enable row selection with `selection_mode` on `Table.Content`. Use `Checkbox`
+with `` slot=`selection `` for select-all and per-row checkboxes. A row is
+selected by a press, Space or Enter.
 
 <Example code={ExSelectionCode} title="table_selection.mlx"><ExSelection.make client:visible /></Example>
 
 ### Expandable Rows
 
-`tree_column` on `Table.Content`, the `id` of a column, makes the table a tree
-grid: a `Table.Row` written inside another, among its cells, is drawn after it
-while it is expanded, a level deeper, its tree column's cell indented by
-HeroUI's styles. `expanded_keys`, or `default_expanded_keys`, and
-`on_expanded_change` say which rows are expanded. A `Button` of
-`slot=`chevron` in a row expands and collapses it; the arrow forward on a row
-expands it, the arrow back collapses it, then reaches the row it is in.
-`Table.use_row_context` and `Table.use_cell_context`, read in a cell, are
-what HeroUI's cell's render function is given: whether its row holds rows and
-is expanded, and whether it is in the tree column. A context is read as the
-cell is drawn, and kept, so a handler reads the row it was drawn in.
+Rows can be nested to display hierarchical data: write a `Table.Row` inside
+another, among its cells. Use the `tree_column` prop, the `id` of a column, to
+designate a column, and render a `Button` with `` slot=`chevron `` in that
+column's cells so users can expand and collapse the row. Use the
+`expanded_keys` prop, or `default_expanded_keys`, and `on_expanded_change` to
+control which rows are expanded. The arrow forward on a row expands it, and
+the arrow back collapses it, then reaches the row it is in.
+
+`Table.use_row_context` and `Table.use_cell_context`, read in a cell, tell
+whether its row holds rows and is expanded, and whether the cell is in the
+tree column; a handler reads the row the cell was drawn in.
 
 <Example code={ExExpandableRowsCode} title="table_expandable_rows.mlx"><ExExpandableRows.make client:visible /></Example>
 
 ### Pagination
 
-`Table.Footer` holds a `Pagination` below the table.
+Use `Table.Footer` to add a pagination component below the table.
 
 <Example code={ExPaginationCode} title="table_pagination.mlx"><ExPagination.make client:visible /></Example>
 
 ### Column Resizing
 
-`Table.Resizable_container` in place of `Table.Scroll_container` lays the
-columns out at a fixed width, each as its `width`, or `default_width` until it
-is resized, says: `Pixels`, a `Percent` of the table's width, or a `Fraction`
-of what the others leave, never narrower than `min_width`, 75 pixels by
-default, nor wider than `max_width`. A `Table.Column_resizer` in a column is
-dragged, or reached by Tab from the column's header, where its arrows resize
-the column by 10 pixels and Enter begins a resize the arrows go on with, which
-Enter, Escape, Space, Tab or leaving it ends. `on_resize_start`, `on_resize`
-and `on_resize_end` on the container are told every column's size by its
-`id`.
+Wrap the table in `Table.Resizable_container`, in place of
+`Table.Scroll_container`, and add `Table.Column_resizer` inside each resizable
+column. A column's `width`, or `default_width` until it is resized, is
+`Pixels`, a `Percent` of the table's width, or a `Fraction` of what the others
+leave, between `min_width`, 75 pixels by default, and `max_width`.
+
+A resizer is dragged, or reached by Tab from its column's header: its arrows
+resize the column by 10 pixels, and Enter begins a resize that Enter, Escape,
+Space, Tab or leaving it ends. `on_resize_start`, `on_resize` and
+`on_resize_end` on the container are told every column's size by its `id`.
 
 <Example code={ExColumnResizingCode} title="table_column_resizing.mlx"><ExColumnResizing.make client:visible /></Example>
 
 ### Empty State
 
-`render_empty_state` on `Table.Body` is drawn while it has no row, across
-every column.
+Use `render_empty_state` on `Table.Body` to display a custom message when the
+table has no data.
 
 <Example code={ExEmptyStateCode} title="table_empty_state.mlx"><ExEmptyState.make client:visible /></Example>
 
 ### Custom Cells
 
-Any element in a cell: here a selection, sorting, HeroUI's `Avatar`, `Chip`
-and `Button`, together.
+Any element in a cell: here a selection, sorting, `Avatar`, `Chip` and
+`Button`, together.
 
 <Example code={ExCustomCellsCode} title="table_custom_cells.mlx"><ExCustomCells.make client:visible /></Example>
 
 ### Virtualization
 
-A `Virtualizer` given `Virtualizer.table_layout`, HeroUI's `TableLayout`, draws
-only the rows in view of the table and a third more beyond, and the focused
-row wherever it is: each part is a `<div>` of its role, placed as React Aria's
-TableLayout places it, the header kept over the rows as they scroll, the
-columns as wide as they ask within the table's width. The table is what
-scrolls: its class gives it its height and its overflow. The keys reach every
-row, drawn or not, and the one they move to is scrolled into view below the
-header. A table whose rows hold rows is not virtualized yet.
+Table supports virtualization through `Virtualizer`, given
+`Virtualizer.table_layout`, enabling efficient rendering of large datasets by
+displaying only the rows visible within the viewport. The table is what
+scrolls: give it a height and an overflow by its class. The keys reach every
+row, drawn or not. A table whose rows hold rows is not virtualized yet.
 
 <Example code={ExVirtualizationCode} title="table_virtualization.mlx"><ExVirtualization.make client:visible /></Example>
 
 ### TanStack Table
 
-HeroUI's TanStack Table example drives the table with `@tanstack/react-table`,
-React's; a Solid application has `@tanstack/solid-table`, which a table of
-`For`s takes as it is.
+HeroUI's Table works as a rendering layer on top of headless table libraries.
+HeroUI's example uses `@tanstack/react-table`; a Solid application uses
+[TanStack Table](https://tanstack.com/table)'s `@tanstack/solid-table`, whose
+rows and columns a table of `For`s draws.
 
 ## Customization
 
@@ -205,29 +188,59 @@ React's; a Solid application has `@tanstack/solid-table`, which a table of
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.table-root`, `.table-root--primary`, `.table-root--secondary`
-- `.table__scroll-container`, `.table__content`, `.table__header`,
-  `.table__column`, `.table__body`, `.table__row`, `.table__cell`,
-  `.table__footer`, `.table__sortable-column-header`,
-  `.table__sortable-column-indicator`, `.table__load-more`,
-  `.table__load-more-content`, `.table__resizable-container`,
-  `.table__column-resizer`
+#### Base Classes
+
+- `.table-root` - Root container (named `table-root` instead of `table`
+  because `table` is a built-in Tailwind CSS utility class for
+  `display: table`)
+- `.table__scroll-container` - Horizontal scroll wrapper with custom scrollbar
+- `.table__content` - The `<table>` element
+- `.table__header` - Header row (`<thead>`)
+- `.table__column` - Column header cell (`<th>`)
+- `.table__body` - Body section (`<tbody>`)
+- `.table__row` - Row element (`<tr>`)
+- `.table__cell` - Data cell (`<td>`)
+- `.table__footer` - Footer container (outside table)
+
+#### Advanced Classes
+
+- `.table__column-resizer` - Drag handle for column resizing
+- `.table__resizable-container` - Wrapper enabling column resizing
+- `.table__load-more` - Sentinel row for infinite scrolling
+- `.table__load-more-content` - Styled container for the loading indicator
+- `.table__sortable-column-header` - A sortable column's label
+- `.table__sortable-column-indicator` - Its sort indicator
+
+#### Variant Classes
+
+- `.table-root--primary` - Gray background container with card-style body
+  (default)
+- `.table-root--secondary` - No background, standalone rounded headers
 
 ### Interactive States
 
-- a row: `[data-hovered="true"]`, `[data-focus-visible="true"]`,
-  `[data-selected="true"]`, `[aria-disabled="true"]`
-- a column: `[data-allows-sorting="true"]`, `[data-hovered="true"]`,
-  `[data-focus-visible="true"]`
-- a sortable header and its indicator: `[data-direction]`
-- a column resizer: `[data-hovered="true"]`, `[data-resizing="true"]`,
-  `[data-focus-visible="true"]`, `[data-resizable-direction]`
-- a cell: `[data-focus-visible="true"]`, `[data-tree-column="true"]`,
-  `[data-level]`, `[data-expanded="true"]`, `[data-has-child-items="true"]`
-- a row of a tree: `[data-level]`, `[data-expanded="true"]`,
-  `[data-has-child-items="true"]`, and its `--table-row-level`
+The Table supports both CSS pseudo-classes and data attributes for
+flexibility:
+
+- **Hover**: `:hover` or `[data-hovered="true"]` (row background change), on
+  rows, columns and column resizers
+- **Selected**: `[data-selected="true"]` (row highlight)
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` (inset focus
+  ring on rows, columns, cells and column resizers)
+- **Disabled**: `[aria-disabled="true"]` (reduced opacity)
+- **Sortable**: `[data-allows-sorting="true"]` (interactive cursor on columns)
+- **Sort direction**: `[data-direction]` on a sortable header and its
+  indicator
+- **Resizing**: `[data-resizing="true"]` and `[data-resizable-direction]` on a
+  column resizer
+- **Tree**: `[data-level]`, `[data-expanded="true"]`,
+  `[data-has-child-items="true"]` on a row and its cells,
+  `[data-tree-column="true"]` on a cell, and the row's `--table-row-level`
 
 ## API Reference
 
@@ -237,7 +250,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual variant. Primary has a gray background container; secondary is flat with transparent rows |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### Table.ScrollContainer, Table.Footer
@@ -248,17 +261,17 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `aria-label` | `aria_label` | `string` | | Its name |
+| `aria-label` | `aria_label` | `string` | | Accessible label for the table |
 | `aria-labelledby` | `aria_labelledby` | `string` | | What names it |
-| `selectionMode` | `selection_mode` | `` [ `none \| `single \| `multiple ] `` | `` `none `` | How many rows may be selected |
+| `selectionMode` | `selection_mode` | `` [ `none \| `single \| `multiple ] `` | `` `none `` | Selection behavior: how many rows may be selected |
 | `selectionBehavior` | `selection_behavior` | `` [ `toggle \| `replace ] `` | `` `toggle `` | Whether a press toggles a row or chooses it alone |
-| `selectedKeys` | `selected_keys` | `string array` | | Its rows' keys selected, controlled |
+| `selectedKeys` | `selected_keys` | `string array` | | Controlled selected keys |
 | `defaultSelectedKeys` | `default_selected_keys` | `string array` | | Its rows' keys selected at first, kept by itself |
-| `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Called with the keys selected; all is every row's but a disabled one |
+| `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Selection change handler; all is every row's key but a disabled one |
 | `disabledKeys` | `disabled_keys` | `string array` | | Its rows' keys disabled |
 | `disallowEmptySelection` | `disallow_empty_selection` | `bool` | `false` | Whether one row stays selected |
-| `sortDescriptor` | `sort_descriptor` | `Table.sort_descriptor` | | The column it is sorted by, and which way |
-| `onSortChange` | `on_sort_change` | `Table.sort_descriptor -> unit` | | Called with the sort a column's press asks for |
+| `sortDescriptor` | `sort_descriptor` | `Table.sort_descriptor` | | Current sort state |
+| `onSortChange` | `on_sort_change` | `Table.sort_descriptor -> unit` | | Sort change handler |
 | `treeColumn` | `tree_column` | `string` | | The `id` of the column whose cells hold a tree's chevrons |
 | `expandedKeys` | `expanded_keys` | `string array` | | Its rows' keys expanded, controlled |
 | `defaultExpandedKeys` | `default_expanded_keys` | `string array` | | Its rows' keys expanded at first, kept by itself |
@@ -277,12 +290,12 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `id` | `id` | `string` | one of its own | The column a sort names |
-| `allowsSorting` | `allows_sorting` | `bool` | `false` | Whether pressing it sorts by it |
-| `isRowHeader` | `is_row_header` | `bool` | `false` | Whether its cells name their rows |
+| `id` | `id` | `string` | one of its own | Column identifier, which a sort names |
+| `allowsSorting` | `allows_sorting` | `bool` | `false` | Whether the column is sortable |
+| `isRowHeader` | `is_row_header` | `bool` | `false` | Whether this column is a row header |
 | `width` | `width` | `Table.column_size` | | Its width, controlled, in a resizable table |
-| `defaultWidth` | `default_width` | `Table.column_size` | `Fraction 1.` | Its width until it is resized |
-| `minWidth` | `min_width` | `float` | `75.` | How narrow it may be, in pixels |
+| `defaultWidth` | `default_width` | `Table.column_size` | `Fraction 1.` | Default width for resizable columns |
+| `minWidth` | `min_width` | `float` | `75.` | Minimum width for resizable columns, in pixels |
 | `maxWidth` | `max_width` | `float` | | How wide it may be, in pixels |
 | `children` | `children` | | | Its label; HeroUI's render function of its sort direction is `Table.Sortable_column_header`'s reading of it |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
@@ -291,9 +304,9 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `sortDirection` | `sort_direction` | `` [ `ascending \| `descending ] `` | its column's | Which way its column is sorted |
-| `showIndicator` | `show_indicator` | `bool` | `true` | Whether the chevron is drawn while it is sorted |
-| `indicator` | `indicator` | `Jsx.element` | HeroUI's chevron | Drawn in a span HeroUI's styles turn, where React clones it with the classes |
+| `sortDirection` | `sort_direction` | `` [ `ascending \| `descending ] `` | its column's | Current sort direction |
+| `showIndicator` | `show_indicator` | `bool` | `true` | Whether to render the sort indicator icon when a direction is set |
+| `indicator` | `indicator` | `Jsx.element` | HeroUI's chevron | Custom indicator element. Overrides the default chevron, in a span that receives a `data-direction` attribute |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Body
@@ -301,14 +314,14 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
 | `items` | — | | | Its rows given by data are a `For` |
-| `renderEmptyState` | `render_empty_state` | `unit -> Jsx.element` | | Drawn while it has no row |
+| `renderEmptyState` | `render_empty_state` | `unit -> Jsx.element` | | Content to display when the table is empty |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 ### Table.Row
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `id` | `id` | `string` | one of its own | Its key |
+| `id` | `id` | `string` | one of its own | Row identifier |
 | `onAction` | `on_action` | `unit -> unit` | | Run by Enter, and by a press as the selection lets it |
 | `href` | `href` | `string` | | Opened as its action, as a link is |
 | `target`, `rel`, `download`, `hrefLang`, `ping`, `referrerPolicy` | `target`, `rel`, `download`, `href_lang`, `ping`, `referrer_policy` | `string` | | Its link's |
@@ -341,8 +354,8 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `isLoading` | `is_loading` | `bool` | `false` | Whether more rows are loading, its row drawn while they are |
-| `onLoadMore` | `on_load_more` | `unit -> unit` | | Called as its sentinel comes into view, never while loading |
+| `isLoading` | `is_loading` | `bool` | `false` | Whether data is currently loading, its row drawn while it is |
+| `onLoadMore` | `on_load_more` | `unit -> unit` | | Handler called when the sentinel row is visible, never while loading |
 | `scrollOffset` | `scroll_offset` | `float` | `1.` | How many heights of the view before the end it asks |
 | `className` | `class_` | `string` | | Added after HeroUI's class, on the loading row |
 
@@ -352,11 +365,11 @@ Each takes `class_`, added after HeroUI's class, and its `children`.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `rowHeight` | `row_size` | `float` | `48.` | Each row's height |
-| `headingHeight` | `heading_size` | `float` | its row's | The header's height |
-| `loaderHeight` | `loader_size` | `float` | its row's | What loads more's height while it loads |
-| `gap` | `gap` | `float` | `0.` | Between the rows |
-| `padding` | `padding` | `float` | `0.` | Around the table |
+| `rowHeight` | `row_size` | `float` | `48.` | The fixed height of a row in px |
+| `headingHeight` | `heading_size` | `float` | its row's | The fixed height of the header in px |
+| `loaderHeight` | `loader_size` | `float` | its row's | The fixed height of a loader element in px |
+| `gap` | `gap` | `float` | `0.` | The gap between items |
+| `padding` | `padding` | `float` | `0.` | The padding around the list |
 | `estimatedRowHeight`, `estimatedHeadingHeight` | — | | | A virtualized table's rows are as high as `row_size` |
 
 ### Table.LoadMoreContent

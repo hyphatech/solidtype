@@ -1,6 +1,6 @@
 ---
 title: ColorSlider
-description: One channel of a colour, slid along a track of its range.
+description: A color slider allows users to adjust an individual channel of a color value.
 ---
 
 import Example from "@components/Example.astro";
@@ -22,24 +22,9 @@ import * as ExCustomStyles from "@islands/color_slider_custom_styles.jsx";
 import ExCustomStylesCode from "@islands/color_slider_custom_styles.mlx?raw";
 import * as Demo from "@islands/color_slider_demo.jsx";
 
-`Solidtype_heroui.Color_slider` is Kobalte's `ColorSlider`, fixed in
-`solidtype-headless`, with the classes HeroUI's own `colorSliderVariants`
-gives: one channel of a colour, slid along a track drawn as the channel's
-range, over a checkerboard that shows through a colour less than opaque, its
-thumb painted the colour. Its thumb is pressed and dragged, or stepped by the
-arrow keys, by the channel's page by Page Up and Page Down -- 15 degrees of a
-hue, 10 of a saturation, 17 of a red -- and to its ends by Home and End.
-
-Its value is Kobalte's `Types.Color`, read from any CSS colour by
-`Solidtype_kobalte.Colors.parse_color`. `on_change` is told each colour other
-than the slider's, and `on_change_end` the last. A channel asked of a space
-that has none of it -- red in HSL, hue in RGB -- is read in the space it is
-in, as HeroUI corrects it.
-
-Kobalte's slider is its accessible pattern: the slider a group, its thumb the
-element of role `slider` that a reader reaches and the keys move, where React
-Aria's thumb holds a range input. Its value is told as React Aria tells it,
-`0°, red`.
+Its value is a `Types.Color.t`, read from any CSS colour by
+`Solidtype_kobalte.Colors.parse_color`. A channel asked of a space that has
+none of it -- red in HSL, hue in RGB -- is read in the space it is in.
 
 Original HeroUI documentation: [ColorSlider](https://heroui.com/en/docs/react/components/color-slider).
 
@@ -89,15 +74,21 @@ The marked row is Kobalte's: its slider is a `group` its label names, where Reac
 
 ### HSL Channels
 
-Sliders of one colour's channels, each given it and told its change.
+Use multiple `Color_slider`s to control different channels of a color value.
+The sliders can share the same color value to create a complete color picker.
 
 <Example code={ExHslChannelsCode} title="color_slider_hsl_channels.mlx"><ExHslChannels.make client:visible /></Example>
 
 ### Alpha Channel
 
+The alpha channel slider shows a transparency checkerboard pattern to help
+visualize the transparency level.
+
 <Example code={ExAlphaChannelCode} title="color_slider_alpha_channel.mlx"><ExAlphaChannel.make client:visible /></Example>
 
 ### RGB Channels
+
+You can also use the RGB color space with red, green, and blue channels.
 
 <Example code={ExRgbChannelsCode} title="color_slider_rgb_channels.mlx"><ExRgbChannels.make client:visible /></Example>
 
@@ -117,15 +108,19 @@ Sliders of one colour's channels, each given it and told its change.
 
 ### CSS Classes
 
-- `.color-slider`, `.color-slider__output`, `.color-slider__track`,
-  `.color-slider__thumb`
-- the track's ends, `--track-start-color` and `--track-end-color`
+- `.color-slider` - Base slider container
+- `.color-slider__output` - Output element displaying current value
+- `.color-slider__track` - Track element with color gradient, its ends
+  `--track-start-color` and `--track-end-color`
+- `.color-slider__thumb` - Thumb element showing current color
 
 ### Interactive States
 
-- the slider: `[data-disabled="true"]`, `[data-orientation]`
-- the thumb: `[data-hovered="true"]`, `[data-focus-visible="true"]`,
-  `[data-dragging="true"]`, `[data-disabled="true"]`
+- **Hover**: `[data-hovered="true"]` on thumb
+- **Focus**: `[data-focus-visible="true"]` on thumb
+- **Dragging**: `[data-dragging="true"]` on thumb
+- **Disabled**: `[data-disabled="true"]` on slider or thumb
+- **Orientation**: `[data-orientation]` on slider
 
 ## API Reference
 
@@ -135,16 +130,16 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `channel` | `channel` | `Color_slider.channel` | | The channel it slides |
-| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The space the channel is of |
-| `value` | `value` | `Types.Color.t` | | Its colour, controlled |
-| `defaultValue` | `default_value` | `Types.Color.t` | | Its colour at first, kept by itself |
-| `onChange` | `on_change` | `Types.Color.t -> unit` | | Called with each colour other than its own |
-| `onChangeEnd` | `on_change_end` | `Types.Color.t -> unit` | | Called with the last, once it stops |
-| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its direction |
-| `isDisabled` | `is_disabled` | `bool` | its fieldset's | Whether it is disabled |
-| `name` | `name` | `string` | | The channel's name in a form |
-| `aria-label` | `aria_label` | `string` | | Its name, where no label names it |
+| `channel` | `channel` | `Color_slider.channel` | | The color channel that the slider manipulates (hue, saturation, lightness, brightness, alpha, red, green, blue) |
+| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The color space (hsl, hsb, rgb). Defaults to the color space of the value |
+| `value` | `value` | `Types.Color.t` | | The current color value (controlled) |
+| `defaultValue` | `default_value` | `Types.Color.t` | | The default color value (uncontrolled) |
+| `onChange` | `on_change` | `Types.Color.t -> unit` | | Handler called when the value changes during dragging, with each colour other than its own |
+| `onChangeEnd` | `on_change_end` | `Types.Color.t -> unit` | | Handler called when dragging ends |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | The orientation of the slider |
+| `isDisabled` | `is_disabled` | `bool` | its fieldset's | Whether the slider is disabled |
+| `name` | `name` | `string` | | The name of the input element for form submission |
+| `aria-label` | `aria_label` | `string` | | Accessibility label for the slider |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called as focus leaves it |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
@@ -154,3 +149,14 @@ Each prop beside the name HeroUI's React component gives it.
 Each takes `class_`, added after HeroUI's class; the track and the thumb
 `style`, after their own, a function of their state in React; the output and
 the thumb their `children`, the output's in place of the channel's value.
+
+## Accessibility
+
+`Color_slider` implements the ARIA slider pattern and provides:
+
+- Full keyboard navigation support (arrow keys, Home, End, Page Up and Page
+  Down)
+- Screen reader announcements for value changes, such as `0°, red`
+- Proper focus management
+- Support for disabled states
+- HTML form integration via a hidden input element

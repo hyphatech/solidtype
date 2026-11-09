@@ -1,6 +1,6 @@
 ---
 title: Skeleton
-description: A placeholder in the shape of content that is loading.
+description: Skeleton is a placeholder to show a loading state and the expected shape of a component.
 ---
 
 import Example from "@components/Example.astro";
@@ -22,10 +22,7 @@ import * as Tailwind from "@islands/skeleton_tailwind.jsx";
 import TailwindCode from "@islands/skeleton_tailwind.mlx?raw";
 import * as Demo from "@islands/skeleton_demo.jsx";
 
-`Solidtype_heroui.Skeleton` is a `<div>` with the classes HeroUI's own
-`skeletonVariants` gives, shaped by its `class_`. Kobalte's Skeleton is a
-wrapper that hides its content while it loads, with a role and sizes of its
-own; HeroUI's is the placeholder alone, which this is, with no behaviour.
+A skeleton takes its shape from its `class_`.
 
 Original HeroUI documentation: [Skeleton](https://heroui.com/en/docs/react/components/skeleton).
 
@@ -63,8 +60,9 @@ row is one they disagree on.
 
 ### Single Shimmer
 
-One shimmer passes over every skeleton at once: the `skeleton--shimmer` class
-on their container, and `` animation_type=`none `` on each.
+A synchronized shimmer effect that passes over all skeleton elements at once.
+Apply the `skeleton--shimmer` class to a parent container and set
+`` animation_type=`none `` on child skeletons.
 
 <Example code={SingleShimmerCode} title="skeleton_single_shimmer.mlx"><SingleShimmer.make client:visible /></Example>
 
@@ -103,8 +101,9 @@ HeroUI in React:
 
 ### Global Animation Configuration
 
-The page's `--skeleton-animation` is the animation of every skeleton given
-none, `shimmer`, `pulse` or `none`, as in React:
+You can set a default animation type for all Skeleton components in your
+application by defining the `--skeleton-animation` CSS variable, `shimmer`,
+`pulse` or `none`:
 
 ```css
 :root {
@@ -116,16 +115,58 @@ none, `shimmer`, `pulse` or `none`, as in React:
 }
 ```
 
-A skeleton reads it once it is in the browser, never on the server, so a
-prerendered skeleton hydrates as it was rendered, a shimmer, and then takes
-the page's. A value it does not know is a shimmer.
+This global setting will be overridden by the `animation_type` prop when
+specified on individual components. A skeleton reads it once it is in the
+browser, never on the server, so a prerendered skeleton shows a shimmer until
+it hydrates. A value it does not know is a shimmer.
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.skeleton`, and its animations `.skeleton--shimmer`, `.skeleton--pulse`,
-  `.skeleton--none`
+#### Base Class
+
+- `.skeleton` - Base skeleton styles with background and rounded corners
+
+#### Animation Variant Classes
+
+- `.skeleton--shimmer` - Adds shimmer animation with gradient effect (default)
+- `.skeleton--pulse` - Adds pulse animation using Tailwind's animate-pulse
+- `.skeleton--none` - No animation, static skeleton
+
+### Animation
+
+The Skeleton component supports three animation types, each with different
+visual effects.
+
+The shimmer effect creates a gradient that moves across the skeleton element:
+
+```css
+.skeleton--shimmer:before {
+  @apply animate-skeleton via-surface-3 absolute inset-0 -translate-x-full
+         bg-gradient-to-r from-transparent to-transparent content-[''];
+}
+```
+
+The shimmer animation is defined in the theme using:
+
+```css
+@theme inline {
+  --animate-skeleton: skeleton 2s linear infinite;
+
+  @keyframes skeleton {
+    100% {
+      transform: translateX(200%);
+    }
+  }
+}
+```
+
+The pulse animation uses Tailwind's built-in `animate-pulse` utility, and
+`.skeleton--none` applies no animation.
 
 ## API Reference
 
@@ -135,5 +176,5 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `animationType` | `animation_type` | `` [ `shimmer \| `pulse \| `none ] `` | the page's `--skeleton-animation`, else `` `shimmer `` | How it moves |
+| `animationType` | `animation_type` | `` [ `shimmer \| `pulse \| `none ] `` | the page's `--skeleton-animation`, else `` `shimmer `` | The animation type for the skeleton. Can be globally configured via `--skeleton-animation` CSS variable |
 | `className` | `class_` | `string` | | Added after HeroUI's classes: its shape |

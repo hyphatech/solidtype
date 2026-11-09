@@ -1,6 +1,6 @@
 ---
 title: Switch
-description: A switch, HeroUI's on Kobalte's.
+description: A toggle switch component for boolean states.
 ---
 
 import Example from "@components/Example.astro";
@@ -26,10 +26,7 @@ import SwitchGroupHorizontalCode from "@islands/switch_group_horizontal.mlx?raw"
 import * as SwitchRenderProps from "@islands/switch_render_props.jsx";
 import SwitchRenderPropsCode from "@islands/switch_render_props.mlx?raw";
 
-`Solidtype_heroui.Switch` is Kobalte's switch in HeroUI's anatomy: the field,
-`Switch.Content`, the clickable label that holds Kobalte's input,
-`Switch.Control` and `Switch.Thumb`, and HeroUI's `Label`. Its state is
-declared as React Aria writes it: Space toggles a switch, and Enter does not.
+Space toggles a focused switch; Enter does not.
 
 Original HeroUI documentation: [Switch](https://heroui.com/en/docs/react/components/switch).
 
@@ -47,6 +44,39 @@ which no style reads.
 <div class="not-content">
   <Demo.make client:load />
 </div>
+
+## Anatomy
+
+```ocaml
+<Switch>
+  <Switch.Content>
+    <Switch.Control>
+      <Switch.Thumb />
+    </Switch.Control>
+    <Label />
+  </Switch.Content>
+</Switch>
+```
+
+`Switch.Content` is the clickable area: the control and its label. For
+grouping multiple switches, use the `Switch_group` component:
+
+```ocaml
+<Switch_group>
+  <Switch>
+    <Switch.Content>
+      <Switch.Control><Switch.Thumb /></Switch.Control>
+      <Label>"Option 1"</Label>
+    </Switch.Content>
+  </Switch>
+  <Switch>
+    <Switch.Content>
+      <Switch.Control><Switch.Thumb /></Switch.Control>
+      <Label>"Option 2"</Label>
+    </Switch.Content>
+  </Switch>
+</Switch_group>
+```
 
 ## Examples
 
@@ -76,8 +106,7 @@ which no style reads.
 
 ### Group
 
-`Solidtype_heroui.Switch_group` lays switches out together, a `<div>` with
-the classes HeroUI's own `switchGroupVariants` gives; each switch is its own.
+`Switch_group` lays switches out together; each switch keeps its own state.
 
 <Example code={SwitchGroupCode} title="switch_group.mlx"><SwitchGroup.make client:visible /></Example>
 
@@ -113,19 +142,39 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.switch`, `.switch__content`, `.switch__control`, `.switch__thumb`
-- Sizes: `.switch--sm`, `.switch--md`, `.switch--lg`
-- Group: `.switch-group`, `.switch-group__items`, `.switch-group--horizontal`,
-  `.switch-group--vertical`
+#### Switch Classes
+
+- `.switch` - Base switch container
+- `.switch__content` - Content container
+- `.switch__control` - Switch control track
+- `.switch__thumb` - Switch thumb that moves
+- `.switch--sm` - Small size variant
+- `.switch--md` - Medium size variant (default)
+- `.switch--lg` - Large size variant
+
+#### SwitchGroup Classes
+
+- `.switch-group` - Switch group container
+- `.switch-group__items` - Container for switch items
+- `.switch-group--horizontal` - Horizontal layout
+- `.switch-group--vertical` - Vertical layout (default)
 
 ### Interactive States
 
-- **Selected**: `[data-selected="true"]`, on the field and its content
+The switch supports both CSS pseudo-classes and data attributes for
+flexibility:
+
+- **Selected**: `[data-selected="true"]`, on the switch and its content (thumb
+  position and background color change)
 - **Hover**: `:hover` or `[data-hovered="true"]`
-- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
-- **Disabled**: `[data-disabled="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` (shows focus
+  ring)
+- **Disabled**: `[data-disabled="true"]` (reduced opacity, no pointer events)
 - **Pressed**: `:active` or `[data-pressed="true"]`
 
 ## API Reference
@@ -136,20 +185,20 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
-| `isSelected` | `is_selected` | `bool` | | Whether it is on, controlled |
-| `defaultSelected` | `default_selected` | `bool` | `false` | Whether it starts on |
-| `onChange` | `on_change` | `bool -> unit` | | Called as it is toggled |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | The size of the switch |
+| `isSelected` | `is_selected` | `bool` | | Whether the switch is on (controlled) |
+| `defaultSelected` | `default_selected` | `bool` | `false` | Whether the switch is on by default (uncontrolled) |
+| `onChange` | `on_change` | `bool -> unit` | | Handler called when the switch value changes |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the switch is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
-| `children` | `children` | elements | | Its content, and its control |
-| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its state |
-| `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
-| `name` | `name` | `string` | | Its name in a form |
-| `value` | `value` | `string` | | Its value in a form, while it is on |
+| `children` | `children` | elements | | Switch content or render function |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the switch is read only |
+| `isRequired` | `is_required` | `bool` | `false` | Whether the switch must be selected |
+| `name` | `name` | `string` | | The name of the input element, used when submitting an HTML form |
+| `value` | `value` | `string` | | The value of the input element, used when submitting an HTML form, while it is on |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the switch is invalid |
 
 ### Switch.Content, Switch.Control and Switch.Thumb
 
@@ -162,6 +211,6 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | How its switches are laid out |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | The orientation of the switch group |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its switches |
+| `children` | `children` | elements | | The switch items to render |

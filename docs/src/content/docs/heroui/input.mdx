@@ -1,6 +1,6 @@
 ---
 title: Input
-description: A single-line text input.
+description: Primitive single-line text input component that accepts standard HTML attributes.
 ---
 
 import Example from "@components/Example.astro";
@@ -15,12 +15,9 @@ import TypesCode from "@islands/input_types.mlx?raw";
 import * as Controlled from "@islands/input_controlled.jsx";
 import ControlledCode from "@islands/input_controlled.mlx?raw";
 
-`Solidtype_heroui.Input` is an `<input>` with the classes HeroUI's own
-`inputVariants` gives and the state its styles read -- hovered, focused,
-focus-visible, disabled, invalid -- kept as React Aria keeps it. It takes
-every attribute an `<input>` takes and passes them on. Inside a
-[TextField](/solidtype/heroui/text-field/) it is Kobalte's `TextField.Input`, which the
-field's value, state, label and description reach.
+For validation, labels, and error messages, see
+[TextField](/solidtype/heroui/text-field/): inside one, an input takes the
+field's value, state, label and description.
 
 Original HeroUI documentation: [Input](https://heroui.com/en/docs/react/components/input).
 
@@ -32,7 +29,12 @@ Original HeroUI documentation: [Input](https://heroui.com/en/docs/react/componen
 
 ### Variants
 
-`` `secondary `` is the variant for an input on a surface.
+The Input component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with shadow, suitable for
+  most use cases
+- **`` `secondary ``** - Lower emphasis variant without shadow, suitable for
+  use in Surface components
 
 <Example code={VariantsCode} title="input_variants.mlx"><Variants.make client:visible /></Example>
 
@@ -52,23 +54,32 @@ Alone, an input is an `<input>`: its value is its `value`, and its changes are i
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.input`, and `.input--primary`, `.input--secondary`, `.input--full-width`
+- `.input` - Native input element styling
+- `.input--primary`, `.input--secondary` - Variants
+- `.input--full-width` - Full width modifier
 
 ### Interactive States
 
 - **Hover**: `:hover` or `[data-hovered="true"]`
 - **Focus Visible**: `:focus-visible` or `[data-focus-visible="true"]`
-- **Invalid**: `[data-invalid="true"]`, alone from its `aria_invalid`
+- **Invalid**: `[data-invalid="true"]` (also syncs with `aria_invalid`)
 - **Disabled**: `:disabled` or `[data-disabled="true"]`
 
 ## API Reference
 
-Input takes every attribute an `<input>` takes, and:
+Input accepts all standard HTML `<input>` attributes plus the following:
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary ``, or its field's | Its look |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary ``, or its field's | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the input should take full width of its container |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+For validation props like `is_invalid`, `is_required`, and error handling,
+use [TextField](/solidtype/heroui/text-field/) with Input as a child
+component.

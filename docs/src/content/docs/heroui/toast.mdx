@@ -1,6 +1,6 @@
 ---
 title: Toast
-description: Brief messages, shown in a stack, closing themselves.
+description: Display temporary notifications and messages to users with automatic dismissal and customizable placement.
 ---
 
 import Example from "@components/Example.astro";
@@ -31,23 +31,9 @@ import TailwindCode from "@islands/toast_tailwind.mlx?raw";
 {/* The page's toasts, on HeroUI's ground and out of the prose's flow, as an example's preview is. */}
 <div class="not-content heroui-ground"><Provider.make client:load /></div>
 
-`Solidtype_heroui.Toast` shows brief messages in a stack, on Kobalte's toast
-region, its list and its toasts, with the classes HeroUI's own `toastVariants`
-gives. A `Toast.Provider`, rendered once at the root of the page, shows the
-toasts a queue holds; `Toast.show` and its kin add, change and close them, from
-anywhere.
-
-The stack is HeroUI's: the newest toast in front, those behind it smaller and
-offset, at most three shown, and all of them laid out apart while the stack is
-hovered or holds the focus, which also holds every toast's countdown, as does
-the page while it is hidden. Alt and T moves the focus to it, and Escape folds
-it; a closing toast stays for its exit before it is gone.
-
 Original HeroUI documentation: [Toast](https://heroui.com/en/docs/react/components/toast).
 
 ## Usage
-
-HeroUI's examples, with HeroUI's icons from `@gravity-ui/icons`.
 
 <Example code={UsageCode} title="toast_usage.mlx"><Usage.make client:visible /></Example>
 
@@ -75,6 +61,9 @@ toast after each.
 </Toast.Provider>
 ```
 
+A `Toast.Provider`, rendered once at the root of the page, shows the toasts;
+`Toast.show` and its kin add, change and close them, from anywhere.
+
 ## Examples
 
 ### Variants
@@ -83,13 +72,14 @@ toast after each.
 
 ### Placements
 
-A queue of its own for each placement, each with its region.
+Each placement here has a queue of its own, shown by its own provider.
 
 <Example code={PlacementsCode} title="toast_placements.mlx"><Placements.make client:visible /></Example>
 
 ### Expanded Stack
 
-`is_expanded` lays the stack out apart without a hover, and holds no countdown.
+`is_expanded` forces the stack into its expanded layout; it does not pause
+timers.
 
 <Example code={ExpandedCode} title="toast_expanded.mlx"><Expanded.make client:visible /></Example>
 
@@ -107,9 +97,8 @@ A queue of its own for each placement, each with its region.
 
 ### Promise & Loading
 
-`Toast.promise` shows a spinner and changes the same toast in place as the
-promise settles; a promise that fails and a `success` that fails are told
-apart. `Toast.update` keeps what it does not name, as HeroUI documents it.
+`Toast.promise` shows a spinner, then changes the same toast in place as the
+promise settles. `Toast.update` keeps what it does not name.
 
 <Example code={PromiseCode} title="toast_promise.mlx"><Promise.make client:visible /></Example>
 
@@ -123,7 +112,7 @@ apart. `Toast.update` keeps what it does not name, as HeroUI documents it.
 
 ### Setup
 
-Render the provider once, at the root of the page:
+Render the provider in the root of your app.
 
 ```ocaml
 let make () =
@@ -146,19 +135,47 @@ and on an action's button by `Toast.action`'s.
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.toast-region`, and its placements `.toast-region--top-start` to
-  `.toast-region--bottom-end`
-- `.toast`, and its variants `.toast--default`, `.toast--accent`,
-  `.toast--success`, `.toast--warning`, `.toast--danger`
-- `.toast__indicator`, `.toast__content`, `.toast__title`,
-  `.toast__description`, `.toast__action`, `.toast__close-button`
+#### Base Classes
+
+- `.toast` - Base toast container
+- `.toast-region` - Toast region container
+- `.toast__content` - Content wrapper for title and description
+- `.toast__indicator` - Icon/indicator container
+- `.toast__title` - Toast title text
+- `.toast__description` - Toast description text
+- `.toast__action` - Action button container
+- `.toast__close-button` - Close button container
+
+#### Variant Classes
+
+- `.toast--default` - Default gray variant
+- `.toast--accent` - Accent blue variant
+- `.toast--success` - Success green variant
+- `.toast--warning` - Warning yellow/orange variant
+- `.toast--danger` - Danger red variant
+
+#### Placement Classes
+
+- `.toast-region--top-start` to `.toast-region--bottom-end` - The region's
+  placement
 
 ### Interactive States
 
-- `[data-frontmost]`, `[data-index]`, `[data-placement]`, `[data-entering]`,
-  `[data-exiting]`, `[data-expanded]`, `[data-hidden]`
+- **Frontmost**: `[data-frontmost]` - Applied to the topmost visible toast
+- **Index**: `[data-index]` - Applied based on toast position in stack
+- **Placement**: `[data-placement="*"]` - Applied based on toast region
+  placement
+- **Entering**: `[data-entering]` - Applied on first paint of a new toast
+- **Exiting**: `[data-exiting]` - Applied while a closing toast plays its exit
+  transition
+- **Expanded**: `[data-expanded]` - Applied to every toast while the stack is
+  expanded
+- **Hidden**: `[data-hidden]` - Applied to toasts beyond `max_visible_toasts`
 
 ## API Reference
 
@@ -166,35 +183,49 @@ and on an action's button by `Toast.action`'s.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `placement` | `placement` | `` [ `top_start \| `top \| `top_end \| `bottom_start \| `bottom \| `bottom_end ] `` | `` `bottom `` | Where its region is |
-| `gap` | `gap` | `float` | `12.` | The gap between toasts, in pixels |
-| `isExpanded` | `is_expanded` | `bool` | `false` | Whether the stack is laid out apart |
-| `maxVisibleToasts` | `max_visible_toasts` | `int` | `3` | How many it shows at once |
-| `hotkey` | `hotkey` | `string array` | `[\| "altKey"; "KeyT" \|]` | What moves the focus to it: modifiers by their name, other keys by their code, the modifiers left out up |
-| `scaleFactor` | `scale_factor` | `float` | `0.05` | How much smaller each toast behind is |
-| `width` | `width` | `string` | `"460px"` | A toast's width |
-| `queue` | `queue` | `Toast.Queue.t` | the default | The queue it shows |
-| `children` | `children` | `Toast.queued -> element` | HeroUI's toast | How each toast is rendered |
+| `placement` | `placement` | `` [ `top_start \| `top \| `top_end \| `bottom_start \| `bottom \| `bottom_end ] `` | `` `bottom `` | Placement of the toast region |
+| `gap` | `gap` | `float` | `12.` | The gap between toasts in pixels |
+| `isExpanded` | `is_expanded` | `bool` | `false` | Force the stack into its expanded layout (does not pause timers) |
+| `maxVisibleToasts` | `max_visible_toasts` | `int` | `3` | Maximum number of toasts to display at once |
+| `hotkey` | `hotkey` | `string array` | `[\| "altKey"; "KeyT" \|]` | Hotkey that moves focus to the toast region and expands the stack. Modifiers match `KeyboardEvent` boolean properties (e.g. `"altKey"`), other keys match `event.code` (e.g. `"KeyT"`). Modifiers you leave out must be up. Pass `[\|\|]` to disable |
+| `scaleFactor` | `scale_factor` | `float` | `0.05` | Scale factor for stacked toasts (0-1) |
+| `width` | `width` | `string` | `"460px"` | Width of the toast as a CSS value |
+| `queue` | `queue` | `Toast.Queue.t` | the default | Custom toast queue instance |
+| `children` | `children` | `Toast.queued -> element` | HeroUI's toast | Custom render function |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### toast
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `toast(title, options)` | `Toast.show title` | `Toast.key` | | Adds a toast |
+| `toast(title, options)` | `Toast.show title` | `Toast.key` | | Add a toast, returns its key |
 | `toast.success`, `info`, `warning`, `danger` | `Toast.success`, `info`, `warning`, `danger` | `Toast.key` | | Adds one of that variant, `info` the accent |
-| `toast.update` | `Toast.update key title` | `Toast.key` | | Changes it in place, keeping what it does not name |
-| `toast.promise` | `Toast.promise p ~loading ~success ~error` | `Toast.key` | | A spinner, then the outcome |
+| `toast.update` | `Toast.update key title` | `Toast.key` | | Update a toast in place, preserving its stack position and keeping what it does not name |
+| `toast.promise` | `Toast.promise p ~loading ~success ~error` | `Toast.key` | | A loading toast, then the message for its outcome |
 | `toast.close`, `clear`, `pauseAll`, `resumeAll` | `Toast.close`, `clear`, `pause_all`, `resume_all` | | | |
-| `description` | `description` | `string` | | Its text under the title |
-| `variant` | `variant` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `default `` | Its look |
-| `indicator` | `indicator` | `Toast.Variant_icon \| Icon of element \| No_icon` | `Variant_icon` | Its icon |
-| `actionProps` | `action` | `Toast.action ~on_press label` | | A button it offers |
-| `isLoading` | `is_loading` | `bool` | `false` | A spinner for its icon |
-| `timeout` | `timeout_ms` | `float` | `4000.` | When it closes itself; `0.` stays |
-| `onClose` | `on_close` | `unit -> unit` | | Called as it begins to close |
+| `description` | `description` | `string` | | Optional description text |
+| `variant` | `variant` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `default `` | Visual variant |
+| `indicator` | `indicator` | `Toast.Variant_icon \| Icon of element \| No_icon` | `Variant_icon` | Indicator icon: the variant's, a custom one, or none |
+| `actionProps` | `action` | `Toast.action ~on_press label` | | An action button |
+| `isLoading` | `is_loading` | `bool` | `false` | Show loading spinner instead of indicator |
+| `timeout` | `timeout_ms` | `float` | `4000.` | Auto-dismiss timeout in milliseconds. Set to `0.` for persistent toasts that don't auto-dismiss |
+| `onClose` | `on_close` | `unit -> unit` | | Called when the toast is dismissed, as its exit animation starts |
 
 ### ToastQueue
 
-`Toast.Queue.create ?max_visible_toasts ?exit_duration_ms ()` is a queue of its
-own, shown by a provider given it; each takes `?queue`.
+A queue manages the state for a `Toast.Provider`, outside any component, so
+you can trigger toasts from anywhere in your application.
+`Toast.Queue.create ?max_visible_toasts ?exit_duration_ms ()` makes one of
+your own, shown by a provider given it as `queue`; each function above takes
+it as `?queue`.
+
+## Accessibility
+
+- **Landmark region**: Toasts render in a labeled region; `Alt` + `T` moves
+  focus straight to it. The hotkey is configurable via the `hotkey` prop and
+  can be disabled by passing an empty array
+- **Keyboard**: `Tab` reaches the controls of visible toasts, and `Escape`
+  collapses the expanded stack
+- **Screen readers**: New toasts are announced automatically
+- **Timers**: Auto-dismiss pauses while the stack is hovered or focused, and
+  while the page is in a background tab

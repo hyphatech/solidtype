@@ -1,6 +1,6 @@
 ---
 title: Checkbox
-description: A checkbox, HeroUI's on Kobalte's.
+description: Checkboxes allow users to select multiple items from a list of individual items, or to mark one individual item as selected.
 ---
 
 import Example from "@components/Example.astro";
@@ -34,11 +34,6 @@ import * as ExTailwind from "@islands/checkbox_tailwind.jsx";
 import ExTailwindCode from "@islands/checkbox_tailwind.mlx?raw";
 import * as Demo from "@islands/checkbox_demo.jsx";
 
-`Solidtype_heroui.Checkbox` is Kobalte's checkbox in HeroUI's anatomy: the
-field, `Checkbox.Content`, the clickable label that holds Kobalte's input,
-`Checkbox.Control`, `Checkbox.Indicator` with HeroUI's own check and dash, and
-HeroUI's `Label`. Its state is declared as React Aria writes it.
-
 Original HeroUI documentation: [Checkbox](https://heroui.com/en/docs/react/components/checkbox).
 
 ## Usage
@@ -58,9 +53,32 @@ which no style reads.
   <Demo.make client:load />
 </div>
 
+## Anatomy
+
+```ocaml
+<Checkbox>
+  <Checkbox.Content>
+    <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+    "Label"
+  </Checkbox.Content>
+  <Description>"Optional field-level help text"</Description>
+  <Field_error>"Optional validation message"</Field_error>
+</Checkbox>
+```
+
+Plain text in `Checkbox.Content` is the clickable label and the checkbox's
+accessible name. `Description` and `Field_error` are optional.
+
 ## Examples
 
 ### Variants
+
+The Checkbox component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with default background,
+  suitable for most use cases
+- **`` `secondary ``** - Lower emphasis variant, suitable for use in Surface
+  components
 
 <Example code={ExVariantsCode} title="checkbox_variants.mlx"><ExVariants.make client:visible /></Example>
 
@@ -74,7 +92,8 @@ which no style reads.
 
 ### External Label
 
-HeroUI's label names the checkbox by its `id`, which the port's checkbox does not take yet; here the checkbox is named as the label is.
+The checkbox does not take an `id` yet, so a `Label` outside it cannot name
+it: here its `aria_label` says what the label says.
 
 <Example code={ExExternalLabelCode} title="checkbox_external_label.mlx"><ExExternalLabel.make client:visible /></Example>
 
@@ -114,7 +133,7 @@ A function child is given the checkbox's state.
 
 ### Custom Indicator
 
-HeroUI draws each icon only while the box is checked, through a render prop; HeroUI's styles show an indicator's content only then, so here it is given as it is.
+An icon given to `Checkbox.Indicator` shows only while the box is checked.
 
 <Example code={ExCustomIndicatorCode} title="checkbox_custom_indicator.mlx"><ExCustomIndicator.make client:visible /></Example>
 
@@ -143,18 +162,28 @@ HeroUI in React:
 
 ### CSS Classes
 
-- `.checkbox`, `.checkbox__content`, `.checkbox__control`,
-  `.checkbox__indicator`
-- Variants: `.checkbox--primary`, `.checkbox--secondary`
+- `.checkbox` - Base checkbox container (the field)
+- `.checkbox__content` - Clickable label wrapping the control and label text
+- `.checkbox__control` - Checkbox control box
+- `.checkbox__indicator` - Checkbox checkmark indicator
+- `.checkbox--primary`, `.checkbox--secondary` - Variants
 
 ### Interactive States
 
-- **Selected**: `[data-selected="true"]` or `[aria-checked="true"]`
-- **Indeterminate**: `[data-indeterminate="true"]`
-- **Invalid**: `[data-invalid="true"]` or `[aria-invalid="true"]`
+The checkbox supports both CSS pseudo-classes and data attributes for
+flexibility:
+
+- **Selected**: `[data-selected="true"]` or `[aria-checked="true"]` (shows
+  checkmark and background color change)
+- **Indeterminate**: `[data-indeterminate="true"]` (shows indeterminate state
+  with dash)
+- **Invalid**: `[data-invalid="true"]` or `[aria-invalid="true"]` (shows error
+  state with danger colors)
 - **Hover**: `:hover` or `[data-hovered="true"]`
-- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
-- **Disabled**: `[data-disabled="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` (shows focus
+  ring on control)
+- **Disabled**: `[data-disabled="true"]` (reduced opacity, including help
+  text)
 - **Pressed**: `:active` or `[data-pressed="true"]`
 
 ## API Reference
@@ -165,24 +194,28 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual style |
-| `isSelected` | `is_selected` | `bool` | | Whether it is checked, controlled |
-| `defaultSelected` | `default_selected` | `bool` | `false` | Whether it starts checked |
-| `isIndeterminate` | `is_indeterminate` | `bool` | `false` | Whether it shows the dash |
-| `onChange` | `on_change` | `bool -> unit` | | Called as it is toggled |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual variant of the component. `` `secondary `` is a lower emphasis variant, suitable for use in surfaces. |
+| `isSelected` | `is_selected` | `bool` | | Whether the checkbox is checked (controlled) |
+| `defaultSelected` | `default_selected` | `bool` | `false` | Whether the checkbox is checked by default (uncontrolled) |
+| `isIndeterminate` | `is_indeterminate` | `bool` | `false` | Whether the checkbox is in an indeterminate state |
+| `onChange` | `on_change` | `bool -> unit` | | Handler called when the checkbox value changes |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the checkbox is disabled |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the checkbox is invalid |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
-| `children` | `children` | elements | | Its content, and its control |
-| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its state |
-| `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
-| `name` | `name` | `string` | | Its name in a form |
-| `value` | `value` | `string` | | Its value in a form, while it is checked |
+| `children` | `children` | elements | | Checkbox content, or a function of its state |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the checkbox is read only |
+| `isRequired` | `is_required` | `bool` | `false` | Whether the checkbox must be selected |
+| `name` | `name` | `string` | | The name of the input element, used when submitting an HTML form |
+| `value` | `value` | `string` | | The value of the input element, used when submitting an HTML form |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
 | `slot` | `slot` | `` [ `selection ] `` | | The checkbox of the part above it: a table row's, or all of a table's rows in its header |
 
 ### Checkbox.Content, Checkbox.Control and Checkbox.Indicator
+
+`Checkbox.Content` is the clickable label that wraps the control and label
+text. Keep `Description` and `Field_error` as siblings of `Checkbox.Content`.
+For a checkbox with no label, pass an `aria_label` on `Checkbox`.
 
 | React | solidtype | Type | Description |
 |---|---|---|---|

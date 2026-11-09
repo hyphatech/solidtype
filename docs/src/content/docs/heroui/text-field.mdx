@@ -1,6 +1,6 @@
 ---
 title: TextField
-description: A field of a label, an input, a description and an error.
+description: Composition-friendly text fields with labels, descriptions, and inline validation.
 ---
 
 import Example from "@components/Example.astro";
@@ -26,13 +26,6 @@ import * as Tailwind from "@islands/text_field_tailwind.jsx";
 import TailwindCode from "@islands/text_field_tailwind.mlx?raw";
 import * as Demo from "@islands/text_field_demo.jsx";
 
-`Solidtype_heroui.Text_field` is Kobalte's `TextField.Root`, with the classes
-HeroUI's own `textFieldVariants` gives, and the parts inside it as Kobalte's:
-its [Label](/solidtype/heroui/label/) names its [Input](/solidtype/heroui/input/) or
-[TextArea](/solidtype/heroui/text-area/), its [Description](/solidtype/heroui/description/) describes it,
-and its [FieldError](/solidtype/heroui/field-error/) shows while it is invalid. It keeps its
-value, controlled or its own, and declares its state as React Aria writes it.
-
 Original HeroUI documentation: [TextField](https://heroui.com/en/docs/react/components/text-field).
 
 ## Usage
@@ -50,6 +43,21 @@ style reads. Hover, focus and type in them to see the state each sets.
   <Demo.make client:load />
 </div>
 
+## Anatomy
+
+```ocaml
+<Text_field>
+  <Label />
+  <Input />
+  <Description />
+  <Field_error />
+</Text_field>
+```
+
+`Text_field` combines label, input, description, and error into a single
+accessible component. For standalone inputs, use
+[Input](/solidtype/heroui/input/) or [TextArea](/solidtype/heroui/text-area/).
+
 ## Examples
 
 ### With Description
@@ -58,7 +66,7 @@ style reads. Hover, focus and type in them to see the state each sets.
 
 ### Required Field
 
-A required field marks its label, as HeroUI's styles mark it.
+A required field marks its label.
 
 <Example code={RequiredCode} title="text_field_required.mlx"><Required.make client:visible /></Example>
 
@@ -72,15 +80,21 @@ A required field marks its label, as HeroUI's styles mark it.
 
 ### Validation
 
-`is_invalid` shows the field's `Field_error`, which its input is then described by, and HeroUI's styles hide its description.
+Use `is_invalid` together with `Field_error` to surface validation messages.
+While the field is invalid, its description is hidden.
 
 <Example code={ValidationCode} title="text_field_validation.mlx"><Validation.make client:visible /></Example>
 
 ### Controlled
 
+Control the value to synchronize counters, previews, or formatting.
+
 <Example code={ControlledCode} title="text_field_controlled.mlx"><Controlled.make client:visible /></Example>
 
 ### TextArea
+
+Use [TextArea](/solidtype/heroui/text-area/) instead of
+[Input](/solidtype/heroui/input/) for multiline content.
 
 <Example code={TextAreaCode} title="text_field_text_area.mlx"><TextArea.make client:visible /></Example>
 
@@ -91,13 +105,9 @@ A required field marks its label, as HeroUI's styles mark it.
 ## Validation
 
 A field is invalid as `is_invalid` says, from the application's own state,
-and a [Form](/solidtype/heroui/form/) refuses a submit while it is. React
-Aria's `validate` and the browser's validation on submit are left out: a
-`validate` would be a second source of a field's validity beside the
-application's, narrower than its own checks, which know when they run, wait
-on a server and read other fields; the browser's checks nothing across
-fields, and points its bubble at nothing on a field whose input Kobalte
-hides. A server's errors are the form's `validation_errors`.
+and a [Form](/solidtype/heroui/form/) refuses a submit while it is. There is
+no `validate` function and no browser validation on submit. A server's errors
+are the form's `validation_errors`.
 
 ## Not yet
 
@@ -113,19 +123,30 @@ HeroUI's In Surface example's surface-aware variant.
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.textfield`, and `.textfield--full-width`
+- `.textfield` - Root container with minimal styling (`flex flex-col gap-1`)
+- `.textfield--full-width` - Full width modifier
+
+Child components ([Label](/solidtype/heroui/label/),
+[Input](/solidtype/heroui/input/), [TextArea](/solidtype/heroui/text-area/),
+[Description](/solidtype/heroui/description/),
+[FieldError](/solidtype/heroui/field-error/)) have their own CSS classes and
+styling. See their respective documentation for customization options.
 
 ### Interactive States
 
-- **Invalid**: `[data-invalid="true"]`, which hides the description
-- **Disabled**: `[data-disabled="true"]`
-- **Read-only**: `[data-readonly="true"]`
-- **Required**: `[data-required="true"]`, which marks the label
+TextField automatically manages these data attributes based on its state:
 
-Kobalte writes its own state on each part too, present and empty, which
-HeroUI's styles pass over, and gives the field the `group` role.
+- **Invalid**: `[data-invalid="true"]` - Automatically hides the description
+  slot when invalid
+- **Disabled**: `[data-disabled="true"]` - Applied when `is_disabled` is true
+- **Read-only**: `[data-readonly="true"]` - Applied when `is_read_only` is true
+- **Required**: `[data-required="true"]` - Applied when `is_required` is true;
+  marks the label
 
 ## API Reference
 
@@ -136,17 +157,27 @@ Each prop beside the name HeroUI's React component gives it.
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
 | `variant` | `variant` | `` [ `primary \| `secondary ] `` | | Its input's variant, where the input sets none |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
-| `value` | `value` | `string` | | Its value, controlled |
-| `defaultValue` | `default_value` | `string` | | Its value at first, kept by itself |
-| `onChange` | `on_change` | `string -> unit` | | Told each change of its value |
-| `isRequired` | `is_required` | `bool` | `false` | Whether it is required |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it is read-only |
-| `name` | `name` | `string` | | Its input's name in a form |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the text field should take full width of its container |
+| `value` | `value` | `string` | | Current value (controlled) |
+| `defaultValue` | `default_value` | `string` | | Default value (uncontrolled) |
+| `onChange` | `on_change` | `string -> unit` | | Handler called when the value changes |
+| `isRequired` | `is_required` | `bool` | `false` | Whether user input is required before form submission |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the value is invalid |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the input is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the input can be selected but not changed |
+| `name` | `name` | `string` | | Name of the input element, for HTML form submission |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
-| `children` | `children` | elements | | Its label, input, description and error |
+| `children` | `children` | elements | | Child components (Label, Input, etc.) or a function of its state |
 | `validate`, `validationBehavior` | — | | | Left out: it is invalid as `is_invalid` says; see Validation |
 | `validationErrors` | — | | | A form's: `Form`'s `validation_errors` |
+
+### Composition Components
+
+TextField works with these separate components, used directly within it:
+
+- **Label** - Field label component
+- **Input** - Single-line text input
+- **TextArea** - Multi-line text input
+- **Description** - Helper text component
+- **FieldError** - Validation error message

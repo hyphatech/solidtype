@@ -1,6 +1,6 @@
 ---
 title: InputGroup
-description: An input with what goes before and after it.
+description: Group related input controls with prefix and suffix elements for enhanced form fields.
 ---
 
 import Example from "@components/Example.astro";
@@ -48,13 +48,6 @@ import * as Tailwind from "@islands/input_group_tailwind.jsx";
 import TailwindCode from "@islands/input_group_tailwind.mlx?raw";
 import * as Demo from "@islands/input_group_demo.jsx";
 
-`Solidtype_heroui.Input_group` is an input or a text area with its prefix
-and suffix, in a group with the classes HeroUI's own `inputGroupVariants`
-gives. A click on the group but on its input gives an input the focus, as
-HeroUI's does, though not a text area. Inside a [TextField](/solidtype/heroui/text-field/)
-its input is the field's, which the field's label names, and the group takes
-the field's variant where it sets none. Kobalte has no group.
-
 Original HeroUI documentation: [InputGroup](https://heroui.com/en/docs/react/components/input-group).
 
 ## Usage
@@ -76,32 +69,59 @@ marked row is one they disagree on.
 ## Anatomy
 
 ```ocaml
-<Input_group>
-  <Input_group.Prefix>"https://"</Input_group.Prefix>
-  <Input_group.Input />
-  <Input_group.Suffix>".com"</Input_group.Suffix>
-</Input_group>
+<Text_field>
+  <Label>"Website"</Label>
+  <Input_group>
+    <Input_group.Prefix>"https://"</Input_group.Prefix>
+    <Input_group.Input /> (* or Input_group.Text_area for multiline input *)
+    <Input_group.Suffix>".com"</Input_group.Suffix>
+  </Input_group>
+</Text_field>
 ```
+
+`Input_group` wraps an input field with optional prefix and suffix elements,
+creating a visually cohesive group. It's typically used within
+[TextField](/solidtype/heroui/text-field/) to add icons, text, buttons, or
+other elements before or after the input. Use `Input_group.Input` for
+single-line inputs or `Input_group.Text_area` for multiline text inputs. A
+click on the group outside its input focuses the input.
 
 ## Examples
 
 ### Variants
 
+The InputGroup component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with shadow, suitable for
+  most use cases
+- **`` `secondary ``** - Lower emphasis variant without shadow, suitable for
+  use in Surface components
+
 <Example code={VariantsCode} title="input_group_variants.mlx"><Variants.make client:visible /></Example>
 
 ### In Surface
+
+When used inside a [Surface](/solidtype/heroui/surface/) component, use
+`` variant=`secondary `` to apply the lower emphasis variant suitable for
+surface backgrounds.
 
 <Example code={SurfaceCode} title="input_group_surface.mlx"><Surface.make client:visible /></Example>
 
 ### Loading State
 
+Show a loading spinner in the suffix to indicate processing.
+
 <Example code={LoadingCode} title="input_group_loading.mlx"><Loading.make client:visible /></Example>
 
 ### Required Field
 
+InputGroup respects the required state from its parent TextField.
+
 <Example code={RequiredCode} title="input_group_required.mlx"><Required.make client:visible /></Example>
 
 ### Disabled State
+
+InputGroup respects the disabled state from its parent TextField.
 
 <Example code={DisabledCode} title="input_group_disabled.mlx"><Disabled.make client:visible /></Example>
 
@@ -111,55 +131,82 @@ marked row is one they disagree on.
 
 ### Text Prefix
 
+Use text as a prefix, such as currency symbols or protocol prefixes.
+
 <Example code={TextPrefixCode} title="input_group_text_prefix.mlx"><TextPrefix.make client:visible /></Example>
 
 ### Text Suffix
+
+Use text as a suffix, such as domain extensions or units.
 
 <Example code={TextSuffixCode} title="input_group_text_suffix.mlx"><TextSuffix.make client:visible /></Example>
 
 ### Icon Prefix and Text Suffix
 
+Combine an icon prefix with a text suffix.
+
 <Example code={IconPrefixTextSuffixCode} title="input_group_icon_prefix_text_suffix.mlx"><IconPrefixTextSuffix.make client:visible /></Example>
 
 ### Copy Button Suffix
+
+Add an interactive button in the suffix, such as a copy button.
 
 <Example code={CopySuffixCode} title="input_group_copy_suffix.mlx"><CopySuffix.make client:visible /></Example>
 
 ### Icon Prefix and Copy Button
 
+Combine an icon prefix with an interactive button suffix.
+
 <Example code={IconPrefixCopySuffixCode} title="input_group_icon_prefix_copy_suffix.mlx"><IconPrefixCopySuffix.make client:visible /></Example>
 
 ### Password Toggle
+
+Use a button in the suffix to toggle password visibility.
 
 <Example code={PasswordCode} title="input_group_password.mlx"><Password.make client:visible /></Example>
 
 ### Keyboard Shortcut
 
+Display keyboard shortcuts using the [Kbd](/solidtype/heroui/kbd/) component.
+
 <Example code={ShortcutCode} title="input_group_shortcut.mlx"><Shortcut.make client:visible /></Example>
 
 ### Badge Suffix
+
+Add a badge or chip in the suffix to show status or labels.
 
 <Example code={BadgeSuffixCode} title="input_group_badge_suffix.mlx"><BadgeSuffix.make client:visible /></Example>
 
 ### Validation
 
+InputGroup automatically reflects invalid state from its parent TextField.
+
 <Example code={InvalidCode} title="input_group_invalid.mlx"><Invalid.make client:visible /></Example>
 
 ### With Prefix Icon
+
+Add an icon before the input field.
 
 <Example code={PrefixIconCode} title="input_group_prefix_icon.mlx"><PrefixIcon.make client:visible /></Example>
 
 ### With Suffix Icon
 
+Add an icon after the input field.
+
 <Example code={SuffixIconCode} title="input_group_suffix_icon.mlx"><SuffixIcon.make client:visible /></Example>
 
 ### With Prefix and Suffix
+
+Combine both prefix and suffix elements.
 
 <Example code={PrefixSuffixCode} title="input_group_prefix_suffix.mlx"><PrefixSuffix.make client:visible /></Example>
 
 ### With TextArea
 
-HeroUI's buttons here show a Tooltip each, which comes with Tooltip's port; the port's TextField takes no `aria_label` yet, so the text area names itself, as the label HeroUI's gives its input.
+Use `Input_group.Text_area` for multiline text inputs with prefix and suffix
+elements. When a textarea is present, the container automatically adjusts its
+height to accommodate the content and aligns prefix/suffix elements to the
+top.
 
 <Example code={TextAreaCode} title="input_group_text_area.mlx"><TextArea.make client:visible /></Example>
 
@@ -173,19 +220,39 @@ HeroUI's buttons here show a Tooltip each, which comes with Tooltip's port; the 
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.input-group`, and `.input-group--primary`, `.input-group--secondary`,
-  `.input-group--full-width`
-- `.input-group__prefix`, `.input-group__input`, `.input-group__suffix`
+- `.input-group` - Root container with border, background, and flex layout,
+  switching to top alignment when a textarea is present
+- `.input-group__input` - Input element with transparent background and no
+  border, also the base class for textarea elements
+- `.input-group__prefix` - Prefix container with left border radius
+- `.input-group__suffix` - Suffix container with right border radius
+- `.input-group--primary` - Primary variant with shadow (default)
+- `.input-group--secondary` - Secondary variant without shadow, suitable for
+  use in surfaces
+- `.input-group--full-width` - Full width modifier
+
+With `Input_group.Text_area`, the container grows with its content and the
+prefix and suffix align to the top. The textarea's own styles, a minimum
+height and vertical resize, apply through
+`[data-slot="input-group-textarea"]`.
 
 ### Interactive States
 
-- **Hover**: `[data-hovered="true"]`
-- **Focus within**: `[data-focus-within="true"]`
+InputGroup automatically manages these data attributes based on its state:
+
+- **Hover**: `[data-hovered="true"]` - Applied when hovering over the group
+- **Focus within**: `[data-focus-within="true"]` - Applied when the input is
+  focused
 - **Focus visible**: `[data-focus-visible="true"]`
-- **Disabled**: `[data-disabled="true"]`
-- **Invalid**: `[data-invalid="true"]`
+- **Disabled**: `[data-disabled="true"]` - Applied when it or its parent
+  TextField is disabled
+- **Invalid**: `[data-invalid="true"]` - Applied when it or its parent
+  TextField is invalid
 
 ## API Reference
 
@@ -195,8 +262,8 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | its field's, else `` `primary `` | Its look |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | its field's, else `` `primary `` | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the input group should take full width of its container |
 | `isDisabled` | `is_disabled` | `bool` | its field's | Whether it is shown disabled |
 | `isInvalid` | `is_invalid` | `bool` | its field's | Whether it is shown invalid |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
@@ -208,4 +275,6 @@ Each takes every attribute its element takes, as [Input](/solidtype/heroui/input
 
 ### InputGroup.Prefix, InputGroup.Suffix
 
-Each takes `class_`, added after HeroUI's class, and its children.
+Each takes `class_`, added after HeroUI's class, and its children: the
+content to display in the prefix or suffix (icons, text, buttons, badges,
+etc.).

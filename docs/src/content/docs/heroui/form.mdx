@@ -1,6 +1,6 @@
 ---
 title: Form
-description: Fields submitted together, a submit refused while one is invalid.
+description: Wrapper component for form validation and submission handling.
 ---
 
 import Example from "@components/Example.astro";
@@ -11,17 +11,8 @@ import ServerErrorsCode from "@islands/form_server_errors.mlx?raw";
 import { Code } from "@astrojs/starlight/components";
 import addTask from "@example/src/add_task.mlx?raw";
 
-`Solidtype_heroui.Form` is a `<form>`, to which HeroUI gives no classes of its
-own. Kobalte has no form: it is built here, above Kobalte's fields. Every field
-inside it -- a text field, a number field, a search field, a checkbox, a
-checkbox group, a radio group, a switch, a slider -- tells it its name and
-whether it is invalid. A submit while one is invalid is refused, and the first
-such field, in the page's order, is focused instead.
-
-A field validates nothing itself. Whether it is invalid is the application's to
-say, from its own state, by its `is_invalid`; when its error shows is the
-application's too, from the field's `on_blur`. The form asks the browser to
-validate nothing, `novalidate`, since a field's input may be one Kobalte hides.
+A field validates nothing itself: it is invalid as its `is_invalid` says, and
+a submit while one is invalid is refused.
 
 Original HeroUI documentation: [Form](https://heroui.com/en/docs/react/components/form).
 
@@ -42,8 +33,9 @@ into and left.
 
 ```ocaml
 <Form on_submit=save>
-  (* fields *)
-  <Button type_=`submit>"Save"</Button>
+  (* form fields go here *)
+  <Button type_=`submit>"Submit"</Button>
+  <Button type_=`reset>"Reset"</Button>
 </Form>
 ```
 
@@ -101,20 +93,44 @@ own `invalid` event is; one submit refused here is one call.
 
 ## Styling Reference
 
-`Form` renders a `<form>` with no classes of HeroUI's. Its fields' look comes
-from their own components.
+`Form` renders a native `<form>` element without dedicated BEM classes. Apply
+layout, spacing, and surface styles through `class_`. Field appearance and
+validation states come from child components such as `Text_field`, `Input`,
+`Label`, `Description`, and `Field_error`. For structured multi-field layouts,
+compose with [Fieldset](/solidtype/heroui/fieldset/).
 
 ## API Reference
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `onSubmit` | `on_submit` | `Dom.event -> unit` | | Called on a submit while every field is valid |
-| `onReset` | `on_reset` | `Dom.event -> unit` | | Called as it is reset |
-| `validationErrors` | `validation_errors` | `(string * string) list` | | A server's errors, by field name |
-| `action` | `action` | `string` | | Where it is submitted |
-| `method` | `method_` | `` [ `get \| `post \| `dialog ] `` | | How it is submitted |
-| `aria-label` | `aria_label` | `string` | | Its name |
-| `aria-labelledby` | `aria_labelledby` | `string` | | The element that names it |
-| `className` | `class_` | `string` | | Its classes |
+| `onSubmit` | `on_submit` | `Dom.event -> unit` | | Handler called when the form is submitted, while every field is valid |
+| `onReset` | `on_reset` | `Dom.event -> unit` | | Handler called when the form is reset |
+| `validationErrors` | `validation_errors` | `(string * string) list` | | Server-side validation errors mapped by field name, cleared when the user changes the field and leaves it |
+| `action` | `action` | `string` | | The URL to submit the form data to |
+| `method` | `method_` | `` [ `get \| `post \| `dialog ] `` | | The HTTP method to use when submitting the form |
+| `aria-label` | `aria_label` | `string` | | Accessibility label for the form |
+| `aria-labelledby` | `aria_labelledby` | `string` | | ID of element that labels the form. Creates a form landmark when provided |
+| `className` | `class_` | `string` | | Tailwind CSS classes applied to the form element |
 | `onInvalid` | `on_invalid` | `Dom.event -> unit` | | Called once a submit is refused, before the first invalid field is focused; `preventDefault` keeps the focus where it is |
 | `validationBehavior` | — | | | Left out: a field validates nothing itself, and is invalid as the application says |
+
+### Form Submission
+
+Forms can be submitted in several ways:
+
+- **Traditional submission**: Set the `action` prop to submit to a URL
+- **Handled in OCaml**: Use the `on_submit` handler to process the form data
+
+### Integration with Form Fields
+
+Every field inside a `Form` tells it its name and whether it is invalid:
+`Text_field`, `Number_field`, `Search_field`, `Time_field`, `Color_field`,
+`Checkbox`, `Checkbox_group`, `Radio_group`, `Switch`, `Slider`,
+`Color_slider`, `Select`, `Combo_box` and `Autocomplete`.
+
+## Accessibility
+
+- Native `<form>` element semantics
+- Form landmark creation with `aria_label` or `aria_labelledby`
+- Automatic focus management on validation errors: a refused submit focuses
+  the first invalid field

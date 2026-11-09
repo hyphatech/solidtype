@@ -1,6 +1,6 @@
 ---
 title: ColorField
-description: A colour typed as its hex, or one of its channels as a number.
+description: Color input field with labels, descriptions, and validation.
 ---
 
 import Example from "@components/Example.astro";
@@ -30,31 +30,10 @@ import * as ExCustomStyles from "@islands/color_field_custom_styles.jsx";
 import ExCustomStylesCode from "@islands/color_field_custom_styles.mlx?raw";
 import * as Demo from "@islands/color_field_demo.jsx";
 
-`Solidtype_heroui.Color_field` is Kobalte's `ColorField`, fixed in
-`solidtype-headless`, with the classes HeroUI's own `colorFieldVariants` and
-`colorInputGroupVariants` give: a colour typed as its hex, with or without its
-`#`, or, given `channel`, one of its channels typed as a number, Kobalte's
-`ColorChannelField`. Its input sits in a group, with what goes before it, a
-swatch of the colour, and what goes after.
-
-What is typed is committed as React Aria commits it, as focus leaves and by
-Enter: nothing is no colour, a hex is that colour, and anything else leaves
-the colour as it was; the input then shows the colour's hex. A key that is not
-a hex digit is not typed. The arrow keys, and Page Up and Page Down, step the
-hex by one and Home and End take it to `#000000` and `#FFFFFF`; a channel is
-stepped by its own step. The wheel steps either while its input has the
-focus, as a NumberField's, unless `is_wheel_disabled`. React Aria's channel
-field never turns on the wheel, which waits for a focus on a group its field
-never draws; this one does, as its hex field does.
-
-Its value is Kobalte's `Types.Color`, read from any CSS colour by
-`Solidtype_kobalte.Colors.parse_color`, or none: `value` is a
-`Js.Nullable.t`, null for none, and `on_change` is told `None` as the field is
-emptied. It is told only a colour committed other than its own.
-
-Kobalte's field is its accessible pattern: the field a group, a channel's
-input a spin button, where React Aria's is a text box. A channel's value is
-told as a number, as React Aria tells it.
+Its value is a `Types.Color.t`, read from any CSS colour by
+`Solidtype_kobalte.Colors.parse_color`, or none. What is typed is committed
+as focus leaves the input and by Enter. The arrow keys, Page Up and Page Down,
+Home and End, and the wheel while the input has the focus, step its value.
 
 Original HeroUI documentation: [ColorField](https://heroui.com/en/docs/react/components/color-field).
 
@@ -93,13 +72,27 @@ The marked row is Kobalte's: its field is a `group` its label names, where React
 </Color_field>
 ```
 
+`Color_field` combines label, color input, description, and error into a
+single accessible component.
+
 ## Examples
 
 ### Variants
 
+`Color_field.Group` supports two visual variants:
+
+- `` `primary `` (default) - Standard styling with shadow, suitable for most
+  use cases
+- `` `secondary `` - Lower emphasis variant without shadow, suitable for use
+  in `Surface` components
+
 <Example code={ExVariantsCode} title="color_field_variants.mlx"><ExVariants.make client:visible /></Example>
 
 ### On Surface
+
+When used inside a [Surface](/solidtype/heroui/surface/) component, use
+``variant=`secondary`` on `Color_field.Group` to apply the lower emphasis
+variant suitable for surface backgrounds.
 
 <Example code={ExOnSurfaceCode} title="color_field_on_surface.mlx"><ExOnSurface.make client:visible /></Example>
 
@@ -121,25 +114,27 @@ The marked row is Kobalte's: its field is a `group` its label names, where React
 
 ### Validation
 
-HeroUI's second field gives its input `defaultValue="not-a-color"`, which
-React Aria's input, whose text the field keeps, never shows; here it is left
-out, and the field drawn as React draws it.
+Use `is_invalid` together with `Field_error` to surface validation messages.
 
 <Example code={ExValidationCode} title="color_field_validation.mlx"><ExValidation.make client:visible /></Example>
 
 ### Channel Editing
 
-A field of each of a colour's HSL channels, each given the colour and told
-its change. Each input takes `min-w-0`: HeroUI's grows to its own width, which
-pushes the `%` after it out of a field 100 pixels wide.
+`Color_field` supports editing individual color channels (hue, saturation,
+lightness, red, green, blue, alpha) by setting the `color_space` and `channel`
+props. Each input here takes `min-w-0`, so the `%` after it fits.
 
 <Example code={ExChannelEditingCode} title="color_field_channel_editing.mlx"><ExChannelEditing.make client:visible /></Example>
 
 ### Controlled
 
+Control the value to synchronize with other components or state management.
+
 <Example code={ExControlledCode} title="color_field_controlled.mlx"><ExControlled.make client:visible /></Example>
 
 ### Form Example
+
+Complete form example with validation and submission handling.
 
 <Example code={ExFormCode} title="color_field_form.mlx"><ExForm.make client:visible /></Example>
 
@@ -159,23 +154,43 @@ pushes the `%` after it out of a field 100 pixels wide.
 
 ### CSS Classes
 
-- `.color-field`, `.color-field--full-width`, and the group's: `.color-input-group`,
-  `.color-input-group__input`, `.color-input-group__prefix`,
-  `.color-input-group__suffix`
-- the group's variants, `.color-input-group--primary` and
-  `.color-input-group--secondary`, and `.color-input-group--full-width`
+- `.color-field` - Root container with minimal styling (`flex flex-col gap-1`)
+- `.color-field--full-width` - Full width modifier
+- `.color-input-group` - Group root container styling
+- `.color-input-group--primary`, `.color-input-group--secondary` - Group
+  variants
+- `.color-input-group--full-width` - Group full width modifier
+- `.color-input-group__input` - Input wrapper styling
+- `.color-input-group__prefix` - Prefix element styling
+- `.color-input-group__suffix` - Suffix element styling
+
+Child components ([Label](/solidtype/heroui/label/),
+[Description](/solidtype/heroui/description/),
+[FieldError](/solidtype/heroui/field-error/)) have their own CSS classes and
+styling. See their respective documentation for customization options.
 
 ### Interactive States
 
-- the field: `[data-channel]`, its channel's name or `hex`,
-  `[data-invalid="true"]`, `[data-required="true"]`,
-  `[data-disabled="true"]`, `[data-readonly="true"]`
-- the group: `[data-hovered="true"]`, `[data-focus-within="true"]`,
-  `[data-focus-visible="true"]`, `[data-invalid="true"]`,
-  `[data-disabled="true"]`
-- the input: `[data-hovered="true"]`, `[data-focused="true"]`,
-  `[data-focus-visible="true"]`, `[data-invalid="true"]`,
-  `[data-disabled="true"]`
+The field manages these data attributes based on its state:
+
+- **Channel**: `[data-channel]` - The channel it edits, or `hex`
+- **Invalid**: `[data-invalid="true"]` - Applied while it is invalid
+- **Required**: `[data-required="true"]` - Applied when `is_required` is true
+- **Disabled**: `[data-disabled="true"]` - Applied when `is_disabled` is true
+- **Read Only**: `[data-readonly="true"]` - Applied when `is_read_only` is
+  true
+
+The group:
+
+- **Hover**: `[data-hovered="true"]`
+- **Focus Within**: `[data-focus-within="true"]`, and
+  `[data-focus-visible="true"]` from the keyboard
+- **Invalid**: `[data-invalid="true"]`
+- **Disabled**: `[data-disabled="true"]`
+
+The input: `[data-hovered="true"]`, `[data-focused="true"]`,
+`[data-focus-visible="true"]`, `[data-invalid="true"]`,
+`[data-disabled="true"]`.
 
 ## API Reference
 
@@ -185,21 +200,21 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Types.Color.t Js.Nullable.t` | | Its colour, controlled, null for none |
-| `defaultValue` | `default_value` | `Types.Color.t` | | Its colour at first, kept by itself |
-| `onChange` | `on_change` | `Types.Color.t option -> unit` | | Called with each colour committed, `None` for none |
-| `channel` | `channel` | `Color_field.channel` | | The channel it edits, fixed as it is made; its hex without one |
-| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The space the channel is of |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
-| `isRequired` | `is_required` | `bool` | `false` | Whether a value is required |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid; so too while a form's error names it |
+| `value` | `value` | `Types.Color.t Js.Nullable.t` | | Current value (controlled), null for none |
+| `defaultValue` | `default_value` | `Types.Color.t` | | Default value (uncontrolled) |
+| `onChange` | `on_change` | `Types.Color.t option -> unit` | | Handler called when the value changes, `None` for none |
+| `channel` | `channel` | `Color_field.channel` | | The color channel to edit, fixed as it is made. If not provided, edits hex value |
+| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The color space that the color field operates in when `channel` is provided |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the color field should take full width of its container |
+| `isRequired` | `is_required` | `bool` | `false` | Whether user input is required before form submission |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the value is invalid; so too while a form's error names it |
 | `validate`, `validationBehavior` | — | | | A field validates nothing itself: it is invalid as the application says |
-| `isDisabled` | `is_disabled` | `bool` | its fieldset's | Whether it is disabled |
-| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it can be read but not changed |
-| `isWheelDisabled` | `is_wheel_disabled` | `bool` | `false` | Whether the wheel leaves it alone |
-| `name` | `name` | `string` | | Its name in a form, which is sent the hex or the channel's value |
+| `isDisabled` | `is_disabled` | `bool` | its fieldset's | Whether the input is disabled |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the input can be selected but not changed |
+| `isWheelDisabled` | `is_wheel_disabled` | `bool` | `false` | Whether to disable changing the value with scroll |
+| `name` | `name` | `string` | | Name of the input element, for HTML form submission: the hex or the channel's value |
 | `autoFocus` | — | | | The input's own `autofocus` |
-| `aria-label` | `aria_label` | `string` | | Its name, where no label names it |
+| `aria-label` | `aria_label` | `string` | | Accessibility label when no visible label is present |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called as focus leaves it |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
@@ -210,8 +225,8 @@ Any other attribute, `id` or `aria_describedby`, is the field's element's.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look, `` `secondary `` on a surface |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the color input group should take full width of its container |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 
 A press on the group but on its input gives the input the focus.

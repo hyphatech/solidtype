@@ -27,10 +27,9 @@ import WithIconsCode from "@islands/segment_with_icons.mlx?raw";
 import * as IconExpand from "@islands/segment_icon_expand.jsx";
 import IconExpandCode from "@islands/segment_icon_expand.mlx?raw";
 
-A segmented control: a few options, one always selected, on Kobalte's
-segmented control in HeroUI's look, so the arrow keys move the selection,
-as in a radio group. Its look is a stylesheet the library ships, imported as
-[Theming](/solidtype/heroui/theming/#setup) shows.
+A segmented control: a few options, one always selected. The arrow keys move
+the selection, as in a radio group. Its look is a stylesheet the library
+ships, imported as [Theming](/solidtype/heroui/theming/#setup) shows.
 
 ## Usage
 
@@ -61,8 +60,8 @@ A `Segment.Separator` goes inside an option, before its label.
 
 ### Controlled
 
-`selected_key` gives the selected option's id, and `on_selection_change` is
-told each option chosen.
+`selected_key` controls the selected option's id, and `on_selection_change` is
+called with each option chosen.
 
 <Example code={ControlledCode} title="segment_controlled.mlx"><Controlled.make client:visible /></Example>
 
@@ -94,9 +93,9 @@ An option of an icon alone is named by its `aria_label`.
 
 ### Icon Expand
 
-`Segment.Item.is_selected ()`, read as a component inside an option is made,
-says whether that option is selected, as a render prop would: here each
-label shows only in the selected option.
+`Segment.Item.is_selected ()`, called in a component inside an option, says
+whether that option is selected: here each label shows only in the selected
+option.
 
 <Example code={IconExpandCode} title="segment_icon_expand.mlx"><IconExpand.make client:visible /></Example>
 
@@ -113,7 +112,7 @@ label shows only in the selected option.
 
 ### Interactive States
 
-On `.segment__item`, as React Aria writes them:
+On `.segment__item`:
 
 - **Selected**: `[data-selected="true"]`
 - **Hovered**: `[data-hovered="true"]`, which dims an option not selected
@@ -124,17 +123,17 @@ And on `.segment`, `[data-disabled="true"]` while it is disabled.
 
 ## API Reference
 
-Each prop beside the name a HeroUI component in React would give it.
+Each prop beside its name in React's convention.
 
 ### Segment
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `default \| `ghost ] `` | `` `default `` | Its look |
+| `variant` | `variant` | `` [ `default \| `ghost ] `` | `` `default `` | Visual style variant |
 | `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its size |
-| `selectedKey` | `selected_key` | `string` | | The selected option's id, while given |
-| `defaultSelectedKey` | `default_selected_key` | `string` | | The one selected at first |
-| `onSelectionChange` | `on_selection_change` | `string -> unit` | | Told each option chosen |
+| `selectedKey` | `selected_key` | `string` | | The selected option's id (controlled) |
+| `defaultSelectedKey` | `default_selected_key` | `string` | | The option selected at first (uncontrolled) |
+| `onSelectionChange` | `on_selection_change` | `string -> unit` | | Called with each option chosen |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether every option is disabled |
 | `name` | `name` | `string` | | Its radios' name in a form |
 | `aria-label` | `aria_label` | `string` | | Its name |

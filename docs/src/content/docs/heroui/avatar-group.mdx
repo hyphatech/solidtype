@@ -1,6 +1,6 @@
 ---
 title: AvatarGroup
-description: Avatars stacked or in a grid, the rest counted.
+description: Display a stacked or grid group of avatars with overflow counting.
 ---
 
 import Example from "@components/Example.astro";
@@ -19,12 +19,6 @@ import OverlapCode from "@islands/avatar_group_overlap.mlx?raw";
 import * as Tailwind from "@islands/avatar_group_tailwind.jsx";
 import TailwindCode from "@islands/avatar_group_tailwind.mlx?raw";
 import * as Demo from "@islands/avatar_group_demo.jsx";
-
-`Solidtype_heroui.Avatar_group` is a `<div>` of `Solidtype_heroui.Avatar`s,
-with the classes HeroUI's own `avatarGroupVariants` gives. It gives the
-avatars inside it its `size`, `color` and `variant`, each where an avatar sets
-none itself, shows the first `max` of them, and counts the rest. Kobalte has
-no group.
 
 Original HeroUI documentation: [AvatarGroup](https://heroui.com/en/docs/react/components/avatar-group).
 
@@ -53,6 +47,8 @@ marked row is one they disagree on.
   <Avatar_group.Count>"+3"</Avatar_group.Count>
 </Avatar_group>
 ```
+
+`Avatar_group.Count` is an optional explicit child.
 
 ## Examples
 
@@ -86,10 +82,8 @@ counts none itself, and shows it whatever its `max`.
 
 ## Counting
 
-React counts a group's own children. Solid cannot single them out, so an
-avatar joins its group as it is made, and is counted in the order the
-avatars were made: an avatar a `For` adds later is counted after the others,
-wherever it is shown.
+Avatars are counted in the order they were made: an avatar a `For` adds later
+is counted after the others, wherever it is shown.
 
 ## Customization
 
@@ -110,9 +104,18 @@ default, and the seam `--avatar-group-seam`.
 
 ### CSS Classes
 
-- `.avatar-group`, and `.avatar-group--grid`, `.avatar-group--clip`,
-  `.avatar-group--ring`
-- `.avatar-group__count`
+- `.avatar-group` - Base avatar group container
+- `.avatar-group--grid` - Grid layout modifier (no overlap)
+- `.avatar-group--clip` - Transparent seam tracing the next avatar's outline
+  (default stacked overlap)
+- `.avatar-group--ring` - Solid box-shadow outline via `--background`
+- `.avatar-group__count` - Overflow count avatar
+
+Stacked layout uses negative margin between siblings
+(`--avatar-group-overlap`, default `0.5rem`). Clip mode masks overlapped
+avatars (not the last child or the count); the seam follows the avatar's own
+`--avatar-radius`, so a themed `--radius` reshapes avatars and seams together.
+Ring mode uses a thin box-shadow outline via `--background`.
 
 ## API Reference
 
@@ -122,24 +125,41 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | The size of each avatar that sets none |
-| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | | The color of each avatar that sets none |
-| `variant` | `variant` | `` [ `default \| `soft ] `` | | The variant of each avatar that sets none |
-| `max` | `max` | `int` | | How many avatars it shows |
-| `isGrid` | `is_grid` | `bool` | `false` | Whether it is a grid, with no overlap |
-| `overlap` | `overlap` | `` [ `clip \| `ring ] `` | `` `clip `` | How stacked avatars overlap |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size applied to child avatars (and the overflow count) when they omit `size` |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | | Color applied to child avatars (and the overflow count) when they omit `color` |
+| `variant` | `variant` | `` [ `default \| `soft ] `` | | Variant applied to child avatars (and the overflow count) when they omit `variant` |
+| `max` | `max` | `int` | | Maximum number of avatar children to render; omit to show all |
+| `isGrid` | `is_grid` | `bool` | `false` | Whether to use a wrapping grid layout without overlap |
+| `overlap` | `overlap` | `` [ `clip \| `ring ] `` | `` `clip `` | Stacked overlap style: transparent seam (default) or box-shadow ring; ignored when `is_grid` |
 | `role` | `role` | `Solidtype.Html.Div.role` | | Its role, `` `group `` where it means something |
 | `aria-label` | `aria_label` | `string` | | Its name |
 | `aria-labelledby` | `aria_labelledby` | `string` | | The id of what names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its avatars, and its count |
+| `children` | `children` | elements | | Avatar components (and optional `Avatar_group.Count`) to group together |
 
 ### AvatarGroup.Count
 
+The overflow indicator, an avatar with a fallback. Not truncated by `max`.
+
 | React | solidtype | Type | Description |
 |---|---|---|---|
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | Its size, else the group's |
-| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | Its color, else the group's |
-| `variant` | `variant` | `` [ `default \| `soft ] `` | Its variant, else the group's |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | Override size from the group |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | Override color from the group |
+| `variant` | `variant` | `` [ `default \| `soft ] `` | Override variant from the group |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
-| `children` | `children` | elements | The count, "+3" |
+| `children` | `children` | elements | Count content (e.g. `"+3"`) |
+
+## Note
+
+- `Avatar_group` passes `size`, `color` and `variant` to every `Avatar` inside
+  it that sets none itself
+- `max` truncates visible avatars when set and auto-counts the rest; omit it
+  to show all
+- For a known total (e.g. from the server), add an explicit
+  `Avatar_group.Count`: it is not truncated by `max` and suppresses the auto
+  count
+- `is_grid` disables overlap and uses a wrapping grid layout instead
+- `overlap` defaults to `` `clip `` (transparent seam); use `` `ring `` for the
+  solid outline; no effect with `is_grid`
+- No role by default: when the stack is meaningful (assignees, viewers), pass
+  `` role=`group `` with `aria_label` or `aria_labelledby`

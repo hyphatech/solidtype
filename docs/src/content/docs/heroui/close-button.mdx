@@ -1,6 +1,6 @@
 ---
 title: CloseButton
-description: A button that closes a dialog, a modal, or dismisses content.
+description: Button component for closing dialogs, modals, or dismissing content.
 ---
 
 import Example from "@components/Example.astro";
@@ -13,11 +13,6 @@ import customIcon from "@islands/close_button_custom_icon.mlx?raw";
 import * as Tailwind from "@islands/close_button_tailwind.jsx";
 import tailwind from "@islands/close_button_tailwind.mlx?raw";
 import * as Demo from "@islands/close_button_demo.jsx";
-
-`Solidtype_heroui.Close_button` is Kobalte's `Button.Root`, a native
-`<button>` named "Close", with the classes HeroUI's own `closeButtonVariants`
-gives, HeroUI's cross, and the state its styles read, declared as React Aria
-writes it.
 
 Original HeroUI documentation: [CloseButton](https://heroui.com/en/docs/react/components/close-button).
 
@@ -45,7 +40,7 @@ style reads. Hover, focus and press them to see the state each sets.
 
 ### With Custom Icon
 
-Its children take the place of HeroUI's cross.
+Its children take the place of the default close icon.
 
 <Example code={customIcon} title="close_button_custom_icon.mlx"><CustomIcon.make client:visible /></Example>
 
@@ -78,16 +73,17 @@ with HeroUI in React:
 
 ### CSS Classes
 
-- `.close-button`, and its variant `.close-button--default`
+- `.close-button` - Base component styles
+- `.close-button--default` - Default variant
 
 ### Interactive States
 
-HeroUI's styles read a pseudo-class or a data attribute for each; the port
-declares each attribute as React Aria writes it, kept by
-`Solidtype_heroui.Interaction`, as Button's are:
+The component supports both CSS pseudo-classes and data attributes for
+flexibility, set as a [`Button`](/solidtype/heroui/button/#interactive-states)'s
+are:
 
 - **Hover**: `:hover` or `[data-hovered="true"]`
-- **Pressed**: `:active` or `[data-pressed="true"]`
+- **Active/Pressed**: `:active` or `[data-pressed="true"]`
 - **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
 - **Disabled**: `:disabled` or `[data-disabled="true"]`
 
@@ -99,9 +95,9 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `default ] `` | `` `default `` | Visual style |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `aria-label` | `aria_label` | `string` | `"Close"` | Its name |
-| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
+| `variant` | `variant` | `` [ `default ] `` | `` `default `` | Visual variant of the button |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the button is disabled |
+| `aria-label` | `aria_label` | `string` | `"Close"` | Accessible label for screen readers |
+| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Handler called when the button is pressed, by mouse, touch or keyboard |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements, or a function of `state` | HeroUI's cross | Its icon |
+| `children` | `children` | elements, or a function of `state` | the close icon | Content to display (defaults to close icon) |

@@ -1,6 +1,6 @@
 ---
 title: Popover
-description: Rich content beside a trigger, HeroUI's on Kobalte's.
+description: Displays rich content in a portal triggered by a button or any custom element.
 ---
 
 import Example from "@components/Example.astro";
@@ -15,10 +15,6 @@ import ExPlacementCode from "@islands/popover_placement.mlx?raw";
 import * as ExTailwind from "@islands/popover_tailwind.jsx";
 import ExTailwindCode from "@islands/popover_tailwind.mlx?raw";
 import * as Demo from "@islands/popover_demo.jsx";
-
-`Solidtype_heroui.Popover` is Kobalte's `Popover`, with the classes HeroUI's
-own `popoverVariants` gives and HeroUI's arrow. A `Button` inside it is its
-trigger, as in HeroUI; anything else is wrapped in `Popover.Trigger`.
 
 Original HeroUI documentation: [Popover](https://heroui.com/en/docs/react/components/popover).
 
@@ -48,11 +44,14 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
     <Popover.Arrow />
     <Popover.Dialog>
       <Popover.Heading>...</Popover.Heading>
-      ...
+      (* content goes here *)
     </Popover.Dialog>
   </Popover.Content>
 </Popover>
 ```
+
+A `Button` inside a popover is its trigger; wrap anything else in
+`Popover.Trigger`.
 
 ## Examples
 
@@ -82,8 +81,9 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every one, as with
-HeroUI in React:
+To customize the Popover component classes, you can use the
+`@layer components` directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -103,31 +103,26 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.popover`, `.popover__dialog`, `.popover__heading`, `.popover__trigger`
+- `.popover` - Base popover container styles
+- `.popover__dialog` - Dialog content wrapper
+- `.popover__heading` - Heading text styles
+- `.popover__trigger` - Trigger element styles
 
 ### Interactive States
 
-- **Entering**: `[data-entering="true"]`, while it appears
-- **Exiting**: `[data-exiting="true"]`, while it disappears
-- **Placement**: `[data-placement="bottom"]`, and the other sides
+The component supports animation states:
+
+- **Entering**: `[data-entering="true"]` - Applied during popover appearance
+- **Exiting**: `[data-exiting="true"]` - Applied during popover
+  disappearance
+- **Placement**: `[data-placement="bottom"]`, and the other sides - Applied
+  based on popover position
 - **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on a trigger
-
-## How it is made
-
-Kobalte's popover opens, closes, places itself, keeps the focus inside it
-and hides the page outside from a reader while it is open, as React Aria's
-does. The port gives the focus to its dialog as it opens, as React Aria's
-does, where Kobalte's gives it to the first button inside, and back to its
-trigger as it closes. Its trigger shows pressed while it is open, as HeroUI's
-does, and a button inside it is a button, not a second trigger. Either side
-of it is a dismiss button only a reader finds, as React Aria puts one; here
-it is a `type="button"`, so a popover inside a form does not submit it.
-
-Kobalte's content is the dialog, named by its heading, where React Aria's is
-the section inside it; a reader is told the same. Its arrow is drawn as
-`Tooltip`'s is: Kobalte's, hidden, places HeroUI's.
 
 ## API Reference
 
@@ -137,20 +132,20 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
-| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
-| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
-| `children` | `children` | elements | | Its trigger and its content |
+| `isOpen` | `is_open` | `bool` | | Controls popover visibility (controlled) |
+| `defaultOpen` | `default_open` | `bool` | `false` | Initial open state (uncontrolled) |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Called when open state changes |
+| `children` | `children` | elements | | Trigger and content elements |
 
 ### Popover.Content
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | `` `bottom `` | Its side of the trigger |
-| `offset` | `offset` | `float` | 8 | Its distance from the trigger |
-| `shouldFlip` | `should_flip` | `bool` | `true` | Whether it moves to the other side where there is no room |
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | `` `bottom `` | Placement of the popover |
+| `offset` | `offset` | `float` | 8 | Distance from the trigger element |
+| `shouldFlip` | `should_flip` | `bool` | `true` | Whether popover can change orientation to fit |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | What it shows |
+| `children` | `children` | elements | | Content to display in the popover |
 
 ### Popover.Dialog, Popover.Heading
 
@@ -165,11 +160,19 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `aria-label` | `aria_label` | `string` | Its name, where its children give none |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
-| `children` | `children` | elements | What it wraps |
+| `children` | `children` | elements | Element that triggers the popover |
 
 ### Popover.Arrow
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Its class |
-| `children` | `children` | elements | An arrow of its own, in place of HeroUI's |
+| `children` | `children` | elements | Custom arrow element |
+
+## Accessibility
+
+- **Focus**: Given to the popover as it opens, and back to its trigger as it
+  closes; it stays inside while the popover is open
+- **Screen readers**: The page outside is hidden from a reader while it is
+  open, and a dismiss button only a reader finds closes it
+- **Trigger**: Shows pressed while the popover is open

@@ -1,6 +1,6 @@
 ---
 title: Autocomplete
-description: A select whose popover filters its list by a search field, HeroUI's on Kobalte's combo box.
+description: An autocomplete combines a select with filtering, allowing users to search and select from a list of options.
 ---
 
 import Example from "@components/Example.astro";
@@ -45,13 +45,6 @@ import ExUserSelectionCode from "@islands/autocomplete_user_selection.mlx?raw";
 import * as ExLocationSearch from "@islands/autocomplete_location_search.jsx";
 import ExLocationSearchCode from "@islands/autocomplete_location_search.mlx?raw";
 import * as Demo from "@islands/autocomplete_demo.jsx";
-
-`Solidtype_heroui.Autocomplete` is a select whose popover holds a search
-field that filters its list, on Kobalte's `Combobox`, with the classes
-HeroUI's own `autocompleteVariants` gives. Its search is the `Search_field`
-inside its `Autocomplete.Filter`, and its list the `List_box` beside it, as
-in HeroUI; `Label`, `Description` and `Field_error` inside it name, describe
-and qualify it.
 
 Original HeroUI documentation: [Autocomplete](https://heroui.com/en/docs/react/components/autocomplete).
 
@@ -100,9 +93,20 @@ which no style reads.
 </Autocomplete>
 ```
 
+A `Label` inside it names its trigger, a `Description` describes it, and a
+`Field_error` shows while it is invalid. The `Search_field` inside its
+`Autocomplete.Filter` is its search, and the `List_box` beside it its list.
+
 ## Examples
 
 ### Variants
+
+The Autocomplete component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with shadow, suitable for
+  most use cases
+- **`` `secondary ``** - Lower emphasis variant without shadow, suitable for
+  use in Surface components
 
 <Example code={ExVariantsCode} title="autocomplete_variants.mlx"><ExVariants.make client:visible /></Example>
 
@@ -116,9 +120,8 @@ which no style reads.
 
 ### Required
 
-HeroUI's required autocomplete is checked by the browser as its form is
-submitted. A `Form` here checks nothing itself, as with a text field: the
-example says the autocomplete is invalid once a submit finds it empty.
+A `Form` does not check a required autocomplete itself: the example marks it
+invalid once a submit finds it empty.
 
 <Example code={ExRequiredCode} title="autocomplete_required.mlx"><ExRequired.make client:visible /></Example>
 
@@ -131,6 +134,9 @@ example says the autocomplete is invalid once a submit finds it empty.
 <Example code={ExWithDisabledOptionsCode} title="autocomplete_with_disabled_options.mlx"><ExWithDisabledOptions.make client:visible /></Example>
 
 ### Allows Empty Collection
+
+`allows_empty_collection` lets the list open even when the search shows no
+option, as when the list is empty at first or every option is filtered out.
 
 <Example code={ExAllowsEmptyCollectionCode} title="autocomplete_allows_empty_collection.mlx"><ExAllowsEmptyCollection.make client:visible /></Example>
 
@@ -177,13 +183,17 @@ while one is; the autocomplete draws its placeholder while none is.
 
 ### In Surface
 
+Inside a [`Surface`](/solidtype/heroui/surface/), use `` variant=`secondary ``
+for the lower emphasis variant suitable for surface backgrounds.
+
 <Example code={ExInSurfaceCode} title="autocomplete_in_surface.mlx"><ExInSurface.make client:visible /></Example>
 
 ### Virtualization
 
-A [`Virtualizer`](/solidtype/heroui/list-box/#virtualizer) around the list
-draws only the options in view of the popover, a thousand users' 50 pixels
-each; the one the keys move to is scrolled into view.
+Autocomplete supports virtualization through a
+[`Virtualizer`](/solidtype/heroui/list-box/#virtualizer) around its list,
+drawing only the options in view of the popover. The option the keys move to
+is scrolled into view.
 
 <Example code={ExVirtualizationCode} title="autocomplete_virtualization.mlx"><ExVirtualization.make client:visible /></Example>
 
@@ -231,11 +241,17 @@ HeroUI in React:
 
 ### CSS Classes
 
-- `.autocomplete`, `.autocomplete--primary`, `.autocomplete--secondary`,
-  `.autocomplete--full-width`
-- `.autocomplete__trigger`, `.autocomplete__value`,
-  `.autocomplete__clear-button`, `.autocomplete__indicator`,
-  `.autocomplete__popover`
+- `.autocomplete` - Base autocomplete container
+- `.autocomplete__trigger` - The button that triggers the autocomplete
+- `.autocomplete__value` - The displayed value or placeholder
+- `.autocomplete__clear-button` - The clear button that removes the selected
+  value
+- `.autocomplete__indicator` - The dropdown indicator icon
+- `.autocomplete__popover` - The popover container
+- `.autocomplete--primary` - Primary variant with shadow (default)
+- `.autocomplete--secondary` - Secondary variant without shadow, suitable for
+  use in surfaces
+- `.autocomplete--full-width` - Full width modifier
 
 ### Interactive States
 
@@ -250,26 +266,6 @@ HeroUI in React:
 - **Entering** and **Exiting**: `[data-entering="true"]`,
   `[data-exiting="true"]` on the popover
 
-## How it is made
-
-Kobalte's combo box filters its options by the search's text, whatever its
-case or accents, or by the filter given, and keeps the focus in the search
-while the arrows move through the list, as React Aria's autocomplete does.
-Its list is the `List_box` beside the search, whose options join the
-autocomplete while it is closed too, so its value shows the option chosen;
-the search moves into the popover each time it opens, and starts empty.
-
-A press on the trigger, or an arrow on its button, opens the list and gives
-the search the focus; typing gives the first option the search keeps the
-focus. Enter or a press chooses: in a choice of one the list closes and the
-focus goes back to the button, where React Aria's is lost to the page. While
-the list is open the page outside is hidden from a reader and no pointer
-reaches it, as React Aria's modal popover does.
-
-The search's input is Kobalte's combo box input, which tells a reader it
-expands and which option it holds, where React Aria's is a search box that
-controls the list.
-
 ## API Reference
 
 Each prop beside the name HeroUI's React component gives it.
@@ -278,23 +274,23 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `placeholder` | `placeholder` | `string` | `"Select an item"` | Shown while nothing is chosen |
-| `selectionMode` | `selection_mode` | `` `single `` \| `` `multiple `` | `` `single `` | One or many, read as it is made |
-| `value` | `value` | `string array` | | The ids chosen, controlled |
-| `defaultValue` | `default_value` | `string array` | | The ids chosen at first |
-| `onChange` | `on_change` | `string array -> unit` | | Told the ids chosen as they change |
+| `placeholder` | `placeholder` | `string` | `"Select an item"` | Temporary text that occupies the autocomplete when it is empty |
+| `selectionMode` | `selection_mode` | `` `single `` \| `` `multiple `` | `` `single `` | Whether single or multiple selection is enabled, read as it is made |
+| `value` | `value` | `string array` | | Current value (controlled) |
+| `defaultValue` | `default_value` | `string array` | | Default value (uncontrolled) |
+| `onChange` | `on_change` | `string array -> unit` | | Handler called when the value changes |
 | `onClear` | `on_clear` | `unit -> unit` | | Told as it is cleared |
-| `disabledKeys` | `disabled_keys` | `string array` | | The disabled options' ids |
-| `isOpen` | `is_open` | `bool` | | Whether its list is open, controlled |
-| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
-| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
-| `allowsEmptyCollection` | `allows_empty_collection` | `bool` | `false` | Whether it opens with no option at all |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `isRequired` | `is_required` | `bool` | `false` | Whether a choice is required |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
-| `name` | `name` | `string` | | Its name in a form |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it fills its container |
-| `variant` | `variant` | `` `primary `` \| `` `secondary `` | `` `primary `` | Its look |
+| `disabledKeys` | `disabled_keys` | `string array` | | Keys of disabled items |
+| `isOpen` | `is_open` | `bool` | | Sets the open state of the popover (controlled) |
+| `defaultOpen` | `default_open` | `bool` | `false` | Sets the default open state of the popover (uncontrolled) |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Handler called when the open state changes |
+| `allowsEmptyCollection` | `allows_empty_collection` | `bool` | `false` | Whether the autocomplete allows an empty collection. When true, the list opens even with no items. |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the autocomplete is disabled |
+| `isRequired` | `is_required` | `bool` | `false` | Whether user input is required |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the autocomplete value is invalid |
+| `name` | `name` | `string` | | The name of the input, used when submitting an HTML form |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the autocomplete should take full width of its container |
+| `variant` | `variant` | `` `primary `` \| `` `secondary `` | `` `primary `` | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces. |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `children` | `children` | elements | | Its label, trigger, description and popover |
 
@@ -302,19 +298,19 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
-| `filter` | `filter` | `string -> string -> bool` | Keeps an option given its text and the search's; contains by default |
-| `inputValue` | `input_value` | `string` | The search's text, controlled |
-| `onInputChange` | `on_input_change` | `string -> unit` | Told the search's text as it changes |
-| `children` | `children` | elements | Its `Search_field` and `List_box` |
+| `filter` | `filter` | `string -> string -> bool` | Custom filter function, given an option's text and the search's; by default, whether the option's text contains the search's, whatever its case or accents |
+| `inputValue` | `input_value` | `string` | Controlled input value |
+| `onInputChange` | `on_input_change` | `string -> unit` | Handler called when input value changes |
+| `children` | `children` | elements | Filter content (`Search_field` and `List_box`) |
 
 ### Autocomplete.Trigger, Autocomplete.Popover, Autocomplete.Indicator, Autocomplete.Clear_button
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
-| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | The popover's side, `bottom` by default |
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | Placement of the popover relative to the trigger, `` `bottom `` by default |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | What it holds; the indicator's own icon |
-| `onClick` | `on_click` | `Dom.mouseEvent -> unit` | The clear button's, told after it clears |
+| `onClick` | `on_click` | `Dom.mouseEvent -> unit` | The clear button's, called after it clears |
 
 ### Autocomplete.Value
 
@@ -322,3 +318,18 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | `string array accessor -> element` | What it draws while something is chosen, given the ids chosen |
+
+## Accessibility
+
+The Autocomplete implements the ARIA combobox pattern with a filtered list and
+provides:
+
+- Full keyboard navigation support: a press on the trigger, or Enter, Space or
+  an arrow on its indicator, opens the list and focuses the search; the arrows
+  move through the options while the focus stays in the search
+- Proper focus management: in a choice of one, choosing closes the list and
+  returns the focus to the indicator
+- Support for disabled states
+- Search functionality with filtering, whatever the text's case or accents,
+  or by the filter given; the search starts empty each time the list opens
+- HTML form integration through `name`

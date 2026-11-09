@@ -1,6 +1,6 @@
 ---
 title: Button
-description: A clickable button, HeroUI's on Kobalte's.
+description: A clickable button component with multiple variants and states.
 ---
 
 import Example from "@components/Example.astro";
@@ -27,10 +27,6 @@ import disabled from "@islands/button_disabled.mlx?raw";
 import * as Tailwind from "@islands/button_tailwind.jsx";
 import tailwind from "@islands/button_tailwind.mlx?raw";
 import * as Demo from "@islands/button_demo.jsx";
-
-`Solidtype_heroui.Button` is Kobalte's `Button.Root`, a native `<button>`, with
-the classes HeroUI's own `buttonVariants` gives and the state its styles read,
-declared as React Aria writes it.
 
 Original HeroUI documentation: [Button](https://heroui.com/en/docs/react/components/button).
 
@@ -66,18 +62,16 @@ style reads. Hover, focus and press them to see the state each sets.
 
 ### Icon Only
 
-An icon-only button is named by its `aria_label`, as in React.
+An icon-only button is named by its `aria_label`.
 
 <Example code={iconOnly} title="button_icon_only.mlx"><IconOnly.make client:visible /></Example>
 
 ### Loading
 
-A pending button keeps its focus but takes no press: its click, and a
-trigger's, reach nothing, a submit button submits nothing, and it is
-`aria-disabled`, as React Aria's is. A reader is told as it comes to be
-pending, or stops, while it has the focus; and one named by its `aria_label`
-is named with a `Spinner` inside it too. A function child is given
-`is_pending` with the rest of its state.
+A pending button keeps its focus but takes no press: its click reaches
+nothing, a submit button submits nothing, and it is `aria-disabled`. A reader
+is told as it starts or stops pending while it has the focus. A function child
+is given `is_pending` with the rest of its state.
 
 <Example code={loading} title="button_loading.mlx"><Loading.make client:visible /></Example>
 
@@ -128,30 +122,30 @@ HeroUI in React:
 
 ### CSS Classes
 
-The classes HeroUI's button styles define, which `variant`, `size`,
-`full_width` and `is_icon_only` choose:
-
-- `.button`, and its sizes `.button--sm`, `.button--md`, `.button--lg`
+- `.button` - Base button styles
+- `.button--sm` - Small size variant
+- `.button--md` - Medium size variant
+- `.button--lg` - Large size variant
 - `.button--primary`, `.button--secondary`, `.button--tertiary`,
   `.button--outline`, `.button--ghost`, `.button--danger`,
-  `.button--danger-soft`
-- `.button--icon-only`, `.button--full-width`
+  `.button--danger-soft` - Variants
+- `.button--icon-only`, with `.button--sm` and `.button--lg` - Icon-only
+  modifier
+- `.button--full-width` - Full width modifier
 
 ### Interactive States
 
-HeroUI's styles read a pseudo-class or a data attribute for each; the port
-declares each attribute as React Aria writes it:
+The button supports both CSS pseudo-classes and data attributes for
+flexibility:
 
-- **Hover**: `:hover` or `[data-hovered="true"]`
-- **Pressed**: `:active` or `[data-pressed="true"]`
-- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
-- **Disabled**: `:disabled` or `[data-disabled="true"]`
-
-Kobalte writes only `data-disabled`, and empty, so the port keeps the rest
-itself, by `Solidtype_heroui.Interaction`, as React Aria does: hovered by a
-mouse but never a touch, pressed by a pointer or by Enter and Space,
-focus-visible only after a key. Its test puts the port and the same Button in
-React through the same steps and compares what each shows after every one.
+- **Hover**: `:hover` or `[data-hovered="true"]`, by a mouse but never a touch
+- **Active/Pressed**: `:active` or `[data-pressed="true"]`, by a pointer or by
+  Enter and Space (includes scale transform)
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`, only after a
+  key (shows focus ring)
+- **Disabled**: `:disabled` or `[data-disabled="true"]` (reduced opacity, no
+  pointer events)
+- **Pending**: `[data-pending="true"]` (no pointer events during loading)
 
 ## API Reference
 
@@ -163,17 +157,17 @@ string React takes, a hyphen written as an underscore: `` `danger_soft `` is
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary \| `tertiary \| `outline \| `ghost \| `danger \| `danger_soft ] `` | `` `primary `` | Visual style |
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
-| `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it holds an icon alone |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `isPending` | `is_pending` | `bool` | `false` | Whether it is pending: focusable, pressed by nothing, `aria-disabled`, `data-pending` |
+| `variant` | `variant` | `` [ `primary \| `secondary \| `tertiary \| `outline \| `ghost \| `danger \| `danger_soft ] `` | `` `primary `` | Visual style variant |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size of the button |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the button should take full width of its container |
+| `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether the button contains only an icon |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the button is disabled |
+| `isPending` | `is_pending` | `bool` | `false` | Whether the button is in a loading state: focusable, pressed by nothing, `aria-disabled` |
 | `id` | `id` | `string` | | Its id, which names it with its spinner while it is pending |
 | `slot` | `slot` | `` [ `trigger ] `` | | Makes it the trigger of the part above it, a [`Disclosure.Heading`](/solidtype/heroui/disclosure/)'s |
 | `type` | `type_` | `` [ `button \| `submit \| `reset \| `menu ] `` | `` `button `` | The button's type in a form |
 | `aria-label` | `aria_label` | `string` | | Its name where it shows an icon alone |
-| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Kobalte's click, by mouse, touch or keyboard, where React Aria's is a press |
+| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Handler called when the button is pressed, by mouse, touch or keyboard |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements, or a function of `state` | | Its content |
+| `children` | `children` | elements, or a function of `state` | | Button content or render prop |
 | `render` | `as_` | a function of its props and `state` | | Draws another element in its place |

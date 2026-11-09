@@ -1,6 +1,6 @@
 ---
 title: Separator
-description: A line between content.
+description: Visually divide content sections.
 ---
 
 import Example from "@components/Example.astro";
@@ -17,10 +17,6 @@ import WithContentCode from "@islands/separator_content.mlx?raw";
 import * as Tailwind from "@islands/separator_tailwind.jsx";
 import TailwindCode from "@islands/separator_tailwind.mlx?raw";
 import * as Demo from "@islands/separator_demo.jsx";
-
-`Solidtype_heroui.Separator` is Kobalte's `Separator.Root`, with the classes
-HeroUI's own `separatorVariants` gives and the explicit role React Aria
-writes.
 
 Original HeroUI documentation: [Separator](https://heroui.com/en/docs/react/components/separator).
 
@@ -46,6 +42,9 @@ which no style reads.
 <Example code={VariantsCode} title="separator_variants.mlx"><Variants.make client:visible /></Example>
 
 ### With Surface
+
+The Separator component adapts to different surface backgrounds for better
+visibility.
 
 <Example code={SurfaceCode} title="separator_surface.mlx"><Surface.make client:visible /></Example>
 
@@ -84,16 +83,22 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.separator`, `.separator--horizontal`, `.separator--vertical`
-- Variants: `.separator--default`, `.separator--secondary`,
-  `.separator--tertiary`
+#### Base & Orientation Classes
 
-A separator is an `<hr>` where it is horizontal and a `<div>` where it is
-vertical, as React Aria's is, and a `<div>` inside a dropdown's menu, as
-React Aria's menu asks; each has the role `separator`, its
-`aria-orientation`, and `data-slot="separator"`, which a menu's styles read.
+- `.separator` - Base separator styles with default horizontal orientation
+- `.separator--horizontal` - Horizontal orientation (full width, 1px height)
+- `.separator--vertical` - Vertical orientation (full height, 1px width)
+
+#### Variant Classes
+
+- `.separator--default` - Default variant with standard contrast
+- `.separator--secondary` - Secondary variant with medium contrast
+- `.separator--tertiary` - Tertiary variant with subtle contrast
 
 ## API Reference
 
@@ -103,6 +108,6 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Its direction |
-| `variant` | `variant` | `` [ `default \| `secondary \| `tertiary ] `` | `` `default `` | Its contrast |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | The orientation of the separator |
+| `variant` | `variant` | `` [ `default \| `secondary \| `tertiary ] `` | `` `default `` | The visual variant of the separator |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |

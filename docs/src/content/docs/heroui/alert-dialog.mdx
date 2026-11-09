@@ -1,6 +1,6 @@
 ---
 title: AlertDialog
-description: A dialog that asks before going on, HeroUI's on Kobalte's.
+description: Modal dialog for critical confirmations requiring user attention and explicit action.
 ---
 
 import Example from "@components/Example.astro";
@@ -33,12 +33,6 @@ import ExCustomAnimationsCode from "@islands/alert_dialog_custom_animations.mlx?
 import * as ExTailwind from "@islands/alert_dialog_tailwind.jsx";
 import ExTailwindCode from "@islands/alert_dialog_tailwind.mlx?raw";
 import * as Demo from "@islands/alert_dialog_demo.jsx";
-
-`Solidtype_heroui.Alert_dialog` is Kobalte's `Dialog` as an `alertdialog`,
-with the classes HeroUI's own `alertDialogVariants` gives. It is a
-[Modal](/solidtype/heroui/modal/) in all but these: only its own buttons close it, unless
-its backdrop says a press outside or Escape may; its container takes no
-scroll; and its icon draws HeroUI's icon for its status.
 
 Original HeroUI documentation: [AlertDialog](https://heroui.com/en/docs/react/components/alert-dialog).
 
@@ -80,6 +74,9 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
 </Alert_dialog>
 ```
 
+`Alert_dialog.Close_trigger` and `Alert_dialog.Icon` are optional. A
+`Button` given `` slot=`close `` inside the dialog closes it.
+
 ## Examples
 
 ### Statuses
@@ -96,7 +93,7 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
 
 ### Controlled State
 
-A signal is Solid's state: each half keeps the dialog's open state in one, where HeroUI's uses `React.useState` and `useOverlayState`.
+Keep the open state in a signal, given as `is_open` with `on_open_change`.
 
 <Example code={ExControlledCode} title="alert_dialog_controlled.mlx"><ExControlled.make client:visible /></Example>
 
@@ -122,7 +119,7 @@ A signal is Solid's state: each half keeps the dialog's open state in one, where
 
 ### Close Methods
 
-The second half closes the dialog from its own state, which the page keeps and the dialog follows. A dialog's function child is given `close` too, as HeroUI's render prop is.
+A dialog's function child is given `close`, which closes it.
 
 <Example code={ExCloseMethodsCode} title="alert_dialog_close_methods.mlx"><ExCloseMethods.make client:visible /></Example>
 
@@ -132,10 +129,8 @@ The second half closes the dialog from its own state, which the page keeps and t
 
 ### Custom Portal
 
-The backdrop's `portal_container`, React Aria's `UNSTABLE_portalContainer`,
-draws it inside an element of the page's instead of at the end of its body:
-here a box whose `transform` makes it a stacking context, which the backdrop
-fills. Any element a `ref` gives is taken.
+The backdrop's `portal_container` draws it inside an element of the page
+instead of at the end of its body. Any element a `ref` gives is taken.
 
 <Example code={ExCustomPortalCode} title="alert_dialog_custom_portal.mlx"><ExCustomPortal.make client:visible /></Example>
 
@@ -168,15 +163,25 @@ HeroUI in React:
 
 ### CSS Classes
 
-- `.alert-dialog__trigger`, `.alert-dialog__backdrop`,
-  `.alert-dialog__container`, `.alert-dialog__dialog`,
-  `.alert-dialog__header`, `.alert-dialog__heading`, `.alert-dialog__icon`,
-  `.alert-dialog__body`, `.alert-dialog__footer`,
-  `.alert-dialog__close-trigger`
-- `.alert-dialog__backdrop--opaque`, `--blur`, `--transparent`
-- `.alert-dialog__dialog--xs`, `--sm`, `--md`, `--lg`, `--cover`
-- `.alert-dialog__icon--default`, `--accent`, `--success`, `--warning`,
-  `--danger`
+- `.alert-dialog__trigger` - Trigger element that opens the alert dialog
+- `.alert-dialog__backdrop` - Overlay backdrop behind the dialog
+- `.alert-dialog__container` - Positioning wrapper with placement support
+- `.alert-dialog__dialog` - Dialog content container
+- `.alert-dialog__header` - Header section for icon and title
+- `.alert-dialog__heading` - Heading text styles
+- `.alert-dialog__body` - Main content area
+- `.alert-dialog__footer` - Footer section for actions
+- `.alert-dialog__icon` - Icon container with status colors
+- `.alert-dialog__close-trigger` - Close button element
+- `.alert-dialog__backdrop--opaque` - Opaque colored backdrop (default)
+- `.alert-dialog__backdrop--blur` - Blurred backdrop with glass effect
+- `.alert-dialog__backdrop--transparent` - Transparent backdrop (no overlay)
+- `.alert-dialog__dialog--xs`, `--sm`, `--md`, `--lg`, `--cover` - Sizes
+- `.alert-dialog__icon--default` - Default gray status
+- `.alert-dialog__icon--accent` - Accent blue status
+- `.alert-dialog__icon--success` - Success green status
+- `.alert-dialog__icon--warning` - Warning orange status
+- `.alert-dialog__icon--danger` - Danger red status
 
 ### Interactive States
 
@@ -184,12 +189,6 @@ HeroUI in React:
 - **Exiting**: `[data-exiting="true"]` on the backdrop and the container
 - **Placement**: `[data-placement="auto"]`, and the others, on the container
   and the dialog
-
-## How it is made
-
-It shares Modal's making, on Kobalte's dialog: see [Modal](/solidtype/heroui/modal/#how-it-is-made).
-Its dialog's role is `alertdialog`, as React Aria's is, and a reader's dismiss
-button is in it only while its backdrop may be dismissed.
 
 ## API Reference
 
@@ -207,30 +206,41 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Its look |
-| `isDismissable` | `is_dismissable` | `bool` | `false` | Whether a press on it closes the dialog |
-| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `true` | Whether Escape does not |
+| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Backdrop overlay style |
+| `isDismissable` | `is_dismissable` | `bool` | `false` | Close on backdrop click |
+| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `true` | Disable Escape key to close |
 | `isOpen` | `is_open` | `bool` | | With no `Alert_dialog` around it, whether it is open |
 | `onOpenChange` | `on_open_change` | `bool -> unit` | | With no `Alert_dialog` around it, told as it opens or closes |
-| `UNSTABLE_portalContainer` | `portal_container` | `_ Dom.element_like` | the page's body | The element it is drawn inside |
+| `UNSTABLE_portalContainer` | `portal_container` | `_ Dom.element_like` | the page's body | Custom portal container |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### AlertDialog.Container
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `placement` | `placement` | `` `auto `` \| `` `center `` \| `` `top `` \| `` `bottom `` | `` `auto `` | Where the dialog is |
-| `size` | `size` | `` `xs `` \| `` `sm `` \| `` `md `` \| `` `lg `` \| `` `cover `` | `` `md `` | Its width |
+| `placement` | `placement` | `` `auto `` \| `` `center `` \| `` `top `` \| `` `bottom `` | `` `auto `` | Dialog position on screen |
+| `size` | `size` | `` `xs `` \| `` `sm `` \| `` `md `` \| `` `lg `` \| `` `cover `` | `` `md `` | Alert Dialog size variant |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### AlertDialog.Icon
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `status` | `status` | `` `default `` \| `` `accent `` \| `` `success `` \| `` `warning `` \| `` `danger `` | `` `danger `` | Its colour and icon |
+| `status` | `status` | `` `default `` \| `` `accent `` \| `` `success `` \| `` `warning `` \| `` `danger `` | `` `danger `` | Status color variant |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | An icon of its own |
+| `children` | `children` | elements | | Custom icon element |
 
 ### AlertDialog.Dialog, Header, Body, Footer, Heading, CloseTrigger, Trigger
 
 As [Modal's](/solidtype/heroui/modal/#api-reference).
+
+## Accessibility
+
+Implements the [WAI-ARIA AlertDialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/alertdialog/):
+
+- **Focus trap**: Focus locked within alert dialog
+- **Keyboard**: Escape closes (when enabled), Tab cycles elements
+- **Screen readers**: `role="alertdialog"`, named by its heading
+- **Scroll lock**: Body scroll disabled when open
+- **Required action**: Defaults to requiring explicit user action (no
+  backdrop or Escape dismiss)

@@ -1,6 +1,6 @@
 ---
 title: Styling
-description: A port's classes, its state and its motion, styled as HeroUI's are.
+description: Style HeroUI components with CSS or Tailwind.
 ---
 
 import Example from "@components/Example.astro";
@@ -9,39 +9,71 @@ import tailwind from "@islands/button_tailwind.mlx?raw";
 import * as State from "@islands/styling_state.jsx";
 import state from "@islands/styling_state.mlx?raw";
 
-A port is styled as HeroUI's [Styling](https://heroui.com/docs/react/getting-started/styling)
-page styles HeroUI's: by classes, by the state it writes, and by HeroUI's own
-classes overridden in CSS. React's `className` is `class_`.
+HeroUI components provide flexible styling options: Tailwind CSS utilities,
+CSS with [BEM](https://bem.info/en/methodology/) classes or data attributes,
+and render functions for dynamic content.
+
+Original HeroUI documentation: [Styling](https://heroui.com/docs/react/getting-started/styling).
 
 ## Classes
 
-Every part takes `class_`, added after HeroUI's. HeroUI's classes are in
-Tailwind's `components` layer, so a utility given wins over them:
+All HeroUI components accept `class_`, React's `className`, added after
+HeroUI's classes. HeroUI's classes are in Tailwind's `components` layer, so a
+utility given wins over them:
 
 <Example code={tailwind} title="button_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
 A part's class is reactive, as any prop: `class_=(fun () -> ...)` changes
-with what it reads. CSS Modules and any other library that gives a class
-string work the same way.
+with what it reads. For scoped styles, CSS Modules and any other library that
+gives a class string work the same way.
+
+Responsive design is Tailwind's breakpoint variants in `class_`, or media
+queries on HeroUI's classes.
+
+### Scrollbars
+
+HeroUI's scroll slots use `@apply scrollbar` in component CSS. For your own
+overflow containers, use the utilities from `@heroui/styles`:
+
+```ocaml
+<div class_="scrollbar h-64 overflow-y-auto">...</div>
+```
+
+| Utility | Effect |
+|---|---|
+| `scrollbar` | HeroUI thumb (reads theme `--scrollbar-*` variables) |
+| `scrollbar-thin` | HeroUI themed thin scrollbar |
+| `scrollbar-default` | OS / browser scrollbars |
+| `scrollbar-none` | Hidden scrollbar |
+
+Global and per-subtree control uses `data-scrollbar` on an ancestor. See
+[Theming](/solidtype/heroui/theming/#scrollbars) for tokens and modes.
 
 ## State
 
-A port writes the state HeroUI's styles read, as React Aria writes it on
-HeroUI's own: `data-hovered`, `data-pressed`, `data-focused`,
+HeroUI components expose their state through data attributes, similar to CSS
+pseudo-classes: `data-hovered`, `data-pressed`, `data-focused`,
 `data-focus-visible`, `data-disabled`, each `"true"` or absent, and each
-component's own, `data-selected`, `data-invalid`, listed on its HeroUI page.
-Tailwind's data variants read it:
+component's own, `data-selected`, `data-invalid`, listed on its page.
+Tailwind's data variants read them:
 
 <Example code={state} title="styling_state.mlx"><State.make client:visible /></Example>
 
 ```css
-.button[data-pressed="true"] {
+.button[data-hovered="true"], .button:hover {
+  background: var(--accent-hover);
+}
+
+.button[data-pressed="true"], .button:active {
   transform: scale(0.97);
+}
+
+.button[data-focus-visible="true"], .button:focus-visible {
+  outline: 2px solid var(--focus);
 }
 ```
 
-The part beneath is Kobalte's, which writes its own state too, present and
-empty: `data-expanded`, `data-checked`.
+Parts also carry `data-expanded` and `data-checked`, present and empty.
 
 A part HeroUI gives a render function takes its children as a function of
 its state, as HeroUI's render props are: a record of reads named as they
@@ -58,29 +90,51 @@ Tailwind data variant reads.
 
 ## HeroUI's classes
 
-A port's elements carry HeroUI's [BEM](https://getbem.com/) classes --
-`.button`, `.button--primary`, `.accordion__trigger` -- so a rule on one
-restyles every port that draws it:
+HeroUI uses [BEM methodology](https://bem.info/en/methodology/) for
+consistent class naming:
+
+```css
+/* Block */
+.button { }
+.accordion { }
+
+/* Element */
+.accordion__trigger { }
+.accordion__panel { }
+
+/* Modifier */
+.button--primary { }
+.button--lg { }
+.accordion--outline { }
+```
+
+A rule on a class restyles every component that draws it. Customizing
+components globally:
 
 ```css
 @layer components {
+  /* Override button styles */
   .button {
-    @apply font-semibold tracking-wide;
+    @apply font-semibold uppercase;
   }
-  .accordion__trigger {
-    @apply text-lg;
+
+  .button--primary {
+    @apply bg-indigo-600 hover:bg-indigo-700;
   }
 }
 ```
 
-Each component's HeroUI page lists its classes.
+Each component's page lists its classes, under Styling Reference: see
+[Button](/solidtype/heroui/button/#css-classes) and
+[Accordion](/solidtype/heroui/accordion/#css-classes). View all component
+classes in
+[@heroui/styles/components](https://github.com/heroui-inc/heroui/tree/v3/packages/styles/components).
 
 ## Motion
 
 A port's transitions are HeroUI's CSS. An overlay -- a popover, a tooltip, a
 modal -- stays on the page while its exit runs, marked `data-entering` then
-`data-exiting` as React Aria marks HeroUI's, so a rule on either changes how
-it comes and goes:
+`data-exiting`, so a rule on either changes how it comes and goes:
 
 ```css
 .popover[data-entering] {
@@ -106,6 +160,6 @@ take their element's props: `style`, `title`, `id`, handlers and `ref`.
 A handler or `ref` you give is called beside the port's own, and a `style`
 is written after the port's, so the port keeps its behaviour. Any other
 attribute you give wins over the port's, but for what its behaviour rests
-on: Kobalte's options and the ids that link its parts. A prop the port names
+on: the options it passes on and the ids that link its parts. A prop the port names
 itself is the port's, whatever the element means by it: a switch's
 `on_change` takes its state.

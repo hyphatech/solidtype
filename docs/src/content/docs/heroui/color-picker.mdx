@@ -1,6 +1,6 @@
 ---
 title: ColorPicker
-description: One colour shared by the colour components inside it.
+description: A composable color picker that synchronizes color value between multiple color components.
 ---
 
 import Example from "@components/Example.astro";
@@ -18,15 +18,9 @@ import * as ExCustomStyles from "@islands/color_picker_custom_styles.jsx";
 import ExCustomStylesCode from "@islands/color_picker_custom_styles.mlx?raw";
 import * as Demo from "@islands/color_picker_demo.jsx";
 
-`Solidtype_heroui.Color_picker` is one colour shared by the colour components
-inside it, a trigger and a popover. Kobalte has no colour picker: the colour is
-`Solidtype_headless.Color_picker`, and the trigger and popover are Kobalte's.
-
 A `Color_area`, `Color_slider`, `Color_field`, `Color_swatch` or
 `Color_swatch_picker` inside it, given no value, shows its colour and moves it.
-A part's own value wins, and its own `on_change` is called too.
-
-Its value is Kobalte's `Types.Color`, read from any CSS colour by
+A part's own value wins, and its own `on_change` is called too. Its value is a `Types.Color.t`, read from any CSS colour by
 `Solidtype_kobalte.Colors.parse_color`.
 
 Original HeroUI documentation: [ColorPicker](https://heroui.com/en/docs/react/components/color-picker).
@@ -49,6 +43,9 @@ what the trigger opens, where React Aria's trigger says nothing.
 </div>
 
 ## Anatomy
+
+`Color_picker` is a composable component that combines multiple color
+components:
 
 ```ocaml
 <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
@@ -78,12 +75,15 @@ what the trigger opens, where React Aria's trigger says nothing.
 
 ### With Fields
 
-A `Color_field` on a channel edits that channel, a `Select` switching between
-colour spaces.
+Use `Color_field` to allow users to edit individual color channel values with
+a `Select` to switch between color spaces.
 
 <Example code={ExWithFieldsCode} title="color_picker_with_fields.mlx"><ExWithFields.make client:visible /></Example>
 
 ### With Sliders
+
+Use multiple `Color_slider` components to adjust each channel of a color
+value.
 
 <Example code={ExWithSlidersCode} title="color_picker_with_sliders.mlx"><ExWithSliders.make client:visible /></Example>
 
@@ -103,16 +103,22 @@ colour spaces.
 
 ### CSS Classes
 
-- `.color-picker`, and its parts': `.color-picker__trigger`,
-  `.color-picker__popover`
+- `.color-picker` - Base container
+- `.color-picker__trigger` - Trigger button
+- `.color-picker__popover` - Popover container
 
 ### Interactive States
 
-- the trigger: `[data-hovered="true"]`, `[data-pressed="true"]`,
-  `[data-focused="true"]`, `[data-focus-visible="true"]`,
-  `[data-disabled="true"]`
-- the popover: `[data-placement]`, `[data-entering="true"]`,
-  `[data-exiting="true"]`
+The trigger:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`, and
+  `[data-focused="true"]`
+- **Disabled**: `:disabled` or `[data-disabled="true"]`
+- **Hover**: `[data-hovered="true"]`
+- **Pressed**: `[data-pressed="true"]`
+
+The popover: `[data-placement]`, `[data-entering="true"]`,
+`[data-exiting="true"]`.
 
 ## API Reference
 
@@ -122,9 +128,9 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Types.Color.t` | | The colour, controlled |
-| `defaultValue` | `default_value` | `Types.Color.t` | black | The colour at first, kept by itself |
-| `onChange` | `on_change` | `Types.Color.t -> unit` | | Called with each colour |
+| `value` | `value` | `Types.Color.t` | | The current color value (controlled) |
+| `defaultValue` | `default_value` | `Types.Color.t` | black | The default color value (uncontrolled) |
+| `onChange` | `on_change` | `Types.Color.t -> unit` | | Handler called when the color changes |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `render` | `as_` | a function of its props | | Draws another element in its place |
 
@@ -134,7 +140,7 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|---|
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether it can be pressed |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-| `children` | `children` | elements, or a function of its state | required | What it holds |
+| `children` | `children` | elements, or a function of its state | required | Trigger content or render prop |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
 ### ColorPicker.Popover
@@ -144,7 +150,7 @@ Each prop beside the name HeroUI's React component gives it.
 | `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
 | `defaultOpen` | `default_open` | `bool` | `false` | Whether it is open at first |
 | `onOpenChange` | `on_open_change` | `bool -> unit` | | Called as it opens and closes |
-| `placement` | `placement` | `` `bottom_left ``, and React Aria's others | `` `bottom_left `` | Where it sits beside its trigger |
+| `placement` | `placement` | `` `bottom_left ``, and React Aria's others | `` `bottom_left `` | Placement of the popover |
 | `offset` | `offset` | `float` | `8.` | Pixels from its trigger |
 | `shouldFlip` | `should_flip` | `bool` | `true` | To the other side where there is no room |
 | `className` | `class_` | `string` | | Added after HeroUI's class |

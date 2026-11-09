@@ -1,6 +1,6 @@
 ---
 title: ScrollShadow
-description: Scrolling content, faded at each edge it hides more at.
+description: Apply visual shadows to indicate scrollable content overflow with automatic detection of scroll position.
 ---
 
 import Example from "@components/Example.astro";
@@ -19,12 +19,6 @@ import VisibilityChangeCode from "@islands/scroll_shadow_visibility_change.mlx?r
 import * as Tailwind from "@islands/scroll_shadow_tailwind.jsx";
 import TailwindCode from "@islands/scroll_shadow_tailwind.mlx?raw";
 import * as Demo from "@islands/scroll_shadow_demo.jsx";
-
-`Solidtype_heroui.Scroll_shadow` is a `<div>` that scrolls, with the classes
-HeroUI's own `scrollShadowVariants` gives, faded at each edge it hides content
-at. It measures itself as it scrolls, as it is resized and as its content
-changes, as HeroUI's hook does, and declares each edge as that hook writes
-it. Kobalte has no scroll shadow.
 
 Original HeroUI documentation: [ScrollShadow](https://heroui.com/en/docs/react/components/scroll-shadow).
 
@@ -94,32 +88,69 @@ with HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.scroll-shadow`, and `.scroll-shadow--vertical`,
-  `.scroll-shadow--horizontal`, `.scroll-shadow--hide-scrollbar`
+#### Base Classes
+
+- `.scroll-shadow` - Root container element
+
+#### Orientation Variants
+
+- `.scroll-shadow--vertical` - Vertical scrolling (default)
+- `.scroll-shadow--horizontal` - Horizontal scrolling
+
+#### State Modifiers
+
+- `.scroll-shadow--hide-scrollbar` - Hides native scrollbar
 
 ### CSS Variables
 
-- `--scroll-shadow-size`, the fade's size, from `size`
-- `--scroll-shadow-offset`, how far it scrolls before the fade starts, from
-  `offset`
-- `--scroll-shadow-scrollbar-size`, the gutter kept for a native scrollbar
+The ScrollShadow component uses CSS variables to size the fade mask and
+reserve space for visible native scrollbars:
+
+| Variable | Default | Description |
+|---|---|---|
+| `--scroll-shadow-size` | `40px` | Controls the fade gradient size. This is set from the `size` prop |
+| `--scroll-shadow-offset` | `0px` | How far the container must be scrolled before the fade starts. This is set from the `offset` prop |
+| `--scroll-shadow-scrollbar-size` | `10px` (`0px` when `hide_scroll_bar`) | Reserves a solid mask gutter for the native scrollbar so the fade does not cover it. Override for wider scrollbars |
 
 ### Data Attributes
 
-- `[data-top-scroll]`, `[data-bottom-scroll]`, `[data-left-scroll]`,
-  `[data-right-scroll]`: `"true"` where content is hidden at that edge,
-  `"false"` where it is not
-- `[data-top-bottom-scroll]`, `[data-left-right-scroll]`: content hidden at
-  both edges
-- `[data-orientation]`, `[data-scroll-shadow-size]`
-- `[data-scroll-shadow-mode]`: `"auto"` where the fade follows the scroll,
-  `"manual"` where `visibility` is given or it is disabled
+The component uses data attributes to control shadow visibility:
 
-A shadow is measured once it is in the browser, so a prerendered one marks no
-edge until it is; where a browser has scroll-driven animations, HeroUI's
-styles fade an `"auto"` shadow from its first paint without them.
+- **Scroll States**: `[data-top-scroll]`, `[data-bottom-scroll]`,
+  `[data-left-scroll]`, `[data-right-scroll]` - `"true"` when content can be
+  scrolled in that direction, `"false"` when it cannot
+- **Combined States**: `[data-top-bottom-scroll]`, `[data-left-right-scroll]`
+  - Applied when content can be scrolled in both directions
+- **Orientation**: `[data-orientation="vertical"]` or
+  `[data-orientation="horizontal"]` - Indicates scroll direction
+- **Size**: `[data-scroll-shadow-size]` - Contains the shadow gradient size
+  value
+- **Shadow Mode**: `[data-scroll-shadow-mode]` - `"auto"` when the fade is
+  derived from the scroll position, `"manual"` when `visibility` is given or
+  `is_enabled` is `false`
+
+### Scroll-Driven Fade
+
+In `` `auto `` mode, browsers that support
+[scroll-driven animations](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline)
+derive the fade from the scroll position in CSS. The mask is therefore correct
+on the very first paint of a prerendered page, before it hydrates. Browsers
+without support fall back to the `[data-*-scroll]` attributes above, which are
+written once the shadow is measured in the browser. Two things to keep in mind
+when customizing:
+
+- In `` `auto `` mode the root always resolves a `mask-image`, even when there
+  is nothing to scroll. That makes it a stacking context and a containing
+  block for `position: fixed` descendants. Set `visibility` explicitly if you
+  need to opt out.
+- The scroll-driven fade uses the `animation` property on the root. Applying
+  an `animate-*` utility to the same element replaces it and leaves no fade.
+  Animate a wrapper instead.
 
 ## API Reference
 
@@ -129,13 +160,13 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `orientation` | `orientation` | `` [ `vertical \| `horizontal ] `` | `` `vertical `` | The way it scrolls |
-| `variant` | `variant` | `` [ `fade ] `` | `` `fade `` | Its shadow |
-| `size` | `size` | `int` | `40` | The fade's size, in pixels |
-| `offset` | `offset` | `int` | `0` | How far it scrolls before the fade starts, in pixels |
-| `hideScrollBar` | `hide_scroll_bar` | `bool` | `false` | Whether the native scrollbar is hidden |
-| `isEnabled` | `is_enabled` | `bool` | `true` | Whether it measures itself |
-| `visibility` | `visibility` | `` [ `auto \| `top \| `bottom \| `left \| `right \| `both \| `none ] `` | `` `auto `` | The edges it marks, or `` `auto `` for those measured |
-| `onVisibilityChange` | `on_visibility_change` | `Scroll_shadow.edge -> unit` | | Told each change of the edges measured |
+| `orientation` | `orientation` | `` [ `vertical \| `horizontal ] `` | `` `vertical `` | The scroll direction |
+| `variant` | `variant` | `` [ `fade ] `` | `` `fade `` | The visual shadow effect style |
+| `size` | `size` | `int` | `40` | The shadow gradient size in pixels |
+| `offset` | `offset` | `int` | `0` | The scroll offset before showing shadows (in pixels) |
+| `hideScrollBar` | `hide_scroll_bar` | `bool` | `false` | Whether to hide the native scrollbar |
+| `isEnabled` | `is_enabled` | `bool` | `true` | Whether scroll shadow detection is enabled |
+| `visibility` | `visibility` | `` [ `auto \| `top \| `bottom \| `left \| `right \| `both \| `none ] `` | `` `auto `` | Controlled shadow visibility state |
+| `onVisibilityChange` | `on_visibility_change` | `Scroll_shadow.edge -> unit` | | Callback invoked when shadow visibility changes |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | What it scrolls |
+| `children` | `children` | elements | | The scrollable content |

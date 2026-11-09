@@ -1,6 +1,6 @@
 ---
 title: Description
-description: A field's helper text.
+description: Provides supplementary text for form fields and other components.
 ---
 
 import Example from "@components/Example.astro";
@@ -8,13 +8,6 @@ import * as Usage from "@islands/description_usage.jsx";
 import UsageCode from "@islands/description_usage.mlx?raw";
 import * as Tailwind from "@islands/description_tailwind.jsx";
 import TailwindCode from "@islands/description_tailwind.mlx?raw";
-
-`Solidtype_heroui.Description` is HeroUI's description, with the classes
-HeroUI's own `descriptionVariants` gives. It is a `<span>`, unless a part
-above it gives it its element, as React Aria's do: inside a
-[Radio Group](/solidtype/heroui/radio-group/) it is Kobalte's group description, which the
-group is described by, and inside a radio the radio's, which its input is
-described by. The Radio Group page shows it in its fields.
 
 Original HeroUI documentation: [Description](https://heroui.com/en/docs/react/components/description).
 
@@ -34,16 +27,26 @@ Original HeroUI documentation: [Description](https://heroui.com/en/docs/react/co
 
 ### CSS Classes
 
-- `.description`
+- `.description` - Base description styles with `muted` text color
 
 ## API Reference
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
-| `children` | `children` | elements | Its text |
+| `children` | `children` | elements | The content of the description |
 
 ### Description.Slot
 
-How a description renders below a part, given its classes and its children,
-as React Aria's `TextContext` gives it.
+How a description renders inside a part, given its classes and its
+children.
+
+## Accessibility
+
+The Description component enhances accessibility by:
+
+- Describing what it is in: inside a [TextField](/solidtype/heroui/text-field/)
+  the field's input, inside a [RadioGroup](/solidtype/heroui/radio-group/) the
+  group, and inside a radio the radio's input
+- Providing the `data-slot="description"` attribute
+- Supporting proper text contrast ratios

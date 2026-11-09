@@ -1,6 +1,6 @@
 ---
 title: Spinner
-description: A loading indicator, for a pending state.
+description: A loading indicator component to show pending states.
 ---
 
 import Example from "@components/Example.astro";
@@ -16,11 +16,8 @@ import * as Tailwind from "@islands/spinner_tailwind.jsx";
 import TailwindCode from "@islands/spinner_tailwind.mlx?raw";
 import * as Demo from "@islands/spinner_demo.jsx";
 
-`Solidtype_heroui.Spinner` is a `<span role="status">` named "Loading", with
-the classes HeroUI's own `spinnerVariants` gives, that draws HeroUI's spinning
-icon. Its gradients take ids of their own from Solid's `createUniqueId`, so
-two spinners on a page never share one, and a prerendered page hydrates with
-the same ids. A spinner has no behaviour, so no Kobalte component underlies it.
+A spinner is announced as a status named "Loading" unless its `aria_label`
+names it otherwise.
 
 Original HeroUI documentation: [Spinner](https://heroui.com/en/docs/react/components/spinner).
 
@@ -50,9 +47,9 @@ marked row is one they disagree on.
 
 ### Speed
 
-An animation utility changes how fast one spinner turns; with
-`motion-reduce:animate-none`, it stays still for a reader who prefers reduced
-motion.
+Apply an animation utility to change how fast a single spinner rotates. Pair
+it with `motion-reduce:animate-none` so it stays still for users who prefer
+reduced motion.
 
 <Example code={SpeedCode} title="spinner_speed.mlx"><Speed.make client:visible /></Example>
 
@@ -83,12 +80,26 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.spinner`, and its sizes `.spinner--sm`, `.spinner--md`, `.spinner--lg`,
-  `.spinner--xl`
-- its colors `.spinner--current`, `.spinner--accent`, `.spinner--danger`,
-  `.spinner--success`, `.spinner--warning`
+#### Base & Size Classes
+
+- `.spinner` - Base spinner styles with default size
+- `.spinner--sm` - Small size variant
+- `.spinner--md` - Medium size variant (default)
+- `.spinner--lg` - Large size variant
+- `.spinner--xl` - Extra large size variant
+
+#### Color Classes
+
+- `.spinner--current` - Inherits current text color
+- `.spinner--accent` - Accent color variant
+- `.spinner--danger` - Danger color variant
+- `.spinner--success` - Success color variant
+- `.spinner--warning` - Warning color variant
 
 ## API Reference
 
@@ -98,7 +109,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `size` | `size` | `` [ `sm \| `md \| `lg \| `xl ] `` | `` `md `` | Its size |
-| `color` | `color` | `` [ `accent \| `current \| `danger \| `success \| `warning ] `` | `` `accent `` | Its color |
-| `aria-label` | `aria_label` | `string` | `"Loading"` | Its name |
+| `size` | `size` | `` [ `sm \| `md \| `lg \| `xl ] `` | `` `md `` | Size of the spinner |
+| `color` | `color` | `` [ `accent \| `current \| `danger \| `success \| `warning ] `` | `` `accent `` | Color variant of the spinner |
+| `aria-label` | `aria_label` | `string` | `"Loading"` | Its name, told to a reader |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |

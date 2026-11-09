@@ -1,6 +1,6 @@
 ---
 title: TextArea
-description: A multi-line text input.
+description: Primitive multiline text input component that accepts standard HTML attributes.
 ---
 
 import Example from "@components/Example.astro";
@@ -11,21 +11,25 @@ import VariantsCode from "@islands/text_area_variants.mlx?raw";
 import * as Rows from "@islands/text_area_rows.jsx";
 import RowsCode from "@islands/text_area_rows.mlx?raw";
 
-`Solidtype_heroui.Text_area` is a `<textarea>` with the classes HeroUI's own
-`textAreaVariants` gives and the state its styles read, as
-[Input](/solidtype/heroui/input/)'s are. It takes every attribute a `<textarea>` takes and
-passes them on. Inside a [TextField](/solidtype/heroui/text-field/) it is Kobalte's
-`TextField.TextArea`.
-
 Original HeroUI documentation: [TextArea](https://heroui.com/en/docs/react/components/text-area).
 
 ## Usage
 
 <Example code={UsageCode} title="text_area_usage.mlx"><Usage.make client:visible /></Example>
 
+For validation, labels, and error messages, see
+[TextField](/solidtype/heroui/text-field/).
+
 ## Examples
 
 ### Variants
+
+The TextArea component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with shadow, suitable for
+  most use cases
+- **`` `secondary ``** - Lower emphasis variant without shadow, suitable for
+  use in Surface components
 
 <Example code={VariantsCode} title="text_area_variants.mlx"><Variants.make client:visible /></Example>
 
@@ -35,10 +39,14 @@ Original HeroUI documentation: [TextArea](https://heroui.com/en/docs/react/compo
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.textarea`, and `.textarea--primary`, `.textarea--secondary`,
-  `.textarea--full-width`
+- `.textarea` - Underlying `<textarea>` element styling
+- `.textarea--primary`, `.textarea--secondary` - Variants
+- `.textarea--full-width` - Full width modifier
 
 ### Interactive States
 
@@ -49,10 +57,13 @@ Original HeroUI documentation: [TextArea](https://heroui.com/en/docs/react/compo
 
 ## API Reference
 
-TextArea takes every attribute a `<textarea>` takes, and:
+TextArea accepts all standard HTML `<textarea>` attributes plus the following:
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary ``, or its field's | Its look |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary ``, or its field's | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the textarea should take full width of its container |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
+
+For validation props like `is_invalid`, `is_required`, and error handling, use
+[TextField](/solidtype/heroui/text-field/) with TextArea as a child component.

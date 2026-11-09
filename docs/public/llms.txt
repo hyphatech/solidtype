@@ -74,78 +74,78 @@ let make () =
 
 Each component's page gives HeroUI's own examples in OCaml, and a table of its props with the name HeroUI's React component gives each.
 
-- [HeroUI](https://hyphatech.github.io/solidtype/heroui/): A maintained port of HeroUI's design system to solidtype: install, and what a port is.
-- [Theming](https://hyphatech.github.io/solidtype/heroui/theming/): HeroUI's themes, colours and dark mode, as a port takes them.
-- [Styling](https://hyphatech.github.io/solidtype/heroui/styling/): A port's classes, its state and its motion, styled as HeroUI's are.
-- [Composition](https://hyphatech.github.io/solidtype/heroui/composition/): A port's parts, and HeroUI's look on elements no port renders.
+- [HeroUI](https://hyphatech.github.io/solidtype/heroui/): A maintained port of HeroUI's design system to solidtype.
+- [Theming](https://hyphatech.github.io/solidtype/heroui/theming/): Customize HeroUI's design system with CSS variables and global styles.
+- [Styling](https://hyphatech.github.io/solidtype/heroui/styling/): Style HeroUI components with CSS or Tailwind.
+- [Composition](https://hyphatech.github.io/solidtype/heroui/composition/): Build flexible UI with component composition patterns.
 - [Coverage](https://hyphatech.github.io/solidtype/heroui/coverage/): Which of HeroUI's components solidtype has ported.
-- [Accordion](https://hyphatech.github.io/solidtype/heroui/accordion/): A stack of sections, each a heading that shows and hides its panel.
-- [Alert](https://hyphatech.github.io/solidtype/heroui/alert/): A message, with its status's icon, title and description.
-- [AlertDialog](https://hyphatech.github.io/solidtype/heroui/alert-dialog/): A dialog that asks before going on, HeroUI's on Kobalte's.
-- [Autocomplete](https://hyphatech.github.io/solidtype/heroui/autocomplete/): A select whose popover filters its list by a search field, HeroUI's on Kobalte's combo box.
-- [Avatar](https://hyphatech.github.io/solidtype/heroui/avatar/): A person's picture, with a fallback while it loads.
-- [AvatarGroup](https://hyphatech.github.io/solidtype/heroui/avatar-group/): Avatars stacked or in a grid, the rest counted.
-- [Badge](https://hyphatech.github.io/solidtype/heroui/badge/): A count or a status over the content it marks.
-- [Breadcrumbs](https://hyphatech.github.io/solidtype/heroui/breadcrumbs/): The trail of pages to the one shown, HeroUI's on Kobalte's.
-- [Button](https://hyphatech.github.io/solidtype/heroui/button/): A clickable button, HeroUI's on Kobalte's.
-- [ButtonGroup](https://hyphatech.github.io/solidtype/heroui/button-group/): Related buttons, grouped with one look.
-- [Card](https://hyphatech.github.io/solidtype/heroui/card/): A container that groups related content and actions.
-- [Checkbox](https://hyphatech.github.io/solidtype/heroui/checkbox/): A checkbox, HeroUI's on Kobalte's.
-- [CheckboxGroup](https://hyphatech.github.io/solidtype/heroui/checkbox-group/): Checkboxes of which any are checked, as a set of values.
-- [Chip](https://hyphatech.github.io/solidtype/heroui/chip/): A short label for a status, a category or a choice.
-- [CloseButton](https://hyphatech.github.io/solidtype/heroui/close-button/): A button that closes a dialog, a modal, or dismisses content.
-- [ColorArea](https://hyphatech.github.io/solidtype/heroui/color-area/): Two channels of a colour, picked across and up a square.
-- [ColorField](https://hyphatech.github.io/solidtype/heroui/color-field/): A colour typed as its hex, or one of its channels as a number.
-- [ColorPicker](https://hyphatech.github.io/solidtype/heroui/color-picker/): One colour shared by the colour components inside it.
-- [ColorSlider](https://hyphatech.github.io/solidtype/heroui/color-slider/): One channel of a colour, slid along a track of its range.
-- [ColorSwatch](https://hyphatech.github.io/solidtype/heroui/color-swatch/): A colour, shown, and named for a reader.
-- [ColorSwatchPicker](https://hyphatech.github.io/solidtype/heroui/color-swatch-picker/): A list of colour swatches, one chosen from a palette.
-- [ComboBox](https://hyphatech.github.io/solidtype/heroui/combo-box/): An input that filters a list of options to choose one or many of, HeroUI's on Kobalte's.
-- [Description](https://hyphatech.github.io/solidtype/heroui/description/): A field's helper text.
-- [Disclosure](https://hyphatech.github.io/solidtype/heroui/disclosure/): A section that shows and hides its content.
-- [DisclosureGroup](https://hyphatech.github.io/solidtype/heroui/disclosure-group/): Disclosures expanded together, one at a time or several.
-- [Drawer](https://hyphatech.github.io/solidtype/heroui/drawer/): A dialog that slides in from an edge, HeroUI's on Kobalte's.
-- [Dropdown](https://hyphatech.github.io/solidtype/heroui/dropdown/): A menu of actions or options from a trigger, HeroUI's on Kobalte's.
+- [Accordion](https://hyphatech.github.io/solidtype/heroui/accordion/): A collapsible content panel for organizing information in a compact space.
+- [Alert](https://hyphatech.github.io/solidtype/heroui/alert/): Display important messages and notifications to users with status indicators.
+- [AlertDialog](https://hyphatech.github.io/solidtype/heroui/alert-dialog/): Modal dialog for critical confirmations requiring user attention and explicit action.
+- [Autocomplete](https://hyphatech.github.io/solidtype/heroui/autocomplete/): An autocomplete combines a select with filtering, allowing users to search and select from a list of options.
+- [Avatar](https://hyphatech.github.io/solidtype/heroui/avatar/): Display user profile images with customizable fallback content.
+- [AvatarGroup](https://hyphatech.github.io/solidtype/heroui/avatar-group/): Display a stacked or grid group of avatars with overflow counting.
+- [Badge](https://hyphatech.github.io/solidtype/heroui/badge/): Displays a small indicator positioned relative to another element, commonly used for notification counts, status dots, and labels.
+- [Breadcrumbs](https://hyphatech.github.io/solidtype/heroui/breadcrumbs/): Navigation breadcrumbs showing the current page's location within a hierarchy.
+- [Button](https://hyphatech.github.io/solidtype/heroui/button/): A clickable button component with multiple variants and states.
+- [ButtonGroup](https://hyphatech.github.io/solidtype/heroui/button-group/): Group related buttons together with consistent styling and spacing.
+- [Card](https://hyphatech.github.io/solidtype/heroui/card/): Flexible container component for grouping related content and actions.
+- [Checkbox](https://hyphatech.github.io/solidtype/heroui/checkbox/): Checkboxes allow users to select multiple items from a list of individual items, or to mark one individual item as selected.
+- [CheckboxGroup](https://hyphatech.github.io/solidtype/heroui/checkbox-group/): A checkbox group component for managing multiple checkbox selections.
+- [Chip](https://hyphatech.github.io/solidtype/heroui/chip/): Small informational badges for displaying labels, statuses, and categories.
+- [CloseButton](https://hyphatech.github.io/solidtype/heroui/close-button/): Button component for closing dialogs, modals, or dismissing content.
+- [ColorArea](https://hyphatech.github.io/solidtype/heroui/color-area/): A 2D color picker that allows users to select colors from a gradient area.
+- [ColorField](https://hyphatech.github.io/solidtype/heroui/color-field/): Color input field with labels, descriptions, and validation.
+- [ColorPicker](https://hyphatech.github.io/solidtype/heroui/color-picker/): A composable color picker that synchronizes color value between multiple color components.
+- [ColorSlider](https://hyphatech.github.io/solidtype/heroui/color-slider/): A color slider allows users to adjust an individual channel of a color value.
+- [ColorSwatch](https://hyphatech.github.io/solidtype/heroui/color-swatch/): A visual preview of a color value with accessibility support.
+- [ColorSwatchPicker](https://hyphatech.github.io/solidtype/heroui/color-swatch-picker/): A list of color swatches that allows users to select a color from a predefined palette.
+- [ComboBox](https://hyphatech.github.io/solidtype/heroui/combo-box/): A combo box combines a text input with a listbox, allowing users to filter a list of options to items matching a query.
+- [Description](https://hyphatech.github.io/solidtype/heroui/description/): Provides supplementary text for form fields and other components.
+- [Disclosure](https://hyphatech.github.io/solidtype/heroui/disclosure/): A disclosure is a collapsible section with a header containing a heading and a trigger button, and a panel that wraps the content.
+- [DisclosureGroup](https://hyphatech.github.io/solidtype/heroui/disclosure-group/): Container that manages multiple Disclosure items with coordinated expanded states.
+- [Drawer](https://hyphatech.github.io/solidtype/heroui/drawer/): Slide-out panel for supplementary content and actions.
+- [Dropdown](https://hyphatech.github.io/solidtype/heroui/dropdown/): A dropdown displays a list of actions or options that a user can choose.
 - [EmptyState](https://hyphatech.github.io/solidtype/heroui/empty-state/): What a list shows where it has nothing to show.
-- [FieldError](https://hyphatech.github.io/solidtype/heroui/field-error/): A field's validation error.
-- [Fieldset](https://hyphatech.github.io/solidtype/heroui/fieldset/): Related fields, with a legend and their actions.
-- [Form](https://hyphatech.github.io/solidtype/heroui/form/): Fields submitted together, a submit refused while one is invalid.
-- [Input](https://hyphatech.github.io/solidtype/heroui/input/): A single-line text input.
-- [InputGroup](https://hyphatech.github.io/solidtype/heroui/input-group/): An input with what goes before and after it.
-- [Kbd](https://hyphatech.github.io/solidtype/heroui/kbd/): A keyboard key, or a combination of keys.
-- [Label](https://hyphatech.github.io/solidtype/heroui/label/): A field's name.
-- [Link](https://hyphatech.github.io/solidtype/heroui/link/): A link, HeroUI's on Kobalte's.
-- [ListBox](https://hyphatech.github.io/solidtype/heroui/list-box/): A list of options to select or act on, HeroUI's on Kobalte's.
-- [Meter](https://hyphatech.github.io/solidtype/heroui/meter/): A quantity within a known range.
-- [Modal](https://hyphatech.github.io/solidtype/heroui/modal/): A dialog over the page, HeroUI's on Kobalte's.
-- [NumberField](https://hyphatech.github.io/solidtype/heroui/number-field/): A number, typed or stepped by its buttons, the arrow keys and the wheel.
-- [Pagination](https://hyphatech.github.io/solidtype/heroui/pagination/): Pages to move between, HeroUI's on Kobalte's buttons.
-- [Popover](https://hyphatech.github.io/solidtype/heroui/popover/): Rich content beside a trigger, HeroUI's on Kobalte's.
-- [ProgressBar](https://hyphatech.github.io/solidtype/heroui/progress-bar/): Determinate or indeterminate progress of an operation over time.
-- [ProgressCircle](https://hyphatech.github.io/solidtype/heroui/progress-circle/): Progress of an operation, as an arc round a circle.
-- [RadioGroup](https://hyphatech.github.io/solidtype/heroui/radio-group/): A radio group, HeroUI's on Kobalte's.
-- [ScrollShadow](https://hyphatech.github.io/solidtype/heroui/scroll-shadow/): Scrolling content, faded at each edge it hides more at.
-- [SearchField](https://hyphatech.github.io/solidtype/heroui/search-field/): A search input, cleared by Escape or its button and submitted by Enter.
+- [FieldError](https://hyphatech.github.io/solidtype/heroui/field-error/): Displays validation error messages for form fields.
+- [Fieldset](https://hyphatech.github.io/solidtype/heroui/fieldset/): Group related form controls with legends, descriptions, and actions.
+- [Form](https://hyphatech.github.io/solidtype/heroui/form/): Wrapper component for form validation and submission handling.
+- [Input](https://hyphatech.github.io/solidtype/heroui/input/): Primitive single-line text input component that accepts standard HTML attributes.
+- [InputGroup](https://hyphatech.github.io/solidtype/heroui/input-group/): Group related input controls with prefix and suffix elements for enhanced form fields.
+- [Kbd](https://hyphatech.github.io/solidtype/heroui/kbd/): Display keyboard shortcuts and key combinations.
+- [Label](https://hyphatech.github.io/solidtype/heroui/label/): Renders an accessible label associated with form controls.
+- [Link](https://hyphatech.github.io/solidtype/heroui/link/): A styled anchor component for navigation with built-in icon support.
+- [ListBox](https://hyphatech.github.io/solidtype/heroui/list-box/): A listbox displays a list of options and allows a user to select one or more of them.
+- [Meter](https://hyphatech.github.io/solidtype/heroui/meter/): A meter represents a quantity within a known range, or a fractional value.
+- [Modal](https://hyphatech.github.io/solidtype/heroui/modal/): Dialog overlay for focused user interactions and important content.
+- [NumberField](https://hyphatech.github.io/solidtype/heroui/number-field/): Number input fields with increment/decrement buttons, validation, and internationalized formatting.
+- [Pagination](https://hyphatech.github.io/solidtype/heroui/pagination/): Page navigation with composable page links, previous/next buttons, and ellipsis indicators.
+- [Popover](https://hyphatech.github.io/solidtype/heroui/popover/): Displays rich content in a portal triggered by a button or any custom element.
+- [ProgressBar](https://hyphatech.github.io/solidtype/heroui/progress-bar/): A progress bar shows either determinate or indeterminate progress of an operation over time.
+- [ProgressCircle](https://hyphatech.github.io/solidtype/heroui/progress-circle/): A circular progress indicator that shows determinate or indeterminate progress.
+- [RadioGroup](https://hyphatech.github.io/solidtype/heroui/radio-group/): Radio group for selecting a single option from a list.
+- [ScrollShadow](https://hyphatech.github.io/solidtype/heroui/scroll-shadow/): Apply visual shadows to indicate scrollable content overflow with automatic detection of scroll position.
+- [SearchField](https://hyphatech.github.io/solidtype/heroui/search-field/): Search input field with clear button and search icon.
 - [Segment](https://hyphatech.github.io/solidtype/heroui/segment/): A segmented control, for a few options of which one is selected.
-- [Select](https://hyphatech.github.io/solidtype/heroui/select/): A button that chooses one or many options from a list, HeroUI's on Kobalte's.
-- [Separator](https://hyphatech.github.io/solidtype/heroui/separator/): A line between content.
-- [Skeleton](https://hyphatech.github.io/solidtype/heroui/skeleton/): A placeholder in the shape of content that is loading.
-- [Slider](https://hyphatech.github.io/solidtype/heroui/slider/): A value, or a range of two, chosen along a track.
-- [Spinner](https://hyphatech.github.io/solidtype/heroui/spinner/): A loading indicator, for a pending state.
-- [Surface](https://hyphatech.github.io/solidtype/heroui/surface/): The background a part of a page stands on.
-- [Switch](https://hyphatech.github.io/solidtype/heroui/switch/): A switch, HeroUI's on Kobalte's.
-- [Table](https://hyphatech.github.io/solidtype/heroui/table/): Rows and columns of data, moved through by the keys, each row's action or link run by Enter or a press.
-- [Tabs](https://hyphatech.github.io/solidtype/heroui/tabs/): Sections of content, one shown at a time, chosen from a list of tabs.
-- [TextArea](https://hyphatech.github.io/solidtype/heroui/text-area/): A multi-line text input.
-- [TextField](https://hyphatech.github.io/solidtype/heroui/text-field/): A field of a label, an input, a description and an error.
+- [Select](https://hyphatech.github.io/solidtype/heroui/select/): A select displays a collapsible list of options and allows a user to select one of them.
+- [Separator](https://hyphatech.github.io/solidtype/heroui/separator/): Visually divide content sections.
+- [Skeleton](https://hyphatech.github.io/solidtype/heroui/skeleton/): Skeleton is a placeholder to show a loading state and the expected shape of a component.
+- [Slider](https://hyphatech.github.io/solidtype/heroui/slider/): A slider allows a user to select one or more values within a range.
+- [Spinner](https://hyphatech.github.io/solidtype/heroui/spinner/): A loading indicator component to show pending states.
+- [Surface](https://hyphatech.github.io/solidtype/heroui/surface/): Container component that provides surface-level styling and context for child components.
+- [Switch](https://hyphatech.github.io/solidtype/heroui/switch/): A toggle switch component for boolean states.
+- [Table](https://hyphatech.github.io/solidtype/heroui/table/): Tables display structured data in rows and columns with support for sorting, selection, column resizing, and infinite scrolling.
+- [Tabs](https://hyphatech.github.io/solidtype/heroui/tabs/): Tabs organize content into multiple sections and allow users to navigate between them.
+- [TextArea](https://hyphatech.github.io/solidtype/heroui/text-area/): Primitive multiline text input component that accepts standard HTML attributes.
+- [TextField](https://hyphatech.github.io/solidtype/heroui/text-field/): Composition-friendly text fields with labels, descriptions, and inline validation.
 - [TextShimmer](https://hyphatech.github.io/solidtype/heroui/text-shimmer/): Text with a highlight sweeping across it, for a label of work under way.
-- [TimeField](https://hyphatech.github.io/solidtype/heroui/time-field/): A time of day, typed or stepped segment by segment.
-- [Toast](https://hyphatech.github.io/solidtype/heroui/toast/): Brief messages, shown in a stack, closing themselves.
-- [ToggleButton](https://hyphatech.github.io/solidtype/heroui/toggle-button/): A button pressed on or off.
-- [ToggleButtonGroup](https://hyphatech.github.io/solidtype/heroui/toggle-button-group/): Toggle buttons of which one or several are selected.
-- [Tooltip](https://hyphatech.github.io/solidtype/heroui/tooltip/): Text shown as an element is hovered or focused, HeroUI's on Kobalte's.
+- [TimeField](https://hyphatech.github.io/solidtype/heroui/time-field/): Time input field with labels, descriptions, and validation.
+- [Toast](https://hyphatech.github.io/solidtype/heroui/toast/): Display temporary notifications and messages to users with automatic dismissal and customizable placement.
+- [ToggleButton](https://hyphatech.github.io/solidtype/heroui/toggle-button/): An interactive toggle control for on/off or selected/unselected states.
+- [ToggleButtonGroup](https://hyphatech.github.io/solidtype/heroui/toggle-button-group/): Groups multiple ToggleButtons into a unified control, allowing users to select one or multiple options.
+- [Tooltip](https://hyphatech.github.io/solidtype/heroui/tooltip/): Displays informative text when users hover over or focus on an element.
 - [TrendChip](https://hyphatech.github.io/solidtype/heroui/trend-chip/): A chip that shows a change, its arrow and colour from its trend.
-- [Typography](https://hyphatech.github.io/solidtype/heroui/typography/): Text in HeroUI's type scale, each type the element it means.
+- [Typography](https://hyphatech.github.io/solidtype/heroui/typography/): A semantic typography primitive for headings, body copy, and inline code.
 
 ## Charts
 

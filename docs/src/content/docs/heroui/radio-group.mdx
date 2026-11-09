@@ -1,6 +1,6 @@
 ---
 title: Radio Group
-description: A radio group, HeroUI's on Kobalte's.
+description: Radio group for selecting a single option from a list.
 ---
 
 import Example from "@components/Example.astro";
@@ -22,14 +22,6 @@ import RadioGroupTailwindCode from "@islands/radio_group_tailwind.mlx?raw";
 import * as RadioGroupCustomIndicator from "@islands/radio_group_custom_indicator.jsx";
 import RadioGroupCustomIndicatorCode from "@islands/radio_group_custom_indicator.mlx?raw";
 
-`Solidtype_heroui.Radio_group` is Kobalte's radio group in HeroUI's anatomy:
-the group, each `Radio`, `Radio.Content`, the clickable label that holds
-Kobalte's input, `Radio.Control` and `Radio.Indicator`. A `Label` in the group
-names it and a `Description` describes it; a `Description` in a radio
-describes that radio's input. Its state is declared as React Aria writes it:
-Space chooses a radio and the arrow keys move the choice, and Enter presses a
-radio's content as React Aria's does, though it chooses nothing.
-
 Original HeroUI documentation: [Radio Group](https://heroui.com/en/docs/react/components/radio-group).
 
 ## Usage
@@ -50,6 +42,31 @@ The marked row is Kobalte's: its label names its radio's input by `for`, where R
   <Demo.make client:load />
 </div>
 
+## Anatomy
+
+```ocaml
+<Radio_group>
+  <Label />
+  <Description />
+  <Radio value="option1">
+    <Radio.Content>
+      <Radio.Control>
+        <Radio.Indicator>
+          <span>"✓"</span>
+        </Radio.Indicator>
+      </Radio.Control>
+      "Label"
+    </Radio.Content>
+    <Description />
+  </Radio>
+</Radio_group>
+```
+
+`Radio.Content` is the clickable area: the control and its label. The
+indicator's children are optional, a custom indicator. A `Description` inside
+a `Radio`, beside its content, describes that radio, and is announced with
+it.
+
 ## Examples
 
 ### Horizontal Orientation
@@ -57,6 +74,13 @@ The marked row is Kobalte's: its label names its radio's input by `for`, where R
 <Example code={RadioGroupHorizontalCode} title="radio_group_horizontal.mlx"><RadioGroupHorizontal.make client:visible /></Example>
 
 ### Variants
+
+The RadioGroup component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with default background,
+  suitable for most use cases
+- **`` `secondary ``** - Lower emphasis variant, suitable for use in Surface
+  components
 
 <Example code={RadioGroupVariantsCode} title="radio_group_variants.mlx"><RadioGroupVariants.make client:visible /></Example>
 
@@ -69,6 +93,9 @@ The marked row is Kobalte's: its label names its radio's input by `for`, where R
 <Example code={RadioGroupControlledCode} title="radio_group_controlled.mlx"><RadioGroupControlled.make client:visible /></Example>
 
 ### Uncontrolled
+
+Combine `default_value` with `on_change` when you only need to react to
+updates.
 
 <Example code={RadioGroupUncontrolledCode} title="radio_group_uncontrolled.mlx"><RadioGroupUncontrolled.make client:visible /></Example>
 
@@ -109,22 +136,40 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.radio-group`, with `.radio-group--primary` and `.radio-group--secondary`
-- `.radio`, `.radio__content`, `.radio__control`, `.radio__indicator`
+#### Base Classes
 
-A disabled radio is styled by `[data-disabled="true"]` on `.radio`: there is
-no `.radio--disabled`.
+- `.radio-group` - Base radio group container
+- `.radio-group--primary`, `.radio-group--secondary` - Variants
+- `.radio` - Individual radio item
+- `.radio__content` - Radio button (label wrapper for control + label text)
+- `.radio__control` - Radio control (circular button)
+- `.radio__indicator` - Radio indicator (inner dot)
+
+#### Modifier Classes
+
+Disabled state is applied via `[data-disabled="true"]` (and `:disabled`) on
+`.radio`: there is no `.radio--disabled` modifier class.
 
 ### Interactive States
 
-- **Selected**: `[data-selected="true"]` or `[aria-checked="true"]`
-- **Hover**: `:hover` or `[data-hovered="true"]`
-- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
-- **Pressed**: `:active` or `[data-pressed="true"]`
-- **Disabled**: `:disabled` or `[data-disabled="true"]`
-- **Invalid**: `[data-invalid="true"]` or `[aria-invalid="true"]`
+The radio supports both CSS pseudo-classes and data attributes for
+flexibility:
+
+- **Selected**: `[aria-checked="true"]` or `[data-selected="true"]`
+  (indicator appears)
+- **Hover**: `:hover` or `[data-hovered="true"]` (border color changes)
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` (shows focus
+  ring)
+- **Pressed**: `:active` or `[data-pressed="true"]` (scale transform)
+- **Disabled**: `:disabled` or `[data-disabled="true"]` (reduced opacity, no
+  pointer events)
+- **Invalid**: `[data-invalid="true"]` or `[aria-invalid="true"]` (error
+  border color)
 
 ## API Reference
 
@@ -135,29 +180,29 @@ string React takes.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `string` | | The value chosen, controlled |
-| `defaultValue` | `default_value` | `string` | none | The value chosen at first |
-| `onChange` | `on_change` | `string -> unit` | | Called as the choice changes |
-| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | Its direction |
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual style |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether every radio is disabled |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid |
+| `value` | `value` | `string` | | The current value (controlled) |
+| `defaultValue` | `default_value` | `string` | none | The default value (uncontrolled) |
+| `onChange` | `on_change` | `string -> unit` | | Handler called when the value changes |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `vertical `` | The orientation of the radio group |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the radio group is disabled |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the radio group is in an invalid state |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
-| `children` | `children` | elements, or a function of `state` | | Its label, description and radios |
-| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether it keeps its choice |
-| `isRequired` | `is_required` | `bool` | `false` | Whether a form requires it |
-| `name` | `name` | `string` | | Its name in a form |
+| `children` | `children` | elements, or a function of `state` | | Radio group content or render function |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the radio group is read only |
+| `isRequired` | `is_required` | `bool` | `false` | Whether the radio group is required |
+| `name` | `name` | `string` | | The name of the radio group, used when submitting an HTML form |
 
 ### Radio
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `string` | required | The value it chooses |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `value` | `value` | `string` | required | The value of the radio button |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the radio button is disabled |
 | `aria-label` | `aria_label` | `string` | | Its name where no text names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements, or a function of `Radio.state` | | Its content and description |
+| `children` | `children` | elements, or a function of `Radio.state` | | Radio content or render function |
 
 ### Radio.Content, Radio.Control and Radio.Indicator
 

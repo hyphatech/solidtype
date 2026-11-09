@@ -1,6 +1,6 @@
 ---
 title: Surface
-description: The background a part of a page stands on.
+description: Container component that provides surface-level styling and context for child components.
 ---
 
 import Example from "@components/Example.astro";
@@ -11,11 +11,6 @@ import VariantsCode from "@islands/surface_variants.mlx?raw";
 import * as Tailwind from "@islands/surface_tailwind.jsx";
 import TailwindCode from "@islands/surface_tailwind.mlx?raw";
 import * as Demo from "@islands/surface_demo.jsx";
-
-`Solidtype_heroui.Surface` is a `<div>` with the classes HeroUI's own
-`surfaceVariants` gives. Kobalte has no surface, and a surface has no
-behaviour: it gives what is inside it its variant, by `Surface.Context`, so a
-part can choose the colours that stand out on it.
 
 Original HeroUI documentation: [Surface](https://heroui.com/en/docs/react/components/surface).
 
@@ -37,19 +32,19 @@ marked row is one they disagree on.
 
 ### Variants
 
-A surface's variant says how prominent it is:
+Surface comes in semantic variants that describe their prominence level:
 
-- `` `default ``, the standard surface, `bg-surface`
-- `` `secondary ``, of medium prominence, `bg-surface-secondary`
-- `` `tertiary ``, of higher prominence, `bg-surface-tertiary`
-- `` `transparent ``, with no background
+- **`` `default ``** - Standard surface appearance (`bg-surface`)
+- **`` `secondary ``** - Medium prominence (`bg-surface-secondary`)
+- **`` `tertiary ``** - Higher prominence (`bg-surface-tertiary`)
+- **`` `transparent ``** - No background
 
 <Example code={VariantsCode} title="surface_variants.mlx"><Variants.make client:visible /></Example>
 
 ### Reading the surface
 
-A part inside a surface reads its variant, a function it calls to follow it as
-it changes, or `None` on no surface:
+Child components can read `Surface.Context` to get the current variant, a
+function to call to follow it as it changes, or `None` on no surface:
 
 ```ocaml
 let surface = Surface.Context.use () in
@@ -89,10 +84,21 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.surface`, and its variants `.surface--default`, `.surface--secondary`,
-  `.surface--tertiary`, `.surface--transparent`
+#### Base Classes
+
+- `.surface` - Base surface container
+
+#### Variant Classes
+
+- `.surface--default` - Default surface variant (`bg-surface`)
+- `.surface--secondary` - Secondary surface variant (`bg-surface-secondary`)
+- `.surface--tertiary` - Tertiary surface variant (`bg-surface-tertiary`)
+- `.surface--transparent` - Transparent surface variant
 
 ## API Reference
 
@@ -102,7 +108,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `default \| `secondary \| `tertiary \| `transparent ] `` | `` `default `` | How prominent it is |
+| `variant` | `variant` | `` [ `default \| `secondary \| `tertiary \| `transparent ] `` | `` `default `` | The visual variant of the surface |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its content |
+| `children` | `children` | elements | | The surface content |
 | `SurfaceContext` | `Surface.Context` | `(unit -> variant) option` | | The variant a part inside it reads |

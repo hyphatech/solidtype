@@ -1,6 +1,6 @@
 ---
 title: Modal
-description: A dialog over the page, HeroUI's on Kobalte's.
+description: Dialog overlay for focused user interactions and important content.
 ---
 
 import Example from "@components/Example.astro";
@@ -34,11 +34,6 @@ import * as ExTailwind from "@islands/modal_tailwind.jsx";
 import ExTailwindCode from "@islands/modal_tailwind.mlx?raw";
 import * as Demo from "@islands/modal_demo.jsx";
 
-`Solidtype_heroui.Modal` is Kobalte's `Dialog`, with the classes HeroUI's own
-`modalVariants` gives. A `Button` inside it is its trigger, as in HeroUI;
-anything else is wrapped in `Modal.Trigger`. A `Button` with `` slot=`close ``
-inside the dialog closes it.
-
 Original HeroUI documentation: [Modal](https://heroui.com/en/docs/react/components/modal).
 
 ## Usage
@@ -66,9 +61,9 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
   <Modal.Backdrop>
     <Modal.Container>
       <Modal.Dialog>
-        <Modal.Close_trigger />
+        <Modal.Close_trigger /> (* Optional: close button *)
         <Modal.Header>
-          <Modal.Icon>...</Modal.Icon>
+          <Modal.Icon>...</Modal.Icon> (* Optional: icon *)
           <Modal.Heading>...</Modal.Heading>
         </Modal.Header>
         <Modal.Body>...</Modal.Body>
@@ -78,6 +73,10 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
   </Modal.Backdrop>
 </Modal>
 ```
+
+A `Button` inside `Modal` is its trigger; wrap anything else in
+`Modal.Trigger`. A `Button` given `` slot=`close `` inside the dialog closes
+it.
 
 ## Examples
 
@@ -95,7 +94,8 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
 
 ### Controlled State
 
-A signal is Solid's state: each half keeps the modal's open state in one, where HeroUI's uses `React.useState` and `useOverlayState`.
+Keep the open state in a signal, and give it to `is_open` and
+`on_open_change`.
 
 <Example code={ExControlledCode} title="modal_controlled.mlx"><ExControlled.make client:visible /></Example>
 
@@ -104,6 +104,9 @@ A signal is Solid's state: each half keeps the modal's open state in one, where 
 <Example code={ExFormCode} title="modal_form.mlx"><ExForm.make client:visible /></Example>
 
 ### Custom Trigger
+
+Use `Modal.Trigger` to create custom trigger elements beyond standard
+buttons.
 
 <Example code={ExCustomTriggerCode} title="modal_custom_trigger.mlx"><ExCustomTrigger.make client:visible /></Example>
 
@@ -117,11 +120,18 @@ A signal is Solid's state: each half keeps the modal's open state in one, where 
 
 ### Dismiss Behavior
 
+`is_dismissable` on `Modal.Backdrop` controls whether the modal can be
+dismissed by clicking the backdrop; it defaults to `true`.
+`is_keyboard_dismiss_disabled` set to `true` disables the Escape key, and
+users must use explicit close actions.
+
 <Example code={ExDismissCode} title="modal_dismiss.mlx"><ExDismiss.make client:visible /></Example>
 
 ### Close Methods
 
-The second half closes the modal from its own state, which the page keeps and the modal follows. A dialog's function child is given `close` too, as HeroUI's render prop is.
+Add `` slot=`close `` to any `Button` within the modal to close it when
+clicked. A dialog's function child is given `close`, to add custom logic
+before closing.
 
 <Example code={ExCloseMethodsCode} title="modal_close_methods.mlx"><ExCloseMethods.make client:visible /></Example>
 
@@ -131,10 +141,8 @@ The second half closes the modal from its own state, which the page keeps and th
 
 ### Custom Portal
 
-The backdrop's `portal_container`, React Aria's `UNSTABLE_portalContainer`,
-draws it inside an element of the page's instead of at the end of its body:
-here a box whose `transform` makes it a stacking context, which the backdrop
-fills. Any element a `ref` gives is taken.
+The backdrop's `portal_container` draws it inside an element of the page
+instead of at the end of its body. Any element a `ref` gives is taken.
 
 <Example code={ExCustomPortalCode} title="modal_custom_portal.mlx"><ExCustomPortal.make client:visible /></Example>
 
@@ -148,8 +156,9 @@ fills. Any element a `ref` gives is taken.
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every one, as with
-HeroUI in React:
+To customize the Modal component classes, you can use the
+`@layer components` directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -165,44 +174,50 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.modal__trigger`, `.modal__backdrop`, `.modal__container`,
-  `.modal__dialog`, `.modal__header`, `.modal__heading`, `.modal__icon`,
-  `.modal__body`, `.modal__footer`, `.modal__close-trigger`
-- `.modal__backdrop--opaque`, `.modal__backdrop--blur`,
-  `.modal__backdrop--transparent`
-- `.modal__container--scroll-outside`, `.modal__dialog--scroll-inside`,
-  `.modal__dialog--scroll-outside`, `.modal__body--scroll-inside`,
-  `.modal__body--scroll-outside`
+- `.modal__trigger` - Trigger element that opens the modal
+- `.modal__backdrop` - Overlay backdrop behind the modal
+- `.modal__container` - Positioning wrapper with placement support
+- `.modal__dialog` - Modal content container
+- `.modal__header` - Header section for titles and icons
+- `.modal__heading` - Heading text
+- `.modal__icon` - Icon beside the heading
+- `.modal__body` - Main content area
+- `.modal__footer` - Footer section for actions
+- `.modal__close-trigger` - Close button element
+- `.modal__backdrop--opaque` - Opaque colored backdrop (default)
+- `.modal__backdrop--blur` - Blurred backdrop with glass effect
+- `.modal__backdrop--transparent` - Transparent backdrop (no overlay)
+- `.modal__container--scroll-outside` - Enables scrolling the entire modal
+- `.modal__dialog--scroll-inside` - Constrains modal height for body
+  scrolling
+- `.modal__dialog--scroll-outside` - Lets the dialog grow with its content
+- `.modal__body--scroll-inside` - Makes only the body scrollable
+- `.modal__body--scroll-outside` - Allows full-page scrolling
 - `.modal__dialog--xs`, `--sm`, `--md`, `--lg`, `--cover`, `--full`, and
-  `.modal__container--full`
+  `.modal__container--full` - Sizes
+
+The backdrop and the container read `--visual-viewport-height`, which a
+phone's keyboard shortens.
 
 ### Interactive States
 
-- **Entering**: `[data-entering="true"]` on the backdrop and the container
-- **Exiting**: `[data-exiting="true"]` on the backdrop and the container
-- **Placement**: `[data-placement="auto"]`, and the others, on the container
-  and the dialog
-
-## How it is made
-
-Kobalte's dialog opens, closes, keeps the focus inside it, hides the page
-outside from a reader and keeps it from scrolling, as React Aria's modal
-does. The port draws HeroUI's backdrop and container around Kobalte's
-content, which is the dialog, a `<section>` as React Aria's is, and gives it
-the focus as it opens, where Kobalte gives it to the first button inside,
-and back to what had it as it closes. A press on a backdrop that stays leaves
-the focus nowhere, which Kobalte's trap does not catch: the dialog takes it
-back, as React Aria's does. The trigger shows pressed while the modal is
-open, as HeroUI's does.
-
-A dismiss button only a reader finds closes a dismissable modal, as React
-Aria puts one: at the dialog's start, where React Aria's is just before it,
-since Kobalte hides all else from a reader; and a `type="button"`, so a modal
-inside a form does not submit it. The backdrop and container read
-`--visual-viewport-height` from the window's visual viewport, which a phone's
-keyboard shortens, as React Aria gives them.
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` - Applied to
+  the close button
+- **Hover**: `:hover` or `[data-hovered="true"]` - Applied to the close
+  button on hover
+- **Active**: `:active` or `[data-pressed="true"]` - Applied to the close
+  button when pressed
+- **Entering**: `[data-entering="true"]` on the backdrop and the container -
+  Applied during modal opening animation
+- **Exiting**: `[data-exiting="true"]` on the backdrop and the container -
+  Applied during modal closing animation
+- **Placement**: `[data-placement="*"]` on the container and the dialog -
+  Applied based on modal position (auto, top, center, bottom)
 
 ## API Reference
 
@@ -212,30 +227,30 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
-| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
-| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
-| `children` | `children` | elements | | Its trigger and its backdrop |
+| `isOpen` | `is_open` | `bool` | | Controlled open state |
+| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open (uncontrolled) |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Open state change handler |
+| `children` | `children` | elements | | Trigger and container elements |
 
 ### Modal.Backdrop
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Its look |
-| `isDismissable` | `is_dismissable` | `bool` | `true` | Whether a press on it closes the modal |
-| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `false` | Whether Escape does not |
+| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Backdrop overlay style |
+| `isDismissable` | `is_dismissable` | `bool` | `true` | Close on backdrop click |
+| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `false` | Disable ESC key to close |
 | `isOpen` | `is_open` | `bool` | | With no `Modal` around it, whether it is open |
 | `onOpenChange` | `on_open_change` | `bool -> unit` | | With no `Modal` around it, told as it opens or closes |
-| `UNSTABLE_portalContainer` | `portal_container` | `_ Dom.element_like` | the page's body | The element it is drawn inside |
+| `UNSTABLE_portalContainer` | `portal_container` | `_ Dom.element_like` | the page's body | Custom portal container |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### Modal.Container
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `placement` | `placement` | `` `auto `` \| `` `center `` \| `` `top `` \| `` `bottom `` | `` `auto `` | Where the dialog is |
-| `scroll` | `scroll` | `` `inside `` \| `` `outside `` | `` `inside `` | What scrolls a long dialog |
-| `size` | `size` | `` `xs `` \| `` `sm `` \| `` `md `` \| `` `lg `` \| `` `cover `` \| `` `full `` | `` `md `` | Its width |
+| `placement` | `placement` | `` `auto `` \| `` `center `` \| `` `top `` \| `` `bottom `` | `` `auto `` | Modal position on screen |
+| `scroll` | `scroll` | `` `inside `` \| `` `outside `` | `` `inside `` | Scroll behavior |
+| `size` | `size` | `` `xs `` \| `` `sm `` \| `` `md `` \| `` `lg `` \| `` `cover `` \| `` `full `` | `` `md `` | Modal size variant |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### Modal.Dialog, Header, Body, Footer, Icon, Heading
@@ -243,7 +258,7 @@ Each prop beside the name HeroUI's React component gives it.
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
-| `children` | `children` | elements | What it holds |
+| `children` | `children` | elements | Content; a dialog's may be a function given `close` |
 
 ### Modal.Trigger
 
@@ -251,9 +266,23 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `aria-label` | `aria_label` | `string` | Its name, where its children give none |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | Custom trigger content |
 
 ### Modal.CloseTrigger
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
+| `children` | `children` | elements | Custom close button |
+
+## Accessibility
+
+Implements the [WAI-ARIA Dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/):
+
+- **Focus trap**: Focus locked within modal; the dialog takes it as the modal
+  opens, and it goes back to what had it as the modal closes
+- **Keyboard**: `ESC` closes (when enabled), `Tab` cycles elements
+- **Screen readers**: the dialog is named by its heading, and the page
+  outside is hidden from a reader; a dismiss button only a reader finds
+  closes a dismissable modal
+- **Scroll lock**: Body scroll disabled when open

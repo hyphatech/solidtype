@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: HeroUI's themes, colours and dark mode, as a port takes them.
+description: Customize HeroUI's design system with CSS variables and global styles.
 ---
 
 import Example from "@components/Example.astro";
@@ -9,11 +9,27 @@ import accent from "@islands/theming_accent.mlx?raw";
 import switchTheme from "@islands/theming_switch.mlx?raw";
 import { Code } from "@astrojs/starlight/components";
 
-A port's classes are HeroUI's own, from `@heroui/styles`, and so are its
-themes: CSS variables and Tailwind's theme, nothing in OCaml. Everything on
-HeroUI's [Theming](https://heroui.com/docs/react/getting-started/theming) and
-[Colors](https://heroui.com/docs/react/getting-started/colors) pages holds
-here as written; this page is what an application on solidtype adds to them.
+HeroUI uses CSS variables and [BEM](https://bem.info/en/methodology/) classes
+for theming. Customize everything from colors to component styles using
+standard CSS; nothing is set in OCaml.
+
+Original HeroUI documentation:
+[Theming](https://heroui.com/docs/react/getting-started/theming) and
+[Colors](https://heroui.com/docs/react/getting-started/colors).
+
+## How It Works
+
+HeroUI's theming system is built on top of
+[Tailwind CSS v4](https://tailwindcss.com/docs/theme)'s theme. When you import
+`@heroui/styles`, it uses Tailwind's built-in color palettes, maps them to
+semantic variables, automatically switches between light and dark themes, and
+uses CSS layers and the `@theme` directive for organization.
+
+**Naming pattern:**
+
+- Colors without a suffix are backgrounds (e.g., `--accent`)
+- Colors with `-foreground` are for text on that background (e.g.,
+  `--accent-foreground`)
 
 ## Setup
 
@@ -22,27 +38,33 @@ here as written; this page is what an application on solidtype adds to them.
 @import "tailwindcss";
 @import "@heroui/styles";
 
-/* Segment, TrendChip and TextShimmer, for which HeroUI ships no CSS, whose
-   stylesheets solidtype-heroui ships beside its JavaScript, under your
-   melange.emit target. */
+/* Segment, TrendChip and TextShimmer: solidtype-heroui ships their
+   stylesheets beside its JavaScript, under your melange.emit target. */
 @import "../_build/default/app/output/node_modules/solidtype-heroui/segment.css" layer(components);
 @import "../_build/default/app/output/node_modules/solidtype-heroui/trend-chip.css" layer(components);
 @import "../_build/default/app/output/node_modules/solidtype-heroui/text-shimmer.css" layer(components);
 
-/* Your own .mlx, where your classes are written whole. */
+/* Your own .mlx */
 @source "./src";
 ```
 
-Tailwind finds a class only where it is written whole, so a class is a
-literal in the `.mlx`, never a string built from pieces. Importing HeroUI's
-pieces one by one works as on HeroUI's page; this site imports only the
-ported components' stylesheets.
+Write each class whole, as a literal in the `.mlx`: Tailwind does not find a
+class built from pieces. HeroUI's selective imports work as on HeroUI's page.
 
-## Light and dark
+## Light and Dark
 
-HeroUI's light theme is the page's own, `:root`; its dark theme is under
-`.dark` or `data-theme="dark"`, on `<html>` or any element above a
-component. Nothing chooses it for you, so set it before the page paints:
+HeroUI's light theme is `:root`; its dark theme applies under `.dark` or
+`data-theme="dark"`, on `<html>` or any element above a component:
+
+```html
+<!-- Light theme -->
+<html class="light" data-theme="light">
+
+<!-- Dark theme -->
+<html class="dark" data-theme="dark">
+```
+
+Nothing chooses the theme for you, so set it before the page paints:
 
 ```html
 <script>
@@ -52,46 +74,118 @@ component. Nothing chooses it for you, so set it before the page paints:
 ```
 
 `Theme.use`, HeroUI's `useTheme`, keeps a visitor's choice and writes it on
-`<html>`: its class and `data-theme`. It is shown here, not run, since it would
-set this site's own theme:
+`<html>` as its class and `data-theme`. It is shown here, not run, since it
+would set this site's own theme:
 
 <Code code={switchTheme} lang="ocaml" title="theming_switch.mlx" />
 
-Its `resolved` is the system's while `"system"` is chosen, and `None` on the
-server. It reads the stored choice once the page is mounted, so a prerendered
-page hydrates. Call it once per application.
+- `theme` is what was chosen: `"system"`, `"light"`, `"dark"` or a theme of
+  your own
+- `resolved` is what `<html>` shows: the system's while `"system"` is chosen,
+  and `None` on the server
+- `set_theme` chooses a theme, keeps it, and writes it on `<html>`
 
-A theme of your own is a pair of blocks, `[data-theme="ocean"]` and
-`[data-theme="ocean-dark"]`, imported into the `theme` layer as HeroUI's page
-shows.
+The stored choice is read once the page is mounted, so a prerendered page
+hydrates. Call `Theme.use` once per application.
 
-## Colours
+## Override Colors
 
-Every colour is a variable, a background named for its role, `--accent`,
-and the text on it, `--accent-foreground`; Tailwind's `bg-accent` and
-`text-accent-foreground` read them. Set one on `:root`, or in a theme's
-block, to change it everywhere: HeroUI derives its hover and soft shades,
-`--accent-hover` and `--accent-soft-foreground`, from it there. Set on an
-element, it reaches only what reads it directly -- the primary button here,
-not the secondary's soft shade:
+Set a variable on `:root`, or in a theme's block, to change it everywhere:
+
+```css
+:root {
+  --accent: oklch(0.7 0.25 260);
+  --success: oklch(0.65 0.15 155);
+}
+```
+
+Its hover and soft shades, such as `--accent-hover` and
+`--accent-soft-foreground`, are derived from it there. Set on an element, a
+variable reaches only what reads it directly: the primary button here, not
+the secondary's soft shade.
 
 <Example code={accent} title="theming_accent.mlx"><Accent.make client:visible /></Example>
 
-A colour of your own is declared in both themes and given to Tailwind by
-`@theme inline`, as HeroUI's page shows; then `bg-info` is a class like any
-other.
+## Create Your Own Theme
 
-## Scrollbars, palette and motion
+A theme is a pair of blocks, `[data-theme="ocean"]` and
+`[data-theme="ocean-dark"]`, in a stylesheet imported into the `theme` layer,
+as HeroUI's page shows. Apply it on `<html>`:
 
-HeroUI's switches are data attributes, on `<html>` or on a part, which
-takes any `data_` attribute and passes it to its element:
+```html
+<html data-theme="ocean">
+```
 
-| Attribute | Does |
-|---|---|
-| `data-scrollbar="default"`, `"none"`, `"thin"` | the browser's scrollbars, none, or HeroUI's |
-| `data-vibrant-palette="true"` | soft colours closer to the raw colour |
-| `data-reduce-motion="true"` | no transitions, as `prefers-reduced-motion` gives |
+## Customize Components
+
+Override any component using its BEM classes:
+
+```css
+@layer components {
+  .button {
+    @apply font-semibold tracking-wide;
+  }
+
+  .accordion__trigger {
+    @apply text-lg font-bold;
+  }
+}
+```
+
+Each component's page lists its classes under Styling Reference.
+
+## Adding Custom Colors
+
+Declare your own semantic color in both light and dark themes, and make it
+available to Tailwind:
+
+```css
+:root,
+[data-theme="light"] {
+  --info: oklch(0.6 0.15 210);
+  --info-foreground: oklch(0.98 0 0);
+}
+
+.dark,
+[data-theme="dark"] {
+  --info: oklch(0.7 0.12 210);
+  --info-foreground: oklch(0.15 0 0);
+}
+
+@theme inline {
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+}
+```
+
+Now `bg-info` and `text-info-foreground` are classes like any other.
+
+## Scrollbars
+
+HeroUI applies a shared scrollbar style to component scroll areas. Set
+`data-scrollbar` on `<html>`, a component, or a scroll slot:
+
+| Mode | `data-scrollbar` | Behavior |
+|---|---|---|
+| HeroUI thin | *(unset)* or `thin` | Thin thumb from theme tokens |
+| OS / browser | `default` | Native scrollbars |
+| Hidden | `none` | No visible scrollbar |
+
+A component takes it as `data_scrollbar`, and passes it to its element:
 
 ```ocaml
 <List_box data_scrollbar="none" ...>
 ```
+
+## Vibrant Palette
+
+By default, HeroUI uses accessible soft foreground colors that mix the
+semantic color with the foreground for better contrast. Add
+`data-vibrant-palette="true"` to your root element for more saturated soft
+foreground colors, closer to the raw color. They may not meet WCAG contrast
+guidelines for some color combinations.
+
+## Reduced Motion
+
+`data-reduce-motion="true"` turns off transitions, as
+`prefers-reduced-motion` does.

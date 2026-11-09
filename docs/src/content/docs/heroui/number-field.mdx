@@ -1,6 +1,6 @@
 ---
 title: NumberField
-description: A number, typed or stepped by its buttons, the arrow keys and the wheel.
+description: Number input fields with increment/decrement buttons, validation, and internationalized formatting.
 ---
 
 import Example from "@components/Example.astro";
@@ -38,21 +38,6 @@ import * as ExTailwind from "@islands/number_field_tailwind.jsx";
 import ExTailwindCode from "@islands/number_field_tailwind.mlx?raw";
 import * as Demo from "@islands/number_field_demo.jsx";
 
-`Solidtype_heroui.Number_field` is Kobalte's `NumberField.Root`, with the
-classes HeroUI's own `numberFieldVariants` gives, and the parts inside it as
-Kobalte's. Its value is a number, controlled or its own, kept on its step's
-grid within its range as HeroUI's field keeps it: Kobalte snaps nothing, so
-the field snaps each value, a value halfway to the step away from the
-minimum, written with its step's decimals, so a tenth added to 0.2 is 0.3;
-and it disables a button its step would not move. Its
-input is Kobalte's spinbutton.
-
-The wheel steps it while its input has the focus, as React Aria's: turned
-down it steps up, turned up it steps down, and a turn mostly sideways, one with
-Control held, which zooms the page, or one over a field read-only or
-`is_wheel_disabled` steps nothing. Kobalte's wheel turns the other way and
-steps on each, so the field's is `solidtype-headless`'s.
-
 Original HeroUI documentation: [NumberField](https://heroui.com/en/docs/react/components/number-field).
 
 ## Usage
@@ -86,13 +71,28 @@ marked row is one they disagree on.
 </Number_field>
 ```
 
+`Number_field` allows users to enter numeric values with optional
+increment/decrement buttons. It supports internationalized formatting,
+validation, and keyboard navigation.
+
 ## Examples
 
 ### Variants
 
+The NumberField component supports two visual variants:
+
+- **`` `primary ``** (default) - Standard styling with shadow, suitable for
+  most use cases
+- **`` `secondary ``** - Lower emphasis variant without shadow, suitable for
+  use in Surface components
+
 <Example code={ExVariantsCode} title="number_field_variants.mlx"><ExVariants.make client:visible /></Example>
 
 ### In Surface
+
+When used inside a [Surface](/solidtype/heroui/surface/) component, use
+`` variant=`secondary `` to apply the lower emphasis variant suitable for
+surface backgrounds.
 
 <Example code={ExSurfaceCode} title="number_field_surface.mlx"><ExSurface.make client:visible /></Example>
 
@@ -114,37 +114,54 @@ marked row is one they disagree on.
 
 ### Validation
 
+Use `is_invalid` together with `Field_error` to surface validation messages.
+
 <Example code={ExValidationCode} title="number_field_validation.mlx"><ExValidation.make client:visible /></Example>
 
 ### Controlled
+
+Control the value to synchronize with other components or perform custom
+formatting.
 
 <Example code={ExControlledCode} title="number_field_controlled.mlx"><ExControlled.make client:visible /></Example>
 
 ### Step Values
 
+Configure increment/decrement step values for precise control. A value is
+kept on its step's grid within its range, with its step's decimals, so a
+tenth added to 0.2 is 0.3; a button its step would not move is disabled.
+
 <Example code={ExStepCode} title="number_field_step.mlx"><ExStep.make client:visible /></Example>
 
 ### Format Options
 
-`format_options` is Kobalte's own: the input shows and reads its value as a currency, a percent or a unit, in the reader's locale, and tells a reader the value as it shows it.
+Format numbers as currency, percentages, decimals, or units with
+internationalization support: the input shows and reads its value in the
+reader's locale, and tells a reader the value as it shows it.
 
 <Example code={ExFormatCode} title="number_field_format.mlx"><ExFormat.make client:visible /></Example>
 
 ### Form Example
 
-HeroUI's button takes `isPending` while the order is sent; the port's button has no pending state yet, so this one shows the spinner alone.
+Complete form integration with validation and submission handling.
 
 <Example code={ExFormCode} title="number_field_form.mlx"><ExForm.make client:visible /></Example>
 
 ### With Validation
 
+Implement custom validation logic with controlled values.
+
 <Example code={ExWithValidationCode} title="number_field_with_validation.mlx"><ExWithValidation.make client:visible /></Example>
 
 ### Custom Icons
 
+Customize the increment and decrement button icons.
+
 <Example code={ExCustomIconsCode} title="number_field_custom_icons.mlx"><ExCustomIcons.make client:visible /></Example>
 
 ### With Chevrons
+
+Use chevron icons in a vertical layout for a different visual style.
 
 <Example code={ExChevronsCode} title="number_field_chevrons.mlx"><ExChevrons.make client:visible /></Example>
 
@@ -162,21 +179,41 @@ HeroUI's button takes `isPending` while the order is sent; the port's button has
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.number-field`, and `.number-field--primary`, `.number-field--secondary`,
-  `.number-field--full-width`
-- `.number-field__group`, and `.number-field__group--full-width`
-- `.number-field__input`
-- `.number-field__increment-button`, `.number-field__decrement-button`
+- `.number-field` - Root container with minimal styling (`flex flex-col
+  gap-1`)
+- `.number-field__group` - Container for input and buttons with border and
+  background styling
+- `.number-field__input` - The numeric input field
+- `.number-field__increment-button` - Button to increment the value
+- `.number-field__decrement-button` - Button to decrement the value
+- `.number-field--primary` - Primary variant with shadow (default)
+- `.number-field--secondary` - Secondary variant without shadow, suitable
+  for use in surfaces
+- `.number-field--full-width`, `.number-field__group--full-width` - Full
+  width modifiers
+
+Child components ([Label](/solidtype/heroui/label/),
+[Description](/solidtype/heroui/description/),
+[FieldError](/solidtype/heroui/field-error/)) have their own CSS classes and
+styling. See their respective documentation for customization options.
 
 ### Interactive States
 
+NumberField automatically manages these data attributes based on its state:
+
+- **Invalid**: `[data-invalid="true"]` - Automatically hides the description
+  slot when invalid
+- **Disabled**: `[data-disabled="true"]` - Applied when `is_disabled` is true
+- **Focus within**: `[data-focus-within="true"]` on the group - Applied when
+  the input or buttons are focused
+- **Focus visible**: `[data-focus-visible="true"]` on the input and buttons -
+  Applied when focus is visible (keyboard navigation)
 - **Hover**: `[data-hovered="true"]` on the group, the input and the buttons
-- **Focus within**: `[data-focus-within="true"]` on the group
-- **Focus visible**: `[data-focus-visible="true"]` on the input and buttons
-- **Disabled**: `[data-disabled="true"]`
-- **Invalid**: `[data-invalid="true"]`
 
 ## API Reference
 
@@ -186,27 +223,36 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
-| `fullWidth` | `full_width` | `bool` | `false` | Whether it takes its container's width |
-| `value` | `value` | `float` | | Its value, controlled |
-| `defaultValue` | `default_value` | `float` | | Its value at first, kept by itself |
-| `onChange` | `on_change` | `float -> unit` | | Told each change of its value |
-| `minValue` | `min_value` | `float` | | The least value |
-| `maxValue` | `max_value` | `float` | | The greatest value |
-| `step` | `step` | `float` | `1.` | How far a button or an arrow key steps |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual variant of the component. `` `primary `` is the default style with shadow. `` `secondary `` is a lower emphasis variant without shadow, suitable for use in surfaces |
+| `fullWidth` | `full_width` | `bool` | `false` | Whether the number field should take full width of its container |
+| `value` | `value` | `float` | | Current value (controlled) |
+| `defaultValue` | `default_value` | `float` | | Default value (uncontrolled) |
+| `onChange` | `on_change` | `float -> unit` | | Handler called when the value changes |
+| `minValue` | `min_value` | `float` | | Minimum allowed value |
+| `maxValue` | `max_value` | `float` | | Maximum allowed value |
+| `step` | `step` | `float` | `1.` | Step value for increment/decrement operations |
 | `isDisabled` | `is_disabled` | `bool` | | Whether it is disabled, else as its fieldset is |
-| `isInvalid` | `is_invalid` | `bool` | `false` | Whether it is invalid, its error shown |
-| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether its value is kept |
+| `isInvalid` | `is_invalid` | `bool` | `false` | Whether the value is invalid |
+| `isReadOnly` | `is_read_only` | `bool` | `false` | Whether the input can be selected but not changed |
 | `isWheelDisabled` | `is_wheel_disabled` | `bool` | `false` | Whether the wheel leaves it alone |
-| `isRequired` | `is_required` | `bool` | `false` | Whether it is required |
-| `name` | `name` | `string` | | Its name in a form |
-| `aria-label` | `aria_label` | `string` | | Its name where no label names it |
+| `isRequired` | `is_required` | `bool` | `false` | Whether user input is required before form submission |
+| `name` | `name` | `string` | | Name of the input element, for HTML form submission |
+| `aria-label` | `aria_label` | `string` | | Accessibility label when no visible label is present |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `onBlur` | `on_blur` | `Dom.focusEvent -> unit` | | Called once focus leaves it for an element outside it |
-| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | | How its value is shown and read |
+| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | | Options for formatting numbers (currency, percent, decimal, unit) |
 | `validate` | — | | | A field validates nothing itself: its `is_invalid` and `Field_error` come from the application's state |
 
 ### NumberField.Group, Input, IncrementButton, DecrementButton
 
 Each takes `class_`, added after HeroUI's class; the input a `placeholder`;
-a button `children`, drawn in place of HeroUI's plus or minus.
+a button `children`, the icon or content for the button, defaulting to a
+plus or minus icon.
+
+## Note
+
+- The arrow keys step the value, as the buttons do
+- The wheel steps it while its input has the focus: turned down it steps up,
+  turned up it steps down
+- A wheel turn mostly sideways, one with Control held, or one over a field
+  read-only or `is_wheel_disabled` steps nothing

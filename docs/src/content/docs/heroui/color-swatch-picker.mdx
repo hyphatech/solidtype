@@ -1,6 +1,6 @@
 ---
 title: ColorSwatchPicker
-description: A list of colour swatches, one chosen from a palette.
+description: A list of color swatches that allows users to select a color from a predefined palette.
 ---
 
 import Example from "@components/Example.astro";
@@ -24,25 +24,10 @@ import * as ExCustomStyles from "@islands/color_swatch_picker_custom_styles.jsx"
 import ExCustomStylesCode from "@islands/color_swatch_picker_custom_styles.mlx?raw";
 import * as Demo from "@islands/color_swatch_picker_demo.jsx";
 
-`Solidtype_heroui.Color_swatch_picker` is a list of colour swatches one is
-chosen from, with the classes HeroUI's own `colorSwatchPickerVariants` gives.
-Kobalte has no such component, so it is made headless first,
-[`Solidtype_headless.Color_swatch_picker`](/solidtype/kobalte/headless/), of
-Kobalte's list hooks as Kobalte makes its own lists: a `listbox` of
-`option`s, each named by the swatch inside it.
-
-Tab reaches the chosen swatch, or the first. In the grid, the default, Left
-and Right move to the swatch before and after, as the page's direction reads
-them, and Up and Down to the one above and below in the same column; in a
-stack, Up and Down move to the one before and after. Home and End reach the
-ends, Page Up and Page Down too unless the list scrolls, and typing the
-start of a colour's name reaches the swatch of that name. A disabled swatch
-is passed over. A press, Space or Enter chooses a swatch.
-
-Its colours are Kobalte's `Types.Color`, read from any CSS colour by
-`Solidtype_kobalte.Colors.parse_color "#F43F5E"`, as HeroUI's are read by
-`parseColor`. A value is its swatch's when the two are one colour, however
-each is written: `rgb(139, 92, 246)` chooses `#8B5CF6`.
+Its colours are `Types.Color.t`s, read from any CSS colour by
+`Solidtype_kobalte.Colors.parse_color`. A value is its swatch's when the two
+are one colour, however each is written: `rgb(139, 92, 246)` chooses
+`#8B5CF6`.
 
 Original HeroUI documentation: [ColorSwatchPicker](https://heroui.com/en/docs/react/components/color-swatch-picker).
 
@@ -89,9 +74,7 @@ pickers: a marked row is one they disagree on.
 
 ### Stack Layout
 
-A stack is a list the keys walk by Up and Down. HeroUI's own keeps `layout`
-for its look, so its swatches stacked are still walked as a grid; the port's
-stack is one.
+A stack is a list the keys walk by Up and Down.
 
 <Example code={ExStackCode} title="color_swatch_picker_stack.mlx"><ExStack.make client:visible /></Example>
 
@@ -107,8 +90,7 @@ stack is one.
 
 `Color_swatch_picker.Indicator` takes its children in place of the
 checkmark. Inside an item, `Solidtype_headless.Color_swatch_picker.use_item_context`
-reads its colour and whether it is chosen or disabled, where HeroUI's
-indicator takes a function of them.
+reads its colour and whether it is chosen or disabled.
 
 <Example code={ExCustomIndicatorCode} title="color_swatch_picker_custom_indicator.mlx"><ExCustomIndicator.make client:visible /></Example>
 
@@ -129,21 +111,37 @@ after its colour.
 
 ### CSS Classes
 
-- `.color-swatch-picker`, and its parts': `.color-swatch-picker__item`,
-  `.color-swatch-picker__swatch`, `.color-swatch-picker__indicator`
-- its sizes, `.color-swatch-picker--xs`, `--sm`, `--md`, `--lg` and `--xl`
-- its variants, `.color-swatch-picker--circle` and `--square`
-- its layouts, `.color-swatch-picker--grid` and `--stack`
+- `.color-swatch-picker` - Base container (flex layout)
+- `.color-swatch-picker__item` - Individual swatch item wrapper
+- `.color-swatch-picker__swatch` - The color swatch visual element
+- `.color-swatch-picker__indicator` - The checkmark over a chosen swatch
+- `.color-swatch-picker--xs` - Extra small (16px)
+- `.color-swatch-picker--sm` - Small (24px)
+- `.color-swatch-picker--md` - Medium (32px, default)
+- `.color-swatch-picker--lg` - Large (36px)
+- `.color-swatch-picker--xl` - Extra large (40px)
+- `.color-swatch-picker--circle` - Circle shape (default)
+- `.color-swatch-picker--square` - Square shape with rounded corners
+- `.color-swatch-picker--grid` - Horizontal wrapping layout (default)
+- `.color-swatch-picker--stack` - Vertical stacked layout
 
 ### Interactive States
 
-- the list: `[data-layout]`, `grid` or `stack`
-- an item: `[data-hovered="true"]`, `[data-pressed="true"]`,
-  `[data-focused="true"]`, `[data-focus-visible="true"]`,
-  `[data-selected="true"]`, `[data-disabled="true"]`, and its colour,
-  `--color-swatch-current`
-- the indicator: `[data-light-color="true"]` over a light colour, which
-  draws its checkmark black
+Each item:
+
+- **Hover**: `[data-hovered="true"]` - Scale up to 1.1 (only when not
+  selected)
+- **Focus**: `[data-focus-visible="true"]` - Focus ring, and
+  `[data-focused="true"]`
+- **Pressed**: `[data-pressed="true"]`
+- **Selected**: `[data-selected="true"]` - Inner border with same color as
+  swatch
+- **Disabled**: `[data-disabled="true"]` - Reduced opacity
+
+An item's colour is `--color-swatch-current`. The list declares
+`[data-layout]`, `grid` or `stack`. The indicator declares
+`[data-light-color="true"]` over a light colour, which draws its checkmark
+black.
 
 ## API Reference
 
@@ -153,12 +151,12 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Types.Color.t` | | The colour chosen, controlled |
-| `defaultValue` | `default_value` | `Types.Color.t` | | The colour chosen at first, kept by itself |
-| `onChange` | `on_change` | `Types.Color.t -> unit` | | Called with the colour of each swatch chosen |
-| `size` | `size` | `` [ `xs \| `sm \| `md \| `lg \| `xl ] `` | `` `md `` | Its swatches' size |
-| `variant` | `variant` | `` [ `circle \| `square ] `` | `` `circle `` | Its swatches' shape |
-| `layout` | `layout` | `` [ `grid \| `stack ] `` | `` `grid `` | Wrapped in rows, or one above another |
+| `value` | `value` | `Types.Color.t` | | The current selected color (controlled) |
+| `defaultValue` | `default_value` | `Types.Color.t` | | The default selected color (uncontrolled) |
+| `onChange` | `on_change` | `Types.Color.t -> unit` | | Handler called when selection changes |
+| `size` | `size` | `` [ `xs \| `sm \| `md \| `lg \| `xl ] `` | `` `md `` | Size of the swatches |
+| `variant` | `variant` | `` [ `circle \| `square ] `` | `` `circle `` | Shape of the swatches |
+| `layout` | `layout` | `` [ `grid \| `stack ] `` | `` `grid `` | Layout direction: wrapped in rows, or one above another |
 | `aria-label` | `aria_label` | `string` | "Color swatches" | Its name |
 | `aria-labelledby` | `aria_labelledby` | `string` | | The id of what names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
@@ -168,8 +166,8 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `color` | `color` | `Types.Color.t` | required | The colour it offers |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it can be chosen |
+| `color` | `color` | `Types.Color.t` | required | The color of the swatch |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the item is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
 | `style` | `style` | `string` | | Added after its colour |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
@@ -187,3 +185,13 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|---|
 | `children` | `children` | nodes | a checkmark | What it shows once its item is chosen |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
+
+## Accessibility
+
+- Tab reaches the chosen swatch, or the first.
+- In a grid, Left and Right move to the swatch before and after, as the page's
+  direction reads them, and Up and Down to the one above and below; in a
+  stack, Up and Down move to the one before and after.
+- Home and End reach the ends, Page Up and Page Down too unless the list
+  scrolls, and typing the start of a colour's name reaches its swatch.
+- A disabled swatch is passed over. A press, Space or Enter chooses a swatch.

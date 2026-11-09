@@ -1,6 +1,6 @@
 ---
 title: Tabs
-description: Sections of content, one shown at a time, chosen from a list of tabs.
+description: Tabs organize content into multiple sections and allow users to navigate between them.
 ---
 
 import Example from "@components/Example.astro";
@@ -26,16 +26,11 @@ import * as Links from "@islands/tabs_links.jsx";
 import LinksCode from "@islands/tabs_links.mlx?raw";
 import * as Demo from "@islands/tabs_demo.jsx";
 
-`Solidtype_heroui.Tabs` is Kobalte's tabs with the classes HeroUI's own
-`tabsVariants` gives: a list of tabs, and a panel for each, shown while its
-tab, of the same `id`, is selected. The arrows of its orientation move
-between the tabs, round from the last to the first, and Home and End to
-either end, skipping a disabled tab; focus selects the tab it reaches, or
-Enter and Space do with `` keyboard_activation=`manual ``.
-
-The selected tab's indicator slides from the tab selected before, as HeroUI's
-styles animate it. A tab and its panel are named by their `id`, which each
-takes; HeroUI's take one too, without which a panel has no tab.
+A panel is shown while the tab of the same `id` is selected; each requires
+its `id`. The arrows of its orientation move between the tabs, round from the
+last to the first, and Home and End to either end, skipping a disabled tab;
+focus selects the tab it reaches, or Enter and Space do with
+`` keyboard_activation=`manual ``.
 
 Original HeroUI documentation: [Tabs](https://heroui.com/en/docs/react/components/tabs).
 
@@ -68,15 +63,17 @@ which no style reads and the port does not.
 <Tabs>
   <Tabs.List_container>
     <Tabs.List aria_label="Options">
-      <Tabs.Tab id="...">
-        <Tabs.Separator /> (* optional *)
+      <Tabs.Tab id="one">
+        <Tabs.Separator />
         <Tabs.Indicator />
       </Tabs.Tab>
     </Tabs.List>
   </Tabs.List_container>
-  <Tabs.Panel id="..." />
+  <Tabs.Panel id="one" />
 </Tabs>
 ```
+
+`Tabs.Separator` is optional.
 
 ## Examples
 
@@ -86,9 +83,10 @@ which no style reads and the port does not.
 
 ### Overflow
 
-When the tabs are more than their container holds, `Tabs.List_container`
-scrolls them, fades the edge they are hidden past, and shows a chevron at that
-end which scrolls on by most of a view, in either orientation.
+When the tab list exceeds the available space, `Tabs.List_container`
+automatically renders scroll chevrons and fading edges so users can navigate
+the hidden tabs. This works the same way for both horizontal and vertical
+orientations.
 
 <Example code={OverflowCode} title="tabs_overflow.mlx"><Overflow.make client:visible /></Example>
 
@@ -100,8 +98,8 @@ A tab is disabled while it or the tabs are; the arrows pass over it.
 
 ### With Separator
 
-`Tabs.Separator` inside each tab but the first draws a line between tabs,
-hidden beside the selected one.
+Add `<Tabs.Separator />` inside each `<Tabs.Tab>` (except the first) to
+display separator lines between tabs, hidden beside the selected one.
 
 <Example code={WithSeparatorCode} title="tabs_separator.mlx"><WithSeparator.make client:visible /></Example>
 
@@ -115,26 +113,25 @@ hidden beside the selected one.
 
 ### Alignment
 
-A tab's content is centred, or set to the start or the end by `align`.
+Tab content is centered by default. Use `align` to align it to the
+`` `start `` or `` `end_ `` instead, which is especially useful for vertical,
+sidebar-style navigation. Individual tabs can still be overridden with
+`class_` on `Tabs.Tab`.
 
 <Example code={AlignmentCode} title="tabs_alignment.mlx"><Alignment.make client:visible /></Example>
 
 ### Links
 
-A tab given an `href` is a link, an `<a>`: a press or Enter follows it, as
-any link is followed, and never selects it, so the tab selected is the one
-`selected_key` names, the route an application's router says is open. Its
-arrows still move focus along the tabs. A disabled tab has no `href`, so it
-is never followed. HeroUI's Render Function example makes its tabs links
-through Next's `Link`; here each is a link to a hash, which the example's
-selection follows.
+A tab given an `href` is a link: a press or Enter follows it, and never
+selects it, so the tab selected is the one `selected_key` names, the route an
+application's router says is open. The arrows still move focus along the
+tabs. A disabled tab is never followed. Here each tab links to a hash, which
+the example's selection follows.
 
 <Example code={LinksCode} title="tabs_links.mlx"><Links.make client:visible /></Example>
 
-React Aria calls `onSelectionChange` with the tab still selected each time a
-link tab is pressed, and selects a link tab that End or Home reaches once a
-link has been followed by Enter; the port tells nothing and selects nothing,
-whichever key or press reaches a link.
+No key or press that reaches a link tab selects it or calls
+`on_selection_change`.
 
 ## Customization
 
@@ -163,24 +160,52 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.tabs`, the root, and `.tabs--secondary`, `.tabs--align-start` and
-  `.tabs--align-end`
-- `.tabs__list-container`, and inside it `.tabs__list-container__scroller`,
-  `.tabs__list-container__scroll-prev` and `.tabs__list-container__scroll-next`
-- `.tabs__list`, `.tabs__tab`, `.tabs__indicator`, `.tabs__separator`
-- `.tabs__panel`
+#### Base Classes
+
+- `.tabs` - Base tabs container
+- `.tabs__list-container` - Tab list container wrapper
+- `.tabs__list-container__scroller` - Scrollable wrapper around the tab list
+  (handles overflow and fading edges)
+- `.tabs__list-container__scroll-prev` - Scroll chevron button for the
+  previous (left / up) direction
+- `.tabs__list-container__scroll-next` - Scroll chevron button for the next
+  (right / down) direction
+- `.tabs__list` - Tab list container
+- `.tabs__tab` - Individual tab button
+- `.tabs__separator` - Separator between tabs
+- `.tabs__panel` - Tab panel content
+- `.tabs__indicator` - Tab indicator
+
+#### Orientation Attributes
+
+- `.tabs[data-orientation="horizontal"]` - Horizontal tab layout (default)
+- `.tabs[data-orientation="vertical"]` - Vertical tab layout
+
+The list and the panel carry `[data-orientation]` too.
+
+#### Variant Classes
+
+- `.tabs--secondary` - Secondary variant with underline indicator
+
+#### Alignment Classes
+
+- `.tabs--align-start` - Aligns tab content to the start
+- `.tabs--align-end` - Aligns tab content to the end
 
 ### Interactive States
 
-- **Selected**: `[aria-selected="true"]` and `[data-selected="true"]` on the
-  tab
-- **Hover**: `:hover` or `[data-hovered="true"]` on the tab
-- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the tab
-- **Disabled**: `[aria-disabled="true"]` and `[data-disabled="true"]` on the
-  tab
-- **Orientation**: `[data-orientation]` on the root, the list and the panel
+The component supports both CSS pseudo-classes and data attributes, on the
+tab:
+
+- **Selected**: `[aria-selected="true"]` or `[data-selected="true"]`
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `[aria-disabled="true"]` or `[data-disabled="true"]`
 
 ## API Reference
 
@@ -190,12 +215,12 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `selectedKey` | `selected_key` | `string` | | The selected tab's id, while given |
-| `defaultSelectedKey` | `default_selected_key` | `string` | the first not disabled | The one selected at first |
-| `onSelectionChange` | `on_selection_change` | `string -> unit` | | Called with the id of the tab selected |
-| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | How the tabs lie |
-| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Its look |
-| `align` | `align` | `` [ `start \| `center \| `end_ ] `` | `` `center `` | Where a tab's content sits |
+| `selectedKey` | `selected_key` | `string` | | Controlled selected tab key |
+| `defaultSelectedKey` | `default_selected_key` | `string` | the first not disabled | Default selected tab key |
+| `onSelectionChange` | `on_selection_change` | `string -> unit` | | Selection change handler |
+| `orientation` | `orientation` | `` [ `horizontal \| `vertical ] `` | `` `horizontal `` | Tab layout orientation |
+| `variant` | `variant` | `` [ `primary \| `secondary ] `` | `` `primary `` | Visual style variant. Primary uses a filled indicator, secondary uses an underline indicator |
+| `align` | `align` | `` [ `start \| `center \| `end_ ] `` | `` `center `` | Alignment of the content inside each tab |
 | `keyboardActivation` | `keyboard_activation` | `` [ `automatic \| `manual ] `` | `` `automatic `` | Whether focus selects, or Enter and Space do |
 | `isDisabled` | `is_disabled` | `bool` | `false` | Whether every tab is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
@@ -205,15 +230,15 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
-| `aria-label` | `aria_label` | `string` | What the tabs are, for a reader |
+| `aria-label` | `aria_label` | `string` | Accessibility label for tab list |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 
 ### Tabs.Tab
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `id` | `id` | `string` | | Its key, and its panel's; required |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
+| `id` | `id` | `string` | | Unique tab identifier, its panel's too; required |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether tab is disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `href` | `href` | `string` | | Where it links: it is an `<a>`, followed and never selected by a press or a key |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
@@ -222,7 +247,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
-| `id` | `id` | `string` | Its tab's id; required |
+| `id` | `id` | `string` | Panel identifier matching tab id; required |
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 
 ### Tabs.List_container, Tabs.Indicator, Tabs.Separator

@@ -1,6 +1,6 @@
 ---
 title: Typography
-description: Text in HeroUI's type scale, each type the element it means.
+description: A semantic typography primitive for headings, body copy, and inline code.
 ---
 
 import Example from "@components/Example.astro";
@@ -17,12 +17,6 @@ import ElementTypeCode from "@islands/typography_element_type.mlx?raw";
 import * as Tailwind from "@islands/typography_tailwind.jsx";
 import TailwindCode from "@islands/typography_tailwind.mlx?raw";
 import * as Demo from "@islands/typography_demo.jsx";
-
-`Solidtype_heroui.Typography` is text with the classes HeroUI's own
-`typographyVariants` gives, each type the element it means -- a heading's
-`<h1>` to `<h6>`, body text a `<p>`, code a `<code>` -- as React Aria's `Text`
-renders it under HeroUI's. Text has no behaviour, so no Kobalte component
-underlies it.
 
 Original HeroUI documentation: [Typography](https://heroui.com/en/docs/react/components/typography).
 
@@ -42,6 +36,8 @@ a marked row is one they disagree on.
 
 ## Anatomy
 
+`Typography` maps visual `type_` values to semantic elements by default.
+
 ```ocaml
 <Typography type_=`h1>"Heading"</Typography>
 ```
@@ -54,11 +50,12 @@ a marked row is one they disagree on.
 
 ### Primitives
 
-- `Typography.Heading`'s `level`, 1 to 6, is `` type_=`h1 `` to `` `h6 ``.
-- `Typography.Paragraph`'s `size`, `` `base ``, `` `sm `` or `` `xs ``, is
-  body text's.
-- `Typography.Code` is inline code.
-- `Typography.Prose` styles the markup it holds.
+- `Typography.Heading` maps `level=1` to `level=6` to `` type_=`h1 `` through
+  `` type_=`h6 ``.
+- `Typography.Paragraph` maps `` size=`base ``, `` `sm `` or `` `xs `` to body
+  text styles.
+- `Typography.Code` maps to the inline code style.
+- `Typography.Prose` styles rich content passed as regular HTML children.
 
 <Example code={PrimitivesCode} title="typography_primitives.mlx"><Primitives.make client:visible /></Example>
 
@@ -68,8 +65,8 @@ a marked row is one they disagree on.
 
 ### Element Type
 
-`element_type` renders another element in the type's style, as React's
-`render` swaps it.
+Use `element_type` when you need to customize the rendered element; it keeps
+the type's style.
 
 <Example code={ElementTypeCode} title="typography_element_type.mlx"><ElementType.make client:visible /></Example>
 
@@ -83,8 +80,9 @@ a marked row is one they disagree on.
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every type, as with
-HeroUI in React:
+To customize the Typography component classes, you can use the
+`@layer components` directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -100,11 +98,24 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.typography`, `.typography-prose`
-- `.typography--h1` to `.typography--h6`, `.typography--body`,
-  `.typography--body-sm`, `.typography--body-xs`, `.typography--code`
+#### Base Classes
+
+- `.typography` - Base typography primitive
+- `.typography-prose` - Rich prose container
+
+#### Type Classes
+
+- `.typography--h1` through `.typography--h6`
+- `.typography--body`, `.typography--body-sm`, `.typography--body-xs`
+- `.typography--code`
+
+#### Modifier Classes
+
 - `.typography--align-start`, `.typography--align-center`,
   `.typography--align-end`, `.typography--align-justify`
 - `.typography--color-default`, `.typography--color-muted`
@@ -120,15 +131,15 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `type` | `type_` | `` [ `body \| `body_sm \| `body_xs \| `code \| `h1 \| ... \| `h6 ] `` | `` `body `` | Its style, and the element it means |
-| `align` | `align` | `` [ `start \| `center \| `end_ \| `justify ] `` | `` `start `` | How it is aligned |
-| `color` | `color` | `` [ `default \| `muted ] `` | `` `default `` | Its color |
-| `weight` | `weight` | `` [ `normal \| `medium \| `semibold \| `bold ] `` | | Its weight, over its type's |
-| `truncate` | `truncate` | `bool` | | Whether it is one line, cut with an ellipsis |
-| `render` | `element_type` | `string` | | The element it renders, over its type's |
-| `render` | `as_` | a function of its props | | Draws another element in its place |
+| `type` | `type_` | `` [ `body \| `body_sm \| `body_xs \| `code \| `h1 \| ... \| `h6 ] `` | `` `body `` | Semantic typography style |
+| `align` | `align` | `` [ `start \| `center \| `end_ \| `justify ] `` | `` `start `` | Text alignment |
+| `color` | `color` | `` [ `default \| `muted ] `` | `` `default `` | Text color |
+| `weight` | `weight` | `` [ `normal \| `medium \| `semibold \| `bold ] `` | | Font weight override |
+| `truncate` | `truncate` | `bool` | | Truncates the text to one line with ellipsis |
+| `render` | `element_type` | `string` | | The element it renders, in place of its type's |
+| `render` | `as_` | a function of its props | | Custom render function |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its text |
+| `children` | `children` | elements | | Text content |
 
 ### Typography.Heading, Paragraph, Code
 

@@ -1,6 +1,6 @@
 ---
 title: Composition
-description: A port's parts, and HeroUI's look on elements no port renders.
+description: Build flexible UI with component composition patterns.
 ---
 
 import Example from "@components/Example.astro";
@@ -13,14 +13,18 @@ import state from "@islands/composition_state.mlx?raw";
 import * as Motion from "@islands/composition_motion.jsx";
 import motion from "@islands/composition_motion.mlx?raw";
 
-What HeroUI's [Composition](https://heroui.com/docs/react/getting-started/composition)
-page does in React, in OCaml.
+HeroUI uses composition patterns to create flexible, customizable components.
+Change the rendered element, compose components together, and maintain full
+control over markup.
+
+Original HeroUI documentation: [Composition](https://heroui.com/docs/react/getting-started/composition).
 
 ## Parts
 
-A component is a module and its parts are modules inside it, as HeroUI's
-compound pattern has them: `<Alert>` is HeroUI's `<Alert>` or
-`<Alert.Root>`, and `<Alert.Title>` its `<Alert.Title>`.
+HeroUI components are built as compound components: they export multiple
+parts that work together. A component is a module and its parts are modules
+inside it: `<Alert>` is HeroUI's `<Alert>` or `<Alert.Root>`, and
+`<Alert.Title>` its `<Alert.Title>`.
 
 ```ocaml
 module Alert = Solidtype_heroui.Alert
@@ -37,42 +41,52 @@ let saved () =
 
 ## HeroUI's look on any element
 
-`Solidtype_heroui.Styles` is HeroUI's variant functions, one module each:
+Apply HeroUI styles to any element using variant functions or BEM classes.
+`Solidtype_heroui.Styles` holds HeroUI's variant functions, one module each:
 `buttonVariants` is `Styles.Button`, its variants the optional arguments of
 `options`, and `classes` the class string; a component of several parts has
 `slots`, and a function per part. HeroUI's BEM classes work as they are:
 
 <Example code={link} title="composition_link.mlx"><Link.make client:visible /></Example>
 
-A class built by a call is bound to a name first, since an attribute that is
-a call is a thunk.
+Bind a class built by a call to a name first, since an attribute that is a
+call is a thunk.
 
 Such an element has HeroUI's look at rest and its `:hover` and `:active`
-rules, but none of the state a port writes. `Solidtype_heroui.Interaction`
-writes it on any element, React Aria's hover, press and focus, as a port
-does -- on a plain link here, or on a part of Kobalte's in HeroUI's classes,
-whose own state HeroUI's styles do not read:
+rules, but none of the state a port declares. `Solidtype_heroui.Interaction`
+gives any element the hover, press and focus state HeroUI's styles read:
 
 <Example code={state} title="composition_state.mlx"><State.make client:visible /></Example>
 
 ## Custom variants
 
-A component of your own wraps a port and gives it classes, where React's
-would extend HeroUI's with `tv`. They come after HeroUI's, and a utility
-wins over HeroUI's classes, which are in Tailwind's `components` layer:
+Create custom variants by wrapping a port in a component of your own that
+gives it classes. They come after HeroUI's, and a utility wins over HeroUI's
+classes, which are in Tailwind's `components` layer:
 
 <Example code={variants} title="composition_variants.mlx"><Variants.make client:visible /></Example>
 
 ## Custom DOM Element
 
-A part that draws an element takes `as_`, HeroUI's `render`: a function of the
-part's props and, where the part has one, its state. It draws what takes the
-part's place, spreading the props on it, which hold the part's classes,
-attributes and handlers. Draw one element, of the part's kind.
+Use the `as_` prop, HeroUI's `render`, on a part that draws an element to
+render a custom component in place of the default DOM element. It is a
+function of the part's props and, where the part has one, its state.
+
+For example, you can render a [Motion](https://motion.dev/) button and use the
+state to drive an animation.
 
 <Example code={motion} title="composition_motion.mlx"><Motion.make client:visible /></Example>
 
-A router's link needs none of this: Solid's router takes every plain same-origin
-`<a>` as its own unless told `explicitLinks`.
+Follow these rules to avoid breaking the behavior and accessibility of the
+component:
+
+- Always render the expected element type (e.g. if `<button>` is expected, do
+  not render an `<a>`).
+- Only render a single root DOM element (no fragments).
+- Always pass the provided props to the underlying DOM element: they hold the
+  part's classes, attributes and handlers.
+
+A router's link needs none of this: Solid's router takes every plain
+same-origin `<a>` as its own unless told `explicitLinks`.
 
 Kobalte's parts take `as_` too, a function of their props alone.

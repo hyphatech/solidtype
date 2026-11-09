@@ -1,6 +1,6 @@
 ---
 title: Drawer
-description: A dialog that slides in from an edge, HeroUI's on Kobalte's.
+description: Slide-out panel for supplementary content and actions.
 ---
 
 import Example from "@components/Example.astro";
@@ -24,12 +24,8 @@ import * as ExTailwind from "@islands/drawer_tailwind.jsx";
 import ExTailwindCode from "@islands/drawer_tailwind.mlx?raw";
 import * as Demo from "@islands/drawer_demo.jsx";
 
-`Solidtype_heroui.Drawer` is Kobalte's `Dialog` sliding in from an edge of
-the page, with the classes HeroUI's own `drawerVariants` gives. It is a
-[Modal](/solidtype/heroui/modal/) in all but these: its content slides in
-from the edge its `placement` names; its trigger is a button; and while it
-may be dismissed its dialog is dragged toward its edge to close, as HeroUI's
-is.
+It is a [Modal](/solidtype/heroui/modal/) that slides in from the edge its
+`placement` names, and is dragged toward that edge to close.
 
 Original HeroUI documentation: [Drawer](https://heroui.com/en/docs/react/components/drawer).
 
@@ -58,8 +54,8 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
   <Drawer.Backdrop>
     <Drawer.Content placement=`bottom>
       <Drawer.Dialog>
-        <Drawer.Handle />
-        <Drawer.Close_trigger />
+        <Drawer.Handle /> (* Optional: drag handle *)
+        <Drawer.Close_trigger /> (* Optional: close button *)
         <Drawer.Header>
           <Drawer.Heading>...</Drawer.Heading>
         </Drawer.Header>
@@ -79,15 +75,21 @@ The marked row is Kobalte's: its trigger tells a reader it opens a dialog, `aria
 
 ### Non-Dismissable
 
+Set `is_dismissable=false` on `Drawer.Backdrop` to prevent closing by clicking
+outside or dragging. The user must interact with the drawer's action buttons.
+
 <Example code={ExNonDismissableCode} title="drawer_non_dismissable.mlx"><ExNonDismissable.make client:visible /></Example>
 
 ### Scrollable Content
+
+`Drawer.Body` automatically handles overflow with native scrolling.
+Drag-to-dismiss is excluded from the body area to avoid scroll conflicts.
 
 <Example code={ExScrollableCode} title="drawer_scrollable.mlx"><ExScrollable.make client:visible /></Example>
 
 ### Controlled State
 
-A signal is Solid's state: each half keeps the drawer's open state in one, where HeroUI's uses `React.useState` and `useOverlayState`.
+Keep the open state in a signal, and give it to `is_open` and `on_open_change`.
 
 <Example code={ExControlledCode} title="drawer_controlled.mlx"><ExControlled.make client:visible /></Example>
 
@@ -113,8 +115,9 @@ A signal is Solid's state: each half keeps the drawer's open state in one, where
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every one, as with
-HeroUI in React:
+To customize the Drawer component classes, you can use the
+`@layer components` directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -132,31 +135,34 @@ HeroUI in React:
 
 ### CSS Classes
 
-- `.drawer__trigger`, `.drawer__backdrop`, `.drawer__content`,
-  `.drawer__dialog`, `.drawer__handle`, `.drawer__header`,
-  `.drawer__heading`, `.drawer__body`, `.drawer__footer`,
-  `.drawer__close-trigger`
-- `.drawer__backdrop--opaque`, `--blur`, `--transparent`
-- `.drawer__content--bottom`, `--top`, `--left`, `--right`, and the same of
-  `.drawer__dialog`
+- `.drawer__trigger` - Trigger element that opens the drawer
+- `.drawer__backdrop` - Overlay backdrop behind the drawer
+- `.drawer__content` - Positioning wrapper for the drawer panel
+- `.drawer__dialog` - The drawer panel itself
+- `.drawer__header` - Header section for titles
+- `.drawer__heading` - Main title text
+- `.drawer__body` - Main scrollable content area
+- `.drawer__footer` - Footer section for actions
+- `.drawer__handle` - Visual drag handle indicator
+- `.drawer__close-trigger` - Close button element
+- `.drawer__backdrop--opaque` - Opaque colored backdrop (default)
+- `.drawer__backdrop--blur` - Blurred backdrop with glass effect
+- `.drawer__backdrop--transparent` - Transparent backdrop (no overlay)
+- `.drawer__content--bottom` - Slides up from the bottom edge (default)
+- `.drawer__content--top` - Slides down from the top edge
+- `.drawer__content--left` - Slides in from the left edge
+- `.drawer__content--right` - Slides in from the right edge
+- `.drawer__dialog--top`, `--bottom`, `--left`, `--right` - The same, on the
+  dialog
 
 ### Interactive States
 
-- **Entering**: `[data-entering="true"]` on the backdrop and the content
-- **Exiting**: `[data-exiting="true"]` on the backdrop and the content
-- **Placement**: `[data-placement="bottom"]`, and the other edges, on the
-  content and the dialog
-
-## How it is made
-
-It shares Modal's making, on Kobalte's dialog: see
-[Modal](/solidtype/heroui/modal/#how-it-is-made). Its drag is HeroUI's: from
-anywhere on its dialog but a button, a field, a link or its body, it starts
-past 8 pixels, follows the pointer toward the drawer's edge alone, and on
-release closes the drawer past 30% of its size or at a flick faster than half
-a pixel a millisecond, leaving the drawer where it was let go to slide on out,
-else springs back. The dialog's own slide in and out is waited for, as its
-backdrop's and content's are.
+- **Entering**: `[data-entering="true"]` on the backdrop and the content -
+  Applied during drawer opening animation
+- **Exiting**: `[data-exiting="true"]` on the backdrop and the content -
+  Applied during drawer closing animation
+- **Placement**: `[data-placement="*"]` on the content and the dialog -
+  Applied based on drawer position (top, bottom, left, right)
 
 ## API Reference
 
@@ -166,17 +172,17 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `isOpen` | `is_open` | `bool` | | Whether it is open, controlled |
-| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open |
-| `onOpenChange` | `on_open_change` | `bool -> unit` | | Told as it opens or closes |
+| `isOpen` | `is_open` | `bool` | | Controlled open state |
+| `defaultOpen` | `default_open` | `bool` | `false` | Whether it starts open (uncontrolled) |
+| `onOpenChange` | `on_open_change` | `bool -> unit` | | Open state change handler |
 
 ### Drawer.Backdrop
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Its look |
-| `isDismissable` | `is_dismissable` | `bool` | `true` | Whether a press on it, or a drag, closes the drawer |
-| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `false` | Whether Escape does not |
+| `variant` | `variant` | `` `opaque `` \| `` `blur `` \| `` `transparent `` | `` `opaque `` | Backdrop overlay style |
+| `isDismissable` | `is_dismissable` | `bool` | `true` | Close on backdrop click, or on a drag |
+| `isKeyboardDismissDisabled` | `is_keyboard_dismiss_disabled` | `bool` | `false` | Disable ESC key to close |
 | `isOpen` | `is_open` | `bool` | | With no `Drawer` around it, whether it is open |
 | `onOpenChange` | `on_open_change` | `bool -> unit` | | With no `Drawer` around it, told as it opens or closes |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
@@ -185,7 +191,7 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | `` `bottom `` | The edge it slides from |
+| `placement` | `placement` | `` `top `` \| `` `bottom `` \| `` `left `` \| `` `right `` | `` `bottom `` | Edge the drawer slides from |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 
 ### Drawer.Trigger, Dialog, Header, Body, Footer, Heading, Handle, CloseTrigger
@@ -194,3 +200,16 @@ Each prop beside the name HeroUI's React component gives it.
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
 | `children` | `children` | elements | What it holds, where it holds any |
+
+## Accessibility
+
+Implements the [WAI-ARIA Dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/):
+
+- **Focus trap**: Focus locked within drawer when open, and given back as it
+  closes
+- **Keyboard**: `ESC` closes (when dismissable), `Tab` cycles elements
+- **Screen readers**: the dialog is named by its heading
+- **Scroll lock**: Body scroll disabled when open
+- **Drag to dismiss**: from anywhere on the dialog but a button, a field, a
+  link or its body; it closes past a third of its size or at a flick, else
+  springs back

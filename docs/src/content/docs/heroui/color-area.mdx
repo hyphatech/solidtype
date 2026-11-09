@@ -1,6 +1,6 @@
 ---
 title: ColorArea
-description: Two channels of a colour, picked across and up a square.
+description: A 2D color picker that allows users to select colors from a gradient area.
 ---
 
 import Example from "@components/Example.astro";
@@ -18,21 +18,8 @@ import * as ExCustomStyles from "@islands/color_area_custom_styles.jsx";
 import ExCustomStylesCode from "@islands/color_area_custom_styles.mlx?raw";
 import * as Demo from "@islands/color_area_demo.jsx";
 
-`Solidtype_heroui.Color_area` is Kobalte's `ColorArea.Root`, a
-`<div role="group">`, with the classes HeroUI's own `colorAreaVariants`
-gives: a square whose gradient is two channels of a colour, one across and one
-up. Its thumb is pressed and dragged over it, or stepped by the arrow keys,
-Page Up and Page Down, Home and End. Kobalte draws the gradient on a
-background of its own, which fills the area from inside.
-
-Its value is Kobalte's `Types.Color`, read from any CSS colour by
-`Solidtype_kobalte.Colors.parse_color`. `on_change` is told each colour as
-the thumb moves, and `on_change_end` the last.
-
-A disabled area is disabled by the port: Kobalte's root keeps `disabled`
-from the form control it makes, so its own area never is. The port takes the
-thumb out of the page's order and disables its inputs, and HeroUI's disabled
-style stops the pointer.
+Its value is a `Types.Color.t`, read from any CSS colour by
+`Solidtype_kobalte.Colors.parse_color`.
 
 Original HeroUI documentation: [ColorArea](https://heroui.com/en/docs/react/components/color-area).
 
@@ -70,8 +57,9 @@ The marked row is where each draws the gradient: Kobalte on a part of its own in
 
 ### Color Space & Channels
 
-`color_space` sets the space, RGB, HSL or HSB, and `x_channel` and
-`y_channel` the channels across and up.
+Use `color_space` to set the color space (RGB, HSL, HSB) and
+`x_channel`/`y_channel` to customize which color channels are displayed on
+each axis.
 
 <Example code={ExSpaceAndChannelsCode} title="color_area_space_and_channels.mlx"><ExSpaceAndChannels.make client:visible /></Example>
 
@@ -99,14 +87,16 @@ The marked row is where each draws the gradient: Kobalte on a part of its own in
 
 ### CSS Classes
 
-- `.color-area`, and `.color-area--show-dots` for its dots
-- `.color-area__thumb`, its colour `--color-area-thumb-color`
+- `.color-area` - Base styles with gradient background and inner shadow
+- `.color-area--show-dots` - Adds dot grid overlay for precision picking
+- `.color-area__thumb` - Draggable thumb indicator, its colour
+  `--color-area-thumb-color`
 
 ### Interactive States
 
-- the area: `[data-disabled="true"]`
-- the thumb: `[data-focus-visible="true"]`, `[data-dragging="true"]`,
-  `[data-disabled="true"]`
+- **Disabled**: `[data-disabled="true"]`, on the area and its thumb
+- **Focus**: `[data-focus-visible="true"]` (thumb only)
+- **Dragging**: `[data-dragging="true"]` (thumb only)
 
 ## API Reference
 
@@ -116,16 +106,16 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `Types.Color.t` | | Its colour, controlled |
-| `defaultValue` | `default_value` | `Types.Color.t` | Kobalte's red | Its colour at first, kept by itself |
-| `onChange` | `on_change` | `Types.Color.t -> unit` | | Called with each colour as the thumb moves |
-| `onChangeEnd` | `on_change_end` | `Types.Color.t -> unit` | | Called with the last, once it stops |
-| `xChannel` | `x_channel` | `Color_area.channel` | its space's | The channel across |
-| `yChannel` | `y_channel` | `Color_area.channel` | its space's | The channel up |
-| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The space its channels are of |
+| `value` | `value` | `Types.Color.t` | | The current color value (controlled) |
+| `defaultValue` | `default_value` | `Types.Color.t` | Kobalte's red | The default color value (uncontrolled) |
+| `onChange` | `on_change` | `Types.Color.t -> unit` | | Handler called when the color changes while dragging |
+| `onChangeEnd` | `on_change_end` | `Types.Color.t -> unit` | | Handler called when the user stops dragging |
+| `xChannel` | `x_channel` | `Color_area.channel` | its space's | Color channel for the horizontal axis |
+| `yChannel` | `y_channel` | `Color_area.channel` | its space's | Color channel for the vertical axis |
+| `colorSpace` | `color_space` | `` [ `rgb \| `hsl \| `hsb ] `` | its value's | The color space for the channels |
 | `xName`, `yName` | `x_name`, `y_name` | `string` | | Each channel's name in a form |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether it is disabled |
-| `showDots` | `show_dots` | `bool` | `false` | Whether dots are drawn over it |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether the color area is disabled |
+| `showDots` | `show_dots` | `bool` | `false` | Whether to show the dot grid overlay |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |
 
@@ -134,5 +124,5 @@ Each prop beside the name HeroUI's React component gives it.
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-| `style` | `style` | `string` | | Added after its colour; a function of its state in React |
+| `style` | `style` | `string` | | Inline styles, added after its colour; a function of its state in React |
 | `render` | `as_` | a function of its props and state | | Draws another element in its place |

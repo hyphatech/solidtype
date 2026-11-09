@@ -1,6 +1,6 @@
 ---
 title: ToggleButton
-description: A button pressed on or off.
+description: An interactive toggle control for on/off or selected/unselected states.
 ---
 
 import Example from "@components/Example.astro";
@@ -20,11 +20,8 @@ import * as Tailwind from "@islands/toggle_button_tailwind.jsx";
 import TailwindCode from "@islands/toggle_button_tailwind.mlx?raw";
 import * as Demo from "@islands/toggle_button_demo.jsx";
 
-`Solidtype_heroui.Toggle_button` is Kobalte's toggle button with the classes
-HeroUI's own `toggleButtonVariants` gives, and the state HeroUI's styles read:
-`data-selected` while it is on, and the hover, press and focus React Aria
-shows. Inside a [`Toggle_button_group`](/solidtype/heroui/toggle-button-group/) it is the
-group's button of its `id`.
+Inside a [ToggleButtonGroup](/solidtype/heroui/toggle-button-group/) it is
+the group's button of its `id`.
 
 Original HeroUI documentation: [ToggleButton](https://heroui.com/en/docs/react/components/toggle-button).
 
@@ -68,9 +65,8 @@ An icon alone is named by `aria_label`.
 
 ### Controlled
 
-`is_selected` gives its state, and `on_change` is called with the new one. Its
-content reads the signal the page keeps, as here, or is a function of its
-state, `s.is_selected`.
+`is_selected` controls its state, and `on_change` is called with the new one.
+Its content may also be a function of its state, `s.is_selected`.
 
 <Example code={ControlledCode} title="toggle_button_controlled.mlx"><Controlled.make client:visible /></Example>
 
@@ -84,8 +80,9 @@ state, `s.is_selected`.
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every toggle button, as
-with HeroUI in React:
+To customize the ToggleButton component classes, you can use the
+`@layer components` directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -101,20 +98,42 @@ with HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.toggle-button`, and its sizes `.toggle-button--sm`, `.toggle-button--md`,
-  `.toggle-button--lg`
-- `.toggle-button--default`, `.toggle-button--ghost`
-- `.toggle-button--icon-only`
+#### Base & Size Classes
+
+- `.toggle-button` - Base toggle button styles
+- `.toggle-button--sm` - Small size variant
+- `.toggle-button--md` - Medium size variant (default)
+- `.toggle-button--lg` - Large size variant
+
+#### Variant Classes
+
+- `.toggle-button--default` - Default variant with filled background
+- `.toggle-button--ghost` - Ghost variant with transparent background
+
+#### Modifier Classes
+
+- `.toggle-button--icon-only` - Icon-only toggle button
+- `.toggle-button--icon-only.toggle-button--sm` - Small icon-only
+- `.toggle-button--icon-only.toggle-button--lg` - Large icon-only
 
 ### Interactive States
 
-- **Selected**: `[data-selected="true"]`
+The toggle button supports both CSS pseudo-classes and data attributes for
+flexibility:
+
+- **Selected**: `[data-selected="true"]` (accent background and foreground)
 - **Hover**: `:hover` or `[data-hovered="true"]`
-- **Pressed**: `:active` or `[data-pressed="true"]`
-- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
-- **Disabled**: `:disabled` or `[data-disabled="true"]`
+- **Active/Pressed**: `:active` or `[data-pressed="true"]` (includes scale
+  transform)
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` (shows focus
+  ring)
+- **Disabled**: `:disabled` or `[data-disabled="true"]` (reduced opacity, no
+  pointer events)
 
 ## API Reference
 
@@ -124,15 +143,29 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `variant` | `variant` | `` [ `default \| `ghost ] `` | `` `default `` | Its look |
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md ``, or its group's | Its size |
-| `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether it shows an icon alone |
+| `variant` | `variant` | `` [ `default \| `ghost ] `` | `` `default `` | Visual style variant |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md ``, or its group's | Size of the toggle button |
+| `isIconOnly` | `is_icon_only` | `bool` | `false` | Whether the button contains only an icon |
 | `id` | `id` | `string` | | Its key in a group |
-| `isSelected` | `is_selected` | `bool` | | Whether it is on, while given |
-| `defaultSelected` | `default_selected` | `bool` | `false` | Whether it is on at first |
-| `onChange` | `on_change` | `bool -> unit` | | Called with its new state |
-| `isDisabled` | `is_disabled` | `bool` | `false`, or its group's | Whether it is disabled |
-| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Called as it is clicked |
+| `isSelected` | `is_selected` | `bool` | | Controlled selected state |
+| `defaultSelected` | `default_selected` | `bool` | `false` | Default selected state (uncontrolled) |
+| `onChange` | `on_change` | `bool -> unit` | | Handler called when selection changes |
+| `isDisabled` | `is_disabled` | `bool` | `false`, or its group's | Whether the toggle button is disabled |
+| `onPress` | `on_click` | `Dom.mouseEvent -> unit` | | Handler called when the button is clicked |
 | `aria-label` | `aria_label` | `string` | | Its name, where it shows an icon alone |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its content |
+| `children` | `children` | elements, or a function of its state | | Button content or render function |
+
+### Render Props
+
+When its children are a function, it is given these values, each read where
+Solid tracks it:
+
+| React | solidtype | Description |
+|---|---|---|
+| `isSelected` | `is_selected` | Whether the button is currently selected |
+| `isPressed` | `is_pressed` | Whether the button is currently pressed |
+| `isHovered` | `is_hovered` | Whether the button is hovered |
+| `isFocused` | `is_focused` | Whether the button is focused |
+| `isFocusVisible` | `is_focus_visible` | Whether the button should show focus indicator |
+| `isDisabled` | `is_disabled` | Whether the button is disabled |

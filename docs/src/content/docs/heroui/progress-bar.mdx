@@ -1,6 +1,6 @@
 ---
 title: ProgressBar
-description: Determinate or indeterminate progress of an operation over time.
+description: A progress bar shows either determinate or indeterminate progress of an operation over time.
 ---
 
 import Example from "@components/Example.astro";
@@ -19,13 +19,6 @@ import CustomScaleCode from "@islands/progress_bar_custom_scale.mlx?raw";
 import * as Format from "@islands/progress_bar_format.jsx";
 import FormatCode from "@islands/progress_bar_format.mlx?raw";
 import * as Demo from "@islands/progress_bar_demo.jsx";
-
-`Solidtype_heroui.Progress_bar` is Kobalte's `Progress.Root`, a
-`<div role="progressbar">`, with the classes HeroUI's own
-`progressBarVariants` gives. Its label names it, its output shows its value as
-Kobalte formats it for the reader's locale, a percentage, and its fill is as
-wide in its track as its value is far along its range, or, indeterminate,
-moves along the track as HeroUI's styles animate it.
 
 Original HeroUI documentation: [ProgressBar](https://heroui.com/en/docs/react/components/progress-bar).
 
@@ -51,7 +44,9 @@ The marked row is Kobalte's own state, `data-progress`, `loading` or `complete`,
 <Progress_bar value=60.>
   <Label>"Loading"</Label>
   <Progress_bar.Output />
-  <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>
+  <Progress_bar.Track>
+    <Progress_bar.Fill />
+  </Progress_bar.Track>
 </Progress_bar>
 ```
 
@@ -67,38 +62,51 @@ The marked row is Kobalte's own state, `data-progress`, `loading` or `complete`,
 
 ### Without Label
 
-A bar no label names is named by its `aria_label`.
+When no visible label is needed, use `aria_label` for accessibility.
 
 <Example code={WithoutLabelCode} title="progress_bar_without_label.mlx"><WithoutLabel.make client:visible /></Example>
 
 ### Indeterminate
 
-`is_indeterminate` where progress cannot be known: the bar has no value for a
-reader and its fill moves along the track.
+Use `is_indeterminate` when progress cannot be determined: the bar has no
+value for a reader and its fill moves along the track.
 
 <Example code={IndeterminateCode} title="progress_bar_indeterminate.mlx"><Indeterminate.make client:visible /></Example>
 
 ### Custom Value Scale
 
+Use `min_value`, `max_value`, and `format_options` to customize the value
+range and display format.
+
 <Example code={CustomScaleCode} title="progress_bar_custom_scale.mlx"><CustomScale.make client:visible /></Example>
 
 ### Format Options
 
-`format_options` formats the output and what a reader is told, by Kobalte's
-number formatter in the reader's locale: a percent, the default, is the
-value's share of its range, and any other style the value itself.
+`format_options` formats the output and what a reader is told, in the
+reader's locale: a percent, the default, is the value's share of its range,
+and any other style the value itself.
 
 <Example code={FormatCode} title="progress_bar_format.mlx"><Format.make client:visible /></Example>
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.progress-bar`, and its colors `.progress-bar--default`,
-  `.progress-bar--accent`, `.progress-bar--success`,
-  `.progress-bar--warning`, `.progress-bar--danger`, and sizes
-  `.progress-bar--sm`, `.progress-bar--md`, `.progress-bar--lg`
-- `.progress-bar__output`, `.progress-bar__track`, `.progress-bar__fill`
+- `.progress-bar` - Base container (grid layout)
+- `.progress-bar__output` - Value text display
+- `.progress-bar__track` - Track background
+- `.progress-bar__fill` - Filled portion of the track
+- `.progress-bar--sm` - Small size variant (thinner track)
+- `.progress-bar--md` - Medium size variant (default)
+- `.progress-bar--lg` - Large size variant (thicker track)
+- `.progress-bar--default` - Default color variant
+- `.progress-bar--accent` - Accent color variant
+- `.progress-bar--success` - Success color variant
+- `.progress-bar--warning` - Warning color variant
+- `.progress-bar--danger` - Danger color variant
 
 ## API Reference
 
@@ -108,16 +116,16 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `value` | `value` | `float` | `0.` | Its value |
-| `minValue` | `min_value` | `float` | `0.` | The least value |
-| `maxValue` | `max_value` | `float` | `100.` | The greatest value |
-| `isIndeterminate` | `is_indeterminate` | `bool` | `false` | Whether its progress cannot be known |
-| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `accent `` | Its fill's color |
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Its track's size |
+| `value` | `value` | `float` | `0.` | The current value |
+| `minValue` | `min_value` | `float` | `0.` | The minimum value |
+| `maxValue` | `max_value` | `float` | `100.` | The maximum value |
+| `isIndeterminate` | `is_indeterminate` | `bool` | `false` | Whether progress is indeterminate |
+| `color` | `color` | `` [ `default \| `accent \| `success \| `warning \| `danger ] `` | `` `accent `` | Color of the fill bar |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size of the progress track |
 | `aria-label` | `aria_label` | `string` | | Its name where no label names it |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
 | `valueLabel` | — | | | The output's `children` instead |
-| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | a percent | How its value is shown |
+| `formatOptions` | `format_options` | `Solidtype_kobalte.Types.NumberFormatOptions.t` | a percent | Number format for the value display |
 
 ### ProgressBar.Output, ProgressBar.Track, ProgressBar.Fill
 

@@ -1,6 +1,6 @@
 ---
 title: Badge
-description: A count or a status over the content it marks.
+description: Displays a small indicator positioned relative to another element, commonly used for notification counts, status dots, and labels.
 ---
 
 import Example from "@components/Example.astro";
@@ -22,12 +22,6 @@ import WithContentCode from "@islands/badge_with_content.mlx?raw";
 import * as Tailwind from "@islands/badge_tailwind.jsx";
 import TailwindCode from "@islands/badge_tailwind.mlx?raw";
 
-`Solidtype_heroui.Badge` is HeroUI's badge: `Badge.Anchor` around the content it
-marks and the badge, with the classes HeroUI's own `badgeVariants` gives. Text
-a badge is given becomes its `Badge.Label`, as in React. A badge has no
-behaviour, so it is HeroUI's spans as they are. A badge with no content is a
-dot.
-
 Original HeroUI documentation: [Badge](https://heroui.com/en/docs/react/components/badge).
 
 ## Usage
@@ -44,6 +38,22 @@ which no style reads.
 <div class="not-content">
   <Demo.make client:load />
 </div>
+
+## Anatomy
+
+```ocaml
+<Badge.Anchor>
+  <Avatar />
+  <Badge color=`danger>"5"</Badge>
+</Badge.Anchor>
+```
+
+Badge is designed to be positioned relative to another element using
+`Badge.Anchor`. Plain-text children are automatically wrapped in
+`Badge.Label`.
+
+For standalone label usage, use the [Chip](/solidtype/heroui/chip/) component
+instead.
 
 ## Examples
 
@@ -65,9 +75,15 @@ which no style reads.
 
 ### Dot Badge
 
+Empty badges act as status indicators, useful for online/offline states or
+activity signals.
+
 <Example code={DotCode} title="badge_dot.mlx"><Dot.make client:visible /></Example>
 
 ### With Content
+
+Badge supports text, numbers, and icons as content. When no children are
+provided, it renders as a dot indicator.
 
 <Example code={WithContentCode} title="badge_with_content.mlx"><WithContent.make client:visible /></Example>
 
@@ -96,13 +112,28 @@ HeroUI in React:
 
 ### CSS Classes
 
-- `.badge`, `.badge__label`, `.badge-anchor`
-- Colors: `.badge--accent`, `.badge--default`, `.badge--success`,
-  `.badge--warning`, `.badge--danger`
-- Variants: `.badge--primary`, `.badge--secondary`, `.badge--soft`
-- Sizes: `.badge--sm`, `.badge--md`, `.badge--lg`
-- Placements: `.badge--top-right`, `.badge--top-left`, `.badge--bottom-right`,
-  `.badge--bottom-left`
+- `.badge` - Base badge container styles
+- `.badge__label` - Label text slot styles
+- `.badge-anchor` - Positioning wrapper for the anchored element
+- `.badge--accent` - Accent color variant
+- `.badge--danger` - Danger color variant
+- `.badge--default` - Default color variant
+- `.badge--success` - Success color variant
+- `.badge--warning` - Warning color variant
+- `.badge--primary` - Primary variant with filled background
+- `.badge--secondary` - Secondary variant with default background
+- `.badge--soft` - Soft variant with lighter background
+- `.badge--sm` - Small size
+- `.badge--md` - Medium size (default)
+- `.badge--lg` - Large size
+- `.badge--top-right` - Position at top-right corner (default)
+- `.badge--top-left` - Position at top-left corner
+- `.badge--bottom-right` - Position at bottom-right corner
+- `.badge--bottom-left` - Position at bottom-left corner
+
+Badges combine variant and color classes (e.g. `.badge--primary.badge--accent`
+or `.badge--soft.badge--danger`): each `primary` and `soft` combination has
+default styles defined.
 
 ## API Reference
 
@@ -114,16 +145,16 @@ string React takes, a hyphen written as an underscore: `` `top_right `` is
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `color` | `color` | `` [ `accent \| `default \| `success \| `warning \| `danger ] `` | `` `default `` | Color |
-| `variant` | `variant` | `` [ `primary \| `secondary \| `soft ] `` | `` `primary `` | Visual style |
-| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size |
-| `placement` | `placement` | `` [ `top_right \| `top_left \| `bottom_right \| `bottom_left ] `` | `` `top_right `` | Corner of the anchor |
+| `color` | `color` | `` [ `accent \| `default \| `success \| `warning \| `danger ] `` | `` `default `` | Color variant of the badge |
+| `variant` | `variant` | `` [ `primary \| `secondary \| `soft ] `` | `` `primary `` | Visual style variant |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size of the badge |
+| `placement` | `placement` | `` [ `top_right \| `top_left \| `bottom_right \| `bottom_left ] `` | `` `top_right `` | Position of the badge relative to its anchor |
 | `className` | `class_` | `string` | | Added after HeroUI's classes |
-| `children` | `children` | elements | | Its content; text becomes a `Badge.Label`, and none a dot |
+| `children` | `children` | elements | | Content to display inside the badge (text, number, or icon); text becomes a `Badge.Label`. When omitted, renders as a dot. |
 
 ### Badge.Anchor and Badge.Label
 
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's class |
-| `children` | `children` | elements | What it holds |
+| `children` | `children` | elements | The anchor's: the element to anchor the badge to, plus the badge itself. The label's: label text content |

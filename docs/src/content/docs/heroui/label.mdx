@@ -1,6 +1,6 @@
 ---
 title: Label
-description: A field's name.
+description: Renders an accessible label associated with form controls.
 ---
 
 import Example from "@components/Example.astro";
@@ -9,14 +9,10 @@ import LabelUsageCode from "@islands/label_usage.mlx?raw";
 import * as Tailwind from "@islands/label_tailwind.jsx";
 import TailwindCode from "@islands/label_tailwind.mlx?raw";
 
-`Solidtype_heroui.Label` is HeroUI's label, with the classes HeroUI's own
-`labelVariants` gives. Inside a switch's, a checkbox's or a radio's content it
-is a `<span>`, since the content is the clickable label already; inside a
-[Radio Group](/solidtype/heroui/radio-group/), but outside a radio, it is Kobalte's group
-label, which names the group; inside a [TextField](/solidtype/heroui/text-field/), Kobalte's
-field label, which names its input; anywhere else it is a `<label>`. The
-[Switch](/solidtype/heroui/switch/), [Checkbox](/solidtype/heroui/checkbox/) and Radio Group pages show it
-in its fields.
+Inside a [TextField](/solidtype/heroui/text-field/) or a
+[Radio Group](/solidtype/heroui/radio-group/) it names the field; the
+[Switch](/solidtype/heroui/switch/), [Checkbox](/solidtype/heroui/checkbox/)
+and Radio Group pages show it in its fields.
 
 Original HeroUI documentation: [Label](https://heroui.com/en/docs/react/components/label).
 
@@ -35,8 +31,9 @@ Original HeroUI documentation: [Label](https://heroui.com/en/docs/react/componen
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every one, as with
-HeroUI in React:
+To customize the Label component classes, you can use the `@layer components`
+directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -48,10 +45,24 @@ HeroUI in React:
 
 ## Styling Reference
 
+HeroUI follows the [BEM](https://bem.info/en/methodology/) methodology to
+ensure component variants and states are reusable and easy to customize.
+
 ### CSS Classes
 
-- `.label`
-- States: `.label--required`, `.label--disabled`, `.label--invalid`
+- `.label` - Base label styles with text styling
+- `.label--required` or `[data-required="true"] > .label` - Shows required
+  asterisk indicator
+- `.label--disabled` or `[data-disabled="true"] .label` - Disabled state
+  styling
+- `.label--invalid` or `[data-invalid="true"] .label` or
+  `[aria-invalid="true"] .label` - Invalid state styling (danger/red text
+  color)
+
+The required asterisk is not shown on a group's label (`role="group"`,
+`role="radiogroup"` or `role="checkboxgroup"`) or inside a radio or a
+checkbox (`data-slot="radio"` or `data-slot="checkbox"`), so a required group
+shows one asterisk.
 
 ## API Reference
 
@@ -62,14 +73,21 @@ Each prop beside the name HeroUI's React component gives it.
 | React | solidtype | Type | Description |
 |---|---|---|---|
 | `className` | `class_` | `string` | Added after HeroUI's classes |
-| `children` | `children` | elements | Its text |
-| `isRequired` | `is_required` | `bool` | Whether it marks its field required |
-| `isDisabled` | `is_disabled` | `bool` | Whether it is shown disabled |
-| `isInvalid` | `is_invalid` | `bool` | Whether it is shown invalid |
+| `children` | `children` | elements | The content of the label |
+| `isRequired` | `is_required` | `bool` | Whether to display a required indicator |
+| `isDisabled` | `is_disabled` | `bool` | Whether the label is in a disabled state |
+| `isInvalid` | `is_invalid` | `bool` | Whether the label is in an invalid state |
 
 ### Label.Slot
 
-How a label renders below a part, given its classes and its children, as
-React Aria's `LabelContext` gives it: `Switch.Content` and `Checkbox.Content`
-make it a `<span>`, since a label in a label is not HTML, and `Radio_group` the
-label that names it.
+How a label renders inside a part, given its classes and its children:
+`Switch.Content` and `Checkbox.Content` render it as a `<span>`, and
+`Radio_group` as the label that names the group.
+
+## Accessibility
+
+- Renders a native `<label>` element, or the field's own label inside a
+  `Text_field` or a `Radio_group`, which names its control
+- Clicking the label focuses or activates the associated form control
+- Communicates required and invalid states to screen readers through its
+  field

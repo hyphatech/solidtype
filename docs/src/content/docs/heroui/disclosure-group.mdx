@@ -1,6 +1,6 @@
 ---
 title: DisclosureGroup
-description: Disclosures expanded together, one at a time or several.
+description: Container that manages multiple Disclosure items with coordinated expanded states.
 ---
 
 import Example from "@components/Example.astro";
@@ -12,11 +12,8 @@ import * as Tailwind from "@islands/disclosure_group_tailwind.jsx";
 import TailwindCode from "@islands/disclosure_group_tailwind.mlx?raw";
 import * as Demo from "@islands/disclosure_group_demo.jsx";
 
-`Solidtype_heroui.Disclosure_group` holds the [`Disclosure`](/solidtype/heroui/disclosure/)s
-inside it, each by its `id`, and keeps which are expanded: one at a time,
-expanding another collapsing it, or several, with the class HeroUI's own
-`disclosureGroupVariants` gives. Kobalte has no disclosure group; this one is
-built on the port's Disclosure, which is Kobalte's collapsible.
+It holds the [`Disclosure`](/solidtype/heroui/disclosure/)s inside it, each
+by its `id`: one expanded at a time, or several.
 
 Original HeroUI documentation: [DisclosureGroup](https://heroui.com/en/docs/react/components/disclosure-group).
 
@@ -41,8 +38,12 @@ framework's own, which no style reads.
 
 ```ocaml
 <Disclosure_group>
-  <Disclosure id="first">...</Disclosure>
-  <Disclosure id="second">...</Disclosure>
+  <Disclosure id="item1">
+    <Disclosure.Heading>
+      <Disclosure.Trigger><Disclosure.Indicator /></Disclosure.Trigger>
+    </Disclosure.Heading>
+    <Disclosure.Content />
+  </Disclosure>
 </Disclosure_group>
 ```
 
@@ -50,13 +51,12 @@ framework's own, which no style reads.
 
 ### Controlled
 
-`expanded_keys` gives the expanded disclosures' ids, and `on_expanded_change`
-is called with them all. `Disclosure_group.navigation`, HeroUI's
-`useDisclosureGroupNavigation`, gives previous and next buttons over the
-group's disclosures. Where several may be expanded, next expands the one
-after the last expanded and previous the one before the first, so each press
-reaches another, where HeroUI's steps from the first expanded alone and
-reaches the same one twice.
+You can control which disclosures are expanded with external navigation
+controls using the `expanded_keys` and `on_expanded_change` props.
+`Disclosure_group.navigation`, HeroUI's `useDisclosureGroupNavigation`, gives
+previous and next buttons over the group's disclosures. Where several may be
+expanded, next expands the one after the last expanded and previous the one
+before the first.
 
 <Example code={ControlledCode} title="disclosure_group_controlled.mlx"><Controlled.make client:visible /></Example>
 
@@ -70,8 +70,9 @@ reaches the same one twice.
 
 ### Global CSS
 
-HeroUI's classes are global, so a stylesheet restyles every group, as with
-HeroUI in React:
+To customize the DisclosureGroup component classes, you can use the
+`@layer components` directive.
+[Learn more](https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes).
 
 ```css
 @layer components {
@@ -85,13 +86,14 @@ HeroUI in React:
 
 ### CSS Classes
 
-- `.disclosure-group`, the group, its layout contained
+- `.disclosure-group` - Base container styles with layout containment
 
 ### Interactive States
 
-- **Disabled**: `[data-disabled="true"]` on the group, and each disclosure
-  disabled with it
-- **Expanded**: `[data-expanded="true"]` on each disclosure expanded
+- **Disabled**: `[data-disabled="true"]` on entire group, and on each
+  disclosure disabled with it
+- **Expanded Management**: Automatically manages `[data-expanded="true"]`
+  states on child Disclosure items
 
 ## API Reference
 
@@ -101,13 +103,13 @@ Each prop beside the name HeroUI's React component gives it.
 
 | React | solidtype | Type | Default | Description |
 |---|---|---|---|---|
-| `expandedKeys` | `expanded_keys` | `string array` | | The expanded disclosures' ids, while given |
-| `defaultExpandedKeys` | `default_expanded_keys` | `string array` | `[\|\|]` | Those expanded at first |
-| `onExpandedChange` | `on_expanded_change` | `string array -> unit` | | Called with the expanded ids |
-| `allowsMultipleExpanded` | `allows_multiple_expanded` | `bool` | `false` | Whether several may be expanded |
-| `isDisabled` | `is_disabled` | `bool` | `false` | Whether every disclosure inside it is disabled |
+| `expandedKeys` | `expanded_keys` | `string array` | | The currently expanded items (controlled) |
+| `defaultExpandedKeys` | `default_expanded_keys` | `string array` | `[\|\|]` | The initially expanded items (uncontrolled) |
+| `onExpandedChange` | `on_expanded_change` | `string array -> unit` | | Handler called when expanded items change |
+| `allowsMultipleExpanded` | `allows_multiple_expanded` | `bool` | `false` | Whether multiple items can be expanded simultaneously |
+| `isDisabled` | `is_disabled` | `bool` | `false` | Whether all disclosures in the group are disabled |
 | `className` | `class_` | `string` | | Added after HeroUI's class |
-| `children` | `children` | elements, or a function of `state` | | Its disclosures |
+| `children` | `children` | elements, or a function of `state` | | Disclosure items to render |
 
 ### navigation
 
