@@ -1,7 +1,6 @@
-SWITCH ?= hypha-solidtype
+SWITCH ?= solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
-# The reference is odoc's, for solidtype's own packages and nothing under them.
 REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
@@ -21,9 +20,6 @@ setup: ## create the switch and install dependencies
 build: ## build everything
 	$(OPAM) dune build @all
 
-# Bun's dependencies, the documentation's among them, installed again whenever
-# the lockfile or a manifest changes, so no target runs against what an older
-# checkout installed.
 node_modules: package.json docs/package.json bun.lock
 	bun install --frozen-lockfile
 	@touch node_modules
@@ -53,8 +49,6 @@ example: build node_modules ## build the example, as a Vite page and an Astro on
 	bun --bun vite build --config example/vite.config.ts
 	bun --bun astro build --root example
 
-# The board's tasks, kept in this file from one serve to the next, migrated
-# before the server starts, never by it.
 BOARD_DB ?= example/board.db
 
 example-serve: example ## serve the example and its API on http://localhost:4420
@@ -62,8 +56,6 @@ example-serve: example ## serve the example and its API on http://localhost:4420
 	$(OPAM) rowtype-migrate up --dir example/migrations --url sqlite:$(BOARD_DB)
 	BOARD_DB=$(BOARD_DB) _build/default/example/server/serve.exe
 
-# odoc's reference from the .mli files is copied in first, for the site to
-# serve as it is.
 docs: build node_modules ## build the documentation site
 	$(OPAM) dune build @doc
 	rm -rf docs/public/reference
