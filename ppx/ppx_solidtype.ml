@@ -1187,11 +1187,20 @@ let reader ~loc p =
             [%expr
               let f = [%e field] in
               [%e call [%expr f]]]
-        | Optional | Default _ ->
+        | Optional ->
             [%expr
               match [%e field] with
               | Some f -> Some [%e call [%expr f]]
               | None -> None]
+        | Default default ->
+            let default = [%expr ([%e default] : [%t p.typ])] in
+            [%expr
+              match [%e field] with
+              | Some f -> [%e call [%expr f]]
+              | None ->
+                  [%e
+                    B.pexp_apply ~loc default
+                      (List.map (fun x -> (Nolabel, arg x)) xs)]]
       in
       List.fold_right
         (fun x body -> [%expr fun [%p B.pvar ~loc x] -> [%e body]])

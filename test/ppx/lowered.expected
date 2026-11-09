@@ -112,6 +112,8 @@ include
         external get_count : 'a t -> int option = "count"[@@mel.get ]
         external get_on_pick : 'a t -> ((int -> unit)[@u ]) option = "onPick"
         [@@mel.get ]
+        external get_on_close :
+          'a t -> ((unit -> unit)[@u ]) option = "onClose"[@@mel.get ]
         external get_children :
           'a t -> (('a -> Solidtype.Jsx.element)[@u ]) = "children"[@@mel.get
                                                                     ]
@@ -119,21 +121,25 @@ include
           text:string ->
             ?count:int ->
               ?on_pick:((int -> unit)[@mel.as "onPick"]) ->
-                children:('a -> Solidtype.Jsx.element) -> unit -> 'a t = ""
+                ?on_close:((unit -> unit)[@mel.as "onClose"]) ->
+                  children:('a -> Solidtype.Jsx.element) -> unit -> 'a t = ""
         [@@mel.obj ]
         let check ~text:(_ : string Solidtype.Check.value)
           ?count:(_ : int Solidtype.Check.value option)
           ?on_pick:(_ : (int -> unit) option)
+          ?on_close:(_ : (unit -> unit) option)
           ~children:(_ :
                       ('a -> Solidtype.Jsx.element, [ `render ])
                         Solidtype.Check.children)
           ?props:(_ : 'a t Solidtype.Solid.rest option) () = ()
         let others (props : 'a t) : _ Solidtype.Solid.rest=
-          Solidtype.Solid.others props [|"text";"count";"onPick";"children"|]
+          Solidtype.Solid.others props
+            [|"text";"count";"onPick";"onClose";"children"|]
         type name =
           | Text 
           | Count 
           | On_pick 
+          | On_close 
           | Children 
         let omit (props : 'a t) (names : name array) :
           'a t Solidtype.Solid.rest=
@@ -143,6 +149,7 @@ include
                 | Text -> "text"
                 | Count -> "count"
                 | On_pick -> "onPick"
+                | On_close -> "onClose"
                 | Children -> "children") names)
       end
     let make (props : _ Props.t) =
@@ -154,6 +161,11 @@ include
         match Props.get_on_pick props with
         | Some f -> Some ((f solidtype__0)[@u ])
         | None -> None[@@inline ][@@ocaml.warning "-26-27"]
+      and on_close solidtype__0 =
+        match Props.get_on_close props with
+        | Some f -> ((f ())[@u ])
+        | None -> ((fun () -> ()) : unit -> unit) ()[@@inline ][@@ocaml.warning
+                                                                 "-26-27"]
       and children solidtype__0 =
         let f = Props.get_children props in ((f solidtype__0)[@u ])[@@inline
                                                                     ]

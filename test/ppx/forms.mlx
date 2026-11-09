@@ -24,8 +24,8 @@ let function_child =
 let ref_callback = <div ref=(fun el -> keep el) />
 
 let%component make ~(text : string) ?(count : int = 0)
-    ?(on_pick : (int -> unit) option) ~(children : 'a -> Solidtype.Jsx.element)
-    () =
+    ?(on_pick : (int -> unit) option) ?(on_close : unit -> unit = fun () -> ())
+    ~(children : 'a -> Solidtype.Jsx.element) () =
   <p>(fun () -> Solidtype.Jsx.int (count ()))</p>
 
 module Given_its_element = struct

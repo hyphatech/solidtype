@@ -8,6 +8,10 @@
   before the `Show` decided, so a value the `Show` guarded raised, and a
   component's handler read its signal once.
 
+- A function prop with a default, `?(on_pick : string -> unit = fun _ -> ())`,
+  is its default while it is not given, as a value prop with a default is.
+  The default was dropped: the body saw `string -> unit option`.
+
 ## 0.7.0 (2026-11-09)
 
 - An optional function prop is given or left out as an optional value prop

@@ -27,6 +27,17 @@ module Picker = struct
     </button>
 end
 
+(* A button that says what its functions make of a press, each its default
+   while it is not given one. *)
+module Defaulted = struct
+  let%component make ?(label : unit -> string = fun () -> "default")
+      ?(on_pick : string -> string = fun v -> "picked " ^ v) () =
+    let said, set_said = S.create_signal "none" in
+    <button on_click=(fun _ -> S.set set_said (label () ^ ", " ^ on_pick "x"))>
+      (fun () -> Solidtype.Jsx.string (S.get said))
+    </button>
+end
+
 external attribute : Dom.element -> string -> string Js.null = "getAttribute"
 [@@mel.send]
 
@@ -77,4 +88,19 @@ let () =
           T.click button;
           E.(
             expect (with_it, T.text button, !picked)
-            |> toEqual ("taken", "not taken", [ "x" ]))))
+            |> toEqual ("taken", "not taken", [ "x" ])));
+      Jest.test "a function prop left out is its default, and given is itself"
+        (fun () ->
+          T.render (fun () ->
+              <div>
+                <Defaulted />
+                <Defaulted
+                  label=(fun _ -> "given") on_pick=(fun v -> "chose " ^ v)
+                />
+              </div>);
+          T.click (T.query "button");
+          T.click (T.query "button + button");
+          E.(
+            expect
+              (T.text (T.query "button"), T.text (T.query "button + button"))
+            |> toEqual ("default, picked x", "given, chose x"))))
