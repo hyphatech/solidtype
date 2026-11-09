@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.7.0 (2026-11-09)
 
 - An optional function prop is given or left out as an optional value prop
   is, `?on_remove=(fun () -> if editable then Some remove else None)`, on any
@@ -33,9 +33,10 @@
 - `Solidtype.Solid.pick`, a component's own props handed on as they were
   given, a function left out absent.
 
-- `Solidtype_heroui.Dropdown.Popover` takes React Aria's every placement,
-  `` `bottom_end `` and the others, as `Color_picker.Popover` does, from the
-  type they now share, `Solidtype_heroui.Overlay.placement`.
+- Breaking: `Solidtype_heroui.Dropdown.Popover` takes React Aria's every
+  placement, `` `bottom_end `` and the others, as `Color_picker.Popover`
+  does, from the type they now share, `Solidtype_heroui.Overlay.placement`;
+  a placement annotated with the four it took before is now that type.
 
 - ButtonGroup's Usage and Tailwind CSS examples open HeroUI's Dropdown from
   the split button's chevron, placed `` `bottom_end ``, as HeroUI's do.
