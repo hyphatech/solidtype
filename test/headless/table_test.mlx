@@ -156,6 +156,72 @@ let () =
                      "columnheader:Role",
                      "columnheader:Name",
                      "columnheader:Actions" )));
+      Jest.testPromise "walks its rows in their order after they are sorted"
+        (fun () ->
+          let shown, set_shown = S.create_signal members in
+          H.render (fun () ->
+              <Table.Root aria_label="Team members">
+                <Table.Header>
+                  <Table.Column is_row_header=true>"Name"</Table.Column>
+                </Table.Header>
+                <Table.Body>
+                  <For each=(fun () -> S.get shown)>
+                    (fun m _ ->
+                      <Table.Row id=(fun () -> m.id)>
+                        <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
+                      </Table.Row>)
+                  </For>
+                </Table.Body>
+              </Table.Root>);
+          let user = H.setup () in
+          H.focus (row "John Smith");
+          S.set set_shown (Array.of_list (List.rev (Array.to_list members)));
+          let* () = H.keyboard user "{ArrowDown}" in
+          let below = where () in
+          let* () = H.keyboard user "{ArrowUp}{ArrowUp}" in
+          Js.Promise.resolve
+            E.(
+              expect (below, where ())
+              |> toEqual ("row:Kate Moore", "row:Sara Johnson")));
+      Jest.test "indexes its columns and cells in their order after a reorder"
+        (fun () ->
+          let columns, set_columns = S.create_signal [| "Name"; "Role" |] in
+          H.render (fun () ->
+              <Table.Root aria_label="Team members">
+                <Table.Header>
+                  <For each=(fun () -> S.get columns)>
+                    (fun c _ ->
+                      <Table.Column
+                        is_row_header=(fun () -> String.equal c "Name")>
+                        (fun () -> Jsx.string c)
+                      </Table.Column>)
+                  </For>
+                </Table.Header>
+                <Table.Body>
+                  <Table.Row id="1">
+                    <For each=(fun () -> S.get columns)>
+                      (fun c _ ->
+                        <Table.Cell>
+                          (fun () -> Jsx.string ("Kate's " ^ c))
+                        </Table.Cell>)
+                    </For>
+                  </Table.Row>
+                </Table.Body>
+              </Table.Root>);
+          S.set set_columns [| "Role"; "Name" |];
+          let cell text =
+            let e = H.by_text text in
+            (H.attribute e "data-column-index", H.attribute e "role")
+          in
+          E.(
+            expect
+              ( cell "Kate's Role",
+                cell "Kate's Name",
+                H.attribute (H.by_text "Role") "aria-colindex" )
+            |> toEqual
+                 ( (Some "0", Some "gridcell"),
+                   (Some "1", Some "rowheader"),
+                   Some "1" )));
       Jest.testPromise
         "selects rows, writing their state as Kobalte writes it, a disabled \
          row left out" (fun () ->

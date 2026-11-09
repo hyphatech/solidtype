@@ -1,5 +1,11 @@
 # Changes
 
+## Unreleased
+
+- `Solidtype_headless.Table`, and HeroUI's on it, walk rows in their order
+  after a `For` sorts them, where the arrows followed the order before, and
+  index columns and cells in theirs after a reorder.
+
 ## 0.6.0 (2026-11-06)
 
 - A prop named `props` is refused at its name, the same on mlx 0.11 and 0.12,

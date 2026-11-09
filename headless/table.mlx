@@ -30,11 +30,6 @@ external query_all :
 external closest : Dom.element -> string -> Dom.element Js.null = "closest"
 [@@mel.send]
 
-(* Whether [other] follows [e] on the page, by DOM's bit for it. *)
-external position : _ Dom.element_like -> _ Dom.element_like -> int
-  = "compareDocumentPosition"
-[@@mel.send]
-
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
 
 (* A key's name, where a part's own [key] names something else. *)
@@ -54,51 +49,6 @@ let in_control e =
         [role=button]")
   <> None
 
-(* Columns, or a row's cells, each placed in order: by the order they were
-   made until it is on the page -- the server's only order, which the
-   browser's agrees with as it hydrates -- then by where it is, so one added
-   between two, or one gone, moves those after it. *)
-type 'element placing = {
-  made : int ref;
-  on_page : 'element list S.accessor;
-  set_on_page : 'element list S.setter;
-  alive : int S.accessor;
-  set_alive : int S.setter;
-}
-
-let placing () =
-  let on_page, set_on_page = S.create_signal [] in
-  let alive, set_alive = S.create_signal 0 in
-  { made = ref 0; on_page; set_on_page; alive; set_alive }
-
-(* Where a part made now is, given what will be its element. *)
-let place p element =
-  let made = !(p.made) in
-  incr p.made;
-  S.update p.set_alive succ;
-  let placed = ref None in
-  S.on_mount (fun () ->
-      Option.iter
-        (fun e ->
-          placed := Some e;
-          S.update p.set_on_page (fun l -> e :: l))
-        (S.get element));
-  S.on_cleanup (fun () ->
-      S.update p.set_alive pred;
-      Option.iter
-        (fun e -> S.update p.set_on_page (List.filter (fun o -> o != e)))
-        !placed);
-  fun () ->
-    let on_page = S.get p.on_page in
-    match !placed with
-    | Some e ->
-        List.length
-          (List.filter (fun o -> o != e && position e o land 2 <> 0) on_page)
-    | None -> made
-
-(* How many there are. *)
-let count p () = S.get p.alive
-
 type row = {
   key : string;
   level : int;
@@ -113,13 +63,13 @@ type row = {
 
 type cell = { is_tree_column : unit -> bool; column_index : unit -> int }
 
-(* A row as the table keeps it: its key, its element, which says where it is
-   on the page, and where it is in the tree. *)
+(* A row as the table keeps it: its key, its element, and where it is in the
+   tree. *)
 type listed = {
   key : string;
   element : Dom.element;
   parent : string option;
-  has_children : unit -> bool;
+  child_keys : unit -> string array;
 }
 
 type sort_descriptor = {
@@ -328,12 +278,16 @@ type table = {
   rows : unit -> listed list;
   add : listed -> unit;
   remove : string -> unit;
+  set_order : (unit -> string array) option -> unit;
+      (** The keys of the body's rows, in the order it holds them. *)
   manager : Manager.t S.accessor;
   row_header : unit -> int;
   set_row_header : (unit -> int) option -> unit;
   tree_index : unit -> int option;
   set_tree_index : (unit -> int) option -> unit;
-  columns : Dom.element placing;
+  column_count : unit -> int;
+  set_column_count : (unit -> int) option -> unit;
+      (** How many columns the header reads. *)
   add_column : column_spec -> unit;
   remove_column : string -> unit;
   sizing : sizing option;
@@ -351,17 +305,13 @@ let in_table part =
 
 let use_context () = (in_table "Table.use_context").context
 
-(* What a row's cells, and the rows nested in it, read of it: where its cells
-   are, and its state. *)
-type row_cells = { cells : Dom.element placing; state : row }
-
 module Row_context = Solidtype.Context.Make_optional (struct
-  type t = row_cells
+  type t = row
 end)
 
 let use_row_context () =
   match Row_context.use () with
-  | Some r -> r.state
+  | Some r -> r
   | None -> invalid_arg "Table.use_row_context is used inside a Table.Row"
 
 module Cell_context = Solidtype.Context.Make_optional (struct
@@ -387,12 +337,20 @@ module Nested = Jsx.Token (struct
 end)
 
 (* A row's cell, drawn by its row once the row has read all it holds: whether
-   it holds rows is then known to each cell, on the server as in the
-   browser. *)
-type drawn_cell = { draw_cell : unit -> Jsx.element }
+   it holds rows is then known to each cell, on the server as in the browser,
+   and its column is its place among them, which a reorder moves. *)
+type drawn_cell = { draw_cell : index:(unit -> int) -> Jsx.element }
 
 module Cells = Jsx.Token (struct
   type t = drawn_cell
+end)
+
+(* A column, drawn by the header once it has read them all, its place among
+   them its index, which a reorder moves. *)
+type drawn_column = { draw_column : index:(unit -> int) -> Jsx.element }
+
+module Columns = Jsx.Token (struct
+  type t = drawn_column
 end)
 
 let role e = Js.Null.toOption (attribute e "role")
@@ -745,10 +703,43 @@ module Root = struct
       Option.value (Props.selection_mode props) ~default:`none
     in
     let rows, set_rows = S.create_signal [] in
+    let order, set_order = S.create_signal None in
+    (* Its rows' keys expanded: [expanded_keys] while it is given them, else
+       those it keeps. *)
+    let kept_expanded, set_kept_expanded =
+      S.create_signal
+        (S.untrack (fun () ->
+             Option.value (Props.default_expanded_keys props) ~default:[||]))
+    in
+    let expanded_keys () =
+      match Props.expanded_keys props with
+      | Some keys -> keys
+      | None -> S.get kept_expanded
+    in
+    let is_expanded k = Array.exists (String.equal k) (expanded_keys ()) in
+    (* Its rows on the page, in the order the body holds them, each followed
+       by those it holds while it is expanded, as they are drawn: never their
+       elements' places, which a sort that moves them leaves unread. *)
     let ordered () =
-      List.sort
-        (fun a b -> if position a.element b.element land 4 <> 0 then -1 else 1)
-        (S.get rows)
+      let on_page = Hashtbl.create 64 in
+      List.iter
+        (fun (r : listed) -> Hashtbl.replace on_page r.key r)
+        (S.get rows);
+      let rec walk keys =
+        List.concat_map
+          (fun k ->
+            match Hashtbl.find_opt on_page k with
+            | Some r ->
+                r
+                ::
+                (if is_expanded k then walk (Array.to_list (r.child_keys ()))
+                 else [])
+            | None -> [])
+          keys
+      in
+      match S.get order with
+      | Some keys -> walk (Array.to_list (keys ()))
+      | None -> []
     in
     (* A table a virtualizer lays out, as React Aria's TableLayout does. *)
     let layout =
@@ -817,21 +808,9 @@ module Root = struct
         element ()
     in
     let row_header, set_row_header = S.create_signal None in
+    let column_count, set_column_count = S.create_signal None in
     let tree_index, set_tree_index = S.create_signal None in
     let m () = S.get manager in
-    (* Its rows' keys expanded: [expanded_keys] while it is given them, else
-       those it keeps. *)
-    let kept_expanded, set_kept_expanded =
-      S.create_signal
-        (S.untrack (fun () ->
-             Option.value (Props.default_expanded_keys props) ~default:[||]))
-    in
-    let expanded_keys () =
-      match Props.expanded_keys props with
-      | Some keys -> keys
-      | None -> S.get kept_expanded
-    in
-    let is_expanded k = Array.exists (String.equal k) (expanded_keys ()) in
     let toggle_expanded k =
       let now = expanded_keys () in
       let next =
@@ -1134,6 +1113,7 @@ module Root = struct
           (fun k ->
             S.set set_rows
               (List.filter (fun r -> not (String.equal r.key k)) (S.get rows)));
+        set_order = S.set set_order;
         manager;
         row_header =
           (fun () ->
@@ -1145,7 +1125,10 @@ module Root = struct
             | Some index -> Some (index ())
             | None -> None);
         set_tree_index = S.set set_tree_index;
-        columns = placing ();
+        column_count =
+          (fun () ->
+            match S.get column_count with Some count -> count () | None -> 0);
+        set_column_count = S.set set_column_count;
         add_column = (fun c -> S.set set_specs (c :: S.get specs));
         remove_column =
           (fun k ->
@@ -1201,11 +1184,13 @@ module Root = struct
                 in
                 match (listed, key e) with
                 | Some r, "ArrowRight"
-                  when r.has_children () && not (is_expanded r.key) ->
+                  when Array.length (r.child_keys ()) > 0
+                       && not (is_expanded r.key) ->
                     toggle_expanded r.key;
                     `grid None
                 | Some r, "ArrowLeft"
-                  when r.has_children () && is_expanded r.key ->
+                  when Array.length (r.child_keys ()) > 0 && is_expanded r.key
+                  ->
                     toggle_expanded r.key;
                     `grid None
                 | Some { parent = Some above; _ }, "ArrowLeft" -> (
@@ -1272,7 +1257,8 @@ module Root = struct
                            virtualized)
         ?aria_colcount=(fun () ->
                          Option.map
-                           (fun v -> string_of_int (v.column_count ()))
+                           (fun (v : virtualized) ->
+                             string_of_int (v.column_count ()))
                            virtualized)
         ?aria_multiselectable=(fun () ->
                                 match selection_mode () with
@@ -1329,13 +1315,27 @@ module Header = struct
 
   let make (props : Props.t) =
     let t = in_table "Table.Header" in
+    let resolved = S.children (fun () -> Props.children props) in
+    let all () = S.to_array (S.get resolved) in
+    let columns = S.create_memo (fun () -> Columns.read (all ())) in
+    t.set_column_count (Some (fun () -> Array.length (S.get columns)));
+    S.on_cleanup (fun () -> t.set_column_count None);
+    let drawn () =
+      Jsx.fragment
+        [|
+          <For each=(fun () -> S.get columns)>
+            (fun c index -> c.draw_column ~index:(fun () -> S.get index))
+          </For>;
+          Jsx.fragment (Columns.others (all ()));
+        |]
+    in
     match t.virtualized with
     | None ->
         <thead
           role=`rowgroup
           ?as_=(fun () -> S.drawn_as props)
           props=(S.undrawn (S.omit props [| "children" |]))>
-          <tr role=`row>(fun () -> Props.children props)</tr>
+          <tr role=`row>(fun () -> Jsx.element (drawn ()))</tr>
         </thead>
     | Some v ->
         (* Its row stays over the rows as they scroll, as React Aria's
@@ -1352,7 +1352,7 @@ module Header = struct
             ?as_=(fun () -> S.drawn_as props)
             props=(S.undrawn (S.omit props [| "children" |]))>
             <div role=`row aria_rowindex="1">
-              (fun () -> Props.children props)
+              (fun () -> Jsx.element (drawn ()))
             </div>
           </div>
         </div>
@@ -1438,10 +1438,7 @@ module Column = struct
       "onKeyDown";
     |]
 
-  let make (props : Props.t) =
-    let t = in_table "Table.Column" in
-    let element, set_element = S.create_signal None in
-    let index = place t.columns element in
+  let draw t ~index (props : Props.t) =
     let names_rows =
       S.untrack (fun () ->
           Option.value (Props.is_row_header props) ~default:false)
@@ -1510,10 +1507,7 @@ module Column = struct
                          "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
                        t.sizing)
             data_resizing=(fun () -> state (resizing ()))
-            ref=(fun e ->
-                  let e = as_element e in
-                  S.set set_element (Some e);
-                  call (Props.ref props) e)
+            ref=(fun e -> call (Props.ref props) (as_element e))
             ?aria_sort=(fun () ->
                          if sortable () then
                            Some
@@ -1557,6 +1551,10 @@ module Column = struct
           (fun () -> Jsx.element drawn)
         </div>
 
+  let make (props : Props.t) =
+    let t = in_table "Table.Column" in
+    Columns.element { draw_column = (fun ~index -> draw t ~index props) }
+
   let component = Jsx.component make
 end
 
@@ -1586,6 +1584,8 @@ module Body = struct
       if Array.length (S.get rows) = 0 then Props.empty_state props else None
     in
     let size () = Array.length (S.get rows) in
+    t.set_order (Some (fun () -> Array.map (fun n -> n.row_key) (S.get rows)));
+    S.on_cleanup (fun () -> t.set_order None);
     let others () = Jsx.element (Jsx.fragment (Nested.others (all ()))) in
     match t.virtualized with
     | None ->
@@ -1603,7 +1603,7 @@ module Body = struct
               <tr role=`row>
                 <td
                   role=`rowheader
-                  colspan=(fun () -> string_of_int (count t.columns ()))>
+                  colspan=(fun () -> string_of_int (t.column_count ()))>
                   (fun () -> Jsx.element (S.get shown))
                 </td>
               </tr>)
@@ -1709,10 +1709,10 @@ module Row = struct
       "onFocus";
     |]
 
-  let draw t ~(parent : row_cells option) ~position ~size (props : Props.t) =
+  let draw t ~(parent : row option) ~position ~size (props : Props.t) =
     let key = S.untrack (fun () -> Props.id props) in
-    let level = match parent with Some p -> p.state.level + 1 | None -> 1 in
-    let parent_key = Option.map (fun (p : row_cells) -> p.state.key) parent in
+    let level = match parent with Some p -> p.level + 1 | None -> 1 in
+    let parent_key = Option.map (fun (p : row) -> p.key) parent in
     let element, set_element = S.create_signal None in
     let item =
       Selection.create_selectable_item
@@ -1729,23 +1729,17 @@ module Row = struct
     let header_id = S.create_unique_id () in
     let r =
       {
-        cells = placing ();
-        state =
-          {
-            key;
-            level;
-            has_child_items;
-            is_expanded = expanded;
-            is_selected = selected;
-            is_disabled = disabled;
-            toggle_expanded = (fun () -> t.context.toggle_expanded key);
-            focus = (fun () -> Option.iter focus (S.get element));
-            header_id;
-          };
+        key;
+        level;
+        has_child_items;
+        is_expanded = expanded;
+        is_selected = selected;
+        is_disabled = disabled;
+        toggle_expanded = (fun () -> t.context.toggle_expanded key);
+        focus = (fun () -> Option.iter focus (S.get element));
+        header_id;
       }
     in
-    (* A row joins the list once it is on the page, where its place among the
-       others is read. *)
     S.on_mount (fun () ->
         Option.iter
           (fun e ->
@@ -1754,7 +1748,8 @@ module Row = struct
                 key;
                 element = e;
                 parent = parent_key;
-                has_children = has_child_items;
+                child_keys =
+                  (fun () -> Array.map (fun n -> n.row_key) (!nested ()));
               })
           (S.get element));
     S.on_cleanup (fun () -> t.remove key);
@@ -1832,7 +1827,7 @@ module Row = struct
                        Selectable_item.on_focus item e)
             props=(S.undrawn (S.omit props own))>
             <For each=(fun () -> Cells.read (all ()))>
-              (fun c _ -> c.draw_cell ())
+              (fun c index -> c.draw_cell ~index:(fun () -> S.get index))
             </For>
           </Dynamic.Drawn>
         in
@@ -1904,9 +1899,7 @@ module Cell = struct
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
   end
 
-  let draw t r (props : Props.t) =
-    let element, set_element = S.create_signal None in
-    let index = place r.cells element in
+  let draw t (r : row) ~index (props : Props.t) =
     let names_row () = index () = t.row_header () in
     let is_tree_column () =
       match t.tree_index () with Some i -> index () = i | None -> false
@@ -1919,7 +1912,7 @@ module Cell = struct
                       Solidtype.Jsx.drawn_as (S.drawn_as props)
                         (tag t.virtualized "td"))
           role=(fun () -> if names_row () then `rowheader else `gridcell)
-          ?id=(fun () -> if names_row () then Some r.state.header_id else None)
+          ?id=(fun () -> if names_row () then Some r.header_id else None)
           ?aria_colindex=(fun () ->
                            Option.map
                              (fun _ -> string_of_int (index () + 1))
@@ -1927,10 +1920,7 @@ module Cell = struct
           tabindex="-1"
           data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
           data_tree_column=(fun () -> state (is_tree_column ()))
-          ref=(fun e ->
-                let e = as_element e in
-                S.set set_element (Some e);
-                call (Props.ref props) e)
+          ref=(fun e -> call (Props.ref props) (as_element e))
           props=(S.undrawn (S.omit props [| "children"; "ref" |]))>
           (fun () -> Props.children props)
         </Dynamic.Drawn>
@@ -1955,7 +1945,7 @@ module Cell = struct
       | Some r -> r
       | None -> invalid_arg "Table.Cell is used inside a Table.Row"
     in
-    Cells.element { draw_cell = (fun () -> draw t r props) }
+    Cells.element { draw_cell = (fun ~index -> draw t r ~index props) }
 
   let component = Jsx.component make
 end
@@ -2019,7 +2009,7 @@ module Load_more = struct
                 props=(S.undrawn (rest ()))>
                 <td
                   role=`rowheader
-                  colspan=(fun () -> string_of_int (count t.columns ()))>
+                  colspan=(fun () -> string_of_int (t.column_count ()))>
                   (fun () -> Props.children props)
                 </td>
               </tr>

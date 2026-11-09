@@ -273,9 +273,10 @@ end
 
 (** A row, a [<tr role="row">] of Kobalte's list, [data-key] its [id], which is
     its key in a selection, named by its row header's cell. A row joins the list
-    once it is on the page, ordered as the page has it. Its children are its
-    cells, and in a tree the rows it holds, drawn after it while it is expanded,
-    and [data-expanded] while it is. *)
+    once it is on the page, in the order its body holds it, so rows sorted by
+    the [For] that draws them are walked in their new order. Its children are
+    its cells, and in a tree the rows it holds, drawn after it while it is
+    expanded, and [data-expanded] while it is. *)
 module Row : sig
   module Props : sig
     type t
