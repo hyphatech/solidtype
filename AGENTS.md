@@ -156,6 +156,9 @@ docs/                the documentation, a Starlight site in Hypha's look,
                      the packages, and a link to each module's odoc page,
                      which `make docs` copies into public/reference/,
                      ignored, since Starlight serves public/ as it is
+  public/llms.txt    the site's index for a model, written by hand: what
+                     solidtype is, how it is written, every page; amended
+                     with each page added or changed
   src/pages/demo/    the Astro page's demo, pages of Astro's own outside
                      Starlight: a route per tea, its islands given props,
                      under a basket the client router keeps; the page
@@ -258,7 +261,8 @@ test/internationalized_date/
                      saving, values of several kinds, a throw as a value
 test/ppx/            what the ppx writes for each JSX form
 test/test_docs.ml    every island of docs/islands on some page, or a part of
-                     other islands, and every rhp page linked to rhp's
+                     other islands, every rhp page linked to rhp's, and
+                     every page in llms.txt
 test/does_not_compile.t
                      each mistake the types refuse, built against the
                      installed library, with the error a user reads

@@ -70,6 +70,50 @@ let every_rhp_page_links_to_rhp () =
          not (contains (read (Filename.concat dir f)) "https://rhp.vercel.app/"))
        pages)
 
+(* llms.txt is written by hand, the site's index for a model: it lists every
+   page by its URL, and lists no page the site does not have. *)
+let site = "https://hyphatech.github.io/solidtype/"
+
+let llms_txt_lists_every_page () =
+  let docs = "../docs/src/content/docs" in
+  let rec slugs dir =
+    Sys.readdir (Filename.concat docs dir)
+    |> Array.to_list
+    |> List.concat_map (fun f ->
+        let path = if String.equal dir "" then f else dir ^ "/" ^ f in
+        if Sys.is_directory (Filename.concat docs path) then slugs path
+        else if Filename.check_suffix f ".md" || Filename.check_suffix f ".mdx"
+        then
+          let name = Filename.remove_extension f in
+          if String.equal name "index" then
+            [ (if String.equal dir "" then "" else dir ^ "/") ]
+          else [ Filename.remove_extension path ^ "/" ]
+        else [])
+  in
+  let pages = slugs "" in
+  let llms = read "../docs/public/llms.txt" in
+  let linked =
+    String.split_on_char '(' llms
+    |> List.filter_map (fun after ->
+        match String.index_opt after ')' with
+        | None -> None
+        | Some close ->
+            let url = String.sub after 0 close in
+            let n = String.length site in
+            if
+              String.starts_with ~prefix:site url
+              && String.ends_with ~suffix:"/" url
+            then Some (String.sub url n (String.length url - n))
+            else None)
+  in
+  Alcotest.(check bool) "the site has pages" true (List.length pages > 1);
+  Alcotest.(check (list string))
+    "a page llms.txt does not list" []
+    (List.filter (fun page -> not (List.mem page linked)) pages);
+  Alcotest.(check (list string))
+    "a page llms.txt lists that the site does not have" []
+    (List.filter (fun page -> not (List.mem page pages)) linked)
+
 let () =
   Alcotest.run "docs"
     [
@@ -82,5 +126,9 @@ let () =
         [
           Alcotest.test_case "every page links to rhp's" `Quick
             every_rhp_page_links_to_rhp;
+        ] );
+      ( "llms.txt",
+        [
+          Alcotest.test_case "lists every page" `Quick llms_txt_lists_every_page;
         ] );
     ]

@@ -1,0 +1,184 @@
+# solidtype
+
+> Solid, typed, for OCaml front ends on SolidJS and Kobalte, compiled by Melange. A component is written in OCaml's JSX (`.mlx`) and reaches the browser as the code Solid's own compiler emits for the same JSX. HeroUI's components are ported onto Kobalte, and rhp's charts are bound.
+
+A reactive read in the wrong place does not compile, and neither does a prop left out, an attribute an element does not take, or a `match` in a `Switch` that misses a case. Solid's, Kobalte's and HeroUI's own documentation stays the reference for what a component does; these pages say how it is written in OCaml.
+
+## Packages
+
+- `solidtype`: Solid 1.9 bound whole, for Melange: signals, resources, stores, its components, its renderer, server rendering included.
+- `ppx_solidtype`: rewrites the JSX of `.mlx` files into calls Melange compiles.
+- `vite-plugin-solidtype`: turns those calls back into JSX for Solid's compiler. It is not on npm: it is the asset `vite-plugin-solidtype-<version>.tgz` of each release at https://github.com/hyphatech/solidtype/releases, at the version of the opam packages.
+- `solidtype-kobalte`: Kobalte 0.13 bound whole, generated from its declarations.
+- `solidtype-headless`: the components Kobalte lacks, with no style, and Kobalte's own where they need a fix.
+- `solidtype-heroui`: HeroUI 3's components, ported onto Kobalte.
+- `solidtype-rhp`: rhp 2.2's charts.
+- `solidtype-internationalized-date`: @internationalized/date, the values HeroUI's date components take.
+
+The opam packages come from Hypha's repository: `opam repo add hypha https://github.com/hyphatech/opam-repository.git`. Each names the npm packages it imports in its opam field `x-npm-depends`: `bun add $(opam show solidtype-heroui --field x-npm-depends)`. In Vite, `solidtype()` goes before `solid()`.
+
+## Writing it
+
+- Every name is snake case, by one rule from the name in Solid's, Kobalte's or HeroUI's documentation: `onClick` is `on_click`, `aria-label` is `aria_label`, `isDisabled` is `is_disabled`; a keyword takes a trailing underscore, `class_`, `type_`. A module keeps its JavaScript name: `Solidtype_kobalte.Switch.Root`, `Solidtype_heroui.Button`.
+- A value that may change is a thunk: `class_=(fun () -> ...)`, a child `(fun () -> Jsx.int (S.get count))`. A literal is given as it is.
+- A function prop is the function itself, and one that takes nothing is `(fun _ -> ...)`, since `(fun () -> ...)` is a thunk.
+- An optional prop is passed with `?`: `?title=(fun () -> note ())`, absent while `None`.
+- A component is `let%component make ~(name : string) () = ...`, and reads a prop as a call, `name ()`; its tag is the module, `<Greeting name="Ada" />`. A root mounted by a page is a plain `let make () = ...`.
+- A spread, TSX's `{...props}`, is the attribute `props`; no prop is named `props`.
+- A `data-` attribute is a `Jsx.data`: `data_selected=(fun () -> Jsx.flag (on ()))`.
+- A namespace wraps the value: `on:click={f}` is `on_click=(Jsx.native f)`.
+- A part draws another element by `as_`, HeroUI's `render`.
+
+```ocaml
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+
+let make () =
+  let count, set_count = S.create_signal 0 in
+  <button
+    class_="button button--primary"
+    type_=`button
+    on_click=(fun _ -> S.update set_count succ)>
+    "Clicked " (fun () -> Jsx.int (S.get count)) " times"
+  </button>
+```
+
+## Start here
+
+- [Getting Started](https://hyphatech.github.io/solidtype/): SolidJS for modern OCaml: install, dune, Vite and a first page.
+- [OCaml over TypeScript](https://hyphatech.github.io/solidtype/start/ocaml-over-typescript/): Safe, readable and predictable, and still Solid underneath.
+- [How it works](https://hyphatech.github.io/solidtype/start/how-it-works/): One component, from OCaml's JSX to the code Solid's compiler emits.
+- [Melange and dune](https://hyphatech.github.io/solidtype/start/melange/): How components are built by dune, compiled by Melange, and why the libraries are shaped as they are.
+- [Vite](https://hyphatech.github.io/solidtype/start/vite/): The plugin in Vite, under Astro, and under vitest.
+- [Astro](https://hyphatech.github.io/solidtype/start/astro/): Build a site with Astro, its interactive parts written as OCaml islands.
+- [Conventions](https://hyphatech.github.io/solidtype/start/conventions/): How a name, a namespace, a data attribute, an optional prop and a spread from Solid's documentation are written in OCaml.
+
+## Solid
+
+- [Solid](https://hyphatech.github.io/solidtype/solid/): Zero-cost bindings to Solid.
+- [Components](https://hyphatech.github.io/solidtype/solid/components/): A component in OCaml's JSX, its props, its children, and how the compiler checks them.
+- [Reactivity](https://hyphatech.github.io/solidtype/solid/reactivity/): Signals, derived values and effects, and why a reactive read is a thunk.
+- [Control flow](https://hyphatech.github.io/solidtype/solid/control-flow/): Show, For, Index, Switch and Match, ErrorBoundary and Portal, with OCaml's options and matches.
+- [Stores and context](https://hyphatech.github.io/solidtype/solid/state/): State tracked field by field, and a value given to every component below a provider.
+- [Async](https://hyphatech.github.io/solidtype/solid/async/): Resources, Suspense and transitions, with OCaml's options and results.
+- [Rendering](https://hyphatech.github.io/solidtype/solid/rendering/): Mounting in the browser, rendering on the server, and hydrating what the server rendered.
+
+## Kobalte
+
+- [Kobalte](https://hyphatech.github.io/solidtype/kobalte/): Zero-cost bindings to Kobalte, generated from its own types.
+- [The binding](https://hyphatech.github.io/solidtype/kobalte/binding/): How solidtype-kobalte is generated from Kobalte's own declarations, and how Kobalte's types become OCaml's.
+- [Using Kobalte](https://hyphatech.github.io/solidtype/kobalte/usage/): Kobalte's components in OCaml's JSX, styled by their own data attributes.
+- [Headless components](https://hyphatech.github.io/solidtype/kobalte/headless/): Components Kobalte lacks, made as Kobalte makes its own, of its hooks, and Kobalte's own, fixed.
+
+## HeroUI
+
+Each component's page gives HeroUI's own examples in OCaml, and a table of its props with the name HeroUI's React component gives each.
+
+- [HeroUI](https://hyphatech.github.io/solidtype/heroui/): A maintained port of HeroUI's design system to solidtype: install, and what a port is.
+- [Theming](https://hyphatech.github.io/solidtype/heroui/theming/): HeroUI's themes, colours and dark mode, as a port takes them.
+- [Styling](https://hyphatech.github.io/solidtype/heroui/styling/): A port's classes, its state and its motion, styled as HeroUI's are.
+- [Composition](https://hyphatech.github.io/solidtype/heroui/composition/): A port's parts, and HeroUI's look on elements no port renders.
+- [Coverage](https://hyphatech.github.io/solidtype/heroui/coverage/): Which of HeroUI's components solidtype has ported.
+- [Accordion](https://hyphatech.github.io/solidtype/heroui/accordion/): A stack of sections, each a heading that shows and hides its panel.
+- [Alert](https://hyphatech.github.io/solidtype/heroui/alert/): A message, with its status's icon, title and description.
+- [AlertDialog](https://hyphatech.github.io/solidtype/heroui/alert-dialog/): A dialog that asks before going on, HeroUI's on Kobalte's.
+- [Autocomplete](https://hyphatech.github.io/solidtype/heroui/autocomplete/): A select whose popover filters its list by a search field, HeroUI's on Kobalte's combo box.
+- [Avatar](https://hyphatech.github.io/solidtype/heroui/avatar/): A person's picture, with a fallback while it loads.
+- [AvatarGroup](https://hyphatech.github.io/solidtype/heroui/avatar-group/): Avatars stacked or in a grid, the rest counted.
+- [Badge](https://hyphatech.github.io/solidtype/heroui/badge/): A count or a status over the content it marks.
+- [Breadcrumbs](https://hyphatech.github.io/solidtype/heroui/breadcrumbs/): The trail of pages to the one shown, HeroUI's on Kobalte's.
+- [Button](https://hyphatech.github.io/solidtype/heroui/button/): A clickable button, HeroUI's on Kobalte's.
+- [ButtonGroup](https://hyphatech.github.io/solidtype/heroui/button-group/): Related buttons, grouped with one look.
+- [Card](https://hyphatech.github.io/solidtype/heroui/card/): A container that groups related content and actions.
+- [Checkbox](https://hyphatech.github.io/solidtype/heroui/checkbox/): A checkbox, HeroUI's on Kobalte's.
+- [CheckboxGroup](https://hyphatech.github.io/solidtype/heroui/checkbox-group/): Checkboxes of which any are checked, as a set of values.
+- [Chip](https://hyphatech.github.io/solidtype/heroui/chip/): A short label for a status, a category or a choice.
+- [CloseButton](https://hyphatech.github.io/solidtype/heroui/close-button/): A button that closes a dialog, a modal, or dismisses content.
+- [ColorArea](https://hyphatech.github.io/solidtype/heroui/color-area/): Two channels of a colour, picked across and up a square.
+- [ColorField](https://hyphatech.github.io/solidtype/heroui/color-field/): A colour typed as its hex, or one of its channels as a number.
+- [ColorPicker](https://hyphatech.github.io/solidtype/heroui/color-picker/): One colour shared by the colour components inside it.
+- [ColorSlider](https://hyphatech.github.io/solidtype/heroui/color-slider/): One channel of a colour, slid along a track of its range.
+- [ColorSwatch](https://hyphatech.github.io/solidtype/heroui/color-swatch/): A colour, shown, and named for a reader.
+- [ColorSwatchPicker](https://hyphatech.github.io/solidtype/heroui/color-swatch-picker/): A list of colour swatches, one chosen from a palette.
+- [ComboBox](https://hyphatech.github.io/solidtype/heroui/combo-box/): An input that filters a list of options to choose one or many of, HeroUI's on Kobalte's.
+- [Description](https://hyphatech.github.io/solidtype/heroui/description/): A field's helper text.
+- [Disclosure](https://hyphatech.github.io/solidtype/heroui/disclosure/): A section that shows and hides its content.
+- [DisclosureGroup](https://hyphatech.github.io/solidtype/heroui/disclosure-group/): Disclosures expanded together, one at a time or several.
+- [Drawer](https://hyphatech.github.io/solidtype/heroui/drawer/): A dialog that slides in from an edge, HeroUI's on Kobalte's.
+- [Dropdown](https://hyphatech.github.io/solidtype/heroui/dropdown/): A menu of actions or options from a trigger, HeroUI's on Kobalte's.
+- [EmptyState](https://hyphatech.github.io/solidtype/heroui/empty-state/): What a list shows where it has nothing to show.
+- [FieldError](https://hyphatech.github.io/solidtype/heroui/field-error/): A field's validation error.
+- [Fieldset](https://hyphatech.github.io/solidtype/heroui/fieldset/): Related fields, with a legend and their actions.
+- [Form](https://hyphatech.github.io/solidtype/heroui/form/): Fields submitted together, a submit refused while one is invalid.
+- [Input](https://hyphatech.github.io/solidtype/heroui/input/): A single-line text input.
+- [InputGroup](https://hyphatech.github.io/solidtype/heroui/input-group/): An input with what goes before and after it.
+- [Kbd](https://hyphatech.github.io/solidtype/heroui/kbd/): A keyboard key, or a combination of keys.
+- [Label](https://hyphatech.github.io/solidtype/heroui/label/): A field's name.
+- [Link](https://hyphatech.github.io/solidtype/heroui/link/): A link, HeroUI's on Kobalte's.
+- [ListBox](https://hyphatech.github.io/solidtype/heroui/list-box/): A list of options to select or act on, HeroUI's on Kobalte's.
+- [Meter](https://hyphatech.github.io/solidtype/heroui/meter/): A quantity within a known range.
+- [Modal](https://hyphatech.github.io/solidtype/heroui/modal/): A dialog over the page, HeroUI's on Kobalte's.
+- [NumberField](https://hyphatech.github.io/solidtype/heroui/number-field/): A number, typed or stepped by its buttons, the arrow keys and the wheel.
+- [Pagination](https://hyphatech.github.io/solidtype/heroui/pagination/): Pages to move between, HeroUI's on Kobalte's buttons.
+- [Popover](https://hyphatech.github.io/solidtype/heroui/popover/): Rich content beside a trigger, HeroUI's on Kobalte's.
+- [ProgressBar](https://hyphatech.github.io/solidtype/heroui/progress-bar/): Determinate or indeterminate progress of an operation over time.
+- [ProgressCircle](https://hyphatech.github.io/solidtype/heroui/progress-circle/): Progress of an operation, as an arc round a circle.
+- [RadioGroup](https://hyphatech.github.io/solidtype/heroui/radio-group/): A radio group, HeroUI's on Kobalte's.
+- [ScrollShadow](https://hyphatech.github.io/solidtype/heroui/scroll-shadow/): Scrolling content, faded at each edge it hides more at.
+- [SearchField](https://hyphatech.github.io/solidtype/heroui/search-field/): A search input, cleared by Escape or its button and submitted by Enter.
+- [Segment](https://hyphatech.github.io/solidtype/heroui/segment/): A segmented control, for a few options of which one is selected.
+- [Select](https://hyphatech.github.io/solidtype/heroui/select/): A button that chooses one or many options from a list, HeroUI's on Kobalte's.
+- [Separator](https://hyphatech.github.io/solidtype/heroui/separator/): A line between content.
+- [Skeleton](https://hyphatech.github.io/solidtype/heroui/skeleton/): A placeholder in the shape of content that is loading.
+- [Slider](https://hyphatech.github.io/solidtype/heroui/slider/): A value, or a range of two, chosen along a track.
+- [Spinner](https://hyphatech.github.io/solidtype/heroui/spinner/): A loading indicator, for a pending state.
+- [Surface](https://hyphatech.github.io/solidtype/heroui/surface/): The background a part of a page stands on.
+- [Switch](https://hyphatech.github.io/solidtype/heroui/switch/): A switch, HeroUI's on Kobalte's.
+- [Table](https://hyphatech.github.io/solidtype/heroui/table/): Rows and columns of data, moved through by the keys.
+- [Tabs](https://hyphatech.github.io/solidtype/heroui/tabs/): Sections of content, one shown at a time, chosen from a list of tabs.
+- [TextArea](https://hyphatech.github.io/solidtype/heroui/text-area/): A multi-line text input.
+- [TextField](https://hyphatech.github.io/solidtype/heroui/text-field/): A field of a label, an input, a description and an error.
+- [TextShimmer](https://hyphatech.github.io/solidtype/heroui/text-shimmer/): Text with a highlight sweeping across it, for a label of work under way.
+- [TimeField](https://hyphatech.github.io/solidtype/heroui/time-field/): A time of day, typed or stepped segment by segment.
+- [Toast](https://hyphatech.github.io/solidtype/heroui/toast/): Brief messages, shown in a stack, closing themselves.
+- [ToggleButton](https://hyphatech.github.io/solidtype/heroui/toggle-button/): A button pressed on or off.
+- [ToggleButtonGroup](https://hyphatech.github.io/solidtype/heroui/toggle-button-group/): Toggle buttons of which one or several are selected.
+- [Tooltip](https://hyphatech.github.io/solidtype/heroui/tooltip/): Text shown as an element is hovered or focused, HeroUI's on Kobalte's.
+- [TrendChip](https://hyphatech.github.io/solidtype/heroui/trend-chip/): A chip that shows a change, its arrow and colour from its trend.
+- [Typography](https://hyphatech.github.io/solidtype/heroui/typography/): Text in HeroUI's type scale, each type the element it means.
+
+## Charts
+
+Each page links to the page of rhp's documentation it follows.
+
+- [Charts](https://hyphatech.github.io/solidtype/rhp/): Zero-cost bindings to rhp, Solid's reactive charts made of HTML.
+- [Gallery](https://hyphatech.github.io/solidtype/rhp/gallery/): rhp's gallery charts in OCaml: a waterfall, a pie, a heatmap, a Gantt chart and candlesticks.
+- [Chart](https://hyphatech.github.io/solidtype/rhp/chart/): The frame of a chart: its scale, its axis and its orientation.
+- [Plot](https://hyphatech.github.io/solidtype/rhp/plot/): A slat for each row, stacked in the chart's band, each in its place as the rows change.
+- [Slat](https://hyphatech.github.io/solidtype/rhp/slat/): The template for one row, with the CSS and layout every slat of its type shares.
+- [Scale](https://hyphatech.github.io/solidtype/rhp/scale/): An axis drawn as a plot of its ticks, from blocks.
+- [Bar](https://hyphatech.github.io/solidtype/rhp/bar/): A bar along the value axis, from one value to another.
+- [Dot](https://hyphatech.github.io/solidtype/rhp/dot/): A round point at a value, or at a value on each of two scales.
+- [Tick](https://hyphatech.github.io/solidtype/rhp/tick/): A short line across the band at a value: a goal, a median, a mark.
+- [Label](https://hyphatech.github.io/solidtype/rhp/label/): Text placed on the chart's scale, or outside it at an edge.
+- [Cell](https://hyphatech.github.io/solidtype/rhp/cell/): A cell of the band, coloured by its value on the scale.
+- [Place](https://hyphatech.github.io/solidtype/rhp/place/): A place on the scale, which draws nothing, for whatever is put in it.
+- [Line](https://hyphatech.github.io/solidtype/rhp/line/): A line through points: a sparkline in a slat, or a line chart on a second scale.
+- [Area](https://hyphatech.github.io/solidtype/rhp/area/): A filled outline across the band: ridgelines, or violins drawn both ways.
+- [Many dots](https://hyphatech.github.io/solidtype/rhp/many-dots/): Many points at once, without a slat or a computation for each.
+- [Poster](https://hyphatech.github.io/solidtype/rhp/poster/): A panel around a chart, as a magazine sets one: kicker, headline, dek and note.
+- [Theme](https://hyphatech.github.io/solidtype/rhp/theme/): The colours and font of every chart inside it.
+- [Helpers](https://hyphatech.github.io/solidtype/rhp/helpers/): The functions of data rhp gives: stacks, running totals, bins, summaries, densities.
+
+## Reference
+
+Each module's interface, its `.mli`, is its contract: what each function does, refuses and defaults to.
+
+- [Reference](https://hyphatech.github.io/solidtype/reference/): The packages, and a link to each module's odoc page.
+- [solidtype](https://hyphatech.github.io/solidtype/reference/solidtype/Solidtype/index.html): Solid's core, renderer, server rendering, stores and components, and the JSX the ppx writes.
+- [solidtype-kobalte](https://hyphatech.github.io/solidtype/reference/solidtype-kobalte/Solidtype_kobalte/index.html): each of Kobalte's components, part by part, its hooks and values.
+- [solidtype-headless](https://hyphatech.github.io/solidtype/reference/solidtype-headless/Solidtype_headless/index.html): the components Kobalte lacks, and Kobalte's own, fixed.
+- [solidtype-heroui](https://hyphatech.github.io/solidtype/reference/solidtype-heroui/Solidtype_heroui/index.html): each port, one module each, and HeroUI's variant functions.
+- [solidtype-rhp](https://hyphatech.github.io/solidtype/reference/solidtype-rhp/Solidtype_rhp/index.html): rhp's charts, and its functions of rows.
+- [solidtype-internationalized-date](https://hyphatech.github.io/solidtype/reference/solidtype-internationalized-date/Solidtype_internationalized_date/index.html): dates, times and time zones.
+- [Source](https://github.com/hyphatech/solidtype): the repository, every `.mli` beside its module.

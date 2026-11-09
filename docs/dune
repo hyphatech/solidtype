@@ -1,4 +1,10 @@
 ; The documentation site is Astro's, built by `make docs`; dune builds its
-; islands and reads none of its JavaScript.
+; islands and reads none of its JavaScript, nor odoc's reference that `make
+; docs` copies into public/, but reads public/llms.txt, which a test holds to
+; the pages. Starlight serves public/ as it is, so no dune file goes there.
 
-(dirs :standard \ node_modules public)
+(dirs :standard \ node_modules)
+
+(subdir
+ public
+ (dirs :standard \ reference))

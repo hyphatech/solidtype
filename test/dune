@@ -8,8 +8,9 @@
   (package solidtype-kobalte)
   (package ppx_solidtype)))
 
-; Every island of the documentation is on one of its pages, and every page
-; of rhp's links to the page of rhp's documentation it follows.
+; Every island of the documentation is on one of its pages, every page
+; of rhp's links to the page of rhp's documentation it follows, and llms.txt
+; lists every page.
 
 (test
  (name test_docs)
@@ -18,7 +19,8 @@
  (libraries alcotest)
  (deps
   (glob_files ../docs/islands/*.{ml,mlx})
-  (glob_files_rec ../docs/src/content/*.{md,mdx})))
+  (glob_files_rec ../docs/src/content/*.{md,mdx})
+  ../docs/public/llms.txt))
 
 ; Its errors are compared as text, so colour stays off even where the
 ; environment forces it, as CI's does.
