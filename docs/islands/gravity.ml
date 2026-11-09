@@ -372,6 +372,11 @@ module Sparkles = Icon.Make (struct
   [@@mel.module "@gravity-ui/icons/svgs/sparkles.svg?raw"]
 end)
 
+module Square_article = Icon.Make (struct
+  external svg : string = "default"
+  [@@mel.module "@gravity-ui/icons/svgs/square-article.svg?raw"]
+end)
+
 module Square_plus = Icon.Make (struct
   external svg : string = "default"
   [@@mel.module "@gravity-ui/icons/svgs/square-plus.svg?raw"]

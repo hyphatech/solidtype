@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- HeroUI's TagGroup, `Solidtype_heroui.Tag_group` and `Tag`, on
+  `Solidtype_headless.Tag_group`, a grid of tags made of Kobalte's list hooks:
+  tags chosen none, one or many, walked by the keys, removed by their button
+  or Delete and Backspace, with HeroUI's sizes, variants and examples; and
+  HeroUI's ErrorMessage, `Solidtype_heroui.Error_message`, a tag group's
+  error.
+
 - `Solidtype_headless.Table`, and HeroUI's on it, walk rows in their order
   after a `For` sorts them, where the arrows followed the order before, and
   index columns and cells in theirs after a reorder.

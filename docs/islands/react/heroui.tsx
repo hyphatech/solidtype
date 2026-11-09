@@ -2,7 +2,7 @@
 // OCaml page owns, beside each port: the one place React runs. Each render
 // is flushed at once, so the page reads the result in the same effect.
 
-import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
+import { Accordion, Alert, AlertDialog, Autocomplete, Avatar, AvatarGroup, Badge, Breadcrumbs, Button, ButtonGroup, Card, Checkbox, CheckboxGroup, Chip, CloseButton, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ComboBox, Description, Disclosure, DisclosureGroup, Drawer, Dropdown, FieldError, Fieldset, Input, InputGroup, Kbd, Label, Link, ListBox, Meter, Modal, NumberField, Pagination, Popover, ProgressBar, ProgressCircle, Radio, RadioGroup, ScrollShadow, SearchField, Select, Separator, Skeleton, Slider, Spinner, Surface, Switch, Table, Tabs, Tag, TagGroup, TextField, TimeField, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useFilter } from "@heroui/react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -1257,4 +1257,37 @@ export function table(host: HTMLElement, props: TableProps): void {
       </Table>,
     ),
   );
+}
+
+type TagGroupProps = {
+  size: "sm" | "md" | "lg";
+  variant: "default" | "surface";
+  selectionMode: "none" | "single" | "multiple";
+};
+
+const groupTags = ["News", "Travel", "Gaming", "Shopping"];
+
+// HeroUI's four tags, removed by their buttons and chosen as the mode says,
+// kept by the group itself, as the port's demo shows them.
+function TagGroupDemo(props: TagGroupProps) {
+  const [tags, setTags] = useState(groupTags);
+  return (
+    <TagGroup
+      {...props}
+      aria-label="Tags"
+      onRemove={(keys) => setTags((ts) => ts.filter((t) => !keys.has(t)))}
+    >
+      <TagGroup.List>
+        {tags.map((t) => (
+          <Tag key={t} id={t}>
+            {t}
+          </Tag>
+        ))}
+      </TagGroup.List>
+    </TagGroup>
+  );
+}
+
+export function tagGroup(host: HTMLElement, props: TagGroupProps): void {
+  flushSync(() => rootOf(host).render(<TagGroupDemo {...props} />));
 }

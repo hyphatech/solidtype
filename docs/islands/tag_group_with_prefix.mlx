@@ -1,0 +1,52 @@
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  <div class_="flex flex-col gap-8">
+    <Tag_group selection_mode=`single>
+      <Label>"With Icons"</Label>
+      <Tag_group.List>
+        <Tag><Gravity.Square_article /> "News"</Tag>
+        <Tag><Gravity.Planet_earth /> "Travel"</Tag>
+        <Tag><Gravity.Rocket /> "Gaming"</Tag>
+        <Tag><Gravity.Shopping_bag /> "Shopping"</Tag>
+      </Tag_group.List>
+      <Description>"Tags with icons"</Description>
+    </Tag_group>
+    <Tag_group selection_mode=`single>
+      <Label>"With Avatars"</Label>
+      <Tag_group.List>
+        <Tag>
+          <Avatar class_="size-4">
+            <Avatar.Image
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+            />
+            <Avatar.Fallback>"F"</Avatar.Fallback>
+          </Avatar>
+          "Fred"
+        </Tag>
+        <Tag>
+          <Avatar class_="size-4">
+            <Avatar.Image
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
+            />
+            <Avatar.Fallback>"M"</Avatar.Fallback>
+          </Avatar>
+          "Michael"
+        </Tag>
+        <Tag>
+          <Avatar class_="size-4">
+            <Avatar.Image
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
+            />
+            <Avatar.Fallback>"J"</Avatar.Fallback>
+          </Avatar>
+          "Jane"
+        </Tag>
+      </Tag_group.List>
+      <Description>"Tags with avatars"</Description>
+    </Tag_group>
+  </div>

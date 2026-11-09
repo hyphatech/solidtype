@@ -1,0 +1,99 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Avatar = Solidtype_heroui.Avatar
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+type user = { id : string; name : string; avatar : string; fallback : string }
+
+let avatar color =
+  "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/" ^ color
+  ^ ".jpg"
+
+let users =
+  [|
+    { id = "fred"; name = "Fred"; avatar = avatar "blue"; fallback = "F" };
+    {
+      id = "michael";
+      name = "Michael";
+      avatar = avatar "green";
+      fallback = "M";
+    };
+    { id = "jane"; name = "Jane"; avatar = avatar "purple"; fallback = "J" };
+    { id = "alice"; name = "Alice"; avatar = avatar "red"; fallback = "A" };
+    { id = "bob"; name = "Bob"; avatar = avatar "orange"; fallback = "B" };
+    {
+      id = "charlie";
+      name = "Charlie";
+      avatar = avatar "black";
+      fallback = "C";
+    };
+  |]
+
+let make () =
+  let items, set_items = S.create_signal users in
+  let selected, set_selected = S.create_signal [| "fred"; "michael" |] in
+  let kept keys k = not (Array.exists (String.equal k) keys) in
+  let remove keys =
+    S.update set_items (Js.Array.filter ~f:(fun u -> kept keys u.id));
+    S.update set_selected (Js.Array.filter ~f:(kept keys))
+  in
+  let chosen () =
+    Js.Array.filter
+      ~f:(fun u -> Array.exists (String.equal u.id) (S.get selected))
+      (S.get items)
+  in
+  <div class_="w-sm">
+    <Tag_group
+      selected_keys=(fun () -> S.get selected)
+      selection_mode=`multiple
+      on_remove=remove
+      on_selection_change=(S.set set_selected)>
+      <Label>"Team Members"</Label>
+      <Tag_group.List
+        render_empty_state=(fun _ ->
+                             <Empty_state class_="p-1">
+                               "No team members"
+                             </Empty_state>)>
+        <For each=(fun () -> S.get items)>
+          (fun user _ ->
+            <Tag id=(fun () -> user.id) text_value=(fun () -> user.name)>
+              <Avatar class_="size-4" size=`sm>
+                <Avatar.Image src=(fun () -> user.avatar) />
+                <Avatar.Fallback>
+                  (fun () -> Jsx.string user.fallback)
+                </Avatar.Fallback>
+              </Avatar>
+              (fun () -> Jsx.string user.name)
+            </Tag>)
+        </For>
+      </Tag_group.List>
+      <Description>"Select team members for your project"</Description>
+    </Tag_group>
+    <Show when_=(fun () -> Array.length (chosen ()) > 0)>
+      <div class_="mt-4 flex flex-col gap-2">
+        <p class_="text-sm font-medium text-muted">"Selected:"</p>
+        <div class_="flex flex-wrap gap-2">
+          <For each=(fun () -> chosen ())>
+            (fun user _ ->
+              <div
+                class_="flex items-center gap-2 rounded-lg bg-surface-tertiary \
+                        px-2 py-1">
+                <Avatar class_="size-4" size=`sm>
+                  <Avatar.Image src=(fun () -> user.avatar) />
+                  <Avatar.Fallback>
+                    (fun () -> Jsx.string user.fallback)
+                  </Avatar.Fallback>
+                </Avatar>
+                <span class_="text-sm">(fun () -> Jsx.string user.name)</span>
+              </div>)
+          </For>
+        </div>
+      </div>
+    </Show>
+  </div>

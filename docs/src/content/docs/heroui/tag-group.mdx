@@ -1,0 +1,205 @@
+---
+title: TagGroup
+description: A focusable list of tags with support for keyboard navigation, selection, and removal.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/tag_group_usage.jsx";
+import ExUsageCode from "@islands/tag_group_usage.mlx?raw";
+import * as ExSizes from "@islands/tag_group_sizes.jsx";
+import ExSizesCode from "@islands/tag_group_sizes.mlx?raw";
+import * as ExVariants from "@islands/tag_group_variants.jsx";
+import ExVariantsCode from "@islands/tag_group_variants.mlx?raw";
+import * as ExDisabled from "@islands/tag_group_disabled.jsx";
+import ExDisabledCode from "@islands/tag_group_disabled.mlx?raw";
+import * as ExSelectionModes from "@islands/tag_group_selection_modes.jsx";
+import ExSelectionModesCode from "@islands/tag_group_selection_modes.mlx?raw";
+import * as ExControlled from "@islands/tag_group_controlled.jsx";
+import ExControlledCode from "@islands/tag_group_controlled.mlx?raw";
+import * as ExErrorMessage from "@islands/tag_group_with_error_message.jsx";
+import ExErrorMessageCode from "@islands/tag_group_with_error_message.mlx?raw";
+import * as ExListData from "@islands/tag_group_with_list_data.jsx";
+import ExListDataCode from "@islands/tag_group_with_list_data.mlx?raw";
+import * as ExPrefix from "@islands/tag_group_with_prefix.jsx";
+import ExPrefixCode from "@islands/tag_group_with_prefix.mlx?raw";
+import * as ExRemove from "@islands/tag_group_with_remove_button.jsx";
+import ExRemoveCode from "@islands/tag_group_with_remove_button.mlx?raw";
+import * as ExCustomStyles from "@islands/tag_group_custom_styles.jsx";
+import ExCustomStylesCode from "@islands/tag_group_custom_styles.mlx?raw";
+import * as Demo from "@islands/tag_group_demo.jsx";
+
+A tag's key is its `id`. Keys are `string`s, and a selection is a
+`string array`.
+
+Original HeroUI documentation: [TagGroup](https://heroui.com/en/docs/react/components/tag-group).
+
+## Usage
+
+<Example code={ExUsageCode} title="tag_group_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Parity
+
+The same HeroUI TagGroup twice, under the same props: in solidtype on the
+left, in React on the right. Below them, every attribute of the two groups: a
+marked row is one they disagree on.
+
+<div class="not-content">
+  <Demo.make client:load />
+</div>
+
+## Anatomy
+
+```ocaml
+<Tag_group>
+  <Label />
+  <Tag_group.List>
+    <Tag> <Tag.Remove_button /> </Tag>
+  </Tag_group.List>
+  <Description />
+  <Error_message />
+</Tag_group>
+```
+
+## Examples
+
+### Sizes
+
+<Example code={ExSizesCode} title="tag_group_sizes.mlx"><ExSizes.make client:visible /></Example>
+
+### Variants
+
+<Example code={ExVariantsCode} title="tag_group_variants.mlx"><ExVariants.make client:visible /></Example>
+
+### Disabled
+
+A tag is disabled by its own `is_disabled`, or by the group's `disabled_keys`.
+The group's `is_disabled` disables every tag.
+
+<Example code={ExDisabledCode} title="tag_group_disabled.mlx"><ExDisabled.make client:visible /></Example>
+
+### Selection Modes
+
+<Example code={ExSelectionModesCode} title="tag_group_selection_modes.mlx"><ExSelectionModes.make client:visible /></Example>
+
+### Controlled
+
+<Example code={ExControlledCode} title="tag_group_controlled.mlx"><ExControlled.make client:visible /></Example>
+
+### With Error Message
+
+<Example code={ExErrorMessageCode} title="tag_group_with_error_message.mlx"><ExErrorMessage.make client:visible /></Example>
+
+### With List Data
+
+Tags drawn from a signal by `For`, removed from it by `on_remove`.
+
+<Example code={ExListDataCode} title="tag_group_with_list_data.mlx"><ExListData.make client:visible /></Example>
+
+### With Prefix
+
+<Example code={ExPrefixCode} title="tag_group_with_prefix.mlx"><ExPrefix.make client:visible /></Example>
+
+### With Remove Button
+
+Given `on_remove`, each tag draws a remove button. A `Tag.Remove_button`
+among a tag's children takes its place; a tag whose children are a function
+draws its own, where `allows_removing` holds.
+
+<Example code={ExRemoveCode} title="tag_group_with_remove_button.mlx"><ExRemove.make client:visible /></Example>
+
+### Render Function
+
+`as_` draws another element in its place, given its props and its state, as [Composition](/solidtype/heroui/composition/#custom-dom-element) shows.
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's classes, on each part.
+
+<Example code={ExCustomStylesCode} title="tag_group_custom_styles.mlx"><ExCustomStyles.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.tag-group` - Base tag group container
+- `.tag-group__list` - Container for the list of tags
+- `.tag` - Base tag styles
+- `.tag__remove-button` - Remove button trigger
+- `.tag--sm`, `.tag--md`, `.tag--lg` - Sizes
+- `.tag--default`, `.tag--surface` - Variants
+
+### Interactive States
+
+Each tag:
+
+- **Selected**: `[data-selected="true"]`
+- **Disabled**: `[data-disabled="true"]`
+- **Hovered**: `[data-hovered="true"]`, while it can be chosen
+- **Pressed**: `[data-pressed="true"]`, while it can be chosen
+- **Focus**: `[data-focus-visible="true"]`, and `[data-focused="true"]`
+
+The list declares `[data-empty="true"]` while it holds no tag.
+
+## API Reference
+
+Each prop beside the name HeroUI's React component gives it.
+
+### TagGroup
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `selectionMode` | `selection_mode` | `` [ `none \| `single \| `multiple ] `` | `` `none `` | The type of selection that is allowed |
+| `selectedKeys` | `selected_keys` | `string array` | | The currently selected keys (controlled) |
+| `defaultSelectedKeys` | `default_selected_keys` | `string array` | | The initial selected keys (uncontrolled) |
+| `onSelectionChange` | `on_selection_change` | `string array -> unit` | | Handler called when the selection changes |
+| `disabledKeys` | `disabled_keys` | `string array` | | Keys of disabled tags |
+| `isDisabled` | `is_disabled` | `bool` | | Whether every tag is disabled |
+| `onRemove` | `on_remove` | `string array -> unit` | | Handler called with the keys of tags removed |
+| `size` | `size` | `` [ `sm \| `md \| `lg ] `` | `` `md `` | Size of the tags |
+| `variant` | `variant` | `` [ `default \| `surface ] `` | `` `default `` | Look of the tags |
+| `aria-label` | `aria_label` | `string` | | Its name, where it has no `Label` |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `render` | `as_` | a function of its props | | Draws another element in its place |
+
+### TagGroup.List
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `renderEmptyState` | `render_empty_state` | `unit -> Jsx.element` | | What it shows while it holds no tag |
+| `className` | `class_` | `string` | | Added after HeroUI's class |
+| `render` | `as_` | a function of its props | | Draws another element in its place |
+
+### Tag
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `id` | `id` | `string` | unique | The tag's key |
+| `textValue` | `text_value` | `string` | its first text | What a reader is told it is |
+| `isDisabled` | `is_disabled` | `bool` | | Whether the tag is disabled |
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | elements, or a function of `Tag.state` | required | Its content |
+| `render` | `as_` | a function of its props and state | | Draws another element in its place |
+
+`Tag.state` holds `is_selected`, `is_disabled`, `is_hovered`, `is_pressed`,
+`is_focused`, `is_focus_visible` and `allows_removing`.
+
+### Tag.RemoveButton
+
+| React | solidtype | Type | Default | Description |
+|---|---|---|---|---|
+| `className` | `class_` | `string` | | Added after HeroUI's classes |
+| `children` | `children` | nodes | a cross | What it shows |
+
+## Accessibility
+
+- Tab reaches the tag last focused, or the first chosen, or the first, then
+  its remove button.
+- The arrows move from tag to tag, a disabled one passed over, wrapping at
+  either end; Home and End reach the first and the last, and typing the start
+  of a tag's name reaches it.
+- A press, Space or Enter chooses a tag, and Escape clears what is chosen.
+- Delete and Backspace remove the focused tag, or every chosen tag where it is
+  chosen; the focus moves to the next tag, or to the list once none is left.
+- A removable tag tells a reader how to remove it.

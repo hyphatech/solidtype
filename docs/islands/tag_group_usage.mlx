@@ -1,0 +1,12 @@
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  <Tag_group aria_label="Tags" selection_mode=`single>
+    <Tag_group.List>
+      <Tag id="default-news"><Gravity.Square_article /> "News"</Tag>
+      <Tag id="default-travel"><Gravity.Planet_earth /> "Travel"</Tag>
+      <Tag id="default-gaming"><Gravity.Rocket /> "Gaming"</Tag>
+      <Tag id="default-shopping"><Gravity.Shopping_bag /> "Shopping"</Tag>
+    </Tag_group.List>
+  </Tag_group>

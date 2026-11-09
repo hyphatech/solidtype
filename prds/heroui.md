@@ -1,6 +1,6 @@
 # HeroUI's whole set on Kobalte
 
-**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed but for ErrorMessage, which waits for TagGroup and Calendar, the hosts all its examples need; group 4 has landed; group 5 has landed; group 6 has landed; dates on `@internationalized/date` are accepted, its binding has landed, and TimeField takes its values.
+**Status: Accepted** — the full set, in OCaml on Kobalte, is decided, and how a form validates, and that a port lands on looking and behaving as HeroUI's; groups 1 to 3 have landed; group 4 has landed; group 5 has landed; group 6 has landed; dates on `@internationalized/date` are accepted, its binding has landed, and TimeField takes its values.
 Date: 2026-10-23
 
 ## The problem
@@ -315,7 +315,8 @@ keeps what it does not name; a disclosure group's navigation reaches
 another disclosure with each press where several expand, where HeroUI's
 reaches the same one twice; and a disclosure toggled before its transition
 ends is left to the toggle after, where React Aria's can hide content just
-expanded again.
+expanded again; and a tag group's `is_disabled` disables its
+tags, as HeroUI documents and its own does not.
 
 ### Tests
 
@@ -408,8 +409,7 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Form: a field's registration, a submit refused and the first invalid
   field focused, `validation_errors` by name
 - [x] TimeField, on Kobalte's
-- [ ] ErrorMessage, with TagGroup and Calendar in group 7, the hosts HeroUI's
-  examples of it are
+- [x] ErrorMessage, with TagGroup, the host all HeroUI's examples of it have
 - [x] The `Form` page: a server's errors and a check before sending from
   wiretype's printed codec, as `validation_errors`
 
@@ -501,8 +501,12 @@ page, its line in `coverage.mdx` and `CHANGES.md`.
 - [x] Table's virtualization, the headless table laid out as React Aria's
   TableLayout by the Virtualizer, moved into solidtype-headless for it
 - [ ] Table's rows that hold rows, virtualized
-- [ ] TagGroup, Toolbar, InputOTP, DateField, Calendar, RangeCalendar,
-  DatePicker, DateRangePicker
+- [x] TagGroup, which Kobalte lacks: made headless of Kobalte's list hooks, a
+  grid of tags removed by their button or the keys, the focus moved on; the
+  group's `is_disabled` disables its tags, as HeroUI documents and its own
+  does not
+- [ ] Toolbar, InputOTP, DateField, Calendar, RangeCalendar, DatePicker,
+  DateRangePicker
 
 ## Verification
 

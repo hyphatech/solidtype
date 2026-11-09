@@ -1,0 +1,36 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Error_message = Solidtype_heroui.Error_message
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  let selected, set_selected = S.create_signal [||] in
+  let invalid () = Array.length (S.get selected) = 0 in
+  <Tag_group
+    selected_keys=(fun () -> S.get selected)
+    selection_mode=`multiple
+    on_selection_change=(S.set set_selected)>
+    <Label>"Amenities"</Label>
+    <Tag_group.List>
+      <Tag id="laundry">"Laundry"</Tag>
+      <Tag id="fitness">"Fitness center"</Tag>
+      <Tag id="parking">"Parking"</Tag>
+      <Tag id="pool">"Swimming pool"</Tag>
+      <Tag id="breakfast">"Breakfast"</Tag>
+    </Tag_group.List>
+    <Description>
+      (fun () ->
+        Jsx.string
+          (if invalid () then "Select at least one category"
+           else
+             "Selected: " ^ String.concat ", " (Array.to_list (S.get selected))))
+    </Description>
+    <Error_message>
+      (fun () ->
+        Jsx.string
+          (if invalid () then "Please select at least one category" else ""))
+    </Error_message>
+  </Tag_group>

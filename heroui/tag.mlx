@@ -1,0 +1,184 @@
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+module Headless = Solidtype_headless.Tag_group
+
+type state = {
+  is_hovered : bool S.accessor;
+  is_pressed : bool S.accessor;
+  is_selected : bool S.accessor;
+  is_focused : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
+  allows_removing : bool S.accessor;
+}
+
+(* What a remove button reads of its tag: the classes of the tag's look, and
+   how it counts itself in, so the tag draws no button of its own beside
+   it. *)
+type in_tag = { slots : unit -> Styles.Tag.slots; remove_here : unit -> unit }
+
+module Context = Solidtype.Context.Make_optional (struct
+  type t = in_tag
+end)
+
+let in_tag part =
+  match Context.use () with
+  | Some t -> t
+  | None -> invalid_arg (part ^ " is used inside a Tag")
+
+external listen : _ Dom.element_like -> string -> (Dom.event -> unit) -> unit
+  = "addEventListener"
+[@@mel.send]
+
+(* Whether [element] itself has the focus, not what is inside it, kept as it
+   gains and loses it. *)
+let self_focus () =
+  let on, set_on = S.create_signal false in
+  let watch e =
+    listen e "focus" (fun _ -> S.set set_on true);
+    listen e "blur" (fun _ -> S.set set_on false)
+  in
+  ((fun () -> S.get on), watch)
+
+(* A class added after HeroUI's own, as React's className is. *)
+let after base = function Some c -> base ^ " " ^ c | None -> base
+
+module Remove_button = struct
+  let%component make ?(class_ : string option)
+      ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
+      ?(children : Jsx.content option) () =
+    let t = in_tag "Tag.Remove_button" in
+    t.remove_here ();
+    let tag = Headless.use_tag_context () in
+    let i =
+      Interaction.create ~disabled:(fun[@u] () -> tag.is_disabled ()) ()
+    in
+    <Headless.Remove_button
+      aria_label="Remove tag"
+      class_=(fun () ->
+               Styles.CloseButton.classes
+                 (Styles.CloseButton.options ~variant:`default
+                    ~class_:
+                      (after
+                         (Styles.Tag.remove_button (t.slots ()))
+                         (class_ ()))
+                    ()))
+      ref=(fun b ->
+            ignore (given_ref b : unit option);
+            Interaction.watch i b)
+      slot="remove"
+      data_slot="tag-remove-button"
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+      props=(Props.others props)>
+      (fun () ->
+        match children () with
+        | Some c -> c
+        | None -> Jsx.element <Close_button.Icon />)
+    </Headless.Remove_button>
+  [@@element button]
+end
+
+let%component make ?(id : string option) ?(text_value : string option)
+    ?(is_disabled : bool option) ?(class_ : string option)
+    ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
+    ~(children : state Jsx.children)
+    ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
+    () =
+  let g = Tag_group.use_context "Tag" in
+  let h = Headless.use_context () in
+  let key =
+    match S.untrack id with Some k -> k | None -> S.create_unique_id ()
+  in
+  let disabled () =
+    Option.value (is_disabled ()) ~default:false || h.is_disabled key
+  in
+  let selectable () =
+    (match h.selection_mode () with
+      | `none -> false
+      | `single | `multiple -> true)
+    && not (disabled ())
+  in
+  let selected () = h.is_selected key in
+  let slots () =
+    Styles.Tag.slots
+      (Styles.Tag.options ?size:(g.size ()) ?variant:(g.variant ()) ())
+  in
+  let removers, set_removers = S.create_signal 0 in
+  let t =
+    {
+      slots;
+      remove_here =
+        (fun () ->
+          S.update set_removers succ;
+          S.on_cleanup (fun () -> S.update set_removers pred));
+    }
+  in
+  (* The ring is the tag's while it has the focus itself, not while its
+     remove button has it. *)
+  let self, watch_self = self_focus () in
+  let i =
+    Interaction.create
+      ~disabled:(fun[@u] () -> disabled ())
+      ~no_hover:(fun[@u] () -> not (selectable ()))
+      ~no_pointer_press:(fun[@u] () -> not (selectable ()))
+      ()
+  in
+  let state () =
+    {
+      is_hovered = (fun[@u] () -> Interaction.hovered i);
+      is_pressed = (fun[@u] () -> Interaction.pressed i);
+      is_selected = (fun[@u] () -> selected ());
+      is_focused = (fun[@u] () -> Interaction.focused i);
+      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i && self ());
+      is_disabled = (fun[@u] () -> disabled ());
+      allows_removing = (fun[@u] () -> h.allows_removing ());
+    }
+  in
+  <Context.Provider value=(fun () -> t)>
+    <Headless.Tag
+      id=(fun () -> key)
+      ?text_value
+      is_disabled=(fun () -> disabled ())
+      ref=(fun e ->
+            ignore (given_ref e : unit option);
+            Interaction.watch i e;
+            watch_self e)
+      class_=(fun () -> after (Styles.Tag.base (slots ())) (class_ ()))
+      data_slot="tag"
+      data_selected=(fun () -> Jsx.flag (selected ()))
+      data_disabled=(fun () -> Jsx.flag (disabled ()))
+      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
+      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
+      data_focus_visible=(fun () ->
+                           Jsx.flag (Interaction.focus_visible i && self ()))
+      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
+      data_allows_removing=(fun () -> Jsx.flag (h.allows_removing ()))
+      data_selection_mode=(fun () ->
+                            match h.selection_mode () with
+                            | `none -> Jsx.flag false
+                            | `single -> Jsx.data "single"
+                            | `multiple -> Jsx.data "multiple")
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      props=(Props.others props)>
+      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () ->
+        (* A tag that can be removed draws HeroUI's button, unless its
+           children draw one of their own, or are a function, which draws
+           what it wants. *)
+        if
+          h.allows_removing ()
+          && (not (Jsx.is_function (children ())))
+          && S.get removers = 0
+        then
+          Jsx.element
+            <Context.Provider value=(fun () -> { t with remove_here = ignore })>
+              <Remove_button />
+            </Context.Provider>
+        else Jsx.string "")
+    </Headless.Tag>
+  </Context.Provider>
+[@@element div]

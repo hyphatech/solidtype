@@ -1,0 +1,57 @@
+---
+title: ErrorMessage
+description: An error message for non-form components such as a TagGroup.
+---
+
+import Example from "@components/Example.astro";
+import * as ExUsage from "@islands/error_message_usage.jsx";
+import ExUsageCode from "@islands/error_message_usage.mlx?raw";
+import * as ExCustomStyles from "@islands/error_message_custom_styles.jsx";
+import ExCustomStylesCode from "@islands/error_message_custom_styles.mlx?raw";
+
+It shows inside a [TagGroup](/solidtype/heroui/tag-group/), which it
+describes, and draws nothing elsewhere. A form field's error is a
+[FieldError](/solidtype/heroui/field-error/).
+
+Original HeroUI documentation: [ErrorMessage](https://heroui.com/en/docs/react/components/error-message).
+
+## Usage
+
+<Example code={ExUsageCode} title="error_message_usage.mlx"><ExUsage.make client:visible /></Example>
+
+## Anatomy
+
+```ocaml
+<Tag_group>
+  <Label />
+  <Tag_group.List> <Tag /> </Tag_group.List>
+  <Description />
+  <Error_message />
+</Tag_group>
+```
+
+## Customization
+
+### Tailwind CSS
+
+`class_` is added after HeroUI's class.
+
+<Example code={ExCustomStylesCode} title="error_message_custom_styles.mlx"><ExCustomStyles.make client:visible /></Example>
+
+## Styling Reference
+
+### CSS Classes
+
+- `.error-message` - Base error message styles with danger color
+- `[slot="errorMessage"]` - The slot it fills
+
+## API Reference
+
+| React | solidtype | Type | Description |
+|---|---|---|---|
+| `className` | `class_` | `string` | Added after HeroUI's class |
+| `children` | `children` | nodes | The error message content |
+
+## Accessibility
+
+- Its component's list is described by it, after its description.

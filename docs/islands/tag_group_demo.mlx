@@ -1,0 +1,67 @@
+module S = Solidtype.Solid
+module For = Solidtype.For
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+module Select = Controls.Select
+
+(* Each choice with the name HeroUI's React component takes for it. *)
+let sizes = [| (`sm, "sm"); (`md, "md"); (`lg, "lg") |]
+let variants = [| (`default, "default"); (`surface, "surface") |]
+let modes = [| (`none, "none"); (`single, "single"); (`multiple, "multiple") |]
+let tags = [| "News"; "Travel"; "Gaming"; "Shopping" |]
+
+let make () =
+  let size, set_size = S.create_signal (`md, "md") in
+  let variant, set_variant = S.create_signal (`default, "default") in
+  let mode, set_mode = S.create_signal (`single, "single") in
+  let shown, set_shown = S.create_signal tags in
+  <section class_="flex flex-col gap-4">
+    <div class_="flex flex-wrap items-end gap-4">
+      <Select
+        label="size"
+        choices=(fun () -> sizes)
+        picked=(fun () -> S.get size)
+        on_pick=(Controls.choose sizes set_size)
+      />
+      <Select
+        label="variant"
+        choices=(fun () -> variants)
+        picked=(fun () -> S.get variant)
+        on_pick=(Controls.choose variants set_variant)
+      />
+      <Select
+        label="selectionMode"
+        choices=(fun () -> modes)
+        picked=(fun () -> S.get mode)
+        on_pick=(Controls.choose modes set_mode)
+      />
+    </div>
+    <Side_by_side
+      compared="[data-slot=tag-group]"
+      solidtype=(<Tag_group
+                   aria_label="Tags"
+                   size=(fun () -> fst (S.get size))
+                   variant=(fun () -> fst (S.get variant))
+                   selection_mode=(fun () -> fst (S.get mode))
+                   on_remove=(fun keys ->
+                               S.update set_shown
+                                 (Js.Array.filter ~f:(fun t ->
+                                      not (Array.exists (String.equal t) keys))))>
+                   <Tag_group.List>
+                     <For each=(fun () -> S.get shown)>
+                       (fun t _ ->
+                         <Tag id=(fun () -> t)>
+                           (fun () -> Solidtype.Jsx.string t)
+                         </Tag>)
+                     </For>
+                   </Tag_group.List>
+                 </Tag_group>)
+      react=(fun host ->
+              Heroui_react.tag_group host
+                (Heroui_react.tag_group_props
+                   ~size:(snd (S.get size))
+                   ~variant:(snd (S.get variant))
+                   ~selection_mode:(snd (S.get mode))
+                   ()))
+    />
+  </section>

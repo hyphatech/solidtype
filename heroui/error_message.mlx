@@ -1,0 +1,27 @@
+module Jsx = Solidtype.Jsx
+
+type slot =
+  ((unit -> string) ->
+   unit Solidtype.Solid.rest ->
+   (unit -> Jsx.content) ->
+   Jsx.element
+  [@u])
+
+(* How an error renders where a component above gives it its element, as
+   React Aria's TextContext does for its errorMessage slot. *)
+module Slot = Solidtype.Context.Make_optional (struct
+  type t = slot
+end)
+
+let%component make ?(class_ : string option) ?(children : Jsx.content option) ()
+    =
+  match Slot.use () with
+  | Some render ->
+      render
+        (fun () ->
+          Styles.ErrorMessage.classes
+            (Styles.ErrorMessage.options ?class_:(class_ ()) ()))
+        (Props.others props)
+        (fun () -> Option.value (children ()) ~default:(Jsx.string "")) [@u]
+  | None -> Jsx.nothing
+[@@element span]

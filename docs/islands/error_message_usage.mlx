@@ -1,0 +1,30 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Description = Solidtype_heroui.Description
+module Error_message = Solidtype_heroui.Error_message
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  let selected, set_selected = S.create_signal [||] in
+  <Tag_group
+    selected_keys=(fun () -> S.get selected)
+    selection_mode=`multiple
+    on_selection_change=(S.set set_selected)>
+    <Label>"Required Categories"</Label>
+    <Tag_group.List>
+      <Tag id="news">"News"</Tag>
+      <Tag id="travel">"Travel"</Tag>
+      <Tag id="gaming">"Gaming"</Tag>
+      <Tag id="shopping">"Shopping"</Tag>
+    </Tag_group.List>
+    <Description>"Select at least one category"</Description>
+    <Error_message>
+      (fun () ->
+        Jsx.string
+          (if Array.length (S.get selected) = 0 then
+             "Please select at least one category"
+           else ""))
+    </Error_message>
+  </Tag_group>

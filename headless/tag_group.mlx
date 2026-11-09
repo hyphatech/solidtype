@@ -1,0 +1,948 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module Selection = Solidtype_kobalte.Selection
+module I18n = Solidtype_kobalte.I18n
+module Types = Solidtype_kobalte.Types
+module Either = Types.Either
+module Delegate = Types.KeyboardDelegate
+module List_state = Types.ListState
+module Manager = Types.MultipleSelectionManager
+module Selectable_list = Types.Selection_CreateSelectableList
+module Selectable_item = Types.Selection_CreateSelectableItem
+
+(* Whether [other] follows [e] on the page, by DOM's bit for it. *)
+external position : _ Dom.element_like -> _ Dom.element_like -> int
+  = "compareDocumentPosition"
+[@@mel.send]
+
+external contains : _ Dom.element_like -> Dom.element -> bool = "contains"
+[@@mel.send]
+
+external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
+external focus : _ Dom.element_like -> unit = "focus" [@@mel.send]
+
+external query_all :
+  _ Dom.element_like -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external target : Dom.keyboardEvent -> Dom.element = "target" [@@mel.get]
+
+external current : Dom.keyboardEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external pressed : Dom.keyboardEvent -> string = "key" [@@mel.get]
+external shift : Dom.keyboardEvent -> bool = "shiftKey" [@@mel.get]
+external stop : Dom.keyboardEvent -> unit = "stopPropagation" [@@mel.send]
+external prevent : Dom.keyboardEvent -> unit = "preventDefault" [@@mel.send]
+
+external related : Dom.focusEvent -> Dom.element Js.null = "relatedTarget"
+[@@mel.get]
+
+external focus_current : Dom.focusEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external focus_target : Dom.focusEvent -> Dom.element = "target" [@@mel.get]
+
+external closest : Dom.element -> string -> Dom.element Js.null = "closest"
+[@@mel.send]
+
+external pointer_target : Dom.pointerEvent -> Dom.element = "target" [@@mel.get]
+
+external pointer_current : Dom.pointerEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+external mouse_target : Dom.mouseEvent -> Dom.element = "target" [@@mel.get]
+
+external mouse_current : Dom.mouseEvent -> Dom.element = "currentTarget"
+[@@mel.get]
+
+(* A handler or a ref the caller gave, called beside the part's own, as
+   Kobalte's parts call theirs. *)
+let call f x = match f with Some f -> f x [@u] | None -> ()
+
+(* Kobalte's state, an attribute present and empty, or none. *)
+let state on = if on then Jsx.data "" else Jsx.flag false
+
+(* What Tab reaches inside a tag, in the page's order. *)
+let tabbable =
+  "button:not([disabled]), a[href], input:not([disabled]), \
+   [tabindex]:not([tabindex=\"-1\"])"
+
+type tag = {
+  key : unit -> string;
+  is_selected : unit -> bool;
+  is_disabled : unit -> bool;
+  allows_removing : unit -> bool;
+}
+
+type group_state = {
+  selection_mode : unit -> [ `none | `single | `multiple ];
+  is_selected : string -> bool;
+  is_disabled : string -> bool;
+  allows_removing : unit -> bool;
+  is_empty : unit -> bool;
+}
+
+(* A tag as the group keeps it: its key, its element, which says where it is
+   on the page, and its name. *)
+type listed = {
+  key : unit -> string;
+  element : Dom.htmlDivElement;
+  disabled : unit -> bool;
+  text : unit -> string;
+}
+
+type group = {
+  manager : Manager.t S.accessor;
+  list : Selectable_list.t;
+  set_list : Dom.htmlDivElement option S.setter;
+  selection_mode : unit -> [ `none | `single | `multiple ];
+  group_disabled : unit -> bool;
+  disabled_key : string -> bool;
+  removable : unit -> bool;
+  remove : string -> unit;
+  is_empty : unit -> bool;
+  made : unit -> unit;
+  add : listed -> unit;
+  drop : Dom.htmlDivElement -> unit;
+  list_id : string;
+  aria_label : unit -> string option;
+  labelled_by : unit -> string option;
+  described_by : unit -> string option;
+  label_id : string;
+  label_here : unit -> unit;
+  description_id : string;
+  description_here : unit -> unit;
+  error_id : string;
+  error_here : unit -> unit;
+  removal_hint : string;
+}
+
+module Group_context = Solidtype.Context.Make_optional (struct
+  type t = group
+end)
+
+type in_tag = { state : tag; row_id : string }
+
+module Tag_context = Solidtype.Context.Make_optional (struct
+  type t = in_tag
+end)
+
+let in_group part =
+  match Group_context.use () with
+  | Some g -> g
+  | None -> invalid_arg (part ^ " is used inside a Tag_group.Root")
+
+let in_tag part =
+  match Tag_context.use () with
+  | Some t -> t
+  | None -> invalid_arg (part ^ " is used inside a Tag_group.Tag")
+
+let use_tag_context () = (in_tag "Tag_group.use_tag_context").state
+
+let use_context () =
+  let g = in_group "Tag_group.use_context" in
+  {
+    selection_mode = g.selection_mode;
+    is_selected = (fun k -> Manager.is_selected (S.get g.manager) k);
+    is_disabled = g.disabled_key;
+    allows_removing = g.removable;
+    is_empty = g.is_empty;
+  }
+
+(* An id on the page while the part that carries it is: a part counts itself
+   in as it is made and out as it goes. *)
+let named id =
+  let count, set_count = S.create_signal 0 in
+  let here () =
+    S.set set_count (S.get count + 1);
+    S.on_cleanup (fun () -> S.set set_count (S.get count - 1))
+  in
+  (here, fun () -> if S.get count > 0 then Some id else None)
+
+(* Where the keys move among the tags: in order, a disabled one passed over,
+   wrapping at either end, Left and Right as the page's direction reads them,
+   as React Aria's tag group moves. *)
+let delegate ~(tags : unit -> listed array) ~direction ~collator =
+  let index k =
+    let all = tags () in
+    let rec find i =
+      if i >= Array.length all then None
+      else if String.equal (all.(i).key ()) k then Some i
+      else find (i + 1)
+    in
+    find 0
+  in
+  let rec usable i step =
+    let all = tags () in
+    if i < 0 || i >= Array.length all then None
+    else if all.(i).disabled () then usable (i + step) step
+    else Some (all.(i).key ())
+  in
+  let first () = usable 0 1 in
+  let last () = usable (Array.length (tags ()) - 1) (-1) in
+  let next k =
+    match Option.bind (index k) (fun i -> usable (i + 1) 1) with
+    | Some n -> Some n
+    | None -> first ()
+  in
+  let previous k =
+    match Option.bind (index k) (fun i -> usable (i - 1) (-1)) with
+    | Some p -> Some p
+    | None -> last ()
+  in
+  let across ~right k =
+    match direction () with
+    | `ltr -> if right then next k else previous k
+    | `rtl -> if right then previous k else next k
+  in
+  let search typed from =
+    let n = String.length typed in
+    let matches k =
+      match index k with
+      | Some i ->
+          let text = (tags ()).(i).text () in
+          String.length text >= n
+          && Float.equal
+               (Types.Collator.compare (S.get collator)
+                  (Js.String.slice ~start:0 ~end_:n text)
+                  typed)
+               0.
+      | None -> false
+    in
+    let after k = Option.bind (index k) (fun i -> usable (i + 1) 1) in
+    let rec go = function
+      | None -> None
+      | Some k when matches k -> Some k
+      | Some k -> go (after k)
+    in
+    go (match from with Some k -> Some k | None -> first ())
+  in
+  Delegate.make ~get_key_below:next ~get_key_above:previous
+    ~get_key_left_of:(across ~right:false)
+    ~get_key_right_of:(across ~right:true)
+    ~get_key_page_below:(fun _ -> last ())
+    ~get_key_page_above:(fun _ -> first ())
+    ~get_first_key:(fun _ _ -> first ())
+    ~get_last_key:(fun _ _ -> last ())
+    ~get_key_for_search:search ()
+
+module Root = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?selection_mode:[ `none | `single | `multiple ] Solidtype.Check.value ->
+      ?selected_keys:string array Solidtype.Check.value ->
+      ?default_selected_keys:string array Solidtype.Check.value ->
+      ?on_selection_change:(string array -> unit) ->
+      ?disabled_keys:string array Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?on_remove:(string array -> unit) ->
+      ?aria_label:string Solidtype.Check.value ->
+      ?aria_labelledby:string Solidtype.Check.value ->
+      ?aria_describedby:string Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external selection_mode : t -> [ `none | `single | `multiple ] option
+      = "selectionMode"
+    [@@mel.get]
+
+    external selected_keys : t -> string array option = "selectedKeys"
+    [@@mel.get]
+
+    external default_selected_keys : t -> string array option
+      = "defaultSelectedKeys"
+    [@@mel.get]
+
+    external on_selection_change : t -> ((string array -> unit)[@u]) option
+      = "onSelectionChange"
+    [@@mel.get]
+
+    external disabled_keys : t -> string array option = "disabledKeys"
+    [@@mel.get]
+
+    external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+
+    external on_remove : t -> ((string array -> unit)[@u]) option = "onRemove"
+    [@@mel.get]
+
+    external aria_label : t -> string option = "aria-label" [@@mel.get]
+
+    external aria_labelledby : t -> string option = "aria-labelledby"
+    [@@mel.get]
+
+    external aria_describedby : t -> string option = "aria-describedby"
+    [@@mel.get]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  (* The props the group takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "selectionMode";
+      "selectedKeys";
+      "defaultSelectedKeys";
+      "onSelectionChange";
+      "disabledKeys";
+      "isDisabled";
+      "onRemove";
+      "aria-label";
+      "aria-labelledby";
+      "aria-describedby";
+      "children";
+    |]
+
+  let make (props : Props.t) =
+    let selection_mode () =
+      Option.value (Props.selection_mode props) ~default:`none
+    in
+    let group_disabled () =
+      Option.value (Props.is_disabled props) ~default:false
+    in
+    let disabled_key k =
+      group_disabled ()
+      ||
+      match Props.disabled_keys props with
+      | Some keys -> Array.exists (String.equal k) keys
+      | None -> false
+    in
+    let listed, set_listed = S.create_signal [] in
+    (* How many tags are made, which a tag counts as it is made, before it is
+       on the page, so the server draws a list that holds some as one. *)
+    let count, set_count = S.create_signal 0 in
+    let tags =
+      S.create_memo (fun () ->
+          Array.of_list
+            (List.sort
+               (fun a b ->
+                 if position a.element b.element land 4 <> 0 then -1 else 1)
+               (S.get listed)))
+    in
+    let keys =
+      S.create_memo (fun () -> Array.map (fun t -> t.key ()) (S.get tags))
+    in
+    let find k =
+      Array.find_opt (fun t -> String.equal (t.key ()) k) (S.get tags)
+    in
+    let state =
+      Selection.create_list_state
+        (Types.CreateListStateProps.make ~data_source:(Either.right keys)
+           ~get_key:(Either.left Fun.id)
+           ~get_text_value:
+             (Either.left (fun k ->
+                  match find k with Some t -> t.text () | None -> ""))
+           ~get_disabled:
+             (Either.left (fun k ->
+                  disabled_key k
+                  || match find k with Some t -> t.disabled () | None -> false))
+           ~selection_mode:
+             (Either.right (S.create_memo (fun () -> Some (selection_mode ()))))
+           ~selected_keys:
+             (Either.right
+                (S.create_memo (fun () -> Props.selected_keys props)))
+           ?default_selected_keys:
+             (Option.map Either.left
+                (S.untrack (fun () -> Props.default_selected_keys props)))
+           ~on_selection_change:(fun keys ->
+             call (Props.on_selection_change props) (Js.Set.toArray keys))
+           ())
+    in
+    let manager =
+      S.create_memo (fun () ->
+          Types.SelectionManager.to_multiple_selection_manager
+            (S.get (List_state.selection_manager state)))
+    in
+    let locale = I18n.use_locale () in
+    let collator =
+      I18n.create_collator
+        ~options:
+          (Types.CollatorOptions.make ~usage:`search ~sensitivity:`base ())
+        ()
+    in
+    let keyboard =
+      S.create_memo (fun () ->
+          Some
+            (delegate
+               ~tags:(fun () -> S.get tags)
+               ~direction:(Types.I18n_UseLocale.direction locale)
+               ~collator))
+    in
+    let list_element, set_list = S.create_signal None in
+    let list =
+      Selection.create_selectable_list
+        (Types.CreateSelectableListProps.make
+           ~collection:(List_state.collection state)
+           ~selection_manager:(Either.right manager)
+           ~keyboard_delegate:(Either.right keyboard) ())
+        list_element ()
+    in
+    let m () = S.get manager in
+    (* A focused tag taken off the page gives the focus to the tag after it
+       that is left, or before it, or to the list once none is, as React
+       Stately's list moves it. Kobalte's list forgets a key as soon as its
+       tag is gone, so the key is kept here; and the focus moves only where it
+       was in the list, which a removal the group asked for notes. *)
+    let focused = ref None in
+    S.create_effect (fun () ->
+        match S.get (Manager.focused_key (m ())) with
+        | Some k -> focused := Some k
+        | None -> ());
+    let refocus = ref false in
+    let before = ref [||] in
+    S.create_effect (fun () ->
+        let now = S.get keys in
+        let was = !before in
+        before := now;
+        match !focused with
+        | Some k when not (Array.exists (String.equal k) now) ->
+            focused := None;
+            let left o =
+              Array.exists (String.equal o) now
+              && (not (disabled_key o))
+              && not
+                   (match find o with Some t -> t.disabled () | None -> false)
+            in
+            let rec walk i step =
+              if i < 0 || i >= Array.length was then None
+              else if left was.(i) then Some was.(i)
+              else walk (i + step) step
+            in
+            let next =
+              match Js.Array.findIndex ~f:(String.equal k) was with
+              | -1 -> None
+              | i -> (
+                  match walk (i + 1) 1 with
+                  | Some n -> Some n
+                  | None -> walk (i - 1) (-1))
+            in
+            S.untrack (fun () ->
+                let back = !refocus || S.get (Manager.is_focused (m ())) in
+                refocus := false;
+                if back then (
+                  Manager.set_focused (m ()) true;
+                  Manager.set_focused_key (m ()) ?key:next ();
+                  match (next, S.get list_element) with
+                  | None, Some l -> focus l
+                  | Some _, _ | None, None -> ()))
+        | Some _ | None -> ());
+    let label_id = S.create_unique_id () in
+    let description_id = S.create_unique_id () in
+    let error_id = S.create_unique_id () in
+    let label_here, labelled = named label_id in
+    let description_here, described = named description_id in
+    let error_here, errored = named error_id in
+    let ids l =
+      match List.filter_map Fun.id l with
+      | [] -> None
+      | some -> Some (String.concat " " some)
+    in
+    let g =
+      {
+        manager;
+        list;
+        set_list;
+        selection_mode;
+        group_disabled;
+        disabled_key;
+        removable = (fun () -> Option.is_some (Props.on_remove props));
+        remove =
+          (fun k ->
+            (refocus :=
+               match (S.get list_element, Js.Null.toOption active) with
+               | Some l, Some a -> contains l a
+               | _ -> false);
+            let selected = Manager.is_selected (m ()) k in
+            call (Props.on_remove props)
+              (if selected then
+                 Js.Array.filter
+                   ~f:(fun k -> not (disabled_key k))
+                   (Js.Set.toArray (S.get (Manager.selected_keys (m ()))))
+               else [| k |]));
+        is_empty = (fun () -> S.get count = 0);
+        made =
+          (fun () ->
+            S.update set_count succ;
+            S.on_cleanup (fun () -> S.update set_count pred));
+        add = (fun t -> S.update set_listed (fun l -> t :: l));
+        drop =
+          (fun e -> S.update set_listed (List.filter (fun t -> t.element != e)));
+        list_id = S.create_unique_id ();
+        aria_label = (fun () -> Props.aria_label props);
+        labelled_by =
+          (fun () ->
+            match (Props.aria_labelledby props, Props.aria_label props) with
+            | Some l, _ -> Some l
+            | None, Some _ -> None
+            | None, None -> labelled ());
+        described_by =
+          (fun () ->
+            ids [ described (); errored (); Props.aria_describedby props ]);
+        label_id;
+        label_here;
+        description_id;
+        description_here;
+        error_id;
+        error_here;
+        removal_hint = S.create_unique_id ();
+      }
+    in
+    <Group_context.Provider value=(fun () -> g)>
+      <div
+        ?as_=(fun () -> S.drawn_as props) props=(S.undrawn (S.omit props own))>
+        (fun () -> Props.children props)
+        (fun () ->
+          if g.removable () then
+            Jsx.element
+              <span id=(fun () -> g.removal_hint) style="display: none">
+                "Press Delete or Backspace to remove."
+              </span>
+          else Jsx.string "")
+      </div>
+    </Group_context.Provider>
+
+  let component = Jsx.component make
+end
+
+(* A part that names the group's list by its id: a label, a description, an
+   error, each a [<span>]. *)
+module Named = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Span.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+  end
+
+  (* Its id is the one the list names, so a caller's is left out. *)
+  let make ~id ~here (props : Props.t) =
+    here ();
+    <span
+      id
+      ?as_=(fun () -> S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children"; "id" |]))>
+      (fun () -> Props.children props)
+    </span>
+end
+
+module Label = struct
+  module Props = Named.Props
+
+  let make props =
+    let g = in_group "Tag_group.Label" in
+    Named.make ~id:g.label_id ~here:g.label_here props
+
+  let component = Jsx.component make
+end
+
+module Description = struct
+  module Props = Named.Props
+
+  let make props =
+    let g = in_group "Tag_group.Description" in
+    Named.make ~id:g.description_id ~here:g.description_here props
+
+  let component = Jsx.component make
+end
+
+module Error_message = struct
+  module Props = Named.Props
+
+  let make props =
+    let g = in_group "Tag_group.Error_message" in
+    Named.make ~id:g.error_id ~here:g.error_here props
+
+  let component = Jsx.component make
+end
+
+module List = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external render_empty_state : t -> ((unit -> Jsx.element)[@u]) option
+      = "renderEmptyState"
+    [@@mel.get]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusIn"
+    [@@mel.get]
+
+    external on_focus_out : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusOut"
+    [@@mel.get]
+  end
+
+  (* The props the list takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "renderEmptyState";
+      "children";
+      "ref";
+      "onKeyDown";
+      "onMouseDown";
+      "onFocusIn";
+      "onFocusOut";
+    |]
+
+  let make (props : Props.t) =
+    let g = in_group "Tag_group.List" in
+    let within, set_within = S.create_signal false in
+    (* Its tags are made before its element, so it is drawn holding them, on
+       the server as in the browser. *)
+    let resolved = S.children (fun () -> Props.children props) in
+    <div
+      id=(fun () -> g.list_id)
+      role=(fun () -> if g.is_empty () then `group else `grid)
+      ref=(fun e ->
+            S.set g.set_list (Some e);
+            call (Props.ref props) e)
+      ?aria_label=(fun () -> g.aria_label ())
+      ?aria_labelledby=(fun () -> g.labelled_by ())
+      ?aria_describedby=(fun () -> g.described_by ())
+      ?aria_multiselectable=(fun () ->
+                              match g.selection_mode () with
+                              | `multiple -> Some true
+                              | `single | `none -> None)
+      tabindex=(fun () ->
+                 match S.get (Selectable_list.tab_index g.list) with
+                 | Some i when not (g.group_disabled ()) -> Js.Float.toString i
+                 | Some _ | None -> "-1")
+      ?aria_disabled=(fun () -> if g.group_disabled () then Some true else None)
+      aria_atomic=false
+      aria_relevant="additions"
+      aria_live=(fun () -> if S.get within then `polite else `off)
+      data_empty=(fun () -> state (g.is_empty ()))
+      on_key_down=(fun e ->
+                    call (Props.on_key_down props) e;
+                    Selectable_list.on_key_down g.list e)
+      on_mouse_down=(fun e ->
+                      call (Props.on_mouse_down props) e;
+                      Selectable_list.on_mouse_down g.list e)
+      on_focus_in=(fun e ->
+                    call (Props.on_focus_in props) e;
+                    S.set set_within true;
+                    Selectable_list.on_focus_in g.list e)
+      on_focus_out=(fun e ->
+                     call (Props.on_focus_out props) e;
+                     (match Js.Null.toOption (related e) with
+                     | Some r when contains (focus_current e) r -> ()
+                     | Some _ | None -> S.set set_within false);
+                     Selectable_list.on_focus_out g.list e)
+      ?as_=(fun () -> S.drawn_as props)
+      props=(S.undrawn (S.omit props own))>
+      (fun () -> Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
+      (fun () ->
+        match Props.render_empty_state props with
+        | Some draw when g.is_empty () -> Jsx.element (draw () [@u])
+        | Some _ | None -> Jsx.string "")
+    </div>
+
+  let component = Jsx.component make
+end
+
+module Tag = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?id:string Solidtype.Check.value ->
+      ?text_value:string Solidtype.Check.value ->
+      ?is_disabled:bool Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Div.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external id : t -> string option = "id" [@@mel.get]
+    external text_value : t -> string option = "textValue" [@@mel.get]
+    external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
+    [@@mel.get]
+
+    external on_pointer_down : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerDown"
+    [@@mel.get]
+
+    external on_pointer_up : t -> ((Dom.pointerEvent -> unit)[@u]) option
+      = "onPointerUp"
+    [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+
+    external on_key_down : t -> ((Dom.keyboardEvent -> unit)[@u]) option
+      = "onKeyDown"
+    [@@mel.get]
+
+    external on_mouse_down : t -> ((Dom.mouseEvent -> unit)[@u]) option
+      = "onMouseDown"
+    [@@mel.get]
+
+    external on_focus : t -> ((Dom.focusEvent -> unit)[@u]) option = "onFocus"
+    [@@mel.get]
+
+    external on_focus_in : t -> ((Dom.focusEvent -> unit)[@u]) option
+      = "onFocusIn"
+    [@@mel.get]
+  end
+
+  (* The props the tag takes for itself; the rest it passes on. *)
+  let own =
+    [|
+      "onFocusIn";
+      "id";
+      "textValue";
+      "isDisabled";
+      "children";
+      "ref";
+      "onPointerDown";
+      "onPointerUp";
+      "onClick";
+      "onKeyDown";
+      "onMouseDown";
+      "onFocus";
+    |]
+
+  (* What a reader is told a tag is where it is given no name: the first text
+     among its children, as HeroUI reads it. *)
+  let first_text children =
+    Array.fold_left
+      (fun found child ->
+        match found with
+        | Some _ -> found
+        | None -> (
+            match Js.Types.classify child with
+            | JSString s when String.length (String.trim s) > 0 -> Some s
+            | _ -> None))
+      None children
+
+  (* Whether a press is the tag's, rather than what can be focused inside it,
+     its remove button, which a press on does not choose the tag. *)
+  let on_tag target row =
+    match Js.Null.toOption (closest target tabbable) with
+    | Some inner -> inner == row
+    | None -> true
+
+  let make (props : Props.t) =
+    let g = in_group "Tag_group.Tag" in
+    let given_key = S.create_unique_id () in
+    let key =
+      S.create_memo (fun () -> Option.value (Props.id props) ~default:given_key)
+    in
+    let disabled () =
+      Option.value (Props.is_disabled props) ~default:false
+      || g.disabled_key (S.get key)
+    in
+    let m () = S.get g.manager in
+    let selectable () =
+      (match g.selection_mode () with
+        | `none -> false
+        | `single | `multiple -> true)
+      && not (disabled ())
+    in
+    let selected () = Manager.is_selected (m ()) (S.get key) in
+    let removable () = g.removable () in
+    let row_id = S.create_unique_id () in
+    let t =
+      {
+        state =
+          {
+            key = (fun () -> S.get key);
+            is_selected = selected;
+            is_disabled = disabled;
+            allows_removing = removable;
+          };
+        row_id;
+      }
+    in
+    (* Its children are made inside it, so a part among them reads the tag
+       it is in. *)
+    let resolved =
+      S.children (fun () ->
+          Jsx.element
+            <Tag_context.Provider value=(fun () -> t)>
+              (fun () -> Props.children props)
+            </Tag_context.Provider>)
+    in
+    let text () =
+      match Props.text_value props with
+      | Some t -> t
+      | None ->
+          Option.value (first_text (S.to_array (S.get resolved))) ~default:""
+    in
+    let element, set_element = S.create_signal None in
+    let item =
+      Selection.create_selectable_item
+        (Types.CreateSelectableItemProps.make
+           ~selection_manager:(Either.right g.manager) ~key:(Either.right key)
+           ~disabled:
+             (Either.right (S.create_memo (fun () -> Some (disabled ()))))
+           ())
+        element
+    in
+    g.made ();
+    (* A tag joins the group once it is on the page, where its place among the
+       others is read. *)
+    S.on_mount (fun () ->
+        Option.iter
+          (fun e ->
+            g.add { key = (fun () -> S.get key); element = e; disabled; text };
+            S.on_cleanup (fun () -> g.drop e))
+          (S.get element));
+    let on_key_down e =
+      call (Props.on_key_down props) e;
+      let row = current e in
+      let from_row = target e == row in
+      match pressed e with
+      | "Tab" -> (
+          (* Tab moves through what can be focused inside the tag before it
+             leaves the group, which the list's keys would do at once. *)
+          match Js.Null.toOption active with
+          | Some now ->
+              let inside = Js.Array.from (query_all row tabbable) in
+              let at = Js.Array.findIndex ~f:(fun e -> e == now) inside in
+              let further =
+                if shift e then not from_row else at + 1 < Array.length inside
+              in
+              if further then stop e
+          | None -> ())
+      | _ when not from_row -> stop e
+      | ("Delete" | "Backspace") when removable () && not (disabled ()) ->
+          prevent e;
+          g.remove (S.get key)
+      | _ -> Selectable_item.on_key_down item e
+    in
+    <Tag_context.Provider value=(fun () -> t)>
+      <div
+        role=`row
+        id=row_id
+        ref=(fun e ->
+              S.set set_element (Some e);
+              call (Props.ref props) e)
+        tabindex=(fun () ->
+                   if disabled () then "-1"
+                   else
+                     match S.get (Manager.focused_key (m ())) with
+                     | None -> "0"
+                     | Some k when String.equal k (S.get key) -> "0"
+                     | Some _ -> "-1")
+        aria_label=(fun () -> text ())
+        ?aria_selected=(fun () ->
+                         if selectable () then Some (selected ()) else None)
+        ?aria_disabled=(fun () -> if disabled () then Some true else None)
+        ?aria_describedby=(fun () ->
+                            if removable () then Some g.removal_hint else None)
+        data_key=(fun () -> Jsx.data (S.get key))
+        data_selected=(fun () -> state (selected ()))
+        data_disabled=(fun () -> state (disabled ()))
+        on_pointer_down=(fun e ->
+                          call (Props.on_pointer_down props) e;
+                          if on_tag (pointer_target e) (pointer_current e) then
+                            Selectable_item.on_pointer_down item e)
+        on_pointer_up=(fun e ->
+                        call (Props.on_pointer_up props) e;
+                        if on_tag (pointer_target e) (pointer_current e) then
+                          Selectable_item.on_pointer_up item e)
+        on_click=(fun e ->
+                   call (Props.on_click props) e;
+                   if on_tag (mouse_target e) (mouse_current e) then
+                     Selectable_item.on_click item e)
+        on_key_down
+        on_mouse_down=(fun e ->
+                        call (Props.on_mouse_down props) e;
+                        Selectable_item.on_mouse_down item e)
+        on_focus=(fun e ->
+                   call (Props.on_focus props) e;
+                   Selectable_item.on_focus item e)
+        on_focus_in=(fun e ->
+                      call (Props.on_focus_in props) e;
+                      (* The focus on what is inside a tag, its remove button,
+                         is the tag's, so the keys and a removal start from
+                         it. *)
+                      if focus_target e != focus_current e && not (disabled ())
+                      then Manager.set_focused_key (m ()) ~key:(S.get key) ())
+        ?as_=(fun () -> S.drawn_as props)
+        props=(S.undrawn (S.omit props own))>
+        <div role=`gridcell aria_colindex="1" style="display: contents">
+          (fun () -> Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
+        </div>
+      </div>
+    </Tag_context.Provider>
+
+  let component = Jsx.component make
+end
+
+module Remove_button = struct
+  module Props = struct
+    type t
+
+    external check :
+      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
+      ?props:'spread Solidtype.Solid.rest ->
+      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      Solidtype.Html.Button.check = "check"
+    [@@mel.module "vite-plugin-solidtype/markers"]
+
+    external children : t -> Jsx.content = "children" [@@mel.get]
+
+    external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
+    [@@mel.get]
+  end
+
+  let make (props : Props.t) =
+    let g = in_group "Tag_group.Remove_button" in
+    let t = in_tag "Tag_group.Remove_button" in
+    let id = S.create_unique_id () in
+    <button
+      type_=`button
+      id
+      aria_label="Remove"
+      aria_labelledby=(fun () -> id ^ " " ^ t.row_id)
+      disabled=(fun () -> t.state.is_disabled ())
+      ?tabindex=(fun () -> if t.state.is_disabled () then None else Some "0")
+      on_click=(fun e ->
+                 call (Props.on_click props) e;
+                 g.remove (t.state.key ()))
+      ?as_=(fun () -> S.drawn_as props)
+      props=(S.undrawn (S.omit props [| "children"; "id"; "onClick" |]))>
+      (fun () -> Props.children props)
+    </button>
+
+  let component = Jsx.component make
+end

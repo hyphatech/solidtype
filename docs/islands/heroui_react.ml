@@ -698,3 +698,16 @@ external table_props : variant:string -> unit -> table_props = "" [@@mel.obj]
 
 external table : Dom.htmlDivElement -> table_props -> unit = "table"
 [@@mel.module "./react/heroui.tsx"]
+
+type tag_group_props
+
+external tag_group_props :
+  size:string ->
+  variant:string ->
+  selection_mode:(string[@mel.as "selectionMode"]) ->
+  unit ->
+  tag_group_props = ""
+[@@mel.obj]
+
+external tag_group : Dom.htmlDivElement -> tag_group_props -> unit = "tagGroup"
+[@@mel.module "./react/heroui.tsx"]

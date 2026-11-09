@@ -107,6 +107,7 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [Drawer](https://hyphatech.github.io/solidtype/heroui/drawer/): Slide-out panel for supplementary content and actions.
 - [Dropdown](https://hyphatech.github.io/solidtype/heroui/dropdown/): A dropdown displays a list of actions or options that a user can choose.
 - [EmptyState](https://hyphatech.github.io/solidtype/heroui/empty-state/): What a list shows where it has nothing to show.
+- [ErrorMessage](https://hyphatech.github.io/solidtype/heroui/error-message/): An error message for non-form components such as a TagGroup.
 - [FieldError](https://hyphatech.github.io/solidtype/heroui/field-error/): Displays validation error messages for form fields.
 - [Fieldset](https://hyphatech.github.io/solidtype/heroui/fieldset/): Group related form controls with legends, descriptions, and actions.
 - [Form](https://hyphatech.github.io/solidtype/heroui/form/): Wrapper component for form validation and submission handling.
@@ -136,6 +137,7 @@ Each component's page gives HeroUI's own examples in OCaml, and a table of its p
 - [Switch](https://hyphatech.github.io/solidtype/heroui/switch/): A toggle switch component for boolean states.
 - [Table](https://hyphatech.github.io/solidtype/heroui/table/): Tables display structured data in rows and columns with support for sorting, selection, column resizing, and infinite scrolling.
 - [Tabs](https://hyphatech.github.io/solidtype/heroui/tabs/): Tabs organize content into multiple sections and allow users to navigate between them.
+- [TagGroup](https://hyphatech.github.io/solidtype/heroui/tag-group/): A focusable list of tags with support for keyboard navigation, selection, and removal.
 - [TextArea](https://hyphatech.github.io/solidtype/heroui/text-area/): Primitive multiline text input component that accepts standard HTML attributes.
 - [TextField](https://hyphatech.github.io/solidtype/heroui/text-field/): Composition-friendly text fields with labels, descriptions, and inline validation.
 - [TextShimmer](https://hyphatech.github.io/solidtype/heroui/text-shimmer/): Text with a highlight sweeping across it, for a label of work under way.

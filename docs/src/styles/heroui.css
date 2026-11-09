@@ -24,6 +24,7 @@
 
 @import "@heroui/styles/components/close-button.css" layer(components);
 @import "@heroui/styles/components/description.css" layer(components);
+@import "@heroui/styles/components/error-message.css" layer(components);
 @import "@heroui/styles/components/field-error.css" layer(components);
 @import "@heroui/styles/components/label.css" layer(components);
 /* Before link.css, as HeroUI's bundle has it: a disabled link in a trail is
@@ -96,6 +97,8 @@
 @import "@heroui/styles/components/color-slider.css" layer(components);
 @import "@heroui/styles/components/color-swatch.css" layer(components);
 @import "@heroui/styles/components/color-swatch-picker.css" layer(components);
+@import "@heroui/styles/components/tag-group.css" layer(components);
+@import "@heroui/styles/components/tag.css" layer(components);
 @import "@heroui/styles/components/table.css" layer(components);
 /* The components HeroUI ships no stylesheet for, whose stylesheets
    solidtype-heroui ships beside its JavaScript, where Melange's output puts

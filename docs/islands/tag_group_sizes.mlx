@@ -1,0 +1,25 @@
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  <div class_="flex flex-col gap-6">
+    <Tag_group selection_mode=`single size=`sm>
+      <Label>"Small"</Label>
+      <Tag_group.List>
+        <Tag>"News"</Tag> <Tag>"Travel"</Tag> <Tag>"Gaming"</Tag>
+      </Tag_group.List>
+    </Tag_group>
+    <Tag_group selection_mode=`single size=`md>
+      <Label>"Medium"</Label>
+      <Tag_group.List>
+        <Tag>"News"</Tag> <Tag>"Travel"</Tag> <Tag>"Gaming"</Tag>
+      </Tag_group.List>
+    </Tag_group>
+    <Tag_group selection_mode=`single size=`lg>
+      <Label>"Large"</Label>
+      <Tag_group.List>
+        <Tag>"News"</Tag> <Tag>"Travel"</Tag> <Tag>"Gaming"</Tag>
+      </Tag_group.List>
+    </Tag_group>
+  </div>

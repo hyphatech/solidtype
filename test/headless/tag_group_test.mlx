@@ -1,0 +1,212 @@
+(* The headless TagGroup as a caller meets it: a grid of rows named by their
+   text, its list named by its label and described by its description and
+   error, tags chosen by a press or the keys, walked with a wrap and as the
+   page's direction reads them, removed by their button or the keys with the
+   focus moved on, the caller's attributes, ref and handlers kept, and no
+   violation axe finds. *)
+
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Tag_group = Solidtype_headless.Tag_group
+module I18n = Solidtype_kobalte.I18n
+module E = Jest.Expect
+module H = Harness
+open Harness.Syntax
+
+let names = [| "News"; "Travel"; "Gaming"; "Shopping" |]
+
+let told_of keys =
+  String.concat "," (List.sort String.compare (Array.to_list keys))
+
+(* Four tags, the third disabled, in a group that removes them from the page
+   and tells what it was asked. *)
+let group ?(rtl = false) ?(selection_mode = `multiple) ?(told = ref [])
+    ?(got_ref = ref false) () =
+  let shown, set_shown = S.create_signal names in
+  let body () =
+    <Tag_group.Root
+      selection_mode=(fun () -> selection_mode)
+      on_selection_change=(fun keys ->
+                            told := ("chose " ^ told_of keys) :: !told)
+      on_remove=(fun keys ->
+                  told := ("removed " ^ told_of keys) :: !told;
+                  S.update set_shown
+                    (Js.Array.filter ~f:(fun n ->
+                         not (Array.exists (String.equal n) keys))))
+      class_="tags"
+      data_testid="group">
+      <Tag_group.Label>"Categories"</Tag_group.Label>
+      <Tag_group.List
+        render_empty_state=(fun _ -> <p>"None"</p>)
+        ref=(fun _ -> got_ref := true)>
+        <For each=(fun () -> S.get shown)>
+          (fun n _ ->
+            <Tag_group.Tag
+              id=(fun () -> n) is_disabled=(fun () -> String.equal n "Gaming")>
+              (fun () -> Jsx.string n)
+              <Tag_group.Remove_button>"x"</Tag_group.Remove_button>
+            </Tag_group.Tag>)
+        </For>
+      </Tag_group.List>
+      <Tag_group.Description>"Pick any"</Tag_group.Description>
+      <Tag_group.Error_message>"Pick one"</Tag_group.Error_message>
+    </Tag_group.Root>
+  in
+  H.render (fun () ->
+      if rtl then
+        <I18n.I18nProvider locale="ar">
+          (fun () -> Jsx.element (body ()))
+        </I18n.I18nProvider>
+      else body ())
+
+let rows () = H.all_by_role "row"
+
+let at_focus () =
+  match H.attribute H.focused "role" with
+  | Some "row" -> H.text H.focused
+  | Some role -> role
+  | None -> H.text H.focused
+
+let linked e name =
+  match H.attribute e name with
+  | Some ids ->
+      String.split_on_char ' ' ids
+      |> List.map (fun id ->
+          match Js.Null.toOption (H.by_id id) with
+          | Some n -> H.text n
+          | None -> "missing")
+      |> String.concat " / "
+  | None -> "none"
+
+let keys user steps =
+  let rec go seen = function
+    | [] -> Js.Promise.resolve (List.rev seen)
+    | k :: rest ->
+        let* () = H.keyboard user k in
+        go (at_focus () :: seen) rest
+  in
+  go [] steps
+
+let () =
+  Jest.describe "Headless Tag_group" (fun () ->
+      Jest.afterEach H.cleanup;
+      Jest.testPromise "is a grid of rows, named and described" (fun () ->
+          group ();
+          let grid =
+            match H.all_by_role "grid" with [||] -> None | all -> Some all.(0)
+          in
+          let read e =
+            (linked e "aria-labelledby", linked e "aria-describedby")
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Option.map read grid,
+                  Array.map (fun r -> H.attribute r "aria-label") (rows ()),
+                  Array.map (fun r -> H.attribute r "aria-disabled") (rows ())
+                )
+              |> toEqual
+                   ( Some ("Categories", "Pick any / Pick one"),
+                     [|
+                       Some "News";
+                       Some "Travel";
+                       Some "Gaming";
+                       Some "Shopping";
+                     |],
+                     [| None; None; Some "true"; None |] )));
+      Jest.testPromise
+        "is walked by the arrows, wrapping, a disabled tag passed" (fun () ->
+          group ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen =
+            keys user
+              [
+                "{ArrowRight}";
+                "{ArrowRight}";
+                "{ArrowRight}";
+                "{ArrowLeft}";
+                "{End}";
+                "{Home}";
+                "{ArrowUp}";
+              ]
+          in
+          Js.Promise.resolve
+            E.(
+              expect seen
+              |> toEqual
+                   [
+                     "Travelx";
+                     "Shoppingx";
+                     "Newsx";
+                     "Shoppingx";
+                     "Shoppingx";
+                     "Newsx";
+                     "Shoppingx";
+                   ]));
+      Jest.testPromise "is walked as the page's direction reads it" (fun () ->
+          group ~rtl:true ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* seen = keys user [ "{ArrowLeft}"; "{ArrowRight}" ] in
+          Js.Promise.resolve E.(expect seen |> toEqual [ "Travelx"; "Newsx" ]));
+      Jest.testPromise "chooses by a press and the keys, cleared by Escape"
+        (fun () ->
+          let told = ref [] in
+          group ~told ();
+          let user = H.setup () in
+          let* () = H.click user (rows ()).(0) in
+          let* () = H.keyboard user "{ArrowRight} " in
+          let* () = H.keyboard user "{Escape}" in
+          Js.Promise.resolve
+            E.(
+              expect (List.rev !told)
+              |> toEqual [ "chose News"; "chose News,Travel"; "chose " ]));
+      Jest.testPromise "removes by its button, not choosing the tag" (fun () ->
+          let told = ref [] in
+          group ~told ();
+          let user = H.setup () in
+          let* () = H.click user (H.all_by_role "button").(0) in
+          Js.Promise.resolve
+            E.(
+              expect (List.rev !told, at_focus ())
+              |> toEqual ([ "removed News" ], "Travelx")));
+      Jest.testPromise
+        "removes by the keys, the chosen ones together, the focus moved on"
+        (fun () ->
+          let told = ref [] in
+          group ~told ();
+          let user = H.setup () in
+          let* () = H.tab user in
+          let* () = H.keyboard user "{ArrowRight}{Delete}" in
+          let after_one = at_focus () in
+          let* () = H.keyboard user " {ArrowLeft} {Backspace}" in
+          Js.Promise.resolve
+            E.(
+              expect (List.rev !told, after_one, at_focus ())
+              |> toEqual
+                   ( [
+                       "removed Travel";
+                       "chose Shopping";
+                       "chose News,Shopping";
+                       "removed News,Shopping";
+                     ],
+                     "Shoppingx",
+                     "grid" )));
+      Jest.testPromise "keeps the caller's attributes and ref" (fun () ->
+          let got_ref = ref false in
+          group ~got_ref ();
+          let root = H.by_text "Categories" in
+          let parent = Js.Null.toOption (H.parent root) in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( Option.bind parent (fun p -> H.attribute p "class"),
+                  Option.bind parent (fun p -> H.attribute p "data-testid"),
+                  !got_ref )
+              |> toEqual (Some "tags", Some "group", true)));
+      Jest.testPromise "passes an axe scan" (fun () ->
+          group ();
+          let* found = H.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||])))

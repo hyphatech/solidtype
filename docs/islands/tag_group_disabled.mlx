@@ -1,0 +1,26 @@
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  <div class_="flex flex-col gap-4">
+    <Tag_group selection_mode=`single>
+      <Label>"Disabled Tags"</Label>
+      <Tag_group.List>
+        <Tag is_disabled=true>"News"</Tag>
+        <Tag>"Travel"</Tag>
+        <Tag is_disabled=true>"Gaming"</Tag>
+      </Tag_group.List>
+      <Description>"Some tags are disabled"</Description>
+    </Tag_group>
+    <Tag_group disabled_keys=(fun () -> [| "travel" |]) selection_mode=`single>
+      <Label>"Disabled Keys"</Label>
+      <Tag_group.List>
+        <Tag id="news">"News"</Tag>
+        <Tag id="travel">"Travel"</Tag>
+        <Tag id="gaming">"Gaming"</Tag>
+      </Tag_group.List>
+      <Description>"Tags disabled via disabled_keys prop"</Description>
+    </Tag_group>
+  </div>

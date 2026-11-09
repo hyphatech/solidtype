@@ -1,0 +1,488 @@
+(* HeroUI's TagGroup beside the same group in React: every part, its classes
+   and state, what names and describes each, where the focus is, and the keys
+   told as chosen and removed, as tags are hovered, pressed, walked, chosen
+   and removed by the keys and their buttons, for each selection mode, size
+   and variant. *)
+
+module Jsx = Solidtype.Jsx
+module S = Solidtype.Solid
+module For = Solidtype.For
+module Tag_group = Solidtype_heroui.Tag_group
+module Tag = Solidtype_heroui.Tag
+module Label = Solidtype_heroui.Label
+module Description = Solidtype_heroui.Description
+module Error_message = Solidtype_heroui.Error_message
+module Empty_state = Solidtype_heroui.Empty_state
+module E = Jest.Expect
+module T = Testing
+open Testing.Syntax
+
+type props
+
+external props :
+  tags:string array ->
+  ?selection_mode:(string[@mel.as "selectionMode"]) ->
+  ?selected_keys:(string array[@mel.as "selectedKeys"]) ->
+  ?default_selected_keys:(string array[@mel.as "defaultSelectedKeys"]) ->
+  ?disabled_keys:(string array[@mel.as "disabledKeys"]) ->
+  ?disabled:string ->
+  ?is_disabled:(bool[@mel.as "isDisabled"]) ->
+  ?size:string ->
+  ?variant:string ->
+  ?removable:bool ->
+  ?custom_remove:(bool[@mel.as "customRemove"]) ->
+  ?label:string ->
+  ?description:string ->
+  ?error_message:(string[@mel.as "errorMessage"]) ->
+  ?aria_label:(string[@mel.as "ariaLabel"]) ->
+  unit ->
+  props = ""
+[@@mel.obj]
+
+module Twin = struct
+  external render : props -> ((string -> unit)[@mel.uncurry]) -> Dom.element
+    = "render"
+  [@@mel.module "./twins/TagGroup.tsx"]
+
+  external step :
+    ((unit -> unit Js.Promise.t)[@mel.uncurry]) -> unit Js.Promise.t = "step"
+  [@@mel.module "./twins/TagGroup.tsx"]
+
+  external render_of_state : bool -> Dom.element = "renderOfState"
+  [@@mel.module "./twins/TagGroup.tsx"]
+
+  external cleanup : unit -> unit = "cleanup"
+  [@@mel.module "./twins/TagGroup.tsx"]
+end
+
+external query_all : Dom.element -> string -> Dom.element Js.Array.array_like
+  = "querySelectorAll"
+[@@mel.send]
+
+external tag_name : Dom.element -> string = "tagName" [@@mel.get]
+external focused : Dom.element = "activeElement" [@@mel.scope "document"]
+
+external by_id : string -> Dom.element Js.null = "getElementById"
+[@@mel.scope "document"]
+
+let tags = [| "news"; "travel"; "gaming"; "shopping" |]
+
+(* What names or describes a part, written as the parts it points to. *)
+let linked value =
+  String.split_on_char ' ' value
+  |> List.filter (fun id -> String.length id > 0)
+  |> List.map (fun id ->
+      match Js.Null.toOption (by_id id) with
+      | Some e -> Option.value (T.attribute e "data-slot") ~default:"?"
+      | None -> "missing")
+  |> String.concat " "
+
+(* What each framework writes for itself and no style reads: React Aria's
+   collection's marker; and the description of how to remove a tag, which
+   React Aria gives a tag once a key is pressed and the port gives it
+   always, read by a reader alone. *)
+let left_out = [ "data-collection" ]
+
+let references e =
+  match T.attribute e "data-slot" with
+  | Some "tag" -> [ "aria-labelledby" ]
+  | Some _ | None -> [ "aria-labelledby"; "aria-describedby" ]
+
+let shown host =
+  let parts = Js.Array.from (query_all host "[data-slot]") in
+  let at_focus =
+    match Js.Array.findIndex ~f:(fun e -> e == focused) parts with
+    | -1 -> if focused == T.body then "body" else "elsewhere"
+    | i -> string_of_int i
+  in
+  Array.map
+    (fun e ->
+      let named =
+        references e
+        |> List.filter_map (fun name ->
+            Option.map (fun v -> name ^ "->" ^ linked v) (T.attribute e name))
+      in
+      String.concat " "
+        (tag_name e
+        :: T.attributes_but (("aria-describedby" :: references e) @ left_out) e
+        :: named)
+      ^
+      match T.attribute e "data-slot" with
+      | Some ("tag" | "label" | "description" | "error-message") ->
+          " text=" ^ T.text_content e
+      | Some _ | None -> "")
+    parts
+  |> Array.to_list
+  |> List.cons ("focus=" ^ at_focus)
+
+let nth host selector i =
+  let all = Js.Array.from (query_all host selector) in
+  if i < Array.length all then all.(i)
+  else Js.Exn.raiseError ("no " ^ selector ^ " " ^ string_of_int i)
+
+let walk ~steps ~step host told =
+  let user = T.setup () in
+  let seen = ref [ (shown host, !told) ] in
+  let rec go = function
+    | [] -> Js.Promise.resolve ()
+    | s :: rest ->
+        let* () =
+          step (fun () ->
+              match String.split_on_char ':' s with
+              | [ "click"; i ] ->
+                  T.click user (nth host "[role=row]" (int_of_string i))
+              | [ "remove"; i ] ->
+                  T.click user
+                    (nth host "[data-slot=tag-remove-button]" (int_of_string i))
+              | [ "hover"; i ] ->
+                  T.hover user (nth host "[role=row]" (int_of_string i))
+              | [ "unhover"; i ] ->
+                  T.unhover user (nth host "[role=row]" (int_of_string i))
+              | [ "tab" ] -> T.tab user
+              | _ -> T.keyboard user s)
+        in
+        seen := (shown host, !told) :: !seen;
+        go rest
+  in
+  let* () = go steps in
+  Js.Promise.resolve (Array.of_list (List.rev !seen))
+
+let mode_name = function
+  | `none -> "none"
+  | `single -> "single"
+  | `multiple -> "multiple"
+
+let size_name = function `sm -> "sm" | `md -> "md" | `lg -> "lg"
+let variant_name = function `default -> "default" | `surface -> "surface"
+
+let told_of keys =
+  String.concat "," (List.sort String.compare (Array.to_list keys))
+
+let both ?selection_mode ?selected_keys ?default_selected_keys ?disabled_keys
+    ?disabled ?is_disabled ?size ?variant ?(removable = false)
+    ?(custom_remove = false) ?label ?description ?error_message ?aria_label
+    ~steps () =
+  let told = ref [] in
+  let shown_tags, set_tags = S.create_signal tags in
+  let remove keys =
+    told := ("removed " ^ told_of keys) :: !told;
+    S.update set_tags (fun ts ->
+        Js.Array.filter
+          ~f:(fun t -> not (Array.exists (String.equal t) keys))
+          ts)
+  in
+  let content () =
+    Jsx.fragment
+      [|
+        (match label with
+        | Some l -> <Label>(fun () -> Jsx.string l)</Label>
+        | None -> Jsx.nothing);
+        <Tag_group.List
+          render_empty_state=(fun _ -> <Empty_state>"No tags"</Empty_state>)>
+          <For each=(fun () -> S.get shown_tags)>
+            (fun t _ ->
+              <Tag
+                id=(fun () -> t)
+                is_disabled=(fun () ->
+                              Option.equal String.equal disabled (Some t))>
+                (fun () -> Jsx.string t)
+                (fun () ->
+                  if custom_remove then
+                    Jsx.element
+                      <Tag.Remove_button>
+                        <svg data_cross="" view_box="0 0 16 16" />
+                      </Tag.Remove_button>
+                  else Jsx.string "")
+              </Tag>)
+          </For>
+        </Tag_group.List>;
+        (match description with
+        | Some d -> <Description>(fun () -> Jsx.string d)</Description>
+        | None -> Jsx.nothing);
+        (match error_message with
+        | Some m -> <Error_message>(fun () -> Jsx.string m)</Error_message>
+        | None -> Jsx.nothing);
+      |]
+  in
+  let selected keys = told := ("selected " ^ told_of keys) :: !told in
+  T.render (fun () ->
+      if removable then
+        <Tag_group
+          ?aria_label=(fun () -> aria_label)
+          ?selection_mode=(fun () -> selection_mode)
+          ?selected_keys=(fun () -> selected_keys)
+          ?default_selected_keys=(fun () -> default_selected_keys)
+          ?disabled_keys=(fun () -> disabled_keys)
+          ?is_disabled=(fun () -> is_disabled)
+          ?size=(fun () -> size)
+          ?variant=(fun () -> variant)
+          on_selection_change=selected
+          on_remove=remove>
+          (fun () -> Jsx.element (content ()))
+        </Tag_group>
+      else
+        <Tag_group
+          ?aria_label=(fun () -> aria_label)
+          ?selection_mode=(fun () -> selection_mode)
+          ?selected_keys=(fun () -> selected_keys)
+          ?default_selected_keys=(fun () -> default_selected_keys)
+          ?disabled_keys=(fun () -> disabled_keys)
+          ?is_disabled=(fun () -> is_disabled)
+          ?size=(fun () -> size)
+          ?variant=(fun () -> variant)
+          on_selection_change=selected>
+          (fun () -> Jsx.element (content ()))
+        </Tag_group>);
+  let* solidtype = walk ~steps ~step:(fun action -> action ()) T.body told in
+  T.cleanup ();
+  let told' = ref [] in
+  let host =
+    Twin.render
+      (props ~tags
+         ?selection_mode:(Option.map mode_name selection_mode)
+         ?selected_keys ?default_selected_keys ?disabled_keys ?disabled
+         ?is_disabled
+         ?size:(Option.map size_name size)
+         ?variant:(Option.map variant_name variant)
+         ~removable ~custom_remove ?label ?description ?error_message
+         ?aria_label ())
+      (fun s -> told' := s :: !told')
+  in
+  let* react = walk ~steps ~step:Twin.step host told' in
+  Twin.cleanup ();
+  Js.Promise.resolve E.(expect solidtype |> toEqual react)
+
+(* The walk on the first tag of a group, whose children are drawn of its
+   state, as words, beside React's. *)
+let of_state ~disabled =
+  T.render (fun () ->
+      <Tag_group
+        aria_label="Tags" selection_mode=`multiple on_remove=(fun _ -> ())>
+        <Tag_group.List>
+          <Tag id="news" text_value="News" is_disabled=(fun () -> disabled)>
+            (fun s ->
+              <span data_words="tag">
+                (fun () ->
+                  Jsx.string
+                    (T.words
+                       [
+                         ("hovered", s.is_hovered);
+                         ("pressed", s.is_pressed);
+                         ("selected", s.is_selected);
+                         ("focused", s.is_focused);
+                         ("focus-visible", s.is_focus_visible);
+                         ("disabled", s.is_disabled);
+                         ("removable", s.allows_removing);
+                       ]))
+              </span>)
+          </Tag>
+          <Tag id="travel">"Travel"</Tag>
+        </Tag_group.List>
+      </Tag_group>);
+  let* solidtype =
+    T.walk ~read:T.words_shown ~step:Twin.step (T.nth "[role=row]" 0)
+  in
+  T.cleanup ();
+  let* react =
+    T.walk ~read:T.words_shown ~step:Twin.step (Twin.render_of_state disabled)
+  in
+  Twin.cleanup ();
+  Js.Promise.resolve (solidtype, react)
+
+let () =
+  Jest.describe "Tag_group" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "draws its tag's children of its state, as React's"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:false in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its tag's children of its state while disabled"
+        (fun () ->
+          let* solidtype, react = of_state ~disabled:true in
+          Js.Promise.resolve E.(expect solidtype |> toEqual react));
+      Jest.testPromise "draws its label, description and error, as React's"
+        (fun () ->
+          both ~selection_mode:`multiple ~label:"Categories"
+            ~description:"Pick any" ~error_message:"Pick one" ~steps:[] ());
+      Jest.testPromise "is chosen one at a time by a press, as React's is"
+        (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`single
+            ~steps:[ "hover:1"; "click:1"; "unhover:1"; "click:2"; "click:2" ]
+            ());
+      Jest.testPromise "is chosen many at a time by a press, as React's is"
+        (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`multiple
+            ~default_selected_keys:[| "news" |]
+            ~steps:[ "click:1"; "click:3"; "click:0" ]
+            ());
+      Jest.testPromise "is not chosen, nor hovered, without a selection mode"
+        (fun () ->
+          both ~aria_label:"Tags"
+            ~steps:[ "hover:1"; "click:1"; "{ArrowRight}" ]
+            ());
+      Jest.testPromise "is walked and chosen by the keys, as React's is"
+        (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`multiple ~disabled:"gaming"
+            ~steps:
+              [
+                "tab";
+                "{ArrowRight}";
+                " ";
+                "{ArrowRight}";
+                "{ArrowRight}";
+                "{ArrowLeft}";
+                "{ArrowDown}";
+                "{ArrowUp}";
+                "{End}";
+                "{Enter}";
+                "{Home}";
+                "s";
+                "{Escape}";
+              ]
+            ());
+      Jest.testPromise "keeps the keys it is given, as React's does" (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`single
+            ~selected_keys:[| "travel" |] ~steps:[ "click:2"; "tab" ] ());
+      Jest.testPromise "disables the tags its keys name, as React's does"
+        (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`single
+            ~disabled_keys:[| "travel" |]
+            ~steps:[ "click:1"; "tab"; "{ArrowRight}" ]
+            ());
+      (* HeroUI documents is_disabled as disabling the group, which React's
+         tag group ignores: the port disables every tag and its button. *)
+      Jest.testPromise "is disabled whole, as HeroUI documents" (fun () ->
+          let told = ref [] in
+          T.render (fun () ->
+              <Tag_group
+                aria_label="Tags"
+                selection_mode=`single
+                is_disabled=true
+                on_selection_change=(fun _ -> told := "selected" :: !told)
+                on_remove=(fun _ -> told := "removed" :: !told)>
+                <Tag_group.List>
+                  <Tag id="news">"News"</Tag> <Tag id="travel">"Travel"</Tag>
+                </Tag_group.List>
+              </Tag_group>);
+          let user = T.setup () in
+          let* () = T.click user (nth T.body "[role=row]" 1) in
+          let* () = T.tab user in
+          let* () = T.keyboard user "{Delete}" in
+          let read selector name =
+            Js.Array.from (query_all T.body selector)
+            |> Array.map (fun e -> T.attribute e name)
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( read "[role=row]" "aria-disabled",
+                  read "[role=row]" "data-disabled",
+                  read "[data-slot=tag-remove-button]" "disabled",
+                  !told,
+                  T.attribute focused "role" )
+              |> toEqual
+                   ( [| Some "true"; Some "true" |],
+                     [| Some "true"; Some "true" |],
+                     [| Some ""; Some "" |],
+                     [],
+                     None )));
+      Jest.testPromise "removes a tag by its button, as React's does" (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`single ~removable:true
+            ~steps:[ "remove:1"; "remove:2"; "remove:1"; "remove:0" ]
+            ());
+      Jest.testPromise "removes tags by the keys, moving the focus, as React's"
+        (fun () ->
+          both ~label:"Tags" ~selection_mode:`multiple ~removable:true
+            ~steps:
+              [
+                "tab";
+                "{ArrowRight}";
+                "{Delete}";
+                "{End}";
+                "{Backspace}";
+                "{Home}";
+                " ";
+                "{ArrowRight}";
+                " ";
+                "{Delete}";
+              ]
+            ());
+      Jest.testPromise "reaches a tag's remove button by Tab, as React's does"
+        (fun () ->
+          both ~aria_label:"Tags" ~selection_mode:`single ~removable:true
+            ~steps:
+              [
+                "tab";
+                "tab";
+                "{Shift>}{Tab}{/Shift}";
+                "{ArrowRight}";
+                "tab";
+                " ";
+              ]
+            ());
+      Jest.testPromise "draws a remove button of its own, as React's does"
+        (fun () ->
+          both ~aria_label:"Tags" ~removable:true ~custom_remove:true
+            ~steps:[ "remove:0" ] ());
+      List.iter
+        (fun (size, variant) ->
+          Jest.testPromise
+            ("draws its " ^ size_name size ^ " size, as React's does")
+            (fun () ->
+              both ~aria_label:"Tags" ~selection_mode:`single
+                ~default_selected_keys:[| "travel" |] ~size ~variant ~steps:[]
+                ()))
+        [ (`sm, `default); (`md, `surface); (`lg, `default) ])
+
+let () =
+  Jest.describe "Tag_group, its elements" (fun () ->
+      Jest.afterEach T.cleanup;
+      Jest.testPromise "pass an axe scan, as React's do" (fun () ->
+          T.render (fun () ->
+              <Tag_group selection_mode=`multiple on_remove=(fun _ -> ())>
+                <Label>"Categories"</Label>
+                <Tag_group.List>
+                  <Tag id="news">"News"</Tag> <Tag id="travel">"Travel"</Tag>
+                </Tag_group.List>
+                <Description>"Pick any"</Description>
+              </Tag_group>);
+          let* found = T.accessibility_violations () in
+          Js.Promise.resolve E.(expect found |> toEqual [||]));
+      Jest.testPromise
+        "take their elements' attributes, calling a caller's ref beside its own"
+        (fun () ->
+          let refs = ref 0 in
+          T.render (fun () ->
+              <Tag_group
+                title="Group" selection_mode=`single on_remove=(fun _ -> ())>
+                <Tag_group.List title="List">
+                  <Tag id="news" title="News" ref=(fun _ -> incr refs)>
+                    "News" <Tag.Remove_button title="Remove" />
+                  </Tag>
+                </Tag_group.List>
+              </Tag_group>);
+          let read slot name =
+            Option.bind
+              (T.query ("[data-slot=" ^ slot ^ "]"))
+              (fun e -> T.attribute e name)
+          in
+          let* () =
+            T.hover (T.setup ())
+              (Option.value (T.query "[data-slot=tag]") ~default:T.body)
+          in
+          Js.Promise.resolve
+            E.(
+              expect
+                ( read "tag-group" "title",
+                  read "tag-group-list" "title",
+                  read "tag" "title",
+                  read "tag-remove-button" "title",
+                  read "tag" "data-hovered",
+                  !refs )
+              |> toEqual
+                   ( Some "Group",
+                     Some "List",
+                     Some "News",
+                     Some "Remove",
+                     Some "true",
+                     1 ))))

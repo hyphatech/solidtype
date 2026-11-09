@@ -1,0 +1,30 @@
+module S = Solidtype.Solid
+module For = Solidtype.For
+module Tag_group = Solidtype_headless.Tag_group
+
+let make () =
+  let tags, set_tags = S.create_signal [| "News"; "Travel"; "Gaming" |] in
+  <Tag_group.Root
+    class_="flex flex-col gap-2"
+    selection_mode=`multiple
+    on_remove=(fun keys ->
+                S.update set_tags
+                  (Js.Array.filter ~f:(fun t ->
+                       not (Array.exists (String.equal t) keys))))>
+    <Tag_group.Label class_="text-sm font-medium">"Categories"</Tag_group.Label>
+    <Tag_group.List class_="flex flex-wrap gap-2">
+      <For each=(fun () -> S.get tags)>
+        (fun t _ ->
+          <Tag_group.Tag
+            id=(fun () -> t)
+            class_="flex items-center gap-1 rounded-full border px-3 py-1 \
+                    data-[selected]:bg-black data-[selected]:text-white">
+            (fun () -> Solidtype.Jsx.string t)
+            <Tag_group.Remove_button>"×"</Tag_group.Remove_button>
+          </Tag_group.Tag>)
+      </For>
+    </Tag_group.List>
+    <Tag_group.Description class_="text-xs">
+      "Delete or Backspace removes the focused tag"
+    </Tag_group.Description>
+  </Tag_group.Root>

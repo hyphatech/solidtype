@@ -1,0 +1,37 @@
+module S = Solidtype.Solid
+module Description = Solidtype_heroui.Description
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let make () =
+  let single, set_single = S.create_signal [| "news" |] in
+  let multiple, set_multiple = S.create_signal [| "news"; "travel" |] in
+  <div class_="flex flex-col gap-8">
+    <Tag_group
+      selected_keys=(fun () -> S.get single)
+      selection_mode=`single
+      on_selection_change=(S.set set_single)>
+      <Label>"Single Selection"</Label>
+      <Tag_group.List>
+        <Tag id="news">"News"</Tag>
+        <Tag id="travel">"Travel"</Tag>
+        <Tag id="gaming">"Gaming"</Tag>
+        <Tag id="shopping">"Shopping"</Tag>
+      </Tag_group.List>
+      <Description>"Choose one category"</Description>
+    </Tag_group>
+    <Tag_group
+      selected_keys=(fun () -> S.get multiple)
+      selection_mode=`multiple
+      on_selection_change=(S.set set_multiple)>
+      <Label>"Multiple Selection"</Label>
+      <Tag_group.List>
+        <Tag id="news">"News"</Tag>
+        <Tag id="travel">"Travel"</Tag>
+        <Tag id="gaming">"Gaming"</Tag>
+        <Tag id="shopping">"Shopping"</Tag>
+      </Tag_group.List>
+      <Description>"Choose multiple categories"</Description>
+    </Tag_group>
+  </div>

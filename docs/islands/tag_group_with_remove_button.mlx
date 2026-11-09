@@ -1,0 +1,82 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Description = Solidtype_heroui.Description
+module Empty_state = Solidtype_heroui.Empty_state
+module Label = Solidtype_heroui.Label
+module Tag = Solidtype_heroui.Tag
+module Tag_group = Solidtype_heroui.Tag_group
+
+let without keys =
+  Js.Array.filter ~f:(fun (id, _) -> not (Array.exists (String.equal id) keys))
+
+let make () =
+  let tags, set_tags =
+    S.create_signal
+      [|
+        ("news", "News");
+        ("travel", "Travel");
+        ("gaming", "Gaming");
+        ("shopping", "Shopping");
+      |]
+  in
+  let frameworks, set_frameworks =
+    S.create_signal
+      [|
+        ("react", "React");
+        ("vue", "Vue");
+        ("angular", "Angular");
+        ("svelte", "Svelte");
+      |]
+  in
+  <div class_="flex flex-col gap-8">
+    <div class_="w-sm">
+      <Tag_group
+        selection_mode=`single
+        on_remove=(fun keys -> S.update set_tags (without keys))>
+        <Label>"Default Remove Button"</Label>
+        <Tag_group.List
+          render_empty_state=(fun _ ->
+                               <Empty_state class_="p-1">
+                                 "No categories found"
+                               </Empty_state>)>
+          <For each=(fun () -> S.get tags)>
+            (fun (id, name) _ ->
+              <Tag id=(fun () -> id) text_value=(fun () -> name)>
+                (fun () -> Jsx.string name)
+              </Tag>)
+          </For>
+        </Tag_group.List>
+        <Description>"Click the X to remove tags"</Description>
+      </Tag_group>
+    </div>
+    <div class_="w-md">
+      <Tag_group
+        selection_mode=`single
+        on_remove=(fun keys -> S.update set_frameworks (without keys))>
+        <Label>"Custom Remove Button"</Label>
+        <Tag_group.List
+          render_empty_state=(fun _ ->
+                               <Empty_state class_="p-1">
+                                 "No frameworks found"
+                               </Empty_state>)>
+          <For each=(fun () -> S.get frameworks)>
+            (fun (id, name) _ ->
+              <Tag id=(fun () -> id) text_value=(fun () -> name)>
+                (fun (s : Tag.state) ->
+                  Jsx.fragment
+                    [|
+                      Jsx.of_content (Jsx.string name);
+                      (if S.get s.allows_removing then
+                         <Tag.Remove_button>
+                           <Gravity.Circle_xmark_fill />
+                         </Tag.Remove_button>
+                       else Jsx.nothing);
+                    |])
+              </Tag>)
+          </For>
+        </Tag_group.List>
+        <Description>"Custom remove button with icon"</Description>
+      </Tag_group>
+    </div>
+  </div>

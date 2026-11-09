@@ -75,6 +75,9 @@ headless/            solidtype-headless: the components Kobalte lacks, one
                      a listbox of colours, each option named by its
                      swatch, walked as a grid by where each option is or
                      as a stack
+  tag_group          a grid of tags: Kobalte's list of rows, chosen, walked
+                     with a wrap, removed by a button or the keys and the
+                     focus moved on
   load_more_sentinel what asks a list for more as its end comes into view
   virtualizer        React Aria's Virtualizer: a collection draws the entries
                      in view, each placed by a layout
