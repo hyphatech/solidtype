@@ -15,6 +15,16 @@ let contains s sub =
 
 let islands = "../docs/islands"
 
+(* Every page of the site under [dir], each read whole. *)
+let rec pages dir =
+  Sys.readdir dir |> Array.to_list
+  |> List.concat_map (fun f ->
+      let path = Filename.concat dir f in
+      if Sys.is_directory path then pages path
+      else if Filename.check_suffix f ".md" || Filename.check_suffix f ".mdx"
+      then [ read path ]
+      else [])
+
 let every_island_is_on_a_page () =
   let sources =
     Sys.readdir islands |> Array.to_list
@@ -25,15 +35,6 @@ let every_island_is_on_a_page () =
         && not (String.contains (Filename.remove_extension f) '.'))
     |> List.map (fun f ->
         (Filename.remove_extension f, read (Filename.concat islands f)))
-  in
-  let rec pages dir =
-    Sys.readdir dir |> Array.to_list
-    |> List.concat_map (fun f ->
-        let path = Filename.concat dir f in
-        if Sys.is_directory path then pages path
-        else if Filename.check_suffix f ".md" || Filename.check_suffix f ".mdx"
-        then [ read path ]
-        else [])
   in
   let docs = String.concat "\n" (pages "../docs/src/content") in
   let shown name = contains docs (Printf.sprintf {|"@islands/%s.|} name) in
@@ -114,6 +115,40 @@ let llms_txt_lists_every_page () =
     "a page llms.txt lists that the site does not have" []
     (List.filter (fun page -> not (List.mem page pages)) linked)
 
+(* The Vite plugin is a release's asset, named by its URL, so a page that
+   installs it names the newest release CHANGES.md records: the release
+   commit that dates its entry moves the pages with it. *)
+let pages_install_the_released_plugin () =
+  let released =
+    read "../CHANGES.md" |> String.split_on_char '\n'
+    |> List.find_map (fun line ->
+        match String.split_on_char ' ' line with
+        | "##" :: version :: _ when not (String.equal version "Unreleased") ->
+            Some version
+        | _ -> None)
+  in
+  let rec version_after = function
+    | "releases" :: "download" :: version :: _ -> Some version
+    | _ :: rest -> version_after rest
+    | [] -> None
+  in
+  let named =
+    pages "../docs/src/content"
+    |> List.concat_map (String.split_on_char '\n')
+    |> List.filter_map (fun line ->
+        version_after (String.split_on_char '/' line))
+  in
+  Alcotest.(check bool)
+    "CHANGES.md records a release" true (Option.is_some released);
+  Alcotest.(check bool)
+    "a page installs the plugin" true
+    (not (List.is_empty named));
+  Alcotest.(check (list string))
+    "a plugin's release that is not the newest" []
+    (List.filter
+       (fun version -> not (Option.equal String.equal (Some version) released))
+       named)
+
 let () =
   Alcotest.run "docs"
     [
@@ -130,5 +165,10 @@ let () =
       ( "llms.txt",
         [
           Alcotest.test_case "lists every page" `Quick llms_txt_lists_every_page;
+        ] );
+      ( "install",
+        [
+          Alcotest.test_case "the newest release's plugin" `Quick
+            pages_install_the_released_plugin;
         ] );
     ]

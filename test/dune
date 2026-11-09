@@ -10,7 +10,7 @@
 
 ; Every island of the documentation is on one of its pages, every page
 ; of rhp's links to the page of rhp's documentation it follows, and llms.txt
-; lists every page.
+; lists every page, and a page installs the newest release's plugin.
 
 (test
  (name test_docs)
@@ -20,7 +20,8 @@
  (deps
   (glob_files ../docs/islands/*.{ml,mlx})
   (glob_files_rec ../docs/src/content/*.{md,mdx})
-  ../docs/public/llms.txt))
+  ../docs/public/llms.txt
+  ../CHANGES.md))
 
 ; Its errors are compared as text, so colour stays off even where the
 ; environment forces it, as CI's does.

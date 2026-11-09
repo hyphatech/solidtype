@@ -261,8 +261,9 @@ test/internationalized_date/
                      saving, values of several kinds, a throw as a value
 test/ppx/            what the ppx writes for each JSX form
 test/test_docs.ml    every island of docs/islands on some page, or a part of
-                     other islands, every rhp page linked to rhp's, and
-                     every page in llms.txt
+                     other islands, every rhp page linked to rhp's, every
+                     page in llms.txt, and the plugin a page installs the
+                     newest release's in CHANGES.md
 test/does_not_compile.t
                      each mistake the types refuse, built against the
                      installed library, with the error a user reads
