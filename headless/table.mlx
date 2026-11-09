@@ -13,6 +13,16 @@ module Selectable_item = Types.Selection_CreateSelectableItem
 
 external focus : Dom.element -> unit = "focus" [@@mel.send]
 
+type focus_options
+
+external focus_options : prevent_scroll:bool -> unit -> focus_options = ""
+[@@mel.obj]
+
+external focus_with : Dom.element -> focus_options -> unit = "focus"
+[@@mel.send]
+
+external contains : Dom.element -> Dom.element -> bool = "contains" [@@mel.send]
+
 external parent : Dom.element -> Dom.element Js.null = "parentElement"
 [@@mel.get]
 
@@ -1276,18 +1286,33 @@ module Root = struct
         on_focus_in=(fun e ->
                       call (Props.on_focus_in props) e;
                       (* Kobalte's list, focused from outside, moves focus to
-                         a row of its choosing, and a row whose key it is
-                         given focuses itself: focus given a cell, or a
-                         part inside one, a resizer's input, stays there, the
-                         list only told it has focus. *)
+                         a row of its choosing, and the row whose key it holds
+                         focuses itself as the list is focused: focus given a
+                         cell, or a part inside one, stays there, its row the
+                         list's, and a column's header leaves the list as it
+                         was. *)
+                      let target = event_target e in
                       match
-                        Js.Null.toOption
-                          (closest (event_target e)
-                             "[role=gridcell], [role=rowheader], \
-                              [role=columnheader]")
+                        ( Js.Null.toOption
+                            (closest target "[role=gridcell], [role=rowheader]"),
+                          Js.Null.toOption
+                            (closest target "[role=columnheader]") )
                       with
-                      | Some _ -> Manager.set_focused (m ()) true
-                      | None -> Selectable_list.on_focus_in list e)
+                      | Some cell, _ -> (
+                          match
+                            Option.bind
+                              (Js.Null.toOption
+                                 (closest cell "[role=row][data-key]"))
+                              (fun row ->
+                                Js.Null.toOption (attribute row "data-key"))
+                          with
+                          | Some key ->
+                              S.batch (fun () ->
+                                  Manager.set_focused_key (m ()) ~key ();
+                                  Manager.set_focused (m ()) true)
+                          | None -> ())
+                      | None, Some _ -> ()
+                      | None, None -> Selectable_list.on_focus_in list e)
         on_focus_out=(fun e ->
                        call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
@@ -1717,7 +1742,16 @@ module Row = struct
     let item =
       Selection.create_selectable_item
         (Types.CreateSelectableItemProps.make
-           ~selection_manager:(Either.right t.manager) ~key:(Either.left key) ())
+           ~selection_manager:(Either.right t.manager) ~key:(Either.left key)
+           ~focus:(fun () ->
+             (* Kobalte focuses the row whose key the list holds as the list is
+                focused: never away from a cell of its own. *)
+             match (S.get element, Js.Null.toOption active) with
+             | Some row, Some focused when contains row focused -> ()
+             | Some row, (Some _ | None) ->
+                 focus_with row (focus_options ~prevent_scroll:true ())
+             | None, (Some _ | None) -> ())
+           ())
         element
     in
     (* Its rows, among its children, once they are read. *)

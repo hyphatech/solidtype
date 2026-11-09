@@ -6,6 +6,10 @@
   after a `For` sorts them, where the arrows followed the order before, and
   index columns and cells in theirs after a reorder.
 
+- `Solidtype_headless.Table`, and HeroUI's on it, keep focus on a cell, a
+  column's header or a control in a cell given it after a row had focus and
+  the table was left, where that row took it back.
+
 ## 0.6.0 (2026-11-06)
 
 - A prop named `props` is refused at its name, the same on mlx 0.11 and 0.12,

@@ -12,6 +12,8 @@ module E = Jest.Expect
 module H = Harness
 open Harness.Syntax
 
+external blur : Dom.element -> unit = "blur" [@@mel.send]
+
 type member = { id : string; name : string; role : string }
 
 let members =
@@ -222,6 +224,25 @@ let () =
                  ( (Some "0", Some "gridcell"),
                    (Some "1", Some "rowheader"),
                    Some "1" )));
+      Jest.testPromise
+        "keeps focus on a cell given it after a row had it and the table was \
+         left" (fun () ->
+          team ();
+          let returned_to start =
+            H.focus (row "Kate Moore");
+            blur H.focused;
+            H.focus (H.by_text start);
+            let* () = Js.Promise.resolve () in
+            Js.Promise.resolve (where ())
+          in
+          let* cell = returned_to "CTO" in
+          let* column = returned_to "Role" in
+          let* control = returned_to "Edit John Smith" in
+          Js.Promise.resolve
+            E.(
+              expect (cell, column, control)
+              |> toEqual
+                   ("gridcell:CTO", "columnheader:Role", "?:Edit John Smith")));
       Jest.testPromise
         "selects rows, writing their state as Kobalte writes it, a disabled \
          row left out" (fun () ->
