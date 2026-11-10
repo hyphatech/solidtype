@@ -34,6 +34,9 @@ module Twin = struct
     = "renderRootOfState"
   [@@mel.module "./twins/Autocomplete.tsx"]
 
+  external render_value_of_many : unit -> Dom.element = "renderValueOfMany"
+  [@@mel.module "./twins/Autocomplete.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Autocomplete.tsx"]
 end
@@ -337,6 +340,41 @@ let value_of_state ~multiple =
   Twin.cleanup ();
   (solidtype, react)
 
+(* What an autocomplete of many options chosen shows in its value of its own,
+   beside React's. *)
+let value_of_many () =
+  T.render (fun () ->
+      <Autocomplete
+        aria_label="State"
+        selection_mode=`multiple
+        default_value=(fun () -> [| "florida"; "texas"; "utah" |])>
+        <Autocomplete.Trigger><Autocomplete.Value /></Autocomplete.Trigger>
+        <Autocomplete.Popover>
+          <List_box selection_mode=`multiple>
+            <List_box.Item id="florida" text_value="Florida">
+              "Florida" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="texas" text_value="Texas">
+              <b>"Texas"</b> <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="utah" text_value="Utah">
+              "Utah" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Autocomplete.Popover>
+      </Autocomplete>);
+  let shown () =
+    T.query "[data-slot=autocomplete-value]"
+    |> Option.map (fun e ->
+        (text e, Array.length (Js.Array.from (query_all e "b"))))
+  in
+  let solidtype = shown () in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_value_of_many () in
+  let react = shown () in
+  Twin.cleanup ();
+  (solidtype, react)
+
 (* An autocomplete whose root and trigger draw their children of their state,
    as words. *)
 let draw_of_state ~disabled ~invalid ~required =
@@ -411,6 +449,9 @@ let trigger_of_state () =
 
 let () =
   Jest.describe "Autocomplete" (fun () ->
+      Jest.test "lists the options chosen in its value, as React's" (fun () ->
+          let solidtype, react = value_of_many () in
+          E.(expect solidtype |> toEqual react));
       Jest.test "draws its children of its state, as React's" (fun () ->
           let solidtype, react = root_of_state () in
           E.(expect solidtype |> toEqual react));

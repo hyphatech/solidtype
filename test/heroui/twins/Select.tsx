@@ -148,6 +148,38 @@ export function renderValueOfState(multiple: boolean): HTMLElement {
   return host;
 }
 
+export function renderValueOfMany(): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Select aria-label="State" selectionMode="multiple" defaultValue={["florida", "texas", "utah"]}>
+        <Select.Trigger>
+          <Select.Value />
+        </Select.Trigger>
+        <Select.Popover>
+          <ListBox selectionMode="multiple">
+            <ListBox.Item id="florida" textValue="Florida">
+              Florida
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="texas" textValue="Texas">
+              <b>Texas</b>
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="utah" textValue="Utah">
+              Utah
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          </ListBox>
+        </Select.Popover>
+      </Select>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
+}
+
 export function cleanup(): void {
   if (!mounted) return;
   const { root, host } = mounted;

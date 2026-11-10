@@ -48,6 +48,11 @@ val content : option_ -> Solidtype.Jsx.element
     option chosen; an indicator inside them is drawn as not selected, as React
     Aria draws it. *)
 
+val shown : option_ list -> Solidtype.Jsx.element
+(** The options' {!content}s, joined as {!listed} joins their texts:
+    ["Florida, Texas, and Utah"], each name as its option draws it, as a
+    select's value shows the options chosen. *)
+
 type node =
   (option_, unit) Solidtype_kobalte.Types.Either.t
   Solidtype_kobalte.Types.CollectionNode.t

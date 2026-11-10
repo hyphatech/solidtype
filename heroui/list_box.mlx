@@ -73,6 +73,33 @@ external format : list_format -> string array -> string = "format" [@@mel.send]
 let listed options =
   format (list_format ()) (Array.of_list (List.map text options))
 
+type list_part
+
+external format_to_parts : list_format -> string array -> list_part array
+  = "formatToParts"
+[@@mel.send]
+
+external part_type : list_part -> string = "type" [@@mel.get]
+external part_value : list_part -> string = "value" [@@mel.get]
+
+(* React Aria's SelectValue: each option's content in the place its text takes
+   in the list the reader's language makes of the texts. *)
+let shown options =
+  let rec join parts contents =
+    match (parts, contents) with
+    | [], _ -> []
+    | part :: parts, content :: contents
+      when String.equal (part_type part) "element" ->
+        content :: join parts contents
+    | part :: parts, contents ->
+        Jsx.of_content (Jsx.string (part_value part)) :: join parts contents
+  in
+  let parts =
+    format_to_parts (list_format ()) (Array.of_list (List.map text options))
+  in
+  Jsx.fragment
+    (Array.of_list (join (Array.to_list parts) (List.map content options)))
+
 (* What a part that holds a list takes of it, to draw it as its own. *)
 type hosted = {
   options : unit -> option_ list;
