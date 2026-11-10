@@ -1,1 +1,2 @@
 x-npm-depends: [ "@kobalte/core@~0.13.14" ]
+x-open-opam: true

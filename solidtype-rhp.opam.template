@@ -1,1 +1,2 @@
 x-npm-depends: [ "@bezda/rhp@~2.2.0" ]
+x-open-opam: true

@@ -1,1 +1,2 @@
 x-npm-depends: [ "@heroui/styles@~3.2.6" ]
+x-open-opam: true

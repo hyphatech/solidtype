@@ -1,1 +1,2 @@
 x-npm-depends: [ "solid-js@~1.9.17" ]
+x-open-opam: true

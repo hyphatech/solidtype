@@ -32,3 +32,4 @@ build: [
 dev-repo: "git+https://github.com/hyphatech/solidtype.git"
 x-maintenance-intent: ["(latest)"]
 x-npm-depends: [ "@bezda/rhp@~2.2.0" ]
+x-open-opam: true
