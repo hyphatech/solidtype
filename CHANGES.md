@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.8.0 (2026-11-10)
 
 - The look of `Segment`, `Trend_chip` and `Text_shimmer` ships in the
   plugin's tarball, imported by one line, `@import
