@@ -1,11 +1,12 @@
 module Toggle_button = Solidtype_heroui.Toggle_button
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex items-center gap-3">
     <Toggle_button is_icon_only=true aria_label="Like">
-      <Icons.Heart />
+      <Gravity.Heart />
     </Toggle_button>
     <Toggle_button is_icon_only=true aria_label="Bookmark" variant=`ghost>
-      <Icons.Bookmark />
+      <Gravity.Bookmark />
     </Toggle_button>
   </div>

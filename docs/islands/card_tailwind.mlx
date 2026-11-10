@@ -1,5 +1,6 @@
 module Button = Solidtype_heroui.Button
 module Card = Solidtype_heroui.Card
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Card
@@ -30,7 +31,7 @@ let make () =
           class_="flex size-10 shrink-0 items-center justify-center rounded-xl \
                   bg-accent/15 text-accent dark:bg-accent/20 \
                   dark:text-accent-soft-foreground">
-          <Icons.Star />
+          <Gravity.Star aria_hidden=true class_="size-5" />
         </div>
         <div class_="flex flex-col gap-1">
           <Card.Title>"Upgrade to Pro"</Card.Title>
@@ -43,13 +44,19 @@ let make () =
     <Card.Content class_="relative">
       <ul class_="flex flex-col gap-2">
         <li class_="flex items-center gap-2 text-sm text-muted">
-          <Icons.Check /> "Unlimited projects and collaborators"
+          <Gravity.Check aria_hidden=true class_="size-4 shrink-0 text-accent"
+          />
+          "Unlimited projects and collaborators"
         </li>
         <li class_="flex items-center gap-2 text-sm text-muted">
-          <Icons.Check /> "Priority support with 24h response"
+          <Gravity.Check aria_hidden=true class_="size-4 shrink-0 text-accent"
+          />
+          "Priority support with 24h response"
         </li>
         <li class_="flex items-center gap-2 text-sm text-muted">
-          <Icons.Check /> "Advanced analytics and exports"
+          <Gravity.Check aria_hidden=true class_="size-4 shrink-0 text-accent"
+          />
+          "Advanced analytics and exports"
         </li>
       </ul>
     </Card.Content>

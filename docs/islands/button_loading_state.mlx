@@ -2,6 +2,7 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Button = Solidtype_heroui.Button
 module Spinner = Solidtype_heroui.Spinner
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   let loading, set_loading = S.create_signal false in
@@ -14,7 +15,7 @@ let make () =
   <Button is_pending=(fun () -> S.get loading) on_click=press>
     (fun () ->
       if S.get loading then Jsx.element <Spinner color=`current size=`sm />
-      else Jsx.element <Icons.Paperclip />)
+      else Jsx.element <Gravity.Paperclip />)
     (fun () ->
       Jsx.string (if S.get loading then "Uploading..." else "Upload File"))
   </Button>

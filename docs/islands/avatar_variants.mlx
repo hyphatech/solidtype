@@ -1,5 +1,6 @@
 module Avatar = Solidtype_heroui.Avatar
 module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex flex-col gap-4">
@@ -72,27 +73,27 @@ let make () =
       <div class_="w-24 shrink-0 text-sm text-muted">"icon"</div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`accent>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`default>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`success>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`warning>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`danger>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
     </div>
@@ -100,27 +101,27 @@ let make () =
       <div class_="w-24 shrink-0 text-sm text-muted">"icon soft"</div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`accent variant=`soft>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`default variant=`soft>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`success variant=`soft>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`warning variant=`soft>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
       <div class_="flex w-20 shrink-0 items-center justify-center">
         <Avatar color=`danger variant=`soft>
-          <Avatar.Fallback><Icons.Person /></Avatar.Fallback>
+          <Avatar.Fallback><Gravity.Person /></Avatar.Fallback>
         </Avatar>
       </div>
     </div>

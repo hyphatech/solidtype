@@ -1,7 +1,8 @@
 module Toggle_button = Solidtype_heroui.Toggle_button
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex items-center gap-3">
-    <Toggle_button><Icons.Heart /> "Default"</Toggle_button>
-    <Toggle_button variant=`ghost><Icons.Heart /> "Ghost"</Toggle_button>
+    <Toggle_button><Gravity.Heart /> "Default"</Toggle_button>
+    <Toggle_button variant=`ghost><Gravity.Heart /> "Ghost"</Toggle_button>
   </div>
