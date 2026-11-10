@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.7.1 (2026-11-10)
 
 - A handler an expression makes, `on_click=(remove (id_of (S.get task)))`,
   and a spread, `props=(...)`, are made when their element is: inside a
