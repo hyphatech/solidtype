@@ -1,0 +1,4 @@
+/* A package's export cannot name a file outside it, so the workspace reaches
+   the stylesheets beside their components through this one; pack.ts copies
+   them into the release's package. */
+@import "../heroui/extras.css";

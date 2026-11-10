@@ -130,6 +130,8 @@ heroui/              solidtype-heroui: HeroUI's components ported onto
   segment trend_chip text_shimmer
                      components HeroUI ships no stylesheet for, made as
                      every port is: their look a stylesheet each
+  extras.css         those stylesheets in the components layer, which the
+                     plugin's tarball ships as heroui-extras.css
 docs/                the documentation, a Starlight site in Hypha's look,
                      from starlight-theme-hypha: how the pieces work
                      together and are set up, the Solid and Kobalte
@@ -203,7 +205,11 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
   src/index          the plugin Vite runs: a .jsx module's markers rewritten
   src/rewrite        the markers rewritten into Solid's JSX
   src/markers        what a build without the plugin reaches: an error
-  pack               the plugin compiled and packed, as a release ships it
+  heroui-extras.css  heroui/extras.css, which the workspace's export reaches
+                     through this file, since an export names no file
+                     outside its package
+  pack               the plugin compiled and packed, as a release ships it,
+                     with heroui/'s stylesheets
   test/twin          each example island through Solid's compiler -- for
                      the browser, hydratable, and for the server -- beside
                      its TSX twin
@@ -212,6 +218,9 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
                      each import found in Solid's and Kobalte's browser build
   test/npm           each package's x-npm-depends: what its library imports
                      from npm, at the workspace's range
+  test/pack          the release's tarball installed in an application,
+                     whose one import puts heroui's extras in the
+                     components layer
   test/astro         the example's Astro page built: it holds the board
                      prerendered, to hydrate
   test/docs          the documentation built, React's compiler beside
@@ -562,15 +571,19 @@ break.
   text shimmer, widgets most kits have -- its props named as HeroUI names
   its own; its look is Tailwind on HeroUI's tokens in a stylesheet of its own,
   `heroui/<name>.css`, rules for its BEM classes, as HeroUI writes its
-  components' CSS. The library ships it beside its JavaScript, and an
-  application imports it into the `components` layer, as
-  `docs/src/styles/heroui.css` does; its parts carry their classes alone,
+  components' CSS, and `heroui/extras.css` imports them into the
+  `components` layer. The plugin's tarball ships them, so an application
+  imports them by one line, `@import
+  "vite-plugin-solidtype/heroui-extras.css"`, as `docs/src/styles/heroui.css`
+  does: it installs the plugin at the libraries' version, and nothing
+  resolves a path into `_build`. Its parts carry their classes alone,
   a caller's class after them. It has no twin: its test is a caller's, its
   classes pinned, with axe. Nothing of a licensed kit is installed, imported
   or copied. Why: every component is restyled alike, by a rule for its
   class, which a utility on the element would beat; and this repository,
   its CI and its site are public. Symptom: a utility in a part's class
-  string, or `rg -n heroui-pro` finding anything.
+  string, or `rg -n heroui-pro` finding anything. Test:
+  `vite-plugin/test/pack.test.ts`.
 - **Each Kobalte component is tested against its TSX twin.** Its test
   renders the OCaml island and the twin and runs one check on both --
   roles, names, state attributes, the pattern's keys -- and axe on both;
@@ -633,7 +646,8 @@ break.
 
 Its opam packages and the Vite plugin are released together, at one
 version, so a binding and the plugin that reads its markers never
-disagree. The plugin is compiled and packed by `vite-plugin/pack.ts` and
+disagree, nor a component and the stylesheet the plugin's tarball ships
+for it. The plugin is compiled and packed by `vite-plugin/pack.ts` and
 attached to the GitHub release by `make release` while it is a draft,
 since an immutable release takes no file after; an application names it
 by its URL.

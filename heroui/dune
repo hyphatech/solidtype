@@ -8,6 +8,5 @@
   solidtype-headless
   solidtype-internationalized-date
   melange.dom)
- (melange.runtime_deps segment.css trend-chip.css text-shimmer.css)
  (preprocess
   (pps melange.ppx ppx_solidtype)))

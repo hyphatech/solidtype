@@ -11,7 +11,7 @@ A reactive read in the wrong place does not compile, and neither does a prop lef
 - `vite-plugin-solidtype`: turns those calls back into JSX for Solid's compiler. It is not on npm: it is the asset `vite-plugin-solidtype-<version>.tgz` of each release at https://github.com/hyphatech/solidtype/releases, at the version of the opam packages.
 - `solidtype-kobalte`: Kobalte 0.13 bound whole, generated from its declarations.
 - `solidtype-headless`: the components Kobalte lacks, with no style, and Kobalte's own where they need a fix.
-- `solidtype-heroui`: HeroUI 3's components, ported onto Kobalte.
+- `solidtype-heroui`: HeroUI 3's components, ported onto Kobalte. Their look is `@import "@heroui/styles";` after Tailwind's, and for Segment, TrendChip and TextShimmer, which HeroUI has no styles for, `@import "vite-plugin-solidtype/heroui-extras.css";`.
 - `solidtype-rhp`: rhp 2.2's charts.
 - `solidtype-internationalized-date`: @internationalized/date, the values HeroUI's date components take.
 

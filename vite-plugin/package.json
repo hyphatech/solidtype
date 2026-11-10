@@ -11,7 +11,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./markers": "./src/markers.js"
+    "./markers": "./src/markers.js",
+    "./heroui-extras.css": "./heroui-extras.css"
   },
   "dependencies": {
     "@babel/core": "^7.28.0"

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- The look of `Segment`, `Trend_chip` and `Text_shimmer` ships in the
+  plugin's tarball, imported by one line, `@import
+  "vite-plugin-solidtype/heroui-extras.css";`, which puts it in the
+  `components` layer. Breaking: the three imports of `_build`'s copies are
+  replaced by that line; `solidtype-heroui` no longer ships the stylesheets
+  beside its JavaScript.
+
 - solidtype is published to open-opam, `opam repo add open-opam
   https://github.com/open-opam/opam-repository.git`, and no longer to Hypha's
   opam repository.

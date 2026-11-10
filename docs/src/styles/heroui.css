@@ -100,12 +100,7 @@
 @import "@heroui/styles/components/tag-group.css" layer(components);
 @import "@heroui/styles/components/tag.css" layer(components);
 @import "@heroui/styles/components/table.css" layer(components);
-/* The components HeroUI ships no stylesheet for, whose stylesheets
-   solidtype-heroui ships beside its JavaScript, where Melange's output puts
-   them. */
-@import "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui/segment.css" layer(components);
-@import "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui/trend-chip.css" layer(components);
-@import "../../../_build/default/docs/islands/out/node_modules/solidtype-heroui/text-shimmer.css" layer(components);
+@import "vite-plugin-solidtype/heroui-extras.css";
 
 /* HeroUI's own ground, as heroui.com's pages give it -- Inter, at the
    browser's size and line, in HeroUI's foreground -- for an example's

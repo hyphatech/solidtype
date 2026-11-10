@@ -38,11 +38,8 @@ uses CSS layers and the `@theme` directive for organization.
 @import "tailwindcss";
 @import "@heroui/styles";
 
-/* Segment, TrendChip and TextShimmer: solidtype-heroui ships their
-   stylesheets beside its JavaScript, under your melange.emit target. */
-@import "../_build/default/app/output/node_modules/solidtype-heroui/segment.css" layer(components);
-@import "../_build/default/app/output/node_modules/solidtype-heroui/trend-chip.css" layer(components);
-@import "../_build/default/app/output/node_modules/solidtype-heroui/text-shimmer.css" layer(components);
+/* Segment, TrendChip and TextShimmer, which HeroUI has no styles for */
+@import "vite-plugin-solidtype/heroui-extras.css";
 
 /* Your own .mlx */
 @source "./src";
