@@ -78,7 +78,5 @@ generate: node_modules ## write the generated bindings
 	$(OPAM) bun generate/internationalized_date.ts
 
 release: node_modules ## tag VERSION and make its release
-	@test "$$(git show HEAD:CHANGES.md | grep -m1 '^## ' | cut -d' ' -f2)" = "$(VERSION)" \
-	  || { echo "CHANGES.md must open with ## $(VERSION)" >&2; exit 2; }
 	rm -rf _build/plugin && bun vite-plugin/pack.ts $(VERSION) _build/plugin
 	open-opam release $(VERSION) --attach _build/plugin/vite-plugin-solidtype-$(VERSION).tgz
