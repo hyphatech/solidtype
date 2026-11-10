@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.9.0 (2026-11-10)
 
 - `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's
   examples draw, a component each, `<Gravity.Chevron_down class_="size-4" />`
