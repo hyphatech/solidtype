@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Button = Solidtype_heroui.Button
 module Disclosure = Solidtype_heroui.Disclosure
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   let expanded, set_expanded = S.create_signal true in

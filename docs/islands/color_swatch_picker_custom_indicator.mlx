@@ -1,6 +1,7 @@
 module For = Solidtype.For
 module Color_swatch_picker = Solidtype_heroui.Color_swatch_picker
 module Colors = Solidtype_kobalte.Colors
+module Gravity = Solidtype_gravity_icons
 
 let colors =
   [|

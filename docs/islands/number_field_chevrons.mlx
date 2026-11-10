@@ -1,6 +1,7 @@
 module Label = Solidtype_heroui.Label
 module Number_field = Solidtype_heroui.Number_field
 module Format = Solidtype_kobalte.Types.NumberFormatOptions
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Number_field
@@ -18,12 +19,12 @@ let make () =
         <Number_field.Increment_button
           class_="flex h-1/2 w-6 items-center justify-center rounded-none \
                   border-0 pt-0.5 text-sm">
-          <Gravity.Chevron_up width=11 height=11 />
+          <Gravity.Chevron_up width="11" height="11" />
         </Number_field.Increment_button>
         <Number_field.Decrement_button
           class_="flex h-1/2 w-6 items-center justify-center rounded-none \
                   border-0 pb-0.5 text-sm">
-          <Gravity.Chevron_down width=11 height=11 />
+          <Gravity.Chevron_down width="11" height="11" />
         </Number_field.Decrement_button>
       </div>
     </Number_field.Group>

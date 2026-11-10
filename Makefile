@@ -1,7 +1,7 @@
 SWITCH ?= solidtype
 OPAM = opam exec --switch=$(SWITCH) --
 DOCS_PORT ?= 4321
-REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date ppx_solidtype odoc.support
+REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date solidtype-gravity-icons ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
 .PHONY: help setup build test lint fmt example example-serve docs docs-serve generate release
@@ -41,6 +41,7 @@ lint: node_modules ## check formatting, types, the release build and bindings
 	$(OPAM) bun generate/heroui.ts --check
 	$(OPAM) bun generate/rhp.ts --check
 	$(OPAM) bun generate/internationalized_date.ts --check
+	$(OPAM) bun generate/gravity_icons.ts --check
 
 fmt: ## format the code
 	$(OPAM) dune fmt
@@ -76,6 +77,7 @@ generate: node_modules ## write the generated bindings
 	$(OPAM) bun generate/heroui.ts
 	$(OPAM) bun generate/rhp.ts
 	$(OPAM) bun generate/internationalized_date.ts
+	$(OPAM) bun generate/gravity_icons.ts
 
 release: node_modules ## release VERSION, once CHANGES.md names it: open-opam tags it and makes its release, the plugin attached
 	@test -n "$(VERSION)" || { echo "Give the version: make release VERSION=1.2.3" >&2; exit 2; }

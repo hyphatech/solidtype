@@ -1,5 +1,6 @@
 module Button = Solidtype_heroui.Button
 module Toast = Solidtype_heroui.Toast
+module Gravity = Solidtype_gravity_icons
 
 (* A toast whose action closes it, as each of HeroUI's here does. *)
 let closing show =

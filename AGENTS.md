@@ -7,7 +7,8 @@ compiler emits for the same JSX. `ppx_solidtype` lowers the JSX;
 `vite-plugin-solidtype` hands it to Solid's compiler. Each JavaScript
 library bound is an opam package of its own: `solidtype` binds Solid,
 `solidtype-kobalte` Kobalte, `solidtype-rhp` rhp's charts,
-`solidtype-internationalized-date` the dates HeroUI's date components take;
+`solidtype-internationalized-date` the dates HeroUI's date components take,
+`solidtype-gravity-icons` Gravity UI's icons, the set HeroUI's examples draw;
 `solidtype-headless` holds the components Kobalte lacks, made as Kobalte
 makes its own, of its hooks, with no style, and Kobalte's own where they
 need a fix; and `solidtype-heroui` is a
@@ -103,6 +104,9 @@ internationalized_date/
                      solidtype-internationalized-date: @internationalized/date's
                      functions, and its values in types, each a kind of one
                      Value, generated
+gravity_icons/       solidtype-gravity-icons: every icon of @gravity-ui/icons,
+                     a module each, so a page bundles only those it draws,
+                     generated
 heroui/              solidtype-heroui: HeroUI's components ported onto
                      Kobalte's, one module each
   styles             HeroUI's variant functions, the classes of each look,
@@ -193,6 +197,7 @@ generate/            what writes the generated bindings from Solid's,
   rhp                rhp's: its components' elements, the types and exports
                      ported by hand, each port held to what rhp declares for
                      it, and a failure on anything else no rule maps
+  gravity_icons      Gravity UI's icons, from the package's SVG files
   internationalized_date
                      @internationalized/date's: its numbers whole, its value
                      classes kinds of one Value, what throws though no
@@ -269,6 +274,9 @@ test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      each against HeroUI's own call
 test/rhp/            each rhp chart island of docs/islands beside the same chart
                      in rhp's own JSX, its twin in twins/: the same page drawn
+test/gravity_icons/  every icon beside the same icon of @gravity-ui/icons in
+                     React, its twin in twins/, and icons.mlx, which names
+                     each, generated
 test/internationalized_date/
                      the date binding as a caller meets it: a zone's daylight
                      saving, values of several kinds, a throw as a value
@@ -516,6 +524,19 @@ break.
   components take that library's values, and a binding by hand would be
   a second copy of its types. Test: `make lint` runs the generator with
   `--check`, and `test/internationalized_date` runs it in Node.
+- **Gravity UI's icons are generated from @gravity-ui/icons' SVG files**, by
+  `generate/gravity_icons.ts` into `gravity_icons/`, a module per icon named
+  by the one spelling rule from its React component's name, `ChevronDown` is
+  `Chevron_down`: an svg of the file's elements and attributes, which takes
+  every attribute an svg does, a caller's after its own. An attribute Solid's
+  JSX types leave off its element is written in Solid's `attr:` namespace,
+  and the package's clip id, `a` in every icon, is one the icon makes,
+  `Solid.create_unique_id`, so two icons on a page never share it; an element,
+  id or reference the generator does not know fails it. The paths are the
+  library's own, so it imports nothing from npm. Why: HeroUI's examples draw
+  these icons, and an example copies into an application only if each icon it
+  draws is there. Test: `make lint` runs the generator with `--check`, and
+  `test/gravity_icons/icons_test.mlx` draws every icon beside React's.
 - **A component Kobalte lacks is made headless first, in
   `solidtype-headless`, and a design system dresses it.** It is made as
   Kobalte makes its own: of Kobalte's hooks, `Solidtype_kobalte.Selection`

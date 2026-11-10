@@ -1,6 +1,7 @@
 module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
 module Select = Solidtype_heroui.Select
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Select class_="w-[256px]" placeholder="Select one">

@@ -1,4 +1,5 @@
 module Segment = Solidtype_heroui.Segment
+module Gravity = Solidtype_gravity_icons
 
 (* An option's label, its width and opacity nothing while its option is not
    selected: a grid column that grows from none to the label's own width. *)

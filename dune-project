@@ -199,6 +199,19 @@
    (>= 7.0.1-55))))
 
 (package
+ (name solidtype-gravity-icons)
+ (synopsis "Gravity UI's icons for solidtype, the icons HeroUI's examples draw")
+ (description
+  "Every icon of @gravity-ui/icons, the set HeroUI's examples draw, as a solidtype component of its own: generated from the package's SVG files.")
+ (depends
+  (ocaml
+   (>= 5.5))
+  (melange
+   (>= 7.0.1-55))
+  (solidtype
+   (= :version))))
+
+(package
  (name ppx_solidtype)
  (synopsis "The JSX lowering of solidtype: OCaml's JSX to Solid's")
  (description

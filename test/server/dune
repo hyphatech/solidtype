@@ -9,6 +9,7 @@
   solidtype-kobalte
   solidtype-heroui
   solidtype-internationalized-date
+  solidtype-gravity-icons
   melange-jest.jest)
  (preprocess
   (pps melange.ppx ppx_solidtype)))

@@ -2,6 +2,7 @@ module Jsx = Solidtype.Jsx
 module For = Solidtype.For
 module Button = Solidtype_heroui.Button
 module Alert_dialog = Solidtype_heroui.Alert_dialog
+module Gravity = Solidtype_gravity_icons
 
 type animation = {
   backdrop : string;

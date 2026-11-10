@@ -2,6 +2,7 @@ module Combo_box = Solidtype_heroui.Combo_box
 module Input = Solidtype_heroui.Input
 module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Combo_box class_="w-[256px]">

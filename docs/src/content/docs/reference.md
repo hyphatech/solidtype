@@ -20,6 +20,7 @@ installed (`solidtype-kobalte`); OCaml code names it as a module
 | `solidtype-heroui` | `solidtype-heroui` | HeroUI's components, a maintained port onto Kobalte's |
 | `solidtype-rhp` | `solidtype-rhp` | rhp 2.2's charts, generated from its own declarations where a rule maps them, written in OCaml where none does |
 | `solidtype-internationalized-date` | `solidtype-internationalized-date` | @internationalized/date 3.12's dates, times and time zones, the values HeroUI's date components take, generated from its own declarations |
+| `solidtype-gravity-icons` | `solidtype-gravity-icons` | Every icon of @gravity-ui/icons 2.22, the set HeroUI's examples draw, a component each, generated from its SVG files |
 | `ppx_solidtype` | `ppx_solidtype` | The ppx that rewrites the JSX of `.mlx` files into calls Melange compiles |
 | `vite-plugin-solidtype` | none: an asset of each GitHub release | The Vite plugin that turns those calls back into JSX for Solid's compiler |
 
@@ -94,6 +95,11 @@ bun add $(opam show solidtype-rhp --field x-npm-depends)
   [`Types`](/solidtype/reference/solidtype-internationalized-date/Solidtype_internationalized_date/Types/index.html),
   its dates, times, date-times and zoned date-times, each a kind of one
   `Value`, with their calendars and formatter.
+
+## solidtype-gravity-icons
+
+- [`Solidtype_gravity_icons`](/solidtype/reference/solidtype-gravity-icons/Solidtype_gravity_icons/index.html)
+  -- each icon, a module of its own, `Chevron_down` for `ChevronDown`.
 
 ## ppx_solidtype
 

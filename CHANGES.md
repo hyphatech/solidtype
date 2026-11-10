@@ -1,5 +1,14 @@
 # Changes
 
+## Unreleased
+
+- `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's
+  examples draw, a component each, `<Gravity.Chevron_down class_="size-4" />`
+  for React's `<ChevronDown className="size-4" />`, so an example copies into
+  an application as it stands. Each takes every attribute an svg does, and
+  gives its clip an id of its own where the package's are all `a`. It imports
+  nothing from npm.
+
 ## 0.8.0 (2026-11-10)
 
 - The look of `Segment`, `Trend_chip` and `Text_shimmer` ships in the

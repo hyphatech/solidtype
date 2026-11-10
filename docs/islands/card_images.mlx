@@ -3,6 +3,7 @@ module Button = Solidtype_heroui.Button
 module Card = Solidtype_heroui.Card
 module Close_button = Solidtype_heroui.Close_button
 module Link = Solidtype_heroui.Link
+module Gravity = Solidtype_gravity_icons
 
 let assets = "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/"
 

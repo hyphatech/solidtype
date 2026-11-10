@@ -5,6 +5,7 @@ module Header = Solidtype_heroui.Header
 module Kbd = Solidtype_heroui.Kbd
 module Label = Solidtype_heroui.Label
 module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Dropdown>

@@ -1,4 +1,5 @@
 module Segment = Solidtype_heroui.Segment
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Segment size=`sm aria_label="Theme" default_selected_key="system">

@@ -1,5 +1,6 @@
 module Tag = Solidtype_heroui.Tag
 module Tag_group = Solidtype_heroui.Tag_group
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Tag_group aria_label="Tags" selection_mode=`single>

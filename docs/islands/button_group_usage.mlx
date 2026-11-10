@@ -4,6 +4,7 @@ module Chip = Solidtype_heroui.Chip
 module Description = Solidtype_heroui.Description
 module Dropdown = Solidtype_heroui.Dropdown
 module Label = Solidtype_heroui.Label
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex flex-col items-start gap-6">

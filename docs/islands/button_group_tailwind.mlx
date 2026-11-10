@@ -3,6 +3,7 @@ module Button_group = Solidtype_heroui.Button_group
 module Description = Solidtype_heroui.Description
 module Dropdown = Solidtype_heroui.Dropdown
 module Label = Solidtype_heroui.Label
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Button_group>

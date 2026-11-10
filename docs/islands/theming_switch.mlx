@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Segment = Solidtype_heroui.Segment
 module Theme = Solidtype_heroui.Theme
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   let t = Theme.use () in
