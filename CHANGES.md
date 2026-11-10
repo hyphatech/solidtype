@@ -9,6 +9,10 @@
   gives its clip an id of its own where the package's are all `a`. It imports
   nothing from npm.
 
+- A `Select` or an `Autocomplete` of many options chosen shows them listed
+  as the reader's language lists them, `Argentina, Venezuela and France`, as
+  HeroUI's does. It ran their names together, `ArgentinaVenezuelaFrance`.
+
 ## 0.8.0 (2026-11-10)
 
 - The look of `Segment`, `Trend_chip` and `Text_shimmer` ships in the

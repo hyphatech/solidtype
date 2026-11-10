@@ -31,6 +31,9 @@ module Twin = struct
   external render_value_of_state : bool -> Dom.element = "renderValueOfState"
   [@@mel.module "./twins/Select.tsx"]
 
+  external render_value_of_many : unit -> Dom.element = "renderValueOfMany"
+  [@@mel.module "./twins/Select.tsx"]
+
   external cleanup : unit -> unit = "cleanup"
   [@@mel.module "./twins/Select.tsx"]
 end
@@ -338,8 +341,46 @@ let value_of_state ~multiple =
   Twin.cleanup ();
   (solidtype, react)
 
+(* What a select of many options chosen shows in its value of its own,
+   beside React's. *)
+let value_of_many () =
+  T.render (fun () ->
+      <Select
+        aria_label="State"
+        selection_mode=`multiple
+        default_value=(fun () -> [| "florida"; "texas"; "utah" |])>
+        <Select.Trigger><Select.Value /></Select.Trigger>
+        <Select.Popover>
+          <List_box selection_mode=`multiple>
+            <List_box.Item id="florida" text_value="Florida">
+              "Florida" <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="texas" text_value="Texas">
+              <b>"Texas"</b> <List_box.Item_indicator />
+            </List_box.Item>
+            <List_box.Item id="utah" text_value="Utah">
+              "Utah" <List_box.Item_indicator />
+            </List_box.Item>
+          </List_box>
+        </Select.Popover>
+      </Select>);
+  let shown () =
+    T.query "[data-slot=select-value]"
+    |> Option.map (fun e ->
+        (text e, Array.length (Js.Array.from (query_all e "b"))))
+  in
+  let solidtype = shown () in
+  T.cleanup ();
+  let (_ : Dom.element) = Twin.render_value_of_many () in
+  let react = shown () in
+  Twin.cleanup ();
+  (solidtype, react)
+
 let () =
   Jest.describe "Select" (fun () ->
+      Jest.test "lists the options chosen in its value, as React's" (fun () ->
+          let solidtype, react = value_of_many () in
+          E.(expect solidtype |> toEqual react));
       Jest.test "draws its value's children of the options chosen, as React's"
         (fun () ->
           let solidtype, react = value_of_state ~multiple:false in

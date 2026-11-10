@@ -71,9 +71,10 @@ module Trigger : sig
   val component : Props.t Solidtype.Jsx.component
 end
 
-(** The option chosen, as its list draws it, or the options chosen one after
-    another, else the select's placeholder; or, while one is chosen, what
-    [children] draws of its {!state}. *)
+(** The option chosen, as its list draws it, or the options chosen so drawn and
+    listed as the reader's language lists them, ["Florida, Texas, and Utah"],
+    else the select's placeholder; or, while one is chosen, what [children]
+    draws of its {!state}. *)
 module Value : sig
   type state = {
     selected_keys : string array Solidtype.Solid.accessor;
