@@ -15,7 +15,7 @@ let id = Spindle.Path.int "id"
    itself, so it is written again here. *)
 let filter =
   Spindle.Query.optional "status"
-    (Spindle.Codec.enum ~kind:"status"
+    (Wiretype.enum ~kind:"status"
        (function Store.To_do -> "to_do" | Doing -> "doing" | Done -> "done")
        [ To_do; Doing; Done ])
 

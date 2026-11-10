@@ -33,6 +33,7 @@ make docs           # the documentation site, odoc's reference copied into
                     # as .github/workflows/docs.yml publishes it from main
 make docs-serve     # the documentation site built, served on DOCS_PORT with
                     # search
+make release VERSION=1.2.3  # once CHANGES.md names it: tag and release with open-opam
 ```
 
 The plugin and the example run on Bun 1.3 or later: JavaScript here only
@@ -633,8 +634,9 @@ break.
 Its opam packages and the Vite plugin are released together, at one
 version, so a binding and the plugin that reads its markers never
 disagree. The plugin is compiled and packed by `vite-plugin/pack.ts` and
-attached to the GitHub release by `.github/workflows/release.yml`, which
-an application names by its URL.
+attached to the GitHub release by `make release` while it is a draft,
+since an immutable release takes no file after; an application names it
+by its URL.
 
 The documentation is published to GitHub Pages, at
 hyphatech.github.io/solidtype, by `.github/workflows/docs.yml` on every

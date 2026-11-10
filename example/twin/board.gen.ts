@@ -48,6 +48,7 @@ export const CodeSchema = z.enum([
   "internal",
   "invalid",
   "not_found",
+  "timed_out",
   "too_large",
   "unreadable",
   "unsupported_media_type",

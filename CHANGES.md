@@ -1,5 +1,11 @@
 # Changes
 
+## Unreleased
+
+- solidtype is published to open-opam, `opam repo add open-opam
+  https://github.com/open-opam/opam-repository.git`, and no longer to Hypha's
+  opam repository.
+
 ## 0.7.1 (2026-11-10)
 
 - A handler an expression makes, `on_click=(remove (id_of (S.get task)))`,

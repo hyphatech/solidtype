@@ -4,7 +4,7 @@ DOCS_PORT ?= 4321
 REFERENCE = solidtype solidtype-kobalte solidtype-headless solidtype-heroui solidtype-rhp solidtype-internationalized-date ppx_solidtype odoc.support
 
 .DEFAULT_GOAL := help
-.PHONY: help setup build test lint fmt example example-serve docs docs-serve generate
+.PHONY: help setup build test lint fmt example example-serve docs docs-serve generate release
 
 help: ## list targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -13,7 +13,7 @@ help: ## list targets
 setup: ## create the switch and install dependencies
 	@command -v bun >/dev/null 2>&1 || echo "The plugin and the example need Bun 1.3 or later."
 	@opam switch list --short | grep -qx $(SWITCH) || opam switch create $(SWITCH) --empty -y
-	opam repo add hypha https://github.com/hyphatech/opam-repository.git --switch=$(SWITCH) --rank=1
+	opam repo add open-opam https://github.com/open-opam/opam-repository.git --switch=$(SWITCH) --rank=1
 	opam install . --switch=$(SWITCH) --deps-only --with-test --with-dev-setup -y
 	bun install --frozen-lockfile
 
@@ -76,3 +76,10 @@ generate: node_modules ## write the generated bindings
 	$(OPAM) bun generate/heroui.ts
 	$(OPAM) bun generate/rhp.ts
 	$(OPAM) bun generate/internationalized_date.ts
+
+release: node_modules ## release VERSION, once CHANGES.md names it: open-opam tags it and makes its release, the plugin attached
+	@test -n "$(VERSION)" || { echo "Give the version: make release VERSION=1.2.3" >&2; exit 2; }
+	@test "$$(git show HEAD:CHANGES.md | grep -m1 '^## ')" = "## $(VERSION) ($$(date +%F))" \
+	  || { echo "The commit to release must open CHANGES.md with ## $(VERSION) ($$(date +%F))" >&2; exit 2; }
+	rm -rf _build/plugin && bun vite-plugin/pack.ts $(VERSION) _build/plugin
+	open-opam release $(VERSION) --attach _build/plugin/vite-plugin-solidtype-$(VERSION).tgz

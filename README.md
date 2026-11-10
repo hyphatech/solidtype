@@ -15,7 +15,7 @@ Fast, accessible and reactivity-safe. Kobalte, HeroUI, rhp's charts and
 ## Quickstart
 
 ```sh
-opam repo add hypha https://github.com/hyphatech/opam-repository.git
+opam repo add open-opam https://github.com/open-opam/opam-repository.git
 opam install solidtype
 ```
 

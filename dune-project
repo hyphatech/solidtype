@@ -53,48 +53,48 @@
   (spindle
    (and
     :with-test
-    (>= 0.11.0)
-    (< 0.12.0)))
+    (>= 0.15.0)
+    (< 0.16.0)))
   (spindle-http
    (and
     :with-test
-    (>= 0.11.0)
-    (< 0.12.0)))
+    (>= 0.15.0)
+    (< 0.16.0)))
   (spindle-sqlite
    (and
     :with-test
-    (>= 0.11.0)
-    (< 0.12.0)))
+    (>= 0.15.0)
+    (< 0.16.0)))
   (rowtype
    (and
     :with-test
-    (>= 0.9.0)
-    (< 0.10.0)))
+    (>= 0.10.2)
+    (< 0.11.0)))
   (rowtype-sqlite
    (and
     :with-test
-    (>= 0.9.0)
-    (< 0.10.0)))
+    (>= 0.10.2)
+    (< 0.11.0)))
   (rowtype-migrate
    (and
     :with-test
-    (>= 0.9.0)
-    (< 0.10.0)))
+    (>= 0.10.2)
+    (< 0.11.0)))
   (wiretype
    (and
     :with-test
-    (>= 0.6.0)
-    (< 0.7.0)))
+    (>= 0.7.0)
+    (< 0.8.0)))
   (ppx_wiretype
    (and
     :with-test
-    (>= 0.6.0)
-    (< 0.7.0)))
+    (>= 0.7.0)
+    (< 0.8.0)))
   (spindle-cli
    (and
     :with-test
-    (>= 0.11.0)
-    (< 0.12.0)))
+    (>= 0.15.0)
+    (< 0.16.0)))
   (alcotest
    (and
     :with-test

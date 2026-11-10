@@ -15,7 +15,7 @@ A reactive read in the wrong place does not compile, and neither does a prop lef
 - `solidtype-rhp`: rhp 2.2's charts.
 - `solidtype-internationalized-date`: @internationalized/date, the values HeroUI's date components take.
 
-The opam packages come from Hypha's repository: `opam repo add hypha https://github.com/hyphatech/opam-repository.git`. Each names the npm packages it imports in its opam field `x-npm-depends`: `bun add $(opam show solidtype-heroui --field x-npm-depends)`. In Vite, `solidtype()` goes before `solid()`.
+The opam packages come from open-opam: `opam repo add open-opam https://github.com/open-opam/opam-repository.git`. Each names the npm packages it imports in its opam field `x-npm-depends`: `bun add $(opam show solidtype-heroui --field x-npm-depends)`. In Vite, `solidtype()` goes before `solid()`.
 
 ## Writing it
 

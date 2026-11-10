@@ -1,6 +1,6 @@
 // Packs the plugin as a release ships it: compiled to JavaScript, its
 // version the release's, into vite-plugin-solidtype-<version>.tgz in the
-// directory given. The release workflow attaches it to the GitHub release,
+// directory given. make release attaches it to the GitHub release,
 // whose URL an application names: `bun vite-plugin/pack.ts 0.1.0 dist`.
 
 import { $ } from "bun";
