@@ -139,12 +139,7 @@ module Value = struct
       (fun () ->
         match children () with
         | Some c -> Jsx.draw c (state ())
-        | None ->
-            (* React Aria's value is the options chosen, each as it is drawn
-               in the list. *)
-            Jsx.element
-              (Jsx.fragment
-                 (Array.of_list (List.map List_box.content (s.selected ())))))
+        | None -> Jsx.element (List_box.shown (s.selected ())))
     </Kobalte.Value>
   [@@element span]
 end

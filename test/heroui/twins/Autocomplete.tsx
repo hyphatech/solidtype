@@ -116,6 +116,38 @@ export function renderValueOfState(multiple: boolean): HTMLElement {
   return host;
 }
 
+export function renderValueOfMany(): HTMLElement {
+  const host = document.body.appendChild(document.createElement("div"));
+  const root = createRoot(host);
+  act(() =>
+    root.render(
+      <Autocomplete aria-label="State" selectionMode="multiple" defaultValue={["florida", "texas", "utah"]}>
+        <Autocomplete.Trigger>
+          <Autocomplete.Value />
+        </Autocomplete.Trigger>
+        <Autocomplete.Popover>
+          <ListBox selectionMode="multiple">
+            <ListBox.Item id="florida" textValue="Florida">
+              Florida
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="texas" textValue="Texas">
+              <b>Texas</b>
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            <ListBox.Item id="utah" textValue="Utah">
+              Utah
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          </ListBox>
+        </Autocomplete.Popover>
+      </Autocomplete>,
+    ),
+  );
+  mounted = { root, host };
+  return host;
+}
+
 // An autocomplete whose root and trigger draw their children of their state,
 // as words in an element marked with each one's name.
 export function renderRootOfState(

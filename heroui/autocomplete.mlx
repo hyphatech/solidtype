@@ -181,12 +181,7 @@ module Value = struct
         match (children (), a.is_empty ()) with
         | Some c, false -> Jsx.draw c (state ())
         | (Some _ | None), true -> Jsx.string (a.placeholder ())
-        | None, false ->
-            (* React Aria's value is the options chosen, each as it is drawn
-               in the list. *)
-            Jsx.element
-              (Jsx.fragment
-                 (Array.of_list (List.map List_box.content (a.selected ())))))
+        | None, false -> Jsx.element (List_box.shown (a.selected ())))
     </span>
   [@@element span]
 end
