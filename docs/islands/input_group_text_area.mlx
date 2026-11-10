@@ -5,6 +5,7 @@ module Text_field = Solidtype_heroui.Text_field
 module S = Solidtype.Solid
 module Button = Solidtype_heroui.Button
 module Spinner = Solidtype_heroui.Spinner
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   let value, set_value = S.create_signal "" in

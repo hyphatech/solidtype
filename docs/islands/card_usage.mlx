@@ -1,5 +1,6 @@
 module Card = Solidtype_heroui.Card
 module Link = Solidtype_heroui.Link
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Card class_="w-[400px]">

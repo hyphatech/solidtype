@@ -13,6 +13,7 @@
   solidtype-headless
   solidtype-rhp
   solidtype-internationalized-date
+  solidtype-gravity-icons
   melange.dom)
  (preprocess
   (pps melange.ppx ppx_solidtype)))

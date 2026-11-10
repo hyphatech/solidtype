@@ -5,6 +5,7 @@ module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
 module Separator = Solidtype_heroui.Separator
 module Surface = Solidtype_heroui.Surface
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Surface class_="w-[256px] rounded-3xl shadow-surface">

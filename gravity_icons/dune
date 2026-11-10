@@ -1,0 +1,7 @@
+(library
+ (name solidtype_gravity_icons)
+ (public_name solidtype-gravity-icons)
+ (modes melange)
+ (libraries solidtype melange.dom)
+ (preprocess
+  (pps melange.ppx ppx_solidtype)))

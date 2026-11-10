@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Toggle_button = Solidtype_heroui.Toggle_button
+module Gravity = Solidtype_gravity_icons
 
 (* The button's state is the page's signal, which its content reads too, as
    React's render prop reads the button's. *)
@@ -10,8 +11,8 @@ let make () =
     <Toggle_button
       is_selected=(fun () -> S.get selected) on_change=(S.set set_selected)>
       (fun () ->
-        if S.get selected then Jsx.element <Icons.Heart_fill />
-        else Jsx.element <Icons.Heart />)
+        if S.get selected then Jsx.element <Gravity.Heart_fill />
+        else Jsx.element <Gravity.Heart />)
       (fun () -> Jsx.string (if S.get selected then "Liked" else "Like"))
     </Toggle_button>
     <p class_="text-sm text-muted">

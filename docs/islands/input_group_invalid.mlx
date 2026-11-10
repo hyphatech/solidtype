@@ -3,6 +3,7 @@ module Input_group = Solidtype_heroui.Input_group
 module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
 module Field_error = Solidtype_heroui.Field_error
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex flex-col gap-4">

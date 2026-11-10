@@ -8,6 +8,7 @@ module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
 module D = Solidtype_internationalized_date
 module Time = D.Types.Time
+module Gravity = Solidtype_gravity_icons
 
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 

@@ -6,6 +6,7 @@ module Button = Solidtype_heroui.Button
 module Checkbox = Solidtype_heroui.Checkbox
 module Chip = Solidtype_heroui.Chip
 module Table = Solidtype_heroui.Table
+module Gravity = Solidtype_gravity_icons
 
 type status = Active | Inactive | On_leave
 

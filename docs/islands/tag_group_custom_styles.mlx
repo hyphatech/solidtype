@@ -1,5 +1,6 @@
 module Tag = Solidtype_heroui.Tag
 module Tag_group = Solidtype_heroui.Tag_group
+module Gravity = Solidtype_gravity_icons
 
 let tag_class =
   "group/tag gap-1.5 rounded-full border border-neutral-300/80 bg-white/80 \

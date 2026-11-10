@@ -3,6 +3,7 @@ module Input_group = Solidtype_heroui.Input_group
 module Label = Solidtype_heroui.Label
 module Text_field = Solidtype_heroui.Text_field
 module Button = Solidtype_heroui.Button
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Text_field

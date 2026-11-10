@@ -3,6 +3,7 @@ module Description = Solidtype_heroui.Description
 module Label = Solidtype_heroui.Label
 module Surface = Solidtype_heroui.Surface
 module Time_field = Solidtype_heroui.Time_field
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Surface class_="flex w-full max-w-sm flex-col gap-4 rounded-3xl p-6">

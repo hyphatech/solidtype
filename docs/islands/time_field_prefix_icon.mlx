@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Label = Solidtype_heroui.Label
 module Time_field = Solidtype_heroui.Time_field
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Time_field class_="w-[256px]" name="time">

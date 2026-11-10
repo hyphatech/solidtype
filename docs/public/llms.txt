@@ -14,6 +14,7 @@ A reactive read in the wrong place does not compile, and neither does a prop lef
 - `solidtype-heroui`: HeroUI 3's components, ported onto Kobalte. Their look is `@import "@heroui/styles";` after Tailwind's, and for Segment, TrendChip and TextShimmer, which HeroUI has no styles for, `@import "vite-plugin-solidtype/heroui-extras.css";`.
 - `solidtype-rhp`: rhp 2.2's charts.
 - `solidtype-internationalized-date`: @internationalized/date, the values HeroUI's date components take.
+- `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's examples draw: `ChevronDown` is `Solidtype_gravity_icons.Chevron_down`. It imports nothing from npm.
 
 The opam packages come from open-opam: `opam repo add open-opam https://github.com/open-opam/opam-repository.git`. Each names the npm packages it imports in its opam field `x-npm-depends`: `bun add $(opam show solidtype-heroui --field x-npm-depends)`. In Vite, `solidtype()` goes before `solid()`.
 
@@ -183,4 +184,5 @@ Each module's interface, its `.mli`, is its contract: what each function does, r
 - [solidtype-heroui](https://hyphatech.github.io/solidtype/reference/solidtype-heroui/Solidtype_heroui/index.html): each port, one module each, and HeroUI's variant functions.
 - [solidtype-rhp](https://hyphatech.github.io/solidtype/reference/solidtype-rhp/Solidtype_rhp/index.html): rhp's charts, and its functions of rows.
 - [solidtype-internationalized-date](https://hyphatech.github.io/solidtype/reference/solidtype-internationalized-date/Solidtype_internationalized_date/index.html): dates, times and time zones.
+- [solidtype-gravity-icons](https://hyphatech.github.io/solidtype/reference/solidtype-gravity-icons/Solidtype_gravity_icons/index.html): every icon of Gravity UI.
 - [Source](https://github.com/hyphatech/solidtype): the repository, every `.mli` beside its module.

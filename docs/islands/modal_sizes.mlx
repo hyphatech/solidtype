@@ -2,6 +2,7 @@ module Jsx = Solidtype.Jsx
 module For = Solidtype.For
 module Button = Solidtype_heroui.Button
 module Modal = Solidtype_heroui.Modal
+module Gravity = Solidtype_gravity_icons
 
 let sizes =
   [|

@@ -1,5 +1,6 @@
 module Empty_state = Solidtype_heroui.Empty_state
 module Table = Solidtype_heroui.Table
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Table class_="min-h-[200px]">

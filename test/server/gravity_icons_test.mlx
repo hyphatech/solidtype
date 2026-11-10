@@ -1,0 +1,36 @@
+(* Icons rendered on the server: each clip an id of its own, which the icon
+   that defines it names, so a page's icons never share one. *)
+
+module Server = Solidtype.Server
+module Gravity = Solidtype_gravity_icons
+module E = Jest.Expect
+
+let ids html =
+  Js.String.match_ ~regexp:[%re "/ id=\"[^\"]+\"/g"] html
+  |> Option.value ~default:[||] |> Array.to_list |> List.filter_map Fun.id
+  |> List.map (fun found ->
+      Js.String.slice ~start:5 ~end_:(String.length found - 1) found)
+
+let () =
+  Jest.describe "Gravity's icons rendered on the server" (fun () ->
+      Jest.test "give each clip an id of its own, named where it is used"
+        (fun () ->
+          let html =
+            Server.render_to_string (fun () ->
+                <div><Gravity.Abbr_sql /> <Gravity.Arrows3_rotate_right /></div>)
+          in
+          let ids = ids html in
+          let named =
+            List.for_all
+              (fun id ->
+                Js.String.includes
+                  ~search:("clip-path=\"url(#" ^ id ^ ")\"")
+                  html)
+              ids
+          in
+          E.(
+            expect
+              ( List.length ids,
+                List.sort_uniq String.compare ids |> List.length,
+                named )
+            |> toEqual (2, 2, true))))

@@ -1,12 +1,13 @@
 module Button = Solidtype_heroui.Button
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex flex-wrap items-center gap-3">
-    <Button is_icon_only=true aria_label="New file"><Icons.Plus /></Button>
+    <Button is_icon_only=true aria_label="New file"><Gravity.Plus /></Button>
     <Button is_icon_only=true aria_label="Approve" variant=`secondary>
-      <Icons.Check />
+      <Gravity.Check />
     </Button>
     <Button is_icon_only=true aria_label="Delete" variant=`danger>
-      <Icons.Trash />
+      <Gravity.Trash_bin />
     </Button>
   </div>

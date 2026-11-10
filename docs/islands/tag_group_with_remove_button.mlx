@@ -6,6 +6,7 @@ module Empty_state = Solidtype_heroui.Empty_state
 module Label = Solidtype_heroui.Label
 module Tag = Solidtype_heroui.Tag
 module Tag_group = Solidtype_heroui.Tag_group
+module Gravity = Solidtype_gravity_icons
 
 let without keys =
   Js.Array.filter ~f:(fun (id, _) -> not (Array.exists (String.equal id) keys))

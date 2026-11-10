@@ -1,9 +1,10 @@
 module Avatar = Solidtype_heroui.Avatar
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex items-center gap-4">
     <Avatar><Avatar.Fallback>"JD"</Avatar.Fallback></Avatar>
-    <Avatar><Avatar.Fallback><Icons.Person /></Avatar.Fallback></Avatar>
+    <Avatar><Avatar.Fallback><Gravity.Person /></Avatar.Fallback></Avatar>
     <Avatar fallback_delay=600.>
       <Avatar.Image
         alt="Delayed Avatar"

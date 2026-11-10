@@ -2,6 +2,7 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Button = Solidtype_heroui.Button
 module Modal = Solidtype_heroui.Modal
+module Gravity = Solidtype_gravity_icons
 
 (* HeroUI shows React's useState and its own useOverlayState; a signal is
    Solid's state, so both halves keep the modal's in one. *)

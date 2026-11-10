@@ -1,21 +1,22 @@
 module Chip = Solidtype_heroui.Chip
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex flex-wrap items-center gap-3">
     <Chip>
-      <Gravity.Circle_fill width=6 /> <Chip.Label>"Information"</Chip.Label>
+      <Gravity.Circle_fill width="6" /> <Chip.Label>"Information"</Chip.Label>
     </Chip>
     <Chip color=`success>
-      <Gravity.Circle_check_fill width=12 />
+      <Gravity.Circle_check_fill width="12" />
       <Chip.Label>"Completed"</Chip.Label>
     </Chip>
     <Chip color=`warning>
-      <Gravity.Clock width=12 /> <Chip.Label>"Pending"</Chip.Label>
+      <Gravity.Clock width="12" /> <Chip.Label>"Pending"</Chip.Label>
     </Chip>
     <Chip color=`danger>
-      <Gravity.Xmark width=12 /> <Chip.Label>"Failed"</Chip.Label>
+      <Gravity.Xmark width="12" /> <Chip.Label>"Failed"</Chip.Label>
     </Chip>
     <Chip color=`accent>
-      <Chip.Label>"Label"</Chip.Label> <Gravity.Chevron_down width=12 />
+      <Chip.Label>"Label"</Chip.Label> <Gravity.Chevron_down width="12" />
     </Chip>
   </div>

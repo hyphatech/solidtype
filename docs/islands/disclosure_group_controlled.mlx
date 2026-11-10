@@ -3,6 +3,7 @@ module Button = Solidtype_heroui.Button
 module Disclosure_group = Solidtype_heroui.Disclosure_group
 module Separator = Solidtype_heroui.Separator
 module Usage = Disclosure_group_usage
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   let expanded, set_expanded = S.create_signal [| "preview" |] in

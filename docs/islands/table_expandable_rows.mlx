@@ -4,6 +4,7 @@ module For = Solidtype.For
 module Show = Solidtype.Show
 module Button = Solidtype_heroui.Button
 module Table = Solidtype_heroui.Table
+module Gravity = Solidtype_gravity_icons
 
 type file = {
   id : string;

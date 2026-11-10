@@ -1,5 +1,6 @@
 module Avatar = Solidtype_heroui.Avatar
 module Badge = Solidtype_heroui.Badge
+module Gravity = Solidtype_gravity_icons
 
 let avatar =
   "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"

@@ -4,6 +4,7 @@ module Label = Solidtype_heroui.Label
 module Modal = Solidtype_heroui.Modal
 module Surface = Solidtype_heroui.Surface
 module Text_field = Solidtype_heroui.Text_field
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Modal>

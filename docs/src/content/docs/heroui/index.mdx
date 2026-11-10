@@ -50,3 +50,25 @@ Import HeroUI's styles, as HeroUI's own installation does:
 @import "tailwindcss";
 @import "@heroui/styles";
 ```
+
+## Icons
+
+HeroUI's examples draw [Gravity UI's icons](https://gravity-ui.com/icons).
+`solidtype-gravity-icons` has every one, named by the one rule:
+`ChevronDown` is `Gravity.Chevron_down`. It imports nothing from npm.
+
+```sh
+opam install solidtype-gravity-icons
+```
+
+```lisp
+(libraries solidtype solidtype-gravity-icons melange.dom)
+```
+
+```ocaml
+module Gravity = Solidtype_gravity_icons
+
+let icon = <Gravity.Chevron_down class_="size-4" />
+```
+
+An icon takes every attribute an `<svg>` does.

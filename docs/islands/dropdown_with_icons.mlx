@@ -2,6 +2,7 @@ module Button = Solidtype_heroui.Button
 module Dropdown = Solidtype_heroui.Dropdown
 module Kbd = Solidtype_heroui.Kbd
 module Label = Solidtype_heroui.Label
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Dropdown>

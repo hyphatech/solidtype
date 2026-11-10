@@ -1,5 +1,6 @@
 module Button = Solidtype_heroui.Button
 module Alert_dialog = Solidtype_heroui.Alert_dialog
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex max-w-sm flex-col gap-6">

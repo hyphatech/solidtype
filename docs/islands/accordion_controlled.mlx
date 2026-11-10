@@ -2,6 +2,7 @@ module S = Solidtype.Solid
 module Accordion = Solidtype_heroui.Accordion
 module Button = Solidtype_heroui.Button
 module Disclosure_group = Solidtype_heroui.Disclosure_group
+module Gravity = Solidtype_gravity_icons
 
 let items =
   [|

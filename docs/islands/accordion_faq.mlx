@@ -1,4 +1,5 @@
 module Accordion = Solidtype_heroui.Accordion
+module Gravity = Solidtype_gravity_icons
 
 let categories =
   [|

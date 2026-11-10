@@ -3,6 +3,7 @@ module Button = Solidtype_heroui.Button
 module Disclosure = Solidtype_heroui.Disclosure
 module Disclosure_group = Solidtype_heroui.Disclosure_group
 module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
 
 (* A disclosure whose trigger is secondary while it is expanded, and
    transparent while it is not. *)

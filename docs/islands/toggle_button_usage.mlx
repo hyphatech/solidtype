@@ -1,3 +1,4 @@
 module Toggle_button = Solidtype_heroui.Toggle_button
+module Gravity = Solidtype_gravity_icons
 
-let make () = <Toggle_button><Icons.Heart /> "Like"</Toggle_button>
+let make () = <Toggle_button><Gravity.Heart /> "Like"</Toggle_button>

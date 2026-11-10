@@ -1,6 +1,7 @@
 module Avatar = Solidtype_heroui.Avatar
 module Chip = Solidtype_heroui.Chip
 module Tooltip = Solidtype_heroui.Tooltip
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex items-center gap-6">
@@ -25,7 +26,7 @@ let make () =
     <Tooltip delay_ms=0.>
       <Tooltip.Trigger aria_label="Status chip">
         <Chip color=`success>
-          <Gravity.Circle_check_fill width=12 />
+          <Gravity.Circle_check_fill width="12" />
           <Chip.Label>"Active"</Chip.Label>
         </Chip>
       </Tooltip.Trigger>

@@ -2,6 +2,7 @@ module Jsx = Solidtype.Jsx
 module For = Solidtype.For
 module Button = Solidtype_heroui.Button
 module Drawer = Solidtype_heroui.Drawer
+module Gravity = Solidtype_gravity_icons
 
 let nav_items =
   [|

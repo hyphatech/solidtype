@@ -1,6 +1,7 @@
 module Avatar = Solidtype_heroui.Avatar
 module Dropdown = Solidtype_heroui.Dropdown
 module Label = Solidtype_heroui.Label
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Dropdown>

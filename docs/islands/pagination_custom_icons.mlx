@@ -2,6 +2,7 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module For = Solidtype.For
 module Pagination = Solidtype_heroui.Pagination
+module Gravity = Solidtype_gravity_icons
 
 let total_pages = 3
 

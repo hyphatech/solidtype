@@ -34,6 +34,7 @@ export default defineConfig({
             "_build/default/test/headless/out/test/headless/*_test.jsx",
             "_build/default/test/heroui/out/test/heroui/*_test.jsx",
             "_build/default/test/rhp/out/test/rhp/*_test.jsx",
+            "_build/default/test/gravity_icons/out/test/gravity_icons/*_test.jsx",
           ],
         },
       },

@@ -1,6 +1,7 @@
 module S = Solidtype.Solid
 module Button = Solidtype_heroui.Button
 module Modal = Solidtype_heroui.Modal
+module Gravity = Solidtype_gravity_icons
 
 (* HeroUI's second dialog closes itself through its render prop's close; here
    the page keeps the modal's state, which the buttons set. *)

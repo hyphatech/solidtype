@@ -1,5 +1,6 @@
 module Chip = Solidtype_heroui.Chip
 module Separator = Solidtype_heroui.Separator
+module Gravity = Solidtype_gravity_icons
 
 let variants =
   [|

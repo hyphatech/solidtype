@@ -1,5 +1,6 @@
 module Toggle_button = Solidtype_heroui.Toggle_button
 module Toggle_button_group = Solidtype_heroui.Toggle_button_group
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <Toggle_button_group
@@ -8,12 +9,12 @@ let make () =
     is_detached=true
     aria_label="Alignment">
     <Toggle_button class_="rounded-full" id="left">
-      <Icons.Align_left /> "Left"
+      <Gravity.Text_align_left /> "Left"
     </Toggle_button>
     <Toggle_button class_="rounded-full" id="center">
-      <Icons.Align_center /> "Center"
+      <Gravity.Text_align_center /> "Center"
     </Toggle_button>
     <Toggle_button class_="rounded-full" id="right">
-      <Icons.Align_right /> "Right"
+      <Gravity.Text_align_right /> "Right"
     </Toggle_button>
   </Toggle_button_group>

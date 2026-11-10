@@ -1,5 +1,6 @@
 module S = Solidtype.Solid
 module Accordion = Solidtype_heroui.Accordion
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   let expanded, set_expanded = S.create_signal [| "" |] in

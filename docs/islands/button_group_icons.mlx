@@ -1,5 +1,6 @@
 module Button = Solidtype_heroui.Button
 module Button_group = Solidtype_heroui.Button_group
+module Gravity = Solidtype_gravity_icons
 
 let make () =
   <div class_="flex flex-col gap-6">
