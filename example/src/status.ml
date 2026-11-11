@@ -2,23 +2,37 @@
    goes. The client prints the server's one status as a type per place it is
    used, so this is the task's, and a move's is made from it. *)
 
-type t = Api.task_status = To_do | Doing | Done
+type t = Api.task_status = Backlog | To_do | Doing | Review | Done
 
-let all = [ To_do; Doing; Done ]
-let label = function To_do -> "To do" | Doing -> "Doing" | Done -> "Done"
-let next = function To_do -> Some Doing | Doing -> Some Done | Done -> None
+let all = [ Backlog; To_do; Doing; Review; Done ]
 
-let previous = function
-  | To_do -> None
-  | Doing -> Some To_do
-  | Done -> Some Doing
+let label = function
+  | Backlog -> "Backlog"
+  | To_do -> "To do"
+  | Doing -> "Doing"
+  | Review -> "Review"
+  | Done -> "Done"
+
+(* The name a menu item is known by. *)
+let key = function
+  | Backlog -> "backlog"
+  | To_do -> "to_do"
+  | Doing -> "doing"
+  | Review -> "review"
+  | Done -> "done"
+
+let of_key k = List.find_opt (fun s -> String.equal (key s) k) all
 
 let equal a b =
   match (a, b) with
-  | To_do, To_do | Doing, Doing | Done, Done -> true
-  | (To_do | Doing | Done), _ -> false
+  | Backlog, Backlog | To_do, To_do | Doing, Doing | Review, Review | Done, Done
+    ->
+      true
+  | (Backlog | To_do | Doing | Review | Done), _ -> false
 
 let to_move : t -> Api.move_status = function
+  | Backlog -> Backlog
   | To_do -> To_do
   | Doing -> Doing
+  | Review -> Review
   | Done -> Done

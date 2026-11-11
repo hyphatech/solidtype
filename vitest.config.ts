@@ -1,3 +1,4 @@
+import { createServer, type AddressInfo } from "node:net";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import solid from "vite-plugin-solid";
@@ -12,6 +13,21 @@ import solidtype from "vite-plugin-solidtype";
 // compiler is kept to those twins, Solid's to everything else.
 const reactTwins = /\/test\/heroui\/twins\/[^/]+\.tsx$/;
 
+// The board's server for the example's tests takes a port no other program
+// holds, so a run beside `make example-serve` does not fail. Vitest reads
+// this file more than once, and the page and the server must agree, so the
+// port is chosen once, in the environment the setup starts the server from.
+process.env.BOARD_TEST_PORT ??= String(
+  await new Promise<number>((resolve, reject) => {
+    const probe = createServer().once("error", reject);
+    probe.listen(0, () => {
+      const { port } = probe.address() as AddressInfo;
+      probe.close(() => resolve(port));
+    });
+  }),
+);
+const boardPort = process.env.BOARD_TEST_PORT;
+
 export default defineConfig({
   test: {
     projects: [
@@ -22,7 +38,7 @@ export default defineConfig({
           environment: "jsdom",
           // The example's board calls its server, from a page on the server's
           // origin, as `make example-serve` serves it.
-          environmentOptions: { jsdom: { url: "http://localhost:4420/" } },
+          environmentOptions: { jsdom: { url: `http://localhost:${boardPort}/` } },
           globalSetup: ["example/test/server.ts"],
           // What jsdom lacks, stood in for in every test file.
           setupFiles: ["test/jsdom.ts", "example/test/fetch.ts"],
@@ -33,8 +49,6 @@ export default defineConfig({
             "_build/default/test/kobalte/out/test/kobalte/*_test.jsx",
             "_build/default/test/headless/out/test/headless/*_test.jsx",
             "_build/default/test/heroui/out/test/heroui/*_test.jsx",
-            "_build/default/test/rhp/out/test/rhp/*_test.jsx",
-            "_build/default/test/gravity_icons/out/test/gravity_icons/*_test.jsx",
           ],
         },
       },

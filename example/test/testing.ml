@@ -11,26 +11,13 @@ external render : (unit -> Solidtype.Jsx.element) -> unit = "render"
 external cleanup : unit -> unit = "cleanup"
 [@@mel.module "@solidjs/testing-library"]
 
-external by_role : string -> Dom.element = "getByRole"
-[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
-
-external click : Dom.element -> unit = "click"
-[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
-
 external text : Dom.element -> string = "textContent" [@@mel.get]
-external class_name : Dom.element -> string = "className" [@@mel.get]
-external checked : Dom.element -> bool = "checked" [@@mel.get]
 
 external find_by_text : string -> Dom.element Js.Promise.t = "findByText"
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
 
 external by_label : string -> Dom.element = "getByLabelText"
 [@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
-
-external set_value : Dom.element -> string -> unit = "value" [@@mel.set]
-
-external input : Dom.element -> unit = "input"
-[@@mel.module "@solidjs/testing-library"] [@@mel.scope "fireEvent"]
 
 type query
 
@@ -77,3 +64,31 @@ external eventually : ((unit -> unit)[@mel.uncurry]) -> unit Js.Promise.t
 let expect_equal ~what expected actual =
   if not (String.equal expected actual) then
     Js.Exn.raiseError (what ^ ": expected " ^ expected ^ ", got " ^ actual)
+
+(* user-event, for what Kobalte opens on a pointer's press rather than a
+   click: a menu, a select. *)
+type user
+type user_options
+
+external user_options :
+  pointer_events_check:(int[@mel.as "pointerEventsCheck"]) ->
+  unit ->
+  user_options = ""
+[@@mel.obj]
+
+external setup_js : user_options -> user = "setup"
+[@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
+
+(* jsdom lays nothing out, so no element is under the pointer to check. *)
+let setup () = setup_js (user_options ~pointer_events_check:0 ())
+
+external press : user -> Dom.element -> unit Js.Promise.t = "click" [@@mel.send]
+
+external type_into : user -> Dom.element -> string -> unit Js.Promise.t = "type"
+[@@mel.send]
+
+external all_by_role_named_js : string -> query -> Dom.element array
+  = "queryAllByRole"
+[@@mel.module "@solidjs/testing-library"] [@@mel.scope "screen"]
+
+let all_by_role_named role name = all_by_role_named_js role (query ~name ())

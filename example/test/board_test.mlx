@@ -1,73 +1,221 @@
 module T = Testing
 open Testing.Syntax
 
-(* Typed into the dialog and added, as a person does: the task's card once
-   the board shows it. *)
-let add ~title ~note =
-  T.click (T.by_role_named "button" "Add a task");
-  let* title_field = T.find_by_label "Title" in
-  T.set_value title_field title;
-  T.input title_field;
-  let note_field = T.by_label "Note" in
-  T.set_value note_field note;
-  T.input note_field;
-  T.click (T.by_role_named "button" "Add");
-  T.find_by_text title
+let invalid label =
+  Option.value
+    (Js.Null.toOption (T.attribute (T.by_label label) "aria-invalid"))
+    ~default:""
+
+(* Typed into a dialog's fields and sent, as a person does. *)
+let fill user ~opening ~fields ~sending =
+  let* () = T.press user (T.by_role_named "button" opening) in
+  let rec each = function
+    | [] -> Js.Promise.resolve ()
+    | (_, "") :: rest -> each rest
+    | (label, value) :: rest ->
+        let* field = T.find_by_label label in
+        let* () = T.type_into user field value in
+        each rest
+  in
+  let* () = each fields in
+  T.press user (T.by_role_named "button" sending)
+
+let start user ~name ~repo =
+  fill user ~opening:"New project"
+    ~fields:[ ("Name", name); ("Repository", repo) ]
+    ~sending:"Start"
+
+let add user ~title ?(note = "") ?(link = "") ?(labels = "") () =
+  fill user ~opening:"New task"
+    ~fields:
+      [ ("Title", title); ("Note", note); ("Link", link); ("Labels", labels) ]
+    ~sending:"Add"
 
 let () =
   Jest.describe "the board, against the example's server" (fun () ->
       Jest.afterEach T.cleanup;
-      (* First, while the run's database holds no task. *)
-      Jest.testPromise "an empty board asks for a task, not for a drop"
+      (* First, while the run's database holds no project. *)
+      Jest.testPromise "an empty board asks for a project, not for a task"
         (fun () ->
           T.render Example.App.make;
-          let* empty = T.find_by_text "No tasks yet. Add one to start." in
+          let* (_ : Dom.element) =
+            T.find_by_text "No projects yet. Start one to put tasks on it."
+          in
           Js.Promise.resolve
             Jest.Expect.(
               expect
-                ( T.column empty,
-                  T.column (T.by_text "Nothing in progress"),
-                  T.column (T.by_text "Nothing done yet") )
-              |> toEqual (Some "To do", Some "Doing", Some "Done")));
-      Jest.testPromise "a task added is on the board, to do, and said so"
+                (Option.is_some
+                   (Js.Null.toOption
+                      (T.attribute
+                         (T.by_role_named "button" "New task")
+                         "disabled")))
+              |> toBe true));
+      Jest.testPromise "a project started is on the board, and said so"
         (fun () ->
           T.render Example.App.make;
-          let* card = add ~title:"Write the README" ~note:"its map first" in
-          let* note = T.find_by_text "its map first" in
+          let user = T.setup () in
+          let* () = start user ~name:"API" ~repo:"acme/api" in
+          let* heading = T.find_by_role_named "heading" "API" in
+          let* said = T.find_by_text "API is started" in
+          let repo = T.by_role_named "link" "acme/api" in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (T.text heading, T.text said, T.attribute repo "href")
+              |> toEqual
+                   ( "API",
+                     "API is started",
+                     Js.Null.return "https://github.com/acme/api" )));
+      Jest.testPromise "a name another project has is shown on its field"
+        (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () = start user ~name:"API" ~repo:"" in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the name's state" "true" (invalid "Name"))
+          in
+          Js.Promise.resolve Jest.pass);
+      Jest.testPromise "a project deleted, once confirmed, is gone" (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* () = start user ~name:"Scratch" ~repo:"" in
+          let* actions = T.find_by_role_named "button" "Actions for Scratch" in
+          let* () = T.press user actions in
+          let* delete = T.find_by_role_named "menuitem" "Delete project" in
+          let* () = T.press user delete in
+          let* heading = T.find_by_role_named "heading" "Delete Scratch?" in
+          let asked = T.text heading in
+          let* confirm = T.find_by_role_named "button" "Delete project" in
+          let* () = T.press user confirm in
+          let* said = T.find_by_text "Scratch is deleted" in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"its menus" "0"
+                  (string_of_int
+                     (Array.length
+                        (T.all_by_role_named "button" "Actions for Scratch"))))
+          in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (asked, T.text said)
+              |> toEqual ("Delete Scratch?", "Scratch is deleted")));
+      Jest.testPromise "a task added is on its project's board, to do"
+        (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () =
+            add user ~title:"Write the README" ~note:"its map first"
+              ~labels:"docs, docs" ()
+          in
+          let* card = T.find_by_text "Write the README" in
           let* said = T.find_by_text "Write the README is on the board" in
           Js.Promise.resolve
             Jest.Expect.(
-              expect (T.column card, T.column note, T.text said)
+              expect (T.column card, T.column (T.by_text "docs"), T.text said)
               |> toEqual
                    ( Some "To do",
                      Some "To do",
                      "Write the README is on the board" )));
-      Jest.testPromise "a task moved by its arrow is in the next column"
-        (fun () ->
+      Jest.testPromise "a task moved by its menu is in that column" (fun () ->
           T.render Example.App.make;
-          let* (_ : Dom.element) = add ~title:"Ship it" ~note:"" in
-          let* move = T.find_by_role_named "button" "Move Ship it to Doing" in
-          T.click move;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () = add user ~title:"Ship it" () in
+          let* actions = T.find_by_role_named "button" "Actions for Ship it" in
+          let* () = T.press user actions in
+          let* move = T.find_by_role_named "menuitem" "Move to Doing" in
+          let* () = T.press user move in
           let* () =
             T.eventually (fun () ->
                 T.expect_equal ~what:"the task's column" "Doing"
                   (Option.value (T.column (T.by_text "Ship it")) ~default:""))
           in
           Js.Promise.resolve Jest.pass);
-      Jest.testPromise "a title the server refuses is shown on its field"
-        (fun () ->
+      Jest.testPromise "a title too long is shown on its field" (fun () ->
           T.render Example.App.make;
-          T.click (T.by_role_named "button" "Add a task");
-          let* title = T.find_by_label "Title" in
-          T.set_value title (String.make 121 't');
-          T.input title;
-          T.click (T.by_role_named "button" "Add");
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () = add user ~title:(String.make 121 't') () in
           let* () =
             T.eventually (fun () ->
                 T.expect_equal ~what:"the title's state" "true"
-                  (Option.value
-                     (Js.Null.toOption
-                        (T.attribute (T.by_label "Title") "aria-invalid"))
-                     ~default:""))
+                  (invalid "Title"))
           in
-          Js.Promise.resolve Jest.pass))
+          Js.Promise.resolve Jest.pass);
+      Jest.testPromise "a title left empty is shown on its field" (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () = add user ~title:"" () in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the title's state" "true"
+                  (invalid "Title"))
+          in
+          Js.Promise.resolve Jest.pass);
+      Jest.testPromise "a title of spaces alone is shown on its field"
+        (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () = add user ~title:"   " () in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the title's state" "true"
+                  (invalid "Title"))
+          in
+          Js.Promise.resolve Jest.pass);
+      Jest.testPromise "a link the server refuses is shown on its field"
+        (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_role_named "heading" "API" in
+          let* () =
+            add user ~title:"Read this" ~link:"ftp://acme.dev/notes" ()
+          in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the link's state" "true" (invalid "Link"))
+          in
+          Js.Promise.resolve Jest.pass);
+      Jest.testPromise "the filter keeps the tasks whose words it names"
+        (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* (_ : Dom.element) = T.find_by_text "Ship it" in
+          let* () =
+            T.type_into user
+              (T.by_role_named "searchbox" "Filter board")
+              "readme"
+          in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the tasks shown" "0"
+                  (string_of_int
+                     (Array.length
+                        (T.all_by_role_named "button" "Actions for Ship it"))))
+          in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (T.column (T.by_text "Write the README"))
+              |> toEqual (Some "To do")));
+      Jest.testPromise "a task removed by its menu is off the board" (fun () ->
+          T.render Example.App.make;
+          let user = T.setup () in
+          let* actions = T.find_by_role_named "button" "Actions for Ship it" in
+          let* () = T.press user actions in
+          let* remove = T.find_by_role_named "menuitem" "Remove" in
+          let* () = T.press user remove in
+          let* said = T.find_by_text "Ship it is off the board" in
+          let* () =
+            T.eventually (fun () ->
+                T.expect_equal ~what:"the task's cards" "0"
+                  (string_of_int
+                     (Array.length
+                        (T.all_by_role_named "button" "Actions for Ship it"))))
+          in
+          Js.Promise.resolve
+            Jest.Expect.(
+              expect (T.text said) |> toEqual "Ship it is off the board")))

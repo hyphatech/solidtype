@@ -1,0 +1,147 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Button = Solidtype_heroui.Button
+module Description = Solidtype_heroui.Description
+module Field_error = Solidtype_heroui.Field_error
+module Form = Solidtype_heroui.Form
+module Input = Solidtype_heroui.Input
+module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Modal = Solidtype_heroui.Modal
+module Select = Solidtype_heroui.Select
+module Text_field = Solidtype_heroui.Text_field
+module Gravity = Solidtype_gravity_icons
+
+external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
+
+(* The dialog that starts a project; [on_added] is given it. What the
+   server finds wrong with a field is shown on that field. *)
+let%component make ~(on_added : Api.project -> unit) () =
+  let open_, set_open = S.create_signal false in
+  let name, set_name = S.create_signal "" in
+  let colour, set_colour = S.create_signal Colour.Blue in
+  let repo, set_repo = S.create_signal "" in
+  let refused, set_refused = S.create_signal [] in
+  let problem, set_problem = S.create_signal "" in
+  let opened o =
+    S.batch (fun () ->
+        if not o then (
+          S.set set_name "";
+          S.set set_colour Colour.Blue;
+          S.set set_repo "";
+          S.set set_refused [];
+          S.set set_problem "");
+        S.set set_open o)
+  in
+  let answered = function
+    | Ok (p : Api.project) ->
+        opened false;
+        on_added p
+    | Error e -> (
+        match Said.on_fields e with
+        | [] -> S.set set_problem (Said.error e)
+        | on_fields -> S.set set_refused on_fields)
+  in
+  let submit e =
+    prevent_default e;
+    ignore
+      (Js.Promise.then_
+         (fun a -> Js.Promise.resolve (answered a))
+         (Api.post_api_projects
+            ~body:
+              {
+                name = S.get name;
+                colour = Colour.to_draft (S.get colour);
+                repo =
+                  (match String.trim (S.get repo) with
+                  | "" -> None
+                  | r -> Some r);
+              }
+            ())
+        : unit Js.Promise.t)
+  in
+  <Modal is_open=(fun () -> S.get open_) on_open_change=opened>
+    <Button
+      variant=`ghost
+      class_="h-9 w-full justify-start gap-3 px-3 text-sm [&>svg]:m-0">
+      <Gravity.Pencil_to_square class_="size-4" /> "New project"
+    </Button>
+    <Modal.Backdrop variant=`blur>
+      <Modal.Container>
+        <Modal.Dialog class_="sm:max-w-md">
+          <Modal.Close_trigger />
+          <Modal.Header>
+            <Modal.Heading>"New project"</Modal.Heading>
+          </Modal.Header>
+          <Form
+            on_submit=submit
+            validation_errors=(fun () -> S.get refused)
+            class_="flex flex-col gap-6">
+            <Modal.Body class_="flex flex-col gap-4">
+              <Text_field
+                variant=`secondary
+                name="name"
+                value=(fun () -> S.get name)
+                on_change=(S.set set_name)
+                is_required=true>
+                <Label>"Name"</Label>
+                <Input placeholder="API" />
+                <Field_error>"Give the project a name."</Field_error>
+              </Text_field>
+              <Select
+                variant=`secondary
+                name="colour"
+                value=(fun () -> [| Colour.key (S.get colour) |])
+                on_change=(fun keys ->
+                            Option.iter (S.set set_colour)
+                              (Option.bind
+                                 (Array.find_opt (fun _ -> true) keys)
+                                 Colour.of_key))>
+                <Label>"Colour"</Label>
+                <Select.Trigger>
+                  <Select.Value /> <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <List_box>
+                    <For each=(fun () -> Array.of_list Colour.all)>
+                      (fun colour _ ->
+                        <List_box.Item
+                          id=(fun () -> Colour.key colour)
+                          text_value=(fun () -> Colour.label colour)>
+                          <span class_="flex items-center gap-2">
+                            <Gravity.Folder
+                              class_=(fun () ->
+                                         "size-4 " ^ Colour.text_class colour)
+                            />
+                            (fun () -> Jsx.string (Colour.label colour))
+                          </span>
+                          <List_box.Item_indicator />
+                        </List_box.Item>)
+                    </For>
+                  </List_box>
+                </Select.Popover>
+              </Select>
+              <Text_field
+                variant=`secondary
+                name="repo"
+                value=(fun () -> S.get repo)
+                on_change=(S.set set_repo)>
+                <Label>"Repository"</Label>
+                <Input placeholder="acme/api" />
+                <Description>"On GitHub, as owner/name."</Description>
+                <Field_error>"Write the repository as owner/name."</Field_error>
+              </Text_field>
+              <p class_="text-sm text-danger empty:hidden" role=`alert>
+                (fun () -> Jsx.string (S.get problem))
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot=`close variant=`tertiary>"Cancel"</Button>
+              <Button type_=`submit>"Start"</Button>
+            </Modal.Footer>
+          </Form>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
+  </Modal>

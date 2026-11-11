@@ -18,10 +18,10 @@ HeroUI's are React's. This file is for anyone changing it, human or agent. Users
 ## Commands
 
 ```sh
-make setup          # once: the switch hypha-solidtype, all dependencies, and
+make setup          # once: the switch solidtype, all dependencies, and
                     # Bun's
-make test           # the ppx's lowering, each island against its twin, the
-                    # example's tests
+make test           # the ppx's lowering, the plugin's rewrite, the
+                    # libraries' tests and the example's
 make lint           # formatting, the plugin's and the generators' types, the
                     # release build, and the generated bindings
 make fmt            # format in place
@@ -215,9 +215,6 @@ vite-plugin/         vite-plugin-solidtype, strict TypeScript over Babel
                      outside its package
   pack               the plugin compiled and packed, as a release ships it,
                      with heroui/'s stylesheets
-  test/twin          each example island through Solid's compiler -- for
-                     the browser, hydratable, and for the server -- beside
-                     its TSX twin
   test/rewrite       what the plugin writes for a marker form
   test/browser       every module of the libraries built for the browser,
                      each import found in Solid's and Kobalte's browser build
@@ -247,10 +244,7 @@ example/             a kanban board: a whole application on the
   server/            a Spindle app: the tasks' store in SQLite, the routes
                      over it, which the board is called against and `make
                      example-serve` serves, their tests, and their command line,
-                     Spindle's, which prints the board's client and the
-                     twins' schemas
-  twin/              each island's TSX twin, read by the twin test alone;
-                     board.gen.ts, the server's Zod schemas, compared
+                     Spindle's, which prints the board's client
   test/              the board's behaviour, in OCaml, run by vitest
                      against the server server.ts starts, on a database of
                      the run's own
@@ -272,11 +266,6 @@ test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      by vitest, and its state beside the same component in
                      React, its twin in twins/; and the variant functions,
                      each against HeroUI's own call
-test/rhp/            each rhp chart island of docs/islands beside the same chart
-                     in rhp's own JSX, its twin in twins/: the same page drawn
-test/gravity_icons/  every icon beside the same icon of @gravity-ui/icons in
-                     React, its twin in twins/, and icons.mlx, which names
-                     each, generated
 test/internationalized_date/
                      the date binding as a caller meets it: a zone's daylight
                      saving, values of several kinds, a throw as a value
@@ -331,23 +320,21 @@ used, a thunk into what it returns, a return-only `if` into a
 conditional, a string into JSX's own text or quoted attribute only where
 JSX reads it back unchanged, else `{"..."}` -- and `vite-plugin-solid` compiles that JSX as
 it compiles TSX: for the browser, and under Astro's build for the server
-and hydratable too, so an island is prerendered and hydrates as its twin
-would.
+and hydratable too, so an island is prerendered and hydrates as the same
+JSX written in TSX would.
 
 ## Rules that must hold
 
 Each rule comes with why it exists and the test or search that catches a
 break.
 
-- **An island compiles as its TSX twin does.** Solid's compiler makes the
-  same templates and the same runtime calls, in order, from an island's
-  rewritten output as from its twin, the three ways Astro's integration
-  runs it: for the browser, hydratable, and for the server. Why: the
-  library promises Solid's own output, and a rewrite that drifts is a
-  slower or a wrong page nobody sees in a type; a prerendered island
-  hydrates because its server and client outputs agree with the twin's.
-  Test: `vite-plugin/test/twin.test.ts`; an island added to `example/src`
-  gets a twin and a row there.
+- **An island compiles as the same JSX in TSX does.** The plugin writes
+  the JSX a TSX author would, and Solid's compiler compiles it the three
+  ways Astro's integration runs it: for the browser, hydratable, and for
+  the server. Why: the library promises Solid's own output, and a rewrite
+  that drifts is a slower or a wrong page nobody sees in a type. Test:
+  `vite-plugin/test/rewrite.test.ts`, what the plugin writes for each
+  marker form, and `test/hydration/`, islands prerendered and hydrated.
 - **An island mounts in an Astro page as any Solid island does**,
   `client:only` or prerendered `client:load`, imported by its namespace
   from Melange's output, `<App.make client:load />`; the page holds
@@ -380,8 +367,8 @@ break.
 - **A reactive read is a plain call.** An accessor is an uncurried
   JavaScript function and `Solid.get` is inlined, so `Solid.get count`
   is `count()`, the call Solid's own JSX makes. Why: a curried read is
-  `Curry._1(count, undefined)`, an arity check on every read. Test: the
-  twin test.
+  `Curry._1(count, undefined)`, an arity check on every read. Symptom:
+  `rg -n Curry _build/default/example/out/example/src` finds a read.
 - **The library has no private modules.** Why: Melange then loses what it
   knows of a module across libraries, so a user's every call into the
   library goes through `Curry` and `Solid.get` is no longer inlined. A
@@ -535,8 +522,7 @@ break.
   id or reference the generator does not know fails it. The paths are the
   library's own, so it imports nothing from npm. Why: HeroUI's examples draw
   these icons, and an example copies into an application only if each icon it
-  draws is there. Test: `make lint` runs the generator with `--check`, and
-  `test/gravity_icons/icons_test.mlx` draws every icon beside React's.
+  draws is there. Test: `make lint` runs the generator with `--check`.
 - **A component Kobalte lacks is made headless first, in
   `solidtype-headless`, and a design system dresses it.** It is made as
   Kobalte makes its own: of Kobalte's hooks, `Solidtype_kobalte.Selection`
@@ -625,13 +611,6 @@ break.
   port instead. Why: a binding half generated leaves out what a user then
   cannot reach, and a rule for one declaration breaks on the next version.
   Test: `make lint` runs `generate/rhp.ts --check`.
-- **Each rhp chart island draws as its twin, rhp's own JSX, does.** A
-  chart island of `docs/islands` compiles as its twin in `test/rhp/twins/`
-  does, the three ways, and draws the same page: its test renders both,
-  lets rhp write its styles, and compares them, the count rhp gives a
-  second slat type of the same CSS set aside. Why: rhp is Solid's, so the
-  binding promises the page rhp draws, which a type cannot show. Test:
-  `vite-plugin/test/twin.test.ts`, `test/rhp/*_test.ml`.
 - **Each rhp page links to the page of rhp's documentation it follows.**
   Why: rhp's documentation is the reference for what a prop does, and a
   copy of it would drift. Test: `test/test_docs.ml`.
