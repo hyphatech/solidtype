@@ -9,6 +9,7 @@ module For = Solidtype.For
 module Kobalte = Solidtype_kobalte.Combobox
 module Types = Solidtype_kobalte.Types
 module Fields = Field
+module Gravity = Solidtype_gravity_icons
 
 type placement = [ `top | `bottom | `left | `right ]
 
@@ -239,27 +240,14 @@ module Indicator = struct
               </span>
         | None ->
             Jsx.element
-              <svg
+              <Gravity.Chevron_down
                 aria_hidden=true
                 class_=(fun () -> classes ())
-                fill="none"
-                height="16"
                 role=`presentation
-                view_box="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
                 data_open=(fun () -> Jsx.flag (a.is_open ()))
                 data_slot="autocomplete-default-indicator"
-                props=(Props.others props)>
-                <path
-                  clip_rule="evenodd"
-                  d="M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 0 \
-                     1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 \
-                     0l-4.5-4.5a.75.75 0 0 1 0-1.06"
-                  fill="currentColor"
-                  fill_rule="evenodd"
-                />
-              </svg>)
+                props=(Props.others props)
+              />)
     </button>
   [@@element svg]
 end
@@ -284,24 +272,11 @@ module Clear_button = struct
       data_empty=(fun () -> Jsx.flag (a.is_empty ()))
       data_slot="autocomplete-clear-button"
       props=(Props.others props)>
-      <svg
+      <Gravity.Xmark
         aria_hidden=true
-        fill="none"
-        height="16"
         role=`presentation
-        view_box="0 0 16 16"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
-        data_slot="autocomplete-clear-button-icon">
-        <path
-          clip_rule="evenodd"
-          d="M3.47 3.47a.75.75 0 0 1 1.06 0L8 6.94l3.47-3.47a.75.75 0 1 1 1.06 \
-             1.06L9.06 8l3.47 3.47a.75.75 0 1 1-1.06 1.06L8 9.06l-3.47 \
-             3.47a.75.75 0 0 1-1.06-1.06L6.94 8 3.47 4.53a.75.75 0 0 1 0-1.06Z"
-          fill="currentColor"
-          fill_rule="evenodd"
-        />
-      </svg>
+        data_slot="autocomplete-clear-button-icon"
+      />
     </button>
   [@@element button]
 end

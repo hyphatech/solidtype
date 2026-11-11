@@ -171,6 +171,8 @@
   (solidtype-headless
    (= :version))
   (solidtype-internationalized-date
+   (= :version))
+  (solidtype-gravity-icons
    (= :version))))
 
 (package

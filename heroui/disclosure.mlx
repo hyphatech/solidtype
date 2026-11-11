@@ -1,6 +1,7 @@
 module Jsx = Solidtype.Jsx
 module Solid = Solidtype.Solid
 module Collapsible = Solidtype_kobalte.Collapsible
+module Gravity = Solidtype_gravity_icons
 
 (* What a disclosure's parts read of it: its classes, its state, and the id
    its trigger controls. *)
@@ -109,26 +110,14 @@ module Indicator = struct
   let%component make ?(class_ : string option) () =
     let d = within "Disclosure.Indicator" in
     (* HeroUI's own chevron, which its styles turn over. *)
-    <svg
+    <Gravity.Chevron_down
       aria_hidden=true
       class_=(fun () -> after (Styles.Disclosure.indicator d.slots) (class_ ()))
-      fill="none"
-      height="16"
       role=`presentation
-      view_box="0 0 16 16"
-      width="16"
-      xmlns="http://www.w3.org/2000/svg"
       data_expanded=(fun () -> Jsx.flag (d.expanded ()))
       data_slot="disclosure-indicator"
-      props=(Props.others props)>
-      <path
-        clip_rule="evenodd"
-        d="M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 0 1 1 1.06 \
-           1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 0-1.06"
-        fill="currentColor"
-        fill_rule="evenodd"
-      />
-    </svg>
+      props=(Props.others props)
+    />
   [@@element svg]
 end
 

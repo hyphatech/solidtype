@@ -150,7 +150,7 @@ let one e =
     :: List.map
          (fun name ->
            if names_another name then name ^ "=(id)"
-           else name ^ "=" ^ Option.value (T.attribute e name) ~default:"")
+           else name ^ "=" ^ T.attribute_shown e name)
          names)
   ^ (if element_count e > 0 then "" else " " ^ text e)
   ^ match tag_name e with "INPUT" -> " value=" ^ input_value e | _ -> ""

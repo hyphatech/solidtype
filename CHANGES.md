@@ -1,5 +1,13 @@
 # Changes
 
+## 0.9.1 (2026-11-11)
+
+- `solidtype-heroui` draws its icons from `solidtype-gravity-icons`, which it
+  now depends on: a chevron, a cross, a status's icon, plus and minus, a
+  search field's magnifier, as HeroUI's React components draw the same
+  Gravity UI icons. A `Trend_chip`'s own arrow is Gravity's `Arrow_up` and
+  `Arrow_down`, as an indicator given an icon is.
+
 ## 0.9.0 (2026-11-10)
 
 - `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's

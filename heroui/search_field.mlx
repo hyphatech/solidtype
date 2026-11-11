@@ -3,6 +3,7 @@ module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.TextField
 module Kobalte_button = Solidtype_kobalte.Button
 module Kobalte_combo_box = Solidtype_kobalte.Combobox
+module Gravity = Solidtype_gravity_icons
 
 external prevent_default : Dom.keyboardEvent -> unit = "preventDefault"
 [@@mel.send]
@@ -123,25 +124,13 @@ module Search_icon = struct
     in
     <Show
       when_=(fun () -> Option.is_some (children ()))
-      fallback=(<svg
+      fallback=(<Gravity.Magnifier
                   aria_hidden=true
                   class_=(fun () -> classes ())
-                  fill="none"
-                  height="16"
                   role=`presentation
-                  view_box="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
                   data_slot="search-field-search-icon"
-                  props=(Props.others props)>
-                  <path
-                    clip_rule="evenodd"
-                    d="M11.5 7a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0m-.82 4.74a6 \
-                       6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06z"
-                    fill="currentColor"
-                    fill_rule="evenodd"
-                  />
-                </svg>)>
+                  props=(Props.others props)
+                />)>
       <span
         class_=(fun () -> classes ())
         data_slot="search-field-search-icon"

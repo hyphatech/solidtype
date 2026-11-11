@@ -14,7 +14,7 @@ A reactive read in the wrong place does not compile, and neither does a prop lef
 - `solidtype-heroui`: HeroUI 3's components, ported onto Kobalte. Their look is `@import "@heroui/styles";` after Tailwind's, and for Segment, TrendChip and TextShimmer, which HeroUI has no styles for, `@import "vite-plugin-solidtype/heroui-extras.css";`.
 - `solidtype-rhp`: rhp 2.2's charts.
 - `solidtype-internationalized-date`: @internationalized/date, the values HeroUI's date components take.
-- `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's examples draw: `ChevronDown` is `Solidtype_gravity_icons.Chevron_down`. It imports nothing from npm.
+- `solidtype-gravity-icons`: every icon of Gravity UI, the set HeroUI's examples draw: `ChevronDown` is `Solidtype_gravity_icons.Chevron_down`. It imports nothing from npm; `solidtype-heroui` depends on it and draws its own icons from it.
 
 The opam packages come from open-opam: `opam repo add open-opam https://github.com/open-opam/opam-repository.git`. Each names the npm packages it imports in its opam field `x-npm-depends`: `bun add $(opam show solidtype-heroui --field x-npm-depends)`. In Vite, `solidtype()` goes before `solid()`.
 

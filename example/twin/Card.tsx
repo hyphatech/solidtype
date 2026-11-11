@@ -1,7 +1,9 @@
-import { Show } from "solid-js";
+import { type JSX, Show } from "solid-js";
 import * as Button from "solidtype-heroui/button.jsx";
 import * as Card from "solidtype-heroui/card.jsx";
 import * as CloseButton from "solidtype-heroui/close_button.jsx";
+import * as ArrowLeft from "solidtype-gravity-icons/arrow_left.jsx";
+import * as ArrowRight from "solidtype-gravity-icons/arrow_right.jsx";
 import type { Task } from "./board.gen";
 
 type Status = Task["status"];
@@ -10,7 +12,7 @@ const labels: Record<Status, string> = { to_do: "To do", doing: "Doing", done: "
 const order: Status[] = ["to_do", "doing", "done"];
 
 export function make(props: { task: Task; onMove: (status: Status) => void; onRemove: () => void }) {
-  const arrow = (label: string, target: Status | undefined) => {
+  const arrow = (icon: JSX.Element, target: Status | undefined) => {
     if (target === undefined) return <span class="size-8" />;
     return (
       <Button.component
@@ -20,7 +22,7 @@ export function make(props: { task: Task; onMove: (status: Status) => void; onRe
         aria-label={"Move " + props.task.title + " to " + labels[target]}
         onClick={() => props.onMove(target)}
       >
-        {label}
+        {icon}
       </Button.component>
     );
   };
@@ -42,8 +44,8 @@ export function make(props: { task: Task; onMove: (status: Status) => void; onRe
           <CloseButton.component aria-label={"Remove " + props.task.title} onClick={() => props.onRemove()} />
         </Card.Header.component>
         <Card.Footer.component class="justify-between">
-          {arrow("←", step(-1))}
-          {arrow("→", step(1))}
+          {arrow(<ArrowLeft.component />, step(-1))}
+          {arrow(<ArrowRight.component />, step(1))}
         </Card.Footer.component>
       </Card.component>
     </li>
