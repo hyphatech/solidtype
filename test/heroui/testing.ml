@@ -193,6 +193,18 @@ let framework_only = function
   | "data-hk" | "data-rac" | "data-react-aria-pressable" | "id" -> true
   | _ -> false
 
+external icon : string -> string option = "icon"
+[@@mel.module "./twins/icons.ts"]
+
+(* An attribute's value, but a path's is the icon it draws where it is one of
+   HeroUI's: React's is HeroUI's copy of a Gravity UI icon, a port's Gravity's
+   own, the same shape spelt otherwise. *)
+let attribute_shown e name =
+  let v = Option.value (attribute e name) ~default:"" in
+  match name with
+  | "d" -> ( match icon v with Some drawn -> "icon " ^ drawn | None -> v)
+  | _ -> v
+
 (* An element's attributes and their values, in order of name, but for each
    framework's own and those [but] names: the order a framework writes them in
    is its own, and no style reads it. *)
@@ -201,8 +213,7 @@ let attributes_but but e =
   |> List.filter (fun name ->
       not (framework_only name || List.exists (String.equal name) but))
   |> List.sort String.compare
-  |> List.map (fun name ->
-      name ^ "=" ^ Option.value (attribute e name) ~default:"")
+  |> List.map (fun name -> name ^ "=" ^ attribute_shown e name)
   |> String.concat " "
 
 let attributes e = attributes_but [] e

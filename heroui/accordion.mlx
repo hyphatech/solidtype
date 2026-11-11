@@ -3,6 +3,7 @@ module Solid = Solidtype.Solid
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Accordion
 module Types = Solidtype_kobalte.Types
+module Gravity = Solidtype_gravity_icons
 
 (* What an accordion's parts read of it: its classes, the keys expanded, and
    each item's own change, told by its key. *)
@@ -251,27 +252,14 @@ module Indicator = struct
        and turns over in its place. *)
     <Show
       when_=(fun () -> Option.is_some (children ()))
-      fallback=(<svg
+      fallback=(<Gravity.Chevron_down
                   aria_hidden=true
                   class_=(fun () -> classes ())
-                  fill="none"
-                  height="16"
                   role=`presentation
-                  view_box="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
                   data_expanded=(fun () -> Jsx.flag (i.expanded ()))
                   data_slot="accordion-indicator"
-                  props=(Props.others props)>
-                  <path
-                    clip_rule="evenodd"
-                    d="M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 \
-                       0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 \
-                       0l-4.5-4.5a.75.75 0 0 1 0-1.06"
-                    fill="currentColor"
-                    fill_rule="evenodd"
-                  />
-                </svg>)>
+                  props=(Props.others props)
+                />)>
       <span
         class_=(fun () -> classes ())
         data_expanded=(fun () -> Jsx.flag (i.expanded ()))

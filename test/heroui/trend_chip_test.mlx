@@ -1,10 +1,11 @@
 (* A trend chip as a caller meets it, since it has no twin: HeroUI's chip coloured by its trend, its arrow drawn for up
-   and down and hidden from a reader, its own indicator drawn for any trend,
+   and down, Gravity UI's, and hidden from a reader, its own indicator drawn for any trend,
    its prefix, value and suffix laid out in the label whatever order they are
    given in, its classes alone for each size and variant, its look its
    stylesheet's, a class given after its own, and no violation axe finds. *)
 
 module Trend_chip = Solidtype_heroui.Trend_chip
+module Gravity = Solidtype_gravity_icons
 module E = Jest.Expect
 module T = Testing
 open Testing.Syntax
@@ -90,6 +91,22 @@ let () =
                    [| (Some "true", Some "trend-chip__indicator") |];
                    [||];
                  |]));
+      Jest.test "draws Gravity UI's arrow up and down" (fun () ->
+          T.render (fun () ->
+              <div>
+                <Trend_chip>"+3.3%"</Trend_chip>
+                <Trend_chip trend=`down>"-2.1%"</Trend_chip>
+                <Gravity.Arrow_up data_testid="up" />
+                <Gravity.Arrow_down data_testid="down" />
+              </div>);
+          let path selector =
+            all (selector ^ " path") |> Array.map (fun p -> T.attribute p "d")
+          in
+          E.(
+            expect (path "[data-slot=trend-chip-indicator]")
+            |> toEqual
+                 (Array.append (path "[data-testid=up]")
+                    (path "[data-testid=down]"))));
       Jest.test
         "lays out its prefix, value and suffix in the label, whatever their \
          order" (fun () ->

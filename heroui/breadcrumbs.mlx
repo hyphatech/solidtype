@@ -4,6 +4,7 @@ module For = Solidtype.For
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Breadcrumbs
 module Link = Solidtype_kobalte.Link
+module Gravity = Solidtype_gravity_icons
 
 (* An item as it joined its trail: how it is drawn, told whether it is the
    page itself. *)
@@ -106,25 +107,12 @@ module Item = struct
                     </span>
               | None ->
                   Jsx.element
-                    <svg
+                    <Gravity.Chevron_right
                       aria_hidden=true
                       class_=(fun () -> Styles.Breadcrumbs.separator (slots ()))
-                      fill="none"
-                      height="16"
                       role=`presentation
-                      view_box="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                      data_slot="breadcrumbs-separator">
-                      <path
-                        clip_rule="evenodd"
-                        d="M5.47 2.97a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 \
-                           0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06L9.44 8 5.47 \
-                           4.03a.75.75 0 0 1 0-1.06Z"
-                        fill="currentColor"
-                        fill_rule="evenodd"
-                      />
-                    </svg>)
+                      data_slot="breadcrumbs-separator"
+                    />)
           </Show>
         </li>);
     Jsx.nothing

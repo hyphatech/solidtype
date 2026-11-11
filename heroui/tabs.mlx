@@ -3,6 +3,7 @@ module Solid = Solidtype.Solid
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Tabs
 module Types = Solidtype_kobalte.Types
+module Gravity = Solidtype_gravity_icons
 
 type css_style
 
@@ -52,40 +53,6 @@ let within_tab part =
 
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
-
-(* A chevron of HeroUI's, by its path. *)
-let chevron d =
-  <svg
-    aria_hidden=true
-    fill="none"
-    height="16"
-    role=`presentation
-    view_box="0 0 16 16"
-    width="16"
-    xmlns="http://www.w3.org/2000/svg">
-    <path
-      clip_rule="evenodd"
-      d=(fun () -> d)
-      fill="currentColor"
-      fill_rule="evenodd"
-    />
-  </svg>
-
-let chevron_up =
-  "M13.03 10.53a.75.75 0 0 1-1.06 0L8 6.56l-3.97 3.97a.75.75 0 0 \
-   1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06"
-
-let chevron_down =
-  "M2.97 5.47a.75.75 0 0 1 1.06 0L8 9.44l3.97-3.97a.75.75 0 1 1 1.06 1.06l-4.5 \
-   4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 0-1.06"
-
-let chevron_left =
-  "M10.53 2.97a.75.75 0 0 1 0 1.06L6.56 8l3.97 3.97a.75.75 0 1 1-1.06 \
-   1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 0"
-
-let chevron_right =
-  "M5.47 2.97a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 \
-   0 1 1-1.06-1.06L9.44 8 5.47 4.03a.75.75 0 0 1 0-1.06Z"
 
 external first_element_child : _ Dom.element_like -> Dom.element Js.null
   = "firstElementChild"
@@ -172,8 +139,12 @@ module List_container = struct
         type_=`button
         on_click=(fun _ -> scroll_by (-1.))>
         (fun () ->
-          Jsx.element
-            (chevron (if vertical () then chevron_up else chevron_left)))
+          if vertical () then
+            Jsx.element
+              <Gravity.Chevron_up aria_hidden=true role=`presentation />
+          else
+            Jsx.element
+              <Gravity.Chevron_left aria_hidden=true role=`presentation />)
       </button>
       <button
         aria_label=(fun () ->
@@ -184,8 +155,12 @@ module List_container = struct
         type_=`button
         on_click=(fun _ -> scroll_by 1.)>
         (fun () ->
-          Jsx.element
-            (chevron (if vertical () then chevron_down else chevron_right)))
+          if vertical () then
+            Jsx.element
+              <Gravity.Chevron_down aria_hidden=true role=`presentation />
+          else
+            Jsx.element
+              <Gravity.Chevron_right aria_hidden=true role=`presentation />)
       </button>
     </div>
   [@@element div]

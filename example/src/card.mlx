@@ -4,12 +4,13 @@ module Show = Solidtype.Show
 module Button = Solidtype_heroui.Button
 module Card = Solidtype_heroui.Card
 module Close_button = Solidtype_heroui.Close_button
+module Gravity = Solidtype_gravity_icons
 
 (* A task on the board, HeroUI's card: dragged to another column, or moved a
    column at a time by its arrows. *)
 let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
     ~(on_remove : unit -> unit) () =
-  let arrow ~label target =
+  let arrow icon target =
     match target with
     | None -> <span class_="size-8" />
     | Some status ->
@@ -20,7 +21,7 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
           aria_label=(fun () ->
                        "Move " ^ (task ()).title ^ " to " ^ Status.label status)
           on_click=(fun _ -> on_move status)>
-          (fun () -> Jsx.string label)
+          (fun () -> Jsx.element icon)
         </Button>
   in
   <li
@@ -48,9 +49,10 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
       <Card.Footer class_="justify-between">
         (fun () ->
           Jsx.element
-            (arrow ~label:{js|←|js} (Status.previous (task ()).status)))
+            (arrow <Gravity.Arrow_left /> (Status.previous (task ()).status)))
         (fun () ->
-          Jsx.element (arrow ~label:{js|→|js} (Status.next (task ()).status)))
+          Jsx.element
+            (arrow <Gravity.Arrow_right /> (Status.next (task ()).status)))
       </Card.Footer>
     </Card>
   </li>

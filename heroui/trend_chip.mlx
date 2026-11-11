@@ -1,5 +1,6 @@
 module Jsx = Solidtype.Jsx
 module S = Solidtype.Solid
+module Gravity = Solidtype_gravity_icons
 
 type trend = [ `up | `down | `neutral ]
 type size = [ `sm | `md | `lg ]
@@ -20,32 +21,27 @@ end)
    trend-chip.css's, in the components layer, which a utility given wins over. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
-(* Each arrow on a 24-unit grid: a stem and a head. *)
-let arrow = function
-  | `up -> Some "M12 19V5M7 10l5-5 5 5"
-  | `down -> Some "M12 5v14M7 14l5 5 5-5"
-  | `neutral -> None
-
-(* The chip's own arrow, none for a neutral trend, given the rest of an
-   indicator's props where one is given without an icon. *)
+(* The chip's own arrow, Gravity's, none for a neutral trend, given the rest of
+   an indicator's props where one is given without an icon. *)
 let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend =
-  match arrow trend with
-  | Some d ->
-      <svg
+  match trend with
+  | `up ->
+      <Gravity.Arrow_up
         aria_hidden=true
         class_=(fun () -> after "trend-chip__indicator" class_)
         data_slot="trend-chip-indicator"
-        fill="none"
-        stroke="currentColor"
-        stroke_linecap="round"
-        stroke_linejoin="round"
-        stroke_width="2"
-        view_box="0 0 24 24"
         ?as_=(fun () -> S.drawn_as others)
-        props=(S.undrawn others)>
-        <path d=(fun () -> d) />
-      </svg>
-  | None -> Jsx.nothing
+        props=(S.undrawn others)
+      />
+  | `down ->
+      <Gravity.Arrow_down
+        aria_hidden=true
+        class_=(fun () -> after "trend-chip__indicator" class_)
+        data_slot="trend-chip-indicator"
+        ?as_=(fun () -> S.drawn_as others)
+        props=(S.undrawn others)
+      />
+  | `neutral -> Jsx.nothing
 
 module Prefix = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
