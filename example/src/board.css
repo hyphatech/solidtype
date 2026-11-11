@@ -27,10 +27,25 @@
 @import "@heroui/styles/components/toast.css" layer(components);
 @import "@heroui/styles/components/input.css" layer(components);
 @import "@heroui/styles/components/textfield.css" layer(components);
+@import "@heroui/styles/components/search-field.css" layer(components);
 @import "@heroui/styles/components/textarea.css" layer(components);
 @import "@heroui/styles/components/card.css" layer(components);
+@import "@heroui/styles/components/separator.css" layer(components);
 @import "@heroui/styles/components/surface.css" layer(components);
+@import "@heroui/styles/components/popover.css" layer(components);
 @import "@heroui/styles/components/modal.css" layer(components);
+@import "@heroui/styles/components/alert-dialog.css" layer(components);
+@import "@heroui/styles/components/menu.css" layer(components);
+@import "@heroui/styles/components/menu-item.css" layer(components);
+@import "@heroui/styles/components/menu-section.css" layer(components);
+@import "@heroui/styles/components/dropdown.css" layer(components);
+@import "@heroui/styles/components/list-box.css" layer(components);
+@import "@heroui/styles/components/list-box-item.css" layer(components);
+@import "@heroui/styles/components/list-box-section.css" layer(components);
+@import "@heroui/styles/components/select.css" layer(components);
+/* The segment the theme is chosen by: solidtype's own, in HeroUI's look,
+   which the plugin's package ships. */
+@import "vite-plugin-solidtype/heroui-extras.css";
 
 /* HeroUI's ground, as heroui.com gives it: Inter, on its background, in its
    foreground, which its components take from the page. */

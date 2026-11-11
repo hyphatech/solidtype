@@ -1,0 +1,116 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Button = Solidtype_heroui.Button
+module Empty_state = Solidtype_heroui.Empty_state
+module Gravity = Solidtype_gravity_icons
+
+let icon (status : Status.t) =
+  match status with
+  | Backlog -> <Gravity.Circle_dashed class_="size-4 shrink-0 text-muted" />
+  | To_do -> <Gravity.Circle class_="size-4 shrink-0 text-muted" />
+  | Doing -> <Gravity.Clock class_="size-4 shrink-0 text-accent" />
+  | Review -> <Gravity.Eye class_="size-4 shrink-0 text-warning" />
+  | Done -> <Gravity.Circle_check_fill class_="size-4 shrink-0 text-success" />
+
+(* The first column and the last fold to the board's edge, the work in hand
+   never being there; a toggle points the way its column goes. *)
+let toggle ~label ~on_fold ~folded (status : Status.t) =
+  let button name icon =
+    <Button
+      variant=`ghost
+      size=`sm
+      is_icon_only=true
+      class_="size-7 min-w-7 text-muted"
+      aria_label=(fun () -> name ^ " " ^ label)
+      on_click=(fun _ -> on_fold ())>
+      (fun () -> Jsx.element icon)
+    </Button>
+  in
+  let name = if folded then "Unfold" else "Fold" in
+  match (status, folded) with
+  | Backlog, true | Done, false ->
+      button name <Gravity.Chevrons_right class_="size-4" />
+  | Backlog, false | Done, true ->
+      button name <Gravity.Chevrons_left class_="size-4" />
+  | (To_do | Doing | Review), _ -> Jsx.nothing
+
+(* A column of the board: its tasks, a drop that moves a task into it, and
+   folded to a rail where the board needs the room. *)
+let%component make ~(status : Status.t) ~(tasks : Api.task array)
+    ~(folded : bool) ~(empty : string) ~(on_fold : unit -> unit)
+    ~(on_drop : float -> unit) ~(on_move : Api.task -> Status.t -> unit)
+    ~(on_remove : Api.task -> unit) () =
+  let over, set_over = S.create_signal false in
+  let label () = Status.label (status ()) in
+  let count () = Jsx.int (Array.length (tasks ())) in
+  <section
+    aria_label=(fun () -> label ())
+    class_=(fun () ->
+             (if folded () then "min-w-12 grow-0 items-center "
+              else "min-w-64 grow ")
+             ^ (if S.get over then
+                  "bg-accent-soft ring-2 ring-inset ring-accent "
+                else "bg-surface/50 ")
+             ^ "flex min-h-0 shrink-0 basis-12 flex-col gap-3 overflow-hidden \
+                rounded-2xl p-2 \
+                transition-[flex-grow,min-width,background-color,box-shadow] \
+                duration-300 ease-out motion-reduce:transition-none")
+    on_drag_over=(fun e ->
+                   Drag.prevent_default e;
+                   S.set set_over true)
+    on_drag_leave=(fun e -> if Drag.left e then S.set set_over false)
+    on_drop=(fun e ->
+              Drag.prevent_default e;
+              S.set set_over false;
+              Option.iter on_drop (Drag.dropped e))>
+    <Show
+      when_=(fun () -> not (folded ()))
+      fallback=(<div
+                  class_="flex animate-in flex-col items-center gap-3 pt-0.5 \
+                          fade-in duration-300">
+                  (fun () ->
+                    Jsx.element
+                      (toggle ~label:(label ()) ~on_fold ~folded:true
+                         (status ())))
+                  (fun () -> Jsx.element (icon (status ())))
+                  <h2
+                    class_="flex items-center gap-2 text-sm font-medium \
+                            [writing-mode:vertical-rl]">
+                    (fun () -> Jsx.string (label ()))
+                    <span class_="text-muted">(fun () -> count ())</span>
+                  </h2>
+                </div>)>
+      <h2
+        class_="flex animate-in items-center gap-2 whitespace-nowrap px-2 \
+                pt-1.5 text-sm font-medium fade-in duration-300">
+        (fun () -> Jsx.element (icon (status ())))
+        (fun () -> Jsx.string (label ()))
+        <span class_="text-muted">(fun () -> count ())</span>
+        <span class_="ms-auto -my-1">
+          (fun () ->
+            Jsx.element
+              (toggle ~label:(label ()) ~on_fold ~folded:false (status ())))
+        </span>
+      </h2>
+      <ul
+        class_="flex min-h-24 min-w-60 flex-1 animate-in flex-col gap-2 \
+                overflow-y-auto fade-in duration-300">
+        <For
+          each=(fun () -> tasks ())
+          fallback=(<li class_="rounded-xl border border-dashed border-border">
+                      <Empty_state class_="p-4 text-center text-sm">
+                        (fun () -> Jsx.string (empty ()))
+                      </Empty_state>
+                    </li>)>
+          (fun (t : Api.task) _ ->
+            <Card
+              task=(fun () -> t)
+              on_move=(fun status -> on_move t status)
+              on_remove=(fun _ -> on_remove t)
+            />)
+        </For>
+      </ul>
+    </Show>
+  </section>

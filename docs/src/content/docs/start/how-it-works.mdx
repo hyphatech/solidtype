@@ -208,10 +208,7 @@ the same component written in TSX.
 
 ## How that is held
 
-The promise that an OCaml component compiles as its TSX twin does is
-tested, not assumed. Each island of the repository's example has a TSX
-twin, and a test compiles both through Solid's compiler three ways, as
-Astro runs it: for the browser, hydratable, and for the server. The
-templates and the runtime calls must be the same, in the same order. An
-island prerendered by the server hydrates in the browser because both
-outputs agree with the twin's.
+The promise that an OCaml component compiles as the same JSX in TSX does is
+tested, not assumed. The plugin's tests hold what it writes for each form
+of JSX, and islands rendered on the server are hydrated in the browser by
+a test of their own.

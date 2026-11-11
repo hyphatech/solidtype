@@ -1,0 +1,151 @@
+module S = Solidtype.Solid
+module Jsx = Solidtype.Jsx
+module For = Solidtype.For
+module Show = Solidtype.Show
+module Alert_dialog = Solidtype_heroui.Alert_dialog
+module Button = Solidtype_heroui.Button
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
+module Segment = Solidtype_heroui.Segment
+module Theme = Solidtype_heroui.Theme
+module Gravity = Solidtype_gravity_icons
+
+let entry selected =
+  (if selected then "bg-default text-foreground "
+   else "text-muted hover:bg-default/60 hover:text-foreground ")
+  ^ "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm outline-none \
+     transition focus-visible:ring-2 focus-visible:ring-focus"
+
+(* The board's projects to choose between, every one's tasks at once, a new
+   one started or one removed once it is confirmed, and the page's theme. *)
+let%component make ~(projects : Api.project array) ~(view : View.t)
+    ~(on_view : View.t -> unit) ~(on_added : Api.project -> unit)
+    ~(on_remove : Api.project -> unit) () =
+  let theme = Theme.use () in
+  (* The project asked about is kept after the dialog closes, so its name
+     stays while the dialog fades out. *)
+  let doomed, set_doomed = S.create_signal None in
+  let asking, set_asking = S.create_signal false in
+  let ask p =
+    S.batch (fun () ->
+        S.set set_doomed (Some p);
+        S.set set_asking true)
+  in
+  let open_tasks () =
+    Array.fold_left
+      (fun n (p : Api.project) -> n +. p.open_tasks)
+      0. (projects ())
+  in
+  <aside
+    class_="flex w-64 shrink-0 flex-col gap-6 border-e border-separator p-3">
+    <div class_="flex items-center gap-2 px-3 pt-2">
+      <Gravity.Layout_columns3 class_="size-5 text-accent" />
+      <span class_="text-base font-semibold">"Kanban"</span>
+    </div>
+    <nav aria_label="Projects" class_="flex flex-col gap-1">
+      <Add_project on_added />
+      <button
+        type_=`button
+        aria_current=(fun () ->
+                       if View.equal (view ()) All then "page" else "false")
+        class_=(fun () -> entry (View.equal (view ()) All))
+        on_click=(fun _ -> on_view All)>
+        <Gravity.Layout_columns3 class_="size-4" />
+        "All projects"
+        <span class_="ms-auto text-xs tabular-nums text-muted">
+          (fun () -> Jsx.string (Js.Float.toString (open_tasks ())))
+        </span>
+      </button>
+      <h2 class_="px-3 pt-5 pb-1 text-xs font-medium text-muted">"Projects"</h2>
+      <For each=(fun () -> projects ())>
+        (fun (p : Api.project) _ ->
+          <div class_="group relative">
+            <button
+              type_=`button
+              aria_current=(fun () ->
+                             if View.equal (view ()) (Project p.id) then "page"
+                             else "false")
+              class_=(fun () -> entry (View.equal (view ()) (Project p.id)))
+              on_click=(fun _ -> on_view (Project p.id))>
+              <Gravity.Folder
+                class_=(fun () -> "size-4 " ^ Colour.text_class p.colour)
+              />
+              <span class_="truncate text-foreground">
+                (fun () -> Jsx.string p.name)
+              </span>
+              <span
+                class_="ms-auto text-xs tabular-nums text-muted \
+                        transition-opacity group-hover:opacity-0 \
+                        group-focus-within:opacity-0">
+                (fun () -> Jsx.string (Js.Float.toString p.open_tasks))
+              </span>
+            </button>
+            <Dropdown>
+              <Button
+                variant=`ghost
+                size=`sm
+                is_icon_only=true
+                class_="absolute end-1.5 top-1.5 size-6 min-w-6 opacity-0 \
+                        transition-opacity group-hover:opacity-100 \
+                        focus-visible:opacity-100 aria-expanded:opacity-100"
+                aria_label=(fun () -> "Actions for " ^ p.name)>
+                <Gravity.Ellipsis class_="size-4" />
+              </Button>
+              <Dropdown.Popover>
+                <Dropdown.Menu on_action=(fun _ -> ask p)>
+                  <Dropdown.Item
+                    id="delete" text_value="Delete project" variant=`danger>
+                    <Gravity.Trash_bin class_="size-4 shrink-0 text-danger" />
+                    <Label>"Delete project"</Label>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
+          </div>)
+      </For>
+    </nav>
+    <Alert_dialog.Backdrop
+      is_open=(fun () -> S.get asking) on_open_change=(S.set set_asking)>
+      <Alert_dialog.Container>
+        <Alert_dialog.Dialog class_="sm:max-w-[400px]">
+          <Alert_dialog.Header>
+            <Alert_dialog.Icon status=`danger />
+            <Alert_dialog.Heading>
+              (fun () ->
+                Jsx.string
+                  ("Delete "
+                  ^ Option.fold ~none:""
+                      ~some:(fun (p : Api.project) -> p.name)
+                      (S.get doomed)
+                  ^ "?"))
+            </Alert_dialog.Heading>
+          </Alert_dialog.Header>
+          <Alert_dialog.Body>
+            <p>"The project and every task on it are deleted for good."</p>
+          </Alert_dialog.Body>
+          <Alert_dialog.Footer>
+            <Button slot=`close variant=`tertiary>"Cancel"</Button>
+            <Button
+              variant=`danger
+              on_click=(fun _ ->
+                           Option.iter on_remove (S.get doomed);
+                           S.set set_asking false)>
+              "Delete project"
+            </Button>
+          </Alert_dialog.Footer>
+        </Alert_dialog.Dialog>
+      </Alert_dialog.Container>
+    </Alert_dialog.Backdrop>
+    <Segment
+      class_="mt-auto"
+      size=`sm
+      aria_label="Theme"
+      selected_key=(fun () -> S.get theme.theme)
+      on_selection_change=theme.set_theme>
+      <Segment.Item id="light" aria_label="Light"><Gravity.Sun /></Segment.Item>
+      <Segment.Item id="dark" aria_label="Dark"><Gravity.Moon /></Segment.Item>
+      <Segment.Item id="system" aria_label="System">
+        <Gravity.Display />
+      </Segment.Item>
+    </Segment>
+  </aside>

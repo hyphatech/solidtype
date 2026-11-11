@@ -225,9 +225,7 @@ the prop out.
 
 There is no runtime of solidtype's between a component and Solid. A read,
 `Solid.get count`, compiles to `count()`, the call Solid's own JSX makes.
-Each of the example's components is compiled beside its TSX twin -- for the
-browser, hydratable, and for the server -- and a test requires the same
-templates and the same runtime calls, in the same order. Solid's
+Solid's
 attributes, Kobalte's components and HeroUI's styles are generated from
 their own TypeScript declarations, and `make lint` fails when they differ,
 so what Kobalte's documentation says a part takes is what its OCaml takes.

@@ -1,37 +1,52 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
+module For = Solidtype.For
 module Show = Solidtype.Show
 module Button = Solidtype_heroui.Button
 module Card = Solidtype_heroui.Card
-module Close_button = Solidtype_heroui.Close_button
+module Chip = Solidtype_heroui.Chip
+module Dropdown = Solidtype_heroui.Dropdown
+module Label = Solidtype_heroui.Label
 module Gravity = Solidtype_gravity_icons
 
-(* A task on the board, HeroUI's card: dragged to another column, or moved a
-   column at a time by its arrows. *)
+(* The host a link goes to, which is all of it a card has room for. *)
+let host link =
+  let after =
+    match String.index_opt link ':' with
+    | Some i when i + 3 <= String.length link -> (
+        match String.sub link (i + 1) 2 with
+        | "//" -> String.sub link (i + 3) (String.length link - i - 3)
+        | _ -> link)
+    | Some _ | None -> link
+  in
+  match String.index_opt after '/' with
+  | Some i -> String.sub after 0 i
+  | None -> after
+
+(* Whether a card has a footer to draw: a link, or a label. *)
+let footed (t : Api.task) = Option.is_some t.link || Array.length t.labels > 0
+
+(* A task on the board, HeroUI's card: dragged to another column, or moved
+   by its menu, which the keyboard reaches too. *)
 let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
     ~(on_remove : unit -> unit) () =
-  let arrow icon target =
-    match target with
-    | None -> <span class_="size-8" />
-    | Some status ->
-        <Button
-          variant=`ghost
-          size=`sm
-          is_icon_only=true
-          aria_label=(fun () ->
-                       "Move " ^ (task ()).title ^ " to " ^ Status.label status)
-          on_click=(fun _ -> on_move status)>
-          (fun () -> Jsx.element icon)
-        </Button>
+  let elsewhere () =
+    Array.of_list
+      (List.filter (fun s -> not (Status.equal s (task ()).status)) Status.all)
+  in
+  let act key =
+    match Status.of_key key with
+    | Some status -> on_move status
+    | None -> on_remove ()
   in
   <li
-    class_="cursor-grab active:cursor-grabbing"
+    class_="group cursor-grab active:cursor-grabbing"
     draggable=true
     on_drag_start=(fun e -> Drag.start e (task ()).id)>
-    <Card class_="gap-1 p-3">
+    <Card class_="gap-2 rounded-2xl p-3">
       <Card.Header class_="flex-row items-start gap-2">
         <div class_="min-w-0 flex-1">
-          <Card.Title class_="truncate">
+          <Card.Title class_="truncate text-sm">
             (fun () -> Jsx.string (task ()).title)
           </Card.Title>
           <Show.Some some=(fun () -> (task ()).note)>
@@ -41,18 +56,65 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
               </Card.Description>)
           </Show.Some>
         </div>
-        <Close_button
-          aria_label=(fun () -> "Remove " ^ (task ()).title)
-          on_click=(fun _ -> on_remove ())
-        />
+        <span class_="text-xs leading-5 tabular-nums text-muted">
+          (fun () -> Jsx.string ("#" ^ Js.Float.toString (task ()).id))
+        </span>
+        <Dropdown>
+          <Button
+            variant=`ghost
+            size=`sm
+            is_icon_only=true
+            class_="-my-0.5 size-6 min-w-6 opacity-0 transition-opacity \
+                    group-hover:opacity-100 focus-visible:opacity-100 \
+                    aria-expanded:opacity-100"
+            aria_label=(fun () -> "Actions for " ^ (task ()).title)>
+            <Gravity.Ellipsis class_="size-4" />
+          </Button>
+          <Dropdown.Popover>
+            <Dropdown.Menu on_action=act>
+              <For each=(fun () -> elsewhere ())>
+                (fun status _ ->
+                  <Dropdown.Item
+                    id=(fun () -> Status.key status)
+                    text_value=(fun () -> "Move to " ^ Status.label status)>
+                    <Gravity.Arrow_right class_="size-4 shrink-0 text-muted" />
+                    <Label>
+                      (fun () -> Jsx.string ("Move to " ^ Status.label status))
+                    </Label>
+                  </Dropdown.Item>)
+              </For>
+              <Dropdown.Item id="remove" text_value="Remove" variant=`danger>
+                <Gravity.Trash_bin class_="size-4 shrink-0 text-danger" />
+                <Label>"Remove"</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>
       </Card.Header>
-      <Card.Footer class_="justify-between">
-        (fun () ->
-          Jsx.element
-            (arrow <Gravity.Arrow_left /> (Status.previous (task ()).status)))
-        (fun () ->
-          Jsx.element
-            (arrow <Gravity.Arrow_right /> (Status.next (task ()).status)))
-      </Card.Footer>
+      <Show when_=(fun () -> footed (task ()))>
+        <Card.Footer class_="flex-wrap gap-1.5">
+          <Show.Some some=(fun () -> (task ()).link)>
+            (fun link ->
+              <Chip size=`sm variant=`secondary>
+                <Gravity.Link class_="size-3" />
+                <Chip.Label>
+                  <a
+                    class_="hover:underline"
+                    href=(fun () -> S.get link)
+                    target="_blank"
+                    rel="noreferrer">
+                    (fun () -> Jsx.string (host (S.get link)))
+                  </a>
+                </Chip.Label>
+              </Chip>)
+          </Show.Some>
+          <For each=(fun () -> (task ()).labels)>
+            (fun label _ ->
+              <Chip size=`sm variant=`secondary>
+                <Chip.Label>(fun () -> Jsx.string label)</Chip.Label>
+              </Chip>)
+          </For>
+        </Card.Footer>
+      </Show>
     </Card>
   </li>

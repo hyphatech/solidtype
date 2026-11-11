@@ -1,46 +1,66 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
-module Dialog = Solidtype_kobalte.Dialog
+module For = Solidtype.For
 module Button = Solidtype_heroui.Button
-module Close_button = Solidtype_heroui.Close_button
+module Description = Solidtype_heroui.Description
 module Field_error = Solidtype_heroui.Field_error
 module Form = Solidtype_heroui.Form
 module Input = Solidtype_heroui.Input
 module Label = Solidtype_heroui.Label
+module List_box = Solidtype_heroui.List_box
+module Modal = Solidtype_heroui.Modal
+module Select = Solidtype_heroui.Select
 module Text_area = Solidtype_heroui.Text_area
 module Text_field = Solidtype_heroui.Text_field
-module Modal = Solidtype_heroui.Styles.Modal
+module Gravity = Solidtype_gravity_icons
 
 external prevent_default : Dom.event -> unit = "preventDefault" [@@mel.send]
 
-(* The dialog that puts a task on the board; [on_added] is told its title.
-   What the server finds wrong with a field is shown on that field. *)
-let%component make ~(on_added : string -> unit) () =
-  (* HeroUI has no modal ported yet, so Kobalte's dialog wears HeroUI's
-     modal classes: a backdrop blurred behind it, and one that only places
-     it. *)
-  let modal = Modal.slots (Modal.options ()) in
-  let backdrop =
-    Modal.backdrop (Modal.slots (Modal.options ~variant:`blur ()))
-  in
-  let placing =
-    Modal.backdrop (Modal.slots (Modal.options ~variant:`transparent ()))
-  in
+(* The labels written in one field, split by commas, each once. *)
+let labels written =
+  List.fold_left
+    (fun kept l ->
+      match String.trim l with
+      | "" -> kept
+      | l when List.exists (String.equal l) kept -> kept
+      | l -> kept @ [ l ])
+    []
+    (String.split_on_char ',' written)
+
+let optional = function "" -> None | s -> Some s
+
+(* The dialog that puts a task on a project's board, [project] chosen at
+   first; [on_added] is told its title. What the server finds wrong with a
+   field is shown on that field. *)
+let%component make ~(projects : Api.project array) ~(project : float option)
+    ~(on_added : string -> unit) () =
   let open_, set_open = S.create_signal false in
+  let chosen, set_chosen = S.create_signal None in
   let title, set_title = S.create_signal "" in
   let note, set_note = S.create_signal "" in
-  let tried, set_tried = S.create_signal false in
+  let link, set_link = S.create_signal "" in
+  let written, set_written = S.create_signal "" in
   let refused, set_refused = S.create_signal [] in
   let problem, set_problem = S.create_signal "" in
-  let untitled () =
-    S.get tried && String.equal (String.trim (S.get title)) ""
+  let target () =
+    match S.get chosen with
+    | Some id -> Some id
+    | None -> (
+        match project () with
+        | Some id -> Some id
+        | None ->
+            Option.map
+              (fun (p : Api.project) -> p.id)
+              (Array.find_opt (fun _ -> true) (projects ())))
   in
   let opened o =
     S.batch (fun () ->
         if not o then (
+          S.set set_chosen None;
           S.set set_title "";
           S.set set_note "";
-          S.set set_tried false;
+          S.set set_link "";
+          S.set set_written "";
           S.set set_refused [];
           S.set set_problem "");
         S.set set_open o)
@@ -49,82 +69,128 @@ let%component make ~(on_added : string -> unit) () =
     | Ok (t : Api.task) ->
         opened false;
         on_added t.title
-    | Error (`Invalid (problems : Api.Problem.t list)) ->
-        S.set set_refused
-          (List.map (fun (p : Api.Problem.t) -> (p.at, p.message)) problems)
-    | Error e -> S.set set_problem (Said.error e)
+    | Error e -> (
+        match Said.on_fields e with
+        | [] -> S.set set_problem (Said.error e)
+        | on_fields -> S.set set_refused on_fields)
   in
   let submit e =
     prevent_default e;
-    S.set set_tried true;
-    if not (untitled ()) then
-      ignore
-        (Js.Promise.then_
-           (fun a -> Js.Promise.resolve (answered a))
-           (Api.post_api_tasks
-              ~body:
-                {
-                  title = S.get title;
-                  note = (match S.get note with "" -> None | n -> Some n);
-                }
-              ())
-          : unit Js.Promise.t)
+    match target () with
+    | Some project ->
+        ignore
+          (Js.Promise.then_
+             (fun a -> Js.Promise.resolve (answered a))
+             (Api.post_api_tasks
+                ~body:
+                  {
+                    project;
+                    title = S.get title;
+                    note = optional (S.get note);
+                    link = optional (String.trim (S.get link));
+                    labels = Array.of_list (labels (S.get written));
+                  }
+                ())
+            : unit Js.Promise.t)
+    | None -> ()
   in
-  <Dialog.Root open_=(fun () -> S.get open_) on_open_change=opened>
-    <Button on_click=(fun _ -> opened true)>"Add a task"</Button>
-    <Dialog.Portal>
-      <Dialog.Overlay class_=(fun () -> backdrop) />
-      <div class_=(fun () -> placing)>
-        <div class_=(fun () -> Modal.container modal)>
-          <Dialog.Content class_=(fun () -> Modal.dialog modal ^ " gap-5")>
-            <Close_button
-              class_=(fun () -> Modal.close_trigger modal)
-              aria_label="Close"
-              on_click=(fun _ -> opened false)
-            />
-            <header class_=(fun () -> Modal.header modal)>
-              <Dialog.Title class_=(fun () -> Modal.heading modal)>
-                "Add a task"
-              </Dialog.Title>
-            </header>
-            <Form
-              on_submit=submit
-              validation_errors=(fun () -> S.get refused)
-              class_="flex flex-col gap-6">
-              <div class_=(fun () -> Modal.body modal ^ " flex flex-col gap-4")>
-                <Text_field
-                  variant=`secondary
-                  name="title"
-                  value=(fun () -> S.get title)
-                  on_change=(S.set set_title)
-                  is_required=true
-                  is_invalid=(fun () -> untitled ())>
-                  <Label>"Title"</Label>
-                  <Input placeholder="What is to be done" />
-                  <Field_error>"Give the task a title."</Field_error>
-                </Text_field>
-                <Text_field
-                  variant=`secondary
-                  name="note"
-                  value=(fun () -> S.get note)
-                  on_change=(S.set set_note)>
-                  <Label>"Note"</Label>
-                  <Text_area placeholder="A line more about it" rows="2" />
-                  <Field_error>"The note is too long."</Field_error>
-                </Text_field>
-                <p class_="text-sm text-danger empty:hidden" role=`alert>
-                  (fun () -> Jsx.string (S.get problem))
-                </p>
-              </div>
-              <footer class_=(fun () -> Modal.footer modal)>
-                <Button variant=`tertiary on_click=(fun _ -> opened false)>
-                  "Cancel"
-                </Button>
-                <Button type_=`submit>"Add"</Button>
-              </footer>
-            </Form>
-          </Dialog.Content>
-        </div>
-      </div>
-    </Dialog.Portal>
-  </Dialog.Root>
+  <Modal is_open=(fun () -> S.get open_) on_open_change=opened>
+    <Button is_disabled=(fun () -> Array.length (projects ()) = 0)>
+      <Gravity.Plus class_="size-4" /> "New task"
+    </Button>
+    <Modal.Backdrop variant=`blur>
+      <Modal.Container>
+        <Modal.Dialog class_="sm:max-w-md">
+          <Modal.Close_trigger />
+          <Modal.Header><Modal.Heading>"New task"</Modal.Heading></Modal.Header>
+          <Form
+            on_submit=submit
+            validation_errors=(fun () -> S.get refused)
+            class_="flex flex-col gap-6">
+            <Modal.Body class_="flex flex-col gap-4">
+              <Select
+                variant=`secondary
+                name="project"
+                value=(fun () ->
+                        match target () with
+                        | Some id -> [| Js.Float.toString id |]
+                        | None -> [||])
+                on_change=(fun keys ->
+                            S.set set_chosen
+                              (Option.bind
+                                 (Array.find_opt (fun _ -> true) keys)
+                                 Float.of_string_opt))>
+                <Label>"Project"</Label>
+                <Select.Trigger>
+                  <Select.Value /> <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <List_box>
+                    <For each=(fun () -> projects ())>
+                      (fun (p : Api.project) _ ->
+                        <List_box.Item
+                          id=(fun () -> Js.Float.toString p.id)
+                          text_value=(fun () -> p.name)>
+                          (fun () -> Jsx.string p.name)
+                          <List_box.Item_indicator />
+                        </List_box.Item>)
+                    </For>
+                  </List_box>
+                </Select.Popover>
+                <Field_error>"Choose a project."</Field_error>
+              </Select>
+              <Text_field
+                variant=`secondary
+                name="title"
+                value=(fun () -> S.get title)
+                on_change=(S.set set_title)
+                is_required=true>
+                <Label>"Title"</Label>
+                <Input placeholder="What is to be done" />
+                <Field_error>"Give the task a title."</Field_error>
+              </Text_field>
+              <Text_field
+                variant=`secondary
+                name="note"
+                value=(fun () -> S.get note)
+                on_change=(S.set set_note)>
+                <Label>"Note"</Label>
+                <Text_area placeholder="A line more about it" rows="2" />
+                <Field_error>"The note is too long."</Field_error>
+              </Text_field>
+              <Text_field
+                variant=`secondary
+                name="link"
+                value=(fun () -> S.get link)
+                on_change=(S.set set_link)>
+                <Label>"Link"</Label>
+                <Input type_="url" placeholder="https://" />
+                <Field_error>
+                  "Give a link that starts with https://."
+                </Field_error>
+              </Text_field>
+              <Text_field
+                variant=`secondary
+                name="labels"
+                value=(fun () -> S.get written)
+                on_change=(S.set set_written)>
+                <Label>"Labels"</Label>
+                <Input placeholder="bug, perf" />
+                <Description>"Up to five, split by commas."</Description>
+                <Field_error>
+                  "Up to five labels, each a short word."
+                </Field_error>
+              </Text_field>
+              <p class_="text-sm text-danger empty:hidden" role=`alert>
+                (fun () -> Jsx.string (S.get problem))
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot=`close variant=`tertiary>"Cancel"</Button>
+              <Button type_=`submit>"Add"</Button>
+            </Modal.Footer>
+          </Form>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
+  </Modal>

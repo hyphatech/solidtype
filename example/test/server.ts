@@ -25,7 +25,7 @@ export default async function setup() {
   migrate("up", "--dir", "example/migrations", "--url", url);
   const server = spawn("_build/default/example/server/serve.exe", [], {
     stdio: ["ignore", "pipe", "pipe"],
-    env: { ...process.env, BOARD_DB: join(dir, "board.db") },
+    env: { ...process.env, BOARD_DB: join(dir, "board.db"), BOARD_PORT: process.env.BOARD_TEST_PORT },
   });
   let log = "";
   server.stderr.on("data", (chunk) => (log += chunk));

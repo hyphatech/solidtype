@@ -53,7 +53,9 @@ example: build node_modules ## build the example, as a Vite page and an Astro on
 BOARD_DB ?= example/board.db
 
 example-serve: example ## serve the example and its API on http://localhost:4420
-	@test -f $(BOARD_DB) || $(OPAM) rowtype-migrate create --url sqlite:$(BOARD_DB)
+	@test -f $(BOARD_DB) || { $(OPAM) rowtype-migrate create --url sqlite:$(BOARD_DB) \
+	  && $(OPAM) rowtype-migrate up --dir example/migrations --url sqlite:$(BOARD_DB) \
+	  && sqlite3 $(BOARD_DB) < example/seed.sql; }
 	$(OPAM) rowtype-migrate up --dir example/migrations --url sqlite:$(BOARD_DB)
 	BOARD_DB=$(BOARD_DB) _build/default/example/server/serve.exe
 

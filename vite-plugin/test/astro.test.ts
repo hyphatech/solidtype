@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 
-test("the page prerenders the board, empty, to hydrate as client:load", () => {
+test("the page prerenders the board, with no project yet, to hydrate as client:load", () => {
   const build = Bun.spawnSync(["bun", "--bun", "astro", "build", "--root", "example"], { cwd: root, stdout: "pipe", stderr: "pipe" });
   expect(build.exitCode, build.stderr.toString()).toBe(0);
   const html = readFileSync(`${root}_build/example-astro/index.html`, "utf8");
@@ -18,9 +18,9 @@ test("the page prerenders the board, empty, to hydrate as client:load", () => {
     .map((m) => ({ client: m[1] ?? "", html: m[2] ?? "" }));
   expect(islands.map((i) => i.client)).toEqual(["load"]);
   const board = islands[0]?.html ?? "";
-  expect(board).toMatch(/^<main data-hk="\w+" class="mx-auto max-w-6xl px-4 py-10">/);
-  expect([...board.matchAll(/<section data-hk="\w+" aria-label="([^"]+)"/g)].map((m) => m[1])).toEqual(["To do", "Doing", "Done"]);
-  for (const waiting of ["No tasks yet. Add one to start.", "Nothing in progress", "Nothing done yet"])
-    expect(board).toContain(waiting);
+  expect(board).toMatch(/^<div data-hk="\w+" class="flex h-screen overflow-hidden">/);
+  expect(board).toContain('<nav aria-label="Projects"');
+  expect(board).toContain("No projects yet. Start one to put tasks on it.");
   expect(board).not.toContain("Could not load the board");
+  expect(board).not.toContain("Could not load the projects");
 }, 60_000);

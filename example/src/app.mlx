@@ -1,9 +1,12 @@
 module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module For = Solidtype.For
+module Show = Solidtype.Show
 module Chip = Solidtype_heroui.Chip
 module Empty_state = Solidtype_heroui.Empty_state
+module Search_field = Solidtype_heroui.Search_field
 module Toast = Solidtype_heroui.Toast
+module Gravity = Solidtype_gravity_icons
 
 (* What a call came to: the board fetched again and [what] said, or why
    not. *)
@@ -20,27 +23,76 @@ let settle ~changed what call =
        call
       : unit Js.Promise.t)
 
-let make () =
-  (* Fetched in the browser alone: a page prerendered has no server to ask,
-     and shows the board empty until it hydrates. *)
+(* Fetched in the browser alone: a page prerendered has no server to ask,
+   and shows the board empty until it hydrates. *)
+let fetched what call =
   let browser () = if Solidtype.Web.is_server then None else Some () in
-  let tasks, actions =
-    S.create_resource_from browser (fun () _ ->
-        Js.Promise.then_
-          (fun answered ->
-            Js.Promise.resolve
-              (match answered with
-              | Ok tasks -> tasks
-              | Error e ->
-                  ignore
-                    (Toast.danger ~description:(Said.error e)
-                       "Could not load the board"
-                      : Toast.key);
-                  [||]))
-          (Api.get_api_tasks ()))
+  S.create_resource_from browser (fun () _ ->
+      Js.Promise.then_
+        (fun answered ->
+          Js.Promise.resolve
+            (match answered with
+            | Ok all -> all
+            | Error e ->
+                ignore
+                  (Toast.danger ~description:(Said.error e) what : Toast.key);
+                [||]))
+        (call ()))
+
+let contains ~within part =
+  Js.String.includes ~search:part (String.lowercase_ascii within)
+
+(* A task the filter's words are in: its title, its note or a label. *)
+let matches filter (t : Api.task) =
+  match String.lowercase_ascii (String.trim filter) with
+  | "" -> true
+  | part ->
+      contains ~within:t.title part
+      || Option.fold ~none:false ~some:(fun n -> contains ~within:n part) t.note
+      || Array.exists (fun l -> contains ~within:l part) t.labels
+
+(* At the top level, so Melange calls them where a page writes them rather
+   than inlining a [match], whose text Solid's server would then not
+   escape. *)
+let heading (shown : Api.project option) =
+  match shown with Some p -> p.name | None -> "All projects"
+
+let counted = function
+  | 1 -> "1 open task"
+  | n -> string_of_int n ^ " open tasks"
+
+let make () =
+  let projects, project_actions =
+    fetched "Could not load the projects" (fun () -> Api.get_api_projects ())
   in
+  let tasks, task_actions =
+    fetched "Could not load the board" (fun () -> Api.get_api_tasks ())
+  in
+  let all_projects () = Option.value (S.latest projects) ~default:[||] in
+  let all_tasks () = Option.value (S.latest tasks) ~default:[||] in
+  let chosen, set_chosen = S.create_signal None in
+  (* Until one is chosen, the board shows the first project. *)
+  let view () =
+    match S.get chosen with
+    | Some v -> v
+    | None -> (
+        match Array.find_opt (fun _ -> true) (all_projects ()) with
+        | Some (p : Api.project) -> View.Project p.id
+        | None -> All)
+  in
+  let shown () =
+    match view () with
+    | All -> None
+    | Project id ->
+        Array.find_opt
+          (fun (p : Api.project) -> Float.equal p.id id)
+          (all_projects ())
+  in
+  let filter, set_filter = S.create_signal "" in
+  let folded, set_folded = S.create_signal [ Status.Backlog; Done ] in
   let changed what =
-    S.refetch actions;
+    S.refetch task_actions;
+    S.refetch project_actions;
     ignore (Toast.success ~description:what "Done" : Toast.key)
   in
   let settle what call = settle ~changed what call in
@@ -55,84 +107,136 @@ let make () =
   let remove (t : Api.task) =
     settle (t.title ^ " is off the board") (Api.delete_api_tasks_id ~id:t.id ())
   in
+  (* A project removed is no longer shown: the board goes back to the
+     first. *)
+  let remove_project (p : Api.project) =
+    if View.equal (view ()) (Project p.id) then S.set set_chosen None;
+    settle (p.name ^ " is deleted") (Api.delete_api_projects_id ~id:p.id ())
+  in
+  let in_view () = Js.Array.filter ~f:(View.shows (view ())) (all_tasks ()) in
+  (* Oldest first, the order work came in, as a column is read: the server
+     gives the newest first, and each kept is put before the last. *)
   let in_column status =
     Array.of_list
-      (List.filter
-         (fun (t : Api.task) -> Status.equal t.status status)
-         (Array.to_list (Option.value (S.latest tasks) ~default:[||])))
+      (Array.fold_left
+         (fun kept (t : Api.task) ->
+           if Status.equal t.status status && matches (S.get filter) t then
+             t :: kept
+           else kept)
+         [] (in_view ()))
   in
-  let find id =
-    Array.find_opt
-      (fun (t : Api.task) -> Float.equal t.id id)
-      (Option.value (S.latest tasks) ~default:[||])
+  let open_tasks () =
+    Array.fold_left
+      (fun n (t : Api.task) ->
+        match t.status with
+        | Done -> n
+        | Backlog | To_do | Doing | Review -> n + 1)
+      0 (in_view ())
   in
   (* A drop needs a task to drag: while the board holds none, a column says
      what it is waiting for. *)
   let empty status =
-    if Array.length (Option.value (S.latest tasks) ~default:[||]) > 0 then
-      "Drop a task here"
+    if not (String.equal (String.trim (S.get filter)) "") then "No task matches"
+    else if Array.length (in_view ()) > 0 then "Drop a task here"
     else
       match (status : Status.t) with
+      | Backlog -> "Nothing waiting"
       | To_do -> "No tasks yet. Add one to start."
       | Doing -> "Nothing in progress"
+      | Review -> "Nothing to review"
       | Done -> "Nothing done yet"
   in
-  let over, set_over = S.create_signal None in
-  <main class_="mx-auto max-w-6xl px-4 py-10">
-    <header class_="mb-8 flex items-center justify-between gap-4">
-      <h1 class_="text-3xl font-semibold tracking-tight">"Kanban Board"</h1>
-      <Add_task on_added=(fun title -> changed (title ^ " is on the board")) />
-    </header>
-    <div class_="grid gap-4 md:grid-cols-3">
-      <For each=(fun () -> Array.of_list Status.all)>
-        (fun status _ ->
-          <section
-            aria_label=(fun () -> Status.label status)
-            class_=(fun () ->
-                     match S.get over with
-                     | Some s when Status.equal s status ->
-                         "rounded-3xl bg-accent-soft p-3 ring-2 ring-accent \
-                          transition"
-                     | Some _ | None ->
-                         "rounded-3xl bg-surface-secondary p-3 transition")
-            on_drag_over=(fun e ->
-                           Drag.prevent_default e;
-                           S.set set_over (Some status))
-            on_drag_leave=(fun _ -> S.set set_over None)
-            on_drop=(fun e ->
-                      Drag.prevent_default e;
-                      S.set set_over None;
-                      Option.iter
-                        (fun t -> move t status)
-                        (Option.bind (Drag.dropped e) find))>
-            <h2
-              class_="mb-3 flex items-center justify-between px-2 text-sm \
-                      font-medium text-muted">
-              (fun () -> Jsx.string (Status.label status))
-              <Chip color=`accent size=`sm variant=`soft>
-                (fun () -> Jsx.int (Array.length (in_column status)))
-              </Chip>
-            </h2>
-            <ul class_="flex min-h-24 flex-col gap-2">
-              <For
-                each=(fun () -> in_column status)
-                fallback=(<li
-                            class_="rounded-2xl border border-dashed \
-                                    border-border">
-                            <Empty_state class_="p-4 text-center">
-                              (fun () -> Jsx.string (empty status))
-                            </Empty_state>
-                          </li>)>
-                (fun (t : Api.task) _ ->
-                  <Card
-                    task=(fun () -> t)
-                    on_move=(fun status -> move t status)
-                    on_remove=(fun _ -> remove t)
-                  />)
-              </For>
-            </ul>
-          </section>)
-      </For>
-    </div>
+  let fold status =
+    S.set set_folded
+      (if List.exists (Status.equal status) (S.get folded) then
+         List.filter (fun s -> not (Status.equal s status)) (S.get folded)
+       else status :: S.get folded)
+  in
+  let dropped status id =
+    Option.iter
+      (fun t -> move t status)
+      (Array.find_opt
+         (fun (t : Api.task) -> Float.equal t.id id)
+         (all_tasks ()))
+  in
+  <div class_="flex h-screen overflow-hidden">
+    <Sidebar
+      projects=(fun () -> all_projects ())
+      view=(fun () -> view ())
+      on_view=(fun v -> S.set set_chosen (Some v))
+      on_added=(fun (p : Api.project) ->
+                 S.set set_chosen (Some (View.Project p.id));
+                 changed (p.name ^ " is started"))
+      on_remove=remove_project
+    />
+    <main class_="flex min-w-0 flex-1 flex-col gap-4 p-4">
+      <header class_="flex flex-wrap items-center gap-3">
+        <h1 class_="text-xl font-semibold">
+          (fun () -> Jsx.string (heading (shown ())))
+        </h1>
+        <span class_="text-sm text-muted">
+          (fun () -> Jsx.string (counted (open_tasks ())))
+        </span>
+        <Show.Some some=(fun () -> Option.bind (shown ()) (fun p -> p.repo))>
+          (fun repo ->
+            <Chip size=`sm variant=`secondary>
+              <Gravity.Logo_github class_="size-3.5" />
+              <Chip.Label>
+                <a
+                  class_="hover:underline"
+                  href=(fun () -> "https://github.com/" ^ S.get repo)
+                  target="_blank"
+                  rel="noreferrer">
+                  (fun () -> Jsx.string (S.get repo))
+                </a>
+              </Chip.Label>
+            </Chip>)
+        </Show.Some>
+        <div class_="ms-auto flex items-center gap-2">
+          <Search_field
+            value=(fun () -> S.get filter) on_change=(S.set set_filter)>
+            <Search_field.Group>
+              <Search_field.Search_icon />
+              <Search_field.Input
+                aria_label="Filter board"
+                class_="w-48"
+                placeholder="Filter board"
+              />
+              <Search_field.Clear_button />
+            </Search_field.Group>
+          </Search_field>
+          <Add_task
+            projects=(fun () -> all_projects ())
+            project=(fun () ->
+                      Option.map (fun (p : Api.project) -> p.id) (shown ()))
+            on_added=(fun title -> changed (title ^ " is on the board"))
+          />
+        </div>
+      </header>
+      <Show
+        when_=(fun () -> Array.length (all_projects ()) > 0)
+        fallback=(<Empty_state
+                    class_="flex flex-1 items-center justify-center \
+                            rounded-2xl border border-dashed border-border">
+                    "No projects yet. Start one to put tasks on it."
+                  </Empty_state>)>
+        <div class_="flex min-h-0 flex-1 gap-3 overflow-x-auto">
+          <For each=(fun () -> Array.of_list Status.all)>
+            (fun status _ ->
+              <Column
+                status=(fun () -> status)
+                tasks=(fun () -> in_column status)
+                folded=(fun () ->
+                         List.exists (Status.equal status) (S.get folded))
+                empty=(fun () -> empty status)
+                on_fold=(fun _ -> fold status)
+                on_drop=(dropped status)
+                on_move=move
+                on_remove=remove
+              />)
+          </For>
+        </div>
+      </Show>
+    </main>
     <Toast.Provider placement=`bottom_end />
-  </main>
+  </div>
