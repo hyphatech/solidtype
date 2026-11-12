@@ -45,8 +45,7 @@ From the repository's root:
 
 ```sh
 make setup          # once: the opam switch and the JavaScript dependencies
-make example-serve  # the API and the built page on http://localhost:4420
-make example        # only build: the page, and the Astro page of the same board
+make example-serve  # build, then serve on http://localhost:4420
 ```
 
 `BOARD_PORT` and `BOARD_DB` change the port and the database. Remove
