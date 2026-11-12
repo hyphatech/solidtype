@@ -12,16 +12,45 @@ against this checkout, the libraries and the plugin as they are here.
   <img alt="The board: the API project's tasks in five columns, the backlog and done folded to the edges, a sidebar of projects" src="board-light.png">
 </picture>
 
+## What it is made of
+
+- [Spindle](https://github.com/hyphatech/spindle): the server, its routes
+  under `/api`, their OpenAPI document at `/docs`, and the built page
+- [rowtype](https://github.com/hyphatech/rowtype): the SQLite store, each
+  statement a typed value, and its migrations, `rowtype-migrate`
+- [wiretype](https://github.com/hyphatech/wiretype): the API's types,
+  their JSON checked where it enters, shared by the server and the
+  Melange client Spindle's command line prints from the routes as the
+  board builds
+- solidtype: the board, written in OCaml's JSX on Solid, Kobalte and
+  HeroUI's ports, compiled by Melange
+- Vite and `vite-plugin-solidtype`: the page built, as a Solid page is
+- Astro: the same board prerendered and hydrated
+- Bun: installs and runs the JavaScript side, and vitest the board's tests
+
+## Prerequisites
+
+- [opam](https://opam.ocaml.org/doc/Install.html). `make setup` creates
+  the switch with OCaml 5.5 and every OCaml dependency.
+- [Bun](https://bun.sh) 1.3 or later. `make setup` installs Vite, Astro,
+  Solid and the rest of the JavaScript into `node_modules`, so none is
+  installed globally.
+- The `sqlite3` command, which seeds a new database. macOS has it, and a
+  minimal Linux takes it from its package manager, `apt install sqlite3`.
+  opam installs only SQLite's library.
+
+## Run it
+
+From the repository's root:
+
 ```sh
-make example        # the page, and the Astro page that mounts the same board
+make setup          # once: the opam switch and the JavaScript dependencies
 make example-serve  # the API and the built page on http://localhost:4420
+make example        # only build: the page, and the Astro page of the same board
 ```
 
-`make example-serve` serves on port 4420, or the one `BOARD_PORT` names,
-and keeps the board in `example/board.db`, or the file `BOARD_DB` names,
-migrated by `rowtype-migrate` before the server starts. A file it makes
-is given `seed.sql`, three projects and their tasks, by `sqlite3`; remove
-the file to start again. `/docs` is the API's interactive document.
+`BOARD_PORT` and `BOARD_DB` change the port and the database. Remove
+`example/board.db` to start again from the seed. `/docs` is the API.
 
 ## How it fits
 
@@ -34,39 +63,40 @@ server/store.ml    the projects and tasks in SQLite through spindle-sqlite's
                    status's word one for the column and the API alike
 server/routes.ml   the store over HTTP, under /api: a name, a title, a
                    repository, a link and labels checked where they enter,
-                   a name taken or a project missing refused on its field;
-                   a failure of the database is Spindle_sqlite.refusal's
-                   answer
+                   a name taken or a project missing refused on its field,
+                   and a failure of the database answered by
+                   Spindle_sqlite.refusal
 server/serve.ml    Spindle serving the routes, their document at /docs,
                    and the built page beside them on one origin, on a pool
                    of the file BOARD_DB names
 server/board.ml    the command line, Spindle_cli: the API as OpenAPI, Zod,
                    or the Melange client
 server/test_tasks  the routes, called in-process on a file of each test's
-                   own, migrated as rowtype-migrate migrates the board's;
-                   a server started again on it, a board made before
+                   own, migrated as rowtype-migrate migrates the board's,
+                   with a server started again on it, a board made before
                    projects migrated, and every statement verified
                    against the tables
 src/api.ml         that client, printed by the command line as dune builds
                    src/, never kept: a route that changes is a front end
                    that stops compiling
-src/*.mlx          the board: App, its projects and tasks (resources), the
+src/app.mlx        the board: its projects and tasks (resources), the
                    project shown, a Search_field that filters it, and
-                   Toasts for what happened; Sidebar, the projects to
-                   choose, Add_project, each project's Dropdown that
+                   Toasts for what happened
+src/sidebar.mlx    the projects to choose, each project's Dropdown that
                    deletes it once an Alert_dialog confirms, and the
-                   theme by a Segment;
-                   Column, a status's tasks, a drop, the first and last
-                   folded to a rail; Card, HeroUI's Card with a Dropdown
-                   that moves or removes it, its link and labels Chips;
-                   Add_task and Add_project, HeroUI's Modal holding its
+                   theme by a Segment
+src/column.mlx     a status's tasks and a drop, the first and last
+                   folded to a rail
+src/card.mlx       HeroUI's Card with a Dropdown that moves or removes
+                   it, its link and labels Chips
+src/add_*.mlx      Add_task and Add_project, HeroUI's Modal holding its
                    Form, Text_fields and Select, the server's problems
                    shown on the fields they name
 src/board.css      HeroUI's styles, the components the board uses, as
-                   HeroUI's README gives them; Tailwind reads the board's
-                   classes from the .mlx sources
-index.html         the page: loads Melange's output from _build; Vite
-                   builds it into _build/example-dist, which the server
+                   HeroUI's README gives them, and the board's classes,
+                   which Tailwind reads from the .mlx sources
+index.html         the page, which loads Melange's output from _build and
+                   Vite builds into _build/example-dist, which the server
                    serves
 pages/index.astro  the same board as an Astro page, prerendered and
                    hydrated, built into _build/example-astro
