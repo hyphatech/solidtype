@@ -60,11 +60,8 @@ seed.sql           a board to look at, for a new database alone
 server/store.ml    the projects and tasks in SQLite through spindle-sqlite's
                    pool, each statement a rowtype value, a colour's and a
                    status's word one for the column and the API alike
-server/routes.ml   the store over HTTP, under /api: a name, a title, a
-                   repository, a link and labels checked where they enter,
-                   a name taken or a project missing refused on its field,
-                   and a failure of the database answered by
-                   Spindle_sqlite.refusal
+server/routes.ml   the store over HTTP, under /api, its input checked where
+                   it enters
 server/serve.ml    Spindle serving the routes, their document at /docs,
                    and the built page beside them on one origin, on a pool
                    of the file BOARD_DB names
