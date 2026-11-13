@@ -313,16 +313,16 @@ let%component make ~(channel : channel)
     <Kobalte.Root
       channel=(fun () -> S.get channel)
       ?color_space=(fun () -> space_for (S.get channel) (S.get color_space))
-      ?value
-      ?default_value
+      ?value=(fun () -> S.get value)
+      ?default_value=(fun () -> S.get default_value)
       on_change=(fun c ->
                   in_form.changed ();
                   ignore (on_change c : unit option))
       on_change_end=(fun c -> ignore (on_change_end c : unit option))
       orientation=(fun () -> S.get orientation)
       disabled=(fun () -> S.get disabled)
-      ?name
-      ?aria_label
+      ?name=(fun () -> S.get name)
+      ?aria_label=(fun () -> S.get aria_label)
       class_=(fun () ->
                after (Styles.ColorSlider.base (S.get s.slots)) (S.get class_))
       data_disabled=(fun () -> Jsx.flag (S.get disabled))

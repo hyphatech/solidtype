@@ -499,8 +499,7 @@ module Read =
               Solidtype.Jsx.d "lang"
                 ((fun () ->
                     Js.Undefined.fromOption
-                      (let (_ : _ Solidtype.Solid.accessor -> _) =
-                         Solidtype.Solid.get in
+                      (let (_ : _ Solidtype.Solid.accessor -> _) = S.get in
                        Props.get_note props : Solidtype.Html.P.lang option))
                 [@u ]))|]
             [|(Solidtype.Jsx.dynamic
@@ -625,21 +624,6 @@ let optional_prop =
                                                                ())[@u ]))
                                                      [@u ]))|] [||])
     ((fun () -> count ())[@u ]) ((fun () -> "x")[@u ])
-let optional_name =
-  (fun (solidtype__count : ((unit -> _ option)[@u ]))
-     (solidtype__text : ((unit -> _)[@u ])) ->
-     if false
-     then
-       Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
-         ?count:(Solidtype.Check.optional solidtype__count) ();
-     Solidtype.Jsx.c Label.component
-       [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.d "count"
-                                                     ((fun () ->
-                                                         Js.Undefined.fromOption
-                                                           ((solidtype__count
-                                                               ())[@u ]))
-                                                     [@u ]))|] [||])
-    ((fun () -> Solidtype.Solid.get count)[@u ]) ((fun () -> "x")[@u ])
 let named_render =
   (fun solidtype__children (solidtype__each : ((unit -> _)[@u ])) ->
      if false

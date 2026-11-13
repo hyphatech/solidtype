@@ -110,9 +110,9 @@ let%component make ?(size : size = `md) ?(color : color option)
   let g = { size; color; variant; join; count } in
   <Context.Provider value=(fun () -> g)>
     <div
-      ?role
-      ?aria_label
-      ?aria_labelledby
+      ?role=(fun () -> S.get role)
+      ?aria_label=(fun () -> S.get aria_label)
+      ?aria_labelledby=(fun () -> S.get aria_labelledby)
       class_=(fun () ->
                after
                  (Styles.AvatarGroup.base

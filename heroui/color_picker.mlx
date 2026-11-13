@@ -214,8 +214,8 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     }
   in
   <Headless
-    ?value
-    ?default_value
+    ?value=(fun () -> S.get value)
+    ?default_value=(fun () -> S.get default_value)
     on_change=(fun c -> ignore (on_change c : unit option))>
     <Kobalte.Root
       open_=(fun () -> S.get p.is_open)

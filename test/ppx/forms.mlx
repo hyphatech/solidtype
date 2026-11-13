@@ -109,7 +109,7 @@ module Read = struct
   let%component make ~(title : string) ~(text : string) ?(note : string option)
       () =
     let text = S.create_memo (fun () -> S.get text ^ "!") in
-    <p title=(fun () -> S.get title) ?lang=note>
+    <p title=(fun () -> S.get title) ?lang=(fun () -> S.get note)>
       (fun () -> Solidtype.Jsx.string (S.get text))
     </p>
 end
@@ -141,7 +141,6 @@ end
 
 let optional_attribute = <a title=(fun () -> "x") ?href=(fun () -> link ()) />
 let optional_prop = <Label text=(fun () -> "x") ?count=(fun () -> count ()) />
-let optional_name = <Label text=(fun () -> "x") ?count />
 let named_render = <For each=(fun () -> items ()) render=row />
 
 module Part = struct

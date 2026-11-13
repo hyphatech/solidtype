@@ -119,8 +119,8 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
                           | ks -> Js.Nullable.return ks.(0))
                   orientation=(fun () -> S.get orientation)
                   disabled=(fun () -> all_disabled ())
-                  ?aria_label
-                  ?aria_labelledby
+                  ?aria_label=(fun () -> S.get aria_label)
+                  ?aria_labelledby=(fun () -> S.get aria_labelledby)
                   class_=(fun () -> class_ ())
                   data_slot="toggle-button-group"
                   data_disabled=(fun () -> Jsx.flag (disabled ()))
@@ -138,8 +138,8 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         value=(fun () -> S.get keys)
         orientation=(fun () -> S.get orientation)
         disabled=(fun () -> all_disabled ())
-        ?aria_label
-        ?aria_labelledby
+        ?aria_label=(fun () -> S.get aria_label)
+        ?aria_labelledby=(fun () -> S.get aria_labelledby)
         class_=(fun () -> class_ ())
         data_slot="toggle-button-group"
         data_disabled=(fun () -> Jsx.flag (disabled ()))

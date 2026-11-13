@@ -165,9 +165,9 @@ let%component make ?(variant : variant = `default) ?(size : size = `md)
     <Kobalte.Root
       value=(fun () -> Option.value (S.get chosen) ~default:"")
       disabled=(fun () -> S.get is_disabled)
-      ?name
-      ?aria_label
-      ?aria_labelledby
+      ?name=(fun () -> S.get name)
+      ?aria_label=(fun () -> S.get aria_label)
+      ?aria_labelledby=(fun () -> S.get aria_labelledby)
       class_=(fun () ->
                after (root_classes (S.get variant) (S.get size)) (S.get class_))
       data_slot="segment"

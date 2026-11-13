@@ -97,7 +97,7 @@ let%component make ?(status : status = `default)
   <Context.Provider value=(fun () -> a)>
     <Surface.Context.Provider value=(fun () -> surface)>
       <div
-        ?role
+        ?role=(fun () -> S.get role)
         class_=(fun () ->
                  after (Styles.Alert.base (S.get a.slots)) (S.get class_))
         data_slot="alert-root"

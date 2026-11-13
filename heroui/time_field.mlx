@@ -613,7 +613,7 @@ let field (type v) ~(kind : v kind) ~(fallback : v S.accessor)
       disabled=(fun () -> S.get is_disabled)
       read_only=(fun () -> S.get is_read_only)
       ?name=(fun () -> name ())
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       class_=(fun () ->
                Styles.TimeField.classes
                  (Styles.TimeField.options ?full_width:(S.get full_width)

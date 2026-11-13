@@ -517,7 +517,7 @@ let%component make ?(placeholder : string = "Select an item")
         disabled=(fun () -> S.get is_disabled)
         required=(fun () -> S.get is_required)
         validation_state=(fun () -> if invalid () then `invalid else `valid)
-        ?name
+        ?name=(fun () -> S.get name)
         placeholder=(fun () -> placeholder_text ())
         class_=(fun () -> root_classes ())
         ref=root
@@ -555,7 +555,7 @@ let%component make ?(placeholder : string = "Select an item")
         disabled=(fun () -> S.get is_disabled)
         required=(fun () -> S.get is_required)
         validation_state=(fun () -> if invalid () then `invalid else `valid)
-        ?name
+        ?name=(fun () -> S.get name)
         placeholder=(fun () -> placeholder_text ())
         class_=(fun () -> root_classes ())
         ref=root

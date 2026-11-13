@@ -123,7 +123,7 @@ module Input = struct
     if f.by_channel then
       <Channel.Input
         ?aria_label=(fun () -> S.get f.aria_label)
-        ?placeholder
+        ?placeholder=(fun () -> S.get placeholder)
         class_=(fun () -> classes ())
         ref=watched
         data_slot="color-input-group-input"
@@ -138,7 +138,7 @@ module Input = struct
       <Hex.Input
         role=`textbox
         ?aria_label=(fun () -> S.get f.aria_label)
-        ?placeholder
+        ?placeholder=(fun () -> S.get placeholder)
         class_=(fun () -> classes ())
         ref=watched
         data_slot="color-input-group-input"
@@ -291,9 +291,9 @@ let%component make ?(value : Color.t Js.Nullable.t option)
           Jsx.element
             <Channel.Root
               channel=(fun () -> ch)
-              ?color_space
-              ?value
-              ?default_value
+              ?color_space=(fun () -> S.get color_space)
+              ?value=(fun () -> S.get value)
+              ?default_value=(fun () -> S.get default_value)
               on_change=changed
               change_on_wheel=(fun () -> not (S.get is_wheel_disabled))
               validation_state=(fun () ->
@@ -301,7 +301,7 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               required=(fun () -> S.get is_required)
               disabled=(fun () -> S.get disabled)
               read_only=(fun () -> S.get is_read_only)
-              ?name
+              ?name=(fun () -> S.get name)
               class_=(fun () -> classes ())
               ref=root
               on_focus_out=leave
@@ -323,8 +323,8 @@ let%component make ?(value : Color.t Js.Nullable.t option)
       | None ->
           Jsx.element
             <Hex.Root
-              ?value
-              ?default_value
+              ?value=(fun () -> S.get value)
+              ?default_value=(fun () -> S.get default_value)
               on_change=changed
               change_on_wheel=(fun () -> not (S.get is_wheel_disabled))
               validation_state=(fun () ->
@@ -332,7 +332,7 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               required=(fun () -> S.get is_required)
               disabled=(fun () -> S.get disabled)
               read_only=(fun () -> S.get is_read_only)
-              ?name
+              ?name=(fun () -> S.get name)
               class_=(fun () -> classes ())
               ref=root
               on_focus_out=leave

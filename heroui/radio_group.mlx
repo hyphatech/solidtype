@@ -176,7 +176,7 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       disabled=(fun () -> is_disabled ())
       read_only=(fun () -> S.get is_read_only)
       required=(fun () -> S.get is_required)
-      ?name
+      ?name=(fun () -> S.get name)
       on_key_down=(fun e ->
                     ignore (on_key_down e : unit option);
                     if S.get is_read_only then move_focus e)

@@ -96,21 +96,21 @@ module Content = struct
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
-      ?aria_label
-      ?aria_labelledby
-      ?selection_mode
-      ?selection_behavior
-      ?selected_keys
-      ?default_selected_keys
+      ?aria_label=(fun () -> S.get aria_label)
+      ?aria_labelledby=(fun () -> S.get aria_labelledby)
+      ?selection_mode=(fun () -> S.get selection_mode)
+      ?selection_behavior=(fun () -> S.get selection_behavior)
+      ?selected_keys=(fun () -> S.get selected_keys)
+      ?default_selected_keys=(fun () -> S.get default_selected_keys)
       on_selection_change=(fun keys ->
                             ignore (on_selection_change keys : unit option))
-      ?disabled_keys
-      ?disallow_empty_selection
-      ?sort_descriptor
+      ?disabled_keys=(fun () -> S.get disabled_keys)
+      ?disallow_empty_selection=(fun () -> S.get disallow_empty_selection)
+      ?sort_descriptor=(fun () -> S.get sort_descriptor)
       on_sort_change=(fun sort -> ignore (on_sort_change sort : unit option))
-      ?tree_column
-      ?expanded_keys
-      ?default_expanded_keys
+      ?tree_column=(fun () -> S.get tree_column)
+      ?expanded_keys=(fun () -> S.get expanded_keys)
+      ?default_expanded_keys=(fun () -> S.get default_expanded_keys)
       on_expanded_change=(fun keys ->
                            ignore (on_expanded_change keys : unit option))
       class_=(fun () ->
@@ -207,13 +207,13 @@ module Column = struct
       }
     in
     <Headless.Column
-      ?id
+      ?id=(fun () -> S.get id)
       allows_sorting=(fun () -> S.get allows_sorting)
-      ?is_row_header
-      ?width
-      ?default_width
-      ?min_width
-      ?max_width
+      ?is_row_header=(fun () -> S.get is_row_header)
+      ?width=(fun () -> S.get width)
+      ?default_width=(fun () -> S.get default_width)
+      ?min_width=(fun () -> S.get min_width)
+      ?max_width=(fun () -> S.get max_width)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
@@ -263,7 +263,7 @@ module Column_resizer = struct
       }
     in
     <Headless.Column_resizer
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch handle e;
@@ -391,13 +391,13 @@ module Row = struct
     <Checkbox.Selection.Provider value=(fun () -> one)>
       <Headless.Row
         id=(fun () -> key)
-        ?href
-        ?target
-        ?rel
-        ?download
-        ?href_lang
-        ?ping
-        ?referrer_policy
+        ?href=(fun () -> S.get href)
+        ?target=(fun () -> S.get target)
+        ?rel=(fun () -> S.get rel)
+        ?download=(fun () -> S.get download)
+        ?href_lang=(fun () -> S.get href_lang)
+        ?ping=(fun () -> S.get ping)
+        ?referrer_policy=(fun () -> S.get referrer_policy)
         ref=(fun e ->
               ignore (given_ref e : unit option);
               Interaction.watch i e)
@@ -519,9 +519,9 @@ module Load_more = struct
       ~(children : Jsx.content) () =
     let slots = in_table "Table.Load_more" in
     <Headless.Load_more
-      ?is_loading
+      ?is_loading=(fun () -> S.get is_loading)
       on_load_more=(fun _ -> ignore (on_load_more () : unit option))
-      ?scroll_offset
+      ?scroll_offset=(fun () -> S.get scroll_offset)
       style=(fun () -> styled "--table-row-level: 1" (S.get style))
       class_=(fun () ->
                after (Styles.Table.load_more (S.get slots)) (S.get class_))

@@ -24,7 +24,7 @@ module Title = struct
   let%component make ?(id : string option) ?(class_ : string option)
       ~(children : Jsx.content) () =
     <h3
-      ?id
+      ?id=(fun () -> S.get id)
       class_=(fun () -> after (Styles.Card.title (slots ())) (S.get class_))
       data_slot="card-title"
       props=(Props.others props)>
@@ -74,8 +74,8 @@ let%component make ?(variant : Surface.variant = `default)
      read as an element is made. *)
   let card () =
     <div
-      ?role
-      ?aria_labelledby
+      ?role=(fun () -> S.get role)
+      ?aria_labelledby=(fun () -> S.get aria_labelledby)
       class_=(fun () ->
                after
                  (Styles.Card.base

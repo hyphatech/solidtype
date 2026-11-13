@@ -17,8 +17,8 @@ let%component make ?(color : Color.t option) ?(color_name : string option)
   let shown () = Headless.shown picker (S.get color) in
   <Headless
     value=(fun () -> shown ())
-    ?color_name
-    ?aria_label
+    ?color_name=(fun () -> S.get color_name)
+    ?aria_label=(fun () -> S.get aria_label)
     class_=(fun () ->
              Styles.ColorSwatch.classes
                (Styles.ColorSwatch.options ?shape:(S.get shape)

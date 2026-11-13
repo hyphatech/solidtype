@@ -748,7 +748,7 @@ let%component make ?(aria_label : string option)
   | None ->
       <As_list
         as_="div"
-        ?aria_label
+        ?aria_label=(fun () -> S.get aria_label)
         value=(fun () -> S.get selected)
         options=(fun () ->
                   Array.of_list (List.map Types.Either.left (S.get options)))
