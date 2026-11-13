@@ -29,9 +29,10 @@ type group = {
 }
 (** What a {!Tag} reads of the group it is in: the look of its tags. *)
 
-val use_context : string -> group
-(** [use_context part] is the group above [part], which raises
-    [Invalid_argument] naming [part] outside one. *)
+module Context : sig
+  val use : unit -> group
+  (** The group above; outside a {!Tag_group} it raises [Invalid_argument]. *)
+end
 
 (** The tags: [data-empty] while it holds none, then drawing
     [render_empty_state] in their place. *)

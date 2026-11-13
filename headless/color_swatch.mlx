@@ -31,7 +31,7 @@ end
    which no browser reads: the background is written as rgba, before the
    caller's style, which wins. *)
 let make (props : Props.t) =
-  let picker = Color_picker.use_context () in
+  let picker = Color_picker.Context.use () in
   let color () = shown picker (Props.value props) in
   <Kobalte.Root
     value=(fun () -> color ())

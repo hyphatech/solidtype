@@ -3,8 +3,8 @@
     collection draw only the entries in view of what scrolls them, the
     collection's own element where it scrolls, else the nearest above that does,
     in a block the size of them all, each entry placed in it by its [layout]. It
-    draws no style, and is no element: a collection reads it by {!use} and
-    places its entries by {!val-window}.
+    draws no style, and is no element: a collection reads it by {!Context.use}
+    and places its entries by {!val-window}.
 
     {[
       <Virtualizer layout=(fun () -> Virtualizer.list_layout ~row_size:50. ())>
@@ -83,8 +83,10 @@ val table_layout :
     what loads more [loader_size] high, else as high as a row. A list ignores
     it. *)
 
-val use : unit -> layout option
-(** The layout of the virtualizer around, [None] with none. *)
+module Context : sig
+  val use : unit -> layout option
+  (** The layout of the virtualizer around, [None] with none. *)
+end
 
 (** {1 A window on rows}
 

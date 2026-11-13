@@ -37,9 +37,6 @@ let in_table part =
   | Some slots -> slots
   | None -> invalid_arg (part ^ " is used inside a Table")
 
-let use_row_context = Headless.use_row_context
-let use_cell_context = Headless.use_cell_context
-
 module Scroll_container = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Scroll_container" in
@@ -134,7 +131,7 @@ end
 module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Header" in
-    let t = Headless.use_context () in
+    let t = Headless.Context.use () in
     (* A checkbox of slot=`selection in the header stands for every row. *)
     let all =
       {
@@ -185,7 +182,7 @@ module Column = struct
          (Solidtype.Html.Th.props -> state -> Solidtype.Jsx.element) option) ()
       =
     let slots = in_table "Table.Column" in
-    let t = Headless.use_context () in
+    let t = Headless.Context.use () in
     let i = Interaction.create () in
     let resizing () =
       match (S.get t.resizing_column, S.get id) with
@@ -253,7 +250,7 @@ module Column_resizer = struct
          (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
       =
     let slots = in_table "Table.Column_resizer" in
-    let column = Headless.use_column_context () in
+    let column = Headless.Column.Context.use () in
     let handle = Interaction.create () in
     let input = Interaction.create () in
     let state () =
@@ -297,7 +294,7 @@ module Sortable_column_header = struct
       ?(show_indicator : bool = true) ?(indicator : Jsx.element option)
       ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Sortable_column_header" in
-    let column = Headless.use_column_context () in
+    let column = Headless.Column.Context.use () in
     let direction () =
       match S.get sort_direction with
       | Some d -> Some d
@@ -358,6 +355,8 @@ module Body = struct
 end
 
 module Row = struct
+  module Context = Headless.Row.Context
+
   let%component make ?(id : string option) ?(on_action : (unit -> unit) option)
       ?(href : string option) ?(target : string option) ?(rel : string option)
       ?(download : string option) ?(href_lang : string option)
@@ -366,7 +365,7 @@ module Row = struct
       ?ref:(given_ref : (Dom.htmlTableRowElement -> unit) option)
       ?(style : string option) ~(children : Jsx.content) () =
     let slots = in_table "Table.Row" in
-    let t = Headless.use_context () in
+    let t = Headless.Context.use () in
     let key =
       match S.untrack (fun () -> S.get id) with
       | Some k -> k
@@ -387,8 +386,8 @@ module Row = struct
     (* HeroUI's styles read React Aria's state, "true" where Kobalte's is
        present and empty, and its row's level for nested rows, which the
        headless row gives the attributes it writes. *)
-    let level () = string_of_int (Headless.use_row_context ()).level in
-    let tree_state read = Jsx.flag (read (Headless.use_row_context ())) in
+    let level () = string_of_int (Headless.Row.Context.use ()).level in
+    let tree_state read = Jsx.flag (read (Headless.Row.Context.use ())) in
     <Checkbox.Selection.Provider value=(fun () -> one)>
       <Headless.Row
         id=(fun () -> key)
@@ -430,6 +429,8 @@ module Row = struct
 end
 
 module Cell = struct
+  module Context = Headless.Cell.Context
+
   (* What its children are drawn of: React Aria's render props for it. *)
   type state = {
     is_hovered : bool Solidtype.Solid.accessor;
@@ -454,7 +455,7 @@ module Cell = struct
     let i = Interaction.create () in
     (* Its row's state and its column's, which the headless cell gives the
        attributes it writes; and its row's chevron, to a button inside it. *)
-    let row () = Headless.use_row_context () in
+    let row () = Headless.Row.Context.use () in
     let state () =
       {
         is_hovered = S.accessor (fun () -> Interaction.hovered i);
@@ -464,10 +465,10 @@ module Cell = struct
         is_selected = S.accessor (fun () -> S.get (row ()).is_selected);
         column_index =
           S.accessor (fun () ->
-              S.get (Headless.use_cell_context ()).column_index);
+              S.get (Headless.Cell.Context.use ()).column_index);
         is_tree_column =
           S.accessor (fun () ->
-              S.get (Headless.use_cell_context ()).is_tree_column);
+              S.get (Headless.Cell.Context.use ()).is_tree_column);
         is_expanded =
           S.accessor (fun () ->
               let r = row () in
@@ -489,7 +490,7 @@ module Cell = struct
       data_has_child_items=(fun () -> Jsx.flag (S.get (row ()).has_child_items))
       data_tree_column=(fun () ->
                          Jsx.flag
-                           (S.get (Headless.use_cell_context ()).is_tree_column))
+                           (S.get (Headless.Cell.Context.use ()).is_tree_column))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>

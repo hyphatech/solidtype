@@ -43,11 +43,6 @@ type item = {
 }
 (** What a part inside an {!Item} reads of it, and a style's attribute on it. *)
 
-val use_item_context : unit -> item
-(** The item above, read by a part inside it, or by a style's attribute on it,
-    which Solid reads inside the item; outside an {!Item} it raises
-    [Invalid_argument]. *)
-
 (** The list, its colour [value] while it is given one, else the one it keeps,
     [default_value] at first, and none chosen while neither names an option's.
     Choosing another option calls [on_change] with its colour. Its [layout],
@@ -78,6 +73,13 @@ end
     {!Swatch} inside it, which its [aria-labelledby] names. It joins the list
     once it is on the page, ordered as the page has it. *)
 module Item : sig
+  module Context : sig
+    val use : unit -> item
+    (** The item above, read by a part inside it, or by a style's attribute on
+        it, which Solid reads inside the item; outside an {!Item} it raises
+        [Invalid_argument]. *)
+  end
+
   module Props : sig
     type t
 

@@ -565,7 +565,7 @@ break.
   Kobalte makes its own: of Kobalte's hooks, `Solidtype_kobalte.Selection`
   first, its parts the elements they name, their roles, keys and state as
   attributes, Kobalte's convention for state, present and empty, and its
-  state a context a style reads, `Table.use_context`. A part takes every
+  state a context a style reads, `Table.Context.use`. A part takes every
   attribute its element does, its `Props` written by hand, and passes them on
   after its own, so a style's attribute wins, and a caller's `ref` and
   handlers are called beside its own. Its HeroUI port adds only HeroUI's

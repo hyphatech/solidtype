@@ -370,7 +370,11 @@ let in_table part =
   | Some t -> t
   | None -> invalid_arg (part ^ " is used inside a Table.Root")
 
-let use_context () = (in_table "Table.use_context").context
+let use_context () = (in_table "Table.Context.use").context
+
+module Context = struct
+  let use = use_context
+end
 
 module Row_context = Solidtype.Context.Make_optional (struct
   type t = row
@@ -379,7 +383,7 @@ end)
 let use_row_context () =
   match Row_context.use () with
   | Some r -> r
-  | None -> invalid_arg "Table.use_row_context is used inside a Table.Row"
+  | None -> invalid_arg "Table.Row.Context.use is used inside a Table.Row"
 
 module Cell_context = Solidtype.Context.Make_optional (struct
   type t = cell
@@ -388,7 +392,7 @@ end)
 let use_cell_context () =
   match Cell_context.use () with
   | Some c -> c
-  | None -> invalid_arg "Table.use_cell_context is used inside a Table.Cell"
+  | None -> invalid_arg "Table.Cell.Context.use is used inside a Table.Cell"
 
 (* A row, drawn by what holds it once that has read all it holds: by the body,
    or by the row it is in, after it, while that row is expanded, since a
@@ -811,7 +815,7 @@ module Root = struct
     in
     (* A table a virtualizer lays out, as React Aria's TableLayout does. *)
     let layout =
-      match Virtualizer.use () with
+      match Virtualizer.Context.use () with
       | Some (Table l) -> Some l
       | Some (List _) | None -> None
     in
@@ -1487,9 +1491,13 @@ end)
 let use_column_context () =
   match Column_context.use () with
   | Some c -> c
-  | None -> invalid_arg "Table.use_column_context is used inside a Table.Column"
+  | None -> invalid_arg "Table.Column.Context.use is used inside a Table.Column"
 
 module Column = struct
+  module Context = struct
+    let use = use_column_context
+  end
+
   module Props = struct
     type t
 
@@ -1767,6 +1775,10 @@ module Body = struct
 end
 
 module Row = struct
+  module Context = struct
+    let use = use_row_context
+  end
+
   module Props = struct
     type t
 
@@ -2174,6 +2186,10 @@ module Row = struct
 end
 
 module Cell = struct
+  module Context = struct
+    let use = use_cell_context
+  end
+
   module Props = struct
     type t
 

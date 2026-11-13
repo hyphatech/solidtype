@@ -98,7 +98,7 @@ module Root = struct
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
     in
-    let picker = Color_picker.use_context () in
+    let picker = Color_picker.Context.use () in
     let current () =
       match (Props.value props, picker) with
       | Some v, _ -> (

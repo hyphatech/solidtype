@@ -58,7 +58,7 @@ module Item = struct
         is_pressed = S.accessor (fun () -> Interaction.pressed i);
         is_selected =
           S.accessor (fun () ->
-              S.get (Headless.use_item_context ()).is_selected);
+              S.get (Headless.Item.Context.use ()).is_selected);
         is_focused = S.accessor (fun () -> Interaction.focused i);
         is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
         is_disabled = S.accessor (fun () -> disabled ());
@@ -86,7 +86,7 @@ module Item = struct
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_selected=(fun () ->
                       Jsx.flag
-                        (S.get (Headless.use_item_context ()).is_selected))
+                        (S.get (Headless.Item.Context.use ()).is_selected))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
@@ -115,7 +115,7 @@ module Indicator = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
       () =
     let slots = within "Color_swatch_picker.Indicator" in
-    let item = Headless.use_item_context () in
+    let item = Headless.Item.Context.use () in
     <span
       aria_hidden=true
       class_=(fun () ->

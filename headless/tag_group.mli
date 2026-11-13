@@ -48,11 +48,6 @@ type tag = {
 }
 (** What a part inside a {!Tag} reads of it, and a style's attribute on it. *)
 
-val use_tag_context : unit -> tag
-(** The tag above, read by a part inside it, or by a style's attribute on it,
-    which Solid reads inside the tag; outside a {!Tag} it raises
-    [Invalid_argument]. *)
-
 type group_state = {
   selection_mode : [ `none | `single | `multiple ] S.accessor;
   is_selected : string -> bool;
@@ -64,8 +59,10 @@ type group_state = {
     tag is chosen, or disabled by the group, whether its tags can be removed,
     and whether its list holds none. *)
 
-val use_context : unit -> group_state
-(** The group above; outside a {!Root} it raises [Invalid_argument]. *)
+module Context : sig
+  val use : unit -> group_state
+  (** The group above; outside a {!Root} it raises [Invalid_argument]. *)
+end
 
 (** The group. Its tags are chosen as [selection_mode] says, [`none] by default:
     the keys chosen are [selected_keys] while it is given them, else those it
@@ -143,6 +140,13 @@ end
     the group once it is on the page, ordered as the page has it. Its [ref] is
     its row's. *)
 module Tag : sig
+  module Context : sig
+    val use : unit -> tag
+    (** The tag above, read by a part inside it, or by a style's attribute on
+        it, which Solid reads inside the tag; outside a {!Tag} it raises
+        [Invalid_argument]. *)
+  end
+
   module Props : sig
     type t
 

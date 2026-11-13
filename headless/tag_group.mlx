@@ -138,10 +138,10 @@ let in_tag part =
   | Some t -> t
   | None -> invalid_arg (part ^ " is used inside a Tag_group.Tag")
 
-let use_tag_context () = (in_tag "Tag_group.use_tag_context").state
+let use_tag_context () = (in_tag "Tag_group.Tag.Context.use").state
 
 let use_context () =
-  let g = in_group "Tag_group.use_context" in
+  let g = in_group "Tag_group.Context.use" in
   {
     selection_mode = g.selection_mode;
     is_selected = (fun k -> Manager.is_selected (S.get g.manager) k);
@@ -149,6 +149,10 @@ let use_context () =
     allows_removing = g.removable;
     is_empty = g.is_empty;
   }
+
+module Context = struct
+  let use = use_context
+end
 
 (* An id on the page while the part that carries it is: a part counts itself
    in as it is made and out as it goes. *)
@@ -683,6 +687,10 @@ module List = struct
 end
 
 module Tag = struct
+  module Context = struct
+    let use = use_tag_context
+  end
+
   module Props = struct
     type t
 

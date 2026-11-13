@@ -80,8 +80,8 @@ let rec expandable_row item =
   <Table.Row id=(fun () -> item.id)>
     <Table.Cell>
       (fun () ->
-        let row = Table.use_row_context () in
-        let cell = Table.use_cell_context () in
+        let row = Table.Row.Context.use () in
+        let cell = Table.Cell.Context.use () in
         Jsx.element
           <span class_="flex items-center gap-1">
             <Show

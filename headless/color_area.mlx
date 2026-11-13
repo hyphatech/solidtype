@@ -37,7 +37,7 @@ module Root = struct
     let disabled =
       S.accessor (fun () -> Option.value (Props.disabled props) ~default:false)
     in
-    let picker = Color_picker.use_context () in
+    let picker = Color_picker.Context.use () in
     <Disabled.Provider value=(fun () -> disabled)>
       <Kobalte.Root
         data_disabled=(fun () -> state (S.get disabled))

@@ -9,8 +9,6 @@ module Context = Solidtype.Context.Make_optional (struct
   type nonrec t = t
 end)
 
-let use_context = Context.use
-
 let value picker own =
   match (own, picker) with
   | Some _, _ -> own

@@ -106,8 +106,8 @@ let rec row f =
   <Table.Row id=(fun () -> f.id)>
     <Table.Cell>
       (fun () ->
-        let r = Table.use_row_context () in
-        let c = Table.use_cell_context () in
+        let r = Table.Row.Context.use () in
+        let c = Table.Cell.Context.use () in
         Jsx.element
           <span class_="flex items-center gap-1">
             <Show

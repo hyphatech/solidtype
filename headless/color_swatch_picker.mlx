@@ -93,7 +93,7 @@ let in_item part =
   | Some i -> i
   | None -> invalid_arg (part ^ " is used inside a Color_swatch_picker.Item")
 
-let use_item_context () = (in_item "Color_swatch_picker.use_item_context").state
+let use_item_context () = (in_item "Color_swatch_picker.Item.Context.use").state
 
 (* What a reader is told of an option, and what typing its start reaches: the
    name its swatch gives it. *)
@@ -315,7 +315,7 @@ module Root = struct
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
     in
-    let picker = Color_picker.use_context () in
+    let picker = Color_picker.Context.use () in
     let current () =
       match Color_picker.value picker (Props.value props) with
       | Some c -> Some c
@@ -434,6 +434,10 @@ module Root = struct
 end
 
 module Item = struct
+  module Context = struct
+    let use = use_item_context
+  end
+
   module Props = struct
     type t
 

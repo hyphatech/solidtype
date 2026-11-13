@@ -33,7 +33,7 @@ module Jsx := Solidtype.Jsx
     is [--color-swatch-current], which HeroUI's styles border it with once it is
     chosen, before its own [style]. It declares [data-hovered], [data-pressed],
     [data-focused], [data-focus-visible], [data-selected] and [data-disabled].
-    Inside it, {!Solidtype_headless.Color_swatch_picker.use_item_context} reads
+    Inside it, {!Solidtype_headless.Color_swatch_picker.Item.Context.use} reads
     its colour and state. *)
 module Item : sig
   type state = {

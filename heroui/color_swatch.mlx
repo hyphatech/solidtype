@@ -13,7 +13,7 @@ let%component make ?(color : Color.t option) ?(color_name : string option)
     ?(aria_label : string option) ?(shape : [ `circle | `square ] option)
     ?(size : [ `xs | `sm | `md | `lg | `xl ] option) ?(class_ : string option)
     ?(style : string option) () =
-  let picker = Solidtype_headless.Color_picker.use_context () in
+  let picker = Solidtype_headless.Color_picker.Context.use () in
   let shown () = Headless.shown picker (S.get color) in
   <Headless
     value=(fun () -> shown ())
