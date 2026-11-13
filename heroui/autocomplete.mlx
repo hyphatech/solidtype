@@ -730,10 +730,9 @@ let%component make ?(placeholder : string = "Select an item")
       search;
     }
   in
-  let selection_mode = (mode :> List_box.selection_mode) in
   let listing =
     {
-      List_box.mode = S.accessor (fun () -> selection_mode);
+      List_box.mode = S.accessor (fun () -> (mode :> List_box.selection_mode));
       is_selected = (fun key -> Array.exists (String.equal key) (keys ()));
       is_disabled = disabled_key;
       act = (fun (_ : string) -> ());

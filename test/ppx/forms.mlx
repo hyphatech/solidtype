@@ -114,6 +114,14 @@ module Read = struct
     </p>
 end
 
+(* A thunk's value coerced, which MLX may read as the function's own result
+   coercion: the coercion is the body's. *)
+let coerced (open_ : [ `a ]) =
+  <p
+    title=(fun () -> match (open_ :> [ `a | `b ]) with `a -> "a" | `b -> "b")
+    data_x=(fun () -> (Jsx.data "x" :> Jsx.data))
+  />
+
 module Removable = struct
   let%component make ~(on_remove : unit -> unit) () =
     <button on_click=(fun _ -> on_remove ())>"x"</button>

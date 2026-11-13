@@ -509,6 +509,23 @@ module Read =
         let component = Solidtype.Jsx.component make
       end
   end
+let coerced (open_ : [ `a ]) =
+  Solidtype.Jsx.el "p"
+    [|(Solidtype.Jsx.d "title"
+         (((fun () ->
+              match (open_ :> [ `a  | `b ]) with | `a -> "a" | `b -> "b")
+         [@u ]) : ((unit -> Solidtype.Html.P.title)[@u ])));(Solidtype.Jsx.d
+                                                               "data-x"
+                                                               (((fun () ->
+                                                                    (
+                                                                    Jsx.data
+                                                                    "x" :> 
+                                                                    Jsx.data))
+                                                               [@u ]) : ((
+                                                               unit ->
+                                                                 Solidtype.Jsx.data)
+                                                               [@u ])))|]
+    [||]
 module Removable =
   struct
     include

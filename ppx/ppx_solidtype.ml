@@ -154,6 +154,22 @@ let is_made (e : expression) =
    uncurried [fun]: a curried [fun () -> fun x -> e] would be one function of
    two, run at once by a call of none. *)
 let uncurried ~loc (e : expression) =
+  (* A thunk's result type, [fun () : t -> e] or [fun () :> t -> e], as MLX
+     may read [fun () -> (e :> t)], is written on its body instead: an
+     uncurried function's result constraint is typed as an exact match on
+     some versions of the compiler's tools, where a coercion on the body is a
+     coercion on every one. *)
+  let e =
+    match e.pexp_desc with
+    | Pexp_function (params, Some c, Pfunction_body body) ->
+        let body =
+          match c with
+          | Pconstraint t -> B.pexp_constraint ~loc:body.pexp_loc body t
+          | Pcoerce (from, t) -> B.pexp_coerce ~loc:body.pexp_loc body from t
+        in
+        { e with pexp_desc = Pexp_function (params, None, Pfunction_body body) }
+    | _ -> e
+  in
   let marked (e : expression) =
     if
       List.exists
