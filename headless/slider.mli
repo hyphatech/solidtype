@@ -4,6 +4,8 @@
     slider's track, where Kobalte's spreads that [ref] over its own, so a press
     on it or a drag of a thumb throws. *)
 
+module Jsx := Solidtype.Jsx
+
 module Track : sig
   module Props : sig
     include module type of Solidtype_kobalte.Slider.Track.Props
@@ -11,8 +13,8 @@ module Track : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Root = Solidtype_kobalte.Slider.Root

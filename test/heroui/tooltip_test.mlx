@@ -56,13 +56,7 @@ external move : T.user -> moved -> T.pointers Js.Promise.t = "pointer"
 [@@mel.send]
 
 (* A while for a framework's timers, its delays at nought, to run. *)
-let settle () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
-      in
-      ())
-  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+let settle () = Testing.wait 20
 
 (* What one framework writes for itself: Kobalte's own state, present and
    empty, which no style of HeroUI's reads; React Aria's tabindex on what is

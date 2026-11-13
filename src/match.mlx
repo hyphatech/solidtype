@@ -32,7 +32,7 @@ let boxed some =
            | None, None -> true
            | Option.Some _, None | None, Option.Some _ -> false))
     (fun () ->
-      match some () with
+      match Solid.get some with
       | Option.Some value -> Option.Some { value }
       | None -> None)
 
@@ -42,10 +42,11 @@ module Some = struct
     let box = boxed some in
     <Raw when_=(fun () -> Solid.get box)>
       (fun b ->
-        children (fun[@u] () ->
-            match Solid.get b with
-            | Option.Some (box : _ box) -> box.value
-            | None -> raise Show.Stale_read))
+        children
+          (Solid.accessor (fun () ->
+               match Solid.get b with
+               | Option.Some (box : _ box) -> box.value
+               | None -> raise Show.Stale_read)))
     </Raw>
 end
 

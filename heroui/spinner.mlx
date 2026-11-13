@@ -14,11 +14,11 @@ let%component make
   let given = Progress.use () in
   <span
     ?id=(fun () -> given)
-    aria_label=(fun () -> aria_label ())
+    aria_label=(fun () -> Solid.get aria_label)
     class_=(fun () ->
              Styles.Spinner.classes
-               (Styles.Spinner.options ?color:(color ()) ?size:(size ())
-                  ?class_:(class_ ()) ()))
+               (Styles.Spinner.options ?color:(Solid.get color)
+                  ?size:(Solid.get size) ?class_:(Solid.get class_) ()))
     role=`status
     data_slot="spinner"
     props=(Props.others props)>

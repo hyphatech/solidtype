@@ -48,6 +48,14 @@ val drawn_as : ('props -> element) option -> string -> drawn
 (** [drawn_as given tag], which the ppx writes for [<tag ?as_=(fun () -> o)>].
 *)
 
+val call : (('a -> unit)[@u]) option -> 'a -> unit
+(** [call f x] calls a handler a caller gave, as Solid's props hold one, with
+    [x], and does nothing where none was given. *)
+
+val act : ((unit -> unit)[@u]) option -> unit
+(** [act f] calls an action a caller gave, [on_load_more], and does nothing
+    where none was given. *)
+
 val ref_beside : ('e -> unit) -> 'rest -> 'e -> unit
 (** [ref_beside written rest] calls [written] and [rest]'s [ref], which Solid
     calls alike on a plain element, and [Dynamic]'s spread would replace: the
@@ -119,10 +127,10 @@ external c : 'props component -> prop array -> child array -> element = "c"
 external s : string -> 'a -> prop = "s"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
-external d : string -> (unit -> 'a) -> prop = "d"
+external d : string -> ((unit -> 'a)[@u]) -> prop = "d"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
-external spread : (unit -> 'props) -> prop = "spread"
+external spread : ((unit -> 'props)[@u]) -> prop = "spread"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 external text : string -> child = "%identity"
@@ -132,7 +140,7 @@ external render : 'f -> child = "%identity"
 (** A component's only child when it is a function the component calls, as
     [For]'s is. Its type is the component's props check's to hold. *)
 
-external dynamic : (unit -> content) -> child = "dynamic"
+external dynamic : ((unit -> content)[@u]) -> child = "dynamic"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 (** {1 Solid's namespaces}

@@ -13,16 +13,19 @@
     a role and sizes of its own; HeroUI's is the placeholder alone, which this
     is, a [<div>] with no behaviour. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 module Props : sig
   type t
 
   val check :
     ?animation_type:[ `shimmer | `pulse | `none ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

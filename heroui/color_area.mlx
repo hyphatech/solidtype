@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Headless = Solidtype_headless.Color_area
 module Color = Solidtype_kobalte.Types.Color
@@ -15,7 +16,10 @@ type channel =
 
 (* What the thumb reads of its area: its classes, and whether it is disabled,
    for HeroUI's state. *)
-type area = { slots : unit -> Styles.ColorArea.slots; disabled : unit -> bool }
+type area = {
+  slots : Styles.ColorArea.slots S.accessor;
+  disabled : bool S.accessor;
+}
 
 module Area_context = Solidtype.Context.Make_optional (struct
   type t = area
@@ -53,34 +57,35 @@ module Thumb = struct
       | None -> invalid_arg "Color_area.Thumb is used inside a Color_area"
     in
     let area = Headless.use_color_area_context () in
-    let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get disabled) () in
     (* HeroUI's disabled style stops the pointer. *)
     let state () =
       {
-        color = (fun[@u] () -> Area.get_display_color area ());
-        is_dragging = (fun[@u] () -> Interaction.dragged i);
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> disabled ());
+        color = S.accessor (fun () -> Area.get_display_color area ());
+        is_dragging = S.accessor (fun () -> Interaction.dragged i);
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_focused = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = disabled;
       }
     in
     <Headless.Thumb
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () -> after (Styles.ColorArea.thumb (slots ())) (class_ ()))
-      style=(fun () -> painted (Area.get_display_color area ()) (style ()))
+      class_=(fun () ->
+               after (Styles.ColorArea.thumb (S.get slots)) (S.get class_))
+      style=(fun () -> painted (Area.get_display_color area ()) (S.get style))
       data_slot="color-area-thumb"
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_dragging=(fun () -> Jsx.flag (Interaction.dragged i))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_disabled=(fun () -> Jsx.flag (S.get disabled))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Headless.HiddenInputX />
       <Headless.HiddenInputY />
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> Jsx.draw c (state ())
         | None -> Jsx.string "")
     </Headless.Thumb>
@@ -99,12 +104,13 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(class_ : string option) ~(children : state Jsx.children)
     ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
     () =
-  let slots () =
-    Styles.ColorArea.slots
-      (Styles.ColorArea.options ?show_dots:(show_dots ()) ())
+  let slots =
+    S.accessor (fun () ->
+        Styles.ColorArea.slots
+          (Styles.ColorArea.options ?show_dots:(S.get show_dots) ()))
   in
-  let a = { slots; disabled = (fun () -> is_disabled ()) } in
-  let state () = { is_disabled = (fun[@u] () -> is_disabled ()) } in
+  let a = { slots; disabled = is_disabled } in
+  let state () = { is_disabled } in
   <Area_context.Provider value=(fun () -> a)>
     <Headless.Root
       ?value
@@ -116,11 +122,12 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       ?color_space
       ?x_name
       ?y_name
-      disabled=(fun () -> is_disabled ())
-      class_=(fun () -> after (Styles.ColorArea.base (slots ())) (class_ ()))
+      disabled=(fun () -> S.get is_disabled)
+      class_=(fun () ->
+               after (Styles.ColorArea.base (S.get slots)) (S.get class_))
       data_slot="color-area"
-      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (* React Aria's area is its own gradient, where Kobalte's draws it on a
          background of its own: it fills the area, rounded and shadowed as the
@@ -128,7 +135,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       <Headless.Background
         style="position: absolute; inset: 0; border-radius: inherit; \
                box-shadow: inherit">
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </Headless.Background>
     </Headless.Root>
   </Area_context.Provider>

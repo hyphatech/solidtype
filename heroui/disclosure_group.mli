@@ -18,12 +18,15 @@
     [is_expanded] and [default_expanded] are not read there; its
     [on_expanded_change] is still called. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type group = {
   is_expanded : string -> bool;
       (** Whether the disclosure of a key is expanded, read where it is shown.
       *)
   toggle : string -> unit;  (** Expands or collapses the disclosure of a key. *)
-  is_disabled : unit -> bool;
+  is_disabled : bool S.accessor;
 }
 (** What a group gives its disclosures. *)
 
@@ -37,19 +40,19 @@ module Context : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> group option
 end
 
 type navigation = {
-  current_index : unit -> int;
+  current_index : int S.accessor;
       (** The index in [item_ids] of the first expanded disclosure, else 0; -1
           while there are none. *)
-  is_prev_disabled : unit -> bool;
+  is_prev_disabled : bool S.accessor;
       (** Whether no disclosure comes before the one expanded. *)
-  is_next_disabled : unit -> bool;
+  is_next_disabled : bool S.accessor;
       (** Whether no disclosure comes after the one expanded. *)
   on_previous : unit -> unit;
       (** Expands the disclosure before, alone, or beside those expanded. *)
@@ -71,7 +74,7 @@ val navigation :
     [allows_multiple_expanded], next expands the one after the last expanded and
     previous the one before the first, so each press reaches another. *)
 
-type state = { is_disabled : bool Solidtype.Solid.accessor }
+type state = { is_disabled : bool S.accessor }
 (** What a group's children are drawn of, given as a function, as HeroUI's
     render props are, read where Solid tracks it. *)
 
@@ -86,13 +89,11 @@ module Props : sig
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

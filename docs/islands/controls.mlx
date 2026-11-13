@@ -17,16 +17,16 @@ module Select = struct
   let%component make ~(label : string) ~(choices : ('a * string) array)
       ~(picked : 'a * string) ~(on_pick : Dom.event -> unit) () =
     <label class_="flex flex-col gap-1 text-xs text-muted">
-      (fun () -> Jsx.string (label ()))
+      (fun () -> Jsx.string (S.get label))
       <select
         class_="rounded-lg border border-separator bg-surface px-2 py-1 \
                 text-sm text-foreground"
         on_change=on_pick>
-        <For each=(fun () -> choices ())>
+        <For each=(fun () -> S.get choices)>
           (fun (_, name) _ ->
             <option
               value=name
-              selected=(fun () -> String.equal name (snd (picked ())))>
+              selected=(fun () -> String.equal name (snd (S.get picked)))>
               (fun () -> Jsx.string name)
             </option>)
         </For>
@@ -40,9 +40,9 @@ module Toggle = struct
     <label class_="flex items-center gap-2 text-sm">
       <input
         type_="checkbox"
-        checked=(fun () -> on ())
+        checked=(fun () -> S.get on)
         on_change=(fun e -> on_toggle (checked (target e)))
       />
-      (fun () -> Jsx.string (label ()))
+      (fun () -> Jsx.string (S.get label))
     </label>
 end

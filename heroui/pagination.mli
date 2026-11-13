@@ -30,6 +30,9 @@
     A part is used inside a [Pagination]: elsewhere it raises [Invalid_argument]
     as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** What the pages are of, "Showing 1-10 of 120": a [<div>] whose direction
     follows its own text. *)
 module Summary : sig
@@ -39,13 +42,13 @@ module Summary : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The list of items: a [<ul>]. *)
@@ -56,13 +59,13 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Ul.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Ul.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** One item: an [<li>] holding a link, Previous, Next or an ellipsis. *)
@@ -73,13 +76,13 @@ module Item : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Li.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Li.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A page: Kobalte's button, [aria-current="page"] while [is_active].
@@ -96,13 +99,13 @@ module Link : sig
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The button to the page before: Kobalte's button, its children an icon and a
@@ -118,13 +121,13 @@ module Previous : sig
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The button to the page after, as {!Previous}. *)
@@ -139,13 +142,13 @@ module Next : sig
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's chevron to the left, or the icon it is given, in a [<span>] hidden
@@ -157,13 +160,13 @@ module Previous_icon : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's chevron to the right, or the icon it is given, as {!Previous_icon}.
@@ -175,13 +178,13 @@ module Next_icon : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Pages left out: "…", hidden from a reader. *)
@@ -191,13 +194,13 @@ module Ellipsis : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -207,10 +210,10 @@ module Props : sig
     ?size:[ `sm | `md | `lg ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Nav.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Nav.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Nav.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

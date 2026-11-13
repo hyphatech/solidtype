@@ -1,9 +1,10 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.Button
 module Gravity = Solidtype_gravity_icons
 
 module Context = Solidtype.Context.Make_optional (struct
-  type t = unit -> Styles.Pagination.slots
+  type t = Styles.Pagination.slots S.accessor
 end)
 
 let within part =
@@ -18,10 +19,10 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
    read, kept as React Aria keeps it. *)
 let button ~slot ~classes ~is_active ~is_disabled ~on_press ~on_click ~given_ref
     ~others children =
-  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  let i = Interaction.create ~disabled:is_disabled () in
   <Kobalte.Root
     class_=(fun () -> classes ())
-    ?aria_current=(fun () -> if is_active () then Some "page" else None)
+    ?aria_current=(fun () -> if S.get is_active then Some "page" else None)
     on_click=(fun e ->
                ignore (on_click e : unit option);
                ignore (on_press () : unit option))
@@ -29,7 +30,7 @@ let button ~slot ~classes ~is_active ~is_disabled ~on_press ~on_click ~given_ref
           ignore (given_ref b : unit option);
           Interaction.watch i b)
     data_slot=(fun () -> Jsx.data slot)
-    data_active=(fun () -> Jsx.flag (is_active ()))
+    data_active=(fun () -> Jsx.flag (S.get is_active))
     data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
     data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
     data_focused=(fun () -> Jsx.flag (Interaction.focused i))
@@ -37,7 +38,7 @@ let button ~slot ~classes ~is_active ~is_disabled ~on_press ~on_click ~given_ref
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
     props=others
     disabled=(fun () -> is_disabled ())>
-    (fun () -> children ())
+    (fun () -> S.get children)
   </Kobalte.Root>
 
 module Summary = struct
@@ -47,11 +48,11 @@ module Summary = struct
        under a right-to-left page, as HeroUI's does. *)
     <div
       class_=(fun () ->
-               after (Styles.Pagination.summary (slots ())) (class_ ()))
+               after (Styles.Pagination.summary (S.get slots)) (S.get class_))
       data_slot="pagination-summary"
       dir=`auto
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -61,10 +62,10 @@ module Content = struct
     let slots = within "Pagination.Content" in
     <ul
       class_=(fun () ->
-               after (Styles.Pagination.content (slots ())) (class_ ()))
+               after (Styles.Pagination.content (S.get slots)) (S.get class_))
       data_slot="pagination-content"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </ul>
   [@@element ul]
 end
@@ -73,10 +74,11 @@ module Item = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = within "Pagination.Item" in
     <li
-      class_=(fun () -> after (Styles.Pagination.item (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Pagination.item (S.get slots)) (S.get class_))
       data_slot="pagination-item"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </li>
   [@@element li]
 end
@@ -89,9 +91,11 @@ module Link = struct
       ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = within "Pagination.Link" in
     button ~slot:"pagination-link"
-      ~classes:(fun () -> after (Styles.Pagination.link (slots ())) (class_ ()))
-      ~is_active ~is_disabled ~on_press ~on_click ~given_ref
-      ~others:(Props.others props) children
+      ~classes:(fun () ->
+        after (Styles.Pagination.link (S.get slots)) (S.get class_))
+      ~is_active
+      ~is_disabled:(fun () -> S.get is_disabled)
+      ~on_press ~on_click ~given_ref ~others:(Props.others props) children
   [@@element button]
 end
 
@@ -105,11 +109,11 @@ module Previous = struct
     button ~slot:"pagination-previous"
       ~classes:(fun () ->
         after
-          (Styles.Pagination.link (slots ()) ^ " pagination__link--nav")
-          (class_ ()))
-      ~is_active:(fun () -> false)
-      ~is_disabled ~on_press ~on_click ~given_ref ~others:(Props.others props)
-      children
+          (Styles.Pagination.link (S.get slots) ^ " pagination__link--nav")
+          (S.get class_))
+      ~is_active:(S.accessor (fun () -> false))
+      ~is_disabled:(fun () -> S.get is_disabled)
+      ~on_press ~on_click ~given_ref ~others:(Props.others props) children
   [@@element button]
 end
 
@@ -123,11 +127,11 @@ module Next = struct
     button ~slot:"pagination-next"
       ~classes:(fun () ->
         after
-          (Styles.Pagination.link (slots ()) ^ " pagination__link--nav")
-          (class_ ()))
-      ~is_active:(fun () -> false)
-      ~is_disabled ~on_press ~on_click ~given_ref ~others:(Props.others props)
-      children
+          (Styles.Pagination.link (S.get slots) ^ " pagination__link--nav")
+          (S.get class_))
+      ~is_active:(S.accessor (fun () -> false))
+      ~is_disabled:(fun () -> S.get is_disabled)
+      ~on_press ~on_click ~given_ref ~others:(Props.others props) children
   [@@element button]
 end
 
@@ -136,11 +140,11 @@ module Previous_icon = struct
       () =
     <span
       aria_hidden=true
-      ?class_=(fun () -> class_ ())
+      ?class_
       data_slot="pagination-previous-icon"
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> c
         | None ->
             Jsx.element
@@ -154,11 +158,11 @@ module Next_icon = struct
       () =
     <span
       aria_hidden=true
-      ?class_=(fun () -> class_ ())
+      ?class_
       data_slot="pagination-next-icon"
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> c
         | None ->
             Jsx.element
@@ -173,7 +177,7 @@ module Ellipsis = struct
     <span
       aria_hidden=true
       class_=(fun () ->
-               after (Styles.Pagination.ellipsis (slots ())) (class_ ()))
+               after (Styles.Pagination.ellipsis (S.get slots)) (S.get class_))
       data_slot="pagination-ellipsis"
       props=(Props.others props)>
       {js|…|js}
@@ -183,19 +187,22 @@ end
 
 let%component make ?(size : [ `sm | `md | `lg ] = `md) ?(class_ : string option)
     ~(children : Jsx.content) () =
-  let slots () =
-    Styles.Pagination.slots (Styles.Pagination.options ~size:(size ()) ())
+  let slots =
+    S.accessor (fun () ->
+        Styles.Pagination.slots
+          (Styles.Pagination.options ~size:(S.get size) ()))
   in
   (* HeroUI names the landmark and gives its role, which a [<nav>] has
      already. *)
   <nav
     aria_label="pagination"
-    class_=(fun () -> after (Styles.Pagination.base (slots ())) (class_ ()))
+    class_=(fun () ->
+             after (Styles.Pagination.base (S.get slots)) (S.get class_))
     role=`navigation
     data_slot="pagination"
     props=(Props.others props)>
     <Context.Provider value=(fun () -> slots)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Context.Provider>
   </nav>
 [@@element nav]

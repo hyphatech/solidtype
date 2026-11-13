@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.Progress
 module I18n = Solidtype_kobalte.I18n
@@ -6,8 +7,8 @@ module Types = Solidtype_kobalte.Types
 (* What a circle's parts read of it: its classes, and how far along its range
    its value is, from 0 to 100, unless it is indeterminate. *)
 type circle = {
-  slots : unit -> Styles.ProgressCircle.slots;
-  percent : unit -> float option;
+  slots : Styles.ProgressCircle.slots S.accessor;
+  percent : float option S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -35,19 +36,21 @@ module Track = struct
     let c = within "Progress_circle.Track" in
     <svg
       class_=(fun () ->
-               after (Styles.ProgressCircle.track (c.slots ())) (class_ ()))
+               after
+                 (Styles.ProgressCircle.track (S.get c.slots))
+                 (S.get class_))
       data_slot="progress-circle-track"
       fill="none"
       view_box=(fun () ->
-                 Option.value (view_box ())
+                 Option.value (S.get view_box)
                    ~default:
                      ("0 0 "
                      ^ number (center *. 2.)
                      ^ " "
                      ^ number (center *. 2.)))
-      ?stroke_width=(fun () -> Option.map number (stroke_width ()))
+      ?stroke_width=(fun () -> Option.map number (S.get stroke_width))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </svg>
   [@@element svg]
 end
@@ -60,13 +63,13 @@ module Track_circle = struct
     <circle
       class_=(fun () ->
                after
-                 (Styles.ProgressCircle.track_circle (c.slots ()))
-                 (class_ ()))
-      cx=(fun () -> number (cx ()))
-      cy=(fun () -> number (cy ()))
+                 (Styles.ProgressCircle.track_circle (S.get c.slots))
+                 (S.get class_))
+      cx=(fun () -> number (S.get cx))
+      cy=(fun () -> number (S.get cy))
       data_slot="progress-circle-track-circle"
-      r=(fun () -> number (r ()))
-      stroke_width=(fun () -> number (stroke_width ()))
+      r=(fun () -> number (S.get r))
+      stroke_width=(fun () -> number (S.get stroke_width))
       props=(Props.others props)
     />
   [@@element circle]
@@ -80,26 +83,30 @@ module Fill_circle = struct
     (* Its length on its own radius: HeroUI's measures it on the default one
        whatever [r] it is given, so a circle of another size draws the wrong
        arc. *)
-    let length () = 2. *. Js.Math._PI *. r () in
+    let length () = 2. *. Js.Math._PI *. S.get r in
     <circle
       class_=(fun () ->
                after
-                 (Styles.ProgressCircle.fill_circle (c.slots ()))
-                 (class_ ()))
-      cx=(fun () -> number (cx ()))
-      cy=(fun () -> number (cy ()))
+                 (Styles.ProgressCircle.fill_circle (S.get c.slots))
+                 (S.get class_))
+      cx=(fun () -> number (S.get cx))
+      cy=(fun () -> number (S.get cy))
       data_slot="progress-circle-fill-circle"
-      r=(fun () -> number (r ()))
+      r=(fun () -> number (S.get r))
       stroke_dasharray=(fun () -> number (length ()))
       stroke_dashoffset=(fun () ->
-                          match c.percent () with
+                          match S.get c.percent with
                           | Some p ->
                               number (length () -. (p /. 100. *. length ()))
                           | None -> number (length () *. 0.75))
       stroke_linecap="round"
-      stroke_width=(fun () -> number (stroke_width ()))
+      stroke_width=(fun () -> number (S.get stroke_width))
       transform=(fun () ->
-                  "rotate(-90 " ^ number (cx ()) ^ " " ^ number (cy ()) ^ ")")
+                  "rotate(-90 "
+                  ^ number (S.get cx)
+                  ^ " "
+                  ^ number (S.get cy)
+                  ^ ")")
       props=(Props.others props)
     />
   [@@element circle]
@@ -125,12 +132,13 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
   (* HeroUI's formatOptions as it reads them, a percent by default: a percent
      is the value's share of its range, any other style the value itself. *)
   let options () =
-    match format_options () with
+    match S.get format_options with
     | Some o -> o
     | None -> Types.NumberFormatOptions.make ~style:`percent ()
   in
   let formatter =
-    I18n.create_number_formatter (Types.Either.right (fun[@u] () -> options ()))
+    I18n.create_number_formatter
+      (Types.Either.right (S.accessor (fun () -> options ())))
   in
   let text ~value ~min ~max =
     let range = max -. min in
@@ -150,46 +158,49 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
   let c =
     {
       slots =
-        (fun () ->
-          Styles.ProgressCircle.slots
-            (Styles.ProgressCircle.options ?color:(color ()) ?size:(size ()) ()));
+        S.accessor (fun () ->
+            Styles.ProgressCircle.slots
+              (Styles.ProgressCircle.options ?color:(S.get color)
+                 ?size:(S.get size) ()));
       percent =
-        (fun () ->
-          let range = max_value () -. min_value () in
-          if is_indeterminate () then None
-          else if range <= 0. then Some 0.
-          else
-            Some
-              (Float.min 100.
-                 (Float.max 0. ((value () -. min_value ()) /. range *. 100.))));
+        S.accessor (fun () ->
+            let range = S.get max_value -. S.get min_value in
+            if S.get is_indeterminate then None
+            else if range <= 0. then Some 0.
+            else
+              Some
+                (Float.min 100.
+                   (Float.max 0.
+                      ((S.get value -. S.get min_value) /. range *. 100.))));
     }
   in
   let state () =
     {
-      percentage = (fun[@u] () -> c.percent ());
+      percentage = c.percent;
       value_text =
-        (fun[@u] () ->
-          if is_indeterminate () then None
-          else
-            Some
-              (text ~value:(value ()) ~min:(min_value ()) ~max:(max_value ())));
-      is_indeterminate = (fun[@u] () -> is_indeterminate ());
+        S.accessor (fun () ->
+            if S.get is_indeterminate then None
+            else
+              Some
+                (text ~value:(S.get value) ~min:(S.get min_value)
+                   ~max:(S.get max_value)));
+      is_indeterminate;
     }
   in
   <Context.Provider value=(fun () -> c)>
     <Kobalte.Root
-      value=(fun () -> value ())
-      indeterminate=(fun () -> is_indeterminate ())
-      min_value=(fun () -> min_value ())
-      max_value=(fun () -> max_value ())
+      value=(fun () -> S.get value)
+      indeterminate=(fun () -> S.get is_indeterminate)
+      min_value=(fun () -> S.get min_value)
+      max_value=(fun () -> S.get max_value)
       ?aria_label
       get_value_label=value_label
       class_=(fun () ->
-               after (Styles.ProgressCircle.base (c.slots ())) (class_ ()))
+               after (Styles.ProgressCircle.base (S.get c.slots)) (S.get class_))
       data_slot="progress-circle"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

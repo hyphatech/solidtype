@@ -23,6 +23,8 @@
 
     A part reads its area's, and raises as Kobalte's does elsewhere. *)
 
+module Jsx := Solidtype.Jsx
+
 module Root : sig
   module Props : sig
     include module type of Solidtype_kobalte.ColorArea.Root.Props
@@ -30,8 +32,8 @@ module Root : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Background : sig
@@ -41,8 +43,8 @@ module Background : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Thumb : sig
@@ -52,8 +54,8 @@ module Thumb : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module HiddenInputX : sig
@@ -63,8 +65,8 @@ module HiddenInputX : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module HiddenInputY : sig
@@ -74,8 +76,8 @@ module HiddenInputY : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Label = Solidtype_kobalte.ColorArea.Label

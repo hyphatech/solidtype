@@ -131,14 +131,17 @@ let root ~is_open ~default_open ~on_open_change children =
   let kept, set_kept = S.create_signal false in
   S.create_computed (fun () ->
       S.set set_kept (Option.value (S.untrack default_open) ~default:false));
-  let opened () = match is_open () with Some o -> o | None -> S.get kept in
+  let opened =
+    S.accessor (fun () ->
+        match is_open () with Some o -> o | None -> S.get kept)
+  in
   let trigger_for_buttons =
     {
       Button.component = Kobalte.Trigger.component;
       is_disabled = None;
       controls = None;
       described_by = None;
-      pressed = Some opened;
+      pressed = Some (fun () -> S.get opened);
       needs_slot = false;
       element = None;
     }
@@ -161,7 +164,7 @@ let root ~is_open ~default_open ~on_open_change children =
 let trigger ~slot ~class_ ~aria_label ~others children =
   <As_div
     as_="div"
-    ?aria_label
+    ?aria_label=(fun () -> aria_label ())
     class_=(fun () -> class_ ())
     role=`button
     tabindex="0"
@@ -187,8 +190,8 @@ end
 
 let overlay_state o =
   {
-    is_entering = (fun[@u] () -> Overlay.entering o);
-    is_exiting = (fun[@u] () -> Overlay.exiting o);
+    is_entering = S.accessor (fun () -> Overlay.entering o);
+    is_exiting = S.accessor (fun () -> Overlay.exiting o);
   }
 
 let backdrop ~slot ~portal_container ~class_ ~style ~ref:given_ref ~dismissable

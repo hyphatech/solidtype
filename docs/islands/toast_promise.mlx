@@ -7,13 +7,7 @@ external error : string -> Js.Exn.t = "Error" [@@mel.new]
 external reject : Js.Exn.t -> 'a Js.Promise.t = "reject" [@@mel.scope "Promise"]
 external random : unit -> float = "random" [@@mel.scope "Math"]
 
-let after ms f =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
-      in
-      ())
-  |> Js.Promise.then_ (fun (_ : bool) -> f ())
+let after ms f = Wait.after ms () |> Js.Promise.then_ f
 
 let upload_file () =
   after 2000 (fun () -> Js.Promise.resolve ("document.pdf", 1024))

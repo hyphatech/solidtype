@@ -146,49 +146,55 @@ let%component make
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
   let group = Button_group.Context.use () in
-  let given own of_group default () =
-    match own () with
-    | Some v -> v
-    | None -> (
-        match Option.bind group of_group with Some v -> v | None -> default)
+  let given own of_group default =
+    S.accessor (fun () ->
+        match S.get own with
+        | Some v -> v
+        | None -> (
+            match Option.bind group of_group with
+            | Some v -> v
+            | None -> default))
   in
   let variant =
-    given variant (fun (g : Button_group.group) -> g.variant ()) `primary
+    given variant (fun (g : Button_group.group) -> S.get g.variant) `primary
   in
-  let size = given size (fun (g : Button_group.group) -> g.size ()) `md in
+  let size = given size (fun (g : Button_group.group) -> S.get g.size) `md in
   let full_width =
-    given full_width (fun (g : Button_group.group) -> g.full_width ()) false
+    given full_width (fun (g : Button_group.group) -> S.get g.full_width) false
   in
   let trigger =
-    match (slot (), Trigger.use ()) with
+    match (S.get slot, Trigger.use ()) with
     | Some `trigger, t -> t
     | (None | Some `close | Some `chevron), Some t when not t.needs_slot ->
         Some t
     | (None | Some `close | Some `chevron), (Some _ | None) -> None
   in
   let closes =
-    match slot () with
+    match S.get slot with
     | Some `close -> Close.use ()
     | Some (`trigger | `chevron) | None -> None
   in
   let chevron =
-    match slot () with
+    match S.get slot with
     | Some `chevron -> Chevron.use ()
     | Some (`trigger | `close) | None -> None
   in
   let in_fieldset = Fieldset.disabled () in
-  let is_disabled () =
-    match
-      (is_disabled (), Option.bind trigger (fun (t : trigger) -> t.is_disabled))
-    with
-    | Some d, _ -> d
-    | None, Some part -> part ()
-    | None, None -> (
+  let is_disabled =
+    S.accessor (fun () ->
         match
-          Option.bind group (fun (g : Button_group.group) -> g.is_disabled ())
+          ( S.get is_disabled,
+            Option.bind trigger (fun (t : trigger) -> t.is_disabled) )
         with
-        | Some d -> d
-        | None -> in_fieldset ())
+        | Some d, _ -> d
+        | None, Some part -> part ()
+        | None, None -> (
+            match
+              Option.bind group (fun (g : Button_group.group) ->
+                  S.get g.is_disabled)
+            with
+            | Some d -> d
+            | None -> S.get in_fieldset))
   in
   let module Root = struct
     module Props = Kobalte.Root.Props
@@ -198,12 +204,12 @@ let%component make
       | Some t -> t.component
       | None -> Kobalte.Root.component
   end in
-  let pending () = is_pending () in
+  let pending () = S.get is_pending in
   (* Its id names it with its spinner, and is what an announcement reads: the
      id it is given, else the one its element has, a trigger's, else its
      own. *)
   let own_id =
-    match S.untrack id with
+    match S.untrack (fun () -> S.get id) with
     | Some given -> given
     | None -> S.create_unique_id ()
   in
@@ -214,35 +220,37 @@ let%component make
     | Some _ | None -> own_id
   in
   let progress_id = S.create_unique_id () in
-  let labelled_by () =
-    match (aria_label (), chevron) with
-    | Some _, _ when pending () -> Some (named_by () ^ " " ^ progress_id)
-    | Some _, Some c -> Some (named_by () ^ " " ^ c.labelled_by)
-    | Some _, None | None, _ -> None
+  let labelled_by =
+    S.accessor (fun () ->
+        match (S.get aria_label, chevron) with
+        | Some _, _ when pending () -> Some (named_by () ^ " " ^ progress_id)
+        | Some _, Some c -> Some (named_by () ^ " " ^ c.labelled_by)
+        | Some _, None | None, _ -> None)
   in
   let i =
     Interaction.create
-      ~disabled:(fun[@u] () -> is_disabled ())
-      ~no_hover:(fun[@u] () -> pending ())
+      ~disabled:(fun () -> S.get is_disabled)
+      ~no_hover:(fun () -> pending ())
       ()
   in
   (* Pressed as it is, or as its trigger shows it, and never while pending. *)
-  let pressed () =
-    (not (pending ()))
-    && (Interaction.pressed i
-       ||
-       match Option.bind trigger (fun (t : trigger) -> t.pressed) with
-       | Some shown -> shown ()
-       | None -> false)
+  let pressed =
+    S.accessor (fun () ->
+        (not (pending ()))
+        && (Interaction.pressed i
+           ||
+           match Option.bind trigger (fun (t : trigger) -> t.pressed) with
+           | Some shown -> shown ()
+           | None -> false))
   in
   let state =
     {
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> pressed ());
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> Interaction.disabled i);
-      is_pending = (fun[@u] () -> pending ());
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = pressed;
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = S.accessor (fun () -> Interaction.disabled i);
+      is_pending = S.accessor (fun () -> pending ());
     }
   in
   (* A reader is told as it comes to be pending, or stops, while it has the
@@ -251,20 +259,20 @@ let%component make
       let now = pending () in
       if Interaction.focused i && not (Bool.equal was now) then
         announce
-          (match S.untrack labelled_by with
+          (match S.untrack (fun () -> S.get labelled_by) with
           | Some ids -> ids
           | None -> named_by ());
       now);
   <Root
     class_=(fun () ->
              Styles.Button.classes
-               (Styles.Button.options ~variant:(variant ()) ~size:(size ())
-                  ~full_width:(full_width ()) ~is_icon_only:(is_icon_only ())
-                  ?class_:(class_ ()) ()))
-    disabled=(fun () -> is_disabled ())
+               (Styles.Button.options ~variant:(S.get variant)
+                  ~size:(S.get size) ~full_width:(S.get full_width)
+                  ~is_icon_only:(S.get is_icon_only) ?class_:(S.get class_) ()))
+    disabled=(fun () -> S.get is_disabled)
     ?aria_label
     ?id=(fun () ->
-          match (id (), trigger) with
+          match (S.get id, trigger) with
           | Some given, _ -> Some given
           | None, None -> Some own_id
           | None, Some _ -> None)
@@ -298,7 +306,7 @@ let%component make
                 | `trigger -> "trigger"
                 | `close -> "close"
                 | `chevron -> "chevron")
-              (slot ()))
+              (S.get slot))
     ?tabindex=(fun () -> Option.map (fun _ -> "-1") chevron)
     on_focus=(fun e ->
                ignore (on_focus e : unit option);
@@ -308,7 +316,7 @@ let%component make
                Option.iter (fun c -> c.focus_row ()) chevron)
     data_slot="button"
     data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
-    data_pressed=(fun () -> Solidtype.Jsx.flag (pressed ()))
+    data_pressed=(fun () -> Solidtype.Jsx.flag (S.get pressed))
     data_focused=(fun () -> Solidtype.Jsx.flag (Interaction.focused i))
     data_focus_visible=(fun () ->
                          Solidtype.Jsx.flag (Interaction.focus_visible i))
@@ -316,17 +324,17 @@ let%component make
     data_pending=(fun () -> Solidtype.Jsx.flag (pending ()))
                  (* A pending submit button submits nothing, Enter in a field included. *)
     type_=(fun () ->
-            match type_ () with
+            match S.get type_ with
             | `submit when pending () -> `button
             | (`submit | `reset | `button | `menu) as t -> t)
     on_click=(fun e ->
                ignore (on_click e : unit option);
                Option.iter (fun close -> close ()) closes;
                Option.iter (fun c -> c.toggle ()) chevron)
-    ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
+    ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
     props=(Props.others props)>
     <Spinner.Progress.Provider value=(fun () -> progress_id)>
-      (fun () -> Solidtype.Jsx.draw (children ()) state)
+      (fun () -> Solidtype.Jsx.draw (S.get children) state)
     </Spinner.Progress.Provider>
   </Root>
 [@@element button]

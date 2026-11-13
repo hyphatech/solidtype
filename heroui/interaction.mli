@@ -9,7 +9,7 @@
     the browser:
 
     {[
-      let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+      let i = Interaction.create ~disabled:(fun () -> S.get disabled) () in
       <Kobalte.Root
         ref=(fun b -> Interaction.watch i b)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -22,9 +22,9 @@
 type t
 
 val create :
-  ?disabled:bool Solidtype.Solid.accessor ->
-  ?no_hover:bool Solidtype.Solid.accessor ->
-  ?no_pointer_press:bool Solidtype.Solid.accessor ->
+  ?disabled:(unit -> bool) ->
+  ?no_hover:(unit -> bool) ->
+  ?no_pointer_press:(unit -> bool) ->
   ?keys:[ `target | `element ] ->
   unit ->
   t

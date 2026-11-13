@@ -19,7 +19,8 @@ external query_all : string -> Dom.element array = "querySelectorAll"
 
 (* A function of the script's text, the script Solid generated: jsdom runs no
    script of a page in the test's own global, which the script sets up. *)
-external function_of : string -> (unit -> unit[@u]) = "Function" [@@mel.new]
+external function_of : string -> unit Solidtype.Solid.accessor = "Function"
+[@@mel.new]
 
 (* The hydration script, run as the page would run it: its body, between the
    tags the server wrote around it. *)
@@ -28,7 +29,7 @@ let run_script tagged =
   let stop = Js.String.indexOf ~search:"</script>" tagged in
   match start with
   | Some start when start <= stop ->
-      (function_of (String.sub tagged start (stop - start))) () [@u]
+      Solidtype.Solid.get (function_of (String.sub tagged start (stop - start)))
   | Some _ | None -> ()
 
 let () =

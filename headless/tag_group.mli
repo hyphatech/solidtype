@@ -37,11 +37,14 @@
     A part is used inside the part above it: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type tag = {
-  key : unit -> string;
-  is_selected : unit -> bool;
-  is_disabled : unit -> bool;
-  allows_removing : unit -> bool;
+  key : string S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
+  allows_removing : bool S.accessor;
 }
 (** What a part inside a {!Tag} reads of it, and a style's attribute on it. *)
 
@@ -51,11 +54,11 @@ val use_tag_context : unit -> tag
     [Invalid_argument]. *)
 
 type group_state = {
-  selection_mode : unit -> [ `none | `single | `multiple ];
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
   is_selected : string -> bool;
   is_disabled : string -> bool;
-  allows_removing : unit -> bool;
-  is_empty : unit -> bool;
+  allows_removing : bool S.accessor;
+  is_empty : bool S.accessor;
 }
 (** What a part inside a {!Root} reads of the group, by a tag's key: whether the
     tag is chosen, or disabled by the group, whether its tags can be removed,
@@ -88,14 +91,14 @@ module Root : sig
       ?aria_label:string Solidtype.Check.value ->
       ?aria_labelledby:string Solidtype.Check.value ->
       ?aria_describedby:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group's name, a [<span>] its list is labelled by. *)
@@ -104,14 +107,14 @@ module Label : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The tags: a [<div role="grid">], [aria-multiselectable] while many can be
@@ -123,15 +126,15 @@ module List : sig
     type t
 
     val check :
-      ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?render_empty_state:(unit -> Jsx.element) ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A tag, of its key [id], unique to the render where it is not given; disabled
@@ -147,14 +150,14 @@ module Tag : sig
       ?id:string Solidtype.Check.value ->
       ?text_value:string Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What removes its tag: a [<button>] named "Remove" and by its tag, which
@@ -164,14 +167,14 @@ module Remove_button : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group's description, a [<span>] its list is described by. *)
@@ -180,14 +183,14 @@ module Description : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group's error, a [<span>] its list is described by after its
@@ -197,12 +200,12 @@ module Error_message : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end

@@ -33,10 +33,13 @@
     A part is used inside the part above it: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type item = {
-  color : unit -> Solidtype_kobalte.Types.Color.t;
-  is_selected : unit -> bool;
-  is_disabled : unit -> bool;
+  color : Solidtype_kobalte.Types.Color.t S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
 }
 (** What a part inside an {!Item} reads of it, and a style's attribute on it. *)
 
@@ -61,14 +64,14 @@ module Root : sig
       ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
       ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
       ?layout:[ `grid | `stack ] Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** An option, of its [color], disabled while [is_disabled]; named by the
@@ -81,14 +84,14 @@ module Item : sig
     val check :
       color:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
       ?is_disabled:bool Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Its option's colour, Kobalte's {!Solidtype_kobalte.ColorSwatch.Root}, fixed
@@ -100,10 +103,10 @@ module Swatch : sig
 
     val check :
       ?color_name:string Solidtype.Check.value ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?props:'spread S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end

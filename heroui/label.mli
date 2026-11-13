@@ -9,12 +9,11 @@
       <Label>"Wi-Fi"</Label>
     ]} *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type slot =
-  ((unit -> string) ->
-   unit Solidtype.Solid.rest ->
-   (unit -> Solidtype.Jsx.content) ->
-   Solidtype.Jsx.element
-  [@u])
+  (unit -> string) -> unit S.rest -> (unit -> Jsx.content) -> Jsx.element
 (** How a label renders below a part: given its classes, the rest of its props
     -- its [data-] attributes -- and its children, the element it is, which
     declares [data-slot="label"]. *)
@@ -30,7 +29,7 @@ module Slot : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> slot option
@@ -46,10 +45,10 @@ module Props : sig
     ?for_:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Label.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Label.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

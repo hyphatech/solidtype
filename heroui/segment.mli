@@ -12,6 +12,9 @@
     A [radiogroup] of radios: Tab reaches it once, and the arrow keys move the
     selection, passing over a disabled option. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type size = [ `sm | `md | `lg ]
 type variant = [ `default | `ghost ]
 
@@ -29,15 +32,15 @@ module Item : sig
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Label.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Label.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 
-  val is_selected : unit -> unit -> bool
+  val is_selected : unit -> bool S.accessor
   (** [is_selected ()], called as a component inside an option is made, reads
       whether that option is selected, where it is shown, as a render prop would
       give an option's children: to show an option's label only while it is
@@ -53,13 +56,13 @@ module Separator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -77,16 +80,16 @@ module Props : sig
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
+val make : Props.t -> Jsx.element
 (** The control: Kobalte's radio group, a [<div>] of role [radiogroup],
     [data-disabled] while [is_disabled]. Its options' key is [selected_key]
     while it is given, else the one kept, [default_selected_key] at first;
     [on_selection_change] is told each option chosen, never the one already
     selected. [name] names its radios in a form. *)
 
-val component : Props.t Solidtype.Jsx.component
+val component : Props.t Jsx.component

@@ -9,12 +9,11 @@
 
     Raises [Invalid_argument] as it is made, outside a field. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type slot =
-  ((unit -> string) ->
-   unit Solidtype.Solid.rest ->
-   (unit -> Solidtype.Jsx.content) ->
-   Solidtype.Jsx.element
-  [@u])
+  (unit -> string) -> unit S.rest -> (unit -> Jsx.content) -> Jsx.element
 (** How an error renders in a field: given its classes, the rest of its props --
     its [data-] attributes -- and its children, the element it is, which
     declares [data-slot="field-error"]. *)
@@ -25,16 +24,16 @@ module Message : sig
   module Provider : sig
     module Props : sig
       val check :
-        value:(unit -> string option) Solidtype.Check.value ->
+        value:string option S.accessor Solidtype.Check.value ->
         ?children:('f, [ `nodes ]) Solidtype.Check.children ->
         unit ->
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
-  val use : unit -> (unit -> string option) option
+  val use : unit -> string option S.accessor option
 end
 
 (** The {!slot} a field gives the errors inside it. *)
@@ -48,16 +47,16 @@ module Slot : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> slot option
 end
 
 type state = {
-  is_invalid : bool Solidtype.Solid.accessor;
+  is_invalid : bool S.accessor;
       (** Whether its field is invalid, which it is wherever it shows. *)
-  validation_errors : string array Solidtype.Solid.accessor;
+  validation_errors : string array S.accessor;
       (** The errors a form gives the field, its server's. *)
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
@@ -70,13 +69,11 @@ module Props : sig
   val check :
     ?class_:string Solidtype.Check.value ->
     ?children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Span.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Span.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

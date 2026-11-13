@@ -1,6 +1,7 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 let%component make ~(label : string) () =
   <button class_="chip" props=(Props.others props)>
-    (fun () -> Jsx.string (label ()))
+    (fun () -> Jsx.string (S.get label))
   </button>

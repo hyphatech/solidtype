@@ -11,10 +11,10 @@ type selection_mode = [ `none | `single | `multiple ]
    and how it is drawn, given Kobalte's node of it. *)
 type option_ = {
   key : string;
-  text : unit -> string;
-  disabled : unit -> bool;
+  text : string S.accessor;
+  disabled : bool S.accessor;
   draw : node S.accessor -> Jsx.element;
-  content : unit -> Jsx.element;
+  content : Jsx.element S.accessor;
 }
 
 (* Kobalte's node of an option, in its list of options alone. *)
@@ -25,7 +25,7 @@ and node = (option_, unit) Types.Either.t Types.CollectionNode.t
 type entry =
   | Option of option_
   | Section of {
-      options : unit -> option_ list;
+      options : option_ list S.accessor;
       draw : (option_ -> Jsx.element) -> Jsx.element;
     }
   | Separator of (unit -> Jsx.element)
@@ -45,10 +45,10 @@ end)
 
 (* What a list's options read of it: how it selects, which keys are selected
    and disabled, and what an option chosen does. *)
-type focus = Real | Virtual of (unit -> string option)
+type focus = Real | Virtual of string option S.accessor
 
 type listing = {
-  mode : unit -> selection_mode;
+  mode : selection_mode S.accessor;
   is_selected : string -> bool;
   is_disabled : string -> bool;
   act : string -> unit;
@@ -60,8 +60,8 @@ module Listing = Solidtype.Context.Make_optional (struct
 end)
 
 let key (o : option_) = o.key
-let text (o : option_) = o.text ()
-let content (o : option_) = o.content ()
+let text (o : option_) = S.get o.text
+let content (o : option_) = S.get o.content
 
 type list_format
 
@@ -102,24 +102,24 @@ let shown options =
 
 (* What a part that holds a list takes of it, to draw it as its own. *)
 type hosted = {
-  options : unit -> option_ list;
+  options : option_ list S.accessor;
   draw : node Types.Collection.t S.accessor -> Jsx.element;
   list_ref : Dom.htmlDivElement -> unit;
   scroll_to_item : string -> unit;
-  empty : unit -> bool;
-  classes : unit -> string;
-  aria_label : unit -> string option;
+  empty : bool S.accessor;
+  classes : string S.accessor;
+  aria_label : string option S.accessor;
   others : unit S.rest;
 }
 
 module Host = Solidtype.Context.Make_optional (struct
-  type t = (hosted -> Jsx.element[@u])
+  type t = hosted -> Jsx.element
 end)
 
 (* What an option's indicator reads of it. *)
 type item = {
-  item_slots : unit -> Styles.ListboxItem.slots;
-  selected : unit -> bool;
+  item_slots : Styles.ListboxItem.slots S.accessor;
+  selected : bool S.accessor;
 }
 
 module Item_context = Solidtype.Context.Make_optional (struct
@@ -156,7 +156,7 @@ module As_span = struct
 end
 
 let description : Description.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <As_span
     as_="span"
     class_=(fun () -> classes ())
@@ -207,25 +207,26 @@ module Item = struct
       =
     within "List_box.Item";
     let others = Props.others props in
-    let key_ = S.untrack id in
+    let key_ = S.untrack (fun () -> S.get id) in
     let draw node =
       let l =
         match Listing.use () with
         | Some l -> l
         | None -> invalid_arg "List_box.Item is used inside a List_box"
       in
-      let disabled () = is_disabled () || l.is_disabled key_ in
-      let selected () = l.is_selected key_ in
-      let item_slots () =
-        Styles.ListboxItem.slots
-          (Styles.ListboxItem.options ~variant:(variant ()) ())
+      let disabled () = S.get is_disabled || l.is_disabled key_ in
+      let selected = S.accessor (fun () -> l.is_selected key_) in
+      let item_slots =
+        S.accessor (fun () ->
+            Styles.ListboxItem.slots
+              (Styles.ListboxItem.options ~variant:(S.get variant) ()))
       in
-      let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+      let i = Interaction.create ~disabled:(fun () -> disabled ()) () in
       let focused () =
         match l.focus with
         | Real -> Interaction.focused i
         | Virtual focused_key ->
-            Option.equal String.equal (focused_key ()) (Some key_)
+            Option.equal String.equal (S.get focused_key) (Some key_)
             && not (disabled ())
       in
       (* A focus held elsewhere shows its ring by the page's last input alone,
@@ -237,27 +238,29 @@ module Item = struct
       in
       (* React Aria's list without a selection acts on an option pressed. *)
       let act () =
-        match l.mode () with
+        match S.get l.mode with
         | `none -> if not (disabled ()) then l.act key_
         | `single | `multiple -> ()
       in
       let state =
         {
-          is_hovered = (fun[@u] () -> Interaction.hovered i);
-          is_pressed = (fun[@u] () -> Interaction.pressed i);
-          is_selected = (fun[@u] () -> selected ());
-          is_focused = (fun[@u] () -> focused ());
-          is_focus_visible = (fun[@u] () -> focus_visible ());
-          is_disabled = (fun[@u] () -> disabled ());
-          selection_mode = (fun[@u] () -> l.mode ());
+          is_hovered = S.accessor (fun () -> Interaction.hovered i);
+          is_pressed = S.accessor (fun () -> Interaction.pressed i);
+          is_selected = selected;
+          is_focused = S.accessor (fun () -> focused ());
+          is_focus_visible = S.accessor (fun () -> focus_visible ());
+          is_disabled = S.accessor (fun () -> disabled ());
+          selection_mode = l.mode;
         }
       in
       <As_option
         as_=(fun () ->
-              Jsx.drawn_as (Option.map (fun f p -> f p state) (as_ ())) "div")
+              Jsx.drawn_as (Option.map (fun f p -> f p state) (S.get as_)) "div")
         item=(fun () -> S.get node)
         class_=(fun () ->
-                 after (Styles.ListboxItem.item (item_slots ())) (class_ ()))
+                 after
+                   (Styles.ListboxItem.item (S.get item_slots))
+                   (S.get class_))
         ref=(fun e ->
               ignore (given_ref e : unit option);
               Interaction.watch i e)
@@ -269,11 +272,11 @@ module Item = struct
                       match pressed e with "Enter" -> act () | _ -> ())
         data_slot="list-box-item"
         data_selection_mode=(fun () ->
-                              match l.mode () with
+                              match S.get l.mode with
                               | `none -> Jsx.flag false
                               | `single -> Jsx.data "single"
                               | `multiple -> Jsx.data "multiple")
-        data_selected=(fun () -> Jsx.flag (selected ()))
+        data_selected=(fun () -> Jsx.flag (S.get selected))
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
         data_focused=(fun () -> Jsx.flag (focused ()))
@@ -282,39 +285,43 @@ module Item = struct
         props=others>
         <Item_context.Provider value=(fun () -> { item_slots; selected })>
           <Description.Slot.Provider value=(fun () -> description)>
-            (fun () -> Jsx.draw (children ()) state)
+            (fun () -> Jsx.draw (S.get children) state)
           </Description.Slot.Provider>
         </Item_context.Provider>
       </As_option>
     in
     (* Its children again, outside the list, as a select's value shows
        them, not selected there, as React Aria draws them. *)
-    let content () =
-      let item_slots () =
-        Styles.ListboxItem.slots
-          (Styles.ListboxItem.options ~variant:(variant ()) ())
-      in
-      let no = fun[@u] () -> false in
-      <Item_context.Provider
-        value=(fun () -> { item_slots; selected = (fun () -> false) })>
-        (fun () ->
-          Jsx.draw (children ())
-            {
-              is_hovered = no;
-              is_pressed = no;
-              is_selected = no;
-              is_focused = no;
-              is_focus_visible = no;
-              is_disabled = no;
-              selection_mode = (fun[@u] () -> `none);
-            })
-      </Item_context.Provider>
+    let content =
+      S.accessor (fun () ->
+          let item_slots =
+            S.accessor (fun () ->
+                Styles.ListboxItem.slots
+                  (Styles.ListboxItem.options ~variant:(S.get variant) ()))
+          in
+          let no = S.accessor (fun () -> false) in
+          <Item_context.Provider
+            value=(fun () ->
+                    { item_slots; selected = S.accessor (fun () -> false) })>
+            (fun () ->
+              Jsx.draw (S.get children)
+                {
+                  is_hovered = no;
+                  is_pressed = no;
+                  is_selected = no;
+                  is_focused = no;
+                  is_focus_visible = no;
+                  is_disabled = no;
+                  selection_mode = S.accessor (fun () -> `none);
+                })
+          </Item_context.Provider>)
     in
     let option_ =
       {
         key = key_;
-        text = (fun () -> Option.value (text_value ()) ~default:key_);
-        disabled = (fun () -> is_disabled ());
+        text =
+          S.accessor (fun () -> Option.value (S.get text_value) ~default:key_);
+        disabled = is_disabled;
         draw;
         content;
       }
@@ -332,15 +339,15 @@ module Item_indicator = struct
       | None ->
           invalid_arg "List_box.Item_indicator is used inside a List_box.Item"
     in
-    let selected = S.create_memo (fun () -> i.selected ()) in
+    let selected = S.create_memo (fun () -> S.get i.selected) in
     <span
       aria_hidden=true
       class_=(fun () ->
                after
-                 (Styles.ListboxItem.indicator (i.item_slots ()))
-                 (class_ ()))
+                 (Styles.ListboxItem.indicator (S.get i.item_slots))
+                 (S.get class_))
       data_slot="list-box-item-indicator"
-      data_visible=(fun () -> Jsx.flag (i.selected ()))
+      data_visible=(fun () -> Jsx.flag (S.get i.selected))
       props=(Props.others props)>
       (fun () ->
         match children selected with
@@ -354,7 +361,7 @@ module Item_indicator = struct
                 stroke="currentColor"
                 stroke_dasharray="22"
                 stroke_dashoffset=(fun () ->
-                                    if i.selected () then "44" else "66")
+                                    if S.get i.selected then "44" else "66")
                 stroke_linecap="round"
                 stroke_linejoin="round"
                 stroke_width="2"
@@ -367,7 +374,7 @@ module Item_indicator = struct
 end
 
 (* A separator stands in its place, among the options. *)
-let separator = fun[@u] drawn -> Entry.element (Separator drawn)
+let separator = fun drawn -> Entry.element (Separator drawn)
 
 external as_element : _ Dom.element_like -> Dom.element = "%identity"
 
@@ -388,16 +395,16 @@ module Load_more_item = struct
         [|
           <div style="position: relative; width: 0px; height: 0px;" inert=true>
             <Solidtype_headless.Load_more_sentinel
-              is_loading=(fun () -> is_loading ())
+              is_loading=(fun () -> S.get is_loading)
               on_load_more=(fun _ -> ignore (on_load_more () : unit option))
-              scroll_offset=(fun () -> scroll_offset ())
+              scroll_offset=(fun () -> S.get scroll_offset)
               style="position: absolute; height: 1px; width: 1px;"
               data_testid="loadMoreSentinel"
             />
           </div>;
-          <Show when_=(fun () -> is_loading ())>
+          <Show when_=(fun () -> S.get is_loading)>
             <div role=`option tabindex="-1" props=others>
-              (fun () -> children ())
+              (fun () -> S.get children)
             </div>
           </Show>;
         |]
@@ -412,7 +419,7 @@ module Section = struct
     let header, set_header = S.create_signal None in
     (* A section's header names it, as React Aria's does. *)
     let header_slot : Header.slot =
-     fun[@u] classes others children ->
+     fun classes others children ->
       S.set set_header
         (Some
            (fun header_id ->
@@ -430,15 +437,16 @@ module Section = struct
       resolving (fun () ->
           <Within.Provider value=(fun () -> true)>
             <Header.Slot.Provider value=(fun () -> header_slot)>
-              (fun () -> children ())
+              (fun () -> S.get children)
             </Header.Slot.Provider>
           </Within.Provider>)
     in
-    let options () =
-      List.filter_map
-        (function
-          | Option o -> Some o | Section _ | Separator _ | Loader _ -> None)
-        (entries ())
+    let options =
+      S.accessor (fun () ->
+          List.filter_map
+            (function
+              | Option o -> Some o | Section _ | Separator _ | Loader _ -> None)
+            (entries ()))
     in
     let others = Props.others props in
     let draw draw_option =
@@ -446,7 +454,7 @@ module Section = struct
       <section
         class_=(fun () ->
                  Styles.ListboxSection.classes
-                   (Styles.ListboxSection.options ?class_:(class_ ()) ()))
+                   (Styles.ListboxSection.options ?class_:(S.get class_) ()))
         role=`group
         ?aria_labelledby=(fun () ->
                            Option.map (fun _ -> header_id) (S.get header))
@@ -456,7 +464,7 @@ module Section = struct
           match S.get header with
           | Some drawn -> Jsx.element (drawn header_id)
           | None -> Jsx.element Jsx.nothing)
-        <For each=(fun () -> Array.of_list (options ()))>
+        <For each=(fun () -> Array.of_list (S.get options))>
           (fun o _ -> draw_option o)
         </For>
       </section>
@@ -515,7 +523,7 @@ let%component make ?(aria_label : string option)
           <Separator.Slot.Provider value=(fun () -> separator)>
             <Separator.Element.Provider value=(fun () -> `div)>
               (fun () ->
-                Option.value (children ()) ~default:(Jsx.element Jsx.nothing))
+                Option.value (S.get children) ~default:(Jsx.element Jsx.nothing))
             </Separator.Element.Provider>
           </Separator.Slot.Provider>
         </Within.Provider>)
@@ -550,30 +558,35 @@ let%component make ?(aria_label : string option)
   in
   S.create_computed (fun () ->
       S.set set_kept
-        (Option.value (S.untrack default_selected_keys) ~default:[||]));
-  let selected () =
-    match selected_keys () with Some keys -> keys | None -> S.get kept
+        (Option.value
+           (S.untrack (fun () -> S.get default_selected_keys))
+           ~default:[||]));
+  let selected =
+    S.accessor (fun () ->
+        match S.get selected_keys with Some keys -> keys | None -> S.get kept)
   in
   let disabled key =
     Array.exists (String.equal key)
-      (Option.value (disabled_keys ()) ~default:[||])
+      (Option.value (S.get disabled_keys) ~default:[||])
   in
   let l =
     {
       mode = selection_mode;
-      is_selected = (fun key -> Array.exists (String.equal key) (selected ()));
+      is_selected =
+        (fun key -> Array.exists (String.equal key) (S.get selected));
       is_disabled = disabled;
       act = (fun key -> ignore (on_action key : unit option));
       focus = Real;
     }
   in
   (* Kobalte's list is of its options alone, in order, whatever holds them. *)
-  let options () =
-    entries ()
-    |> List.concat_map (function
-      | Option o -> [ o ]
-      | Section s -> s.options ()
-      | Separator _ | Loader _ -> [])
+  let options =
+    S.accessor (fun () ->
+        entries ()
+        |> List.concat_map (function
+          | Option o -> [ o ]
+          | Section s -> S.get s.options
+          | Separator _ | Loader _ -> []))
   in
   (* An option is drawn while Kobalte's collection holds it, as a combo box's
      filter keeps it, and a section while one of its options is. *)
@@ -582,13 +595,16 @@ let%component make ?(aria_label : string option)
       Types.Collection.get_item (S.get collection) o.key
     in
     let option_ (o : option_) =
-      <Show.Some some=(node o)>(fun node -> o.draw node)</Show.Some>
+      <Show.Some some=(fun () -> node o ())>
+        (fun node -> o.draw node)
+      </Show.Some>
     in
     S.create_computed (fun () ->
         S.set set_empty
-          (not (List.exists (fun o -> Option.is_some (node o ())) (options ()))));
-    let shows (s : unit -> option_ list) () =
-      List.exists (fun o -> Option.is_some (node o ())) (s ())
+          (not
+             (List.exists (fun o -> Option.is_some (node o ())) (S.get options))));
+    let shows (s : option_ list S.accessor) () =
+      List.exists (fun o -> Option.is_some (node o ())) (S.get s)
     in
     let entries_drawn =
       match layout with
@@ -599,7 +615,7 @@ let%component make ?(aria_label : string option)
               | Option o -> option_ o
               | Separator drawn | Loader drawn -> drawn ()
               | Section s ->
-                  <Show when_=(shows s.options)>
+                  <Show when_=(fun () -> shows s.options ())>
                     (fun () -> Jsx.element (s.draw option_))
                   </Show>)
           </For>
@@ -609,11 +625,14 @@ let%component make ?(aria_label : string option)
             | Section s -> shows s.options ()
             | Separator _ | Loader _ -> true
           in
-          let rows () = Array.of_list (List.filter shown (entries ())) in
+          let rows =
+            S.accessor (fun () ->
+                Array.of_list (List.filter shown (entries ())))
+          in
           let holds key = function
             | Option o -> String.equal o.key key
             | Section s ->
-                List.exists (fun o -> String.equal o.key key) (s.options ())
+                List.exists (fun o -> String.equal o.key key) (S.get s.options)
             | Separator _ | Loader _ -> false
           in
           let state = Kobalte.use_listbox_context () in
@@ -630,7 +649,8 @@ let%component make ?(aria_label : string option)
             | None, None -> 48.
           in
           let w =
-            Virtualizer.window l ~rows
+            Virtualizer.window l
+              ~rows:(fun () -> S.get rows)
               ~fixed:(function
                 | Option _ -> (
                     match (l.row_size, l.estimated_row_size) with
@@ -649,7 +669,7 @@ let%component make ?(aria_label : string option)
                     in
                     heading
                     +. (row_estimate +. l.gap)
-                       *. float_of_int (List.length (s.options ()))
+                       *. float_of_int (List.length (S.get s.options))
                 | Separator _ -> 1.
                 | Loader _ -> l.loader_size)
               ~keep:(fun entry ->
@@ -661,7 +681,9 @@ let%component make ?(aria_label : string option)
              section, by its element. *)
           (placed :=
              fun key ->
-               match Array.find_opt (holds key) (S.untrack rows) with
+               match
+                 Array.find_opt (holds key) (S.untrack (fun () -> S.get rows))
+               with
                | Some (Option _ as entry) ->
                    w.scroll_to entry;
                    true
@@ -672,8 +694,8 @@ let%component make ?(aria_label : string option)
           <div
             role=`presentation
             ref=(fun e -> w.watch (as_element e))
-            style=(fun () -> w.block ())>
-            <For each=(fun () -> w.drawn ())>
+            style=(fun () -> S.get w.block)>
+            <For each=(fun () -> S.get w.drawn)>
               (fun entry _ ->
                 <div
                   role=`presentation
@@ -704,9 +726,11 @@ let%component make ?(aria_label : string option)
         </Show>;
       |]
   in
-  let classes () =
-    Styles.Listbox.classes
-      (Styles.Listbox.options ~variant:(variant ()) ?class_:(class_ ()) ())
+  let classes =
+    S.accessor (fun () ->
+        Styles.Listbox.classes
+          (Styles.Listbox.options ~variant:(S.get variant)
+             ?class_:(S.get class_) ()))
   in
   match Host.use () with
   | Some take ->
@@ -714,29 +738,29 @@ let%component make ?(aria_label : string option)
         {
           options;
           draw;
-          empty = (fun () -> S.get empty);
+          empty;
           classes;
-          aria_label = (fun () -> aria_label ());
+          aria_label;
           others = Props.others props;
           list_ref;
           scroll_to_item;
-        } [@u]
+        }
   | None ->
       <As_list
         as_="div"
         ?aria_label
-        value=(fun () -> selected ())
+        value=(fun () -> S.get selected)
         options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+                  Array.of_list (List.map Types.Either.left (S.get options)))
         option_value=(fun o -> o.key)
-        option_text_value=(fun o -> o.text ())
-        option_disabled=(fun o -> o.disabled () || disabled o.key)
-        selection_mode=(fun () -> selection_mode ())
+        option_text_value=(fun o -> S.get o.text)
+        option_disabled=(fun o -> S.get o.disabled || disabled o.key)
+        selection_mode=(fun () -> S.get selection_mode)
         virtualized=true
         scroll_to_item
         ref=list_ref
         aria_orientation=`vertical
-        class_=(fun () -> classes ())
+        class_=(fun () -> S.get classes)
         data_slot="list-box"
         data_layout="stack"
         data_orientation="vertical"

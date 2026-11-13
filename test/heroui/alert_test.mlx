@@ -1,6 +1,7 @@
 (* HeroUI's Alert, beside the same Alert in React: every part, and the icon
    each status draws. *)
 
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Alert = Solidtype_heroui.Alert
 module Surface = Solidtype_heroui.Surface
@@ -76,7 +77,7 @@ let () =
             let%component make () =
               (match Surface.Context.use () with
               | Some v -> (
-                  match v () with
+                  match S.get v with
                   | `default -> read := "default"
                   | `secondary | `tertiary | `transparent -> read := "other")
               | None -> read := "none");

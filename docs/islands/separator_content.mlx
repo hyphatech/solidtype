@@ -33,7 +33,7 @@ let make () =
             </div>
           </div>
           (fun () ->
-            if (index () [@u]) < Array.length items - 1 then
+            if Solidtype.Solid.get index < Array.length items - 1 then
               Solidtype.Jsx.element <Separator class_="my-4" />
             else Solidtype.Jsx.string "")
         </div>)

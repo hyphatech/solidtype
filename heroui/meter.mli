@@ -22,6 +22,9 @@
     A part is used inside a [Meter]: elsewhere it raises [Invalid_argument] as
     it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The value as text, Kobalte's, a percentage by default, or the children it is
     given: a [<span>]. *)
 module Output : sig
@@ -31,13 +34,13 @@ module Output : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The bar the fill is drawn in: a [<div>]. *)
@@ -48,13 +51,13 @@ module Track : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The part of the track up to the value: a [<div>] as wide as its share. *)
@@ -65,19 +68,19 @@ module Fill : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  percentage : float Solidtype.Solid.accessor;
+  percentage : float S.accessor;
       (** Its value's share of its range, from 0 to 100. *)
-  value_text : string Solidtype.Solid.accessor;  (** Its value as it is shown. *)
+  value_text : string S.accessor;  (** Its value as it is shown. *)
 }
 (** What a meter's children are drawn of, given as a function, as HeroUI's
     render props are, each read where Solid tracks it. *)
@@ -98,13 +101,11 @@ module Props : sig
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

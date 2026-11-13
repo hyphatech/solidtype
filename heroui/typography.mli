@@ -9,6 +9,9 @@
 
     Text has no behaviour, so no Kobalte component underlies it. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type type_ =
   [ `body | `body_sm | `body_xs | `code | `h1 | `h2 | `h3 | `h4 | `h5 | `h6 ]
 
@@ -32,13 +35,13 @@ module Heading : sig
       ?element_type:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Element.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Element.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Body text of a [size], as [type_] [`body], [`body_sm] and [`body_xs] are. *)
@@ -55,13 +58,13 @@ module Paragraph : sig
       ?element_type:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Element.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Element.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Inline code, as [type_] [`code] is. *)
@@ -77,13 +80,13 @@ module Code : sig
       ?element_type:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Element.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Element.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A [<div>] that styles the markup it holds -- headings, paragraphs, code --
@@ -95,13 +98,13 @@ module Prose : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -116,10 +119,10 @@ module Props : sig
     ?element_type:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Element.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Element.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Element.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

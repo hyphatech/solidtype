@@ -368,7 +368,7 @@ module Direction = struct
     <span>
       (fun () ->
         Jsx.string
-          (match c.direction () with
+          (match S.get c.direction with
           | Some `ascending -> "up"
           | Some `descending -> "down"
           | None -> "-"))

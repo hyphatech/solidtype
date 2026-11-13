@@ -19,6 +19,9 @@
     A part is used inside a [Checkbox]: elsewhere it raises [Invalid_argument]
     as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type checkbox
 (** What a checkbox's parts read of it. *)
 
@@ -32,7 +35,7 @@ module Context : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> checkbox option
@@ -44,16 +47,16 @@ end
     Raises [Invalid_argument] outside a [Checkbox]. *)
 module Content : sig
   type state = {
-    is_selected : bool Solidtype.Solid.accessor;
-    is_indeterminate : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_pressed : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_read_only : bool Solidtype.Solid.accessor;
-    is_invalid : bool Solidtype.Solid.accessor;
-    is_required : bool Solidtype.Solid.accessor;
+    is_selected : bool S.accessor;
+    is_indeterminate : bool S.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
+    is_read_only : bool S.accessor;
+    is_invalid : bool S.accessor;
+    is_required : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -64,16 +67,14 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Label.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Label.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Label.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The box the indicator is drawn in.
@@ -86,13 +87,13 @@ module Control : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The mark: HeroUI's check, drawn in as it is selected, or its dash while
@@ -106,20 +107,20 @@ module Indicator : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type selection = {
-  selected : unit -> bool;
-  indeterminate : unit -> bool;
+  selected : bool S.accessor;
+  indeterminate : bool S.accessor;
   set : bool -> unit;
-  disabled : unit -> bool;
+  disabled : bool S.accessor;
 }
 (** What a checkbox of [slot=`selection] is, as the part above it gives it, as
     React Aria's selection slot does: whether it is checked, or some but not all
@@ -137,19 +138,19 @@ module Selection : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> selection option
 end
 
 type state = {
-  is_selected : bool Solidtype.Solid.accessor;
-  is_indeterminate : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_read_only : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
+  is_selected : bool S.accessor;
+  is_indeterminate : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_required : bool S.accessor;
 }
 (** What a checkbox's children are drawn of, given as a function, as HeroUI's
     render props are, each read where Solid tracks it. *)
@@ -176,13 +177,11 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

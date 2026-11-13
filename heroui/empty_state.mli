@@ -8,16 +8,19 @@
 
     It has no behaviour, so no Kobalte component underlies it. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 module Props : sig
   type t
 
   val check :
     ?class_:string Solidtype.Check.value ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

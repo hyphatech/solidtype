@@ -15,8 +15,8 @@ type popover = {
   set_offset : float -> unit;
   set_flip : bool -> unit;
   set_arrow : bool -> unit;
-  placement : unit -> string;
-  mutable side : unit -> string;
+  placement : string S.accessor;
+  mutable side : string S.accessor;
   mutable dialog : Dom.element option;
 }
 
@@ -63,12 +63,12 @@ module Trigger = struct
     <As_div
       as_="div"
       ?aria_label
-      class_=(fun () -> after (Styles.Popover.trigger p.slots) (class_ ()))
+      class_=(fun () -> after (Styles.Popover.trigger p.slots) (S.get class_))
       role=`button
       tabindex="0"
       data_slot="popover-trigger"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </As_div>
   [@@element div]
 end
@@ -81,10 +81,10 @@ module Content = struct
       ~(children : Jsx.content) () =
     let p = within "Popover.Content" in
     S.create_computed (fun () ->
-        p.set_placement (Option.value (placement ()) ~default:`bottom));
+        p.set_placement (Option.value (S.get placement) ~default:`bottom));
     S.create_computed (fun () ->
-        p.set_offset (Option.value (offset ()) ~default:8.));
-    S.create_computed (fun () -> p.set_flip (should_flip ()));
+        p.set_offset (Option.value (S.get offset) ~default:8.));
+    S.create_computed (fun () -> p.set_flip (S.get should_flip));
     let k = Kobalte.use_popover_context () in
     let open_ = Types.PopoverContextValue.is_open k in
     let close () = Types.PopoverContextValue.close k () in
@@ -110,7 +110,9 @@ module Content = struct
                focus (as_element trigger)
            | (Some _ | None), _ -> ());
         now);
-    let side, watch_side = Overlay.placed_side ~placement:p.placement () in
+    let side, watch_side =
+      Overlay.placed_side ~placement:(fun () -> S.get p.placement) ()
+    in
     p.side <- side;
     (* React Aria's popover gives its dialog the focus as it opens, where
        Kobalte's gives it to the first button inside. *)
@@ -124,24 +126,24 @@ module Content = struct
     <Show when_=(fun () -> Overlay.present o)>
       <Kobalte.Portal>
         <Kobalte.Content
-          class_=(fun () -> after (Styles.Popover.base p.slots) (class_ ()))
+          class_=(fun () -> after (Styles.Popover.base p.slots) (S.get class_))
           style=(fun () ->
                   "--trigger-anchor-point: \
                    var(--kb-popover-content-transform-origin);"
-                  ^ match style () with Some s -> " " ^ s | None -> "")
+                  ^ match S.get style with Some s -> " " ^ s | None -> "")
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 content := Some (as_element e);
                 Overlay.watch o e;
                 watch_side e)
           on_open_auto_focus=focus_dialog
-          data_placement=(fun () -> Jsx.data (side ()))
+          data_placement=(fun () -> Jsx.data (S.get side))
           data_entering=(fun () -> Jsx.flag (Overlay.entering o))
           data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
           (fun () -> Jsx.element (Overlay.dismiss close))
           <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-            (fun () -> children ())
+            (fun () -> S.get children)
           </Button.Trigger.Provider>
           (fun () -> Jsx.element (Overlay.dismiss close))
         </Kobalte.Content>
@@ -154,14 +156,14 @@ module Dialog = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let p = within "Popover.Dialog" in
     <section
-      class_=(fun () -> after (Styles.Popover.dialog p.slots) (class_ ()))
+      class_=(fun () -> after (Styles.Popover.dialog p.slots) (S.get class_))
       tabindex="-1"
       ref=(fun e ->
             p.dialog <- Some (as_element e);
             S.on_cleanup (fun () -> p.dialog <- None))
       data_slot="popover-dialog"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </section>
   [@@element section]
 end
@@ -170,9 +172,9 @@ module Heading = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let p = within "Popover.Heading" in
     <Kobalte.Title
-      class_=(fun () -> after (Styles.Popover.heading p.slots) (class_ ()))
+      class_=(fun () -> after (Styles.Popover.heading p.slots) (S.get class_))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Kobalte.Title>
   [@@element h2]
 end
@@ -190,15 +192,15 @@ module Arrow = struct
           size=12. style="visibility: hidden;" ref=(fun k -> follow k)
         />;
         <div
-          ?class_=(fun () -> class_ ())
+          ?class_
           style=(fun () ->
-                  "position: absolute; " ^ position ()
-                  ^ match style () with Some s -> " " ^ s | None -> "")
-          data_placement=(fun () -> Jsx.data (p.side ()))
+                  "position: absolute; " ^ S.get position
+                  ^ match S.get style with Some s -> " " ^ s | None -> "")
+          data_placement=(fun () -> Jsx.data (S.get p.side))
           data_slot="popover-overlay-arrow-group"
           props=(Props.others props)>
           (fun () ->
-            match children () with
+            match S.get children with
             | Some c -> c
             | None ->
                 Jsx.element
@@ -220,8 +222,12 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
     ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
   let kept, set_kept = S.create_signal false in
   S.create_computed (fun () ->
-      S.set set_kept (Option.value (S.untrack default_open) ~default:false));
-  let opened () = match is_open () with Some o -> o | None -> S.get kept in
+      S.set set_kept
+        (Option.value (S.untrack (fun () -> S.get default_open)) ~default:false));
+  let opened =
+    S.accessor (fun () ->
+        match S.get is_open with Some o -> o | None -> S.get kept)
+  in
   let placement, set_placement = S.create_signal `bottom in
   let offset, set_offset = S.create_signal 8. in
   let flip, set_flip = S.create_signal true in
@@ -234,13 +240,13 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
       set_flip = S.set set_flip;
       set_arrow = S.set set_arrow;
       placement =
-        (fun () ->
-          match S.get placement with
-          | `top -> "top"
-          | `bottom -> "bottom"
-          | `left -> "left"
-          | `right -> "right");
-      side = (fun () -> "bottom");
+        S.accessor (fun () ->
+            match S.get placement with
+            | `top -> "top"
+            | `bottom -> "bottom"
+            | `left -> "left"
+            | `right -> "right");
+      side = S.accessor (fun () -> "bottom");
       dialog = None;
     }
   in
@@ -250,19 +256,19 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
       is_disabled = None;
       controls = None;
       described_by = None;
-      pressed = Some opened;
+      pressed = Some (fun () -> S.get opened);
       needs_slot = false;
       element = None;
     }
   in
   <Kobalte.Root
-    ?open_=(fun () -> is_open ())
-    ?default_open=(fun () -> default_open ())
+    ?open_=is_open
+    ?default_open
     on_open_change=(fun o ->
                      S.set set_kept o;
                      ignore (on_open_change o : unit option))
     modal=true
-    placement=(fun () -> p.placement ())
+    placement=(fun () -> S.get p.placement)
     gutter=(fun () ->
              (* Kobalte puts half its arrow's height more between them, where
                 HeroUI's offset is the whole gap. *)
@@ -271,7 +277,7 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
     force_mount=true>
     <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
       <Context.Provider value=(fun () -> p)>
-        (fun () -> children ())
+        (fun () -> S.get children)
       </Context.Provider>
     </Button.Trigger.Provider>
   </Kobalte.Root>

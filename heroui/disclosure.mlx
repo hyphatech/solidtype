@@ -7,9 +7,9 @@ module Gravity = Solidtype_gravity_icons
    its trigger controls. *)
 type disclosure = {
   slots : Styles.Disclosure.slots;
-  expanded : unit -> bool;
+  expanded : bool Solid.accessor;
   expand : bool -> unit;
-  disabled : unit -> bool;
+  disabled : bool Solid.accessor;
   content_id : string;
 }
 
@@ -33,7 +33,7 @@ module Heading = struct
     let trigger =
       {
         Button.component = Collapsible.Trigger.component;
-        is_disabled = Some d.disabled;
+        is_disabled = Some (fun () -> Solid.get d.disabled);
         controls = Some d.content_id;
         described_by = None;
         pressed = None;
@@ -42,11 +42,12 @@ module Heading = struct
       }
     in
     <h3
-      class_=(fun () -> after (Styles.Disclosure.heading d.slots) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Disclosure.heading d.slots) (Solid.get class_))
       data_slot="disclosure-heading"
       props=(Props.others props)>
       <Button.Trigger.Provider value=(fun () -> trigger)>
-        (fun () -> children ())
+        (fun () -> Solid.get children)
       </Button.Trigger.Provider>
     </h3>
   [@@element h3]
@@ -76,18 +77,20 @@ module Trigger = struct
          (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
       () =
     let d = within "Disclosure.Trigger" in
-    let i = Interaction.create ~disabled:(fun[@u] () -> d.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> Solid.get d.disabled) () in
     let state () =
       {
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_pressed = (fun[@u] () -> Interaction.pressed i);
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> Interaction.disabled i);
+        is_hovered = Solid.accessor (fun () -> Interaction.hovered i);
+        is_pressed = Solid.accessor (fun () -> Interaction.pressed i);
+        is_focused = Solid.accessor (fun () -> Interaction.focused i);
+        is_focus_visible =
+          Solid.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = Solid.accessor (fun () -> Interaction.disabled i);
       }
     in
     <Collapsible_trigger
-      class_=(fun () -> after (Styles.Disclosure.trigger d.slots) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Disclosure.trigger d.slots) (Solid.get class_))
       aria_controls=(fun () -> d.content_id)
       slot="trigger"
       ref=(fun b ->
@@ -99,9 +102,9 @@ module Trigger = struct
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (Solid.get children) (state ()))
     </Collapsible_trigger>
   [@@element button]
 end
@@ -112,9 +115,10 @@ module Indicator = struct
     (* HeroUI's own chevron, which its styles turn over. *)
     <Gravity.Chevron_down
       aria_hidden=true
-      class_=(fun () -> after (Styles.Disclosure.indicator d.slots) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Disclosure.indicator d.slots) (Solid.get class_))
       role=`presentation
-      data_expanded=(fun () -> Jsx.flag (d.expanded ()))
+      data_expanded=(fun () -> Jsx.flag (Solid.get d.expanded))
       data_slot="disclosure-indicator"
       props=(Props.others props)
     />
@@ -134,31 +138,38 @@ module Content = struct
     (* Its focus, within it, whether or not the disclosure is disabled. *)
     let i = Interaction.create () in
     let panel =
-      Panel.create ~expanded:d.expanded ~expand:(fun () -> d.expand true) ()
+      Panel.create
+        ~expanded:(fun () -> Solid.get d.expanded)
+        ~expand:(fun () -> d.expand true)
+        ()
     in
     let state () =
-      { is_focus_visible_within = (fun[@u] () -> Interaction.focus_visible i) }
+      {
+        is_focus_visible_within =
+          Solid.accessor (fun () -> Interaction.focus_visible i);
+      }
     in
     <Collapsible.Content
-      class_=(fun () -> after (Styles.Disclosure.content d.slots) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Disclosure.content d.slots) (Solid.get class_))
       style=(fun () ->
-              match style () with
+              match Solid.get style with
               | Some s -> Panel.style panel ^ "; " ^ s
               | None -> Panel.style panel)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e;
             Panel.watch panel e)
-      data_expanded=(fun () -> Jsx.flag (d.expanded ()))
+      data_expanded=(fun () -> Jsx.flag (Solid.get d.expanded))
       data_slot="disclosure-content"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)
             (* What the trigger names it by, and whether it is shown, are the
          disclosure's, which an attribute in the rest must not replace. *)
       id=(fun () -> d.content_id)
-      aria_hidden=(fun () -> not (d.expanded ()))
+      aria_hidden=(fun () -> not (Solid.get d.expanded))
       ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (Solid.get children) (state ()))
     </Collapsible.Content>
   [@@element div]
 end
@@ -172,8 +183,8 @@ module Body = struct
       props=(Props.others props)>
       <div
         class_=(fun () ->
-                 after (Styles.Disclosure.body_inner d.slots) (class_ ()))>
-        (fun () -> children ())
+                 after (Styles.Disclosure.body_inner d.slots) (Solid.get class_))>
+        (fun () -> Solid.get children)
       </div>
     </div>
   [@@element div]
@@ -199,22 +210,26 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
   let expanded, expand =
     match group with
     | None ->
-        Field.controlled ~value:is_expanded ~default:(default_expanded ())
+        Field.controlled
+          ~value:(fun () -> Solid.get is_expanded)
+          ~default:(Solid.get default_expanded)
           ~on_change:(fun v -> on_expanded_change v)
     | Some g ->
         let key =
-          match id () with Some k -> k | None -> Solid.create_unique_id ()
+          match Solid.get id with
+          | Some k -> k
+          | None -> Solid.create_unique_id ()
         in
-        ( (fun () -> g.is_expanded key),
+        ( Solid.accessor (fun () -> g.is_expanded key),
           fun v ->
             g.toggle key;
             ignore (on_expanded_change v : unit option) )
   in
   let is_disabled () =
-    is_disabled ()
+    Solid.get is_disabled
     ||
     match group with
-    | Some (g : Disclosure_group.group) -> g.is_disabled ()
+    | Some (g : Disclosure_group.group) -> Solid.get g.is_disabled
     | None -> false
   in
   let d =
@@ -222,7 +237,7 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
       slots = Styles.Disclosure.slots (Styles.Disclosure.options ());
       expanded;
       expand;
-      disabled = (fun () -> is_disabled ());
+      disabled = Solid.accessor (fun () -> is_disabled ());
       content_id = Solid.create_unique_id ();
     }
   in
@@ -232,27 +247,28 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
      styles shrink to nothing and find in page reaches. *)
   let state () =
     {
-      is_expanded = (fun[@u] () -> expanded ());
-      is_focus_visible_within = (fun[@u] () -> Interaction.focus_visible focus);
-      is_disabled = (fun[@u] () -> is_disabled ());
+      is_expanded = expanded;
+      is_focus_visible_within =
+        Solid.accessor (fun () -> Interaction.focus_visible focus);
+      is_disabled = Solid.accessor (fun () -> is_disabled ());
     }
   in
   <Collapsible.Root
-    open_=(fun () -> expanded ())
+    open_=(fun () -> Solid.get expanded)
     on_open_change=expand
     disabled=(fun () -> is_disabled ())
     force_mount=true
-    class_=(fun () -> after (Styles.Disclosure.base d.slots) (class_ ()))
-    data_expanded=(fun () -> Jsx.flag (expanded ()))
+    class_=(fun () -> after (Styles.Disclosure.base d.slots) (Solid.get class_))
+    data_expanded=(fun () -> Jsx.flag (Solid.get expanded))
     data_disabled=(fun () -> Jsx.flag (is_disabled ()))
     data_slot="disclosure"
     ref=(fun e ->
           ignore (given_ref e : unit option);
           Interaction.watch focus e)
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
     props=(Props.others props)>
     <Context.Provider value=(fun () -> d)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (Solid.get children) (state ()))
     </Context.Provider>
   </Collapsible.Root>
 [@@element div]

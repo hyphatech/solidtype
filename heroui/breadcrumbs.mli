@@ -29,13 +29,13 @@
     An item is used inside a [Breadcrumbs]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** One page of the trail: an [<li>] holding its link, Kobalte's, and HeroUI's
     chevron after it, or the trail's [separator]. *)
 module Item : sig
-  type state = {
-    is_current : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-  }
+  type state = { is_current : bool S.accessor; is_disabled : bool S.accessor }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
 
@@ -48,16 +48,14 @@ module Item : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Li.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Li.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Li.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The trail. [separator] is drawn between items in place of HeroUI's chevron,
@@ -68,15 +66,15 @@ module Props : sig
   type t
 
   val check :
-    ?separator:Solidtype.Jsx.element Solidtype.Check.value ->
+    ?separator:Jsx.element Solidtype.Check.value ->
     ?on_action:(string -> unit) ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Ol.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Ol.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Ol.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

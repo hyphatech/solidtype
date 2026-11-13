@@ -38,8 +38,11 @@
     press giving the row the focus, and named by its [aria_label] and the row's
     name. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type trigger = {
-  component : unit Solidtype.Jsx.component;
+  component : unit Jsx.component;
       (** What the button renders as, in place of Kobalte's [Button.Root]: a
           component that takes the same props and is a [<button>]. *)
   is_disabled : (unit -> bool) option;
@@ -84,7 +87,7 @@ module Chevron : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> chevron option
@@ -102,7 +105,7 @@ module Close : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> (unit -> unit) option
@@ -119,19 +122,19 @@ module Trigger : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> trigger option
 end
 
 type state = {
-  is_hovered : bool Solidtype.Solid.accessor;
-  is_pressed : bool Solidtype.Solid.accessor;
-  is_focused : bool Solidtype.Solid.accessor;
-  is_focus_visible : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_pending : bool Solidtype.Solid.accessor;
+  is_hovered : bool S.accessor;
+  is_pressed : bool S.accessor;
+  is_focused : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_pending : bool S.accessor;
 }
 (** What a button's children are drawn of, given as a function, as HeroUI's
     render props are: each read where Solid tracks it, as its [data-] attribute
@@ -170,13 +173,11 @@ module Props : sig
     ?ref:(Dom.htmlButtonElement -> unit) ->
     ?aria_label:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Button.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

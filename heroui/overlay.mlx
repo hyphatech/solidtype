@@ -128,7 +128,7 @@ let arrow_position () =
     copy ();
     S.on_cleanup (fun () -> disconnect watching)
   in
-  ((fun () -> S.get position), follow)
+  (position, follow)
 
 external parent : _ Dom.element_like -> Dom.element Js.null = "parentElement"
 [@@mel.get]
@@ -166,7 +166,9 @@ let placed_side ~placement () =
         read ();
         S.on_cleanup (fun () -> disconnect watching)
   in
-  ((fun () -> match S.get side with Some s -> s | None -> placement ()), watch)
+  ( S.accessor (fun () ->
+        match S.get side with Some s -> s | None -> placement ()),
+    watch )
 
 external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
 external body : Dom.element = "body" [@@mel.scope "document"]

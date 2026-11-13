@@ -46,13 +46,14 @@ writes:
   getter for each field, `check`, which the compiler applies to every
   `<Greeting ... />` to catch a prop left out or misspelt, and `omit` and
   `others`, for a spread;
-- `make`, a function of that object, in which each parameter becomes a
-  read of its field: `name ()` reads `props.name` at the moment it runs,
-  inside a thunk, where Solid tracks it;
+- `make`, a function of that object, in which each value parameter is an
+  accessor of its field: `S.get name` reads `props.name` at the moment it
+  runs, inside a thunk, where Solid tracks it;
 - `component`, `make` as the value a JSX tag names.
 
-So in the body a value prop is read as a call, `name ()`, never as a plain
-value. An optional parameter with a default,
+So in the body a value prop is read as a signal is, `S.get name`, never as a
+plain value, and is handed on as it is, `?title=name`. A function prop is
+called, `on_close ()`. An optional parameter with a default,
 `?(greeting : string = "Hello")`, reads its default while the prop is left
 out; one without, `?(note : string option)`, reads an `option`.
 
@@ -95,7 +96,7 @@ would call; a function prop is the function itself, `on_close=(fun _ ->
 ## Children
 
 Children are a prop, `children`. As `Jsx.content`, they are any JSX and are
-read where they go, `(fun () -> children ())`:
+read where they go, `(fun () -> S.get children)`:
 
 <Example code={children} title="solid_children.mlx"><Children.make client:visible /></Example>
 
@@ -104,9 +105,19 @@ A component may also take a function as its only child, which it calls, as
 it takes: `[ `nodes ]` for elements, `[ `render ]` for a function, or both.
 
 Children of either kind, as HeroUI's render props are, are
-`~(children : state Jsx.children)`, drawn by `Jsx.draw (children ())
+`~(children : state Jsx.children)`, drawn by `Jsx.draw (S.get children)
 state`. A caller gives elements, or a function that reads the state's
 fields by name, `(fun s -> if S.get s.is_on then ... else ...)`.
+
+State a component hands its children is read as any value that changes,
+with `S.get`. A signal, a memo or a prop is handed on as it is; a value
+derived for them is `S.accessor (fun () -> e)`, computed at each read:
+
+```ocaml
+let%component make ~(width : int) ~(children : state Jsx.children) () =
+  let wide = S.accessor (fun () -> S.get width > 600) in
+  <div>(fun () -> Jsx.draw (S.get children) { wide })</div>
+```
 
 A function prop that takes nothing is written `(fun _ -> ...)`, as
 `on_close` is above, which hides the panel and shows a button in its place: `(fun () -> ...)` is a thunk, which would be read as a
@@ -152,6 +163,10 @@ component's own prop names, so a misspelt one is a compile error.
 component's check admits besides them, its `data-` attributes, which it
 passes on to its element, `props=(Props.others props)`. A component's
 spread is a rest of its own props, or that rest of any component's.
+
+A handler read from props written by hand is JavaScript's, and is called by
+`Jsx.call f x`, or `Jsx.act f` for one that takes nothing; each does nothing
+where none was given.
 
 ## A component chosen at run time
 

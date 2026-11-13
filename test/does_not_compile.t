@@ -31,11 +31,11 @@ The components the cases use.
   $ cat > label.mlx <<'EOF'
   > let%component make ~(text : string) ?(count : int option) () =
   >   ignore count;
-  >   <span>(fun () -> Solidtype.Jsx.string (text ()))</span>
+  >   <span>(fun () -> Solidtype.Jsx.string (Solidtype.Solid.get text))</span>
   > EOF
   $ cat > each.mlx <<'EOF'
   > let%component make ~(each : 'a array) ~(children : 'a -> Solidtype.Jsx.element) () =
-  >   ignore (each ());
+  >   ignore (Solidtype.Solid.get each);
   >   ignore children;
   >   <ul />
   > EOF
@@ -114,12 +114,10 @@ A read passed as an attribute's value, not inside a thunk.
   >   <div class_=(if Solidtype.Solid.get count > 2 then "hot" else "cold") />
   > EOF
   $ build
-  File "case.mlx", line 3, characters 53-58:
+  File "case.mlx", line 3, characters 14-71:
   3 |   <div class_=(if Solidtype.Solid.get count > 2 then "hot" else "cold") />
-                                                           ^^^^^
-  Error: This constant has type string but an expression was expected of type
-           unit -> string
-         Hint: Did you forget to wrap the expression using fun () ->?
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: a value that changes is given as a thunk, (fun () -> ...)
   [1]
 
 A read passed as a child's value.
@@ -133,9 +131,7 @@ A read passed as a child's value.
   File "case.mlx", line 3, characters 5-52:
   3 |   <p>(Solidtype.Jsx.int (Solidtype.Solid.get count))</p>
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type Solidtype.Jsx.content
-         but an expression was expected of type unit -> Solidtype.Jsx.content
-         Hint: Did you forget to wrap the expression using fun () ->?
+  Error: a value that changes is given as a thunk, (fun () -> ...)
   [1]
 
 A read passed as a component's prop.
@@ -146,12 +142,10 @@ A read passed as a component's prop.
   >   <Label text=(if Solidtype.Solid.get count = 1 then "time" else "times") />
   > EOF
   $ build
-  File "case.mlx", line 3, characters 53-59:
+  File "case.mlx", line 3, characters 14-73:
   3 |   <Label text=(if Solidtype.Solid.get count = 1 then "time" else "times") />
-                                                           ^^^^^^
-  Error: This constant has type string but an expression was expected of type
-           unit -> string
-         Hint: Did you forget to wrap the expression using fun () ->?
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: a value that changes is given as a thunk, (fun () -> ...)
   [1]
 
 A misspelt attribute.
@@ -201,7 +195,7 @@ value, spread.
 
   $ cat > case.mlx <<'EOF'
   > let%component make ~(props : string) () =
-  >   <span>(fun () -> Solidtype.Jsx.string (props ()))</span>
+  >   <span>(fun () -> Solidtype.Jsx.string (Solidtype.Solid.get props))</span>
   > EOF
   $ build
   File "case.mlx", line 1, characters 21-26:
@@ -247,14 +241,11 @@ called as a thunk.
   > let make () = <Each each=(fun () -> [| "a" |])>render</Each>
   > EOF
   $ build
-  File "case.mlx", line 2, characters 14-60:
+  File "case.mlx", line 2, characters 47-53:
   2 | let make () = <Each each=(fun () -> [| "a" |])>render</Each>
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type
-           ('a -> Solidtype.Jsx.element, [> `nodes ]) Solidtype.Check.children
-         but an expression was expected of type
-           ('a -> Solidtype.Jsx.element, [ `render ]) Solidtype.Check.children
-         The second variant type does not allow tag(s) `nodes
+                                                     ^^^^^^
+  Error: a child is a string, an element or a thunk, (fun () -> ...); a
+         function given by its name is render=f
   [1]
 
 Children of state, given a function that reads a field its state lacks, and
@@ -263,7 +254,7 @@ one that takes a field's accessor for its value.
   $ cat > tag.mlx <<'EOF'
   > type state = { label : string Solidtype.Solid.accessor }
   > let%component make ~(children : state Solidtype.Jsx.children) () =
-  >   <span>(fun () -> Solidtype.Jsx.draw (children ()) { label = (fun [@u] () -> "x") })</span>
+  >   <span>(fun () -> Solidtype.Jsx.draw (Solidtype.Solid.get children) { label = Solidtype.Solid.accessor (fun () -> "x") })</span>
   > EOF
   $ cat > case.mlx <<'EOF'
   > let make () = <Tag>(fun s -> <b>(fun () -> Solidtype.Jsx.int s.count)</b>)</Tag>
@@ -534,12 +525,12 @@ A component without its last parameter, (), reported where it is defined.
 
   $ cat > case.mlx <<'EOF'
   > let%component make ~(name : string) =
-  >   <p>(fun () -> Solidtype.Jsx.string (name ()))</p>
+  >   <p>(fun () -> Solidtype.Jsx.string (Solidtype.Solid.get name))</p>
   > EOF
   $ build
-  File "case.mlx", lines 1-2, characters 0-51:
+  File "case.mlx", lines 1-2, characters 0-68:
   1 | let%component make ~(name : string) =
-  2 |   <p>(fun () -> Solidtype.Jsx.string (name ()))</p>
+  2 |   <p>(fun () -> Solidtype.Jsx.string (Solidtype.Solid.get name))</p>
   Error: a component's last parameter is ()
   [1]
 
@@ -714,7 +705,7 @@ props, and passes them on.
   $ cat > save.mlx <<'EOF'
   > let%component make ?(class_ : string option) ~(children : Solidtype.Jsx.content) () =
   >   ignore class_;
-  >   <button props=(Props.others props)>(fun () -> children ())</button>
+  >   <button props=(Props.others props)>(fun () -> Solidtype.Solid.get children)</button>
   > [@@element button]
   > EOF
   $ cat > case.mlx <<'EOF'
@@ -773,7 +764,7 @@ requires, left out, does not compile.
 
   $ cat > part.mlx <<'EOF'
   > let%component make ~(children : Solidtype.Jsx.content) () =
-  >   <button props=(Props.others props)>(fun () -> children ())</button>
+  >   <button props=(Props.others props)>(fun () -> Solidtype.Solid.get children)</button>
   > [@@element button]
   > EOF
   $ cat > case.mlx <<'EOF'

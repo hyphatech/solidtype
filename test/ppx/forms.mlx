@@ -1,3 +1,5 @@
+module S = Solidtype.Solid
+
 let static = <div class_="x" />
 let handler = <button on_click=(fun _ -> ()) />
 let handler_made = <button on_click=(remove (id ())) />
@@ -26,13 +28,13 @@ let ref_callback = <div ref=(fun el -> keep el) />
 let%component make ~(text : string) ?(count : int = 0)
     ?(on_pick : (int -> unit) option) ?(on_close : unit -> unit = fun () -> ())
     ~(children : 'a -> Solidtype.Jsx.element) () =
-  <p>(fun () -> Solidtype.Jsx.int (count ()))</p>
+  <p>(fun () -> Solidtype.Jsx.int (S.get count))</p>
 
 module Given_its_element = struct
   let%component make ?(variant : [ `a | `b ] option) ?(class_ : string option)
       () =
     <button
-      class_=(fun () -> Option.value (class_ ()) ~default:"")
+      class_=(fun () -> Option.value (S.get class_) ~default:"")
       props=(Props.others props)
     />
   [@@element button]
@@ -100,6 +102,26 @@ let strings =
     <Label text="x\\y" />
   </p>
 
+(* A prop is read where it is used, and one the body binds again is the body's
+   own: [title] is read whole, the shadowed [text] through its accessor, and a
+   prop handed on stays an accessor. *)
+module Read = struct
+  let%component make ~(title : string) ~(text : string) ?(note : string option)
+      () =
+    let text = S.create_memo (fun () -> S.get text ^ "!") in
+    <p title=(fun () -> S.get title) ?lang=note>
+      (fun () -> Solidtype.Jsx.string (S.get text))
+    </p>
+end
+
+(* A thunk's value coerced, which MLX may read as the function's own result
+   coercion: the coercion is the body's. *)
+let coerced (open_ : [ `a ]) =
+  <p
+    title=(fun () -> match (open_ :> [ `a | `b ]) with `a -> "a" | `b -> "b")
+    data_x=(fun () -> (Jsx.data "x" :> Jsx.data))
+  />
+
 module Removable = struct
   let%component make ~(on_remove : unit -> unit) () =
     <button on_click=(fun _ -> on_remove ())>"x"</button>
@@ -125,7 +147,7 @@ let named_render = <For each=(fun () -> items ()) render=row />
 module Part = struct
   let%component make ?(class_ : string option) () =
     <button
-      class_=(fun () -> Option.value (class_ ()) ~default:"")
+      class_=(fun () -> Option.value (S.get class_) ~default:"")
       ref=(fun _ -> ())
       props=(Props.others props)
     />

@@ -20,11 +20,14 @@
     A part is used inside a [Slider]: elsewhere it raises [Invalid_argument] as
     it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The values as text, joined by an en dash, or the children it is given. *)
 module Output : sig
   type state = {
-    orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    orientation : [ `horizontal | `vertical ] S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -35,24 +38,22 @@ module Output : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Output.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Output.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Output.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The line the thumbs move along, Kobalte's. *)
 module Track : sig
   type state = {
-    orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
+    orientation : [ `horizontal | `vertical ] S.accessor;
+    is_disabled : bool S.accessor;
+    is_hovered : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -65,16 +66,14 @@ module Track : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The part of the track between the start, or the first thumb of a range, and
@@ -86,24 +85,24 @@ module Fill : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A thumb, Kobalte's, with the input a keyboard and a reader reach: the
     [index]th, 0 the default, of the slider's values. *)
 module Thumb : sig
   type state = {
-    is_dragging : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    is_dragging : bool S.accessor;
+    is_hovered : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -117,21 +116,19 @@ module Thumb : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlSpanElement -> unit) ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
+  orientation : [ `horizontal | `vertical ] S.accessor;
+  is_disabled : bool S.accessor;
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, each read where Solid tracks it. *)
@@ -158,13 +155,11 @@ module Props : sig
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     ?ref:(Dom.htmlDivElement -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

@@ -2,11 +2,10 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type slot =
-  ((unit -> string) ->
-   unit Solidtype.Solid.rest ->
-   (unit -> Jsx.content) ->
-   Jsx.element
-  [@u])
+  (unit -> string) ->
+  unit Solidtype.Solid.rest ->
+  (unit -> Jsx.content) ->
+  Jsx.element
 
 (* How a field's error renders, which the field gives it: Kobalte's error
    message, which the field shows while it is invalid. *)
@@ -17,7 +16,7 @@ end)
 (* A server's error for the field, which a form gives it and which stands in
    for the error's own words while it lasts. *)
 module Message = Solidtype.Context.Make_optional (struct
-  type t = unit -> string option
+  type t = string option S.accessor
 end)
 
 (* What its children are drawn of: React Aria's render props for a field's
@@ -33,18 +32,22 @@ let%component make ?(class_ : string option)
        (Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) option) ()
     =
   let classes () =
-    Styles.FieldError.classes (Styles.FieldError.options ?class_:(class_ ()) ())
+    Styles.FieldError.classes
+      (Styles.FieldError.options ?class_:(S.get class_) ())
   in
-  let message = Option.value (Message.use ()) ~default:(fun () -> None) in
+  let message =
+    Option.value (Message.use ()) ~default:(S.accessor (fun () -> None))
+  in
   let state =
     {
-      is_invalid = (fun[@u] () -> true);
+      is_invalid = S.accessor (fun () -> true);
       validation_errors =
-        (fun[@u] () -> match message () with Some m -> [| m |] | None -> [||]);
+        S.accessor (fun () ->
+            match S.get message with Some m -> [| m |] | None -> [||]);
     }
   in
   let content () =
-    match (message (), children ()) with
+    match (S.get message, S.get children) with
     | _, Some c when Jsx.is_function c -> Jsx.draw c state
     | Some m, _ -> Jsx.string m
     | None, Some c -> Jsx.draw c state
@@ -54,7 +57,7 @@ let%component make ?(class_ : string option)
   | Some render ->
       render classes
         (S.with_drawn (Props.others props)
-           (Option.map (fun f p -> f p state) (as_ ())))
-        content [@u]
+           (Option.map (fun f p -> f p state) (S.get as_)))
+        content
   | None -> invalid_arg "Field_error is used inside a field"
 [@@element span]

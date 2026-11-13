@@ -1,9 +1,10 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type variant = [ `default | `secondary | `tertiary | `transparent ]
 
 module Context = Solidtype.Context.Make_optional (struct
-  type t = unit -> variant
+  type t = variant S.accessor
 end)
 
 let%component make ?(variant : variant = `default) ?(class_ : string option)
@@ -12,11 +13,11 @@ let%component make ?(variant : variant = `default) ?(class_ : string option)
     <div
       class_=(fun () ->
                Styles.Surface.classes
-                 (Styles.Surface.options ~variant:(variant ())
-                    ?class_:(class_ ()) ()))
+                 (Styles.Surface.options ~variant:(S.get variant)
+                    ?class_:(S.get class_) ()))
       data_slot="surface"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   </Context.Provider>
 [@@element div]

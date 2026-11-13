@@ -69,11 +69,11 @@ let move_focus e =
 (* What a group's radios read of it: the value chosen, and whether it is
    disabled or invalid. *)
 type group = {
-  value : unit -> string option;
-  disabled : unit -> bool;
-  invalid : unit -> bool;
-  read_only : unit -> bool;
-  required : unit -> bool;
+  value : string option S.accessor;
+  disabled : bool S.accessor;
+  invalid : bool S.accessor;
+  read_only : bool S.accessor;
+  required : bool S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -83,7 +83,7 @@ end)
 (* A label in a group, but outside a radio's content, is the group's: Kobalte's
    label, which names it. *)
 let label : Label.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte.Label class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
   </Kobalte.Label>
@@ -91,7 +91,7 @@ let label : Label.slot =
 (* A description in a group, but outside a radio, is the group's: Kobalte's
    description, which it is described by. *)
 let description : Description.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte.Description
     class_=(fun () -> classes ())
     slot="description"
@@ -128,16 +128,23 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
-    match is_disabled () with Some d -> d | None -> in_fieldset ()
+    match S.get is_disabled with Some d -> d | None -> S.get in_fieldset
   in
-  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
-  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let in_form =
+    Form.field
+      ~name:(fun () -> S.get name)
+      ~invalid:(fun () -> S.get is_invalid)
+  in
+  let invalid =
+    S.accessor (fun () ->
+        S.get is_invalid || Option.is_some (S.get in_form.error))
+  in
   (* The value is the group's, read by Kobalte and by every radio alike;
      none is Kobalte's own empty value, as a form's reset leaves it. *)
   let chosen, choose =
     Field.controlled
-      ~value:(fun () -> Option.map Option.some (value ()))
-      ~default:(default_value ())
+      ~value:(fun () -> Option.map Option.some (S.get value))
+      ~default:(S.get default_value)
       ~on_change:
         (Option.iter (fun v ->
              in_form.changed ();
@@ -146,41 +153,41 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
   let g =
     {
       value = chosen;
-      disabled = (fun () -> is_disabled ());
+      disabled = S.accessor (fun () -> is_disabled ());
       invalid;
-      read_only = (fun () -> is_read_only ());
-      required = (fun () -> is_required ());
+      read_only = is_read_only;
+      required = is_required;
     }
   in
   let state () =
     {
-      orientation = (fun[@u] () -> orientation ());
-      is_disabled = (fun[@u] () -> is_disabled ());
-      is_read_only = (fun[@u] () -> is_read_only ());
-      is_required = (fun[@u] () -> is_required ());
-      is_invalid = (fun[@u] () -> invalid ());
+      orientation;
+      is_disabled = S.accessor (fun () -> is_disabled ());
+      is_read_only;
+      is_required;
+      is_invalid = invalid;
     }
   in
   <Context.Provider value=(fun () -> g)>
     <Kobalte.Root
-      value=(fun () -> Option.value (chosen ()) ~default:"")
+      value=(fun () -> Option.value (S.get chosen) ~default:"")
       on_change=(fun v -> choose (Some v))
-      orientation=(fun () -> orientation ())
+      orientation=(fun () -> S.get orientation)
       disabled=(fun () -> is_disabled ())
-      read_only=(fun () -> is_read_only ())
-      required=(fun () -> is_required ())
+      read_only=(fun () -> S.get is_read_only)
+      required=(fun () -> S.get is_required)
       ?name
       on_key_down=(fun e ->
                     ignore (on_key_down e : unit option);
-                    if is_read_only () then move_focus e)
+                    if S.get is_read_only then move_focus e)
       on_click=(fun e ->
                  ignore (on_click e : unit option);
-                 if is_read_only () then keep_choice e)
-      validation_state=(fun () -> if invalid () then `invalid else `valid)
+                 if S.get is_read_only then keep_choice e)
+      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
       class_=(fun () ->
                Styles.RadioGroup.classes
-                 (Styles.RadioGroup.options ~variant:(variant ())
-                    ?class_:(class_ ()) ()))
+                 (Styles.RadioGroup.options ~variant:(S.get variant)
+                    ?class_:(S.get class_) ()))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -194,18 +201,18 @@ let%component make ?(variant : [ `primary | `secondary ] = `primary)
       data_slot="radio-group"
       data_orientation=(fun () ->
                          Jsx.data
-                           (match orientation () with
+                           (match S.get orientation with
                            | `horizontal -> "horizontal"
                            | `vertical -> "vertical"))
       data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      data_invalid=(fun () -> Jsx.flag (invalid ()))
-      data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-      data_required=(fun () -> Jsx.flag (is_required ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_invalid=(fun () -> Jsx.flag (S.get invalid))
+      data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
+      data_required=(fun () -> Jsx.flag (S.get is_required))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
-          (fun () -> Jsx.draw (children ()) (state ()))
+          (fun () -> Jsx.draw (S.get children) (state ()))
         </Description.Slot.Provider>
       </Label.Slot.Provider>
     </Kobalte.Root>

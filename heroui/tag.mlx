@@ -15,7 +15,10 @@ type state = {
 (* What a remove button reads of its tag: the classes of the tag's look, and
    how it counts itself in, so the tag draws no button of its own beside
    it. *)
-type in_tag = { slots : unit -> Styles.Tag.slots; remove_here : unit -> unit }
+type in_tag = {
+  slots : Styles.Tag.slots S.accessor;
+  remove_here : unit -> unit;
+}
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = in_tag
@@ -50,9 +53,7 @@ module Remove_button = struct
     let t = in_tag "Tag.Remove_button" in
     t.remove_here ();
     let tag = Headless.use_tag_context () in
-    let i =
-      Interaction.create ~disabled:(fun[@u] () -> tag.is_disabled ()) ()
-    in
+    let i = Interaction.create ~disabled:(fun () -> S.get tag.is_disabled) () in
     <Headless.Remove_button
       aria_label="Remove tag"
       class_=(fun () ->
@@ -60,8 +61,8 @@ module Remove_button = struct
                  (Styles.CloseButton.options ~variant:`default
                     ~class_:
                       (after
-                         (Styles.Tag.remove_button (t.slots ()))
-                         (class_ ()))
+                         (Styles.Tag.remove_button (S.get t.slots))
+                         (S.get class_))
                     ()))
       ref=(fun b ->
             ignore (given_ref b : unit option);
@@ -75,7 +76,7 @@ module Remove_button = struct
       data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> c
         | None -> Jsx.element <Close_button.Icon />)
     </Headless.Remove_button>
@@ -91,21 +92,24 @@ let%component make ?(id : string option) ?(text_value : string option)
   let g = Tag_group.use_context "Tag" in
   let h = Headless.use_context () in
   let key =
-    match S.untrack id with Some k -> k | None -> S.create_unique_id ()
+    match S.untrack (fun () -> S.get id) with
+    | Some k -> k
+    | None -> S.create_unique_id ()
   in
   let disabled () =
-    Option.value (is_disabled ()) ~default:false || h.is_disabled key
+    Option.value (S.get is_disabled) ~default:false || h.is_disabled key
   in
   let selectable () =
-    (match h.selection_mode () with
+    (match S.get h.selection_mode with
       | `none -> false
       | `single | `multiple -> true)
     && not (disabled ())
   in
   let selected () = h.is_selected key in
-  let slots () =
-    Styles.Tag.slots
-      (Styles.Tag.options ?size:(g.size ()) ?variant:(g.variant ()) ())
+  let slots =
+    S.accessor (fun () ->
+        Styles.Tag.slots
+          (Styles.Tag.options ?size:(S.get g.size) ?variant:(S.get g.variant) ()))
   in
   let removers, set_removers = S.create_signal 0 in
   let t =
@@ -122,20 +126,21 @@ let%component make ?(id : string option) ?(text_value : string option)
   let self, watch_self = self_focus () in
   let i =
     Interaction.create
-      ~disabled:(fun[@u] () -> disabled ())
-      ~no_hover:(fun[@u] () -> not (selectable ()))
-      ~no_pointer_press:(fun[@u] () -> not (selectable ()))
+      ~disabled:(fun () -> disabled ())
+      ~no_hover:(fun () -> not (selectable ()))
+      ~no_pointer_press:(fun () -> not (selectable ()))
       ()
   in
   let state () =
     {
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> Interaction.pressed i);
-      is_selected = (fun[@u] () -> selected ());
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i && self ());
-      is_disabled = (fun[@u] () -> disabled ());
-      allows_removing = (fun[@u] () -> h.allows_removing ());
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = S.accessor (fun () -> Interaction.pressed i);
+      is_selected = S.accessor (fun () -> selected ());
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible =
+        S.accessor (fun () -> Interaction.focus_visible i && self ());
+      is_disabled = S.accessor (fun () -> disabled ());
+      allows_removing = h.allows_removing;
     }
   in
   <Context.Provider value=(fun () -> t)>
@@ -147,7 +152,7 @@ let%component make ?(id : string option) ?(text_value : string option)
             ignore (given_ref e : unit option);
             Interaction.watch i e;
             watch_self e)
-      class_=(fun () -> after (Styles.Tag.base (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Tag.base (S.get slots)) (S.get class_))
       data_slot="tag"
       data_selected=(fun () -> Jsx.flag (selected ()))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
@@ -156,22 +161,22 @@ let%component make ?(id : string option) ?(text_value : string option)
       data_focus_visible=(fun () ->
                            Jsx.flag (Interaction.focus_visible i && self ()))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_allows_removing=(fun () -> Jsx.flag (h.allows_removing ()))
+      data_allows_removing=(fun () -> Jsx.flag (S.get h.allows_removing))
       data_selection_mode=(fun () ->
-                            match h.selection_mode () with
+                            match S.get h.selection_mode with
                             | `none -> Jsx.flag false
                             | `single -> Jsx.data "single"
                             | `multiple -> Jsx.data "multiple")
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
       (fun () ->
         (* A tag that can be removed draws HeroUI's button, unless its
            children draw one of their own, or are a function, which draws
            what it wants. *)
         if
-          h.allows_removing ()
-          && (not (Jsx.is_function (children ())))
+          S.get h.allows_removing
+          && (not (Jsx.is_function (S.get children)))
           && S.get removers = 0
         then
           Jsx.element

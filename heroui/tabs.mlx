@@ -17,8 +17,8 @@ external queue_microtask : (unit -> unit) -> unit = "queueMicrotask"
 (* What a tabs' parts read of it: its classes and orientation, and its
    indicators. *)
 type tabs = {
-  slots : unit -> Styles.Tabs.slots;
-  orientation : unit -> [ `horizontal | `vertical ];
+  slots : Styles.Tabs.slots Solid.accessor;
+  orientation : [ `horizontal | `vertical ] Solid.accessor;
   indicators : Selection_indicator.t;
   tab_id : string -> string;
       (* The id of the tab of a key, which its panel is labelled by, and,
@@ -35,7 +35,7 @@ module Context = Solidtype.Context.Make_optional (struct
 end)
 
 (* What a tab's parts read of it. *)
-type tab = { selected : unit -> bool }
+type tab = { selected : bool Solid.accessor }
 
 module Tab_context = Solidtype.Context.Make_optional (struct
   type t = tab
@@ -79,7 +79,9 @@ module List_container = struct
     let t = within "Tabs.List_container" in
     let container = ref None in
     let vertical () =
-      match t.orientation () with `vertical -> true | `horizontal -> false
+      match Solid.get t.orientation with
+      | `vertical -> true
+      | `horizontal -> false
     in
     (* Most of a view on, toward the start or the end, and no further than
        the list goes, as HeroUI's chevrons scroll it; in a right-to-left page
@@ -116,19 +118,21 @@ module List_container = struct
               (if vertical then scroll_options ~behavior:"smooth" ~top:next ()
                else scroll_options ~behavior:"smooth" ~left:next ())
     in
-    let slots () = t.slots () in
+    let slots () = Solid.get t.slots in
     <div
       class_=(fun () ->
-               after (Styles.Tabs.tab_list_container (slots ())) (class_ ()))
+               after
+                 (Styles.Tabs.tab_list_container (slots ()))
+                 (Solid.get class_))
       ref=(fun e -> container := Some e)
       data_slot="tabs-list-container"
       props=(Props.others props)>
       <Scroll_shadow
         class_=(fun () -> Styles.Tabs.scroller (slots ()))
         hide_scroll_bar=true
-        orientation=(fun () -> t.orientation ())
+        orientation=(fun () -> Solid.get t.orientation)
         size=64>
-        (fun () -> children ())
+        (fun () -> Solid.get children)
       </Scroll_shadow>
       <button
         aria_label=(fun () ->
@@ -207,52 +211,55 @@ module Tab = struct
       () =
     let t = within "Tabs.Tab" in
     let k = Kobalte.use_tabs_context () in
-    let selected () =
-      Option.equal String.equal
-        (Solid.get
-           (Types.SingleSelectListState.selected_key
-              (Solid.get (Types.TabsContextValue.list_state k))))
-        (Some (id ()))
+    let selected =
+      Solid.accessor (fun () ->
+          Option.equal String.equal
+            (Solid.get
+               (Types.SingleSelectListState.selected_key
+                  (Solid.get (Types.TabsContextValue.list_state k))))
+            (Some (Solid.get id)))
     in
     let disabled () =
-      is_disabled () || Solid.get (Types.TabsContextValue.is_disabled k)
+      Solid.get is_disabled || Solid.get (Types.TabsContextValue.is_disabled k)
     in
-    let n = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+    let n = Interaction.create ~disabled () in
     (* A disabled link has no [href], since [disabled] keeps no [<a>] from
        being followed. *)
-    let link () = if disabled () then None else href () in
+    let link () = if disabled () then None else Solid.get href in
     Solid.create_computed (fun () ->
-        let key = id () in
-        match href () with
+        let key = Solid.get id in
+        match Solid.get href with
         | Some _ ->
             Hashtbl.replace t.links key ();
             Solid.on_cleanup (fun () -> Hashtbl.remove t.links key)
         | None -> ());
     let state () =
       {
-        is_hovered = (fun[@u] () -> Interaction.hovered n);
-        is_pressed = (fun[@u] () -> Interaction.pressed n);
-        is_focused = (fun[@u] () -> Interaction.focused n);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible n);
-        is_selected = (fun[@u] () -> selected ());
-        is_disabled = (fun[@u] () -> Interaction.disabled n);
+        is_hovered = Solid.accessor (fun () -> Interaction.hovered n);
+        is_pressed = Solid.accessor (fun () -> Interaction.pressed n);
+        is_focused = Solid.accessor (fun () -> Interaction.focused n);
+        is_focus_visible =
+          Solid.accessor (fun () -> Interaction.focus_visible n);
+        is_selected = selected;
+        is_disabled = Solid.accessor (fun () -> Interaction.disabled n);
       }
     in
     <As_tab
       as_=(fun () ->
             Jsx.drawn_as
-              (Option.map (fun f p -> f p (state ())) (as_ ()))
+              (Option.map (fun f p -> f p (state ())) (Solid.get as_))
               (match link () with Some _ -> "a" | None -> "button"))
       ?href=(fun () -> link ())
-      id=(fun () -> t.tab_id (id ()))
-      value=(fun () -> id ())
-      disabled=(fun () -> is_disabled ())
-      class_=(fun () -> after (Styles.Tabs.tab (t.slots ())) (class_ ()))
+      id=(fun () -> t.tab_id (Solid.get id))
+      value=(fun () -> Solid.get id)
+      disabled=(fun () -> Solid.get is_disabled)
+      class_=(fun () ->
+               after (Styles.Tabs.tab (Solid.get t.slots)) (Solid.get class_))
       ref=(fun b ->
             ignore (given_ref (as_html b) : unit option);
             Interaction.watch n b)
       data_slot="tabs-tab"
-      data_selected=(fun () -> Jsx.flag (selected ()))
+      data_selected=(fun () -> Jsx.flag (Solid.get selected))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered n))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed n))
       data_focused=(fun () -> Jsx.flag (Interaction.focused n))
@@ -262,10 +269,11 @@ module Tab = struct
             (* The panel a selected tab names is the tabs', which an attribute in
          the rest must not replace. *)
       ?aria_controls=(fun () ->
-                       if selected () then Some (t.tab_id (id ()) ^ "-panel")
+                       if Solid.get selected then
+                         Some (t.tab_id (Solid.get id) ^ "-panel")
                        else None)>
       <Tab_context.Provider value=(fun () -> { selected })>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (Solid.get children) (state ()))
       </Tab_context.Provider>
     </As_tab>
   [@@element a]
@@ -279,14 +287,16 @@ module Indicator = struct
       let i = Selection_indicator.indicator t.indicators in
       <div
         class_=(fun () ->
-                 after (Styles.Tabs.tab_indicator (t.slots ())) (class_ ()))
+                 after
+                   (Styles.Tabs.tab_indicator (Solid.get t.slots))
+                   (Solid.get class_))
         ref=(fun e -> i.ref e)
         data_slot="tabs-indicator"
-        data_entering=(fun () -> Jsx.flag (i.entering ()))
+        data_entering=(fun () -> Jsx.flag (Solid.get i.entering))
         props=(Props.others props)
       />
     in
-    <Show when_=(fun () -> tab.selected ())>
+    <Show when_=(fun () -> Solid.get tab.selected)>
       (fun () -> Jsx.element (indicator ()))
     </Show>
   [@@element div]
@@ -297,7 +307,10 @@ module Separator = struct
     let t, (_ : tab) = within_tab "Tabs.Separator" in
     <span
       aria_hidden=true
-      class_=(fun () -> after (Styles.Tabs.separator (t.slots ())) (class_ ()))
+      class_=(fun () ->
+               after
+                 (Styles.Tabs.separator (Solid.get t.slots))
+                 (Solid.get class_))
       data_slot="tabs-separator"
       props=(Props.others props)
     />
@@ -320,18 +333,20 @@ module Panel = struct
                 (Solid.get
                    (Types.SingleSelectListState.selected_key
                       (Solid.get (Types.TabsContextValue.list_state k))))
-                (Some (id ())))>
+                (Some (Solid.get id)))>
       <Kobalte.Content
-        value=(fun () -> id ())
+        value=(fun () -> Solid.get id)
         force_mount=true
-        id=(fun () -> t.tab_id (id ()) ^ "-panel")
-        aria_labelledby=(fun () -> t.tab_id (id ()))
+        id=(fun () -> t.tab_id (Solid.get id) ^ "-panel")
+        aria_labelledby=(fun () -> t.tab_id (Solid.get id))
         class_=(fun () ->
-                 after (Styles.Tabs.tab_panel (t.slots ())) (class_ ()))
+                 after
+                   (Styles.Tabs.tab_panel (Solid.get t.slots))
+                   (Solid.get class_))
         data_slot="tabs-panel"
         data_orientation=(fun () -> Jsx.data "")
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () -> Solid.get children)
       </Kobalte.Content>
     </Show>
   [@@element div]
@@ -343,11 +358,14 @@ module List = struct
       ~(children : Jsx.content) () =
     let t = within "Tabs.List" in
     <Kobalte.List
-      ?aria_label=(fun () -> aria_label ())
-      class_=(fun () -> after (Styles.Tabs.tab_list (t.slots ())) (class_ ()))
+      ?aria_label
+      class_=(fun () ->
+               after
+                 (Styles.Tabs.tab_list (Solid.get t.slots))
+                 (Solid.get class_))
       data_slot="tabs-list"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> Solid.get children)
     </Kobalte.List>
   [@@element div]
 end
@@ -364,10 +382,11 @@ let%component make ?(selected_key : string option)
   let t =
     {
       slots =
-        (fun () ->
-          Styles.Tabs.slots
-            (Styles.Tabs.options ~align:(align ()) ~variant:(variant ()) ()));
-      orientation = (fun () -> orientation ());
+        Solid.accessor (fun () ->
+            Styles.Tabs.slots
+              (Styles.Tabs.options ~align:(Solid.get align)
+                 ~variant:(Solid.get variant) ()));
+      orientation;
       indicators = Selection_indicator.create ();
       tab_id =
         (let ids = Hashtbl.create 8 in
@@ -384,9 +403,12 @@ let%component make ?(selected_key : string option)
   (* Kobalte is given the key selected while there is one, so a link's key it
      selects is refused unseen; its first, while none is, stands, as React
      Aria selects a first tab that is a link. *)
-  let kept, keep = Solid.create_signal (default_selected_key ()) in
-  let selected () =
-    match selected_key () with Some key -> Some key | None -> Solid.get kept
+  let kept, keep = Solid.create_signal (Solid.get default_selected_key) in
+  let selected =
+    Solid.accessor (fun () ->
+        match Solid.get selected_key with
+        | Some key -> Some key
+        | None -> Solid.get kept)
   in
   (* Kobalte tells a selection twice as the arrows go round from the last tab
      to the first, in one press; React Aria tells each press once. *)
@@ -400,24 +422,25 @@ let%component make ?(selected_key : string option)
         ignore (on_selection_change key : unit option)
   in
   let change key =
-    match (Hashtbl.mem t.links key, selected ()) with
+    match (Hashtbl.mem t.links key, Solid.get selected) with
     | true, Some _ -> ()
     | true, None | false, (Some _ | None) ->
         Solid.set keep (Some key);
         tell key
   in
   <Kobalte.Root
-    ?value=(fun () -> selected ())
-    orientation=(fun () -> orientation ())
-    activation_mode=(fun () -> keyboard_activation ())
-    disabled=(fun () -> is_disabled ())
-    class_=(fun () -> after (Styles.Tabs.base (t.slots ())) (class_ ()))
+    ?value=selected
+    orientation=(fun () -> Solid.get orientation)
+    activation_mode=(fun () -> Solid.get keyboard_activation)
+    disabled=(fun () -> Solid.get is_disabled)
+    class_=(fun () ->
+             after (Styles.Tabs.base (Solid.get t.slots)) (Solid.get class_))
     data_slot="tabs"
-    data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+    data_disabled=(fun () -> Jsx.flag (Solid.get is_disabled))
     props=(Props.others props)
     on_change=change>
     <Context.Provider value=(fun () -> t)>
-      (fun () -> children ())
+      (fun () -> Solid.get children)
     </Context.Provider>
   </Kobalte.Root>
 [@@element div]

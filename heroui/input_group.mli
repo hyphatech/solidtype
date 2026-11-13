@@ -16,6 +16,9 @@
     is. A part is used inside an [Input_group]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** What goes before the input: a [<div>]. *)
 module Prefix : sig
   module Props : sig
@@ -24,13 +27,13 @@ module Prefix : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What goes after the input: a [<div>]. *)
@@ -41,13 +44,13 @@ module Suffix : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group's input: an {!Input}, which takes every attribute an [<input>]
@@ -55,8 +58,8 @@ end
 module Input : sig
   module Props = Input.Props
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group's text area: a {!Text_area}, which takes every attribute a
@@ -64,16 +67,16 @@ end
 module Text_area : sig
   module Props = Text_area.Props
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  is_hovered : bool Solidtype.Solid.accessor;
-  is_focus_within : bool Solidtype.Solid.accessor;
-  is_focus_visible : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
+  is_hovered : bool S.accessor;
+  is_focus_within : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_invalid : bool S.accessor;
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, each read where Solid tracks it. *)
@@ -89,13 +92,11 @@ module Props : sig
     ?class_:string Solidtype.Check.value ->
     ?on_click:(Dom.mouseEvent -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

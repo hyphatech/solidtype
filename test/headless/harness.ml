@@ -6,6 +6,26 @@ module Syntax = struct
   let ( let* ) p f = Js.Promise.then_ f p
 end
 
+(* A promise made by an OCaml function given [resolve], as JavaScript's own
+   constructor makes one. *)
+external promise : ((('a -> unit) -> unit)[@mel.uncurry]) -> 'a Js.Promise.t
+  = "Promise"
+[@@mel.new]
+
+external request_frame : ((float -> unit)[@mel.uncurry]) -> int
+  = "requestAnimationFrame"
+
+(* [ms] milliseconds passed. *)
+let wait ms =
+  promise (fun resolve ->
+      ignore
+        (Js.Global.setTimeout ~f:(fun () -> resolve ()) ms
+          : Js.Global.timeoutId))
+
+(* A frame drawn, as a browser draws one after the page changes. *)
+let frame () =
+  promise (fun resolve -> ignore (request_frame (fun _ -> resolve ()) : int))
+
 open Syntax
 
 external render : (unit -> Solidtype.Jsx.element) -> unit = "render"
@@ -59,13 +79,7 @@ external pointer : user -> pointer_action array -> unit Js.Promise.t = "pointer"
 [@@mel.send]
 
 (* A wait as long as a touch is held. *)
-let sleep ms =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
-      in
-      ())
-  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+let sleep ms = wait ms
 
 external tab_js : user -> unit -> unit Js.Promise.t = "tab" [@@mel.send]
 

@@ -50,27 +50,27 @@ let input ~classes ~slot (props : Props.t) =
      Aria's is. *)
   let disabled () =
     match place with
-    | In_text_field f -> f.disabled ()
-    | In_combo_box f -> f.disabled ()
+    | In_text_field f -> S.get f.disabled
+    | In_combo_box f -> S.get f.disabled
     | Alone -> Option.value (Props.disabled props) ~default:false
   in
   let invalid () =
     match place with
-    | In_text_field f -> f.invalid ()
-    | In_combo_box f -> f.invalid ()
+    | In_text_field f -> S.get f.invalid
+    | In_combo_box f -> S.get f.invalid
     | Alone -> (
         match Props.aria_invalid props with
         | Some "false" | None -> false
         | Some _ -> true)
   in
-  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let i = Interaction.create ~disabled:(fun () -> disabled ()) () in
   let classes () =
     classes
       ~variant:
         (match (Props.variant props, place) with
         | Some v, _ -> Some v
-        | None, In_text_field f -> f.variant ()
-        | None, In_combo_box f -> Some (f.variant ())
+        | None, In_text_field f -> S.get f.variant
+        | None, In_combo_box f -> Some (S.get f.variant)
         | None, Alone -> None)
   in
   match place with
@@ -85,7 +85,7 @@ let input ~classes ~slot (props : Props.t) =
                  | Some t -> Some t
                  | None -> if disabled () then None else Some "")
         ref=(fun e ->
-              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Jsx.call (Props.ref props) e;
               Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -102,9 +102,9 @@ let input ~classes ~slot (props : Props.t) =
                  match Props.title props with
                  | Some t -> Some t
                  | None -> if disabled () then None else Some "")
-        ?name=(fun () -> f.name ())
+        ?name=(fun () -> S.get f.name)
         ref=(fun e ->
-              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Jsx.call (Props.ref props) e;
               Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -112,7 +112,7 @@ let input ~classes ~slot (props : Props.t) =
         data_focus_visible=(fun () ->
                              Jsx.flag
                                (Interaction.focus_visible i
-                               || (Interaction.focused i && f.returned ())))
+                               || (Interaction.focused i && S.get f.returned)))
         data_disabled=(fun () -> Jsx.flag (disabled ()))
         data_invalid=(fun () -> Jsx.flag (invalid ()))
       />
@@ -123,7 +123,7 @@ let input ~classes ~slot (props : Props.t) =
         class_=(fun () -> classes ())
         ?title=(fun () -> Props.title props)
         ref=(fun e ->
-              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Jsx.call (Props.ref props) e;
               Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))

@@ -59,14 +59,14 @@ module Picker = struct
       ~(options : 'a option_ array) ~(picked : string)
       ~(on_pick : string -> unit) () =
     <Select
-      class_=(fun () -> class_ ())
-      value=(fun () -> [| picked () |])
+      class_=(fun () -> S.get class_)
+      value=(fun () -> [| S.get picked |])
       on_change=(fun ids -> Array.iter on_pick ids)>
-      <Label>(fun () -> Jsx.string (label ()))</Label>
+      <Label>(fun () -> Jsx.string (S.get label))</Label>
       <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
       <Select.Popover>
         <List_box>
-          <For each=(fun () -> options ())>
+          <For each=(fun () -> S.get options)>
             (fun o _ ->
               <List_box.Item id=(fun () -> o.id) text_value=(fun () -> o.name)>
                 (fun () -> Jsx.string o.name) <List_box.Item_indicator />

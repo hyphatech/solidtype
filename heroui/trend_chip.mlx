@@ -49,10 +49,10 @@ module Prefix = struct
       (Prefix
          (fun () ->
            <span
-             class_=(fun () -> after "trend-chip__prefix" (class_ ()))
+             class_=(fun () -> after "trend-chip__prefix" (S.get class_))
              data_slot="trend-chip-prefix"
              props=(Props.others props)>
-             (fun () -> children ())
+             (fun () -> S.get children)
            </span>))
   [@@element span]
 end
@@ -63,10 +63,10 @@ module Suffix = struct
       (Suffix
          (fun () ->
            <span
-             class_=(fun () -> after "trend-chip__suffix" (class_ ()))
+             class_=(fun () -> after "trend-chip__suffix" (S.get class_))
              data_slot="trend-chip-suffix"
              props=(Props.others props)>
-             (fun () -> children ())
+             (fun () -> S.get children)
            </span>))
   [@@element span]
 end
@@ -77,27 +77,28 @@ module Indicator = struct
     Part.element
       (Indicator
          (fun trend ->
-           match children () with
+           match S.get children with
            | Some icon ->
                <span
                  aria_hidden=true
                  class_=(fun () ->
                           after
                             "trend-chip__indicator trend-chip__indicator--icon"
-                            (class_ ()))
+                            (S.get class_))
                  data_slot="trend-chip-indicator"
                  props=(Props.others props)>
                  (fun () -> icon)
                </span>
            | None ->
-               own_arrow ?class_:(class_ ()) ~others:(Props.others props) trend))
+               own_arrow ?class_:(S.get class_) ~others:(Props.others props)
+                 trend))
   [@@element span]
 end
 
 let%component make ?(trend : trend = `up) ?(size : size = `sm)
     ?(variant : variant = `soft) ?(class_ : string option)
     ~(children : Jsx.content) () =
-  let resolved = S.children (fun () -> children ()) in
+  let resolved = S.children (fun () -> S.get children) in
   let all () = S.to_array (S.get resolved) in
   let parts () = Array.to_list (Part.read (all ())) in
   let drawn f =
@@ -109,27 +110,27 @@ let%component make ?(trend : trend = `up) ?(size : size = `sm)
         (function Indicator i -> Some i | Prefix _ | Suffix _ -> None)
         (parts ())
     with
-    | Some i -> i (trend ())
-    | None -> own_arrow (trend ())
+    | Some i -> i (S.get trend)
+    | None -> own_arrow (S.get trend)
   in
   <Chip
     color=(fun () ->
-            match trend () with
+            match S.get trend with
             | `up -> `success
             | `down -> `danger
             | `neutral -> `default)
-    size=(fun () -> size ())
-    variant=(fun () -> variant ())
+    size=(fun () -> S.get size)
+    variant=(fun () -> S.get variant)
     class_=(fun () ->
              after
-               (match size () with
+               (match S.get size with
                | `sm -> "trend-chip trend-chip--sm"
                | `md -> "trend-chip trend-chip--md"
                | `lg -> "trend-chip trend-chip--lg")
-               (class_ ()))
+               (S.get class_))
     data_trend=(fun () ->
                  Jsx.data
-                   (match trend () with
+                   (match S.get trend with
                    | `up -> "up"
                    | `down -> "down"
                    | `neutral -> "neutral"))

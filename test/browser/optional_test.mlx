@@ -49,7 +49,7 @@ let () =
       Jest.test "an element's attribute is there while its option is Some"
         (fun () ->
           let link, set_link = S.create_signal None in
-          T.render (fun () -> <a ?title=(fun () -> S.get link)>"home"</a>);
+          T.render (fun () -> <a ?title=link>"home"</a>);
           let before = title "a" in
           S.set set_link (Some "/");
           let some = title "a" in
@@ -60,8 +60,7 @@ let () =
       Jest.test "a component passes on an optional prop it may leave out"
         (fun () ->
           let note, set_note = S.create_signal (Some "first") in
-          T.render (fun () ->
-              <div><Noted ?note=(fun () -> S.get note) /> <Noted /></div>);
+          T.render (fun () -> <div><Noted ?note /> <Noted /></div>);
           let first = title "span" in
           S.set set_note None;
           let none = title "span" in

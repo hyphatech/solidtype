@@ -21,15 +21,18 @@
     input, whose keys move through the list and choose. A part is used inside a
     [Search_field]: elsewhere it raises [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The icon, the input and the clear button, laid out together: a
     [<div role="group">]. *)
 module Group : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_focus_within : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_invalid : bool Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_focus_within : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
+    is_invalid : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -40,16 +43,14 @@ module Group : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's magnifier, or the icon it is given. *)
@@ -60,13 +61,13 @@ module Search_icon : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Svg.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The field's input, Kobalte's, of type [search]. *)
@@ -79,13 +80,13 @@ module Input : sig
       ?class_:string Solidtype.Check.value ->
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlInputElement -> unit) ->
-      ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Input.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Input.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The button that clears the field and gives its input the focus back:
@@ -93,11 +94,11 @@ end
     the children it is given, out of the tab order, as React Aria's is. *)
 module Clear_button : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_pressed : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -108,27 +109,25 @@ module Clear_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
       ?on_pointer_down:(Dom.pointerEvent -> unit) ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
-      ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  is_empty : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
-  is_read_only : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
+  is_empty : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, each read where Solid tracks it. *)
@@ -155,13 +154,11 @@ module Props : sig
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     ?ref:(Dom.htmlDivElement -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

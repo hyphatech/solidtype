@@ -20,6 +20,9 @@
     hydrated -- it draws the entries in its first 400 pixels, so a page is
     prerendered with them. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type list_layout = {
   orientation : [ `vertical | `horizontal ];
   row_size : float option;
@@ -89,13 +92,13 @@ val use : unit -> layout option
     while it is a row: which rows to draw, and how each is placed. *)
 
 type 'row window = {
-  drawn : unit -> 'row array;
+  drawn : 'row array S.accessor;
       (** The rows in view of what scrolls the list, and those kept wherever
           they are, in order; a read Solid tracks. *)
   place : 'row -> string;
       (** A row's style: where it is in the block, and its length where the
           layout fixes it. *)
-  block : unit -> string;
+  block : string S.accessor;
       (** The block's style: as long as the rows all are. *)
   frame : 'row -> Dom.element -> unit;
       (** A row's element as it is made, measured where its length is not fixed.
@@ -128,10 +131,10 @@ module Props : sig
   val check :
     layout:layout Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t Solidtype.Solid.rest ->
+    ?props:t S.rest ->
     unit ->
     unit
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

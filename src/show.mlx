@@ -37,7 +37,7 @@ let boxed some =
            | None, None -> true
            | Option.Some _, None | None, Option.Some _ -> false))
     (fun () ->
-      match some () with
+      match Solid.get some with
       | Option.Some value -> Option.Some { value }
       | None -> None)
 
@@ -47,12 +47,14 @@ module Some = struct
     let box = boxed some in
     <Raw
       when_=(fun () -> Solid.get box)
-      fallback=(fun () -> Option.value (fallback ()) ~default:Jsx.nothing)>
+      fallback=(fun () ->
+                 Option.value (Solid.get fallback) ~default:Jsx.nothing)>
       (fun b ->
-        children (fun[@u] () ->
-            match Solid.get b with
-            | Option.Some (box : _ box) -> box.value
-            | None -> raise Stale_read))
+        children
+          (Solid.accessor (fun () ->
+               match Solid.get b with
+               | Option.Some (box : _ box) -> box.value
+               | None -> raise Stale_read)))
     </Raw>
 end
 
@@ -63,7 +65,8 @@ module Keyed = struct
     <Raw
       when_=(fun () -> Solid.get box)
       keyed=true
-      fallback=(fun () -> Option.value (fallback ()) ~default:Jsx.nothing)>
+      fallback=(fun () ->
+                 Option.value (Solid.get fallback) ~default:Jsx.nothing)>
       (fun b ->
         match b with
         | Option.Some (box : _ box) -> children box.value

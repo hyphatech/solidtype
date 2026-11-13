@@ -20,15 +20,18 @@
     checkboxes, each its own [Checkbox.Root], which the group checks and is told
     of. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type group = {
   checked : string -> bool;
   set : string -> bool -> unit;
-  variant : unit -> [ `primary | `secondary ] option;
-  disabled : unit -> bool;
-  invalid : unit -> bool;
-  read_only : unit -> bool;
-  name : unit -> string option;
-  described_by : unit -> string option;
+  variant : [ `primary | `secondary ] option S.accessor;
+  disabled : bool S.accessor;
+  invalid : bool S.accessor;
+  read_only : bool S.accessor;
+  name : string option S.accessor;
+  described_by : string option S.accessor;
 }
 (** What a group's checkboxes read of it: whether a value is checked, read as it
     changes; [set value on], which checks or unchecks it; the variant they take
@@ -45,17 +48,17 @@ module Context : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> group option
 end
 
 type state = {
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_read_only : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
+  is_invalid : bool S.accessor;
 }
 (** What a group's children are drawn of, given as a function, as HeroUI's
     render props are, each read where Solid tracks it. *)
@@ -78,13 +81,11 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

@@ -1,5 +1,35 @@
 # Changes
 
+## Unreleased
+
+- What changes is read one way, `S.get x`, and given one way, `fun () -> e`.
+  Breaking: a component's value prop is read `S.get name`, not `name ()`,
+  and its children `S.get children`; a field of a part's state or context
+  that was `unit -> t`, `s.selected ()`, is a `t Solid.accessor`,
+  `S.get s.selected`, as `s.is_pressed` already was, and so is what
+  `Fieldset.disabled`, `Segment.Item.is_selected` and `Surface.Context`
+  give. `Interaction.create` takes thunks, `~disabled:(fun () -> ...)`,
+  where it took accessors built with `fun[@u]`. A prop's read in a
+  component's body compiles to Solid's own, `props.name`.
+
+- `S.accessor (fun () -> e)` makes an accessor of a thunk, at no cost to a
+  read, so a component that hands on what it derives writes no `[@u]`.
+  `Jsx.call f x` calls a handler a caller gave, `Jsx.act f` an action of no
+  argument, each nothing where none was given. Breaking: the slots of
+  `Description`, `Label`, `Header`, `Error_message`, `Field_error` and
+  `Separator`, and `List_box.Host`, are OCaml functions,
+  `fun classes others children -> ...`, where they were `fun[@u]`.
+
+- In JSX, a value that changes is given as a thunk written where it is
+  given, `fun () -> e`; any other expression of a thunk is refused there, as
+  is a name given as a child, which is `render=f`. Breaking:
+  `is_invalid=(short name 3)` is `is_invalid=(fun () -> short name 3)`. Each
+  thunk reaches Solid as a JavaScript function of no argument, so one whose
+  value is a function, `value=(fun () -> fun s -> ...)`, gives that function.
+
+- An optional prop is passed on by the name of its accessor, `?title=note`,
+  a signal's or a component's own; it was `?title=(fun () -> S.get note)`.
+
 ## 0.9.1 (2026-11-11)
 
 - `solidtype-heroui` draws its icons from `solidtype-gravity-icons`, which it

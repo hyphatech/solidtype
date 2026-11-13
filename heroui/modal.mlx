@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type variant = [ `opaque | `blur | `transparent ]
@@ -7,9 +8,9 @@ type size = [ `xs | `sm | `md | `lg | `cover | `full ]
 
 (* What the dialog and its body read of their container. *)
 type container = {
-  placement : unit -> placement;
-  scroll : unit -> scroll;
-  size : unit -> size;
+  placement : placement S.accessor;
+  scroll : scroll S.accessor;
+  size : size S.accessor;
 }
 
 module Container_context = Solidtype.Context.Make_optional (struct
@@ -23,9 +24,9 @@ let container () =
   | Some c -> c
   | None ->
       {
-        placement = (fun () -> `auto);
-        scroll = (fun () -> `inside);
-        size = (fun () -> `md);
+        placement = S.accessor (fun () -> `auto);
+        scroll = S.accessor (fun () -> `inside);
+        size = S.accessor (fun () -> `md);
       }
 
 (* A class added after HeroUI's own, as React's className is. *)
@@ -44,8 +45,10 @@ module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
       ~(children : Jsx.content) () =
     Dialog_frame.trigger ~slot:"modal-trigger"
-      ~class_:(fun () -> after (Styles.Modal.trigger (slots ())) (class_ ()))
-      ~aria_label ~others:(Props.others props) children
+      ~class_:(fun () -> after (Styles.Modal.trigger (slots ())) (S.get class_))
+      ~aria_label:(fun () -> S.get aria_label)
+      ~others:(Props.others props)
+      (fun () -> S.get children)
   [@@element div]
 end
 
@@ -63,17 +66,22 @@ module Backdrop = struct
          Dialog_frame.overlay_state ->
          Solidtype.Jsx.element)
          option) () =
-    Dialog_frame.backdrop ~slot:"modal-backdrop" ~portal_container
+    Dialog_frame.backdrop ~slot:"modal-backdrop"
+      ~portal_container:(fun () -> S.get portal_container)
       ~class_:(fun () ->
         after
-          (Styles.Modal.backdrop (slots ~variant:(variant ()) ()))
-          (class_ ()))
-      ~style ~ref:given_ref ~dismissable:is_dismissable
-      ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
-      ~is_open ~default_open
+          (Styles.Modal.backdrop (slots ~variant:(S.get variant) ()))
+          (S.get class_))
+      ~style:(fun () -> S.get style)
+      ~ref:given_ref
+      ~dismissable:(fun () -> S.get is_dismissable)
+      ~keyboard_dismissable:(fun () -> not (S.get is_keyboard_dismiss_disabled))
+      ~is_open:(fun () -> S.get is_open)
+      ~default_open:(fun () -> S.get default_open)
       ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-      ~as_ ~others:(Props.others props)
-      (fun s -> Jsx.draw (children ()) s)
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s -> Jsx.draw (S.get children) s)
   [@@element div]
 end
 
@@ -94,14 +102,16 @@ module Container = struct
       ~class_:(fun () ->
         after
           (Styles.Modal.container
-             (slots ~scroll:(scroll ()) ~size:(size ()) ()))
-          (class_ ()))
-      ~placement:(fun () -> placement_name (placement ()))
-      ~ref:given_ref ~as_ ~others:(Props.others props)
+             (slots ~scroll:(S.get scroll) ~size:(S.get size) ()))
+          (S.get class_))
+      ~placement:(fun () -> placement_name (S.get placement))
+      ~ref:given_ref
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
       (fun s ->
         Jsx.element
           <Container_context.Provider value=(fun () -> c)>
-            (fun () -> Jsx.draw (children ()) s)
+            (fun () -> Jsx.draw (S.get children) s)
           </Container_context.Provider>)
   [@@element div]
 end
@@ -122,21 +132,23 @@ module Dialog = struct
       ~class_:(fun () ->
         after
           (Styles.Modal.dialog
-             (slots ~scroll:(c.scroll ()) ~size:(c.size ()) ()))
-          (class_ ()))
-      ~placement:(fun () -> placement_name (c.placement ()))
-      ~ref:given_ref ~on_focus_out ~as_ ~others:(Props.others props)
-      (fun s -> Jsx.draw (children ()) s)
+             (slots ~scroll:(S.get c.scroll) ~size:(S.get c.size) ()))
+          (S.get class_))
+      ~placement:(fun () -> placement_name (S.get c.placement))
+      ~ref:given_ref ~on_focus_out
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s -> Jsx.draw (S.get children) s)
   [@@element section]
 end
 
 module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Modal.header (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Modal.header (slots ())) (S.get class_))
       data_slot="modal-header"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -147,11 +159,11 @@ module Body = struct
     <div
       class_=(fun () ->
                after
-                 (Styles.Modal.body (slots ~scroll:(c.scroll ()) ()))
-                 (class_ ()))
+                 (Styles.Modal.body (slots ~scroll:(S.get c.scroll) ()))
+                 (S.get class_))
       data_slot="modal-body"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -159,10 +171,10 @@ end
 module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Modal.footer (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Modal.footer (slots ())) (S.get class_))
       data_slot="modal-footer"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -170,10 +182,10 @@ end
 module Icon = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Modal.icon (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Modal.icon (slots ())) (S.get class_))
       data_slot="modal-icon"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -181,8 +193,9 @@ end
 module Heading = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     Dialog_frame.heading ~slot:"modal-heading"
-      ~class_:(fun () -> after (Styles.Modal.heading (slots ())) (class_ ()))
-      ~others:(Props.others props) children
+      ~class_:(fun () -> after (Styles.Modal.heading (slots ())) (S.get class_))
+      ~others:(Props.others props)
+      (fun () -> S.get children)
   [@@element h2]
 end
 
@@ -198,13 +211,18 @@ module Close_trigger = struct
     let f = within "Modal.Close_trigger" in
     Dialog_frame.close_trigger f ~slot:"modal-close-trigger"
       ~class_:(fun () ->
-        after (Styles.Modal.close_trigger (slots ())) (class_ ()))
-      ~on_click ~as_ ~others:(Props.others props) ~children
+        after (Styles.Modal.close_trigger (slots ())) (S.get class_))
+      ~on_click
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      ~children:(fun () -> S.get children)
   [@@element button]
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
     ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
-  Dialog_frame.root ~is_open ~default_open
+  Dialog_frame.root
+    ~is_open:(fun () -> S.get is_open)
+    ~default_open:(fun () -> S.get default_open)
     ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-    children
+    (fun () -> S.get children)

@@ -269,10 +269,10 @@ let group_of_state ~disabled =
                     (T.words
                        [
                          ( "vertical",
-                           fun[@u] () ->
-                             match S.get g.orientation with
-                             | `vertical -> true
-                             | `horizontal -> false );
+                           S.accessor (fun () ->
+                               match S.get g.orientation with
+                               | `vertical -> true
+                               | `horizontal -> false) );
                          ("disabled", g.is_disabled);
                        ]))
               </span>;

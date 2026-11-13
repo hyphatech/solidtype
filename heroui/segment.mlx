@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.SegmentedControl
@@ -7,10 +8,10 @@ type variant = [ `default | `ghost ]
 
 (* What a segment's options read of it. *)
 type segment = {
-  value : unit -> string option;
-  disabled : unit -> bool;
-  variant : unit -> variant;
-  size : unit -> size;
+  value : string option S.accessor;
+  disabled : bool S.accessor;
+  variant : variant S.accessor;
+  size : size S.accessor;
   indicators : Selection_indicator.t;
 }
 
@@ -19,7 +20,7 @@ module Context = Solidtype.Context.Make_optional (struct
 end)
 
 (* What an option's content reads of it. *)
-type item = { selected : unit -> bool }
+type item = { selected : bool S.accessor }
 
 module Item_context = Solidtype.Context.Make_optional (struct
   type t = item
@@ -62,7 +63,7 @@ end)
 let indicator s =
   let i = Selection_indicator.indicator s.indicators in
   <div
-    class_=(fun () -> indicator_classes (s.variant ()))
+    class_=(fun () -> indicator_classes (S.get s.variant))
     ref=(fun e -> i.ref e)
     data_slot="segment-indicator"
   />
@@ -72,41 +73,48 @@ module Item = struct
       ?(aria_label : string option) ?(class_ : string option)
       ~(children : Jsx.content) () =
     let s = within "Segment.Item" in
-    let selected () =
-      match s.value () with Some v -> String.equal v (id ()) | None -> false
+    let selected =
+      S.accessor (fun () ->
+          match S.get s.value with
+          | Some v -> String.equal v (S.get id)
+          | None -> false)
     in
-    let disabled () = s.disabled () || is_disabled () in
+    let disabled =
+      S.accessor (fun () -> S.get s.disabled || S.get is_disabled)
+    in
     let field : Field.state =
       {
         selected;
-        indeterminate = (fun () -> false);
+        indeterminate = S.accessor (fun () -> false);
         disabled;
-        invalid = (fun () -> false);
-        read_only = (fun () -> false);
-        required = (fun () -> false);
+        invalid = S.accessor (fun () -> false);
+        read_only = S.accessor (fun () -> false);
+        required = S.accessor (fun () -> false);
         aria_label;
-        described_by = (fun () -> None);
+        described_by = S.accessor (fun () -> None);
         interaction =
           Interaction.create
-            ~disabled:(fun[@u] () -> disabled ())
+            ~disabled:(fun () -> S.get disabled)
             ~keys:`element ();
       }
     in
     <Item_context.Provider value=(fun () -> { selected })>
       <Kobalte.Item
-        value=(fun () -> id ())
-        disabled=(fun () -> is_disabled ())
+        value=(fun () -> S.get id)
+        disabled=(fun () -> S.get is_disabled)
         class_="segment__item-control">
         <Field_content
           field=(fun () -> field)
           slot="segment-item"
           class_=(fun () ->
-                   after (item_classes (s.variant ()) (s.size ())) (class_ ()))
+                   after
+                     (item_classes (S.get s.variant) (S.get s.size))
+                     (S.get class_))
           props=(Props.others props)>
-          <Show when_=(fun () -> selected ())>
+          <Show when_=(fun () -> S.get selected)>
             (fun () -> Jsx.element (indicator s))
           </Show>
-          (fun () -> children ())
+          (fun () -> S.get children)
         </Field_content>
       </Kobalte.Item>
     </Item_context.Provider>
@@ -124,7 +132,7 @@ module Separator = struct
     let (_ : segment) = within "Segment.Separator" in
     <span
       aria_hidden=true
-      class_=(fun () -> after "segment__separator" (class_ ()))
+      class_=(fun () -> after "segment__separator" (S.get class_))
       data_slot="segment-separator"
       props=(Props.others props)
     />
@@ -139,33 +147,34 @@ let%component make ?(variant : variant = `default) ?(size : size = `md)
     ?(class_ : string option) ~(children : Jsx.content) () =
   let chosen, choose =
     Field.controlled
-      ~value:(fun () -> Option.map Option.some (selected_key ()))
-      ~default:(default_selected_key ())
+      ~value:(fun () -> Option.map Option.some (S.get selected_key))
+      ~default:(S.get default_selected_key)
       ~on_change:
         (Option.iter (fun key -> ignore (on_selection_change key : unit option)))
   in
   let s =
     {
       value = chosen;
-      disabled = (fun () -> is_disabled ());
-      variant = (fun () -> variant ());
-      size = (fun () -> size ());
+      disabled = is_disabled;
+      variant;
+      size;
       indicators = Selection_indicator.create ();
     }
   in
   <Context.Provider value=(fun () -> s)>
     <Kobalte.Root
-      value=(fun () -> Option.value (chosen ()) ~default:"")
-      disabled=(fun () -> is_disabled ())
+      value=(fun () -> Option.value (S.get chosen) ~default:"")
+      disabled=(fun () -> S.get is_disabled)
       ?name
-      ?aria_label=(fun () -> aria_label ())
-      ?aria_labelledby=(fun () -> aria_labelledby ())
-      class_=(fun () -> after (root_classes (variant ()) (size ())) (class_ ()))
+      ?aria_label
+      ?aria_labelledby
+      class_=(fun () ->
+               after (root_classes (S.get variant) (S.get size)) (S.get class_))
       data_slot="segment"
-      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
       props=(Props.others props)
       on_change=(fun key -> choose (Some key))>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

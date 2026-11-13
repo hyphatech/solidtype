@@ -43,15 +43,18 @@
     A part is used inside a [Color_picker]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The button that opens the popover, Kobalte's trigger, pressed while it is
     open, and named by what is inside it. *)
 module Trigger : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_pressed : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children and [as_] are drawn of: React Aria's render props for
       it. *)
@@ -64,16 +67,14 @@ module Trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type placement = Overlay.placement
@@ -100,13 +101,13 @@ module Popover : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The picker, a [<div>], its colour [value] while it is given one, else the
@@ -121,10 +122,10 @@ module Props : sig
     ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

@@ -5,6 +5,12 @@ type 'a equals = By of ('a -> 'a -> bool) | Never
 (* Inlined, so a read is the call Solid's own JSX would make, [count()]. *)
 let[@inline] get (f : 'a accessor) = f () [@u]
 
+(* A function's [valueOf] is the function itself; [mel.uncurry] has Melange
+   write the thunk given as a JavaScript function of no argument, so the
+   accessor costs nothing as it is read. *)
+external accessor : ((unit -> 'a)[@mel.uncurry]) -> 'a accessor = "valueOf"
+[@@mel.send]
+
 (* Solid's [equals] is a function or [false]. *)
 type 'a js_equals
 

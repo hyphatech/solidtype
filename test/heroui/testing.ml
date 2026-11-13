@@ -5,6 +5,26 @@ module Syntax = struct
   let ( let* ) p f = Js.Promise.then_ f p
 end
 
+(* A promise made by an OCaml function given [resolve], as JavaScript's own
+   constructor makes one. *)
+external promise : ((('a -> unit) -> unit)[@mel.uncurry]) -> 'a Js.Promise.t
+  = "Promise"
+[@@mel.new]
+
+external request_frame : ((float -> unit)[@mel.uncurry]) -> int
+  = "requestAnimationFrame"
+
+(* [ms] milliseconds passed. *)
+let wait ms =
+  promise (fun resolve ->
+      ignore
+        (Js.Global.setTimeout ~f:(fun () -> resolve ()) ms
+          : Js.Global.timeoutId))
+
+(* A frame drawn, as a browser draws one after the page changes. *)
+let frame () =
+  promise (fun resolve -> ignore (request_frame (fun _ -> resolve ()) : int))
+
 external render : (unit -> Solidtype.Jsx.element) -> unit = "render"
 [@@mel.module "@solidjs/testing-library"]
 

@@ -1,11 +1,12 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 module Context = Solidtype.Context.Make_optional (struct
-  type t = unit -> bool
+  type t = bool S.accessor
 end)
 
 let disabled () =
-  match Context.use () with Some d -> d | None -> fun () -> false
+  match Context.use () with Some d -> d | None -> S.accessor (fun () -> false)
 
 (* HeroUI's classes for a fieldset's parts, read as a part is made: a module
    does nothing as it loads. *)
@@ -17,10 +18,11 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Legend = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <legend
-      class_=(fun () -> after (Styles.Fieldset.legend (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Fieldset.legend (slots ())) (S.get class_))
       data_slot="fieldset-legend"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </legend>
   [@@element legend]
 end
@@ -29,10 +31,10 @@ module Group = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () ->
-               after (Styles.Fieldset.field_group (slots ())) (class_ ()))
+               after (Styles.Fieldset.field_group (slots ())) (S.get class_))
       data_slot="fieldset-field-group"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -40,10 +42,11 @@ end
 module Actions = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Fieldset.actions (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Fieldset.actions (slots ())) (S.get class_))
       data_slot="fieldset-actions"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -52,16 +55,16 @@ let%component make ?(disabled : bool = false) ?(name : string option)
     ?(class_ : string option) ~(children : Jsx.content) () =
   (* Named, so the plugin hands the context the read itself: a function
      written in a thunk is read as what it returns. *)
-  let is_disabled () = disabled () in
+  let is_disabled = S.accessor (fun () -> S.get disabled) in
   <fieldset
-    disabled=(fun () -> disabled ())
+    disabled=(fun () -> S.get disabled)
     ?name
-    class_=(fun () -> after (Styles.Fieldset.base (slots ())) (class_ ()))
-    data_disabled=(fun () -> Jsx.flag (disabled ()))
+    class_=(fun () -> after (Styles.Fieldset.base (slots ())) (S.get class_))
+    data_disabled=(fun () -> Jsx.flag (S.get disabled))
     data_slot="fieldset"
     props=(Props.others props)>
     <Context.Provider value=(fun () -> is_disabled)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Context.Provider>
   </fieldset>
 [@@element fieldset]

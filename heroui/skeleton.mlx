@@ -23,7 +23,7 @@ let%component make ?(animation_type : [ `shimmer | `pulse | `none ] option)
   let page, set_page = S.create_signal None in
   S.on_mount (fun () -> S.set set_page (page_animation ()));
   let animation () =
-    match animation_type () with Some a -> Some a | None -> S.get page
+    match S.get animation_type with Some a -> Some a | None -> S.get page
   in
   <div
     class_=(fun () ->
@@ -32,7 +32,7 @@ let%component make ?(animation_type : [ `shimmer | `pulse | `none ] option)
                  (Styles.Skeleton.slots
                     (Styles.Skeleton.options ?animation_type:(animation ()) ()))
              in
-             match class_ () with Some c -> base ^ " " ^ c | None -> base)
+             match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
     props=(Props.others props)
   />
 [@@element div]

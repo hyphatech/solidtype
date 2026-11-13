@@ -37,24 +37,25 @@ let text_area ~classes ~slot (props : Props.t) =
      Aria's is. *)
   let disabled () =
     match field with
-    | Some f -> f.disabled ()
+    | Some f -> S.get f.disabled
     | None -> Option.value (Props.disabled props) ~default:false
   in
   let invalid () =
     match field with
-    | Some f -> f.invalid ()
+    | Some f -> S.get f.invalid
     | None -> (
         match Props.aria_invalid props with
         | Some "false" | None -> false
         | Some _ -> true)
   in
-  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let i = Interaction.create ~disabled:(fun () -> disabled ()) () in
   let classes () =
     classes
       ~variant:
         (match Props.variant props with
         | Some v -> Some v
-        | None -> Option.bind field (fun (f : Text_field.field) -> f.variant ()))
+        | None ->
+            Option.bind field (fun (f : Text_field.field) -> S.get f.variant))
   in
   match field with
   | Some _ ->
@@ -68,7 +69,7 @@ let text_area ~classes ~slot (props : Props.t) =
                  | Some t -> Some t
                  | None -> if disabled () then None else Some "")
         ref=(fun e ->
-              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Jsx.call (Props.ref props) e;
               Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
@@ -84,7 +85,7 @@ let text_area ~classes ~slot (props : Props.t) =
         class_=(fun () -> classes ())
         ?title=(fun () -> Props.title props)
         ref=(fun e ->
-              (match Props.ref props with Some f -> f e [@u] | None -> ());
+              Jsx.call (Props.ref props) e;
               Interaction.watch i e)
         data_slot=(fun () -> Jsx.data slot)
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))

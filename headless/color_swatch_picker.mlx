@@ -40,8 +40,7 @@ external client_height : _ Dom.element_like -> float = "clientHeight"
 external scroll_top : _ Dom.element_like -> float = "scrollTop" [@@mel.get]
 
 (* A handler or a ref the caller gave, called beside the part's own, as
-   Kobalte's parts call theirs. *)
-let call f x = match f with Some f -> f x [@u] | None -> ()
+   Kobalte's parts Jsx.call theirs. *)
 let tabindex = function Some i -> Js.Float.toString i | None -> "-1"
 
 (* Kobalte's state, an attribute present and empty, or none. *)
@@ -52,24 +51,24 @@ let state on = if on then Jsx.data "" else Jsx.flag false
 let key_of c = Color.to_string c ~format:`hexa ()
 
 type item = {
-  color : unit -> Color.t;
-  is_selected : unit -> bool;
-  is_disabled : unit -> bool;
+  color : Color.t S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
 }
 
 (* An option as the list keeps it: its key, its colour, its element, which says
    where it is on the page, and the id of the swatch that names it. *)
 type listed = {
-  key : unit -> string;
-  color : unit -> Color.t;
+  key : string S.accessor;
+  color : Color.t S.accessor;
   element : Dom.htmlDivElement;
-  disabled : unit -> bool;
+  disabled : bool S.accessor;
   label_id : string;
 }
 
 type picker = {
   manager : Types.MultipleSelectionManager.t S.accessor;
-  chosen : unit -> string option;
+  chosen : string option S.accessor;
   add : listed -> unit;
   remove : Dom.htmlDivElement -> unit;
 }
@@ -108,38 +107,40 @@ let name (i : listed) =
    in order through a stack, and through a grid by where each option is, the
    one above or below being the nearest in its column, as React Aria's grid
    list finds it. A disabled option is passed over. *)
-let delegate ~(options : unit -> listed array) ~layout ~direction ~collator
+let delegate ~(options : listed array S.accessor) ~layout ~direction ~collator
     ~list =
   let index k =
-    let all = options () in
+    let all = S.get options in
     let rec find i =
       if i >= Array.length all then None
-      else if String.equal (all.(i).key ()) k then Some i
+      else if String.equal (S.get all.(i).key) k then Some i
       else find (i + 1)
     in
     find 0
   in
   (* The first option from [i] on, by [step], that is not disabled. *)
   let rec usable i step =
-    let all = options () in
+    let all = S.get options in
     if i < 0 || i >= Array.length all then None
-    else if all.(i).disabled () then usable (i + step) step
+    else if S.get all.(i).disabled then usable (i + step) step
     else Some all.(i)
   in
   let after k =
     Option.bind (index k) (fun i ->
-        Option.map (fun o -> o.key ()) (usable (i + 1) 1))
+        Option.map (fun o -> S.get o.key) (usable (i + 1) 1))
   in
   let before k =
     Option.bind (index k) (fun i ->
-        Option.map (fun o -> o.key ()) (usable (i - 1) (-1)))
+        Option.map (fun o -> S.get o.key) (usable (i - 1) (-1)))
   in
-  let first () = Option.map (fun o -> o.key ()) (usable 0 1) in
+  let first () = Option.map (fun o -> S.get o.key) (usable 0 1) in
   let last () =
-    Option.map (fun o -> o.key ()) (usable (Array.length (options ()) - 1) (-1))
+    Option.map
+      (fun o -> S.get o.key)
+      (usable (Array.length (S.get options) - 1) (-1))
   in
   let rect k =
-    Option.map (fun i -> bounds (options ()).(i).element) (index k)
+    Option.map (fun i -> bounds (S.get options).(i).element) (index k)
   in
   (* The next option by [next] in another row, in the same column. *)
   let in_column k next =
@@ -190,7 +191,7 @@ let delegate ~(options : unit -> listed array) ~layout ~direction ~collator
     let matches k =
       match index k with
       | Some i ->
-          let text = name (options ()).(i) in
+          let text = name (S.get options).(i) in
           String.length text >= n
           && Float.equal
                (Types.Collator.compare (S.get collator)
@@ -306,10 +307,10 @@ module Root = struct
                (S.get listed)))
     in
     let keys =
-      S.create_memo (fun () -> Array.map (fun o -> o.key ()) (S.get options))
+      S.create_memo (fun () -> Array.map (fun o -> S.get o.key) (S.get options))
     in
     let find k =
-      Array.find_opt (fun o -> String.equal (o.key ()) k) (S.get options)
+      Array.find_opt (fun o -> String.equal (S.get o.key) k) (S.get options)
     in
     let kept, set_kept =
       S.create_signal (S.untrack (fun () -> Props.default_value props))
@@ -320,14 +321,14 @@ module Root = struct
       | Some c -> Some c
       | None -> S.get kept
     in
-    let chosen () = Option.map key_of (current ()) in
+    let chosen = S.accessor (fun () -> Option.map key_of (current ())) in
     let choose k =
       match find k with
-      | Some o when not (Option.equal String.equal (chosen ()) (Some k)) ->
-          let c = o.color () in
+      | Some o when not (Option.equal String.equal (S.get chosen) (Some k)) ->
+          let c = S.get o.color in
           S.set set_kept (Some c);
           Color_picker.changed picker c;
-          call (Props.on_change props) c
+          Jsx.call (Props.on_change props) c
       | Some _ | None -> ()
     in
     let state =
@@ -339,14 +340,16 @@ module Root = struct
                   match find k with Some o -> name o | None -> ""))
            ~get_disabled:
              (Either.left (fun k ->
-                  match find k with Some o -> o.disabled () | None -> false))
+                  match find k with Some o -> S.get o.disabled | None -> false))
            ~selection_mode:(Either.left `single)
            ~disallow_empty_selection:(Either.left true)
            ~selected_keys:
              (Either.right
                 (S.create_memo (fun () ->
                      Some
-                       (match chosen () with Some k -> [| k |] | None -> [||]))))
+                       (match S.get chosen with
+                       | Some k -> [| k |]
+                       | None -> [||]))))
            ~on_selection_change:(fun keys ->
              match Js.Set.toArray keys with [| k |] -> choose k | _ -> ())
            ())
@@ -367,11 +370,8 @@ module Root = struct
     let keyboard =
       S.create_memo (fun () ->
           Some
-            (delegate
-               ~options:(fun () -> S.get options)
-               ~layout
-               ~direction:(Types.I18n_UseLocale.direction locale)
-               ~collator
+            (delegate ~options ~layout
+               ~direction:(Types.I18n_UseLocale.direction locale) ~collator
                ~list:(fun () -> S.get element)))
     in
     let list =
@@ -396,7 +396,7 @@ module Root = struct
         role=`listbox
         ref=(fun e ->
               S.set set_element (Some e);
-              call (Props.ref props) e)
+              Jsx.call (Props.ref props) e)
         ?aria_label=(fun () ->
                       match
                         (Props.aria_label props, Props.aria_labelledby props)
@@ -413,16 +413,16 @@ module Root = struct
                         | `stack -> "stack"))
         data_orientation="vertical"
         on_key_down=(fun e ->
-                      call (Props.on_key_down props) e;
+                      Jsx.call (Props.on_key_down props) e;
                       Selectable_list.on_key_down list e)
         on_mouse_down=(fun e ->
-                        call (Props.on_mouse_down props) e;
+                        Jsx.call (Props.on_mouse_down props) e;
                         Selectable_list.on_mouse_down list e)
         on_focus_in=(fun e ->
-                      call (Props.on_focus_in props) e;
+                      Jsx.call (Props.on_focus_in props) e;
                       Selectable_list.on_focus_in list e)
         on_focus_out=(fun e ->
-                       call (Props.on_focus_out props) e;
+                       Jsx.call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
         ?as_=(fun () -> S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
@@ -493,11 +493,15 @@ module Item = struct
 
   let make (props : Props.t) =
     let p = in_picker "Color_swatch_picker.Item" in
-    let color () = Props.color props in
-    let key = S.create_memo (fun () -> key_of (color ())) in
-    let disabled () = Option.value (Props.is_disabled props) ~default:false in
-    let selected () =
-      Option.equal String.equal (p.chosen ()) (Some (S.get key))
+    let color = S.accessor (fun () -> Props.color props) in
+    let key = S.create_memo (fun () -> key_of (S.get color)) in
+    let disabled =
+      S.accessor (fun () ->
+          Option.value (Props.is_disabled props) ~default:false)
+    in
+    let selected =
+      S.accessor (fun () ->
+          Option.equal String.equal (S.get p.chosen) (Some (S.get key)))
     in
     let label_id = S.create_unique_id () in
     let element, set_element = S.create_signal None in
@@ -506,7 +510,7 @@ module Item = struct
         (Types.CreateSelectableItemProps.make
            ~selection_manager:(Either.right p.manager) ~key:(Either.right key)
            ~disabled:
-             (Either.right (S.create_memo (fun () -> Some (disabled ()))))
+             (Either.right (S.create_memo (fun () -> Some (S.get disabled))))
            ())
         element
     in
@@ -515,14 +519,7 @@ module Item = struct
     S.on_mount (fun () ->
         Option.iter
           (fun e ->
-            p.add
-              {
-                key = (fun () -> S.get key);
-                color;
-                element = e;
-                disabled;
-                label_id;
-              };
+            p.add { key; color; element = e; disabled; label_id };
             S.on_cleanup (fun () -> p.remove e))
           (S.get element));
     let it =
@@ -536,34 +533,34 @@ module Item = struct
         role=`option
         ref=(fun e ->
               S.set set_element (Some e);
-              call (Props.ref props) e)
+              Jsx.call (Props.ref props) e)
         ?tabindex=(fun () ->
-                    if disabled () then None
+                    if S.get disabled then None
                     else
                       Some (tabindex (S.get (Selectable_item.tab_index item))))
-        aria_selected=(fun () -> selected ())
-        ?aria_disabled=(fun () -> if disabled () then Some true else None)
+        aria_selected=(fun () -> S.get selected)
+        ?aria_disabled=(fun () -> if S.get disabled then Some true else None)
         aria_labelledby=label_id
         data_key=(fun () -> Jsx.data (S.get key))
-        data_selected=(fun () -> state (selected ()))
-        data_disabled=(fun () -> state (disabled ()))
+        data_selected=(fun () -> state (S.get selected))
+        data_disabled=(fun () -> state (S.get disabled))
         on_pointer_down=(fun e ->
-                          call (Props.on_pointer_down props) e;
+                          Jsx.call (Props.on_pointer_down props) e;
                           Selectable_item.on_pointer_down item e)
         on_pointer_up=(fun e ->
-                        call (Props.on_pointer_up props) e;
+                        Jsx.call (Props.on_pointer_up props) e;
                         Selectable_item.on_pointer_up item e)
         on_click=(fun e ->
-                   call (Props.on_click props) e;
+                   Jsx.call (Props.on_click props) e;
                    Selectable_item.on_click item e)
         on_key_down=(fun e ->
-                      call (Props.on_key_down props) e;
+                      Jsx.call (Props.on_key_down props) e;
                       Selectable_item.on_key_down item e)
         on_mouse_down=(fun e ->
-                        call (Props.on_mouse_down props) e;
+                        Jsx.call (Props.on_mouse_down props) e;
                         Selectable_item.on_mouse_down item e)
         on_focus=(fun e ->
-                   call (Props.on_focus props) e;
+                   Jsx.call (Props.on_focus props) e;
                    Selectable_item.on_focus item e)
         ?as_=(fun () -> S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
@@ -591,7 +588,7 @@ module Swatch = struct
     let it = in_item "Color_swatch_picker.Swatch" in
     let label_id = it.label_id in
     <Color_swatch
-      value=(fun () -> it.state.color ())
+      value=(fun () -> S.get it.state.color)
       id=(fun () -> label_id)
       props=(S.omit props [| "id" |])
     />

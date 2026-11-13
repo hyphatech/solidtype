@@ -14,6 +14,9 @@
       />
     ]} *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 module Props : sig
   type t
 
@@ -21,9 +24,9 @@ module Props : sig
     ?is_loading:bool Solidtype.Check.value ->
     ?on_load_more:(unit -> unit) ->
     ?scroll_offset:float Solidtype.Check.value ->
-    ?props:'spread Solidtype.Solid.rest ->
+    ?props:'spread S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

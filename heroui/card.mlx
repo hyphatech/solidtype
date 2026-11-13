@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 
@@ -11,10 +12,10 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Card.header (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Card.header (slots ())) (S.get class_))
       data_slot="card-header"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -24,10 +25,10 @@ module Title = struct
       ~(children : Jsx.content) () =
     <h3
       ?id
-      class_=(fun () -> after (Styles.Card.title (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Card.title (slots ())) (S.get class_))
       data_slot="card-title"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </h3>
   [@@element h3]
 end
@@ -35,10 +36,11 @@ end
 module Description = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <p
-      class_=(fun () -> after (Styles.Card.description (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Card.description (slots ())) (S.get class_))
       data_slot="card-description"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </p>
   [@@element p]
 end
@@ -46,10 +48,10 @@ end
 module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Card.content (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Card.content (slots ())) (S.get class_))
       data_slot="card-content"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -57,10 +59,10 @@ end
 module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.Card.footer (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Card.footer (slots ())) (S.get class_))
       data_slot="card-footer"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -78,17 +80,17 @@ let%component make ?(variant : Surface.variant = `default)
                after
                  (Styles.Card.base
                     (Styles.Card.slots
-                       (Styles.Card.options ~variant:(variant ()) ())))
-                 (class_ ()))
+                       (Styles.Card.options ~variant:(S.get variant) ())))
+                 (S.get class_))
       data_slot="card"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   in
   (* A transparent card is no surface, as HeroUI's is not. *)
   <Show
     when_=(fun () ->
-            match variant () with
+            match S.get variant with
             | `transparent -> false
             | `default | `secondary | `tertiary -> true)
     fallback=(fun () -> card ())>

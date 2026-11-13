@@ -23,6 +23,9 @@
     A part is used inside a [Color_field]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type channel =
   [ `hue
   | `saturation
@@ -39,11 +42,11 @@ type channel =
     and [data-invalid]. *)
 module Group : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_focus_within : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_invalid : bool Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_focus_within : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
+    is_invalid : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -57,16 +60,14 @@ module Group : sig
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The field's input, Kobalte's, its [placeholder] shown while it is empty. It
@@ -80,13 +81,13 @@ module Input : sig
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlInputElement -> unit) ->
-      ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Input.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Input.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What is before the input, a [<div>]: a swatch of the colour, say. *)
@@ -97,13 +98,13 @@ module Prefix : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What is after the input, a [<div>]: a unit, say. *)
@@ -114,13 +115,13 @@ module Suffix : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The field, Kobalte's root. Its colour is [value] while it is given one --
@@ -135,10 +136,10 @@ end
 *)
 
 type state = {
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
-  is_read_only : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
+  is_disabled : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_required : bool S.accessor;
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, each read where Solid tracks it. *)
@@ -165,13 +166,11 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?class_:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

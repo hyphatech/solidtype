@@ -15,6 +15,9 @@
 
     Kobalte has no switch group, and a group has no behaviour. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 module Props : sig
   type t
 
@@ -22,10 +25,10 @@ module Props : sig
     ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

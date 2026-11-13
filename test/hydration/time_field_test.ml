@@ -21,7 +21,9 @@ external query_all : string -> Dom.element Js.Array.array_like
 
 external text : Dom.element -> string = "textContent" [@@mel.get]
 external hidden : Dom.element -> bool = "hidden" [@@mel.get]
-external function_of : string -> (unit -> unit[@u]) = "Function" [@@mel.new]
+
+external function_of : string -> unit Solidtype.Solid.accessor = "Function"
+[@@mel.new]
 
 (* The hydration script, run as the page would run it. *)
 let run_script tagged =
@@ -29,7 +31,7 @@ let run_script tagged =
   let stop = Js.String.indexOf ~search:"</script>" tagged in
   match start with
   | Some start when start <= stop ->
-      (function_of (String.sub tagged start (stop - start))) () [@u]
+      Solidtype.Solid.get (function_of (String.sub tagged start (stop - start)))
   | Some _ | None -> ()
 
 let segments () = Js.Array.from (query_all "[role=spinbutton]")

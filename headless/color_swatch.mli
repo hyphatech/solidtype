@@ -11,6 +11,9 @@
     Given no [value], it is its {!Color_picker}'s colour, as React Aria's is,
     else transparent. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 val shown :
   Color_picker.t option ->
   Solidtype_kobalte.Types.Color.t option ->
@@ -26,11 +29,11 @@ module Props : sig
     ?translations:
       Solidtype_kobalte.Types.ColorSwatch_Root_Translations.t
       Solidtype.Check.value ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:'spread Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:'spread S.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

@@ -15,6 +15,8 @@
 
     A part reads its field's, and raises as Kobalte's does elsewhere. *)
 
+module Jsx := Solidtype.Jsx
+
 (** The field, Kobalte's, its wheel its {!Input}'s: [change_on_wheel], [true] by
     default, says whether the wheel steps it. *)
 module Root : sig
@@ -24,8 +26,8 @@ module Root : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The field's input, Kobalte's, stepped by the wheel as {!wheel} steps it. Its
@@ -37,8 +39,8 @@ module Input : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 val wheel :

@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Link
@@ -12,9 +13,9 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Icon = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
       () =
-    let icon () = after (Styles.Link.icon (slots ())) (class_ ()) in
+    let icon () = after (Styles.Link.icon (slots ())) (S.get class_) in
     <Show
-      when_=(fun () -> Option.is_some (children ()))
+      when_=(fun () -> Option.is_some (S.get children))
       fallback=(<span
                   class_=(fun () -> icon ())
                   data_default_icon="true"
@@ -38,7 +39,8 @@ module Icon = struct
                   </svg>
                 </span>)>
       <span class_=(fun () -> icon ()) data_slot="link-icon">
-        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+        (fun () ->
+          match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element span]
@@ -64,33 +66,33 @@ let%component make ~(href : string) ?(is_disabled : bool option)
   (* A link is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
   let is_disabled () =
-    match is_disabled () with Some d -> d | None -> in_fieldset ()
+    match S.get is_disabled with Some d -> d | None -> S.get in_fieldset
   in
-  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  let i = Interaction.create ~disabled:(fun () -> is_disabled ()) () in
   (* Current while it says it is, any aria-current at all, as React Aria
      reads it. *)
   let current () =
-    match aria_current () with
+    match S.get aria_current with
     | Some c -> not (String.equal c "")
     | None -> false
   in
   let state () =
     {
-      is_current = (fun[@u] () -> current ());
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> Interaction.pressed i);
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> Interaction.disabled i);
+      is_current = S.accessor (fun () -> current ());
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = S.accessor (fun () -> Interaction.pressed i);
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = S.accessor (fun () -> Interaction.disabled i);
     }
   in
   <Kobalte.Root
-    href=(fun () -> href ())
+    href=(fun () -> S.get href)
     disabled=(fun () -> is_disabled ())
     class_=(fun () ->
              after
                (Styles.Link.base (Styles.Link.slots (Styles.Link.options ())))
-               (class_ ()))
+               (S.get class_))
     ref=(fun a ->
           ignore (given_ref a : unit option);
           Interaction.watch i a)
@@ -102,8 +104,8 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
     data_current=(fun () -> Jsx.flag (current ()))
     ?aria_current
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
     props=(Props.others props)>
-    (fun () -> Jsx.draw (children ()) (state ()))
+    (fun () -> Jsx.draw (S.get children) (state ()))
   </Kobalte.Root>
 [@@element a]

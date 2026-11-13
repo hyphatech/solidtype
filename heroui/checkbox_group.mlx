@@ -4,12 +4,12 @@ module Jsx = Solidtype.Jsx
 type group = {
   checked : string -> bool;
   set : string -> bool -> unit;
-  variant : unit -> [ `primary | `secondary ] option;
-  disabled : unit -> bool;
-  invalid : unit -> bool;
-  read_only : unit -> bool;
-  name : unit -> string option;
-  described_by : unit -> string option;
+  variant : [ `primary | `secondary ] option S.accessor;
+  disabled : bool S.accessor;
+  invalid : bool S.accessor;
+  read_only : bool S.accessor;
+  name : string option S.accessor;
+  described_by : string option S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -25,7 +25,7 @@ let named () =
     S.set set_count (S.get count + 1);
     S.on_cleanup (fun () -> S.set set_count (S.get count - 1))
   in
-  (id, here, fun () -> if S.get count > 0 then Some id else None)
+  (id, here, S.accessor (fun () -> if S.get count > 0 then Some id else None))
 
 (* What its children are drawn of: React Aria's render props for a
    checkbox group. *)
@@ -49,19 +49,30 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     () =
   (* A group is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
-  let disabled () =
-    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  let disabled =
+    S.accessor (fun () ->
+        match S.get is_disabled with Some d -> d | None -> S.get in_fieldset)
   in
-  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
-  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let in_form =
+    Form.field
+      ~name:(fun () -> S.get name)
+      ~invalid:(fun () -> S.get is_invalid)
+  in
+  let invalid =
+    S.accessor (fun () ->
+        S.get is_invalid || Option.is_some (S.get in_form.error))
+  in
   let values, choose =
-    Field.controlled ~value ~default:(default_value ()) ~on_change:(fun v ->
+    Field.controlled
+      ~value:(fun () -> S.get value)
+      ~default:(S.get default_value)
+      ~on_change:(fun v ->
         in_form.changed ();
         on_change v)
   in
-  let checked v = List.exists (String.equal v) (values ()) in
+  let checked v = List.exists (String.equal v) (S.get values) in
   let set v on =
-    let others = List.filter (fun w -> not (String.equal v w)) (values ()) in
+    let others = List.filter (fun w -> not (String.equal v w)) (S.get values) in
     choose (if on then others @ [ v ] else others)
   in
   let label_id, label_here, labelled_by = named () in
@@ -70,7 +81,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
      names the group, as React Aria's is; and a description one that
      describes it, and each checkbox's input. *)
   let label : Label.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     label_here ();
     <span
       id=label_id class_=(fun () -> classes ()) data_slot="label" props=others>
@@ -78,7 +89,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     </span>
   in
   let description : Description.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     description_here ();
     <span
       id=description_id
@@ -96,8 +107,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       variant;
       disabled;
       invalid;
-      read_only = (fun () -> is_read_only ());
-      name = (fun () -> name ());
+      read_only = is_read_only;
+      name;
       described_by;
     }
   in
@@ -110,23 +121,26 @@ let%component make ?(variant : [ `primary | `secondary ] option)
         (fun () ->
           let state =
             {
-              is_disabled = (fun[@u] () -> disabled ());
-              is_read_only = (fun[@u] () -> is_read_only ());
-              is_required = (fun[@u] () -> is_required ());
-              is_invalid = (fun[@u] () -> invalid ());
+              is_disabled = disabled;
+              is_read_only;
+              is_required;
+              is_invalid = invalid;
             }
           in
-          let resolved = S.children (fun () -> Jsx.draw (children ()) state) in
+          let resolved =
+            S.children (fun () -> Jsx.draw (S.get children) state)
+          in
           Jsx.element
             <div
               role=`group
-              ?aria_labelledby=(fun () -> labelled_by ())
-              ?aria_describedby=(fun () -> described_by ())
-              ?aria_disabled=(fun () -> if disabled () then Some true else None)
+              ?aria_labelledby=labelled_by
+              ?aria_describedby=described_by
+              ?aria_disabled=(fun () ->
+                               if S.get disabled then Some true else None)
               class_=(fun () ->
                        Styles.CheckboxGroup.classes
-                         (Styles.CheckboxGroup.options ?variant:(variant ())
-                            ?class_:(class_ ()) ()))
+                         (Styles.CheckboxGroup.options ?variant:(S.get variant)
+                            ?class_:(S.get class_) ()))
               ref=(fun e ->
                     ignore (given_ref e : unit option);
                     in_form.root e)
@@ -138,11 +152,11 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                                  on_blur e)
                                e)
               data_slot="checkbox-group"
-              data_disabled=(fun () -> Jsx.flag (disabled ()))
-              data_invalid=(fun () -> Jsx.flag (invalid ()))
-              data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-              data_required=(fun () -> Jsx.flag (is_required ()))
-              ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
+              data_disabled=(fun () -> Jsx.flag (S.get disabled))
+              data_invalid=(fun () -> Jsx.flag (S.get invalid))
+              data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
+              data_required=(fun () -> Jsx.flag (S.get is_required))
+              ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
               props=(Props.others props)>
               (fun () ->
                 Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))

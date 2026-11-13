@@ -13,11 +13,11 @@ type placement = Overlay.placement
    and the placement, offset and flip its popover asks for. *)
 type picker = {
   slots : Styles.ColorPicker.slots;
-  is_open : unit -> bool;
+  is_open : bool S.accessor;
   set_opened : bool -> unit;
   set_given_open : bool option -> unit;
   mutable told_open : bool -> unit;
-  placement : unit -> string;
+  placement : string S.accessor;
   set_placement : placement -> unit;
   set_offset : float -> unit;
   set_flip : bool -> unit;
@@ -58,20 +58,21 @@ module Trigger = struct
          (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
       () =
     let p = within "Color_picker.Trigger" in
-    let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
-    let pressed () = Interaction.pressed i || p.is_open () in
+    let i = Interaction.create ~disabled:(fun () -> S.get is_disabled) () in
+    let pressed () = Interaction.pressed i || S.get p.is_open in
     let state () =
       {
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_pressed = (fun[@u] () -> pressed ());
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> is_disabled ());
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_pressed = S.accessor (fun () -> pressed ());
+        is_focused = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled;
       }
     in
     <Kobalte.Trigger
-      disabled=(fun () -> is_disabled ())
-      class_=(fun () -> after (Styles.ColorPicker.trigger p.slots) (class_ ()))
+      disabled=(fun () -> S.get is_disabled)
+      class_=(fun () ->
+               after (Styles.ColorPicker.trigger p.slots) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
@@ -80,10 +81,10 @@ module Trigger = struct
       data_pressed=(fun () -> Jsx.flag (pressed ()))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -97,24 +98,24 @@ module Popover = struct
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ~(children : Jsx.content) () =
     let p = within "Color_picker.Popover" in
-    Option.iter p.set_opened (S.untrack default_open);
-    S.create_computed (fun () -> p.set_given_open (is_open ()));
+    Option.iter p.set_opened (S.untrack (fun () -> S.get default_open));
+    S.create_computed (fun () -> p.set_given_open (S.get is_open));
     p.told_open <- (fun o -> ignore (on_open_change o : unit option));
-    S.create_computed (fun () -> p.set_placement (placement ()));
-    S.create_computed (fun () -> p.set_offset (offset ()));
-    S.create_computed (fun () -> p.set_flip (should_flip ()));
+    S.create_computed (fun () -> p.set_placement (S.get placement));
+    S.create_computed (fun () -> p.set_offset (S.get offset));
+    S.create_computed (fun () -> p.set_flip (S.get should_flip));
     let k = Kobalte.use_popover_context () in
     let close () = Types.PopoverContextValue.close k () in
-    let o = Overlay.create ~is_open:(fun () -> p.is_open ()) () in
+    let o = Overlay.create ~is_open:(fun () -> S.get p.is_open) () in
     let content = ref None in
     Overlay.return_focus
-      ~is_open:(fun () -> p.is_open ())
+      ~is_open:(fun () -> S.get p.is_open)
       ~inside:(fun focused ->
         Option.fold ~none:false ~some:(fun c -> contains c focused) !content)
       ();
     let side, watch_side =
       Overlay.placed_side
-        ~placement:(fun () -> Overlay.side_of (p.placement ()))
+        ~placement:(fun () -> Overlay.side_of (S.get p.placement))
         ()
     in
     (* React Aria's popover takes the focus itself as it opens, where Kobalte's
@@ -136,16 +137,16 @@ module Popover = struct
           id_of trigger)
         (S.get (Types.PopoverContextValue.trigger_ref k))
     in
-    <Surface.Context.Provider value=(fun () () -> `default)>
+    <Surface.Context.Provider value=(fun () -> S.accessor (fun () -> `default))>
       <Show when_=(fun () -> Overlay.present o)>
         <Kobalte.Portal>
           <Kobalte.Content
             class_=(fun () ->
-                     after (Styles.ColorPicker.popover p.slots) (class_ ()))
+                     after (Styles.ColorPicker.popover p.slots) (S.get class_))
             style=(fun () ->
                     "--trigger-anchor-point: \
                      var(--kb-popover-content-transform-origin);"
-                    ^ match style () with Some s -> " " ^ s | None -> "")
+                    ^ match S.get style with Some s -> " " ^ s | None -> "")
             ref=(fun e ->
                   ignore (given_ref e : unit option);
                   content := Some (as_element e);
@@ -153,7 +154,7 @@ module Popover = struct
                   watch_side e)
             on_open_auto_focus=focus_popover
             data_slot="color-picker-popover"
-            data_placement=(fun () -> Jsx.data (side ()))
+            data_placement=(fun () -> Jsx.data (S.get side))
             data_entering=(fun () -> Jsx.flag (Overlay.entering o))
             data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
             props=(Props.others props)
@@ -161,7 +162,7 @@ module Popover = struct
             ?aria_labelledby=(fun () -> named_by ())>
             (fun () -> Jsx.element (Overlay.dismiss close))
             <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-              (fun () -> children ())
+              (fun () -> S.get children)
             </Button.Trigger.Provider>
             (fun () -> Jsx.element (Overlay.dismiss close))
           </Kobalte.Content>
@@ -186,16 +187,16 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     {
       slots = Styles.ColorPicker.slots (Styles.ColorPicker.options ());
       is_open =
-        (fun () ->
-          match S.get given_open with Some o -> o | None -> S.get opened);
+        S.accessor (fun () ->
+            match S.get given_open with Some o -> o | None -> S.get opened);
       set_opened = S.set set_opened;
       set_given_open = S.set set_given_open;
       told_open = ignore;
       placement =
-        (fun () ->
-          Overlay.kobalte_placement
-            (Types.I18n_UseLocale.direction locale ())
-            (S.get placement));
+        S.accessor (fun () ->
+            Overlay.kobalte_placement
+              (Types.I18n_UseLocale.direction locale ())
+              (S.get placement));
       set_placement = S.set set_placement;
       set_offset = S.set set_offset;
       set_flip = S.set set_flip;
@@ -207,7 +208,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
       is_disabled = None;
       controls = None;
       described_by = None;
-      pressed = Some p.is_open;
+      pressed = Some (fun () -> S.get p.is_open);
       needs_slot = false;
       element = None;
     }
@@ -217,12 +218,12 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?default_value
     on_change=(fun c -> ignore (on_change c : unit option))>
     <Kobalte.Root
-      open_=(fun () -> p.is_open ())
+      open_=(fun () -> S.get p.is_open)
       on_open_change=(fun o ->
                        S.set set_opened o;
                        p.told_open o)
       modal=true
-      placement=(fun () -> p.placement ())
+      placement=(fun () -> S.get p.placement)
       gutter=(fun () -> S.get offset)
       flip=(fun () -> Types.Either.right (S.get flip))
       force_mount=true>
@@ -230,10 +231,10 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
         <Context.Provider value=(fun () -> p)>
           <div
             class_=(fun () ->
-                     after (Styles.ColorPicker.base p.slots) (class_ ()))
+                     after (Styles.ColorPicker.base p.slots) (S.get class_))
             data_slot="color-picker"
             props=(Props.others props)>
-            (fun () -> children ())
+            (fun () -> S.get children)
           </div>
         </Context.Provider>
       </Button.Trigger.Provider>

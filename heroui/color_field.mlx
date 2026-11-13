@@ -26,10 +26,10 @@ external contains : Dom.htmlElement -> Dom.element -> bool = "contains"
 
 (* What a field's parts read of it: its kind and its state. *)
 type field = {
-  aria_label : unit -> string option;
+  aria_label : string option S.accessor;
   by_channel : bool;
-  disabled : unit -> bool;
-  invalid : unit -> bool;
+  disabled : bool S.accessor;
+  invalid : bool S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -43,7 +43,7 @@ let within part =
 
 (* A group's classes, which its parts read. *)
 module Group_context = Solidtype.Context.Make_optional (struct
-  type t = unit -> Styles.ColorInputGroup.slots
+  type t = Styles.ColorInputGroup.slots S.accessor
 end)
 
 let in_group part =
@@ -82,10 +82,12 @@ module Prefix = struct
     let slots = in_group "Color_field.Prefix" in
     <div
       class_=(fun () ->
-               after (Styles.ColorInputGroup.prefix (slots ())) (class_ ()))
+               after
+                 (Styles.ColorInputGroup.prefix (S.get slots))
+                 (S.get class_))
       data_slot="color-input-group-prefix"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -95,10 +97,12 @@ module Suffix = struct
     let slots = in_group "Color_field.Suffix" in
     <div
       class_=(fun () ->
-               after (Styles.ColorInputGroup.suffix (slots ())) (class_ ()))
+               after
+                 (Styles.ColorInputGroup.suffix (S.get slots))
+                 (S.get class_))
       data_slot="color-input-group-suffix"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -108,9 +112,9 @@ module Input = struct
       ?ref:(given_ref : (Dom.htmlInputElement -> unit) option) () =
     let f = within "Color_field.Input" in
     let slots = in_group "Color_field.Input" in
-    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get f.disabled) () in
     let classes () =
-      after (Styles.ColorInputGroup.input (slots ())) (class_ ())
+      after (Styles.ColorInputGroup.input (S.get slots)) (S.get class_)
     in
     let watched e =
       ignore (given_ref e : unit option);
@@ -118,7 +122,7 @@ module Input = struct
     in
     if f.by_channel then
       <Channel.Input
-        ?aria_label=(fun () -> f.aria_label ())
+        ?aria_label=(fun () -> S.get f.aria_label)
         ?placeholder
         class_=(fun () -> classes ())
         ref=watched
@@ -126,14 +130,14 @@ module Input = struct
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        data_disabled=(fun () -> Jsx.flag (S.get f.disabled))
+        data_invalid=(fun () -> Jsx.flag (S.get f.invalid))
         props=(Props.others props) />
     else
       (* React Aria names a hex field's input a text box, as it is. *)
       <Hex.Input
         role=`textbox
-        ?aria_label=(fun () -> f.aria_label ())
+        ?aria_label=(fun () -> S.get f.aria_label)
         ?placeholder
         class_=(fun () -> classes ())
         ref=watched
@@ -141,8 +145,8 @@ module Input = struct
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
+        data_disabled=(fun () -> Jsx.flag (S.get f.disabled))
+        data_invalid=(fun () -> Jsx.flag (S.get f.invalid))
         props=(Props.others props) />
   [@@element input]
 end
@@ -165,12 +169,13 @@ module Group = struct
          (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
       =
     let f = within "Color_field.Group" in
-    let slots () =
-      Styles.ColorInputGroup.slots
-        (Styles.ColorInputGroup.options ?full_width:(full_width ())
-           ?variant:(variant ()) ())
+    let slots =
+      S.accessor (fun () ->
+          Styles.ColorInputGroup.slots
+            (Styles.ColorInputGroup.options ?full_width:(S.get full_width)
+               ?variant:(S.get variant) ()))
     in
-    let i = Interaction.create ~disabled:(fun[@u] () -> f.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get f.disabled) () in
     let element = ref None in
     (* A press on the group but on its input gives the input the focus. *)
     let clicked e =
@@ -184,11 +189,11 @@ module Group = struct
     in
     let state () =
       {
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_focus_within = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> f.disabled ());
-        is_invalid = (fun[@u] () -> f.invalid ());
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_focus_within = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = f.disabled;
+        is_invalid = f.invalid;
       }
     in
     <Group_context.Provider value=(fun () -> slots)>
@@ -200,16 +205,18 @@ module Group = struct
               Interaction.watch i e)
         on_click=clicked
         class_=(fun () ->
-                 after (Styles.ColorInputGroup.base (slots ())) (class_ ()))
+                 after
+                   (Styles.ColorInputGroup.base (S.get slots))
+                   (S.get class_))
         data_slot="color-input-group"
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (f.disabled ()))
-        data_invalid=(fun () -> Jsx.flag (f.invalid ()))
-        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+        data_disabled=(fun () -> Jsx.flag (S.get f.disabled))
+        data_invalid=(fun () -> Jsx.flag (S.get f.invalid))
+        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
         props=(Props.others props)>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </div>
     </Group_context.Provider>
   [@@element div]
@@ -237,24 +244,30 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
     () =
   let in_fieldset = Fieldset.disabled () in
-  let disabled () =
-    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  let disabled =
+    S.accessor (fun () ->
+        match S.get is_disabled with Some d -> d | None -> S.get in_fieldset)
   in
-  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
-  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let in_form =
+    Form.field
+      ~name:(fun () -> S.get name)
+      ~invalid:(fun () -> S.get is_invalid)
+  in
+  let invalid =
+    S.accessor (fun () ->
+        S.get is_invalid || Option.is_some (S.get in_form.error))
+  in
   (* A change is a form's too, which clears the error it showed. *)
   let changed c =
     in_form.changed ();
     ignore (on_change c : unit option)
   in
-  let by_channel = Option.is_some (S.untrack channel) in
-  let f =
-    { aria_label = (fun () -> aria_label ()); by_channel; disabled; invalid }
-  in
+  let by_channel = Option.is_some (S.untrack (fun () -> S.get channel)) in
+  let f = { aria_label; by_channel; disabled; invalid } in
   let classes () =
     Styles.ColorField.classes
-      (Styles.ColorField.options ?full_width:(full_width ()) ?class_:(class_ ())
-         ())
+      (Styles.ColorField.options ?full_width:(S.get full_width)
+         ?class_:(S.get class_) ())
   in
   let leave e =
     ignore (on_focus_out e : unit option);
@@ -269,16 +282,11 @@ let%component make ?(value : Color.t Js.Nullable.t option)
     in_form.root e
   in
   let state () =
-    {
-      is_disabled = (fun[@u] () -> disabled ());
-      is_invalid = (fun[@u] () -> invalid ());
-      is_read_only = (fun[@u] () -> is_read_only ());
-      is_required = (fun[@u] () -> is_required ());
-    }
+    { is_disabled = disabled; is_invalid = invalid; is_read_only; is_required }
   in
   <Context.Provider value=(fun () -> f)>
     (fun () ->
-      match S.untrack channel with
+      match S.untrack (fun () -> S.get channel) with
       | Some ch ->
           Jsx.element
             <Channel.Root
@@ -287,27 +295,28 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               ?value
               ?default_value
               on_change=changed
-              change_on_wheel=(fun () -> not (is_wheel_disabled ()))
+              change_on_wheel=(fun () -> not (S.get is_wheel_disabled))
               validation_state=(fun () ->
-                                 if invalid () then `invalid else `valid)
-              required=(fun () -> is_required ())
-              disabled=(fun () -> disabled ())
-              read_only=(fun () -> is_read_only ())
+                                 if S.get invalid then `invalid else `valid)
+              required=(fun () -> S.get is_required)
+              disabled=(fun () -> S.get disabled)
+              read_only=(fun () -> S.get is_read_only)
               ?name
               class_=(fun () -> classes ())
               ref=root
               on_focus_out=leave
               data_slot="color-field"
               data_channel=(fun () -> Jsx.data (channel_name ch))
-              data_required=(fun () -> Jsx.flag (is_required ()))
-              data_invalid=(fun () -> Jsx.flag (invalid ()))
-              data_disabled=(fun () -> Jsx.flag (disabled ()))
-              data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-              ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+              data_required=(fun () -> Jsx.flag (S.get is_required))
+              data_invalid=(fun () -> Jsx.flag (S.get invalid))
+              data_disabled=(fun () -> Jsx.flag (S.get disabled))
+              data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
+              ?as_=(fun () ->
+                     Option.map (fun f p -> f p (state ())) (S.get as_))
               props=(Props.others props)>
               <Field_error.Message.Provider value=(fun () -> in_form.error)>
                 <Channel_parts>
-                  (fun () -> Jsx.draw (children ()) (state ()))
+                  (fun () -> Jsx.draw (S.get children) (state ()))
                 </Channel_parts>
               </Field_error.Message.Provider>
             </Channel.Root>
@@ -317,33 +326,34 @@ let%component make ?(value : Color.t Js.Nullable.t option)
               ?value
               ?default_value
               on_change=changed
-              change_on_wheel=(fun () -> not (is_wheel_disabled ()))
+              change_on_wheel=(fun () -> not (S.get is_wheel_disabled))
               validation_state=(fun () ->
-                                 if invalid () then `invalid else `valid)
-              required=(fun () -> is_required ())
-              disabled=(fun () -> disabled ())
-              read_only=(fun () -> is_read_only ())
+                                 if S.get invalid then `invalid else `valid)
+              required=(fun () -> S.get is_required)
+              disabled=(fun () -> S.get disabled)
+              read_only=(fun () -> S.get is_read_only)
               ?name
               class_=(fun () -> classes ())
               ref=root
               on_focus_out=leave
               data_slot="color-field"
               data_channel="hex"
-              data_required=(fun () -> Jsx.flag (is_required ()))
-              data_invalid=(fun () -> Jsx.flag (invalid ()))
-              data_disabled=(fun () -> Jsx.flag (disabled ()))
-              data_readonly=(fun () -> Jsx.flag (is_read_only ()))
-              ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+              data_required=(fun () -> Jsx.flag (S.get is_required))
+              data_invalid=(fun () -> Jsx.flag (S.get invalid))
+              data_disabled=(fun () -> Jsx.flag (S.get disabled))
+              data_readonly=(fun () -> Jsx.flag (S.get is_read_only))
+              ?as_=(fun () ->
+                     Option.map (fun f p -> f p (state ())) (S.get as_))
               props=(Props.others props)>
               <Field_error.Message.Provider value=(fun () -> in_form.error)>
                 <Hex_parts>
                   (fun () ->
-                    Jsx.draw (children ())
+                    Jsx.draw (S.get children)
                       {
-                        is_disabled = (fun[@u] () -> disabled ());
-                        is_invalid = (fun[@u] () -> invalid ());
-                        is_read_only = (fun[@u] () -> is_read_only ());
-                        is_required = (fun[@u] () -> is_required ());
+                        is_disabled = disabled;
+                        is_invalid = invalid;
+                        is_read_only;
+                        is_required;
                       })
                 </Hex_parts>
               </Field_error.Message.Provider>

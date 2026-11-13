@@ -194,10 +194,10 @@ let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
     </span>
   in
   let horizontal (g : Radio_group.state) =
-   fun[@u] () ->
-    match Solidtype.Solid.get g.orientation with
-    | `horizontal -> true
-    | `vertical -> false
+    Solidtype.Solid.accessor (fun () ->
+        match Solidtype.Solid.get g.orientation with
+        | `horizontal -> true
+        | `vertical -> false)
   in
   T.render (fun () ->
       <Radio_group

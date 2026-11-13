@@ -18,10 +18,10 @@ type channel =
 
 (* What a slider's parts read of it: its channel, its classes, its state. *)
 type slider = {
-  channel : unit -> channel;
-  slots : unit -> Styles.ColorSlider.slots;
-  disabled : unit -> bool;
-  orientation : unit -> [ `horizontal | `vertical ];
+  channel : channel S.accessor;
+  slots : Styles.ColorSlider.slots S.accessor;
+  disabled : bool S.accessor;
+  orientation : [ `horizontal | `vertical ] S.accessor;
   thumb_id : string;
 }
 
@@ -56,7 +56,7 @@ let space_for channel space =
 
 (* A label in a color slider is Kobalte's, which names it and its thumb. *)
 let label : Label.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte.Label class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
   </Kobalte.Label>
@@ -75,31 +75,26 @@ module Output = struct
       () =
     let s = within "Color_slider.Output" in
     let context = Kobalte.use_color_slider_context () in
-    let state () =
-      {
-        orientation = (fun[@u] () -> s.orientation ());
-        is_disabled = (fun[@u] () -> s.disabled ());
-      }
-    in
+    let state () = { orientation = s.orientation; is_disabled = s.disabled } in
     <output
       for_=(fun () -> s.thumb_id)
       aria_live=`off
       class_=(fun () ->
-               after (Styles.ColorSlider.output (s.slots ())) (class_ ()))
+               after (Styles.ColorSlider.output (S.get s.slots)) (S.get class_))
       data_orientation=(fun () ->
-                         Jsx.data (orientation_name (s.orientation ())))
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+                         Jsx.data (orientation_name (S.get s.orientation)))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_slot="color-slider-output"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some given -> Jsx.draw given (state ())
         | None ->
             Jsx.string
               (Color.format_channel_value
                  (S.get (Slider_context.value context))
-                 (s.channel ())))
+                 (S.get s.channel)))
     </output>
   [@@element output]
 end
@@ -126,7 +121,7 @@ module Track = struct
        is replaced, so it is drawn here as Kobalte draws it. *)
     let drawn () =
       let color = Slider_context.get_display_color context () in
-      let channel = s.channel () in
+      let channel = S.get s.channel in
       let range = Color.get_channel_range color channel in
       let at v =
         Color.to_string
@@ -143,7 +138,7 @@ module Track = struct
             [ at low; at high ]
       in
       let towards =
-        match s.orientation () with
+        match S.get s.orientation with
         | `vertical -> "top"
         | `horizontal -> "right"
       in
@@ -151,12 +146,12 @@ module Track = struct
         at low,
         at high )
     in
-    let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get s.disabled) () in
     let state () =
       {
-        orientation = (fun[@u] () -> s.orientation ());
-        is_disabled = (fun[@u] () -> s.disabled ());
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        orientation = s.orientation;
+        is_disabled = s.disabled;
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
       }
     in
     <Kobalte.Track
@@ -164,7 +159,7 @@ module Track = struct
             ignore (given_ref e : unit option);
             Interaction.watch i e)
       class_=(fun () ->
-               after (Styles.ColorSlider.track (s.slots ())) (class_ ()))
+               after (Styles.ColorSlider.track (S.get s.slots)) (S.get class_))
       style=(fun () ->
               let gradient, start, end_ = drawn () in
               with_style
@@ -172,14 +167,14 @@ module Track = struct
                ^ ", repeating-conic-gradient(#efefef 0% 25%, #f7f7f7 0% \
                   50%)                   50% / 16px 16px; --track-end-color: "
                ^ end_ ^ "; --track-start-color: " ^ start)
-                (style ()))
+                (S.get style))
       data_orientation=(fun () ->
-                         Jsx.data (orientation_name (s.orientation ())))
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+                         Jsx.data (orientation_name (S.get s.orientation)))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_slot="color-slider-track"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
     </Kobalte.Track>
   [@@element div]
 end
@@ -203,28 +198,28 @@ module Thumb = struct
       () =
     let s = within "Color_slider.Thumb" in
     let context = Kobalte.use_color_slider_context () in
-    let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get s.disabled) () in
     (* Dragged while a pointer holds it, where a key held presses it but drags
        nothing, as React Aria's thumb is. *)
     let dragging () = Interaction.dragged i in
     let state () =
       {
-        color = (fun[@u] () -> S.get (Slider_context.value context));
-        is_dragging = (fun[@u] () -> dragging ());
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> s.disabled ());
+        color = S.accessor (fun () -> S.get (Slider_context.value context));
+        is_dragging = S.accessor (fun () -> dragging ());
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_focused = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = s.disabled;
       }
     in
     <Kobalte.Thumb
       class_=(fun () ->
-               after (Styles.ColorSlider.thumb (s.slots ())) (class_ ()))
+               after (Styles.ColorSlider.thumb (S.get s.slots)) (S.get class_))
       style=(fun () ->
               (* Placed as React Aria places it, at the channel's value along
                  the track, where Kobalte's would be measured. *)
               let color = S.get (Slider_context.value context) in
-              let channel = s.channel () in
+              let channel = S.get s.channel in
               let range = Color.get_channel_range color channel in
               let span = Range.max_value range -. Range.min_value range in
               let at =
@@ -235,7 +230,7 @@ module Thumb = struct
                   /. span
               in
               let place =
-                match s.orientation () with
+                match S.get s.orientation with
                 | `horizontal ->
                     "position: absolute; left: " ^ percent at
                     ^ "; transform: translate(-50%, -50%)"
@@ -246,29 +241,29 @@ module Thumb = struct
                     ^ "; bottom: auto; transform: translate(-50%, -50%)"
               in
               let painted =
-                if s.disabled () then ""
+                if S.get s.disabled then ""
                 else
                   "; background-color: "
                   ^ Color.to_string
                       (Slider_context.get_display_color context ())
                       ~format:`css ()
               in
-              with_style (place ^ painted) (style ()))
+              with_style (place ^ painted) (S.get style))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_dragging=(fun () -> Jsx.flag (dragging ()))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_slot="color-slider-thumb"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)
       id=(fun () -> s.thumb_id)>
       <Kobalte.Input />
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> Jsx.draw c (state ())
         | None -> Jsx.string "")
     </Kobalte.Thumb>
@@ -295,44 +290,44 @@ let%component make ~(channel : channel)
     () =
   (* A slider is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
-  let disabled () =
-    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  let disabled =
+    S.accessor (fun () ->
+        match S.get is_disabled with Some d -> d | None -> S.get in_fieldset)
   in
-  let in_form = Form.field ~name ~invalid:(fun () -> false) in
+  let in_form =
+    Form.field ~name:(fun () -> S.get name) ~invalid:(fun () -> false)
+  in
   let s =
     {
-      channel = (fun () -> channel ());
+      channel;
       slots =
-        (fun () -> Styles.ColorSlider.slots (Styles.ColorSlider.options ()));
+        S.accessor (fun () ->
+            Styles.ColorSlider.slots (Styles.ColorSlider.options ()));
       disabled;
-      orientation = (fun () -> orientation ());
+      orientation;
       thumb_id = S.create_unique_id ();
     }
   in
-  let state () =
-    {
-      orientation = (fun[@u] () -> orientation ());
-      is_disabled = (fun[@u] () -> disabled ());
-    }
-  in
+  let state () = { orientation; is_disabled = disabled } in
   <Context.Provider value=(fun () -> s)>
     <Kobalte.Root
-      channel=(fun () -> channel ())
-      ?color_space=(fun () -> space_for (channel ()) (color_space ()))
+      channel=(fun () -> S.get channel)
+      ?color_space=(fun () -> space_for (S.get channel) (S.get color_space))
       ?value
       ?default_value
       on_change=(fun c ->
                   in_form.changed ();
                   ignore (on_change c : unit option))
       on_change_end=(fun c -> ignore (on_change_end c : unit option))
-      orientation=(fun () -> orientation ())
-      disabled=(fun () -> disabled ())
+      orientation=(fun () -> S.get orientation)
+      disabled=(fun () -> S.get disabled)
       ?name
       ?aria_label
       class_=(fun () ->
-               after (Styles.ColorSlider.base (s.slots ())) (class_ ()))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
+               after (Styles.ColorSlider.base (S.get s.slots)) (S.get class_))
+      data_disabled=(fun () -> Jsx.flag (S.get disabled))
+      data_orientation=(fun () ->
+                         Jsx.data (orientation_name (S.get orientation)))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -344,10 +339,10 @@ let%component make ~(channel : channel)
                          on_blur e)
                        e)
       data_slot="color-slider"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

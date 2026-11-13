@@ -55,6 +55,9 @@
     A part is used inside a {!Root}, a cell inside a {!Row}: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type sort_descriptor = {
   column : string;
   direction : [ `ascending | `descending ];
@@ -70,20 +73,20 @@ type column_size =
       (** A share of what the other columns leave, as CSS's [fr] is. *)
 
 type context = {
-  selection_mode : unit -> [ `none | `single | `multiple ];
-  sort : unit -> sort_descriptor option;
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
+  sort : sort_descriptor option S.accessor;
   sort_by : string -> unit;
       (** Asks for a column's sort: ascending, or turned if it was so. *)
   is_selected : string -> bool;
   is_disabled : string -> bool;
   toggle : string -> unit;  (** Toggles a row's selection. *)
-  is_select_all : unit -> bool;  (** Whether every row is selected. *)
-  is_empty : unit -> bool;  (** Whether no row is selected. *)
+  is_select_all : bool S.accessor;  (** Whether every row is selected. *)
+  is_empty : bool S.accessor;  (** Whether no row is selected. *)
   select_all : unit -> unit;
   clear_selection : unit -> unit;
-  resizing_column : unit -> string option;
+  resizing_column : string option S.accessor;
       (** The [id] of the column being resized, in a {!Resizable_container}. *)
-  tree_column : unit -> string option;
+  tree_column : string option S.accessor;
       (** The [id] of the column whose cells hold a tree's chevrons. *)
   is_expanded : string -> bool;  (** Whether a row's rows are shown. *)
   toggle_expanded : string -> unit;
@@ -97,10 +100,10 @@ val use_context : unit -> context
 type row = {
   key : string;
   level : int;  (** 1 in the body, and one more in each row it is inside. *)
-  has_child_items : unit -> bool;  (** Whether it holds rows. *)
-  is_expanded : unit -> bool;
-  is_selected : unit -> bool;
-  is_disabled : unit -> bool;
+  has_child_items : bool S.accessor;  (** Whether it holds rows. *)
+  is_expanded : bool S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
   toggle_expanded : unit -> unit;
   focus : unit -> unit;  (** Gives it the focus, as a press of it does. *)
   header_id : string;  (** The id of the cell that names it. *)
@@ -113,9 +116,9 @@ val use_row_context : unit -> row
     [Invalid_argument]. *)
 
 type cell = {
-  is_tree_column : unit -> bool;
+  is_tree_column : bool S.accessor;
       (** Whether it is in the table's tree column. *)
-  column_index : unit -> int;
+  column_index : int S.accessor;
 }
 (** What a part inside a {!Cell} reads of it, and a style's attribute on it. *)
 
@@ -124,8 +127,8 @@ val use_cell_context : unit -> cell
     [Invalid_argument]. *)
 
 type column = {
-  direction : unit -> [ `ascending | `descending ] option;
-  resizing : unit -> bool;  (** Whether it is being resized. *)
+  direction : [ `ascending | `descending ] option S.accessor;
+  resizing : bool S.accessor;  (** Whether it is being resized. *)
 }
 (** What a part inside a {!Column} reads of it: which way it is sorted, if it
     is, and whether it is being resized. *)
@@ -150,14 +153,14 @@ module Resizable_container : sig
       ?on_resize_start:((string * column_size) array -> unit) ->
       ?on_resize:((string * column_size) array -> unit) ->
       ?on_resize_end:((string * column_size) array -> unit) ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The [<table role="grid">], [aria-multiselectable] while many rows may be
@@ -201,14 +204,14 @@ module Root : sig
       ?default_expanded_keys:string array Solidtype.Check.value ->
       ?on_expanded_change:(string array -> unit) ->
       ?on_row_action:(string -> unit) ->
-      ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Table.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The [<thead role="rowgroup">] and its one [<tr role="row">], where its
@@ -218,14 +221,14 @@ module Header : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Thead.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Thead.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Thead.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A column's header, a [<th role="columnheader">], [aria-colindex] its place,
@@ -247,14 +250,14 @@ module Column : sig
       ?default_width:column_size Solidtype.Check.value ->
       ?min_width:float Solidtype.Check.value ->
       ?max_width:float Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Th.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Th.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The [<tbody role="rowgroup">], its {!Row}s, or, while it has none, a row of
@@ -264,15 +267,15 @@ module Body : sig
     type t
 
     val check :
-      ?empty_state:Solidtype.Jsx.element Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Tbody.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?empty_state:Jsx.element Solidtype.Check.value ->
+      ?as_:(Solidtype.Html.Tbody.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tbody.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A row, a [<tr role="row">] of Kobalte's list, [data-key] its [id], which is
@@ -305,14 +308,14 @@ module Row : sig
       ?href_lang:string Solidtype.Check.value ->
       ?ping:string Solidtype.Check.value ->
       ?referrer_policy:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Tr.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A cell, a [<td>], a [gridcell], or a [rowheader] in the row header's column,
@@ -323,14 +326,14 @@ module Cell : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Td.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Td.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Td.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What loads more rows, after a {!Body}'s last, as React Aria's
@@ -348,14 +351,14 @@ module Load_more : sig
       ?is_loading:bool Solidtype.Check.value ->
       ?on_load_more:(unit -> unit) ->
       ?scroll_offset:float Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Tr.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What resizes the {!Column} it is in, as React Aria's [ColumnResizer] does: a
@@ -375,12 +378,12 @@ module Column_resizer : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end

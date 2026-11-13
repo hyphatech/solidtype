@@ -1,8 +1,8 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type group = {
   variant :
-    unit ->
     [ `primary
     | `secondary
     | `tertiary
@@ -10,10 +10,11 @@ type group = {
     | `ghost
     | `danger
     | `danger_soft ]
-    option;
-  size : unit -> [ `sm | `md | `lg ] option;
-  is_disabled : unit -> bool option;
-  full_width : unit -> bool option;
+    option
+    S.accessor;
+  size : [ `sm | `md | `lg ] option S.accessor;
+  is_disabled : bool option S.accessor;
+  full_width : bool option S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -29,7 +30,7 @@ module Separator = struct
                  Styles.ButtonGroup.separator
                    (Styles.ButtonGroup.slots (Styles.ButtonGroup.options ()))
                in
-               match class_ () with
+               match S.get class_ with
                | Some c -> separator ^ " " ^ c
                | None -> separator)
       data_slot="button-group-separator"
@@ -52,7 +53,7 @@ let%component make
     ?(full_width : bool option) ?(is_disabled : bool option)
     ?(class_ : string option) ~(children : Jsx.content) () =
   let g = { variant; size; is_disabled; full_width } in
-  let disabled () = Option.value (is_disabled ()) ~default:false in
+  let disabled () = Option.value (S.get is_disabled) ~default:false in
   <Context.Provider value=(fun () -> g)>
     <div
       role=`group
@@ -60,18 +61,18 @@ let%component make
                let base =
                  Styles.ButtonGroup.base
                    (Styles.ButtonGroup.slots
-                      (Styles.ButtonGroup.options ?full_width:(full_width ())
-                         ~orientation:(orientation ()) ()))
+                      (Styles.ButtonGroup.options ?full_width:(S.get full_width)
+                         ~orientation:(S.get orientation) ()))
                in
                (* A slot's class takes no class of the caller's, so it is
                   added after HeroUI's, as React's className is. *)
-               match class_ () with
+               match S.get class_ with
                | Some c -> base ^ " " ^ c
                | None -> base)
       data_slot="button-group"
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   </Context.Provider>
 [@@element div]

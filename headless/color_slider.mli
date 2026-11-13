@@ -24,6 +24,8 @@
 
     A part reads its slider's, and raises as Kobalte's does elsewhere. *)
 
+module Jsx := Solidtype.Jsx
+
 module Root : sig
   module Props : sig
     include module type of Solidtype_kobalte.ColorSlider.Root.Props
@@ -31,8 +33,8 @@ module Root : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Thumb : sig
@@ -42,8 +44,8 @@ module Thumb : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A track given a [ref] still knows it is the slider's, as {!Slider.Track}
@@ -55,8 +57,8 @@ module Track : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Input = Solidtype_kobalte.ColorSlider.Input

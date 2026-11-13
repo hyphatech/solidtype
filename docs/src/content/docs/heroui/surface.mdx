@@ -43,13 +43,14 @@ Surface comes in semantic variants that describe their prominence level:
 
 ### Reading the surface
 
-Child components can read `Surface.Context` to get the current variant, a
-function to call to follow it as it changes, or `None` on no surface:
+Child components can read `Surface.Context` to get the current variant, an
+accessor read with `S.get` to follow it as it changes, or `None` on no
+surface:
 
 ```ocaml
 let surface = Surface.Context.use () in
 let on_surface () =
-  match surface with Some variant -> variant () | None -> `default
+  match surface with Some variant -> S.get variant | None -> `default
 ```
 
 ### Not yet

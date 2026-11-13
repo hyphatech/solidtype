@@ -175,8 +175,8 @@ let%component make ?(compared : string = ":scope > *")
   let read () =
     match (!solidtype_host, !react_host) with
     | Some s, Some r ->
-        let s_focusable, s_shown = shown (compared ()) s in
-        let r_focusable, r_shown = shown (compared ()) r in
+        let s_focusable, s_shown = shown (S.get compared) s in
+        let r_focusable, r_shown = shown (S.get compared) r in
         S.set set_table
           (Array.map
              (fun (name, a, b) -> (name, a, b, s_focusable && r_focusable))
@@ -214,7 +214,7 @@ let%component make ?(compared : string = ":scope > *")
           class_="heroui-ground flex min-h-24 items-center justify-center \
                   rounded-xl border border-separator p-6"
           ref=(fun el -> solidtype_host := Some el)>
-          (fun () -> Jsx.element (solidtype ()))
+          (fun () -> Jsx.element (S.get solidtype))
         </div>
       </figure>
       <figure class_="flex flex-col gap-2">
