@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.10.0 (2026-11-13)
 
 - Every context is reached by its module's `Context.use ()`, as the ports'
   were. Breaking: `Table.use_context ()` is `Table.Context.use ()`;
