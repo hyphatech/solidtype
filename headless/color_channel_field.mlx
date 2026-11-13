@@ -21,9 +21,9 @@ type channel =
 type field = {
   typing : bool -> unit;
   commit : unit -> unit;
-  colour : unit -> Color.t option;
-  channel : unit -> channel;
-  wheel : unit -> bool;
+  colour : Color.t option S.accessor;
+  channel : channel S.accessor;
+  wheel : bool S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -105,12 +105,10 @@ module Root = struct
           match Js.Nullable.toOption v with
           | Some _ as given -> given
           | None -> S.get kept)
-      | None, Some p -> Some (p.color ())
+      | None, Some p -> Some (S.get p.color)
       | None, None -> S.get kept
     in
-    let tell c =
-      match Props.on_change props with Some f -> f c [@u] | None -> ()
-    in
+    let tell c = Jsx.call (Props.on_change props) c in
     let emptied = ref false in
     let settle c =
       if Float.is_nan (Color.get_channel_value c (Props.channel props)) then
@@ -175,8 +173,9 @@ module Root = struct
           settle c
       | None -> ()
     in
-    let change_on_wheel () =
-      Option.value (Props.change_on_wheel props) ~default:true
+    let change_on_wheel =
+      S.accessor (fun () ->
+          Option.value (Props.change_on_wheel props) ~default:true)
     in
     let field =
       {
@@ -186,21 +185,21 @@ module Root = struct
             if on then emptied := false);
         commit;
         colour =
-          (fun () ->
-            match (current (), Props.color_space props) with
-            | Some c, Some space ->
-                Color.to_format_opt c
-                  (space
-                    :> [ `rgb
-                       | `hsl
-                       | `hsb
-                       | `hex
-                       | `hexa
-                       | `rgba
-                       | `hsla
-                       | `hsba ])
-            | shown, _ -> shown);
-        channel = (fun () -> Props.channel props);
+          S.accessor (fun () ->
+              match (current (), Props.color_space props) with
+              | Some c, Some space ->
+                  Color.to_format_opt c
+                    (space
+                      :> [ `rgb
+                         | `hsl
+                         | `hsb
+                         | `hex
+                         | `hexa
+                         | `rgba
+                         | `hsla
+                         | `hsba ])
+              | shown, _ -> shown);
+        channel = S.accessor (fun () -> Props.channel props);
         wheel = change_on_wheel;
       }
     in
@@ -243,8 +242,6 @@ module Input = struct
     [@@mel.get]
   end
 
-  let call f e = match f with Some f -> f e [@u] | None -> ()
-
   let make (props : Props.t) =
     (* Kobalte's channel field is its number field, whose input tells its
        value now as the text it shows once the value changes. *)
@@ -264,9 +261,9 @@ module Input = struct
        Kobalte's own are. *)
     let commit () =
       f.commit ();
-      match f.colour () with
+      match S.get f.colour with
       | Some c ->
-          let channel = f.channel () in
+          let channel = S.get f.channel in
           let percent =
             match
               Types.NumberFormatOptions.style
@@ -295,17 +292,17 @@ module Input = struct
                 f.typing false;
                 if String.equal (key k) "Enter" then commit ());
             listen_blur e (fun _ -> commit ());
-            call (Props.ref props) e)
+            Jsx.call (Props.ref props) e)
       on_input=(fun e ->
                  f.typing true;
-                 call (Props.on_input props) e)
+                 Jsx.call (Props.on_input props) e)
       on_change=(fun e ->
                   commit ();
-                  call (Props.on_change props) e)
+                  Jsx.call (Props.on_change props) e)
       on_wheel=(fun e ->
                  f.typing false;
-                 Number_field.wheel ~change_on_wheel:(f.wheel ()) number e;
-                 call (Props.on_wheel props) e)
+                 Number_field.wheel ~change_on_wheel:(S.get f.wheel) number e;
+                 Jsx.call (Props.on_wheel props) e)
       ?aria_valuenow=(fun () ->
                        let v = S.get (Field_context.raw_value number) in
                        if Float.is_nan v then None

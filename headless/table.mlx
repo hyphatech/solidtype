@@ -118,16 +118,16 @@ let open_link row attributes e =
 type row = {
   key : string;
   level : int;
-  has_child_items : unit -> bool;
-  is_expanded : unit -> bool;
-  is_selected : unit -> bool;
-  is_disabled : unit -> bool;
+  has_child_items : bool S.accessor;
+  is_expanded : bool S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
   toggle_expanded : unit -> unit;
   focus : unit -> unit;
   header_id : string;
 }
 
-type cell = { is_tree_column : unit -> bool; column_index : unit -> int }
+type cell = { is_tree_column : bool S.accessor; column_index : int S.accessor }
 
 (* A row as the table keeps it: its key, its element, and where it is in the
    tree. *)
@@ -135,7 +135,7 @@ type listed = {
   key : string;
   element : Dom.element;
   parent : string option;
-  child_keys : unit -> string array;
+  child_keys : string array S.accessor;
 }
 
 type sort_descriptor = {
@@ -144,18 +144,18 @@ type sort_descriptor = {
 }
 
 type context = {
-  selection_mode : unit -> [ `none | `single | `multiple ];
-  sort : unit -> sort_descriptor option;
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
+  sort : sort_descriptor option S.accessor;
   sort_by : string -> unit;
   is_selected : string -> bool;
   is_disabled : string -> bool;
   toggle : string -> unit;
-  is_select_all : unit -> bool;
-  is_empty : unit -> bool;
+  is_select_all : bool S.accessor;
+  is_empty : bool S.accessor;
   select_all : unit -> unit;
   clear_selection : unit -> unit;
-  resizing_column : unit -> string option;
-  tree_column : unit -> string option;
+  resizing_column : string option S.accessor;
+  tree_column : string option S.accessor;
   is_expanded : string -> bool;
   toggle_expanded : string -> unit;
 }
@@ -268,7 +268,7 @@ let column_widths ~available (columns : (column_size * float * float) array) =
 (* What a resizable container tells the table inside it: how wide it is, and
    whom a resize is told. *)
 type container = {
-  width : unit -> float;
+  width : float S.accessor;
   on_resize_start : (string * column_size) array -> unit;
   on_resize : (string * column_size) array -> unit;
   on_resize_end : (string * column_size) array -> unit;
@@ -282,11 +282,11 @@ end)
    made, and the sizes it asks for. *)
 type column_spec = {
   column_key : string;
-  column_index : unit -> int;
-  width : unit -> column_size option;
+  column_index : int S.accessor;
+  width : column_size option S.accessor;
   default_width : column_size option;
-  min_width : unit -> float option;
-  max_width : unit -> float option;
+  min_width : float option S.accessor;
+  max_width : float option S.accessor;
 }
 
 (* What the parts of a resizable table read of its layout, and how a resize
@@ -295,7 +295,7 @@ type sizing = {
   width_of : string -> float;
   min_of : string -> float;
   max_of : string -> float;
-  resizing : unit -> string option;
+  resizing : string option S.accessor;
   set_resizing : string option -> unit;
   resize_to : string -> float -> (string * column_size) array;
       (** A column given a width: every column's size after it. *)
@@ -308,17 +308,17 @@ type sizing = {
 type virtualized = {
   options : Virtualizer.table_layout;
   column_box : int -> float * float;  (** A column's left and width. *)
-  column_count : unit -> int;
-  content_width : unit -> float;
-  body_height : unit -> float;
-  row_count : unit -> int;
+  column_count : int S.accessor;
+  content_width : float S.accessor;
+  body_height : float S.accessor;
+  row_count : int S.accessor;
   set_rows : string array -> unit;  (** The keys of all the body's rows. *)
-  window : unit -> int * int;
+  window : (int * int) S.accessor;
       (** The first row drawn and the last; none while the last is before the
           first. *)
-  focused_row : unit -> int option;
+  focused_row : int option S.accessor;
       (** The focused row, drawn wherever it is. *)
-  scrolling : unit -> bool;
+  scrolling : bool S.accessor;
 }
 
 let px n = Js.Float.toString n ^ "px"
@@ -341,19 +341,19 @@ external as_element : _ Dom.element_like -> Dom.element = "%identity"
    layout where it is resizable or virtualized. *)
 type table = {
   context : context;
-  rows : unit -> listed list;
+  rows : listed list S.accessor;
   add : listed -> unit;
   remove : string -> unit;
-  set_order : (unit -> string array) option -> unit;
+  set_order : string array S.accessor option -> unit;
       (** The keys of the body's rows, in the order it holds them. *)
   row_action : (string -> unit) option;
   manager : Manager.t S.accessor;
-  row_header : unit -> int;
-  set_row_header : (unit -> int) option -> unit;
-  tree_index : unit -> int option;
-  set_tree_index : (unit -> int) option -> unit;
-  column_count : unit -> int;
-  set_column_count : (unit -> int) option -> unit;
+  row_header : int S.accessor;
+  set_row_header : int S.accessor option -> unit;
+  tree_index : int option S.accessor;
+  set_tree_index : int S.accessor option -> unit;
+  column_count : int S.accessor;
+  set_column_count : int S.accessor option -> unit;
       (** How many columns the header reads. *)
   add_column : column_spec -> unit;
   remove_column : string -> unit;
@@ -396,7 +396,7 @@ let use_cell_context () =
    the server as in the browser. *)
 type nested = {
   row_key : string;
-  draw : position:(unit -> int) -> size:(unit -> int) -> Jsx.element;
+  draw : position:int S.accessor -> size:int S.accessor -> Jsx.element;
 }
 
 module Nested = Jsx.Token (struct
@@ -406,7 +406,7 @@ end)
 (* A row's cell, drawn by its row once the row has read all it holds: whether
    it holds rows is then known to each cell, on the server as in the browser,
    and its column is its place among them, which a reorder moves. *)
-type drawn_cell = { draw_cell : index:(unit -> int) -> Jsx.element }
+type drawn_cell = { draw_cell : index:int S.accessor -> Jsx.element }
 
 module Cells = Jsx.Token (struct
   type t = drawn_cell
@@ -414,7 +414,7 @@ end)
 
 (* A column, drawn by the header once it has read them all, its place among
    them its index, which a reorder moves. *)
-type drawn_column = { draw_column : index:(unit -> int) -> Jsx.element }
+type drawn_column = { draw_column : index:int S.accessor -> Jsx.element }
 
 module Columns = Jsx.Token (struct
   type t = drawn_column
@@ -509,8 +509,7 @@ let tabindex = function Some i -> Js.Float.toString i | None -> "-1"
 let state on = if on then Jsx.data "" else Jsx.flag false
 
 (* A handler or a ref the caller gave, called beside the part's own, as
-   Kobalte's parts call theirs. *)
-let call f x = match f with Some f -> f x [@u] | None -> ()
+   Kobalte's parts Jsx.call theirs. *)
 
 external client_width : _ Dom.element_like -> float = "clientWidth" [@@mel.get]
 
@@ -572,18 +571,11 @@ module Resizable_container = struct
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external on_resize_start :
-      t -> (((string * column_size) array -> unit)[@u]) option = "onResizeStart"
-    [@@mel.get]
+    type resized = ((string * column_size) array -> unit[@u])
 
-    external on_resize :
-      t -> (((string * column_size) array -> unit)[@u]) option = "onResize"
-    [@@mel.get]
-
-    external on_resize_end :
-      t -> (((string * column_size) array -> unit)[@u]) option = "onResizeEnd"
-    [@@mel.get]
-
+    external on_resize_start : t -> resized option = "onResizeStart" [@@mel.get]
+    external on_resize : t -> resized option = "onResize" [@@mel.get]
+    external on_resize_end : t -> resized option = "onResizeEnd" [@@mel.get]
     external children : t -> Jsx.content = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
@@ -619,18 +611,19 @@ module Resizable_container = struct
           !container);
     let told =
       {
-        width = (fun () -> S.get width);
+        width;
         on_resize_start =
-          (fun sizes -> call (Props.on_resize_start props) sizes);
-        on_resize = (fun sizes -> call (Props.on_resize props) sizes);
-        on_resize_end = (fun sizes -> call (Props.on_resize_end props) sizes);
+          (fun sizes -> Jsx.call (Props.on_resize_start props) sizes);
+        on_resize = (fun sizes -> Jsx.call (Props.on_resize props) sizes);
+        on_resize_end =
+          (fun sizes -> Jsx.call (Props.on_resize_end props) sizes);
       }
     in
     <Container_context.Provider value=(fun () -> told)>
       <div
         ref=(fun e ->
               container := Some e;
-              call (Props.ref props) e)
+              Jsx.call (Props.ref props) e)
         ?as_=(fun () -> S.drawn_as props)
         props=(S.undrawn
                  (S.omit props
@@ -771,8 +764,9 @@ module Root = struct
     |]
 
   let make (props : Props.t) =
-    let selection_mode () =
-      Option.value (Props.selection_mode props) ~default:`none
+    let selection_mode =
+      S.accessor (fun () ->
+          Option.value (Props.selection_mode props) ~default:`none)
     in
     let rows, set_rows = S.create_signal [] in
     let order, set_order = S.create_signal None in
@@ -792,26 +786,28 @@ module Root = struct
     (* Its rows on the page, in the order the body holds them, each followed
        by those it holds while it is expanded, as they are drawn: never their
        elements' places, which a sort that moves them leaves unread. *)
-    let ordered () =
-      let on_page = Hashtbl.create 64 in
-      List.iter
-        (fun (r : listed) -> Hashtbl.replace on_page r.key r)
-        (S.get rows);
-      let rec walk keys =
-        List.concat_map
-          (fun k ->
-            match Hashtbl.find_opt on_page k with
-            | Some r ->
-                r
-                ::
-                (if is_expanded k then walk (Array.to_list (r.child_keys ()))
-                 else [])
-            | None -> [])
-          keys
-      in
-      match S.get order with
-      | Some keys -> walk (Array.to_list (keys ()))
-      | None -> []
+    let ordered =
+      S.accessor (fun () ->
+          let on_page = Hashtbl.create 64 in
+          List.iter
+            (fun (r : listed) -> Hashtbl.replace on_page r.key r)
+            (S.get rows);
+          let rec walk keys =
+            List.concat_map
+              (fun k ->
+                match Hashtbl.find_opt on_page k with
+                | Some r ->
+                    r
+                    ::
+                    (if is_expanded k then
+                       walk (Array.to_list (S.get r.child_keys))
+                     else [])
+                | None -> [])
+              keys
+          in
+          match S.get order with
+          | Some keys -> walk (Array.to_list (S.get keys))
+          | None -> [])
     in
     (* A table a virtualizer lays out, as React Aria's TableLayout does. *)
     let layout =
@@ -826,7 +822,7 @@ module Root = struct
       S.create_memo (fun () ->
           match S.get body_keys with
           | Some all -> all
-          | None -> Array.of_list (List.map (fun r -> r.key) (ordered ())))
+          | None -> Array.of_list (List.map (fun r -> r.key) (S.get ordered)))
     in
     let scroll_to = ref (fun (_ : string) -> ()) in
     let disabled k =
@@ -845,7 +841,8 @@ module Root = struct
            ~get_key:(Either.left Fun.id) ~get_text_value:(Either.left text)
            ~get_disabled:(Either.left disabled)
            ~selection_mode:
-             (Either.right (S.create_memo (fun () -> Some (selection_mode ()))))
+             (Either.right
+                (S.create_memo (fun () -> Some (S.get selection_mode))))
            ~selection_behavior:
              (Either.right
                 (S.create_memo (fun () -> Props.selection_behavior props)))
@@ -859,7 +856,7 @@ module Root = struct
              (Option.map Either.left
                 (S.untrack (fun () -> Props.default_selected_keys props)))
            ~on_selection_change:(fun keys ->
-             call (Props.on_selection_change props) (Js.Set.toArray keys))
+             Jsx.call (Props.on_selection_change props) (Js.Set.toArray keys))
            ())
     in
     let manager =
@@ -891,13 +888,13 @@ module Root = struct
         else Array.append now [| k |]
       in
       S.set set_kept_expanded next;
-      call (Props.on_expanded_change props) next
+      Jsx.call (Props.on_expanded_change props) next
     in
     let tree () = Option.is_some (Props.tree_column props) in
     let specs, set_specs = S.create_signal [] in
     let ordered_columns () =
       List.sort
-        (fun a b -> Int.compare (a.column_index ()) (b.column_index ()))
+        (fun a b -> Int.compare (S.get a.column_index) (S.get b.column_index))
         (S.get specs)
     in
     let sizing =
@@ -911,20 +908,20 @@ module Root = struct
               (S.get kept)
           in
           let asked c =
-            match c.width () with
+            match S.get c.width with
             | Some w -> w
             | None -> (
                 match kept_size c.column_key with
                 | Some w -> w
                 | None -> Option.value c.default_width ~default:(Fraction 1.))
           in
-          let narrowest c = Option.value (c.min_width ()) ~default:75. in
-          let widest c = Option.value (c.max_width ()) ~default:max_safe in
+          let narrowest c = Option.value (S.get c.min_width) ~default:75. in
+          let widest c = Option.value (S.get c.max_width) ~default:max_safe in
           let layout =
             S.create_memo (fun () ->
                 let columns = Array.of_list (ordered_columns ()) in
                 let widths =
-                  column_widths ~available:(told.width ())
+                  column_widths ~available:(S.get told.width)
                     (Array.map
                        (fun c -> (asked c, narrowest c, widest c))
                        columns)
@@ -972,7 +969,7 @@ module Root = struct
               ((key, Pixels wanted)
               :: List.filter_map
                    (fun c ->
-                     match c.width () with
+                     match S.get c.width with
                      | Some _ -> None
                      | None ->
                          Array.find_opt
@@ -987,7 +984,7 @@ module Root = struct
             width_of;
             min_of;
             max_of;
-            resizing = (fun () -> S.get resizing);
+            resizing;
             set_resizing = S.set set_resizing;
             resize_to;
             told;
@@ -1038,7 +1035,7 @@ module Root = struct
                       Option.iter Js.Global.clearTimeout !settle))
                 (S.get element));
           let asked c =
-            match c.width () with
+            match S.get c.width with
             | Some w -> w
             | None -> Option.value c.default_width ~default:(Fraction 1.)
           in
@@ -1053,8 +1050,9 @@ module Root = struct
                       (Array.map
                          (fun c ->
                            ( asked c,
-                             Option.value (c.min_width ()) ~default:75.,
-                             Option.value (c.max_width ()) ~default:max_safe ))
+                             Option.value (S.get c.min_width) ~default:75.,
+                             Option.value (S.get c.max_width) ~default:max_safe
+                           ))
                          columns))
           in
           let column_box i =
@@ -1067,36 +1065,44 @@ module Root = struct
               done;
               (!left, w.(i))
           in
-          let content_width () = Array.fold_left ( +. ) 0. (S.get widths) in
-          let row_count () =
-            match S.get body_keys with Some k -> Array.length k | None -> 0
+          let content_width =
+            S.accessor (fun () -> Array.fold_left ( +. ) 0. (S.get widths))
+          in
+          let row_count =
+            S.accessor (fun () ->
+                match S.get body_keys with
+                | Some k -> Array.length k
+                | None -> 0)
           in
           let step = l.row_size +. l.gap in
           let body_top = l.padding +. l.heading_size +. l.gap in
-          let body_height () =
-            match row_count () with
-            | 0 -> Float.max 0. (snd (S.get size) -. l.heading_size)
-            | n -> (Float.of_int n *. step) -. l.gap
+          let body_height =
+            S.accessor (fun () ->
+                match S.get row_count with
+                | 0 -> Float.max 0. (snd (S.get size) -. l.heading_size)
+                | n -> (Float.of_int n *. step) -. l.gap)
           in
           (* As React Aria draws them: what is in view and a third more below,
              or above while it scrolls up, in whole rows. *)
-          let window () =
-            let n = row_count () and _, high = S.get size in
-            if n = 0 || high <= 0. then (0, -1)
-            else
-              let from =
-                if S.get up then S.get scroll -. (high /. 3.) else S.get scroll
-              in
-              let y = Float.floor (from /. l.row_size) *. l.row_size in
-              let h =
-                Float.ceil (high *. 4. /. 3. /. l.row_size) *. l.row_size
-              in
-              let row at =
-                max 0
-                  (min (n - 1)
-                     (int_of_float (Float.floor ((at -. body_top) /. step))))
-              in
-              (row y, row (y +. h))
+          let window =
+            S.accessor (fun () ->
+                let n = S.get row_count and _, high = S.get size in
+                if n = 0 || high <= 0. then (0, -1)
+                else
+                  let from =
+                    if S.get up then S.get scroll -. (high /. 3.)
+                    else S.get scroll
+                  in
+                  let y = Float.floor (from /. l.row_size) *. l.row_size in
+                  let h =
+                    Float.ceil (high *. 4. /. 3. /. l.row_size) *. l.row_size
+                  in
+                  let row at =
+                    max 0
+                      (min (n - 1)
+                         (int_of_float (Float.floor ((at -. body_top) /. step))))
+                  in
+                  (row y, row (y +. h)))
           in
           let index_of k =
             match S.get body_keys with
@@ -1109,8 +1115,11 @@ module Root = struct
                 find 0
             | None -> None
           in
-          let focused_row () =
-            Option.bind (S.get (Manager.focused_key (S.get manager))) index_of
+          let focused_row =
+            S.accessor (fun () ->
+                Option.bind
+                  (S.get (Manager.focused_key (S.get manager)))
+                  index_of)
           in
           (* A row the keys move to is brought into view below the header,
              which stays over the rows. *)
@@ -1137,14 +1146,14 @@ module Root = struct
           {
             options = l;
             column_box;
-            column_count = (fun () -> Array.length (S.get widths));
+            column_count = S.accessor (fun () -> Array.length (S.get widths));
             content_width;
             body_height;
             row_count;
             set_rows = (fun keys -> S.set set_body_keys (Some keys));
             window;
             focused_row;
-            scrolling = (fun () -> S.get scrolling);
+            scrolling;
           })
         layout
     in
@@ -1153,7 +1162,7 @@ module Root = struct
         context =
           {
             selection_mode;
-            sort = (fun () -> Props.sort_descriptor props);
+            sort = S.accessor (fun () -> Props.sort_descriptor props);
             (* A column pressed is sorted ascending, or turned if it was. *)
             sort_by =
               (fun column ->
@@ -1164,27 +1173,28 @@ module Root = struct
                       `descending
                   | Some _ | None -> `ascending
                 in
-                call (Props.on_sort_change props) { column; direction });
+                Jsx.call (Props.on_sort_change props) { column; direction });
             is_selected = (fun k -> Manager.is_selected (m ()) k);
             is_disabled = disabled;
             toggle = (fun k -> Manager.toggle_selection (m ()) k);
-            is_select_all = (fun () -> S.get (Manager.is_select_all (m ())));
-            is_empty = (fun () -> S.get (Manager.is_empty (m ())));
+            is_select_all =
+              S.accessor (fun () -> S.get (Manager.is_select_all (m ())));
+            is_empty = S.accessor (fun () -> S.get (Manager.is_empty (m ())));
             select_all = (fun () -> Manager.select_all (m ()) ());
             clear_selection = (fun () -> Manager.clear_selection (m ()) ());
             resizing_column =
-              (fun () ->
-                match sizing with Some s -> s.resizing () | None -> None);
-            tree_column = (fun () -> Props.tree_column props);
+              S.accessor (fun () ->
+                  match sizing with Some s -> S.get s.resizing | None -> None);
+            tree_column = S.accessor (fun () -> Props.tree_column props);
             is_expanded;
             toggle_expanded;
           };
         rows = ordered;
         add = (fun r -> S.set set_rows (r :: S.get rows));
         row_action =
-          Option.map
-            (fun f key -> (f key [@u]))
-            (S.untrack (fun () -> Props.on_row_action props));
+          (match S.untrack (fun () -> Props.on_row_action props) with
+          | Some _ as given -> Some (Jsx.call given)
+          | None -> None);
         remove =
           (fun k ->
             S.set set_rows
@@ -1192,18 +1202,22 @@ module Root = struct
         set_order = S.set set_order;
         manager;
         row_header =
-          (fun () ->
-            match S.get row_header with Some index -> index () | None -> 0);
+          S.accessor (fun () ->
+              match S.get row_header with
+              | Some index -> S.get index
+              | None -> 0);
         set_row_header = S.set set_row_header;
         tree_index =
-          (fun () ->
-            match S.get tree_index with
-            | Some index -> Some (index ())
-            | None -> None);
+          S.accessor (fun () ->
+              match S.get tree_index with
+              | Some index -> Some (S.get index)
+              | None -> None);
         set_tree_index = S.set set_tree_index;
         column_count =
-          (fun () ->
-            match S.get column_count with Some count -> count () | None -> 0);
+          S.accessor (fun () ->
+              match S.get column_count with
+              | Some count -> S.get count
+              | None -> 0);
         set_column_count = S.set set_column_count;
         add_column = (fun c -> S.set set_specs (c :: S.get specs));
         remove_column =
@@ -1221,10 +1235,10 @@ module Root = struct
        cell, an arrow, Home and End are the grid's even where they reach
        nothing, as an accessible grid's are, or the list would move a row. *)
     let on_key_down e =
-      call (Props.on_key_down props) e;
+      Jsx.call (Props.on_key_down props) e;
       let resizing =
         match sizing with
-        | Some s -> Option.is_some (s.resizing ())
+        | Some s -> Option.is_some (S.get s.resizing)
         | None -> false
       in
       let moved =
@@ -1255,25 +1269,25 @@ module Root = struct
                   if tree () then
                     List.find_opt
                       (fun (r : listed) -> same r.element focused)
-                      (t.rows ())
+                      (S.get t.rows)
                   else None
                 in
                 match (listed, key e) with
                 | Some r, "ArrowRight"
-                  when Array.length (r.child_keys ()) > 0
+                  when Array.length (S.get r.child_keys) > 0
                        && not (is_expanded r.key) ->
                     toggle_expanded r.key;
                     `grid None
                 | Some r, "ArrowLeft"
-                  when Array.length (r.child_keys ()) > 0 && is_expanded r.key
-                  ->
+                  when Array.length (S.get r.child_keys) > 0
+                       && is_expanded r.key ->
                     toggle_expanded r.key;
                     `grid None
                 | Some { parent = Some above; _ }, "ArrowLeft" -> (
                     match
                       List.find_opt
                         (fun (r : listed) -> String.equal r.key above)
-                        (t.rows ())
+                        (S.get t.rows)
                     with
                     | Some r -> `row r.element
                     | None -> `grid None)
@@ -1304,13 +1318,13 @@ module Root = struct
               role=`presentation
               style=(fun () ->
                       "width: "
-                      ^ px (v.content_width () +. (2. *. l.padding))
+                      ^ px (S.get v.content_width +. (2. *. l.padding))
                       ^ "; height: "
                       ^ px
                           (l.padding +. l.heading_size +. l.gap
-                         +. v.body_height () +. l.padding)
+                         +. S.get v.body_height +. l.padding)
                       ^ "; pointer-events: "
-                      ^ (if v.scrolling () then "none" else "auto")
+                      ^ (if S.get v.scrolling then "none" else "auto")
                       ^ "; position: relative;")>
               (fun () -> Props.children props)
             </div>
@@ -1326,18 +1340,18 @@ module Root = struct
         ref=(fun e ->
               let e = as_element e in
               S.set set_element (Some e);
-              call (Props.ref props) e)
+              Jsx.call (Props.ref props) e)
         ?aria_rowcount=(fun () ->
                          Option.map
-                           (fun v -> string_of_int (v.row_count () + 1))
+                           (fun v -> string_of_int (S.get v.row_count + 1))
                            virtualized)
         ?aria_colcount=(fun () ->
                          Option.map
                            (fun (v : virtualized) ->
-                             string_of_int (v.column_count ()))
+                             string_of_int (S.get v.column_count))
                            virtualized)
         ?aria_multiselectable=(fun () ->
-                                match selection_mode () with
+                                match S.get selection_mode with
                                 | `multiple -> Some true
                                 | `single | `none -> None)
         tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
@@ -1347,10 +1361,10 @@ module Root = struct
                  | None -> None)
         on_key_down
         on_mouse_down=(fun e ->
-                        call (Props.on_mouse_down props) e;
+                        Jsx.call (Props.on_mouse_down props) e;
                         Selectable_list.on_mouse_down list e)
         on_focus_in=(fun e ->
-                      call (Props.on_focus_in props) e;
+                      Jsx.call (Props.on_focus_in props) e;
                       (* Kobalte's list, focused from outside, moves focus to
                          a row of its choosing, and the row whose key it holds
                          focuses itself as the list is focused: focus given a
@@ -1380,7 +1394,7 @@ module Root = struct
                       | None, Some _ -> ()
                       | None, None -> Selectable_list.on_focus_in list e)
         on_focus_out=(fun e ->
-                       call (Props.on_focus_out props) e;
+                       Jsx.call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
         props=(S.undrawn (S.omit props own))>
         (fun () -> content ())
@@ -1409,13 +1423,14 @@ module Header = struct
     let resolved = S.children (fun () -> Props.children props) in
     let all () = S.to_array (S.get resolved) in
     let columns = S.create_memo (fun () -> Columns.read (all ())) in
-    t.set_column_count (Some (fun () -> Array.length (S.get columns)));
+    t.set_column_count
+      (Some (S.accessor (fun () -> Array.length (S.get columns))));
     S.on_cleanup (fun () -> t.set_column_count None);
     let drawn () =
       Jsx.fragment
         [|
           <For each=(fun () -> S.get columns)>
-            (fun c index -> c.draw_column ~index:(fun () -> S.get index))
+            (fun c index -> c.draw_column ~index)
           </For>;
           Jsx.fragment (Columns.others (all ()));
         |]
@@ -1436,7 +1451,7 @@ module Header = struct
           role=`presentation
           style=(fun () ->
                   placed ~sticky:true ~overflow:"hidden" ~z:1 ~top:l.padding
-                    ~left:l.padding ~width:(v.content_width ())
+                    ~left:l.padding ~width:(S.get v.content_width)
                     ~height:l.heading_size ())>
           <div
             role=`rowgroup
@@ -1454,8 +1469,8 @@ end
 (* What a part inside a column reads of it: how it is sorted, and whether it
    is being resized. *)
 type column = {
-  direction : unit -> [ `ascending | `descending ] option;
-  resizing : unit -> bool;
+  direction : [ `ascending | `descending ] option S.accessor;
+  resizing : bool S.accessor;
 }
 
 module Column_context = Solidtype.Context.Make_optional (struct
@@ -1543,7 +1558,7 @@ module Column = struct
       | Some k -> k
       | None -> S.create_unique_id ()
     in
-    (match S.untrack t.context.tree_column with
+    (match S.untrack (fun () -> S.get t.context.tree_column) with
     | Some column when String.equal column key ->
         t.set_tree_index (Some index);
         S.on_cleanup (fun () -> t.set_tree_index None)
@@ -1551,10 +1566,11 @@ module Column = struct
     let sortable () =
       Option.value (Props.allows_sorting props) ~default:false
     in
-    let direction () =
-      match t.context.sort () with
-      | Some s when String.equal s.column key -> Some s.direction
-      | Some _ | None -> None
+    let direction =
+      S.accessor (fun () ->
+          match S.get t.context.sort with
+          | Some s when String.equal s.column key -> Some s.direction
+          | Some _ | None -> None)
     in
     (* A sortable column is pressed, by a pointer, Enter or Space, to be
        sorted by. *)
@@ -1566,19 +1582,20 @@ module Column = struct
       {
         column_key = key;
         column_index = index;
-        width = (fun () -> Props.width props);
+        width = S.accessor (fun () -> Props.width props);
         default_width = S.untrack (fun () -> Props.default_width props);
-        min_width = (fun () -> Props.min_width props);
-        max_width = (fun () -> Props.max_width props);
+        min_width = S.accessor (fun () -> Props.min_width props);
+        max_width = S.accessor (fun () -> Props.max_width props);
       };
     S.on_cleanup (fun () -> t.remove_column key);
-    let resizing () =
-      match t.sizing with
-      | Some s -> (
-          match s.resizing () with
-          | Some k -> String.equal k key
+    let resizing =
+      S.accessor (fun () ->
+          match t.sizing with
+          | Some s -> (
+              match S.get s.resizing with
+              | Some k -> String.equal k key
+              | None -> false)
           | None -> false)
-      | None -> false
     in
     let drawn =
       <Column_context.Provider value=(fun () -> { direction; resizing })>
@@ -1591,27 +1608,27 @@ module Column = struct
             role=`columnheader
             id=(fun () -> header_id)
             tabindex="-1"
-            aria_colindex=(fun () -> string_of_int (index () + 1))
+            aria_colindex=(fun () -> string_of_int (S.get index + 1))
             ?style=(fun () ->
                      Option.map
                        (fun s ->
                          "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
                        t.sizing)
-            data_resizing=(fun () -> state (resizing ()))
-            ref=(fun e -> call (Props.ref props) (as_element e))
+            data_resizing=(fun () -> state (S.get resizing))
+            ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
             ?aria_sort=(fun () ->
                          if sortable () then
                            Some
-                             (match direction () with
+                             (match S.get direction with
                              | Some `ascending -> `ascending
                              | Some `descending -> `descending
                              | None -> `none)
                          else None)
             on_click=(fun e ->
-                       call (Props.on_click props) e;
+                       Jsx.call (Props.on_click props) e;
                        press ())
             on_key_down=(fun e ->
-                          call (Props.on_key_down props) e;
+                          Jsx.call (Props.on_key_down props) e;
                           (* A key in a part inside it, a resizer's, is the
                          part's. *)
                           match key_name e with
@@ -1634,10 +1651,10 @@ module Column = struct
         <div
           role=`presentation
           style=(fun () ->
-                  let i = index () in
+                  let i = S.get index in
                   let left, width = v.column_box i in
                   placed ~overflow:"visible"
-                    ~z:(v.column_count () - i + 1)
+                    ~z:(S.get v.column_count - i + 1)
                     ~top:0. ~left ~width ~height:v.options.heading_size ())>
           (fun () -> Jsx.element drawn)
         </div>
@@ -1674,8 +1691,9 @@ module Body = struct
     let empty () =
       if Array.length (S.get rows) = 0 then Props.empty_state props else None
     in
-    let size () = Array.length (S.get rows) in
-    t.set_order (Some (fun () -> Array.map (fun n -> n.row_key) (S.get rows)));
+    let size = S.accessor (fun () -> Array.length (S.get rows)) in
+    t.set_order
+      (Some (S.accessor (fun () -> Array.map (fun n -> n.row_key) (S.get rows))));
     S.on_cleanup (fun () -> t.set_order None);
     let others () = Jsx.element (Jsx.fragment (Nested.others (all ()))) in
     match t.virtualized with
@@ -1685,8 +1703,7 @@ module Body = struct
           ?as_=(fun () -> S.drawn_as props)
           props=(S.undrawn (S.omit props [| "emptyState"; "children" |]))>
           <For each=(fun () -> S.get rows)>
-            (fun n position ->
-              n.draw ~position:(fun () -> S.get position) ~size)
+            (fun n position -> n.draw ~position ~size)
           </For>
           (fun () -> others ())
           <Show.Some some=(fun () -> empty ())>
@@ -1694,7 +1711,7 @@ module Body = struct
               <tr role=`row>
                 <td
                   role=`rowheader
-                  colspan=(fun () -> string_of_int (t.column_count ()))>
+                  colspan=(fun () -> string_of_int (S.get t.column_count))>
                   (fun () -> Jsx.element (S.get shown))
                 </td>
               </tr>)
@@ -1707,10 +1724,10 @@ module Body = struct
         (* The rows in view, and the focused one wherever it is, in order. *)
         let drawn () =
           let rows = S.get rows in
-          let first, last = v.window () in
+          let first, last = S.get v.window in
           let shown i =
             (i >= first && i <= last)
-            || match v.focused_row () with Some f -> f = i | None -> false
+            || match S.get v.focused_row with Some f -> f = i | None -> false
           in
           Js.Array.filteri ~f:(fun _ i -> shown i) rows
         in
@@ -1720,14 +1737,15 @@ module Body = struct
           style=(fun () ->
                   placed ~overflow:"hidden" ~z:0
                     ~top:(l.padding +. l.heading_size +. l.gap)
-                    ~left:l.padding ~width:(v.content_width ())
-                    ~height:(v.body_height ()) ())>
+                    ~left:l.padding ~width:(S.get v.content_width)
+                    ~height:(S.get v.body_height) ())>
           <div
             role=`rowgroup
             ?as_=(fun () -> S.drawn_as props)
             props=(S.undrawn (S.omit props [| "emptyState"; "children" |]))>
             <For each=(fun () -> drawn ())>
-              (fun n _ -> n.draw ~position:(fun () -> index_of n) ~size)
+              (fun n _ ->
+                n.draw ~position:(S.accessor (fun () -> index_of n)) ~size)
             </For>
             (fun () -> others ())
             <Show.Some some=(fun () -> empty ())>
@@ -1735,7 +1753,8 @@ module Body = struct
                 <div role=`row style="display: contents">
                   <div
                     role=`rowheader
-                    aria_colspan=(fun () -> string_of_int (v.column_count ()))
+                    aria_colspan=(fun () ->
+                                   string_of_int (S.get v.column_count))
                     style="display: contents">
                     (fun () -> Jsx.element (S.get shown))
                   </div>
@@ -1869,10 +1888,12 @@ module Row = struct
     in
     (* Its rows, among its children, once they are read. *)
     let nested = ref (fun () -> [||]) in
-    let has_child_items () = Array.length (!nested ()) > 0 in
-    let expanded () = t.context.is_expanded key in
-    let selected () = t.context.is_selected key in
-    let disabled () = t.context.is_disabled key in
+    let has_child_items =
+      S.accessor (fun () -> Array.length (!nested ()) > 0)
+    in
+    let expanded = S.accessor (fun () -> t.context.is_expanded key) in
+    let selected = S.accessor (fun () -> t.context.is_selected key) in
+    let disabled = S.accessor (fun () -> t.context.is_disabled key) in
     let header_id = S.create_unique_id () in
     let m () = S.get t.manager in
     (* As React Aria runs a row's action: the first a press runs where the row
@@ -1897,7 +1918,7 @@ module Row = struct
       (Option.is_some (Props.on_action props)
       || Option.is_some t.row_action
       || Option.is_some (link ()))
-      && not (disabled ())
+      && not (S.get disabled)
     in
     let allows_selection () = Selectable_item.allows_selection item () in
     let replaces () =
@@ -1916,7 +1937,7 @@ module Row = struct
     in
     let has_action () = primary () || secondary () in
     let act e =
-      Option.iter (fun f -> (f () [@u])) (Props.on_action props);
+      Jsx.act (Props.on_action props);
       Option.iter (fun f -> f key) t.row_action;
       match (link (), S.get element) with
       | Some attributes, Some row -> open_link row attributes e
@@ -1956,15 +1977,16 @@ module Row = struct
                 element = e;
                 parent = parent_key;
                 child_keys =
-                  (fun () -> Array.map (fun n -> n.row_key) (!nested ()));
+                  S.accessor (fun () ->
+                      Array.map (fun n -> n.row_key) (!nested ()));
               })
           (S.get element));
     S.on_cleanup (fun () -> t.remove key);
-    let tree () = Option.is_some (t.context.tree_column ()) in
+    let tree () = Option.is_some (S.get t.context.tree_column) in
 
     (* A press that began in a control is the control's. *)
     let pressed given own e =
-      call given e;
+      Jsx.call given e;
       if not (in_control e) then own e
     in
     <Row_context.Provider value=(fun () -> r)>
@@ -1984,38 +2006,41 @@ module Row = struct
             ref=(fun e ->
                   let e = as_element e in
                   S.set set_element (Some e);
-                  call (Props.ref props) e)
+                  Jsx.call (Props.ref props) e)
             ?aria_rowindex=(fun () ->
                              match t.virtualized with
                              | Some _ when not (tree ()) ->
-                                 Some (string_of_int (position () + 2))
+                                 Some (string_of_int (S.get position + 2))
                              | Some _ | None -> None)
             tabindex=(fun () ->
                        tabindex (S.get (Selectable_item.tab_index item)))
             aria_labelledby=(fun () -> header_id)
             ?aria_selected=(fun () ->
-                             match t.context.selection_mode () with
+                             match S.get t.context.selection_mode with
                              | `none -> None
-                             | `single | `multiple -> Some (selected ()))
-            ?aria_disabled=(fun () -> if disabled () then Some true else None)
+                             | `single | `multiple -> Some (S.get selected))
+            ?aria_disabled=(fun () ->
+                             if S.get disabled then Some true else None)
             ?aria_expanded=(fun () ->
-                             if tree () && has_child_items () then
-                               Some (expanded ())
+                             if tree () && S.get has_child_items then
+                               Some (S.get expanded)
                              else None)
             ?aria_level=(fun () ->
                           if tree () then Some (string_of_int level) else None)
             ?aria_posinset=(fun () ->
                              if tree () then
-                               Some (string_of_int (position () + 1))
+                               Some (string_of_int (S.get position + 1))
                              else None)
             ?aria_setsize=(fun () ->
-                            if tree () then Some (string_of_int (size ()))
+                            if tree () then Some (string_of_int (S.get size))
                             else None)
             data_key=(fun () -> Jsx.data key)
-            data_selected=(fun () -> state (selected ()))
-            data_disabled=(fun () -> state (disabled ()))
+            data_selected=(fun () -> state (S.get selected))
+            data_disabled=(fun () -> state (S.get disabled))
             data_expanded=(fun () ->
-                            state (tree () && has_child_items () && expanded ()))
+                            state
+                              (tree () && S.get has_child_items
+                             && S.get expanded))
             on_pointer_down=(pressed (Props.on_pointer_down props) (fun e ->
                                  pointer := pointer_type e;
                                  primary_at_down := primary ();
@@ -2045,10 +2070,10 @@ module Row = struct
                                cancel_long_press ();
                                Selectable_item.on_pointer_up item e))
             on_pointer_cancel=(fun e ->
-                                call (Props.on_pointer_cancel props) e;
+                                Jsx.call (Props.on_pointer_cancel props) e;
                                 cancel_long_press ())
             on_context_menu=(fun e ->
-                              call (Props.on_context_menu props) e;
+                              Jsx.call (Props.on_context_menu props) e;
                               (* A long touch's menu would cover what it
                                  selects. *)
                               if Option.is_some !long_press || !long_pressed
@@ -2084,14 +2109,14 @@ module Row = struct
                              act e
                            end))
             on_mouse_down=(fun e ->
-                            call (Props.on_mouse_down props) e;
+                            Jsx.call (Props.on_mouse_down props) e;
                             Selectable_item.on_mouse_down item e)
             on_focus=(fun e ->
-                       call (Props.on_focus props) e;
+                       Jsx.call (Props.on_focus props) e;
                        Selectable_item.on_focus item e)
             props=(S.undrawn (S.omit props own))>
             <For each=(fun () -> Cells.read (all ()))>
-              (fun c index -> c.draw_cell ~index:(fun () -> S.get index))
+              (fun c index -> c.draw_cell ~index)
             </For>
           </Dynamic.Drawn>
         in
@@ -2105,8 +2130,9 @@ module Row = struct
                 style=(fun () ->
                         placed ~overflow:"visible" ~z:0
                           ~top:
-                            (Float.of_int (position ()) *. (l.row_size +. l.gap))
-                          ~left:0. ~width:(v.content_width ())
+                            (Float.of_int (S.get position)
+                            *. (l.row_size +. l.gap))
+                          ~left:0. ~width:(S.get v.content_width)
                           ~height:l.row_size ())>
                 (fun () -> Jsx.element drawn)
               </div>
@@ -2115,12 +2141,11 @@ module Row = struct
         @@ Jsx.fragment
              [|
                row;
-               <Show when_=(fun () -> expanded ())>
+               <Show when_=(fun () -> S.get expanded)>
                  <For each=(fun () -> !nested ())>
                    (fun n position ->
-                     n.draw
-                       ~position:(fun () -> S.get position)
-                       ~size:(fun () -> Array.length (!nested ())))
+                     n.draw ~position
+                       ~size:(S.accessor (fun () -> Array.length (!nested ()))))
                  </For>
                </Show>;
              |])
@@ -2164,9 +2189,12 @@ module Cell = struct
   end
 
   let draw t (r : row) ~index (props : Props.t) =
-    let names_row () = index () = t.row_header () in
-    let is_tree_column () =
-      match t.tree_index () with Some i -> index () = i | None -> false
+    let names_row () = S.get index = S.get t.row_header in
+    let is_tree_column =
+      S.accessor (fun () ->
+          match S.get t.tree_index with
+          | Some i -> S.get index = i
+          | None -> false)
     in
     let drawn =
       <Cell_context.Provider
@@ -2179,12 +2207,12 @@ module Cell = struct
           ?id=(fun () -> if names_row () then Some r.header_id else None)
           ?aria_colindex=(fun () ->
                            Option.map
-                             (fun _ -> string_of_int (index () + 1))
+                             (fun _ -> string_of_int (S.get index + 1))
                              t.virtualized)
           tabindex="-1"
-          data_column_index=(fun () -> Jsx.data (string_of_int (index ())))
-          data_tree_column=(fun () -> state (is_tree_column ()))
-          ref=(fun e -> call (Props.ref props) (as_element e))
+          data_column_index=(fun () -> Jsx.data (string_of_int (S.get index)))
+          data_tree_column=(fun () -> state (S.get is_tree_column))
+          ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
           props=(S.undrawn (S.omit props [| "children"; "ref" |]))>
           (fun () -> Props.children props)
         </Dynamic.Drawn>
@@ -2196,7 +2224,7 @@ module Cell = struct
         <div
           role=`presentation
           style=(fun () ->
-                  let left, width = v.column_box (index ()) in
+                  let left, width = v.column_box (S.get index) in
                   placed ~overflow:"visible" ~z:1 ~top:0. ~left ~width
                     ~height:v.options.row_size ())>
           (fun () -> Jsx.element drawn)
@@ -2243,10 +2271,7 @@ module Load_more = struct
     let sentinel () =
       <Load_more_sentinel
         is_loading=(fun () -> is_loading ())
-        on_load_more=(fun _ ->
-                       match Props.on_load_more props with
-                       | Some f -> f () [@u]
-                       | None -> ())
+        on_load_more=(fun _ -> Jsx.act (Props.on_load_more props))
         ?scroll_offset=(fun () -> Props.scroll_offset props)
         style="position: relative; height: 1px; width: 1px;"
       />
@@ -2273,7 +2298,7 @@ module Load_more = struct
                 props=(S.undrawn (rest ()))>
                 <td
                   role=`rowheader
-                  colspan=(fun () -> string_of_int (t.column_count ()))>
+                  colspan=(fun () -> string_of_int (S.get t.column_count))>
                   (fun () -> Props.children props)
                 </td>
               </tr>
@@ -2287,8 +2312,9 @@ module Load_more = struct
           role=`presentation
           style=(fun () ->
                   placed ~overflow:"visible" ~z:0
-                    ~top:(Float.of_int (v.row_count ()) *. (l.row_size +. l.gap))
-                    ~left:0. ~width:(v.content_width ())
+                    ~top:
+                      (Float.of_int (S.get v.row_count) *. (l.row_size +. l.gap))
+                    ~left:0. ~width:(S.get v.content_width)
                     ~height:(if is_loading () then l.loader_size else 0.)
                     ())>
           <div style="height: 0px;" inert=true>
@@ -2303,7 +2329,7 @@ module Load_more = struct
               props=(S.undrawn (rest ()))>
               <div
                 role=`rowheader
-                aria_colspan=(fun () -> string_of_int (v.column_count ()))
+                aria_colspan=(fun () -> string_of_int (S.get v.column_count))
                 style="display: contents">
                 (fun () -> Props.children props)
               </div>
@@ -2410,7 +2436,7 @@ module Column_resizer = struct
     let input = ref None in
     let handle = ref None in
     let editing () =
-      match s.resizing () with Some k -> String.equal k key | None -> false
+      match S.get s.resizing with Some k -> String.equal k key | None -> false
     in
     (* A resize begun, and the sizes it last made, which its end is told. *)
     let started = ref false in
@@ -2446,11 +2472,12 @@ module Column_resizer = struct
     let step by = resize (s.width_of key +. by) in
     let dragging = ref None in
     let mouse_cursor, set_mouse_cursor = S.create_signal None in
-    let direction () =
-      let width = s.width_of key in
-      if s.min_of key >= width then "left"
-      else if s.max_of key <= width then "right"
-      else "both"
+    let direction =
+      S.accessor (fun () ->
+          let width = s.width_of key in
+          if s.min_of key >= width then "left"
+          else if s.max_of key <= width then "right"
+          else "both")
     in
     let whole x = Js.Float.toString (Float.floor x) in
     (* No text is selected while the handle is pressed, and none by the
@@ -2483,12 +2510,12 @@ module Column_resizer = struct
       role=`presentation
       ref=(fun e ->
             handle := Some e;
-            call (Props.ref props) e)
+            Jsx.call (Props.ref props) e)
       style="touch-action: none;"
       data_resizing=(fun () -> state (editing ()))
-      data_resizable_direction=(fun () -> Jsx.data (direction ()))
+      data_resizable_direction=(fun () -> Jsx.data (S.get direction))
       on_pointer_down=(fun e ->
-                        call (Props.on_pointer_down props) e;
+                        Jsx.call (Props.on_pointer_down props) e;
                         if
                           button e = 0
                           && not
@@ -2509,7 +2536,7 @@ module Column_resizer = struct
                             Some (client_x e, s.width_of key, pointer_type e)
                         end)
       on_pointer_move=(fun e ->
-                        call (Props.on_pointer_move props) e;
+                        Jsx.call (Props.on_pointer_move props) e;
                         match !dragging with
                         | Some (from, width, kind) ->
                             (* A mouse's drag holds its cursor over the page. *)
@@ -2525,11 +2552,11 @@ module Column_resizer = struct
                             resize (width +. client_x e -. from)
                         | None -> ())
       on_pointer_up=(fun e ->
-                      call (Props.on_pointer_up props) e;
+                      Jsx.call (Props.on_pointer_up props) e;
                       stop_drag ())
       on_pointer_cancel=(fun _ -> stop_drag ())
       on_click=(fun e ->
-                 call (Props.on_click props) e;
+                 Jsx.call (Props.on_click props) e;
                  (* A press on the resizer is never its column's. *)
                  stop_propagation e)
       ?as_=(fun () -> S.drawn_as props)

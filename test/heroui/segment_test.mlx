@@ -98,7 +98,7 @@ module Shown = struct
   let%component make () =
     let selected = Segment.Item.is_selected () in
     <span>
-      (fun () -> Solidtype.Jsx.string (if selected () then "on" else "off"))
+      (fun () -> Solidtype.Jsx.string (if S.get selected then "on" else "off"))
     </span>
 end
 

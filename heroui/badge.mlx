@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 (* A class added after HeroUI's own, as React's className is. *)
@@ -6,10 +7,10 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Anchor = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after "badge-anchor" (class_ ()))
+      class_=(fun () -> after "badge-anchor" (S.get class_))
       data_slot="badge-anchor"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   [@@element span]
 end
@@ -21,10 +22,10 @@ module Label = struct
 
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after (label ()) (class_ ()))
+      class_=(fun () -> after (label ()) (S.get class_))
       data_slot="badge-label"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   [@@element span]
 end
@@ -45,14 +46,14 @@ let%component make
              after
                (Styles.Badge.base
                   (Styles.Badge.slots
-                     (Styles.Badge.options ~color:(color ())
-                        ~placement:(placement ()) ~size:(size ())
-                        ~variant:(variant ()) ())))
-               (class_ ()))
+                     (Styles.Badge.options ~color:(S.get color)
+                        ~placement:(S.get placement) ~size:(S.get size)
+                        ~variant:(S.get variant) ())))
+               (S.get class_))
     data_slot="badge"
     props=(Props.others props)>
     (fun () ->
-      match children () with
+      match S.get children with
       | Some c when text c -> Jsx.element <Label>(fun () -> c)</Label>
       | Some c -> c
       | None -> Jsx.string "")

@@ -143,11 +143,7 @@ let walk ~step ~vertical host told =
     let* () = step action in
     (* A frame on, each side having written what it writes a frame later:
        React's scroll shadow its edges, and an indicator its entering. *)
-    let frame () =
-      Js.Promise.make (fun ~resolve ~reject:_ ->
-          ignore (request_frame (fun _ -> (resolve true [@u])) : int))
-      |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
-    in
+    let frame () = Testing.frame () in
     let* () = step frame in
     seen := (name, shown host, Array.of_list (List.rev !told)) :: !seen;
     Js.Promise.resolve ()
@@ -239,7 +235,7 @@ let both ?selected_key ?default_selected_key ?orientation ?variant ?align
 type descriptor
 
 external number : value:float -> descriptor = "" [@@mel.obj]
-external counted : value:((_ -> unit)[@u]) -> descriptor = "" [@@mel.obj]
+external counted : value:(_ -> unit) -> descriptor = "" [@@mel.obj]
 
 external define : Dom.element -> string -> descriptor -> unit = "defineProperty"
 [@@mel.scope "Object"]
@@ -256,7 +252,7 @@ let scrolled_by_chevron container =
   let scrolls = ref 0 in
   set_attribute scroller "data-client-width" "100";
   define scroller "scrollWidth" (number ~value:500.);
-  define scroller "scrollTo" (counted ~value:(fun[@u] _ -> incr scrolls));
+  define scroller "scrollTo" (counted ~value:(fun _ -> incr scrolls));
   scrolls
 
 let same (solidtype, react) =

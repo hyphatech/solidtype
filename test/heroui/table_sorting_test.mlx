@@ -125,15 +125,15 @@ let () =
                            ("focus-visible", s.is_focus_visible);
                            ("sorting", s.allows_sorting);
                            ( "ascending",
-                             fun[@u] () ->
-                               match S.get s.sort_direction with
-                               | Some `ascending -> true
-                               | Some `descending | None -> false );
+                             S.accessor (fun () ->
+                                 match S.get s.sort_direction with
+                                 | Some `ascending -> true
+                                 | Some `descending | None -> false) );
                            ( "descending",
-                             fun[@u] () ->
-                               match S.get s.sort_direction with
-                               | Some `descending -> true
-                               | Some `ascending | None -> false );
+                             S.accessor (fun () ->
+                                 match S.get s.sort_direction with
+                                 | Some `descending -> true
+                                 | Some `ascending | None -> false) );
                            ("resizing", s.is_resizing);
                          ]))
                 </span>)

@@ -24,6 +24,9 @@
 
     A part reads its field's, and raises as Kobalte's does elsewhere. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 module Input : sig
   module Props : sig
     include module type of Solidtype_kobalte.ColorChannelField.Input.Props
@@ -31,8 +34,8 @@ module Input : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Root : sig
@@ -70,14 +73,14 @@ module Root : sig
       ?validation_state:[ `valid | `invalid ] Solidtype.Check.value ->
       ?required:bool Solidtype.Check.value ->
       ?read_only:bool Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:'spread Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:'spread S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Label = Solidtype_kobalte.ColorChannelField.Label

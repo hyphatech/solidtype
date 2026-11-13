@@ -23,8 +23,11 @@
     [default_value] at first, else black. A hex field emptied changes nothing,
     and shows the colour again as it is committed. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type t = {
-  color : unit -> Solidtype_kobalte.Types.Color.t;
+  color : Solidtype_kobalte.Types.Color.t S.accessor;
   set_color : Solidtype_kobalte.Types.Color.t -> unit;
 }
 (** The picker a part is inside: its colour, read as it changes, and what moves
@@ -51,10 +54,10 @@ module Props : sig
     ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t Solidtype.Solid.rest ->
+    ?props:t S.rest ->
     unit ->
     unit
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

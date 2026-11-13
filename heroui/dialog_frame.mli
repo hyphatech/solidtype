@@ -18,6 +18,9 @@
     handler and a [ref] are called before the port's, and a style's declarations
     follow the port's. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type t
 (** A backdrop, as its parts read it. *)
 
@@ -36,8 +39,8 @@ val dismissable : t -> bool
 (** Whether a press outside closes it, as its backdrop says. *)
 
 type overlay_state = {
-  is_entering : bool Solidtype.Solid.accessor;
-  is_exiting : bool Solidtype.Solid.accessor;
+  is_entering : bool S.accessor;
+  is_exiting : bool S.accessor;
 }
 (** What a backdrop's and a container's children are drawn of, given as a
     function, as HeroUI's render props are: whether it is entering or exiting,
@@ -51,16 +54,16 @@ val root :
   is_open:(unit -> bool option) ->
   default_open:(unit -> bool option) ->
   on_open_change:(bool -> unit) ->
-  (unit -> Solidtype.Jsx.content) ->
-  Solidtype.Jsx.element
+  (unit -> Jsx.content) ->
+  Jsx.element
 
 val trigger :
   slot:string ->
   class_:(unit -> string) ->
   aria_label:(unit -> string option) ->
-  others:_ Solidtype.Solid.rest ->
-  (unit -> Solidtype.Jsx.content) ->
-  Solidtype.Jsx.element
+  others:_ S.rest ->
+  (unit -> Jsx.content) ->
+  Jsx.element
 (** Kobalte's trigger as the [<div role="button">] HeroUI's is, reached by Tab,
     so a button inside it is not a button inside a button. *)
 
@@ -76,11 +79,10 @@ val backdrop :
   default_open:(unit -> bool option) ->
   on_open_change:(bool -> unit) ->
   as_:
-    (unit ->
-    (Solidtype.Html.Div.props -> overlay_state -> Solidtype.Jsx.element) option) ->
-  others:_ Solidtype.Solid.rest ->
-  (overlay_state -> Solidtype.Jsx.content) ->
-  Solidtype.Jsx.element
+    (unit -> (Solidtype.Html.Div.props -> overlay_state -> Jsx.element) option) ->
+  others:_ S.rest ->
+  (overlay_state -> Jsx.content) ->
+  Jsx.element
 (** A press on it closes the dialog while [dismissable], and Escape while
     [keyboard_dismissable]; [is_open], [default_open] and [on_open_change] are
     its own where no root is above it. It is drawn at the end of the page's
@@ -93,11 +95,10 @@ val container :
   placement:(unit -> string) ->
   ref:(Dom.htmlDivElement -> unit option) ->
   as_:
-    (unit ->
-    (Solidtype.Html.Div.props -> overlay_state -> Solidtype.Jsx.element) option) ->
-  others:_ Solidtype.Solid.rest ->
-  (overlay_state -> Solidtype.Jsx.content) ->
-  Solidtype.Jsx.element
+    (unit -> (Solidtype.Html.Div.props -> overlay_state -> Jsx.element) option) ->
+  others:_ S.rest ->
+  (overlay_state -> Jsx.content) ->
+  Jsx.element
 (** A [<div>] that enters and exits with the backdrop. *)
 
 val dialog :
@@ -111,20 +112,19 @@ val dialog :
   on_focus_out:(Dom.focusEvent -> unit option) ->
   as_:
     (unit ->
-    (Solidtype.Html.Section.props -> dialog_state -> Solidtype.Jsx.element)
-    option) ->
-  others:_ Solidtype.Solid.rest ->
-  (dialog_state -> Solidtype.Jsx.content) ->
-  Solidtype.Jsx.element
+    (Solidtype.Html.Section.props -> dialog_state -> Jsx.element) option) ->
+  others:_ S.rest ->
+  (dialog_state -> Jsx.content) ->
+  Jsx.element
 (** [on_element] is given the dialog's element as it is made, for a part that
     does more with it, as a drawer is dragged. *)
 
 val heading :
   slot:string ->
   class_:(unit -> string) ->
-  others:_ Solidtype.Solid.rest ->
-  (unit -> Solidtype.Jsx.content) ->
-  Solidtype.Jsx.element
+  others:_ S.rest ->
+  (unit -> Jsx.content) ->
+  Jsx.element
 (** Kobalte's title, an [<h2>], which names the dialog. *)
 
 val close_trigger :
@@ -134,10 +134,9 @@ val close_trigger :
   on_click:(Dom.mouseEvent -> unit option) ->
   as_:
     (unit ->
-    (Solidtype.Html.Button.props -> Close_button.state -> Solidtype.Jsx.element)
-    option) ->
-  others:Close_button.Props.t Solidtype.Solid.rest ->
-  children:(unit -> Close_button.state Solidtype.Jsx.children option) ->
-  Solidtype.Jsx.element
+    (Solidtype.Html.Button.props -> Close_button.state -> Jsx.element) option) ->
+  others:Close_button.Props.t S.rest ->
+  children:(unit -> Close_button.state Jsx.children option) ->
+  Jsx.element
 (** HeroUI's close button, which closes the dialog: HeroUI's cross, or the
     children it is given. *)

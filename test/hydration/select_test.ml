@@ -25,7 +25,8 @@ external value : Dom.element -> string = "value" [@@mel.get]
 external options : Dom.element -> Dom.element Js.Array.array_like = "options"
 [@@mel.get]
 
-external function_of : string -> (unit -> unit[@u]) = "Function" [@@mel.new]
+external function_of : string -> unit Solidtype.Solid.accessor = "Function"
+[@@mel.new]
 
 (* The hydration script, run as the page would run it. *)
 let run_script tagged =
@@ -33,7 +34,7 @@ let run_script tagged =
   let stop = Js.String.indexOf ~search:"</script>" tagged in
   match start with
   | Some start when start <= stop ->
-      (function_of (String.sub tagged start (stop - start))) () [@u]
+      Solidtype.Solid.get (function_of (String.sub tagged start (stop - start)))
   | Some _ | None -> ()
 
 let () =

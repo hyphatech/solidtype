@@ -110,11 +110,13 @@ let rec row f =
         let c = Table.use_cell_context () in
         Jsx.element
           <span class_="flex items-center gap-1">
-            <Show when_=(fun () -> r.has_child_items () && c.is_tree_column ())>
+            <Show
+              when_=(fun () ->
+                      S.get r.has_child_items && S.get c.is_tree_column)>
               <Button
                 is_icon_only=true
                 aria_label="Toggle row"
-                is_disabled=(fun () -> r.is_disabled ())
+                is_disabled=(fun () -> S.get r.is_disabled)
                 size=`sm
                 slot=`chevron
                 variant=`ghost>

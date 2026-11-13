@@ -44,7 +44,7 @@ let make () =
       <div class_="flex gap-2">
         <Button
           aria_label="Previous item"
-          is_disabled=(fun () -> n.is_prev_disabled ())
+          is_disabled=(fun () -> S.get n.is_prev_disabled)
           size=`sm
           variant=`secondary
           on_click=(fun _ -> n.on_previous ())>
@@ -52,7 +52,7 @@ let make () =
         </Button>
         <Button
           aria_label="Next item"
-          is_disabled=(fun () -> n.is_next_disabled ())
+          is_disabled=(fun () -> S.get n.is_next_disabled)
           size=`sm
           variant=`secondary
           on_click=(fun _ -> n.on_next ())>

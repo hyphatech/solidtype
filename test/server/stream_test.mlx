@@ -13,12 +13,18 @@ let contains part s = Js.String.includes ~search:part s
 
 (* A writable that collects what is written, and the promise of all of it
    once the stream closes. *)
+(* A promise made by an OCaml function given [resolve], as JavaScript's own
+   constructor makes one. *)
+external promise : ((('a -> unit) -> unit)[@mel.uncurry]) -> 'a Js.Promise.t
+  = "Promise"
+[@@mel.new]
+
 let collecting () =
   let chunks = ref [] in
   let closed = ref (fun () -> ()) in
   let all =
-    Js.Promise.make (fun ~resolve ~reject:_ ->
-        closed := fun () -> (resolve (String.concat "" (List.rev !chunks)) [@u]))
+    promise (fun resolve ->
+        closed := fun () -> resolve (String.concat "" (List.rev !chunks)))
   in
   let w =
     Server.writable
@@ -30,7 +36,9 @@ let collecting () =
 
 module Loaded = struct
   let%component make ~(text : string) () =
-    let data, _ = S.create_resource (fun _ -> Js.Promise.resolve (text ())) in
+    let data, _ =
+      S.create_resource (fun _ -> Js.Promise.resolve (S.get text))
+    in
     <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
 end
 

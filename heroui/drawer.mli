@@ -29,15 +29,18 @@
     A part but the backdrop is used inside a [Drawer.Backdrop]: elsewhere it
     raises [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** A button that opens it, as HeroUI's is: Kobalte's trigger, a [<button>],
     hovered, pressed and focused as React Aria's is, and pressed while the
     drawer is open. A {!Button} inside a drawer opens it too. *)
 module Trigger : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_pressed : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -50,16 +53,14 @@ module Trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What covers the page while the drawer is open: a [<div>], [opaque] by
@@ -81,19 +82,17 @@ module Backdrop : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+        ( Dialog_frame.overlay_state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?as_:
-        (Solidtype.Html.Div.props ->
-        Dialog_frame.overlay_state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (Solidtype.Html.Div.props -> Dialog_frame.overlay_state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Where the drawer is: a [<div>] at the edge [placement] names, [`bottom] by
@@ -107,19 +106,17 @@ module Content : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+        ( Dialog_frame.overlay_state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?as_:
-        (Solidtype.Html.Div.props ->
-        Dialog_frame.overlay_state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (Solidtype.Html.Div.props -> Dialog_frame.overlay_state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The drawer: Kobalte's content, a [<section>] its {!Heading} names, which
@@ -133,19 +130,19 @@ module Dialog : sig
       ?ref:(Dom.htmlElement -> unit) ->
       ?on_focus_out:(Dom.focusEvent -> unit) ->
       children:
-        ( Dialog_frame.dialog_state -> Solidtype.Jsx.element,
+        ( Dialog_frame.dialog_state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?as_:
         (Solidtype.Html.Section.props ->
         Dialog_frame.dialog_state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Section.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Its top: a [<div>]. *)
@@ -156,13 +153,13 @@ module Header : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What it holds: a [<div>], which scrolls, and from which no drag starts. *)
@@ -173,13 +170,13 @@ module Body : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Its actions: a [<div>]. *)
@@ -190,13 +187,13 @@ module Footer : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Its title, which names it: Kobalte's title, an [<h2>]. *)
@@ -207,13 +204,13 @@ module Heading : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.H2.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.H2.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's bar that shows the drawer can be dragged: a [<div>] hidden from a
@@ -224,13 +221,13 @@ module Handle : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's close button in its corner, which closes it. *)
@@ -242,19 +239,16 @@ module Close_trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?children:
-        ( Close_button.state -> Solidtype.Jsx.element,
+        ( Close_button.state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
-      ?as_:
-        (Solidtype.Html.Button.props ->
-        Close_button.state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Close_button.state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -265,10 +259,10 @@ module Props : sig
     ?default_open:bool Solidtype.Check.value ->
     ?on_open_change:(bool -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t Solidtype.Solid.rest ->
+    ?props:t S.rest ->
     unit ->
     unit
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

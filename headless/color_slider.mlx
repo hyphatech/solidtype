@@ -28,8 +28,6 @@ external listen_capture :
   unit = "addEventListener"
 [@@mel.send]
 
-let call_ref f e = match f with Some f -> f e [@u] | None -> ()
-
 module Root = struct
   module Props = struct
     include Kobalte.Root.Props
@@ -59,8 +57,6 @@ module Root = struct
     [@@mel.obj]
   end
 
-  let call f x = match f with Some f -> f x [@u] | None -> ()
-
   let make (props : Props.t) =
     (* Its colour, kept here so a page can move it: [value] while it is given
        one, else the one it keeps. *)
@@ -87,7 +83,7 @@ module Root = struct
       if not same then begin
         S.set set_kept (Some c);
         Color_picker.changed picker c;
-        call (Props.on_change props) c
+        Jsx.call (Props.on_change props) c
       end
     in
     (* Kobalte's slider pages by a tenth of its range, whatever the colour's
@@ -113,7 +109,7 @@ module Root = struct
           if not (Float.equal next now) then begin
             let c = Color.with_channel_value color channel next in
             changed c;
-            call (Props.on_change_end props) c
+            Jsx.call (Props.on_change_end props) c
           end
       | Some _ | None -> ()
     in
@@ -121,10 +117,10 @@ module Root = struct
       channel=(fun () -> Props.channel props)
       ?value=(fun () -> current ())
       on_change=changed
-      on_change_end=(fun c -> call (Props.on_change_end props) c)
+      on_change_end=(fun c -> Jsx.call (Props.on_change_end props) c)
       ref=(fun e ->
             listen_capture e paged;
-            call (Props.ref props) e)
+            Jsx.call (Props.ref props) e)
       props=(S.omit
                (S.merge_props [| props; Props.no_page ~page_size:Js.null () |])
                [| "value"; "defaultValue"; "onChange"; "onChangeEnd"; "ref" |])
@@ -183,7 +179,7 @@ module Track = struct
     <Kobalte.Track
       ref=(fun e ->
             Types.SliderContextValue.register_track slider (Slider.as_html e);
-            call_ref (Props.ref props) e)
+            Jsx.call (Props.ref props) e)
       props=(S.omit props [| "ref" |])
     />
 

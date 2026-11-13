@@ -31,6 +31,9 @@
     A part but the backdrop is used inside an [Alert_dialog.Backdrop]: elsewhere
     it raises [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** A trigger of anything that is not a {!Button}: Kobalte's trigger, a [<div>]
     with the role of a button, reached by Tab. *)
 module Trigger : sig
@@ -41,13 +44,13 @@ module Trigger : sig
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What covers the page while the dialog is open: a [<div>], [opaque] by
@@ -72,19 +75,17 @@ module Backdrop : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+        ( Dialog_frame.overlay_state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?as_:
-        (Solidtype.Html.Div.props ->
-        Dialog_frame.overlay_state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (Solidtype.Html.Div.props -> Dialog_frame.overlay_state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Where the dialog is placed: a [<div>], [placement] [`auto] by default, at
@@ -100,19 +101,17 @@ module Container : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( Dialog_frame.overlay_state -> Solidtype.Jsx.element,
+        ( Dialog_frame.overlay_state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?as_:
-        (Solidtype.Html.Div.props ->
-        Dialog_frame.overlay_state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (Solidtype.Html.Div.props -> Dialog_frame.overlay_state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The dialog: Kobalte's content, a [<section>] with the role of an
@@ -127,19 +126,19 @@ module Dialog : sig
       ?ref:(Dom.htmlElement -> unit) ->
       ?on_focus_out:(Dom.focusEvent -> unit) ->
       children:
-        ( Dialog_frame.dialog_state -> Solidtype.Jsx.element,
+        ( Dialog_frame.dialog_state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
       ?as_:
         (Solidtype.Html.Section.props ->
         Dialog_frame.dialog_state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Section.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The dialog's top, its {!Icon} and {!Heading}: a [<div>]. *)
@@ -150,13 +149,13 @@ module Header : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What the dialog says: a [<div>]. *)
@@ -167,13 +166,13 @@ module Body : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The dialog's actions: a [<div>]. *)
@@ -184,13 +183,13 @@ module Footer : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's icon for [status], [`danger] by default -- info for the default and
@@ -206,13 +205,13 @@ module Icon : sig
         Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The dialog's title, which names it: Kobalte's title, an [<h2>]. *)
@@ -223,13 +222,13 @@ module Heading : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.H2.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.H2.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** HeroUI's close button in the dialog's corner, which closes it. *)
@@ -241,19 +240,16 @@ module Close_trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?children:
-        ( Close_button.state -> Solidtype.Jsx.element,
+        ( Close_button.state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
-      ?as_:
-        (Solidtype.Html.Button.props ->
-        Close_button.state ->
-        Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Close_button.state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -264,10 +260,10 @@ module Props : sig
     ?default_open:bool Solidtype.Check.value ->
     ?on_open_change:(bool -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?props:t Solidtype.Solid.rest ->
+    ?props:t S.rest ->
     unit ->
     unit
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

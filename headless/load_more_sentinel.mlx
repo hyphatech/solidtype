@@ -92,10 +92,7 @@ let make (props : Props.t) =
           observer
             (fun entries ->
               if Array.exists intersecting entries && not (S.untrack is_loading)
-              then
-                match Props.on_load_more props with
-                | Some f -> f () [@u]
-                | None -> ())
+              then Jsx.act (Props.on_load_more props))
             (observing
                ~root:(Js.Null.fromOption (scrolling e))
                ~root_margin:("0px " ^ margin ^ " " ^ margin ^ " " ^ margin)
@@ -114,7 +111,7 @@ let make (props : Props.t) =
   <div
     ref=(fun e ->
           sentinel := Some e;
-          match Props.ref props with Some f -> f e [@u] | None -> ())
+          Jsx.call (Props.ref props) e)
     ?as_=(fun () -> S.drawn_as props)
     props=(S.undrawn
              (S.omit props

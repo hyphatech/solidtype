@@ -38,7 +38,7 @@ module Variant = struct
     let shown () =
       match surface with
       | Some variant -> (
-          match variant () with
+          match S.get variant with
           | `default -> "default"
           | `secondary -> "secondary"
           | `tertiary -> "tertiary"

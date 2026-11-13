@@ -10,14 +10,17 @@
       <Text_area placeholder="Your message" aria_label="Message" />
     ]} *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 module Props : sig
   type t
 
   val check :
     ?variant:[ `primary | `secondary ] Solidtype.Check.value ->
     ?full_width:bool Solidtype.Check.value ->
-    ?as_:(Solidtype.Html.Textarea.props -> Solidtype.Jsx.element) ->
-    ?props:'spread Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Textarea.props -> Jsx.element) ->
+    ?props:'spread S.rest ->
     (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Textarea.check
 
@@ -29,10 +32,10 @@ val text_area :
   classes:(variant:[ `primary | `secondary ] option -> string) ->
   slot:string ->
   Props.t ->
-  Solidtype.Jsx.element
+  Jsx.element
 (** [text_area ~classes ~slot props], this part as another part renders it with
     its own classes, given the variant it takes, and its own [data-slot]: an
     input group's. *)
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

@@ -34,7 +34,7 @@ let%component make ~(projects : Api.project array) ~(view : View.t)
   let open_tasks () =
     Array.fold_left
       (fun n (p : Api.project) -> n +. p.open_tasks)
-      0. (projects ())
+      0. (S.get projects)
   in
   <aside
     class_="flex w-64 shrink-0 flex-col gap-6 border-e border-separator p-3">
@@ -47,8 +47,8 @@ let%component make ~(projects : Api.project array) ~(view : View.t)
       <button
         type_=`button
         aria_current=(fun () ->
-                       if View.equal (view ()) All then "page" else "false")
-        class_=(fun () -> entry (View.equal (view ()) All))
+                       if View.equal (S.get view) All then "page" else "false")
+        class_=(fun () -> entry (View.equal (S.get view) All))
         on_click=(fun _ -> on_view All)>
         <Gravity.Layout_columns3 class_="size-4" />
         "All projects"
@@ -57,15 +57,16 @@ let%component make ~(projects : Api.project array) ~(view : View.t)
         </span>
       </button>
       <h2 class_="px-3 pt-5 pb-1 text-xs font-medium text-muted">"Projects"</h2>
-      <For each=(fun () -> projects ())>
+      <For each=(fun () -> S.get projects)>
         (fun (p : Api.project) _ ->
           <div class_="group relative">
             <button
               type_=`button
               aria_current=(fun () ->
-                             if View.equal (view ()) (Project p.id) then "page"
+                             if View.equal (S.get view) (Project p.id) then
+                               "page"
                              else "false")
-              class_=(fun () -> entry (View.equal (view ()) (Project p.id)))
+              class_=(fun () -> entry (View.equal (S.get view) (Project p.id)))
               on_click=(fun _ -> on_view (Project p.id))>
               <Gravity.Folder
                 class_=(fun () -> "size-4 " ^ Colour.text_class p.colour)

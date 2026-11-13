@@ -18,6 +18,9 @@
     A radio is used inside a {!Radio_group}, and a part inside a [Radio]:
     elsewhere each raises [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type radio
 (** What a radio's parts read of it. *)
 
@@ -31,7 +34,7 @@ module Context : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> radio option
@@ -43,15 +46,15 @@ end
     Raises [Invalid_argument] outside a [Radio]. *)
 module Content : sig
   type state = {
-    is_selected : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_pressed : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_read_only : bool Solidtype.Solid.accessor;
-    is_invalid : bool Solidtype.Solid.accessor;
-    is_required : bool Solidtype.Solid.accessor;
+    is_selected : bool S.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
+    is_read_only : bool S.accessor;
+    is_invalid : bool S.accessor;
+    is_required : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -62,16 +65,14 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Label.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Label.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Label.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The circle the indicator is drawn in.
@@ -84,13 +85,13 @@ module Control : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The dot, which HeroUI's styles draw as the radio is selected, or the
@@ -104,24 +105,24 @@ module Indicator : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( Content.state -> Solidtype.Jsx.element,
+        ( Content.state -> Jsx.element,
           [ `nodes | `render ] )
         Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Content.state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Content.state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  is_selected : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_read_only : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_read_only : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_required : bool S.accessor;
 }
 (** What a radio's children are drawn of, given as a function, as HeroUI's
     render props are, each read where Solid tracks it. *)
@@ -135,13 +136,11 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

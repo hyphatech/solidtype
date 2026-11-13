@@ -43,13 +43,13 @@ let create () = { last = None }
 
 type indicator = {
   ref : 'e. 'e Dom.element_like -> unit;
-  entering : unit -> bool;
+  entering : bool Solid.accessor;
 }
 
 (* What is done to an indicator's element once it is given. *)
 type placed = {
-  connected : unit -> bool;
-  leave : unit -> snapshot option;
+  connected : bool Solid.accessor;
+  leave : snapshot option Solid.accessor;
   start : snapshot -> unit;
 }
 
@@ -120,7 +120,7 @@ let indicator t =
           | None, _ -> ()));
   Solid.on_cleanup (fun () ->
       match !placed with
-      | Some p when p.connected () -> t.last <- p.leave ()
+      | Some p when Solid.get p.connected -> t.last <- Solid.get p.leave
       | Some _ | None -> ());
   {
     ref =
@@ -128,9 +128,9 @@ let indicator t =
         placed :=
           Some
             {
-              connected = (fun () -> is_connected e);
-              leave = (fun () -> snapshot e);
+              connected = Solid.accessor (fun () -> is_connected e);
+              leave = Solid.accessor (fun () -> snapshot e);
               start = (fun s -> start_from s e);
             });
-    entering = (fun () -> Solid.get entering);
+    entering;
   }

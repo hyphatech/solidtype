@@ -28,8 +28,8 @@ type field = {
   commit : unit -> unit;
   step : int -> unit;
   go_to : int -> unit;
-  editable : unit -> bool;
-  wheel : unit -> bool;
+  editable : bool S.accessor;
+  wheel : bool S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -95,14 +95,14 @@ module Root = struct
     let colour () =
       match (Props.value props, picker) with
       | Some v, _ -> Js.Nullable.toOption v
-      | None, Some p -> Some (p.color ())
+      | None, Some p -> Some (S.get p.color)
       | None, None -> S.get kept
     in
     let set c =
       if not (same c (S.untrack colour)) then begin
         S.set set_kept c;
         Option.iter (Color_picker.changed picker) c;
-        match Props.on_change props with Some f -> f c [@u] | None -> ()
+        Jsx.call (Props.on_change props) c
       end
     in
     (* Kobalte's field keeps the text typed: its colour's hex until a key
@@ -134,13 +134,16 @@ module Root = struct
       in
       go_to (from + by)
     in
-    let editable () =
-      not
-        (Option.value (Props.disabled props) ~default:false
-        || Option.value (Props.read_only props) ~default:false)
+    let editable =
+      S.accessor (fun () ->
+          not
+            (Option.value (Props.disabled props) ~default:false
+            || Option.value (Props.read_only props) ~default:false))
     in
-    let wheel () =
-      Option.value (Props.change_on_wheel props) ~default:true && editable ()
+    let wheel =
+      S.accessor (fun () ->
+          Option.value (Props.change_on_wheel props) ~default:true
+          && S.get editable)
     in
     let field = { commit; step; go_to; editable; wheel } in
     <Context.Provider value=(fun () -> field)>
@@ -172,8 +175,6 @@ module Input = struct
     [@@mel.get]
   end
 
-  let call f e = match f with Some f -> f e [@u] | None -> ()
-
   let make (props : Props.t) =
     let f =
       match Context.use () with
@@ -185,9 +186,9 @@ module Input = struct
        a modifier leaves to the text. *)
     let keyed e =
       match key e with
-      | "Enter" -> if f.editable () then f.commit ()
+      | "Enter" -> if S.get f.editable then f.commit ()
       | k
-        when f.editable ()
+        when S.get f.editable
              && not
                   (ctrl_key e || meta_key e || shift_key e || alt_key e
                  || is_composing e) -> (
@@ -211,7 +212,7 @@ module Input = struct
         | Some a -> a == current_target e
         | None -> false
       in
-      if f.wheel () && focused && not (wheel_ctrl_key e) then begin
+      if S.get f.wheel && focused && not (wheel_ctrl_key e) then begin
         prevent_wheel e;
         stop_wheel e;
         let dx = delta_x e and dy = delta_y e in
@@ -221,13 +222,13 @@ module Input = struct
     <Kobalte.Input
       on_blur=(fun e ->
                 f.commit ();
-                call (Props.on_blur props) e)
+                Jsx.call (Props.on_blur props) e)
       on_key_down=(fun e ->
                     keyed e;
-                    call (Props.on_key_down props) e)
+                    Jsx.call (Props.on_key_down props) e)
       on_wheel=(fun e ->
                  wheeled e;
-                 call (Props.on_wheel props) e)
+                 Jsx.call (Props.on_wheel props) e)
       props=(S.omit props [| "onBlur"; "onKeyDown"; "onWheel" |])
     />
 

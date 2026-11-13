@@ -1,8 +1,9 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 module Greeting = struct
   let%component make ~(name : string) ?(greeting : string = "Hello") () =
-    <p>(fun () -> Jsx.string (greeting () ^ ", " ^ name () ^ "!"))</p>
+    <p>(fun () -> Jsx.string (S.get greeting ^ ", " ^ S.get name ^ "!"))</p>
 end
 
 let make () =

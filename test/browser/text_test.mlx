@@ -3,13 +3,16 @@
    An expected string that is not ASCII is written {js|...|js}, where
    Melange reads [\\] as one backslash. *)
 
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module E = Jest.Expect
 module T = Testing
 
 module Quoted = struct
   let%component make ~(text : string) () =
-    <span title=(fun () -> text ())>(fun () -> Jsx.string (text ()))</span>
+    <span title=(fun () -> S.get text)>
+      (fun () -> Jsx.string (S.get text))
+    </span>
 end
 
 let () =

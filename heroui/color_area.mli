@@ -17,6 +17,9 @@
     inside a [Color_area]: elsewhere it raises [Invalid_argument] as it is made.
 *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type channel =
   [ `hue
   | `saturation
@@ -33,12 +36,12 @@ type channel =
     is dragged, and [data-disabled]. *)
 module Thumb : sig
   type state = {
-    color : Solidtype_kobalte.Types.Color.t Solidtype.Solid.accessor;
-    is_dragging : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    color : Solidtype_kobalte.Types.Color.t S.accessor;
+    is_dragging : bool S.accessor;
+    is_hovered : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -51,19 +54,17 @@ module Thumb : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlSpanElement -> unit) ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
-type state = { is_disabled : bool Solidtype.Solid.accessor }
+type state = { is_disabled : bool S.accessor }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, read where Solid tracks it. *)
 
@@ -84,13 +85,11 @@ module Props : sig
     ?show_dots:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

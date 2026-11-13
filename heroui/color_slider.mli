@@ -18,6 +18,9 @@
     used inside a [Color_slider]: elsewhere it raises [Invalid_argument] as it
     is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type channel =
   [ `hue
   | `saturation
@@ -32,8 +35,8 @@ type channel =
     [0°] for a hue, [50%] for a saturation; its [children] in its place. *)
 module Output : sig
   type state = {
-    orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    orientation : [ `horizontal | `vertical ] S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -44,16 +47,14 @@ module Output : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Output.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Output.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Output.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The track, drawn as the channel's range from its least to its most, over a
@@ -61,9 +62,9 @@ end
     which HeroUI's styles cap it with. [style] after its own. *)
 module Track : sig
   type state = {
-    orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
+    orientation : [ `horizontal | `vertical ] S.accessor;
+    is_disabled : bool S.accessor;
+    is_hovered : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -76,16 +77,14 @@ module Track : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The thumb, Kobalte's, painted the colour, but for a disabled slider's; its
@@ -93,12 +92,12 @@ end
     [data-dragging] and [data-disabled]. [style] after its own. *)
 module Thumb : sig
   type state = {
-    color : Solidtype_kobalte.Types.Color.t Solidtype.Solid.accessor;
-    is_dragging : bool Solidtype.Solid.accessor;
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
+    color : Solidtype_kobalte.Types.Color.t S.accessor;
+    is_dragging : bool S.accessor;
+    is_hovered : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -111,16 +110,14 @@ module Thumb : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlSpanElement -> unit) ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The slider, Kobalte's root, of the colour's [channel] in its [color_space],
@@ -133,8 +130,8 @@ end
     leaves it. It declares [data-orientation] and [data-disabled]. *)
 
 type state = {
-  orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
+  orientation : [ `horizontal | `vertical ] S.accessor;
+  is_disabled : bool S.accessor;
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, each read where Solid tracks it. *)
@@ -158,13 +155,11 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?class_:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

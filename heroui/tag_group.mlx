@@ -1,9 +1,10 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Headless = Solidtype_headless.Tag_group
 
 type group = {
-  size : unit -> [ `sm | `md | `lg ] option;
-  variant : unit -> [ `default | `surface ] option;
+  size : [ `sm | `md | `lg ] option S.accessor;
+  variant : [ `default | `surface ] option S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -40,14 +41,14 @@ module List = struct
     let h = Headless.use_context () in
     let self, watch_self = self_focus () in
     <Headless.List
-      class_=(fun () -> after (Styles.TagGroup.list (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.TagGroup.list (slots ())) (S.get class_))
       data_slot="tag-group-list"
-      data_empty=(fun () -> Jsx.flag (h.is_empty ()))
+      data_empty=(fun () -> Jsx.flag (S.get h.is_empty))
       data_focused=(fun () -> Jsx.flag (self ()))
       data_focus_visible=(fun () -> Jsx.flag (self () && Interaction.keyed ()))
       ref=(fun e -> watch_self e)
       props=(Props.omit props [| Props.Class_; Props.Children |])>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Headless.List>
   [@@element div]
 end
@@ -62,19 +63,19 @@ let%component make ?(size : [ `sm | `md | `lg ] option)
     ?(on_remove : (string array -> unit) option) ?(aria_label : string option)
     ?(aria_labelledby : string option) ?(class_ : string option)
     ~(children : Jsx.content) () =
-  let g = { size = (fun () -> size ()); variant = (fun () -> variant ()) } in
+  let g = { size; variant } in
   (* Its label names its list and is a span, its description and error
      describe the list, as React Aria's tag group gives them their
      elements. *)
   let label : Label.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     <Headless.Label
       class_=(fun () -> classes ()) data_slot="label" props=others>
       (fun () -> children ())
     </Headless.Label>
   in
   let description : Description.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     <Headless.Description
       class_=(fun () -> classes ())
       slot="description"
@@ -84,7 +85,7 @@ let%component make ?(size : [ `sm | `md | `lg ] option)
     </Headless.Description>
   in
   let error : Error_message.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     <Headless.Error_message
       class_=(fun () -> classes ())
       slot="errorMessage"
@@ -95,14 +96,14 @@ let%component make ?(size : [ `sm | `md | `lg ] option)
   in
   <Context.Provider value=(fun () -> g)>
     <Headless.Root
-      class_=(fun () -> after (Styles.TagGroup.base (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.TagGroup.base (slots ())) (S.get class_))
       data_slot="tag-group"
       props=(Props.omit props
                [| Props.Size; Props.Variant; Props.Class_; Props.Children |])>
       <Label.Slot.Provider value=(fun () -> label)>
         <Description.Slot.Provider value=(fun () -> description)>
           <Error_message.Slot.Provider value=(fun () -> error)>
-            (fun () -> children ())
+            (fun () -> S.get children)
           </Error_message.Slot.Provider>
         </Description.Slot.Provider>
       </Label.Slot.Provider>

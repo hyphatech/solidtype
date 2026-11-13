@@ -19,11 +19,14 @@
     documents. Every button inside it reads the group, not only its own children
     as in React. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type size = [ `sm | `md | `lg ]
 
 type group = {
-  size : unit -> size option;
-  is_disabled : unit -> bool option;
+  size : size option S.accessor;
+  is_disabled : bool option S.accessor;
   is_selected : string -> bool;
       (** Whether the button of a key is selected, read where it is shown. *)
   join : (unit -> bool) -> unit;
@@ -42,7 +45,7 @@ module Context : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> group option
@@ -56,13 +59,13 @@ module Separator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group. [selection_mode] is [`single] by default, one button selected at
@@ -72,8 +75,8 @@ end
     last selected button from being unselected. It is named by [aria_label] or
     [aria_labelledby]. *)
 type state = {
-  orientation : [ `horizontal | `vertical ] Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
+  orientation : [ `horizontal | `vertical ] S.accessor;
+  is_disabled : bool S.accessor;
 }
 (** What a group's children are drawn of, given as a function, as HeroUI's
     render props are, each read where Solid tracks it. *)
@@ -96,13 +99,11 @@ module Props : sig
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

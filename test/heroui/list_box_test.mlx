@@ -43,13 +43,7 @@ external text : Dom.element -> string = "textContent" [@@mel.get]
 external active : Dom.element Js.null = "activeElement" [@@mel.scope "document"]
 
 (* A while for a framework's timers and focus moves to run. *)
-let settle () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
-      in
-      ())
-  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+let settle () = Testing.wait 20
 
 (* What one framework writes for itself, which no style of HeroUI's reads:
    Kobalte's own state, present and empty, an [aria-disabled] it writes false,
@@ -302,10 +296,10 @@ let of_state ~disabled =
                 ("selected", s.is_selected);
                 ("disabled", s.is_disabled);
                 ( "single",
-                  fun[@u] () ->
-                    match Solidtype.Solid.get s.selection_mode with
-                    | `single -> true
-                    | `none | `multiple -> false );
+                  Solidtype.Solid.accessor (fun () ->
+                      match Solidtype.Solid.get s.selection_mode with
+                      | `single -> true
+                      | `none | `multiple -> false) );
               ])
         </List_box.Item>
         <List_box.Item id="banana">"Banana"</List_box.Item>

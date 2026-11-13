@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Progress
@@ -7,8 +8,8 @@ module Types = Solidtype_kobalte.Types
 (* What a bar's parts read of it: its classes, and how far along its range
    its value is, from 0 to 100, unless it is indeterminate. *)
 type bar = {
-  slots : unit -> Styles.ProgressBar.slots;
-  percent : unit -> float option;
+  slots : Styles.ProgressBar.slots S.accessor;
+  percent : float option S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -33,7 +34,7 @@ end)
 
 (* A label in a bar is Kobalte's, a span, which names it. *)
 let label : Label.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte_label
     as_="span" class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
@@ -44,10 +45,10 @@ module Output = struct
       () =
     let m = within "Progress_bar.Output" in
     let classes () =
-      after (Styles.ProgressBar.output (m.slots ())) (class_ ())
+      after (Styles.ProgressBar.output (S.get m.slots)) (S.get class_)
     in
     <Show
-      when_=(fun () -> Option.is_some (children ()))
+      when_=(fun () -> Option.is_some (S.get children))
       fallback=(<Kobalte_value
                   as_="span"
                   class_=(fun () -> classes ())
@@ -58,7 +59,8 @@ module Output = struct
         class_=(fun () -> classes ())
         data_slot="progress-bar-output"
         props=(Props.others props)>
-        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+        (fun () ->
+          match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element span]
@@ -69,10 +71,10 @@ module Track = struct
     let m = within "Progress_bar.Track" in
     <div
       class_=(fun () ->
-               after (Styles.ProgressBar.track (m.slots ())) (class_ ()))
+               after (Styles.ProgressBar.track (S.get m.slots)) (S.get class_))
       data_slot="progress-bar-track"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -82,9 +84,9 @@ module Fill = struct
     let m = within "Progress_bar.Fill" in
     <div
       class_=(fun () ->
-               after (Styles.ProgressBar.fill (m.slots ())) (class_ ()))
+               after (Styles.ProgressBar.fill (S.get m.slots)) (S.get class_))
       ?style=(fun () ->
-               match (m.percent (), style ()) with
+               match (S.get m.percent, S.get style) with
                | Some p, given ->
                    let own = "width: " ^ Js.Float.toString p ^ "%;" in
                    Some
@@ -116,12 +118,13 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
   (* HeroUI's formatOptions as it reads them, a percent by default: a percent
      is the value's share of its range, any other style the value itself. *)
   let options () =
-    match format_options () with
+    match S.get format_options with
     | Some o -> o
     | None -> Types.NumberFormatOptions.make ~style:`percent ()
   in
   let formatter =
-    I18n.create_number_formatter (Types.Either.right (fun[@u] () -> options ()))
+    I18n.create_number_formatter
+      (Types.Either.right (S.accessor (fun () -> options ())))
   in
   let text ~value ~min ~max =
     let range = max -. min in
@@ -141,47 +144,50 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
   let m =
     {
       slots =
-        (fun () ->
-          Styles.ProgressBar.slots
-            (Styles.ProgressBar.options ?color:(color ()) ?size:(size ()) ()));
+        S.accessor (fun () ->
+            Styles.ProgressBar.slots
+              (Styles.ProgressBar.options ?color:(S.get color)
+                 ?size:(S.get size) ()));
       percent =
-        (fun () ->
-          let range = max_value () -. min_value () in
-          if is_indeterminate () then None
-          else if range <= 0. then Some 0.
-          else
-            Some
-              (Float.min 100.
-                 (Float.max 0. ((value () -. min_value ()) /. range *. 100.))));
+        S.accessor (fun () ->
+            let range = S.get max_value -. S.get min_value in
+            if S.get is_indeterminate then None
+            else if range <= 0. then Some 0.
+            else
+              Some
+                (Float.min 100.
+                   (Float.max 0.
+                      ((S.get value -. S.get min_value) /. range *. 100.))));
     }
   in
   let state () =
     {
-      percentage = (fun[@u] () -> m.percent ());
+      percentage = m.percent;
       value_text =
-        (fun[@u] () ->
-          if is_indeterminate () then None
-          else
-            Some
-              (text ~value:(value ()) ~min:(min_value ()) ~max:(max_value ())));
-      is_indeterminate = (fun[@u] () -> is_indeterminate ());
+        S.accessor (fun () ->
+            if S.get is_indeterminate then None
+            else
+              Some
+                (text ~value:(S.get value) ~min:(S.get min_value)
+                   ~max:(S.get max_value)));
+      is_indeterminate;
     }
   in
   <Context.Provider value=(fun () -> m)>
     <Kobalte.Root
-      value=(fun () -> value ())
-      indeterminate=(fun () -> is_indeterminate ())
-      min_value=(fun () -> min_value ())
-      max_value=(fun () -> max_value ())
+      value=(fun () -> S.get value)
+      indeterminate=(fun () -> S.get is_indeterminate)
+      min_value=(fun () -> S.get min_value)
+      max_value=(fun () -> S.get max_value)
       ?aria_label
       get_value_label=value_label
       class_=(fun () ->
-               after (Styles.ProgressBar.base (m.slots ())) (class_ ()))
+               after (Styles.ProgressBar.base (S.get m.slots)) (S.get class_))
       data_slot="progress-bar"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

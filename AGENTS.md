@@ -287,13 +287,15 @@ module.
 MLX parses `.mlx` into OCaml with each element marked `[@JSX]`.
 `ppx_solidtype` lowers each one to a call of `Solidtype.Jsx`: a literal,
 an element, a handler (`on_` and its event), a function or a name static,
-anything else a thunk, so a read outside a thunk does not compile; a
+anything else a thunk the caller writes, `fun () -> e`, which the ppx refuses
+any other expression for, so a read outside a thunk does not compile; a
 handler an expression makes, `on_click=(remove id)`, and a spread are a
 thunk the ppx writes, since Melange evaluates an expression before the
 element it is written in, outside a branch Solid has not drawn, and never
 out of a function; an
-optional prop, `?name=`, a thunk of an option, `undefined` while it is
-`None`, and `?name:` in the check, so a required prop refuses it; a
+optional prop, `?name=`, a thunk of an option or an accessor of one by its
+name, `?title=note`, `undefined` while it is `None`, and `?name:` in the
+check, so a required prop refuses it; a
 name is given back its JavaScript spelling, and a value wrapped in one
 of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
 argument is therefore written `(fun _ -> ...)`; a component's render
@@ -364,6 +366,41 @@ break.
   correct. Why: the rewrite keeps its meaning because it reads
   one shape it owns. Symptom: `rg -n 'Jsx\.(el|c|s|d|spread|dynamic|render)\b'
   example src` finds a call written by hand.
+- **What changes is read one way and given one way.** What the library
+  hands out -- a signal, a memo, a component's value prop, a field of a
+  part's state or context -- is a `Solid.accessor`, read by `S.get`; what a
+  caller gives -- a JSX attribute or child, a function's parameter, a record
+  a part builds to give another -- is a thunk, `fun () -> e`. A part that
+  hands on what it derives makes it an accessor by `S.accessor (fun () ->
+  e)`, which Melange writes as a plain JavaScript function, so no code but a
+  binding's writes `[@u]`. A value prop is
+  an accessor of Solid's props object, and the ppx writes `S.get name` in a
+  component's body as the read itself, `props.name`, Solid's own. Why: a
+  thunk read as a call, `label ()`, looks like calling a string, and an
+  accessor asked of a caller makes them build Melange's uncurried function
+  by hand. Test: `test/ppx`, a prop read whole and a shadowed one through
+  its accessor. Symptom: `rg -n '^\s+\w+ : unit -> [a-tv-z]' heroui/*.mli
+  headless/*.mli` finds a public field a caller reads as a call, and
+  `rg -n '^\s+\??\w+:[^:]*accessor ->' heroui/*.mli headless/*.mli` a
+  parameter that asks for an accessor, and `rg -n 'fun ?\[@u\] \(\)' heroui
+  headless test docs example` an accessor built by hand.
+- **Every thunk the ppx hands Solid is a function of no argument.** It writes
+  the caller's `fun () -> e` uncurried, a function that thunk gives bound
+  apart, and `S.accessor (fun () -> e)` as that function itself; a thunk
+  given by any other expression is refused where it is written. Why: Solid
+  calls a thunk with no argument, and Melange writes a curried `fun () -> fun
+  h -> e` as one function of two, which that call would run at once; a thunk
+  made elsewhere would reach Solid only through Melange's adapter, a call as
+  it is made, and its laziness would not show where it is given. Test:
+  `test/browser/flow_test.mlx`, a context whose value is a function given as
+  `fun () -> fun s -> ...`; `test/does_not_compile.t`, a value given as no
+  thunk.
+- **`[@u]` is a binding's alone.** Outside `src/`, which binds Solid itself,
+  it is written only in an `external`, or a `type` an external names, where
+  it says how JavaScript calls a function. Why: an uncurried function written
+  by hand is Melange's calling convention leaking into code that means
+  something else. Symptom: `rg -n --glob '*.{ml,mlx,mli}' '\[@u\]' heroui
+  headless test docs example | rg -v ':\s*(external|type) '` finds one.
 - **A reactive read is a plain call.** An accessor is an uncurried
   JavaScript function and `Solid.get` is inlined, so `Solid.get count`
   is `count()`, the call Solid's own JSX makes. Why: a curried read is

@@ -65,10 +65,7 @@ external property : style -> string -> string = "getPropertyValue" [@@mel.send]
 external request_frame : (float -> unit) -> int = "requestAnimationFrame"
 
 (* A frame drawn, as a browser draws one after the page changes. *)
-let frame () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore (request_frame (fun _ -> (resolve true [@u])) : int))
-  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+let frame () = Testing.frame ()
 
 type event
 

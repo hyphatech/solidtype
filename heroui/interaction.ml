@@ -123,9 +123,9 @@ let pressing target e =
   | _ -> false
 
 type t = {
-  off : bool S.accessor option;
-  no_hover : bool S.accessor option;
-  no_pointer_press : bool S.accessor option;
+  off : (unit -> bool) option;
+  no_hover : (unit -> bool) option;
+  no_pointer_press : (unit -> bool) option;
   keys : [ `target | `element ];
   hover : bool S.accessor;
   set_hover : bool S.setter;
@@ -151,7 +151,7 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
   Option.iter
     (fun off ->
       S.create_computed (fun () ->
-          if S.get off then begin
+          if off () then begin
             S.set set_hover false;
             S.set set_press false;
             S.set set_drag false
@@ -173,8 +173,8 @@ let create ?disabled ?no_hover ?no_pointer_press ?(keys = `target) () =
     watched = None;
   }
 
-let disabled i = match i.off with Some d -> S.get d | None -> false
-let holds = function Some a -> S.get a | None -> false
+let disabled i = match i.off with Some d -> d () | None -> false
+let holds = function Some a -> a () | None -> false
 let pointer_inert i = holds i.no_pointer_press
 
 (* A disabled element is neither hovered, pressed nor focused, whatever was

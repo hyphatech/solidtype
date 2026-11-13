@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Headless = Solidtype_headless.Color_swatch
 module Color = Solidtype_kobalte.Types.Color
 
@@ -13,16 +14,16 @@ let%component make ?(color : Color.t option) ?(color_name : string option)
     ?(size : [ `xs | `sm | `md | `lg | `xl ] option) ?(class_ : string option)
     ?(style : string option) () =
   let picker = Solidtype_headless.Color_picker.use_context () in
-  let shown () = Headless.shown picker (color ()) in
+  let shown () = Headless.shown picker (S.get color) in
   <Headless
     value=(fun () -> shown ())
     ?color_name
     ?aria_label
     class_=(fun () ->
              Styles.ColorSwatch.classes
-               (Styles.ColorSwatch.options ?shape:(shape ()) ?size:(size ())
-                  ?class_:(class_ ()) ()))
-    style=(fun () -> painted (shown ()) (style ()))
+               (Styles.ColorSwatch.options ?shape:(S.get shape)
+                  ?size:(S.get size) ?class_:(S.get class_) ()))
+    style=(fun () -> painted (shown ()) (S.get style))
     data_slot="color-swatch"
     props=(Props.others props)
   />

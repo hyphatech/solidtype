@@ -19,6 +19,9 @@
     measured on its own radius. A part is used inside a [Progress_circle]:
     elsewhere it raises [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The drawing the circles are in: an [<svg>], 36 units square. *)
 module Track : sig
   module Props : sig
@@ -29,13 +32,13 @@ module Track : sig
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Svg.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The whole circle the arc is drawn on: a [<circle>]. *)
@@ -49,13 +52,13 @@ module Track_circle : sig
       ?r:float Solidtype.Check.value ->
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Circle.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Circle.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Circle.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The arc as far as the value is along its range, from the top, clockwise: a
@@ -71,22 +74,22 @@ module Fill_circle : sig
       ?r:float Solidtype.Check.value ->
       ?stroke_width:float Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Circle.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Circle.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Circle.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  percentage : float option Solidtype.Solid.accessor;
+  percentage : float option S.accessor;
       (** Its value's share of its range, from 0 to 100, while it is not
           indeterminate. *)
-  value_text : string option Solidtype.Solid.accessor;
+  value_text : string option S.accessor;
       (** Its value as it is shown, while it is not indeterminate. *)
-  is_indeterminate : bool Solidtype.Solid.accessor;
+  is_indeterminate : bool S.accessor;
 }
 (** What its children are drawn of, given as a function, as HeroUI's render
     props are, each read where Solid tracks it. *)
@@ -108,13 +111,11 @@ module Props : sig
     ?format_options:
       Solidtype_kobalte.Types.NumberFormatOptions.t Solidtype.Check.value ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

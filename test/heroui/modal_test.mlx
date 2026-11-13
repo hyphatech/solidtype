@@ -3,6 +3,7 @@
    trigger is pressed, Tab moves within it, Escape closes it, a button with
    slot="close" closes it, and so does a press on the backdrop. *)
 
+module S = Solidtype.Solid
 module Modal = Solidtype_heroui.Modal
 module Button = Solidtype_heroui.Button
 module E = Jest.Expect
@@ -71,13 +72,7 @@ external setup : options -> T.user = "setup"
 [@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
 
 (* A while for a framework's timers and focus moves to run. *)
-let settle () =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) 20
-      in
-      ())
-  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+let settle () = Testing.wait 20
 
 (* What one framework writes for itself: Kobalte's own state, present and
    empty, which no style of HeroUI's reads, and its trigger's popup, which

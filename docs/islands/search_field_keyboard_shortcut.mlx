@@ -8,14 +8,22 @@ type window
 
 external window : window = "window"
 
-external add_key_down :
-  window -> (_[@mel.as "keydown"]) -> ((Dom.keyboardEvent -> unit)[@u]) -> unit
-  = "addEventListener"
-[@@mel.send]
+type controller
+type signal
+type listening
 
-external remove_key_down :
-  window -> (_[@mel.as "keydown"]) -> ((Dom.keyboardEvent -> unit)[@u]) -> unit
-  = "removeEventListener"
+external controller : unit -> controller = "AbortController" [@@mel.new]
+external signal : controller -> signal = "signal" [@@mel.get]
+external abort : controller -> unit = "abort" [@@mel.send]
+external listening : signal:signal -> unit -> listening = "" [@@mel.obj]
+
+(* A listener that stays until its signal aborts. *)
+external add_key_down :
+  window ->
+  (_[@mel.as "keydown"]) ->
+  ((Dom.keyboardEvent -> unit)[@mel.uncurry]) ->
+  listening ->
+  unit = "addEventListener"
 [@@mel.send]
 
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
@@ -41,8 +49,7 @@ let make () =
   let value, set_value = S.create_signal "" in
   (* The element around the field, whose input a key focuses. *)
   let around = ref None in
-  let handle_key_down =
-   fun[@u] e ->
+  let handle_key_down e =
     let input =
       Option.bind !around (fun d -> Js.Null.toOption (query d "input"))
     in
@@ -60,8 +67,9 @@ let make () =
     | _ -> ()
   in
   S.on_mount (fun () ->
-      add_key_down window handle_key_down;
-      S.on_cleanup (fun () -> remove_key_down window handle_key_down));
+      let c = controller () in
+      add_key_down window handle_key_down (listening ~signal:(signal c) ());
+      S.on_cleanup (fun () -> abort c));
   <div class_="flex flex-col gap-4">
     <div ref=(fun d -> around := Some d)>
       <Search_field

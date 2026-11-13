@@ -11,6 +11,9 @@
 
     Kobalte has no surface, and a surface has no behaviour. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type variant = [ `default | `secondary | `tertiary | `transparent ]
 
 (** The variant of the surface a part is inside, if any, read as it changes. *)
@@ -18,16 +21,16 @@ module Context : sig
   module Provider : sig
     module Props : sig
       val check :
-        value:(unit -> variant) Solidtype.Check.value ->
+        value:variant S.accessor Solidtype.Check.value ->
         ?children:('f, [ `nodes ]) Solidtype.Check.children ->
         unit ->
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
-  val use : unit -> (unit -> variant) option
+  val use : unit -> variant S.accessor option
 end
 
 module Props : sig
@@ -37,10 +40,10 @@ module Props : sig
     ?variant:variant Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

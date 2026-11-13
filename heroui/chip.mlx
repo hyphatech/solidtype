@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 (* A class added after HeroUI's own, as React's className is. *)
@@ -9,10 +10,10 @@ module Label = struct
 
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <span
-      class_=(fun () -> after (label ()) (class_ ()))
+      class_=(fun () -> after (label ()) (S.get class_))
       data_slot="chip-label"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   [@@element span]
 end
@@ -32,13 +33,13 @@ let%component make
              after
                (Styles.Chip.base
                   (Styles.Chip.slots
-                     (Styles.Chip.options ~color:(color ()) ?size:(size ())
-                        ~variant:(variant ()) ())))
-               (class_ ()))
+                     (Styles.Chip.options ~color:(S.get color)
+                        ?size:(S.get size) ~variant:(S.get variant) ())))
+               (S.get class_))
     data_slot="chip"
     props=(Props.others props)>
     (fun () ->
-      let c = children () in
+      let c = S.get children in
       if text c then Jsx.element <Label>(fun () -> c)</Label> else c)
   </span>
 [@@element span]

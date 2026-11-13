@@ -15,5 +15,5 @@ let%component make ~(fallback : exn -> (unit -> unit) -> Jsx.element)
   <Raw
     fallback=(fun e reset ->
                fallback (Solid.exn_of_thrown e) (fun () -> (reset () [@u])))>
-    (fun () -> children ())
+    (fun () -> Solid.get children)
   </Raw>

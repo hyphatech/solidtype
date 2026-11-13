@@ -23,6 +23,13 @@ val get : 'a accessor -> 'a
 (** [get count] reads [count], and inside a tracking scope -- a thunk in a JSX
     position, an effect, a memo -- subscribes to it. *)
 
+external accessor : ((unit -> 'a)[@mel.uncurry]) -> 'a accessor = "valueOf"
+[@@mel.send]
+(** [accessor (fun () -> e)] is [e] as an accessor, read by {!get} as a signal
+    is, recomputed at each read where a memo would keep it: what a part hands on
+    that it derives. Melange writes the function as JavaScript's own, so a read
+    is a plain call. *)
+
 val create_signal :
   ?equals:'a equals -> ?name:string -> 'a -> 'a accessor * 'a setter
 (** By default a value [===] to the last is no change. *)

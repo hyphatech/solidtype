@@ -18,6 +18,9 @@
     An animation is one the element runs as an attribute starts it; with none,
     as in a browser that cannot tell, an overlay enters and leaves at once. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type t
 
 val create : is_open:(unit -> bool) -> unit -> t
@@ -38,7 +41,7 @@ val entering : t -> bool
 val exiting : t -> bool
 (** Whether its exit animation runs. *)
 
-val arrow_position : unit -> (unit -> string) * (_ Dom.element_like -> unit)
+val arrow_position : unit -> string S.accessor * (_ Dom.element_like -> unit)
 (** Where Kobalte places an overlay's arrow, as the [left], [top], [right] and
     [bottom] of a style, and the [ref] that gives it Kobalte's arrow. Kobalte's
     arrow draws a shape of its own and takes no other, so it is kept, hidden,
@@ -47,7 +50,7 @@ val arrow_position : unit -> (unit -> string) * (_ Dom.element_like -> unit)
 val placed_side :
   placement:(unit -> string) ->
   unit ->
-  (unit -> string) * (_ Dom.element_like -> unit)
+  string S.accessor * (_ Dom.element_like -> unit)
 (** The side Kobalte placed an overlay's content on, ["top"] or another, as
     React Aria's [data-placement] names it, read from Kobalte's positioner as it
     moves, else [placement] until it is placed; and the [ref] that gives it the
@@ -64,7 +67,7 @@ val return_focus :
     does: Kobalte's does as its content unmounts, which waits here for HeroUI's
     exit animation, when the focus has already left. *)
 
-val dismiss : (unit -> unit) -> Solidtype.Jsx.element
+val dismiss : (unit -> unit) -> Jsx.element
 (** A button only a reader finds, which closes an overlay, as React Aria puts
     one for a reader with no Escape key. *)
 

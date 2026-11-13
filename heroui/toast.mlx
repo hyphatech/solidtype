@@ -348,12 +348,12 @@ let is_loading e = (S.get e.content).loading
 type stack = {
   queue : Queue.t;
   placement :
-    unit ->
-    [ `top_start | `top | `top_end | `bottom_start | `bottom | `bottom_end ];
-  gap : unit -> float;
-  scale_factor : unit -> float;
-  max_visible : unit -> int;
-  expanded : unit -> bool;
+    [ `top_start | `top | `top_end | `bottom_start | `bottom | `bottom_end ]
+    S.accessor;
+  gap : float S.accessor;
+  scale_factor : float S.accessor;
+  max_visible : int S.accessor;
+  expanded : bool S.accessor;
   heights : (key * float) list S.accessor;
   set_height : key -> float -> unit;
   forget_height : key -> unit;
@@ -370,7 +370,7 @@ let in_stack part =
 
 (* A toast's classes, which its parts read. *)
 module Slots = Solidtype.Context.Make_optional (struct
-  type t = unit -> Styles.Toast.slots
+  type t = Styles.Toast.slots S.accessor
 end)
 
 let slots_of part =
@@ -444,15 +444,17 @@ module Indicator = struct
       ?(children : Jsx.content option) () =
     let slots = slots_of "Toast.Indicator" in
     <div
-      class_=(fun () -> after (Styles.Toast.indicator (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Toast.indicator (S.get slots)) (S.get class_))
       data_slot="toast-indicator"
       props=(Props.others props)>
       <Show
-        when_=(fun () -> Option.is_some (children ()))
+        when_=(fun () -> Option.is_some (S.get children))
         fallback=(fun () ->
                    Status_icon.svg ~slot:"toast-default-icon" (fun () ->
-                       variant ()))>
-        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+                       S.get variant))>
+        (fun () ->
+          match S.get children with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
   [@@element div]
@@ -462,10 +464,11 @@ module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = slots_of "Toast.Content" in
     <div
-      class_=(fun () -> after (Styles.Toast.content (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Toast.content (S.get slots)) (S.get class_))
       data_slot="toast-content"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -474,10 +477,10 @@ module Title = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = slots_of "Toast.Title" in
     <Kobalte.Title
-      class_=(fun () -> after (Styles.Toast.title (slots ())) (class_ ()))
+      class_=(fun () -> after (Styles.Toast.title (S.get slots)) (S.get class_))
       data_slot="toast-title"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Kobalte.Title>
   [@@element div]
 end
@@ -486,10 +489,11 @@ module Description = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let slots = slots_of "Toast.Description" in
     <Kobalte.Description
-      class_=(fun () -> after (Styles.Toast.description (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Toast.description (S.get slots)) (S.get class_))
       data_slot="toast-description"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Kobalte.Description>
   [@@element div]
 end
@@ -504,15 +508,16 @@ module Action_button = struct
          option) () =
     let slots = slots_of "Toast.Action_button" in
     <Button
-      variant=(fun () -> variant ())
-      class_=(fun () -> after (Styles.Toast.action (slots ())) (class_ ()))
+      variant=(fun () -> S.get variant)
+      class_=(fun () ->
+               after (Styles.Toast.action (S.get slots)) (S.get class_))
       on_click=(fun e ->
                  ignore (on_click e : unit option);
                  ignore (on_press () : unit option))
       data_slot="toast-action-button"
-      ?as_=(fun () -> as_ ())
+      ?as_
       props=(Props.others props)>
-      (fun s -> Jsx.of_content (Jsx.draw (children ()) s))
+      (fun s -> Jsx.of_content (Jsx.draw (S.get children) s))
     </Button>
   [@@element button]
 end
@@ -542,10 +547,10 @@ module Close_button = struct
     let i = Interaction.create () in
     let state () =
       {
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_pressed = (fun[@u] () -> Interaction.pressed i);
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_pressed = S.accessor (fun () -> Interaction.pressed i);
+        is_focused = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
       }
     in
     <Solidtype_kobalte.Button.Root
@@ -553,7 +558,8 @@ module Close_button = struct
       class_=(fun () ->
                Styles.CloseButton.classes
                  (Styles.CloseButton.options
-                    ~class_:(after (Styles.Toast.close (slots ())) (class_ ()))
+                    ~class_:
+                      (after (Styles.Toast.close (S.get slots)) (S.get class_))
                     ()))
       ref=(fun b ->
             ignore (given_ref b : unit option);
@@ -561,16 +567,16 @@ module Close_button = struct
       type_=`button
       on_click=(fun e ->
                  ignore (on_click e : unit option);
-                 Option.iter (fun k -> close ~queue:s.queue k) (key ()))
+                 Option.iter (fun k -> close ~queue:s.queue k) (S.get key))
       data_slot="toast-close"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> Jsx.draw c (state ())
         | None -> Jsx.element <Close_button.Icon />)
     </Solidtype_kobalte.Button.Root>
@@ -602,14 +608,15 @@ module Item = struct
          (Solidtype.Html.Li.props -> state -> Solidtype.Jsx.element) option) ()
       =
     let s = in_stack "Toast" in
-    let e = toast () in
+    let e = S.get toast in
     let variant () =
-      match variant () with Some v -> v | None -> (S.get e.content).variant
+      match S.get variant with Some v -> v | None -> (S.get e.content).variant
     in
-    let slots () =
-      Styles.Toast.slots
-        (Styles.Toast.options ~placement:(s.placement ()) ~variant:(variant ())
-           ())
+    let slots =
+      S.accessor (fun () ->
+          Styles.Toast.slots
+            (Styles.Toast.options ~placement:(S.get s.placement)
+               ~variant:(variant ()) ()))
     in
     let all () = S.get s.queue.entries in
     (* Closing toasts leave the stack's layout, the others closing up while it
@@ -627,7 +634,9 @@ module Item = struct
     in
     let index () = position e (laid_out ()) in
     let frontmost () = index () <= 0 in
-    let hidden () = (not (S.get e.exiting)) && index () >= s.max_visible () in
+    let hidden () =
+      (not (S.get e.exiting)) && index () >= S.get s.max_visible
+    in
     let height_of k = List.assoc_opt k (S.get s.heights) in
     let own () = height_of e.key in
     let front () =
@@ -653,10 +662,10 @@ module Item = struct
       let full = position e (all ()) in
       String.concat "; "
         ([
-           "--offset-collapsed: " ^ px (i *. s.gap ());
-           "--offset-expanded: " ^ px (before () +. (i *. s.gap ()));
+           "--offset-collapsed: " ^ px (i *. S.get s.gap);
+           "--offset-expanded: " ^ px (before () +. (i *. S.get s.gap));
            "--scale-collapsed: "
-           ^ Js.Float.toString (1. -. (i *. s.scale_factor ()));
+           ^ Js.Float.toString (1. -. (i *. S.get s.scale_factor));
            "--front-height: " ^ px (front ());
            "z-index: "
            ^ string_of_int
@@ -729,8 +738,9 @@ module Item = struct
     let state () =
       {
         toast = e;
-        is_focused = (fun[@u] () -> Interaction.focused focus);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible focus);
+        is_focused = S.accessor (fun () -> Interaction.focused focus);
+        is_focus_visible =
+          S.accessor (fun () -> Interaction.focus_visible focus);
       }
     in
     <Slots.Provider value=(fun () -> slots)>
@@ -743,13 +753,15 @@ module Item = struct
               ignore (given_ref el : unit option);
               Interaction.watch focus el;
               watch el)
-        class_=(fun () -> after (Styles.Toast.toast (slots ())) (class_ ()))
+        class_=(fun () ->
+                 after (Styles.Toast.toast (S.get slots)) (S.get class_))
         style=(fun () ->
-                layout () ^ match style () with Some s -> " " ^ s | None -> "")
+                layout ()
+                ^ match S.get style with Some s -> " " ^ s | None -> "")
         tab_index=(fun () ->
                     if
                       frontmost ()
-                      || (s.expanded () && not (hidden () || S.get e.exiting))
+                      || (S.get s.expanded && not (hidden () || S.get e.exiting))
                     then "0"
                     else "-1")
         ?aria_hidden=(fun () ->
@@ -757,15 +769,15 @@ module Item = struct
         ?inert=(fun () -> if hidden () then Some true else None)
         data_entering=(fun () -> Jsx.flag (S.get entering))
         data_exiting=(fun () -> Jsx.flag (S.get e.exiting))
-        data_expanded=(fun () -> Jsx.flag (s.expanded ()))
+        data_expanded=(fun () -> Jsx.flag (S.get s.expanded))
         data_frontmost=(fun () -> Jsx.flag (frontmost ()))
         data_hidden=(fun () -> Jsx.flag (hidden ()))
         data_index=(fun () -> Jsx.data (string_of_int (index ())))
-        data_placement=(fun () -> Jsx.data (placement_name (s.placement ())))
+        data_placement=(fun () -> Jsx.data (placement_name (S.get s.placement)))
         data_slot="toast"
-        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+        ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
         props=(Props.others props)>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </Kobalte.Root>
     </Slots.Provider>
   [@@element li]
@@ -827,9 +839,9 @@ let default_toast e =
         | Some d ->
             Jsx.element <Description>(fun () -> Jsx.string d)</Description>
         | None -> Jsx.string "")
-      (action_in true)
+      (fun () -> action_in true ())
     </Content>
-    (action_in false)
+    (fun () -> action_in false ())
     <Close_button key=(fun () -> e.key) />
   </Item>
 
@@ -901,14 +913,16 @@ module Provider = struct
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
       ?(children : (queued -> Jsx.element) option) () =
-    let q = queue_of (queue ()) in
+    let q = queue_of (S.get queue) in
     let heights, set_heights = S.create_signal [] in
     let interacting, set_interacting = S.create_signal false in
     let active () =
       List.filter (fun e -> not (S.get e.exiting)) (S.get q.entries)
     in
-    let expanded () =
-      (is_expanded () || S.get interacting) && List.length (active ()) > 1
+    let expanded =
+      S.accessor (fun () ->
+          (S.get is_expanded || S.get interacting)
+          && List.length (active ()) > 1)
     in
     let s =
       {
@@ -917,10 +931,10 @@ module Provider = struct
         gap;
         scale_factor;
         max_visible =
-          (fun () ->
-            match max_visible_toasts () with
-            | Some n -> n
-            | None -> Option.value q.max_visible_toasts ~default:3);
+          S.accessor (fun () ->
+              match S.get max_visible_toasts with
+              | Some n -> n
+              | None -> Option.value q.max_visible_toasts ~default:3);
         expanded;
         heights;
         set_height =
@@ -991,7 +1005,7 @@ module Provider = struct
           outside ())
       in
       let hot ev =
-        if pressed (hotkey ()) ev then (
+        if pressed (S.get hotkey) ev then (
           event_default ev;
           focus region)
       in
@@ -1036,21 +1050,21 @@ module Provider = struct
                after
                  (Styles.Toast.region
                     (Styles.Toast.slots
-                       (Styles.Toast.options ~placement:(placement ()) ())))
-                 (class_ ()))
+                       (Styles.Toast.options ~placement:(S.get placement) ())))
+                 (S.get class_))
              (* Kobalte's region on the top layer asks for the pointer, inline, over
          HeroUI's region, which lets it through to the page but for its
          toasts. *)
       style=(fun () ->
               "pointer-events: none; --gap: "
-              ^ px (gap ())
+              ^ px (S.get gap)
               ^ "; --placement: "
-              ^ placement_name (placement ())
+              ^ placement_name (S.get placement)
               ^ "; --scale-factor: "
-              ^ Js.Float.toString (scale_factor ())
-              ^ "; --toast-width: " ^ width () ^ ";"
-              ^ match style () with Some s -> " " ^ s | None -> "")
-      data_expanded=(fun () -> Jsx.flag (expanded ()))
+              ^ Js.Float.toString (S.get scale_factor)
+              ^ "; --toast-width: " ^ S.get width ^ ";"
+              ^ match S.get style with Some s -> " " ^ s | None -> "")
+      data_expanded=(fun () -> Jsx.flag (S.get expanded))
       data_slot="toast-region"
       props=(Props.others props)>
       <Kobalte.List

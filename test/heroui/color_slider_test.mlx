@@ -224,8 +224,10 @@ let of_state ~disabled =
     </span>
   in
   let vertical o =
-   fun[@u] () ->
-    match Solidtype.Solid.get o with `vertical -> true | `horizontal -> false
+    S.accessor (fun () ->
+        match Solidtype.Solid.get o with
+        | `vertical -> true
+        | `horizontal -> false)
   in
   T.render (fun () ->
       <Color_slider

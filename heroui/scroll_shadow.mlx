@@ -124,9 +124,9 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
   (* What was measured, once it is: content hidden before and after. *)
   let measured, set_measured = S.create_signal None in
   let measuring () =
-    is_enabled ()
+    S.get is_enabled
     &&
-    match visibility () with
+    match S.get visibility with
     | `auto -> true
     | `top | `bottom | `left | `right | `both | `none -> false
   in
@@ -134,7 +134,7 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
     match !element with
     | Some e when measuring () ->
         let ((before, after) as now) =
-          hidden ~orientation:(orientation ()) ~offset:(offset ()) e
+          hidden ~orientation:(S.get orientation) ~offset:(S.get offset) e
         in
         let changed =
           match S.get measured with
@@ -145,7 +145,7 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
         if changed then begin
           S.set set_measured (Some now);
           let edge =
-            match (before, after, orientation ()) with
+            match (before, after, S.get orientation) with
             | true, true, _ -> `both
             | true, false, `vertical -> `top
             | false, true, `vertical -> `bottom
@@ -160,7 +160,7 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
   (* Checked first, then watched, as HeroUI's hook does, so what the first
      check writes is no change to the content. *)
   S.create_effect (fun () ->
-      ignore (orientation (), offset ());
+      ignore (S.get orientation, S.get offset);
       if measuring () then check () else S.set set_measured None);
   (* Measured again as it scrolls, as it is resized, and as its content
      changes, which resizes neither it nor scrolls it. *)
@@ -196,14 +196,14 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
       | None -> ());
   (* The edges given, else those measured. *)
   let marks () =
-    match visibility () with
+    match S.get visibility with
     | `auto -> (
         match S.get measured with
-        | Some hidden when is_enabled () ->
-            measured_marks (orientation ()) hidden
+        | Some hidden when S.get is_enabled ->
+            measured_marks (S.get orientation) hidden
         | Some _ | None -> none)
     | `both -> (
-        match orientation () with
+        match S.get orientation with
         | `vertical -> { none with top_bottom = shown }
         | `horizontal -> { none with left_right = shown })
     | `top -> { none with top = shown }
@@ -219,25 +219,26 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
                Styles.ScrollShadow.base
                  (Styles.ScrollShadow.slots
                     (Styles.ScrollShadow.options
-                       ~hide_scroll_bar:(hide_scroll_bar ())
-                       ~orientation:(orientation ()) ~variant:(variant ()) ()))
+                       ~hide_scroll_bar:(S.get hide_scroll_bar)
+                       ~orientation:(S.get orientation) ~variant:(S.get variant)
+                       ()))
              in
-             match class_ () with Some c -> base ^ " " ^ c | None -> base)
+             match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
     style=(fun () ->
             "--scroll-shadow-size: "
-            ^ string_of_int (size ())
+            ^ string_of_int (S.get size)
             ^ "px; --scroll-shadow-offset: "
-            ^ string_of_int (offset ())
+            ^ string_of_int (S.get offset)
             ^ "px;")
     data_orientation=(fun () ->
                        Jsx.data
-                         (match orientation () with
+                         (match S.get orientation with
                          | `vertical -> "vertical"
                          | `horizontal -> "horizontal"))
     data_scroll_shadow_mode=(fun () ->
                               Jsx.data
                                 (if measuring () then "auto" else "manual"))
-    data_scroll_shadow_size=(fun () -> Jsx.data (string_of_int (size ())))
+    data_scroll_shadow_size=(fun () -> Jsx.data (string_of_int (S.get size)))
     data_slot="scroll-shadow"
     data_top_scroll=(fun () -> (marks ()).top)
     data_bottom_scroll=(fun () -> (marks ()).bottom)
@@ -246,6 +247,6 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
     data_right_scroll=(fun () -> (marks ()).right)
     data_left_right_scroll=(fun () -> (marks ()).left_right)
     props=(Props.others props)>
-    (fun () -> children ())
+    (fun () -> S.get children)
   </div>
 [@@element div]

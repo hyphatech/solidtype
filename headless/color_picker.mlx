@@ -3,7 +3,7 @@ module Jsx = Solidtype.Jsx
 module Colors = Solidtype_kobalte.Colors
 module Color = Solidtype_kobalte.Types.Color
 
-type t = { color : unit -> Color.t; set_color : Color.t -> unit }
+type t = { color : Color.t S.accessor; set_color : Color.t -> unit }
 
 module Context = Solidtype.Context.Make_optional (struct
   type nonrec t = t
@@ -14,7 +14,7 @@ let use_context = Context.use
 let value picker own =
   match (own, picker) with
   | Some _, _ -> own
-  | None, Some p -> Some (p.color ())
+  | None, Some p -> Some (S.get p.color)
   | None, None -> None
 
 let changed picker c = match picker with Some p -> p.set_color c | None -> ()
@@ -23,13 +23,15 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(on_change : (Color.t -> unit) option) ~(children : Jsx.content) () =
   let kept, set_kept =
     S.create_signal
-      (match S.untrack default_value with
+      (match S.untrack (fun () -> S.get default_value) with
       | Some c -> c
       | None -> Colors.parse_color "#000000")
   in
   let picker =
     {
-      color = (fun () -> match value () with Some c -> c | None -> S.get kept);
+      color =
+        S.accessor (fun () ->
+            match S.get value with Some c -> c | None -> S.get kept);
       set_color =
         (fun c ->
           S.set set_kept c;
@@ -37,5 +39,5 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     }
   in
   <Context.Provider value=(fun () -> picker)>
-    (fun () -> children ())
+    (fun () -> S.get children)
   </Context.Provider>

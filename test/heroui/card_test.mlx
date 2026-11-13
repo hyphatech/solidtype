@@ -1,6 +1,7 @@
 (* HeroUI's Card, beside the same Card in React, part by part, and the surface
    it gives what is inside it. *)
 
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Card = Solidtype_heroui.Card
 module Surface = Solidtype_heroui.Surface
@@ -57,7 +58,7 @@ module On_surface = struct
         Jsx.string
           (match surface with
           | Some variant -> (
-              match variant () with
+              match S.get variant with
               | `default -> "default"
               | `secondary -> "secondary"
               | `tertiary -> "tertiary"

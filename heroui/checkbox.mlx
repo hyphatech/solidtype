@@ -1,10 +1,14 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Checkbox
 
 (* What a checkbox's parts read of the checkbox they are in: its classes,
    and its state as a field. *)
-type checkbox = { slots : unit -> Styles.Checkbox.slots; field : Field.state }
+type checkbox = {
+  slots : Styles.Checkbox.slots S.accessor;
+  field : Field.state;
+}
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = checkbox
@@ -14,10 +18,10 @@ end)
    React Aria's selection slot does: a table's row, or its header, all its
    rows. *)
 type selection = {
-  selected : unit -> bool;
-  indeterminate : unit -> bool;
+  selected : bool S.accessor;
+  indeterminate : bool S.accessor;
   set : bool -> unit;
-  disabled : unit -> bool;
+  disabled : bool S.accessor;
 }
 
 module Selection = Solidtype.Context.Make_optional (struct
@@ -56,16 +60,16 @@ module Content = struct
   let state_of (f : Field.state) =
     let i = f.interaction in
     {
-      is_selected = (fun[@u] () -> f.selected ());
-      is_indeterminate = (fun[@u] () -> f.indeterminate ());
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> Interaction.pressed i);
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> f.disabled ());
-      is_read_only = (fun[@u] () -> f.read_only ());
-      is_invalid = (fun[@u] () -> f.invalid ());
-      is_required = (fun[@u] () -> f.required ());
+      is_selected = f.selected;
+      is_indeterminate = f.indeterminate;
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = S.accessor (fun () -> Interaction.pressed i);
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = f.disabled;
+      is_read_only = f.read_only;
+      is_invalid = f.invalid;
+      is_required = f.required;
     }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
@@ -78,10 +82,10 @@ module Content = struct
       field=(fun () -> c.field)
       slot="checkbox-content"
       class_=(fun () ->
-               after (Styles.Checkbox.content (c.slots ())) (class_ ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+               after (Styles.Checkbox.content (S.get c.slots)) (S.get class_))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state_of c.field))
+      (fun () -> Jsx.draw (S.get children) (state_of c.field))
     </Field_content>
   [@@element label]
 end
@@ -91,10 +95,10 @@ module Control = struct
     let c = within "Checkbox.Control" in
     <span
       class_=(fun () ->
-               after (Styles.Checkbox.control (c.slots ())) (class_ ()))
+               after (Styles.Checkbox.control (S.get c.slots)) (S.get class_))
       data_slot="checkbox-control"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   [@@element span]
 end
@@ -110,7 +114,7 @@ module Indicator = struct
       role=`presentation
       stroke="currentColor"
       stroke_dasharray="22"
-      stroke_dashoffset=(fun () -> if on () then "44" else "66")
+      stroke_dashoffset=(fun () -> if S.get on then "44" else "66")
       stroke_linecap="round"
       stroke_linejoin="round"
       stroke_width="2"
@@ -137,16 +141,16 @@ module Indicator = struct
     <span
       aria_hidden=true
       class_=(fun () ->
-               after (Styles.Checkbox.indicator (c.slots ())) (class_ ()))
+               after (Styles.Checkbox.indicator (S.get c.slots)) (S.get class_))
       data_slot="checkbox-indicator"
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some given -> given
         | None ->
             Jsx.element
               <Show
-                when_=(fun () -> c.field.indeterminate ())
+                when_=(fun () -> S.get c.field.indeterminate)
                 fallback=(fun () -> check c.field.selected)>
                 (fun () -> Jsx.element (dash ()))
               </Show>)
@@ -161,7 +165,7 @@ end)
 (* A description in a checkbox, but outside its content, is the checkbox's:
    Kobalte's, which its input is described by, beside its group's. *)
 let description : Description.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte_description
     as_="span"
     class_=(fun () -> classes ())
@@ -178,7 +182,7 @@ end)
 (* An error in a checkbox is the checkbox's: Kobalte's, shown while it is
    invalid and describing its input. *)
 let error : Field_error.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte_error
     as_="span"
     class_=(fun () -> classes ())
@@ -202,12 +206,12 @@ type state = {
 
 let state_of (f : Field.state) =
   {
-    is_selected = (fun[@u] () -> f.selected ());
-    is_indeterminate = (fun[@u] () -> f.indeterminate ());
-    is_disabled = (fun[@u] () -> f.disabled ());
-    is_read_only = (fun[@u] () -> f.read_only ());
-    is_invalid = (fun[@u] () -> f.invalid ());
-    is_required = (fun[@u] () -> f.required ());
+    is_selected = f.selected;
+    is_indeterminate = f.indeterminate;
+    is_disabled = f.disabled;
+    is_read_only = f.read_only;
+    is_invalid = f.invalid;
+    is_required = f.required;
   }
 
 let%component make ?(variant : [ `primary | `secondary ] option)
@@ -225,7 +229,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     () =
   (* Given its slot, its state is the selection of the part above it. *)
   let slotted =
-    match (slot (), Selection.use ()) with
+    match (S.get slot, Selection.use ()) with
     | Some `selection, Some s -> Some s
     | Some `selection, None | None, _ -> None
   in
@@ -236,19 +240,24 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let in_form =
     match group with
     | Some _ -> Form.field ~name:(fun () -> None) ~invalid:(fun () -> false)
-    | None -> Form.field ~name ~invalid:(fun () -> is_invalid ())
+    | None ->
+        Form.field
+          ~name:(fun () -> S.get name)
+          ~invalid:(fun () -> S.get is_invalid)
   in
   let own_on, own_change =
-    Field.controlled ~value:is_selected ~default:(default_selected ())
-      ~on_change
+    Field.controlled
+      ~value:(fun () -> S.get is_selected)
+      ~default:(S.get default_selected) ~on_change
   in
-  let in_group f own () =
-    match group with Some g -> f g || own () | None -> own ()
+  let in_group f own =
+    S.accessor (fun () ->
+        match group with Some g -> f g || S.get own | None -> S.get own)
   in
   let on, change =
-    match (group, value ()) with
+    match (group, S.get value) with
     | Some g, Some v ->
-        ( (fun () -> g.checked v),
+        ( S.accessor (fun () -> g.checked v),
           fun now ->
             g.set v now;
             ignore (on_change now : unit option) )
@@ -269,34 +278,38 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   in
   let is_indeterminate () =
     match slotted with
-    | Some s -> s.indeterminate ()
-    | None -> is_indeterminate ()
+    | Some s -> S.get s.indeterminate
+    | None -> S.get is_indeterminate
   in
-  let is_disabled () =
-    match slotted with
-    | Some s -> s.disabled () || is_disabled ()
-    | None -> is_disabled ()
+  let is_disabled =
+    S.accessor (fun () ->
+        match slotted with
+        | Some s -> S.get s.disabled || S.get is_disabled
+        | None -> S.get is_disabled)
   in
-  let disabled = in_group (fun g -> g.disabled ()) is_disabled in
+  let disabled = in_group (fun g -> S.get g.disabled) is_disabled in
   let invalid =
     in_group
-      (fun g -> g.invalid ())
-      (fun () -> is_invalid () || Option.is_some (in_form.error ()))
+      (fun g -> S.get g.invalid)
+      (S.accessor (fun () ->
+           S.get is_invalid || Option.is_some (S.get in_form.error)))
   in
-  let read_only = in_group (fun g -> g.read_only ()) is_read_only in
+  let read_only = in_group (fun g -> S.get g.read_only) is_read_only in
   (* A required group asks for one value checked, never each checkbox. *)
-  let required () = is_required () in
-  let name () =
-    match name () with
-    | Some n -> Some n
-    | None -> Option.bind group (fun (g : Checkbox_group.group) -> g.name ())
+  let required = S.accessor (fun () -> S.get is_required) in
+  let name =
+    S.accessor (fun () ->
+        match S.get name with
+        | Some n -> Some n
+        | None ->
+            Option.bind group (fun (g : Checkbox_group.group) -> S.get g.name))
   in
   let variant () =
-    match variant () with
+    match S.get variant with
     | Some v -> v
     | None -> (
         match
-          Option.bind group (fun (g : Checkbox_group.group) -> g.variant ())
+          Option.bind group (fun (g : Checkbox_group.group) -> S.get g.variant)
         with
         | Some v -> v
         | None -> `primary)
@@ -304,27 +317,27 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let c =
     {
       slots =
-        (fun () ->
-          Styles.Checkbox.slots
-            (Styles.Checkbox.options ~variant:(variant ()) ()));
+        S.accessor (fun () ->
+            Styles.Checkbox.slots
+              (Styles.Checkbox.options ~variant:(variant ()) ()));
       field =
         {
           selected = on;
-          indeterminate = (fun () -> is_indeterminate ());
+          indeterminate = S.accessor (fun () -> is_indeterminate ());
           disabled;
           invalid;
           read_only;
           required;
           aria_label;
           described_by =
-            (fun () ->
-              Option.bind group (fun (g : Checkbox_group.group) ->
-                  g.described_by ()));
+            S.accessor (fun () ->
+                Option.bind group (fun (g : Checkbox_group.group) ->
+                    S.get g.described_by));
           interaction =
             Interaction.create
-              ~disabled:(fun[@u] () -> disabled ())
-              ~no_hover:(fun[@u] () -> read_only ())
-              ~no_pointer_press:(fun[@u] () -> read_only ())
+              ~disabled:(fun () -> S.get disabled)
+              ~no_hover:(fun () -> S.get read_only)
+              ~no_pointer_press:(fun () -> S.get read_only)
               ();
         };
     }
@@ -332,16 +345,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   let state () = state_of c.field in
   <Context.Provider value=(fun () -> c)>
     <Kobalte.Root
-      checked=(fun () -> on ())
+      checked=(fun () -> S.get on)
       on_change=change
       indeterminate=(fun () -> is_indeterminate ())
-      disabled=(fun () -> disabled ())
-      read_only=(fun () -> read_only ())
-      required=(fun () -> required ())
+      disabled=(fun () -> S.get disabled)
+      read_only=(fun () -> S.get read_only)
+      required=(fun () -> S.get required)
       ?name
       ?value
-      validation_state=(fun () -> if invalid () then `invalid else `valid)
-      class_=(fun () -> after (Styles.Checkbox.base (c.slots ())) (class_ ()))
+      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
+      class_=(fun () ->
+               after (Styles.Checkbox.base (S.get c.slots)) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -353,17 +367,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                          on_blur e)
                        e)
       data_slot="checkbox"
-      data_selected=(fun () -> Jsx.flag (on ()))
+      data_selected=(fun () -> Jsx.flag (S.get on))
       data_indeterminate=(fun () -> Jsx.flag (is_indeterminate ()))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_readonly=(fun () -> Jsx.flag (read_only ()))
-      data_required=(fun () -> Jsx.flag (required ()))
-      data_invalid=(fun () -> Jsx.flag (invalid ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_disabled=(fun () -> Jsx.flag (S.get disabled))
+      data_readonly=(fun () -> Jsx.flag (S.get read_only))
+      data_required=(fun () -> Jsx.flag (S.get required))
+      data_invalid=(fun () -> Jsx.flag (S.get invalid))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
         <Field_error.Slot.Provider value=(fun () -> error)>
-          (fun () -> Jsx.draw (children ()) (state_of c.field))
+          (fun () -> Jsx.draw (S.get children) (state_of c.field))
         </Field_error.Slot.Provider>
       </Description.Slot.Provider>
     </Kobalte.Root>

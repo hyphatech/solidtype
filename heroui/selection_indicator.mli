@@ -6,6 +6,8 @@
     one's value. Where its style gives no transition, it is drawn in its place
     at once. *)
 
+module S := Solidtype.Solid
+
 type t
 (** A collection's indicators, which keep where the last one was. *)
 
@@ -13,7 +15,7 @@ val create : unit -> t
 
 type indicator = {
   ref : 'e. 'e Dom.element_like -> unit;  (** Given the indicator's element. *)
-  entering : unit -> bool;
+  entering : bool S.accessor;
       (** True for a frame once the collection's first indicator is drawn, where
           no last one was, as React Aria's marks it entering. *)
 }

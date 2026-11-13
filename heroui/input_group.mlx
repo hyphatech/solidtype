@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 external query : Dom.htmlDivElement -> string -> Dom.htmlElement Js.null
@@ -11,7 +12,7 @@ external contains : Dom.htmlElement -> Dom.element -> bool = "contains"
 [@@mel.send]
 
 (* What a group's parts read of it: its classes. *)
-type group = { slots : unit -> Styles.InputGroup.slots }
+type group = { slots : Styles.InputGroup.slots S.accessor }
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = group
@@ -30,10 +31,10 @@ module Prefix = struct
     let g = within "Input_group.Prefix" in
     <div
       class_=(fun () ->
-               after (Styles.InputGroup.prefix (g.slots ())) (class_ ()))
+               after (Styles.InputGroup.prefix (S.get g.slots)) (S.get class_))
       data_slot="input-group-prefix"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -43,10 +44,10 @@ module Suffix = struct
     let g = within "Input_group.Suffix" in
     <div
       class_=(fun () ->
-               after (Styles.InputGroup.suffix (g.slots ())) (class_ ()))
+               after (Styles.InputGroup.suffix (S.get g.slots)) (S.get class_))
       data_slot="input-group-suffix"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -57,7 +58,7 @@ module Input = struct
   let make (props : Props.t) =
     let g = within "Input_group.Input" in
     Input.input props ~slot:"input-group-input" ~classes:(fun ~variant:_ ->
-        after (Styles.InputGroup.input (g.slots ())) (Props.class_ props))
+        after (Styles.InputGroup.input (S.get g.slots)) (Props.class_ props))
 
   let component = Jsx.component make
 end
@@ -69,7 +70,7 @@ module Text_area = struct
     let g = within "Input_group.Text_area" in
     Text_area.text_area props ~slot:"input-group-textarea"
       ~classes:(fun ~variant:_ ->
-        after (Styles.InputGroup.input (g.slots ())) (Props.class_ props))
+        after (Styles.InputGroup.input (S.get g.slots)) (Props.class_ props))
 
   let component = Jsx.component make
 end
@@ -92,33 +93,33 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     () =
   let field = Text_field.Context.use () in
   let disabled () =
-    match (is_disabled (), field) with
+    match (S.get is_disabled, field) with
     | Some d, _ -> d
-    | None, Some f -> f.disabled ()
+    | None, Some f -> S.get f.disabled
     | None, None -> false
   in
   let invalid () =
-    match (is_invalid (), field) with
+    match (S.get is_invalid, field) with
     | Some i, _ -> i
-    | None, Some f -> f.invalid ()
+    | None, Some f -> S.get f.invalid
     | None, None -> false
   in
   let g =
     {
       slots =
-        (fun () ->
-          Styles.InputGroup.slots
-            (Styles.InputGroup.options ?full_width:(full_width ())
-               ?variant:
-                 (match variant () with
-                 | Some v -> Some v
-                 | None ->
-                     Option.bind field (fun (f : Text_field.field) ->
-                         f.variant ()))
-               ()));
+        S.accessor (fun () ->
+            Styles.InputGroup.slots
+              (Styles.InputGroup.options ?full_width:(S.get full_width)
+                 ?variant:
+                   (match S.get variant with
+                   | Some v -> Some v
+                   | None ->
+                       Option.bind field (fun (f : Text_field.field) ->
+                           S.get f.variant))
+                 ()));
     }
   in
-  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let i = Interaction.create ~disabled:(fun () -> disabled ()) () in
   let element = ref None in
   (* A click on the group but on its input gives the input the focus, as
      HeroUI's does: an input's, never a text area's. *)
@@ -133,11 +134,11 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   in
   let state () =
     {
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_focus_within = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> disabled ());
-      is_invalid = (fun[@u] () -> invalid ());
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_focus_within = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = S.accessor (fun () -> disabled ());
+      is_invalid = S.accessor (fun () -> invalid ());
     }
   in
   <Context.Provider value=(fun () -> g)>
@@ -151,16 +152,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
             element := Some e;
             Interaction.watch i e)
       on_click=clicked
-      class_=(fun () -> after (Styles.InputGroup.base (g.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.InputGroup.base (S.get g.slots)) (S.get class_))
       data_slot="input-group"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_disabled=(fun () -> Jsx.flag (disabled ()))
       data_invalid=(fun () -> Jsx.flag (invalid ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
     </div>
   </Context.Provider>
 [@@element div]

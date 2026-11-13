@@ -10,6 +10,9 @@
       <Close_button on_click=(fun _ -> close ()) />
     ]} *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** HeroUI's cross: the [<svg>] a close button draws where it is given no
     children, for a part that is a close button of its own. *)
 module Icon : sig
@@ -17,21 +20,21 @@ module Icon : sig
     type t
 
     val check :
-      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Svg.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 type state = {
-  is_hovered : bool Solidtype.Solid.accessor;
-  is_pressed : bool Solidtype.Solid.accessor;
-  is_focused : bool Solidtype.Solid.accessor;
-  is_focus_visible : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
+  is_hovered : bool S.accessor;
+  is_pressed : bool S.accessor;
+  is_focused : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
 }
 (** What a close button's children are drawn of, given as a function, as
     HeroUI's render props are, each read where Solid tracks it. A function draws
@@ -48,13 +51,11 @@ module Props : sig
     ?on_click:(Dom.mouseEvent -> unit) ->
     ?ref:(Dom.htmlButtonElement -> unit) ->
     ?children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Button.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

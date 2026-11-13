@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.Button
 module Gravity = Solidtype_gravity_icons
@@ -32,23 +33,23 @@ let%component make ?(variant : [ `default ] = `default)
     ?(as_ :
        (Solidtype.Html.Button.props -> state -> Solidtype.Jsx.element) option)
     () =
-  let i = Interaction.create ~disabled:(fun[@u] () -> is_disabled ()) () in
+  let i = Interaction.create ~disabled:(fun () -> S.get is_disabled) () in
   let state () =
     {
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> Interaction.pressed i);
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> Interaction.disabled i);
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = S.accessor (fun () -> Interaction.pressed i);
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = S.accessor (fun () -> Interaction.disabled i);
     }
   in
   <Kobalte.Root
-    aria_label=(fun () -> aria_label ())
+    aria_label=(fun () -> S.get aria_label)
     class_=(fun () ->
              Styles.CloseButton.classes
-               (Styles.CloseButton.options ~variant:(variant ())
-                  ?class_:(class_ ()) ()))
-    disabled=(fun () -> is_disabled ())
+               (Styles.CloseButton.options ~variant:(S.get variant)
+                  ?class_:(S.get class_) ()))
+    disabled=(fun () -> S.get is_disabled)
     ref=(fun b ->
           ignore (given_ref b : unit option);
           Interaction.watch i b)
@@ -60,10 +61,10 @@ let%component make ?(variant : [ `default ] = `default)
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
     type_=`button
     on_click=(fun e -> ignore (on_click e : unit option))
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
     props=(Props.others props)>
     (fun () ->
-      match children () with
+      match S.get children with
       | Some c -> Jsx.draw c (state ())
       | None -> Jsx.element <Icon />)
   </Kobalte.Root>

@@ -18,7 +18,7 @@ let rooted f =
 
 module Counted = struct
   let%component make ~(children : Jsx.content) () =
-    let resolved = S.children (fun () -> children ()) in
+    let resolved = S.children (fun () -> S.get children) in
     <p>(fun () -> Jsx.int (Array.length (S.to_array (S.get resolved))))</p>
 end
 
@@ -33,16 +33,16 @@ module Number = Jsx.Token (struct
 end)
 
 module Say = struct
-  let%component make ~(word : string) () = Word.element (word ())
+  let%component make ~(word : string) () = Word.element (S.get word)
 end
 
 module Count = struct
-  let%component make ~(n : int) () = Number.element (n ())
+  let%component make ~(n : int) () = Number.element (S.get n)
 end
 
 module Sentence = struct
   let%component make ~(children : Jsx.content) () =
-    let resolved = S.children (fun () -> children ()) in
+    let resolved = S.children (fun () -> S.get children) in
     <p>
       (fun () ->
         Jsx.string
@@ -53,7 +53,7 @@ end
 
 module Greeting = struct
   let%component make ~(name : string) () =
-    <p>(fun () -> Jsx.string ("Hello, " ^ name ()))</p>
+    <p>(fun () -> Jsx.string ("Hello, " ^ S.get name))</p>
 end
 
 (* Greeting, loaded when it is first rendered. *)

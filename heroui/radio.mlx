@@ -1,9 +1,10 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.RadioGroup
 
 (* What a radio's parts read of the radio they are in: its classes, and its
    state as a field. *)
-type radio = { slots : unit -> Styles.Radio.slots; field : Field.state }
+type radio = { slots : Styles.Radio.slots S.accessor; field : Field.state }
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = radio
@@ -40,15 +41,15 @@ module Content = struct
   let state_of (f : Field.state) =
     let i = f.interaction in
     {
-      is_selected = (fun[@u] () -> f.selected ());
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> Interaction.pressed i);
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> f.disabled ());
-      is_read_only = (fun[@u] () -> f.read_only ());
-      is_invalid = (fun[@u] () -> f.invalid ());
-      is_required = (fun[@u] () -> f.required ());
+      is_selected = f.selected;
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = S.accessor (fun () -> Interaction.pressed i);
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = f.disabled;
+      is_read_only = f.read_only;
+      is_invalid = f.invalid;
+      is_required = f.required;
     }
 
   let%component make ?(class_ : string option) ~(children : state Jsx.children)
@@ -60,10 +61,11 @@ module Content = struct
     <Field_content
       field=(fun () -> r.field)
       slot="radio-content"
-      class_=(fun () -> after (Styles.Radio.content (r.slots ())) (class_ ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      class_=(fun () ->
+               after (Styles.Radio.content (S.get r.slots)) (S.get class_))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state_of r.field))
+      (fun () -> Jsx.draw (S.get children) (state_of r.field))
     </Field_content>
   [@@element label]
 end
@@ -72,10 +74,11 @@ module Control = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let r = within "Radio.Control" in
     <span
-      class_=(fun () -> after (Styles.Radio.control (r.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Radio.control (S.get r.slots)) (S.get class_))
       data_slot="radio-control"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   [@@element span]
 end
@@ -89,13 +92,14 @@ module Indicator = struct
     let r = within "Radio.Indicator" in
     <span
       aria_hidden=true
-      class_=(fun () -> after (Styles.Radio.indicator (r.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Radio.indicator (S.get r.slots)) (S.get class_))
       data_slot="radio-indicator"
       ?as_=(fun () ->
-             Option.map (fun f p -> f p (Content.state_of r.field)) (as_ ()))
+             Option.map (fun f p -> f p (Content.state_of r.field)) (S.get as_))
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some given -> Jsx.draw given (Content.state_of r.field)
         | None -> Jsx.string "")
     </span>
@@ -105,7 +109,7 @@ end
 (* A description in a radio is the radio's: Kobalte's, which its input is
    described by. *)
 let description : Description.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte.ItemDescription
     class_=(fun () -> classes ())
     slot="description"
@@ -126,11 +130,11 @@ type state = {
 
 let state_of (f : Field.state) =
   {
-    is_selected = (fun[@u] () -> f.selected ());
-    is_disabled = (fun[@u] () -> f.disabled ());
-    is_read_only = (fun[@u] () -> f.read_only ());
-    is_invalid = (fun[@u] () -> f.invalid ());
-    is_required = (fun[@u] () -> f.required ());
+    is_selected = f.selected;
+    is_disabled = f.disabled;
+    is_read_only = f.read_only;
+    is_invalid = f.invalid;
+    is_required = f.required;
   }
 
 let%component make ~(value : string) ?(is_disabled : bool = false)
@@ -143,27 +147,31 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
     | Some g -> g
     | None -> invalid_arg "Radio is used inside a Radio_group"
   in
-  let selected () =
-    match g.value () with Some v -> String.equal v (value ()) | None -> false
+  let selected =
+    S.accessor (fun () ->
+        match S.get g.value with
+        | Some v -> String.equal v (S.get value)
+        | None -> false)
   in
-  let disabled () = g.disabled () || is_disabled () in
+  let disabled = S.accessor (fun () -> S.get g.disabled || S.get is_disabled) in
   let r =
     {
-      slots = (fun () -> Styles.Radio.slots (Styles.Radio.options ()));
+      slots =
+        S.accessor (fun () -> Styles.Radio.slots (Styles.Radio.options ()));
       field =
         {
           selected;
-          indeterminate = (fun () -> false);
+          indeterminate = S.accessor (fun () -> false);
           disabled;
           invalid = g.invalid;
           read_only = g.read_only;
           required = g.required;
           aria_label;
-          described_by = (fun () -> None);
+          described_by = S.accessor (fun () -> None);
           interaction =
             Interaction.create
-              ~disabled:(fun[@u] () -> disabled ())
-              ~no_hover:(fun[@u] () -> g.read_only ())
+              ~disabled:(fun () -> S.get disabled)
+              ~no_hover:(fun () -> S.get g.read_only)
               ~keys:`element ();
         };
     }
@@ -171,19 +179,20 @@ let%component make ~(value : string) ?(is_disabled : bool = false)
   let state () = state_of r.field in
   <Context.Provider value=(fun () -> r)>
     <Kobalte.Item
-      value=(fun () -> value ())
-      disabled=(fun () -> is_disabled ())
-      class_=(fun () -> after (Styles.Radio.base (r.slots ())) (class_ ()))
+      value=(fun () -> S.get value)
+      disabled=(fun () -> S.get is_disabled)
+      class_=(fun () ->
+               after (Styles.Radio.base (S.get r.slots)) (S.get class_))
       data_slot="radio"
-      data_selected=(fun () -> Jsx.flag (selected ()))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_invalid=(fun () -> Jsx.flag (g.invalid ()))
-      data_readonly=(fun () -> Jsx.flag (g.read_only ()))
-      data_required=(fun () -> Jsx.flag (g.required ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_selected=(fun () -> Jsx.flag (S.get selected))
+      data_disabled=(fun () -> Jsx.flag (S.get disabled))
+      data_invalid=(fun () -> Jsx.flag (S.get g.invalid))
+      data_readonly=(fun () -> Jsx.flag (S.get g.read_only))
+      data_required=(fun () -> Jsx.flag (S.get g.required))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Description.Slot.Provider value=(fun () -> description)>
-        (fun () -> Jsx.draw (children ()) (state_of r.field))
+        (fun () -> Jsx.draw (S.get children) (state_of r.field))
       </Description.Slot.Provider>
     </Kobalte.Item>
   </Context.Provider>

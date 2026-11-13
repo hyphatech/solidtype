@@ -15,10 +15,10 @@ type placement = [ `top | `bottom | `left | `right ]
 
 module Search = struct
   type t = {
-    text : unit -> string;
+    text : string S.accessor;
     set : string -> unit;
-    elsewhere : unit -> bool;
-    returned : unit -> bool;
+    elsewhere : bool S.accessor;
+    returned : bool S.accessor;
   }
 
   include Solidtype.Context.Make_optional (struct
@@ -30,7 +30,7 @@ end
    while it is given, and who is told it. *)
 type filtering = {
   keeps : string -> string -> bool option;
-  given : unit -> string option;
+  given : string option S.accessor;
   tell : string -> unit;
 }
 
@@ -38,27 +38,27 @@ type filtering = {
    has joined it, the options chosen, whether it is open and how it opens,
    clears and filters, and the ids its parts name each other by. *)
 type autocomplete = {
-  slots : unit -> Styles.Autocomplete.slots;
+  slots : Styles.Autocomplete.slots S.accessor;
   hosted : List_box.hosted option S.accessor;
-  selected : unit -> List_box.option_ list;
-  is_open : unit -> bool;
+  selected : List_box.option_ list S.accessor;
+  is_open : bool S.accessor;
   toggle : unit -> unit;
   open_ : unit -> unit;
-  is_empty : unit -> bool;
-  placeholder : unit -> string;
+  is_empty : bool S.accessor;
+  placeholder : string S.accessor;
   clear : unit -> unit;
-  disabled : unit -> bool;
-  invalid : unit -> bool;
+  disabled : bool S.accessor;
+  invalid : bool S.accessor;
   set_placement : placement -> unit;
-  placement : unit -> string;
+  placement : string S.accessor;
   label_id : string;
   value_id : string;
   description_id : string;
-  described : unit -> bool;
+  described : bool S.accessor;
       (* Whether a description is there to describe the button by: taken as
          one until the autocomplete is on the page, where it is looked for,
          so the server's page and the browser's agree as it hydrates. *)
-  listbox_id : unit -> string option;
+  listbox_id : string option S.accessor;
   indicator : Dom.element option ref;
   set_indicator : Interaction.t -> unit;
   return_focus : unit -> unit;
@@ -114,15 +114,15 @@ module Trigger = struct
          (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option) ()
       =
     let a = within "Autocomplete.Trigger" in
-    let i = Interaction.create ~disabled:(fun[@u] () -> a.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get a.disabled) () in
     (* A press anywhere on it opens or closes the list, as HeroUI's does. *)
     let state () =
       {
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_focus_within = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> a.disabled ());
-        is_invalid = (fun[@u] () -> a.invalid ());
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_focus_within = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = a.disabled;
+        is_invalid = a.invalid;
       }
     in
     <Kobalte.Control
@@ -131,17 +131,19 @@ module Trigger = struct
             ignore (given_ref e : unit option);
             Interaction.watch i e)
       class_=(fun () ->
-               after (Styles.Autocomplete.trigger (a.slots ())) (class_ ()))
+               after
+                 (Styles.Autocomplete.trigger (S.get a.slots))
+                 (S.get class_))
       on_click=(fun e ->
                  ignore (on_click e : unit option);
-                 if not (a.disabled ()) then a.toggle ())
+                 if not (S.get a.disabled) then a.toggle ())
       data_slot="autocomplete-trigger"
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
-      data_disabled=(fun () -> Jsx.flag (a.disabled ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_disabled=(fun () -> Jsx.flag (S.get a.disabled))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
     </Kobalte.Control>
   [@@element div]
 end
@@ -162,27 +164,28 @@ module Value = struct
     let a = within "Autocomplete.Value" in
     let keys =
       S.create_memo (fun () ->
-          Array.of_list (List.map List_box.key (a.selected ())))
+          Array.of_list (List.map List_box.key (S.get a.selected)))
     in
     let state () =
       {
-        selected_keys = (fun[@u] () -> S.get keys);
-        selected_text = (fun[@u] () -> List_box.listed (a.selected ()));
+        selected_keys = keys;
+        selected_text =
+          S.accessor (fun () -> List_box.listed (S.get a.selected));
       }
     in
     <span
       id=(fun () -> a.value_id)
       class_=(fun () ->
-               after (Styles.Autocomplete.value (a.slots ())) (class_ ()))
+               after (Styles.Autocomplete.value (S.get a.slots)) (S.get class_))
       data_slot="autocomplete-value"
-      data_placeholder=(fun () -> Jsx.flag (a.is_empty ()))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      data_placeholder=(fun () -> Jsx.flag (S.get a.is_empty))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (fun () ->
-        match (children (), a.is_empty ()) with
+        match (S.get children, S.get a.is_empty) with
         | Some c, false -> Jsx.draw c (state ())
-        | (Some _ | None), true -> Jsx.string (a.placeholder ())
-        | None, false -> Jsx.element (List_box.shown (a.selected ())))
+        | (Some _ | None), true -> Jsx.string (S.get a.placeholder)
+        | None, false -> Jsx.element (List_box.shown (S.get a.selected)))
     </span>
   [@@element span]
 end
@@ -191,10 +194,10 @@ module Indicator = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
       () =
     let a = within "Autocomplete.Indicator" in
-    let i = Interaction.create ~disabled:(fun[@u] () -> a.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get a.disabled) () in
     a.set_indicator i;
     let classes () =
-      after (Styles.Autocomplete.indicator (a.slots ())) (class_ ())
+      after (Styles.Autocomplete.indicator (S.get a.slots)) (S.get class_)
     in
     (* The select's own button, which Tab reaches; a press on it is the
        trigger's, around it. *)
@@ -202,28 +205,31 @@ module Indicator = struct
       type_=`button
       tabindex="0"
       aria_haspopup="listbox"
-      aria_expanded=(fun () -> a.is_open ())
-      ?aria_controls=(fun () -> if a.is_open () then a.listbox_id () else None)
+      aria_expanded=(fun () -> S.get a.is_open)
+      ?aria_controls=(fun () ->
+                       if S.get a.is_open then S.get a.listbox_id else None)
       aria_labelledby=(fun () -> a.value_id ^ " " ^ a.label_id)
       ?aria_describedby=(fun () ->
-                          if a.described () then Some a.description_id else None)
-      disabled=(fun () -> a.disabled ())
+                          if S.get a.described then Some a.description_id
+                          else None)
+      disabled=(fun () -> S.get a.disabled)
       ref=(fun e ->
             a.indicator := Some (as_element e);
             Interaction.watch i e)
       on_key_down=(fun e ->
                     match key e with
-                    | ("ArrowDown" | "ArrowUp") when not (a.is_open ()) ->
+                    | ("ArrowDown" | "ArrowUp") when not (S.get a.is_open) ->
                         prevent_default e;
                         a.open_ ()
                     | _ -> ())
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i || a.is_open ()))
+      data_pressed=(fun () ->
+                     Jsx.flag (Interaction.pressed i || S.get a.is_open))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (a.disabled ()))>
+      data_disabled=(fun () -> Jsx.flag (S.get a.disabled))>
       (fun () ->
-        match S.untrack (fun () -> children ()) with
+        match S.untrack (fun () -> S.get children) with
         | Some _ ->
             (* HeroUI gives an indicator of the user's its classes; a Solid
                component cannot add them to an element already made, so a
@@ -233,10 +239,11 @@ module Indicator = struct
                 aria_hidden=true
                 class_=(fun () -> classes ())
                 data_slot="autocomplete-indicator"
-                data_open=(fun () -> Jsx.flag (a.is_open ()))
+                data_open=(fun () -> Jsx.flag (S.get a.is_open))
                 props=(Props.others props)>
                 (fun () ->
-                  Option.value (children ()) ~default:(Jsx.element Jsx.nothing))
+                  Option.value (S.get children)
+                    ~default:(Jsx.element Jsx.nothing))
               </span>
         | None ->
             Jsx.element
@@ -244,7 +251,7 @@ module Indicator = struct
                 aria_hidden=true
                 class_=(fun () -> classes ())
                 role=`presentation
-                data_open=(fun () -> Jsx.flag (a.is_open ()))
+                data_open=(fun () -> Jsx.flag (S.get a.is_open))
                 data_slot="autocomplete-default-indicator"
                 props=(Props.others props)
               />)
@@ -260,16 +267,18 @@ module Clear_button = struct
       type_=`button
       tabindex="-1"
       aria_label="Clear selection"
-      ?aria_hidden=(fun () -> if a.is_empty () then Some true else None)
-      disabled=(fun () -> a.disabled ())
+      ?aria_hidden=(fun () -> if S.get a.is_empty then Some true else None)
+      disabled=(fun () -> S.get a.disabled)
       class_=(fun () ->
-               after (Styles.Autocomplete.clear_button (a.slots ())) (class_ ()))
+               after
+                 (Styles.Autocomplete.clear_button (S.get a.slots))
+                 (S.get class_))
       on_click=(fun e ->
                  (* A press on it is its own, not the trigger's around it. *)
                  stop_click e;
                  a.clear ();
                  ignore (on_click e : unit option))
-      data_empty=(fun () -> Jsx.flag (a.is_empty ()))
+      data_empty=(fun () -> Jsx.flag (S.get a.is_empty))
       data_slot="autocomplete-clear-button"
       props=(Props.others props)>
       <Gravity.Xmark
@@ -308,9 +317,11 @@ module Popover = struct
       ~(children : Jsx.content) () =
     let a = within "Autocomplete.Popover" in
     S.create_computed (fun () ->
-        a.set_placement (Option.value (placement ()) ~default:`bottom));
-    let o = Overlay.create ~is_open:a.is_open () in
-    let side, watch_side = Overlay.placed_side ~placement:a.placement () in
+        a.set_placement (Option.value (S.get placement) ~default:`bottom));
+    let o = Overlay.create ~is_open:(fun () -> S.get a.is_open) () in
+    let side, watch_side =
+      Overlay.placed_side ~placement:(fun () -> S.get a.placement) ()
+    in
     (* Made once, as the page mounts: its list box joins the autocomplete
        while it is closed too, as its value shows the option chosen, and its
        search is moved into the popover each time it opens. Neither is on the
@@ -321,7 +332,7 @@ module Popover = struct
           (Some
              (S.untrack (fun () ->
                   <Context.Provider value=(fun () -> a)>
-                    (fun () -> children ())
+                    (fun () -> S.get children)
                   </Context.Provider>))));
     <Show when_=(fun () -> Overlay.present o)>
       <Kobalte.Portal>
@@ -330,14 +341,16 @@ module Popover = struct
           tabindex="-1"
           aria_labelledby=(fun () -> a.label_id)
           class_=(fun () ->
-                   after (Styles.Autocomplete.popover (a.slots ())) (class_ ()))
+                   after
+                     (Styles.Autocomplete.popover (S.get a.slots))
+                     (S.get class_))
           style=(fun () ->
                   styled
                     "--trigger-width: var(--kb-popper-anchor-width); \
                      --trigger-anchor-point: \
                      var(--kb-combobox-content-transform-origin); max-height: \
                      var(--kb-popper-content-available-height);"
-                    (style ()))
+                    (S.get style))
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Overlay.watch o e;
@@ -349,7 +362,7 @@ module Popover = struct
                                 prevent_default_event e;
                                 a.return_focus ())
           data_slot="autocomplete-popover"
-          data_placement=(fun () -> Jsx.data (side ()))
+          data_placement=(fun () -> Jsx.data (S.get side))
           data_entering=(fun () -> Jsx.flag (Overlay.entering o))
           data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
@@ -366,11 +379,11 @@ module Popover = struct
                     ref=(fun e -> h.list_ref e)
                     scroll_to_item=(fun key -> h.scroll_to_item key)
                     aria_orientation=`vertical
-                    class_=(fun () -> h.classes ())
+                    class_=(fun () -> S.get h.classes)
                     data_slot="list-box"
                     data_layout="stack"
                     data_orientation="vertical"
-                    data_empty=(fun () -> Jsx.flag (h.empty ()))
+                    data_empty=(fun () -> Jsx.flag (S.get h.empty))
                     props=h.others>
                     (fun collection -> h.draw collection)
                   </As_list>
@@ -390,11 +403,11 @@ module Filter = struct
     a.set_filtering
       {
         keeps = (fun text typed -> filter text typed);
-        given = (fun () -> input_value ());
+        given = input_value;
         tell = (fun text -> ignore (on_input_change text : unit option));
       };
     <Search.Provider value=(fun () -> a.search)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Search.Provider>
 end
 
@@ -421,10 +434,11 @@ let selection kobalte =
       Some (S.get (Types.ListState.selection_manager list))
   | None -> None
 
-let focused_key kobalte () =
-  match selection kobalte with
-  | Some m -> Types.SelectionManager.focused_key m ()
-  | None -> None
+let focused_key kobalte =
+  S.accessor (fun () ->
+      match selection kobalte with
+      | Some m -> Types.SelectionManager.focused_key m ()
+      | None -> None)
 
 (* What its children are drawn of: React Aria's render props for a select,
    which an autocomplete is. *)
@@ -453,24 +467,35 @@ let%component make ?(placeholder : string = "Select an item")
     ~(children : state Jsx.children)
     ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
     () =
-  let in_form = Form.field ~name ~invalid:(fun () -> is_invalid ()) in
-  let invalid () = is_invalid () || Option.is_some (in_form.error ()) in
+  let in_form =
+    Form.field
+      ~name:(fun () -> S.get name)
+      ~invalid:(fun () -> S.get is_invalid)
+  in
+  let invalid =
+    S.accessor (fun () ->
+        S.get is_invalid || Option.is_some (S.get in_form.error))
+  in
   let hosted, set_hosted = S.create_signal None in
   let kept, set_kept = S.create_signal [||] in
   S.create_computed (fun () ->
-      S.set set_kept (Option.value (S.untrack default_value) ~default:[||]));
-  let keys () = match value () with Some keys -> keys | None -> S.get kept in
+      S.set set_kept
+        (Option.value (S.untrack (fun () -> S.get default_value)) ~default:[||]));
+  let keys () =
+    match S.get value with Some keys -> keys | None -> S.get kept
+  in
   let options () =
     match S.get hosted with
-    | Some (h : List_box.hosted) -> h.options ()
+    | Some (h : List_box.hosted) -> S.get h.options
     | None -> []
   in
   (* In the order they were chosen, as React Aria lists them. *)
-  let selected () =
-    let options = options () in
-    keys () |> Array.to_list
-    |> List.filter_map (fun key ->
-        List.find_opt (fun o -> String.equal (List_box.key o) key) options)
+  let selected =
+    S.accessor (fun () ->
+        let options = options () in
+        keys () |> Array.to_list
+        |> List.filter_map (fun key ->
+            List.find_opt (fun o -> String.equal (List_box.key o) key) options))
   in
   let change keys =
     S.set set_kept keys;
@@ -479,14 +504,14 @@ let%component make ?(placeholder : string = "Select an item")
   in
   let disabled_key key =
     Array.exists (String.equal key)
-      (Option.value (disabled_keys ()) ~default:[||])
+      (Option.value (S.get disabled_keys) ~default:[||])
   in
-  let mode = S.untrack selection_mode in
+  let mode = S.untrack (fun () -> S.get selection_mode) in
   let kobalte = ref None in
   let filtering, set_filtering = S.create_signal None in
   let filtering () = S.untrack (fun () -> S.get filtering)
   and given () =
-    Option.bind (S.get filtering) (fun (f : filtering) -> f.given ())
+    Option.bind (S.get filtering) (fun (f : filtering) -> S.get f.given)
   in
   let indicator = ref None in
   let popover_has e =
@@ -573,9 +598,11 @@ let%component make ?(placeholder : string = "Select an item")
       | Some _ | None -> ());
   let opened_kept, set_opened = S.create_signal false in
   S.create_computed (fun () ->
-      S.set set_opened (Option.value (S.untrack default_open) ~default:false));
-  let opened () =
-    match is_open () with Some o -> o | None -> S.get opened_kept
+      S.set set_opened
+        (Option.value (S.untrack (fun () -> S.get default_open)) ~default:false));
+  let opened =
+    S.accessor (fun () ->
+        match S.get is_open with Some o -> o | None -> S.get opened_kept)
   in
   let focus_search () =
     next_tick (fun () ->
@@ -613,20 +640,21 @@ let%component make ?(placeholder : string = "Select an item")
   let search =
     {
       Search.text =
-        (fun () ->
-          match !kobalte with
-          | Some k ->
-              Option.value
-                (S.get (Types.ComboboxContextValue.input_value k))
-                ~default:""
-          | None -> "");
+        S.accessor (fun () ->
+            match !kobalte with
+            | Some k ->
+                Option.value
+                  (S.get (Types.ComboboxContextValue.input_value k))
+                  ~default:""
+            | None -> "");
       set =
         (fun text ->
           match !kobalte with
           | Some k -> Types.ComboboxContextValue.set_input_value k text
           | None -> ());
-      elsewhere = (fun () -> Option.is_some (focused_key kobalte ()));
-      returned = (fun () -> S.get returned && Interaction.keyed ());
+      elsewhere =
+        S.accessor (fun () -> Option.is_some (S.get (focused_key kobalte)));
+      returned = S.accessor (fun () -> S.get returned && Interaction.keyed ());
     }
   in
   let placement, set_placement = S.create_signal `bottom in
@@ -646,10 +674,10 @@ let%component make ?(placeholder : string = "Select an item")
   let a =
     {
       slots =
-        (fun () ->
-          Styles.Autocomplete.slots
-            (Styles.Autocomplete.options ~full_width:(full_width ())
-               ~variant:(variant ()) ()));
+        S.accessor (fun () ->
+            Styles.Autocomplete.slots
+              (Styles.Autocomplete.options ~full_width:(S.get full_width)
+                 ~variant:(S.get variant) ()));
       hosted;
       selected;
       is_open = opened;
@@ -657,7 +685,8 @@ let%component make ?(placeholder : string = "Select an item")
         (fun () ->
           match !kobalte with
           | Some k ->
-              if S.untrack opened then Types.ComboboxContextValue.close k ()
+              if S.untrack (fun () -> S.get opened) then
+                Types.ComboboxContextValue.close k ()
               else
                 Types.ComboboxContextValue.open_ k (Types.Either.right false)
                   ~trigger_mode:`input ()
@@ -669,7 +698,7 @@ let%component make ?(placeholder : string = "Select an item")
               Types.ComboboxContextValue.open_ k (Types.Either.right false)
                 ~trigger_mode:`input ()
           | None -> ());
-      is_empty = (fun () -> Array.length (keys ()) = 0);
+      is_empty = S.accessor (fun () -> Array.length (keys ()) = 0);
       placeholder;
       clear =
         (fun () ->
@@ -679,21 +708,21 @@ let%component make ?(placeholder : string = "Select an item")
       invalid;
       set_placement = S.set set_placement;
       placement =
-        (fun () ->
-          match S.get placement with
-          | `top -> "top"
-          | `bottom -> "bottom"
-          | `left -> "left"
-          | `right -> "right");
+        S.accessor (fun () ->
+            match S.get placement with
+            | `top -> "top"
+            | `bottom -> "bottom"
+            | `left -> "left"
+            | `right -> "right");
       label_id = S.create_unique_id ();
       value_id = S.create_unique_id ();
       description_id;
-      described = (fun () -> S.get described);
+      described;
       listbox_id =
-        (fun () ->
-          match !kobalte with
-          | Some k -> S.get (Types.ComboboxContextValue.listbox_id k)
-          | None -> None);
+        S.accessor (fun () ->
+            match !kobalte with
+            | Some k -> S.get (Types.ComboboxContextValue.listbox_id k)
+            | None -> None);
       indicator;
       set_indicator = (fun i -> S.set set_indicator_i (Some i));
       return_focus;
@@ -703,7 +732,7 @@ let%component make ?(placeholder : string = "Select an item")
   in
   let listing =
     {
-      List_box.mode = (fun () -> (mode :> List_box.selection_mode));
+      List_box.mode = S.accessor (fun () -> (mode :> List_box.selection_mode));
       is_selected = (fun key -> Array.exists (String.equal key) (keys ()));
       is_disabled = disabled_key;
       act = (fun (_ : string) -> ());
@@ -713,13 +742,13 @@ let%component make ?(placeholder : string = "Select an item")
   (* A form is sent the ids chosen as React Aria sends them, each by a hidden
      input, an empty one while none is. *)
   let sent_keys () =
-    match (name (), keys ()) with
+    match (S.get name, keys ()) with
     | Some _, [||] -> [| "" |]
     | Some _, keys -> keys
     | None, _ -> [||]
   in
   let label : Label.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     <Kobalte_label
       as_="span"
       id=(fun () -> a.label_id)
@@ -730,7 +759,7 @@ let%component make ?(placeholder : string = "Select an item")
     </Kobalte_label>
   in
   let description : Description.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     <Kobalte_description
       as_="span"
       id=(fun () -> a.description_id)
@@ -742,7 +771,7 @@ let%component make ?(placeholder : string = "Select an item")
     </Kobalte_description>
   in
   let error : Field_error.slot =
-   fun[@u] classes others children ->
+   fun classes others children ->
     <Kobalte_error
       as_="span"
       class_=(fun () -> classes ())
@@ -755,17 +784,22 @@ let%component make ?(placeholder : string = "Select an item")
   in
   let state =
     {
-      is_focused = (fun[@u] () -> focused ());
+      is_focused = S.accessor (fun () -> focused ());
       is_focus_visible =
-        (fun[@u] () ->
-          match S.get indicator_i with
-          | Some i -> Interaction.focus_visible i
-          | None -> false);
-      is_disabled = (fun[@u] () -> is_disabled ());
-      is_open = (fun[@u] () -> opened ());
-      is_invalid = (fun[@u] () -> invalid ());
-      is_required = (fun[@u] () -> is_required ());
+        S.accessor (fun () ->
+            match S.get indicator_i with
+            | Some i -> Interaction.focus_visible i
+            | None -> false);
+      is_disabled;
+      is_open = opened;
+      is_invalid = invalid;
+      is_required;
     }
+  in
+  let host h =
+    S.set set_hosted (Some h);
+    S.on_cleanup (fun () -> S.set set_hosted None);
+    Jsx.nothing
   in
   let parts () =
     let k = Kobalte.use_combobox_context () in
@@ -773,28 +807,21 @@ let%component make ?(placeholder : string = "Select an item")
     (* The focus comes back to the search from an option by keys, which shows
        its ring, as React Aria's virtual focus does. *)
     S.create_computed (fun () ->
-        let now = Option.is_some (focused_key kobalte ()) in
+        let now = Option.is_some (S.get (focused_key kobalte)) in
         if !had_focus && not now then
           S.set set_returned (S.untrack Interaction.keyed)
         else if now then S.set set_returned false;
         had_focus := now);
     <Context.Provider value=(fun () -> a)>
-      <List_box.Host.Provider
-        value=(fun () ->
-                fun[@u] h ->
-                 S.set set_hosted (Some h);
-                 S.on_cleanup (fun () -> S.set set_hosted None);
-                 Jsx.nothing)>
+      <List_box.Host.Provider value=(fun () -> host)>
         <List_box.Listing.Provider value=(fun () -> listing)>
           <Field_error.Message.Provider value=(fun () -> in_form.error)>
             <Label.Slot.Provider value=(fun () -> label)>
               <Description.Slot.Provider value=(fun () -> description)>
                 <Field_error.Slot.Provider value=(fun () -> error)>
-                  (fun () -> Jsx.draw (children ()) state)
+                  (fun () -> Jsx.draw (S.get children) state)
                   <For each=(fun () -> sent_keys ())>
-                    (fun key _ ->
-                      <input type_="hidden" ?name=(fun () -> name ()) value=key
-                      />)
+                    (fun key _ -> <input type_="hidden" ?name value=key />)
                   </For>
                 </Field_error.Slot.Provider>
               </Description.Slot.Provider>
@@ -808,7 +835,7 @@ let%component make ?(placeholder : string = "Select an item")
     Types.Either.right (fun o typed -> keeps (List_box.text o) typed)
   in
   let root_classes () =
-    after (Styles.Autocomplete.base (a.slots ())) (class_ ())
+    after (Styles.Autocomplete.base (S.get a.slots)) (S.get class_)
   in
   let others = Props.others props in
   let root e =
@@ -824,7 +851,7 @@ let%component make ?(placeholder : string = "Select an item")
      Aria's does; an autocomplete opens with no option at all only by
      [allows_empty_collection]. *)
   let open_refused o =
-    o && (not (allows_empty_collection ())) && List.length (options ()) = 0
+    o && (not (S.get allows_empty_collection)) && List.length (options ()) = 0
   in
   match mode with
   | `single ->
@@ -838,7 +865,7 @@ let%component make ?(placeholder : string = "Select an item")
         value=(fun () ->
                 (* [null], an empty selection Kobalte keeps: [undefined]
                    would be no value given. *)
-                match selected () with
+                match S.get selected with
                 | o :: _ -> Js.Nullable.return o
                 | [] -> Js.Nullable.null)
         on_change=(fun o ->
@@ -847,32 +874,32 @@ let%component make ?(placeholder : string = "Select an item")
                       | Some o -> [| List_box.key o |]
                       | None -> [||]))
         on_input_change=told
-        open_=(fun () -> opened ())
+        open_=(fun () -> S.get opened)
         on_open_change=(fun o _ -> if not (open_refused o) then open_change o)
         trigger_mode=`input
         default_filter=(fun () -> filter)
         allows_empty_collection=true
         no_reset_input_on_blur=true
-        placement=(fun () -> a.placement ())
+        placement=(fun () -> S.get a.placement)
         gutter=8.
         overflow_padding=12.
         same_width=false
         virtualized=true
         force_mount=true
         modal=true
-        disabled=(fun () -> is_disabled ())
-        required=(fun () -> is_required ())
-        validation_state=(fun () -> if invalid () then `invalid else `valid)
+        disabled=(fun () -> S.get is_disabled)
+        required=(fun () -> S.get is_required)
+        validation_state=(fun () -> if S.get invalid then `invalid else `valid)
         class_=(fun () -> root_classes ())
         ref=root
         on_focus_out=focus_out
         data_slot="autocomplete"
-        data_open=(fun () -> Jsx.flag (opened ()))
+        data_open=(fun () -> Jsx.flag (S.get opened))
         data_focused=(fun () -> Jsx.flag (focused ()))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
-        data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-        data_required=(fun () -> Jsx.flag (is_required ()))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
+        data_invalid=(fun () -> Jsx.flag (S.get invalid))
+        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
+        data_required=(fun () -> Jsx.flag (S.get is_required))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root>
@@ -885,35 +912,35 @@ let%component make ?(placeholder : string = "Select an item")
         option_text_value=List_box.text
         option_label=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () -> Array.of_list (selected ()))
+        value=(fun () -> Array.of_list (S.get selected))
         on_change=(fun os -> change (Array.map List_box.key os))
         on_input_change=told
-        open_=(fun () -> opened ())
+        open_=(fun () -> S.get opened)
         on_open_change=(fun o _ -> if not (open_refused o) then open_change o)
         trigger_mode=`input
         default_filter=(fun () -> filter)
         allows_empty_collection=true
         no_reset_input_on_blur=true
-        placement=(fun () -> a.placement ())
+        placement=(fun () -> S.get a.placement)
         gutter=8.
         overflow_padding=12.
         same_width=false
         virtualized=true
         force_mount=true
         modal=true
-        disabled=(fun () -> is_disabled ())
-        required=(fun () -> is_required ())
-        validation_state=(fun () -> if invalid () then `invalid else `valid)
+        disabled=(fun () -> S.get is_disabled)
+        required=(fun () -> S.get is_required)
+        validation_state=(fun () -> if S.get invalid then `invalid else `valid)
         class_=(fun () -> root_classes ())
         ref=root
         on_focus_out=focus_out
         data_slot="autocomplete"
-        data_open=(fun () -> Jsx.flag (opened ()))
+        data_open=(fun () -> Jsx.flag (S.get opened))
         data_focused=(fun () -> Jsx.flag (focused ()))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
-        data_disabled=(fun () -> Jsx.flag (is_disabled ()))
-        data_required=(fun () -> Jsx.flag (is_required ()))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (as_ ()))
+        data_invalid=(fun () -> Jsx.flag (S.get invalid))
+        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
+        data_required=(fun () -> Jsx.flag (S.get is_required))
+        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
         props=others>
         (fun () -> Jsx.element (parts ()))
       </Kobalte.Root_multiple>

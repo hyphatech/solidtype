@@ -28,6 +28,9 @@
 
     A part reads its field's, and raises as Kobalte's does elsewhere. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The field. Its colour is [value] while it is given one -- null for none --
     else the one it keeps, [default_value] at first; [on_change] is told each
     colour committed other than its own, [None] for none. The rest are Kobalte's
@@ -47,13 +50,13 @@ module Root : sig
       ?required:bool Solidtype.Check.value ->
       ?disabled:bool Solidtype.Check.value ->
       ?read_only:bool Solidtype.Check.value ->
-      ?props:t Solidtype.Solid.rest ->
+      ?props:t S.rest ->
       (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The field's input, Kobalte's, committed by Enter and stepped by the keys and
@@ -68,8 +71,8 @@ module Input : sig
     type t
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Label = Solidtype_kobalte.ColorField.Label

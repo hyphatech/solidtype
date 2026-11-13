@@ -3,6 +3,7 @@
    are clicked and pressed by the keys, and the keys it tells; and the
    previous and next buttons HeroUI's navigation gives. *)
 
+module S = Solidtype.Solid
 module Disclosure = Solidtype_heroui.Disclosure
 module Disclosure_group = Solidtype_heroui.Disclosure_group
 module E = Jest.Expect
@@ -198,16 +199,16 @@ let navigated ?allows_multiple_expanded start presses =
   let expanded, set_expanded = Solidtype.Solid.create_signal start in
   let n =
     Disclosure_group.navigation ?allows_multiple_expanded
-      ~expanded_keys:(fun () -> Solidtype.Solid.get expanded)
+      ~expanded_keys:(fun () -> S.get expanded)
       ~item_ids:keys
       ~on_expanded_change:(Solidtype.Solid.set set_expanded)
       ()
   in
   let state () =
-    ( Js.Array.join ~sep:"," (Solidtype.Solid.get expanded),
-      n.current_index (),
-      n.is_prev_disabled (),
-      n.is_next_disabled () )
+    ( Js.Array.join ~sep:"," (S.get expanded),
+      S.get n.current_index,
+      S.get n.is_prev_disabled,
+      S.get n.is_next_disabled )
   in
   state ()
   :: List.map

@@ -80,15 +80,7 @@ external setup : setup_options -> T.user = "setup"
 [@@mel.module "@testing-library/user-event"] [@@mel.scope "default"]
 
 (* A wait, for the frames a toast enters in and the time it exits in. *)
-(* Melange reads [resolve () [@u]] as a call of no argument, so the wait
-   resolves to [true], then to [()]. *)
-let wait ms =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      let (_ : Js.Global.timeoutId) =
-        Js.Global.setTimeout ~f:(fun () -> (resolve true [@u])) ms
-      in
-      ())
-  |> Js.Promise.then_ (fun (_ : bool) -> Js.Promise.resolve ())
+let wait ms = Testing.wait ms
 
 (* jsdom has no layout: a toast's scrollHeight stands in for a browser's,
    its whole height while its own is [auto], and less while its stylesheet

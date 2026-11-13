@@ -1,10 +1,14 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 
 type status = [ `default | `accent | `success | `warning | `danger ]
 
 (* What an alert's parts read of it: its classes and its status. *)
-type alert = { slots : unit -> Styles.Alert.slots; status : unit -> status }
+type alert = {
+  slots : Styles.Alert.slots S.accessor;
+  status : status S.accessor;
+}
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = alert
@@ -23,15 +27,17 @@ module Indicator = struct
       () =
     let a = within "Alert.Indicator" in
     <div
-      class_=(fun () -> after (Styles.Alert.indicator (a.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Alert.indicator (S.get a.slots)) (S.get class_))
       data_slot="alert-indicator"
       props=(Props.others props)>
       <Show
-        when_=(fun () -> Option.is_some (children ()))
+        when_=(fun () -> Option.is_some (S.get children))
         fallback=(fun () ->
                    Status_icon.svg ~slot:"alert-default-icon" (fun () ->
-                       a.status ()))>
-        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+                       S.get a.status))>
+        (fun () ->
+          match S.get children with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
   [@@element div]
@@ -41,10 +47,11 @@ module Content = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let a = within "Alert.Content" in
     <div
-      class_=(fun () -> after (Styles.Alert.content (a.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Alert.content (S.get a.slots)) (S.get class_))
       data_slot="alert-content"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -53,10 +60,11 @@ module Title = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let a = within "Alert.Title" in
     <p
-      class_=(fun () -> after (Styles.Alert.title (a.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Alert.title (S.get a.slots)) (S.get class_))
       data_slot="alert-title"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </p>
   [@@element p]
 end
@@ -66,10 +74,10 @@ module Description = struct
     let a = within "Alert.Description" in
     <span
       class_=(fun () ->
-               after (Styles.Alert.description (a.slots ())) (class_ ()))
+               after (Styles.Alert.description (S.get a.slots)) (S.get class_))
       data_slot="alert-description"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   [@@element span]
 end
@@ -80,20 +88,21 @@ let%component make ?(status : status = `default)
   let a =
     {
       slots =
-        (fun () ->
-          Styles.Alert.slots (Styles.Alert.options ~status:(status ()) ()));
-      status = (fun () -> status ());
+        S.accessor (fun () ->
+            Styles.Alert.slots (Styles.Alert.options ~status:(S.get status) ()));
+      status;
     }
   in
-  let surface () = `default in
+  let surface = S.accessor (fun () -> `default) in
   <Context.Provider value=(fun () -> a)>
     <Surface.Context.Provider value=(fun () -> surface)>
       <div
         ?role
-        class_=(fun () -> after (Styles.Alert.base (a.slots ())) (class_ ()))
+        class_=(fun () ->
+                 after (Styles.Alert.base (S.get a.slots)) (S.get class_))
         data_slot="alert-root"
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () -> S.get children)
       </div>
     </Surface.Context.Provider>
   </Context.Provider>

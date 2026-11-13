@@ -1,6 +1,7 @@
 (* Solid's components that act only where a page is rendered on the server,
    read from the HTML that render writes. *)
 
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Server = Solidtype.Server
 module NoHydration = Solidtype.NoHydration
@@ -15,7 +16,8 @@ module Tag = struct
 
   let%component make ~(children : state Jsx.children) () =
     <span>
-      (fun () -> Jsx.draw (children ()) { label = (fun[@u] () -> "drawn") })
+      (fun () ->
+        Jsx.draw (S.get children) { label = S.accessor (fun () -> "drawn") })
     </span>
 end
 

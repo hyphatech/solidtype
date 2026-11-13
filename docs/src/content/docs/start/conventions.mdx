@@ -75,7 +75,7 @@ does not name, on its element, after its own attributes:
 | TSX | OCaml |
 |---|---|
 | `data-slot="badge"` | `data_slot="badge"` |
-| `data-selected={on() ? "true" : undefined}` | `data_selected=(fun () -> Jsx.flag (on ()))` |
+| `data-selected={on() ? "true" : undefined}` | `data_selected=(fun () -> Jsx.flag (S.get on))` |
 | `data-id={id()}` | `data_id=(fun () -> Jsx.data (id ()))` |
 
 ## Values given to a component
@@ -87,12 +87,12 @@ A literal is given as it is, and anything that may change as a thunk,
 
 An optional prop, one a component may leave out, is passed on as it is
 with OCaml's own `?`: present while its option is `Some`, absent while it
-is `None`, as TSX passes `undefined`. A component's optional parameter is
-such an option, so it passes on by its name.
+is `None`, as TSX passes `undefined`. An accessor of an option, a signal's
+or a component's optional parameter, passes on by its name.
 
 | TSX | OCaml |
 |---|---|
-| `title={note()}` | `?title=(fun () -> note ())` |
+| `title={note()}` | `?title=note` |
 | `name={props.name}` | `?name` |
 | `onRemove={editable ? remove : undefined}` | `?on_remove=(fun () -> if editable then Some remove else None)` |
 

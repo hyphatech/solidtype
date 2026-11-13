@@ -12,6 +12,9 @@
 
     A spinner has no behaviour, so no Kobalte component underlies it. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The id a part above gives the spinners inside it, as React Aria's
     ProgressBarContext gives a pending button's. *)
 module Progress : sig
@@ -24,7 +27,7 @@ module Progress : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> string option
@@ -40,10 +43,10 @@ module Props : sig
     ?size:[ `sm | `md | `lg | `xl ] Solidtype.Check.value ->
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Span.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

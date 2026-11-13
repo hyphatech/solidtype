@@ -16,9 +16,11 @@
     only its own children as in React, until a component that holds buttons of
     its own -- a dialog, a dropdown -- gives them a context of their own. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type group = {
   variant :
-    unit ->
     [ `primary
     | `secondary
     | `tertiary
@@ -26,10 +28,11 @@ type group = {
     | `ghost
     | `danger
     | `danger_soft ]
-    option;
-  size : unit -> [ `sm | `md | `lg ] option;
-  is_disabled : unit -> bool option;
-  full_width : unit -> bool option;
+    option
+    S.accessor;
+  size : [ `sm | `md | `lg ] option S.accessor;
+  is_disabled : bool option S.accessor;
+  full_width : bool option S.accessor;
 }
 (** What a group gives its buttons: each prop it was given, or [None]. *)
 
@@ -43,7 +46,7 @@ module Context : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> group option
@@ -57,13 +60,13 @@ module Separator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -85,10 +88,10 @@ module Props : sig
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

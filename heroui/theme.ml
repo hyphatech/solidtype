@@ -78,7 +78,7 @@ let use ?(default = "system") () =
       now);
   {
     theme;
-    resolved = (fun[@u] () -> S.get resolved);
+    resolved;
     set_theme =
       (fun name ->
         store name;

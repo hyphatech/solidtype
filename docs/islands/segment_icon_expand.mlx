@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Segment = Solidtype_heroui.Segment
 module Gravity = Solidtype_gravity_icons
 
@@ -11,15 +12,15 @@ module Label = struct
                "grid transition-[grid-template-columns,opacity] duration-200 \
                 ease-out motion-reduce:transition-none "
                ^
-               if selected () then "grid-cols-[1fr] opacity-100"
+               if S.get selected then "grid-cols-[1fr] opacity-100"
                else "grid-cols-[0fr] opacity-0")>
       <span
         class_=(fun () ->
                  "min-w-0 overflow-hidden whitespace-nowrap \
                   transition-[padding] duration-200 ease-out \
                   motion-reduce:transition-none "
-                 ^ if selected () then "ps-1.5" else "ps-0")>
-        (fun () -> Solidtype.Jsx.string (text ()))
+                 ^ if S.get selected then "ps-1.5" else "ps-0")>
+        (fun () -> Solidtype.Jsx.string (S.get text))
       </span>
     </span>
 end

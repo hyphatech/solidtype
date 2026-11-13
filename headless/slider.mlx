@@ -20,7 +20,7 @@ module Track = struct
     <Kobalte.Track
       ref=(fun e ->
             Context.register_track context (as_html e);
-            match Props.ref props with Some f -> f e [@u] | None -> ())
+            Jsx.call (Props.ref props) e)
       props=(S.omit props [| "ref" |])
     />
 

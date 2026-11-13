@@ -8,15 +8,15 @@ module Types = Solidtype_kobalte.Types
    where each is along the track, its orientation and state, its classes and
    its thumbs' ids. *)
 type slider = {
-  values : unit -> float array;
+  values : float array S.accessor;
   format : float -> string;
   percent : float -> float;
-  orientation : unit -> [ `horizontal | `vertical ];
-  disabled : unit -> bool;
-  slots : unit -> Styles.Slider.slots;
+  orientation : [ `horizontal | `vertical ] S.accessor;
+  disabled : bool S.accessor;
+  slots : Styles.Slider.slots S.accessor;
   thumb_id : int -> string;
-  min_value : unit -> float;
-  max_value : unit -> float;
+  min_value : float S.accessor;
+  max_value : float S.accessor;
 }
 
 module Context = Solidtype.Context.Make_optional (struct
@@ -40,7 +40,7 @@ let percent p = Js.Float.toString (p *. 100.) ^ "%"
 (* Where the fill starts and ends along the track, from 0 to 1: from the start,
    or a range's first thumb, to its last. *)
 let fill_span s =
-  let values = s.values () in
+  let values = S.get s.values in
   match Array.length values with
   | 0 -> (0., 0.)
   | n ->
@@ -53,7 +53,7 @@ let with_style own = function Some s -> own ^ " " ^ s | None -> own
 
 (* A label in a slider is Kobalte's, which names it and its thumbs. *)
 let label id : Label.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte.Label
     id=(fun () -> id)
     class_=(fun () -> classes ())
@@ -75,32 +75,28 @@ module Output = struct
          (Solidtype.Html.Output.props -> state -> Solidtype.Jsx.element) option)
       () =
     let s = within "Slider.Output" in
-    let state () =
-      {
-        orientation = (fun[@u] () -> s.orientation ());
-        is_disabled = (fun[@u] () -> s.disabled ());
-      }
-    in
+    let state () = { orientation = s.orientation; is_disabled = s.disabled } in
     <output
       for_=(fun () ->
              String.concat " "
                (Array.to_list
-                  (Array.mapi (fun i _ -> s.thumb_id i) (s.values ()))))
+                  (Array.mapi (fun i _ -> s.thumb_id i) (S.get s.values))))
       aria_live=`off
-      class_=(fun () -> after (Styles.Slider.output (s.slots ())) (class_ ()))
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      class_=(fun () ->
+               after (Styles.Slider.output (S.get s.slots)) (S.get class_))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_orientation=(fun () ->
-                         Jsx.data (orientation_name (s.orientation ())))
+                         Jsx.data (orientation_name (S.get s.orientation)))
       data_slot="slider-output"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (fun () ->
-        match children () with
+        match S.get children with
         | Some given -> Jsx.draw given (state ())
         | None ->
             Jsx.string
               (String.concat {js| – |js}
-                 (Array.to_list (Array.map s.format (s.values ())))))
+                 (Array.to_list (Array.map s.format (S.get s.values)))))
     </output>
   [@@element output]
 end
@@ -122,33 +118,34 @@ module Track = struct
     let s = within "Slider.Track" in
     let filled () =
       let start, stop = fill_span s in
-      match Array.length (s.values ()) with
+      match Array.length (S.get s.values) with
       | 1 -> (stop > 0., stop >= 1.)
       | _ -> (start <= 0., stop >= 1.)
     in
-    let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get s.disabled) () in
     let state () =
       {
-        orientation = (fun[@u] () -> s.orientation ());
-        is_disabled = (fun[@u] () -> s.disabled ());
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
+        orientation = s.orientation;
+        is_disabled = s.disabled;
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
       }
     in
     <Kobalte.Track
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () -> after (Styles.Slider.track (s.slots ())) (class_ ()))
-      style=(fun () -> with_style "position: relative;" (style ()))
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      class_=(fun () ->
+               after (Styles.Slider.track (S.get s.slots)) (S.get class_))
+      style=(fun () -> with_style "position: relative;" (S.get style))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_fill_start=(fun () -> Jsx.flag (fst (filled ())))
       data_fill_end=(fun () -> Jsx.flag (snd (filled ())))
       data_orientation=(fun () ->
-                         Jsx.data (orientation_name (s.orientation ())))
+                         Jsx.data (orientation_name (S.get s.orientation)))
       data_slot="slider-track"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (children ()) (state ()))
+      (fun () -> Jsx.draw (S.get children) (state ()))
     </Kobalte.Track>
   [@@element div]
 end
@@ -157,11 +154,12 @@ module Fill = struct
   let%component make ?(class_ : string option) ?(style : string option) () =
     let s = within "Slider.Fill" in
     <div
-      class_=(fun () -> after (Styles.Slider.fill (s.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Slider.fill (S.get s.slots)) (S.get class_))
       style=(fun () ->
               let start, stop = fill_span s in
               let own =
-                match s.orientation () with
+                match S.get s.orientation with
                 | `horizontal ->
                     "left: " ^ percent start ^ "; width: "
                     ^ percent (stop -. start)
@@ -171,8 +169,8 @@ module Fill = struct
                     ^ percent (stop -. start)
                     ^ ";"
               in
-              with_style own (style ()))
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+              with_style own (S.get style))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_slot="slider-fill"
       props=(Props.others props)
     />
@@ -197,45 +195,47 @@ module Thumb = struct
          (Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) option)
       () =
     let s = within "Slider.Thumb" in
-    let i = Interaction.create ~disabled:(fun[@u] () -> s.disabled ()) () in
+    let i = Interaction.create ~disabled:(fun () -> S.get s.disabled) () in
     (* Dragged while a pointer holds it, where a key held presses it but drags
        nothing, as React Aria's thumb is. *)
     let dragging () = Interaction.dragged i in
     let at () =
-      let values = s.values () in
-      if index () < Array.length values then s.percent values.(index ()) else 0.
+      let values = S.get s.values in
+      if S.get index < Array.length values then s.percent values.(S.get index)
+      else 0.
     in
     (* A thumb of a range moves between its neighbours, which bound it for a
        reader, as React Aria's do. *)
     let bound side default () =
-      let values = s.values () in
-      let near = index () + side in
+      let values = S.get s.values in
+      let near = S.get index + side in
       if near >= 0 && near < Array.length values then values.(near)
-      else default ()
+      else S.get default
     in
     let state () =
       {
-        is_dragging = (fun[@u] () -> dragging ());
-        is_hovered = (fun[@u] () -> Interaction.hovered i);
-        is_focused = (fun[@u] () -> Interaction.focused i);
-        is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-        is_disabled = (fun[@u] () -> s.disabled ());
+        is_dragging = S.accessor (fun () -> dragging ());
+        is_hovered = S.accessor (fun () -> Interaction.hovered i);
+        is_focused = S.accessor (fun () -> Interaction.focused i);
+        is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+        is_disabled = s.disabled;
       }
     in
     <Kobalte.Thumb
       aria_valuemin=(fun () -> Js.Float.toString (bound (-1) s.min_value ()))
       aria_valuemax=(fun () -> Js.Float.toString (bound 1 s.max_value ()))
       aria_valuetext=(fun () ->
-                       let values = s.values () in
-                       if index () < Array.length values then
-                         s.format values.(index ())
+                       let values = S.get s.values in
+                       if S.get index < Array.length values then
+                         s.format values.(S.get index)
                        else "")
-      class_=(fun () -> after (Styles.Slider.thumb (s.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Slider.thumb (S.get s.slots)) (S.get class_))
       style=(fun () ->
               (* Placed as React Aria places it, centred on its value across
                  the track, which HeroUI's styles count on. *)
               let edge =
-                match s.orientation () with
+                match S.get s.orientation with
                 | `horizontal -> "left: " ^ percent (at ())
                 (* Kobalte holds a vertical thumb by its bottom, which would
                    stretch it with its top. *)
@@ -247,22 +247,22 @@ module Thumb = struct
               with_style
                 ("display: flex; position: absolute; " ^ edge
                ^ "; transform: translate(-50%, -50%);")
-                (style ()))
+                (S.get style))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      data_disabled=(fun () -> Jsx.flag (s.disabled ()))
+      data_disabled=(fun () -> Jsx.flag (S.get s.disabled))
       data_dragging=(fun () -> Jsx.flag (dragging ()))
       data_focused=(fun () -> Jsx.flag (Interaction.focused i))
       data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
       data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
       data_slot="slider-thumb"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)
-      id=(fun () -> s.thumb_id (index ()))>
+      id=(fun () -> s.thumb_id (S.get index))>
       <Kobalte.Input />
       (fun () ->
-        match children () with
+        match S.get children with
         | Some c -> Jsx.draw c (state ())
         | None -> Jsx.string "")
     </Kobalte.Thumb>
@@ -294,28 +294,34 @@ let%component make ?(value : float array option)
      Kobalte's locale: Kobalte formats a thumb's value as a decimal alone. *)
   let formatter =
     I18n.create_number_formatter
-      (Types.Either.right (fun[@u] () ->
-           match format_options () with
-           | Some o -> o
-           | None -> Types.NumberFormatOptions.make ~style:`decimal ()))
+      (Types.Either.right
+         (S.accessor (fun () ->
+              match S.get format_options with
+              | Some o -> o
+              | None -> Types.NumberFormatOptions.make ~style:`decimal ())))
   in
   (* A slider is disabled as it says, else as its fieldset is. *)
   let in_fieldset = Fieldset.disabled () in
-  let disabled () =
-    match is_disabled () with Some d -> d | None -> in_fieldset ()
+  let disabled =
+    S.accessor (fun () ->
+        match S.get is_disabled with Some d -> d | None -> S.get in_fieldset)
   in
   let values, set =
-    Field.controlled ~value
-      ~default:(Option.value (default_value ()) ~default:[| min_value () |])
+    Field.controlled
+      ~value:(fun () -> S.get value)
+      ~default:
+        (Option.value (S.get default_value) ~default:[| S.get min_value |])
       ~on_change
   in
   (* A slider is never invalid by itself, HeroUI's having no isInvalid, but
      a server's error for it refuses a submit. *)
-  let in_form = Form.field ~name ~invalid:(fun () -> false) in
+  let in_form =
+    Form.field ~name:(fun () -> S.get name) ~invalid:(fun () -> false)
+  in
   (* Kobalte tells its values as it is made too; a change is values other
      than these. *)
   let change now =
-    let was = values () in
+    let was = S.get values in
     let same =
       Array.length now = Array.length was && Array.for_all2 Float.equal now was
     in
@@ -331,38 +337,36 @@ let%component make ?(value : float array option)
       format = (fun v -> Types.NumberFormat.format (S.get formatter) v);
       percent =
         (fun v ->
-          let range = max_value () -. min_value () in
-          if range <= 0. then 0. else (v -. min_value ()) /. range);
-      orientation = (fun () -> orientation ());
+          let range = S.get max_value -. S.get min_value in
+          if range <= 0. then 0. else (v -. S.get min_value) /. range);
+      orientation;
       disabled;
-      slots = (fun () -> Styles.Slider.slots (Styles.Slider.options ()));
+      slots =
+        S.accessor (fun () -> Styles.Slider.slots (Styles.Slider.options ()));
       thumb_id = (fun i -> id ^ "-thumb-" ^ string_of_int i);
-      min_value = (fun () -> min_value ());
-      max_value = (fun () -> max_value ());
+      min_value;
+      max_value;
     }
   in
-  let state () =
-    {
-      orientation = (fun[@u] () -> orientation ());
-      is_disabled = (fun[@u] () -> disabled ());
-    }
-  in
+  let state () = { orientation; is_disabled = disabled } in
   <Context.Provider value=(fun () -> s)>
     <Kobalte.Root
-      value=(fun () -> values ())
+      value=(fun () -> S.get values)
       on_change=change
       on_change_end=(fun v -> ignore (on_change_end v : unit option))
-      min_value=(fun () -> min_value ())
-      max_value=(fun () -> max_value ())
-      step=(fun () -> step ())
-      orientation=(fun () -> orientation ())
-      disabled=(fun () -> disabled ())
+      min_value=(fun () -> S.get min_value)
+      max_value=(fun () -> S.get max_value)
+      step=(fun () -> S.get step)
+      orientation=(fun () -> S.get orientation)
+      disabled=(fun () -> S.get disabled)
       ?name
       ?aria_label
       aria_labelledby=(fun () -> label_id)
-      class_=(fun () -> after (Styles.Slider.base (s.slots ())) (class_ ()))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_orientation=(fun () -> Jsx.data (orientation_name (orientation ())))
+      class_=(fun () ->
+               after (Styles.Slider.base (S.get s.slots)) (S.get class_))
+      data_disabled=(fun () -> Jsx.flag (S.get disabled))
+      data_orientation=(fun () ->
+                         Jsx.data (orientation_name (S.get orientation)))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -374,10 +378,10 @@ let%component make ?(value : float array option)
                          on_blur e)
                        e)
       data_slot="slider"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label label_id)>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

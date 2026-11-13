@@ -38,23 +38,23 @@ let text ~others ~type_ ~align ~color ~weight ~truncate ~element_type ~class_
   <Dynamic.Drawn
     component=(fun () ->
                 Jsx.drawn_as (S.drawn_as others)
-                  (match element_type () with
+                  (match S.get element_type with
                   | Some tag -> tag
-                  | None -> element (type_ ())))
+                  | None -> element (S.get type_)))
     class_=(fun () ->
              let base =
                Styles.Typography.base
                  (Styles.Typography.slots
-                    (Styles.Typography.options ~type_:(type_ ())
-                       ~align:(Option.value (align ()) ~default:`start)
-                       ~color:(Option.value (color ()) ~default:`default)
-                       ?weight:(weight ()) ?truncate:(truncate ()) ()))
+                    (Styles.Typography.options ~type_:(S.get type_)
+                       ~align:(Option.value (S.get align) ~default:`start)
+                       ~color:(Option.value (S.get color) ~default:`default)
+                       ?weight:(S.get weight) ?truncate:(S.get truncate) ()))
              in
-             match class_ () with Some c -> base ^ " " ^ c | None -> base)
+             match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
     data_slot="typography"
-    data_type=(fun () -> Jsx.data (name (type_ ())))
+    data_type=(fun () -> Jsx.data (name (S.get type_)))
     props=(S.undrawn others)>
-    (fun () -> children ())
+    (fun () -> S.get children)
   </Dynamic.Drawn>
 
 let%component make ?(type_ : type_ = `body) ?(align : align option)
@@ -70,17 +70,18 @@ module Heading = struct
       ?(color : color option) ?(weight : weight option)
       ?(truncate : bool option) ?(element_type : string option)
       ?(class_ : string option) ~(children : Jsx.content) () =
-    let type_ () =
-      match level () with
-      | 1 -> `h1
-      | 2 -> `h2
-      | 3 -> `h3
-      | 4 -> `h4
-      | 5 -> `h5
-      | 6 -> `h6
-      | n ->
-          invalid_arg
-            ("Typography.Heading's level is 1 to 6, not " ^ string_of_int n)
+    let type_ =
+      S.accessor (fun () ->
+          match S.get level with
+          | 1 -> `h1
+          | 2 -> `h2
+          | 3 -> `h3
+          | 4 -> `h4
+          | 5 -> `h5
+          | 6 -> `h6
+          | n ->
+              invalid_arg
+                ("Typography.Heading's level is 1 to 6, not " ^ string_of_int n))
     in
     text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
       ~element_type ~class_ children
@@ -92,8 +93,12 @@ module Paragraph = struct
       ?(align : align option) ?(color : color option) ?(weight : weight option)
       ?(truncate : bool option) ?(element_type : string option)
       ?(class_ : string option) ~(children : Jsx.content) () =
-    let type_ () =
-      match size () with `base -> `body | `sm -> `body_sm | `xs -> `body_xs
+    let type_ =
+      S.accessor (fun () ->
+          match S.get size with
+          | `base -> `body
+          | `sm -> `body_sm
+          | `xs -> `body_xs)
     in
     text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
       ~element_type ~class_ children
@@ -106,7 +111,7 @@ module Code = struct
       ?(element_type : string option) ?(class_ : string option)
       ~(children : Jsx.content) () =
     text ~others:(Props.others props)
-      ~type_:(fun () -> `code)
+      ~type_:(S.accessor (fun () -> `code))
       ~align ~color ~weight ~truncate ~element_type ~class_ children
   [@@element element]
 end
@@ -119,10 +124,12 @@ module Prose = struct
                  Styles.Typography.prose
                    (Styles.Typography.slots (Styles.Typography.options ()))
                in
-               match class_ () with Some c -> prose ^ " " ^ c | None -> prose)
+               match S.get class_ with
+               | Some c -> prose ^ " " ^ c
+               | None -> prose)
       data_slot="prose"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end

@@ -37,16 +37,19 @@
     A part is used inside a [Combo_box]: elsewhere it raises [Invalid_argument]
     as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type placement = [ `top | `bottom | `left | `right ]
 (** A side of the input group. *)
 
 type field = {
-  variant : unit -> [ `primary | `secondary ];
-  disabled : unit -> bool;
-  invalid : unit -> bool;
-  name : unit -> string option;
+  variant : [ `primary | `secondary ] S.accessor;
+  disabled : bool S.accessor;
+  invalid : bool S.accessor;
+  name : string option S.accessor;
       (** The name a form is sent its text under, where it is sent the text. *)
-  returned : unit -> bool;
+  returned : bool S.accessor;
       (** Whether the focus has come back to the input from the list by keys,
           which shows its ring, as React Aria's virtual focus does. *)
 }
@@ -63,7 +66,7 @@ module Field : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> field option
@@ -78,13 +81,13 @@ module Input_group : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The button that opens the list with every option: Kobalte's trigger, which
@@ -98,13 +101,13 @@ module Trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The options chosen, their texts listed as the reader's language lists them,
@@ -112,9 +115,9 @@ end
     [children] draws of its {!state}. *)
 module Value : sig
   type state = {
-    selected_keys : string array Solidtype.Solid.accessor;
+    selected_keys : string array S.accessor;
         (** The options chosen, by their ids. *)
-    selected_text : string Solidtype.Solid.accessor;
+    selected_text : string S.accessor;
         (** Their texts, as the reader's language lists them. *)
   }
   (** What its children are drawn of while an option is chosen, given as a
@@ -128,16 +131,14 @@ module Value : sig
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The list's popover: drawn in a portal at the end of the page while it is
@@ -153,13 +154,13 @@ module Popover : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The combo box. [selection_mode] is read as it is made. Its [value] is the
@@ -182,11 +183,11 @@ end
     the ids chosen, under [name]. An option whose id [disabled_keys] holds is
     disabled. *)
 type state = {
-  is_open : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
-  is_read_only : bool Solidtype.Solid.accessor;
+  is_open : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_required : bool S.accessor;
+  is_read_only : bool S.accessor;
 }
 (** What a combo box's children are drawn of, given as a function, as HeroUI's
     render props are, each read where Solid tracks it. *)
@@ -224,13 +225,11 @@ module Props : sig
     ?on_key_down:(Dom.keyboardEvent -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

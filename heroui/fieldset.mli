@@ -19,27 +19,30 @@
     Kobalte has no fieldset. A part's classes are the same in any fieldset, so a
     part needs none around it. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** Whether the fieldset a component is inside is disabled, read as it changes.
 *)
 module Context : sig
   module Provider : sig
     module Props : sig
       val check :
-        value:(unit -> bool) Solidtype.Check.value ->
+        value:bool S.accessor Solidtype.Check.value ->
         ?children:('f, [ `nodes ]) Solidtype.Check.children ->
         unit ->
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
-  val use : unit -> (unit -> bool) option
+  val use : unit -> bool S.accessor option
 end
 
-val disabled : unit -> unit -> bool
-(** [disabled ()], called as a component is made, is a read of whether the
-    fieldset it is inside is disabled, [false] in none. *)
+val disabled : unit -> bool S.accessor
+(** [disabled ()], called as a component is made, is whether the fieldset it is
+    inside is disabled, [false] in none. *)
 
 (** The fieldset's caption: a [<legend>]. *)
 module Legend : sig
@@ -49,13 +52,13 @@ module Legend : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Legend.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Legend.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Legend.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The fields, laid out together: a [<div>]. *)
@@ -66,13 +69,13 @@ module Group : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** Its buttons, laid out together: a [<div>]. *)
@@ -83,13 +86,13 @@ module Actions : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 module Props : sig
@@ -100,10 +103,10 @@ module Props : sig
     ?name:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Fieldset.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Fieldset.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Fieldset.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

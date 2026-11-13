@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Kobalte = Solidtype_kobalte.ToggleButton
 module Item = Solidtype_kobalte.ToggleGroup.Item
@@ -28,32 +29,34 @@ let%component make ?(variant : [ `default | `ghost ] option)
   (* A prop the button sets is its own, else its group's, else HeroUI's
      default; and it is disabled, too, in a disabled fieldset. *)
   let size () =
-    match size () with
+    match S.get size with
     | Some s -> s
     | None -> (
         match
-          Option.bind group (fun (g : Toggle_button_group.group) -> g.size ())
+          Option.bind group (fun (g : Toggle_button_group.group) ->
+              S.get g.size)
         with
         | Some s -> s
         | None -> `md)
   in
   let in_fieldset = Fieldset.disabled () in
-  let disabled () =
-    match is_disabled () with
-    | Some d -> d
-    | None -> (
-        match
-          Option.bind group (fun (g : Toggle_button_group.group) ->
-              g.is_disabled ())
-        with
+  let disabled =
+    S.accessor (fun () ->
+        match S.get is_disabled with
         | Some d -> d
-        | None -> in_fieldset ())
+        | None -> (
+            match
+              Option.bind group (fun (g : Toggle_button_group.group) ->
+                  S.get g.is_disabled)
+            with
+            | Some d -> d
+            | None -> S.get in_fieldset))
   in
-  let i = Interaction.create ~disabled:(fun[@u] () -> disabled ()) () in
+  let i = Interaction.create ~disabled:(fun () -> S.get disabled) () in
   let class_ () =
     Styles.ToggleButton.classes
-      (Styles.ToggleButton.options ?variant:(variant ()) ~size:(size ())
-         ~is_icon_only:(is_icon_only ()) ?class_:(class_ ()) ())
+      (Styles.ToggleButton.options ?variant:(S.get variant) ~size:(size ())
+         ~is_icon_only:(S.get is_icon_only) ?class_:(S.get class_) ())
   in
   let on_click e = ignore (on_click e : unit option) in
   let watch b =
@@ -62,48 +65,50 @@ let%component make ?(variant : [ `default | `ghost ] option)
   in
   let state selected =
     {
-      is_hovered = (fun[@u] () -> Interaction.hovered i);
-      is_pressed = (fun[@u] () -> Interaction.pressed i);
-      is_focused = (fun[@u] () -> Interaction.focused i);
-      is_focus_visible = (fun[@u] () -> Interaction.focus_visible i);
-      is_disabled = (fun[@u] () -> Interaction.disabled i);
-      is_selected = (fun[@u] () -> selected ());
+      is_hovered = S.accessor (fun () -> Interaction.hovered i);
+      is_pressed = S.accessor (fun () -> Interaction.pressed i);
+      is_focused = S.accessor (fun () -> Interaction.focused i);
+      is_focus_visible = S.accessor (fun () -> Interaction.focus_visible i);
+      is_disabled = S.accessor (fun () -> Interaction.disabled i);
+      is_selected = selected;
     }
   in
-  let draw selected () = Jsx.draw (children ()) (state selected) in
+  let draw selected () = Jsx.draw (S.get children) (state selected) in
   let drawn selected () =
-    Option.map (fun f p -> f p (state selected)) (as_ ())
+    Option.map (fun f p -> f p (state selected)) (S.get as_)
   in
   match group with
   | None ->
       let selected, set_selected =
-        Field.controlled ~value:is_selected ~default:(default_selected ())
+        Field.controlled
+          ~value:(fun () -> S.get is_selected)
+          ~default:(S.get default_selected)
           ~on_change:(fun v -> on_change v)
       in
       <Kobalte.Root
-        pressed=(fun () -> selected ())
+        pressed=(fun () -> S.get selected)
         on_change=set_selected
         class_=(fun () -> class_ ())
         ?aria_label
         ref=watch
         data_slot="toggle-button"
-        data_selected=(fun () -> Jsx.flag (selected ()))
+        data_selected=(fun () -> Jsx.flag (S.get selected))
         data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
         data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
         data_focused=(fun () -> Jsx.flag (Interaction.focused i))
         data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
         data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
         on_click
-        ?as_=(drawn selected)
+        ?as_=(fun () -> drawn selected ())
         props=(Props.others props)
-        disabled=(fun () -> disabled ())>
+        disabled=(fun () -> S.get disabled)>
         (fun () -> draw selected ())
       </Kobalte.Root>
   | Some g -> (
-      match id () with
+      match S.get id with
       | None -> invalid_arg "Toggle_button is given an id inside a group"
       | Some key ->
-          g.join disabled;
+          g.join (fun () -> S.get disabled);
           <Item
             class_=(fun () -> class_ ())
             ?aria_label
@@ -119,7 +124,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
             on_click
             props=(Props.others props)
             value=(fun () -> key)
-            disabled=(fun () -> disabled ())>
-            (fun () -> draw (fun () -> g.is_selected key) ())
+            disabled=(fun () -> S.get disabled)>
+            (fun () -> draw (S.accessor (fun () -> g.is_selected key)) ())
           </Item>)
 [@@element button]

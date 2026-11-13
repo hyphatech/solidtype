@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Image
@@ -26,7 +27,7 @@ module Image = struct
       ?(loading : string option) ?(class_ : string option) () =
     let a = within "Avatar.Image" in
     <Kobalte.Img
-      src=(fun () -> src ())
+      src=(fun () -> S.get src)
       ?alt
       ?srcset
       ?sizes
@@ -35,12 +36,12 @@ module Image = struct
                        (function
                          | `anonymous -> "anonymous"
                          | `use_credentials -> "use-credentials")
-                       (crossorigin ()))
+                       (S.get crossorigin))
       ?loading
       class_=(fun () ->
                after
                  (Styles.Avatar.image (Styles.Avatar.slots (a.options ())))
-                 (class_ ()))
+                 (S.get class_))
       props=(Props.others props)
     />
   [@@element img]
@@ -54,11 +55,11 @@ module Fallback = struct
       class_=(fun () ->
                after
                  (Styles.Avatar.fallback
-                    (Styles.Avatar.slots (a.options ?color:(color ()) ())))
-                 (class_ ()))
+                    (Styles.Avatar.slots (a.options ?color:(S.get color) ())))
+                 (S.get class_))
       data_slot="avatar-fallback"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </Kobalte.Fallback>
   [@@element span]
 end
@@ -69,22 +70,28 @@ let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
   (* A prop the avatar sets is its own, else its group's; and in a group it is
      shown while the group shows it. *)
   let group = Avatar_group.Context.use () in
-  let own field of_group () =
-    match field () with Some v -> Some v | None -> Option.bind group of_group
+  let own field of_group =
+    S.accessor (fun () ->
+        match S.get field with
+        | Some v -> Some v
+        | None -> Option.bind group of_group)
   in
-  let size = own size (fun (g : Avatar_group.group) -> Some (g.size ())) in
-  let variant = own variant (fun (g : Avatar_group.group) -> g.variant ()) in
-  let color = own color (fun (g : Avatar_group.group) -> g.color ()) in
-  let shown = match group with Some g -> g.join () | None -> fun () -> true in
+  let size = own size (fun (g : Avatar_group.group) -> Some (S.get g.size)) in
+  let variant = own variant (fun (g : Avatar_group.group) -> S.get g.variant) in
+  let color = own color (fun (g : Avatar_group.group) -> S.get g.color) in
+  let shown =
+    match group with Some g -> S.get g.join | None -> fun () -> true
+  in
   (* A fallback's own color is its own, else the avatar's. *)
   let a =
     {
       options =
         (fun ?color:fallback () ->
           let color =
-            match fallback with Some c -> Some c | None -> color ()
+            match fallback with Some c -> Some c | None -> S.get color
           in
-          Styles.Avatar.options ?color ?size:(size ()) ?variant:(variant ()) ());
+          Styles.Avatar.options ?color ?size:(S.get size)
+            ?variant:(S.get variant) ());
     }
   in
   <Show when_=(fun () -> shown ())>
@@ -94,9 +101,9 @@ let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
         class_=(fun () ->
                  after
                    (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
-                   (class_ ()))
+                   (S.get class_))
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () -> S.get children)
       </Kobalte.Root>
     </Context.Provider>
   </Show>

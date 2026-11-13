@@ -8,6 +8,9 @@
     It is an [<hr>] where it is horizontal, else a [<div>], as React Aria's is,
     and a [<div>] wherever a part above asks for one by {!Element}. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 (** The element a part above draws its separators as: an [<hr>] where none says,
     and a [<div>] in a {!Dropdown.Menu} or a {!List_box}, as React Aria's menu
     and list box ask. *)
@@ -21,7 +24,7 @@ module Element : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> [ `hr | `div ]
@@ -33,20 +36,16 @@ module Slot : sig
   module Provider : sig
     module Props : sig
       val check :
-        value:
-          (((unit -> Solidtype.Jsx.element) -> Solidtype.Jsx.element)[@u])
-          Solidtype.Check.value ->
+        value:((unit -> Jsx.element) -> Jsx.element) Solidtype.Check.value ->
         ?children:('f, [ `nodes ]) Solidtype.Check.children ->
         unit ->
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
-  val use :
-    unit ->
-    (((unit -> Solidtype.Jsx.element) -> Solidtype.Jsx.element)[@u]) option
+  val use : unit -> ((unit -> Jsx.element) -> Jsx.element) option
 end
 
 module Props : sig
@@ -56,10 +55,10 @@ module Props : sig
     ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
     ?variant:[ `default | `secondary | `tertiary ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

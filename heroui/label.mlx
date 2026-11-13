@@ -1,11 +1,11 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type slot =
-  ((unit -> string) ->
-   unit Solidtype.Solid.rest ->
-   (unit -> Jsx.content) ->
-   Jsx.element
-  [@u])
+  (unit -> string) ->
+  unit Solidtype.Solid.rest ->
+  (unit -> Jsx.content) ->
+  Jsx.element
 
 (* How a label renders where a part above gives it its element, as React
    Aria's LabelContext does: a span in a control's own clickable label, since
@@ -19,19 +19,19 @@ let%component make ?(is_required : bool option) ?(is_disabled : bool option)
     ?(class_ : string option) ~(children : Jsx.content) () =
   let classes () =
     Styles.Label.classes
-      (Styles.Label.options ?is_required:(is_required ())
-         ?is_disabled:(is_disabled ()) ?is_invalid:(is_invalid ())
-         ?class_:(class_ ()) ())
+      (Styles.Label.options ?is_required:(S.get is_required)
+         ?is_disabled:(S.get is_disabled) ?is_invalid:(S.get is_invalid)
+         ?class_:(S.get class_) ())
   in
   match Slot.use () with
   | Some render ->
-      render classes (Props.others props) (fun () -> children ()) [@u]
+      render classes (Props.others props) (fun () -> S.get children)
   | None ->
       <label
-        ?for_=(fun () -> for_ ())
+        ?for_
         class_=(fun () -> classes ())
         data_slot="label"
         props=(Props.others props)>
-        (fun () -> children ())
+        (fun () -> S.get children)
       </label>
 [@@element label]

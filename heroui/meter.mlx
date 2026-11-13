@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 module Kobalte = Solidtype_kobalte.Meter
@@ -6,7 +7,10 @@ module Types = Solidtype_kobalte.Types
 
 (* What a meter's parts read of it: its classes and how far along its range
    its value is, from 0 to 100. *)
-type meter = { slots : unit -> Styles.Meter.slots; percent : unit -> float }
+type meter = {
+  slots : Styles.Meter.slots S.accessor;
+  percent : float S.accessor;
+}
 
 module Context = Solidtype.Context.Make_optional (struct
   type t = meter
@@ -30,7 +34,7 @@ end)
 
 (* A label in a meter is Kobalte's, a span, which names it. *)
 let label : Label.slot =
- fun[@u] classes others children ->
+ fun classes others children ->
   <Kobalte_label
     as_="span" class_=(fun () -> classes ()) data_slot="label" props=others>
     (fun () -> children ())
@@ -40,9 +44,11 @@ module Output = struct
   let%component make ?(class_ : string option) ?(children : Jsx.content option)
       () =
     let m = within "Meter.Output" in
-    let classes () = after (Styles.Meter.output (m.slots ())) (class_ ()) in
+    let classes () =
+      after (Styles.Meter.output (S.get m.slots)) (S.get class_)
+    in
     <Show
-      when_=(fun () -> Option.is_some (children ()))
+      when_=(fun () -> Option.is_some (S.get children))
       fallback=(<Kobalte_value
                   as_="span"
                   class_=(fun () -> classes ())
@@ -53,7 +59,8 @@ module Output = struct
         class_=(fun () -> classes ())
         data_slot="meter-output"
         props=(Props.others props)>
-        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+        (fun () ->
+          match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element span]
@@ -63,10 +70,11 @@ module Track = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     let m = within "Meter.Track" in
     <div
-      class_=(fun () -> after (Styles.Meter.track (m.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Meter.track (S.get m.slots)) (S.get class_))
       data_slot="meter-track"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -75,10 +83,13 @@ module Fill = struct
   let%component make ?(class_ : string option) ?(style : string option) () =
     let m = within "Meter.Fill" in
     <div
-      class_=(fun () -> after (Styles.Meter.fill (m.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Meter.fill (S.get m.slots)) (S.get class_))
       style=(fun () ->
-              let own = "width: " ^ Js.Float.toString (m.percent ()) ^ "%;" in
-              match style () with Some s -> own ^ " " ^ s | None -> own)
+              let own =
+                "width: " ^ Js.Float.toString (S.get m.percent) ^ "%;"
+              in
+              match S.get style with Some s -> own ^ " " ^ s | None -> own)
       data_slot="meter-fill"
       props=(Props.others props)
     />
@@ -103,12 +114,13 @@ let%component make ~(value : float) ?(min_value : float = 0.)
   (* HeroUI's formatOptions as it reads them, a percent by default: a percent
      is the value's share of its range, any other style the value itself. *)
   let options () =
-    match format_options () with
+    match S.get format_options with
     | Some o -> o
     | None -> Types.NumberFormatOptions.make ~style:`percent ()
   in
   let formatter =
-    I18n.create_number_formatter (Types.Either.right (fun[@u] () -> options ()))
+    I18n.create_number_formatter
+      (Types.Either.right (S.accessor (fun () -> options ())))
   in
   let text ~value ~min ~max =
     let range = max -. min in
@@ -128,39 +140,42 @@ let%component make ~(value : float) ?(min_value : float = 0.)
   let m =
     {
       slots =
-        (fun () ->
-          Styles.Meter.slots
-            (Styles.Meter.options ?color:(color ()) ?size:(size ()) ()));
+        S.accessor (fun () ->
+            Styles.Meter.slots
+              (Styles.Meter.options ?color:(S.get color) ?size:(S.get size) ()));
       percent =
-        (fun () ->
-          let range = max_value () -. min_value () in
-          if range <= 0. then 0.
-          else
-            Float.min 100.
-              (Float.max 0. ((value () -. min_value ()) /. range *. 100.)));
+        S.accessor (fun () ->
+            let range = S.get max_value -. S.get min_value in
+            if range <= 0. then 0.
+            else
+              Float.min 100.
+                (Float.max 0.
+                   ((S.get value -. S.get min_value) /. range *. 100.)));
     }
   in
   let state () =
     {
-      percentage = (fun[@u] () -> m.percent ());
+      percentage = m.percent;
       value_text =
-        (fun[@u] () ->
-          text ~value:(value ()) ~min:(min_value ()) ~max:(max_value ()));
+        S.accessor (fun () ->
+            text ~value:(S.get value) ~min:(S.get min_value)
+              ~max:(S.get max_value));
     }
   in
   <Context.Provider value=(fun () -> m)>
     <Kobalte.Root
-      value=(fun () -> value ())
-      min_value=(fun () -> min_value ())
-      max_value=(fun () -> max_value ())
+      value=(fun () -> S.get value)
+      min_value=(fun () -> S.get min_value)
+      max_value=(fun () -> S.get max_value)
       ?aria_label
       get_value_label=value_label
-      class_=(fun () -> after (Styles.Meter.base (m.slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.Meter.base (S.get m.slots)) (S.get class_))
       data_slot="meter"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (as_ ()))
+      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       <Label.Slot.Provider value=(fun () -> label)>
-        (fun () -> Jsx.draw (children ()) (state ()))
+        (fun () -> Jsx.draw (S.get children) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

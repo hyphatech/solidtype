@@ -2,7 +2,7 @@ module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 
 type field = {
-  error : unit -> string option;
+  error : string option S.accessor;
   changed : unit -> unit;
   left : unit -> unit;
   root : Dom.htmlDivElement -> unit;
@@ -10,7 +10,7 @@ type field = {
 
 (* A field as the form keeps it, to ask on a submit. *)
 type entry = {
-  element : unit -> Dom.htmlDivElement option;
+  element : Dom.htmlDivElement option S.accessor;
   name : unit -> string option;
   invalid : unit -> bool;
 }
@@ -30,19 +30,19 @@ let field ~name ~invalid =
   match Context.use () with
   | None ->
       {
-        error = (fun () -> None);
+        error = S.accessor (fun () -> None);
         changed = (fun () -> ());
         left = (fun () -> ());
         root = (fun (_ : Dom.htmlDivElement) -> ());
       }
   | Some form ->
       let element, set_element = S.create_signal None in
-      let entry = { element = (fun () -> S.get element); name; invalid } in
+      let entry = { element; name; invalid } in
       form.add entry;
       S.on_cleanup (fun () -> form.remove entry);
       let changed = ref false in
       {
-        error = (fun () -> Option.bind (name ()) form.error);
+        error = S.accessor (fun () -> Option.bind (name ()) form.error);
         changed = (fun () -> changed := true);
         left =
           (fun () ->
@@ -116,14 +116,14 @@ let%component make ?(action : string option)
   let cleared, set_cleared = S.create_signal (None, []) in
   let cleared_now () =
     let from, names = S.get cleared in
-    match (from, validation_errors ()) with
+    match (from, S.get validation_errors) with
     | Some from, Some errors when from == errors -> names
     | (Some _ | None), (Some _ | None) -> []
   in
   let error name =
     if List.exists (String.equal name) (cleared_now ()) then None
     else
-      Option.bind (validation_errors ()) (fun errors ->
+      Option.bind (S.get validation_errors) (fun errors ->
           List.assoc_opt name errors)
   in
   let form =
@@ -133,7 +133,7 @@ let%component make ?(action : string option)
       error;
       clear =
         (fun name ->
-          S.set set_cleared (validation_errors (), name :: cleared_now ()));
+          S.set set_cleared (S.get validation_errors, name :: cleared_now ()));
     }
   in
   let invalid (e : entry) =
@@ -149,7 +149,7 @@ let%component make ?(action : string option)
            prevents the focus as React's does. *)
         let invalid = new_event "invalid" (event_init ~cancelable:true ()) in
         if dispatch (target event) invalid then
-          List.filter_map (fun (e : entry) -> e.element ()) refused
+          List.filter_map (fun (e : entry) -> S.get e.element) refused
           |> first_in_page
           |> Option.iter (fun root -> Option.iter focus (control root))
   in
@@ -166,7 +166,7 @@ let%component make ?(action : string option)
       on_invalid=(fun e -> ignore (on_invalid e : unit option))
       data_slot="form"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </form>
   </Context.Provider>
 [@@element form]

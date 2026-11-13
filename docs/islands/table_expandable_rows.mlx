@@ -85,11 +85,12 @@ let rec expandable_row item =
         Jsx.element
           <span class_="flex items-center gap-1">
             <Show
-              when_=(fun () -> row.has_child_items () && cell.is_tree_column ())>
+              when_=(fun () ->
+                      S.get row.has_child_items && S.get cell.is_tree_column)>
               <Button
                 is_icon_only=true
                 aria_label="Toggle row"
-                is_disabled=(fun () -> row.is_disabled ())
+                is_disabled=(fun () -> S.get row.is_disabled)
                 size=`sm
                 slot=`chevron
                 variant=`ghost>
@@ -98,7 +99,7 @@ let rec expandable_row item =
                              "size-4 text-muted transition-transform \
                               duration-150 "
                              ^
-                             if row.is_expanded () then "rotate-90"
+                             if S.get row.is_expanded then "rotate-90"
                              else "rtl:rotate-180")
                 />
               </Button>

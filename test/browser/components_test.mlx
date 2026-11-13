@@ -18,20 +18,22 @@ exception Broken
 
 module Greeting = struct
   let%component make ~(name : string) () =
-    <p>(fun () -> Jsx.string ("Hello, " ^ name ()))</p>
+    <p>(fun () -> Jsx.string ("Hello, " ^ S.get name))</p>
 end
 
 (* Raises while [broken] says so, and renders once it does not. *)
 module Fragile = struct
   let%component make ~(broken : bool) () =
-    <p>(fun () -> if broken () then raise Broken else Jsx.string "mended")</p>
+    <p>
+      (fun () -> if S.get broken then raise Broken else Jsx.string "mended")
+    </p>
 end
 
 (* A card whose callback takes nothing, as a close or a remove does. *)
 module Removable = struct
   let%component make ~(title : string) ~(on_remove : unit -> unit) () =
     <button on_click=(fun _ -> on_remove ())>
-      (fun () -> Solidtype.Jsx.string (title ()))
+      (fun () -> Solidtype.Jsx.string (S.get title))
     </button>
 end
 
@@ -53,7 +55,9 @@ end
 (* Shows [text] once a fetch of it has resolved. *)
 module Loaded = struct
   let%component make ~(text : string) () =
-    let data, _ = S.create_resource (fun _ -> Js.Promise.resolve (text ())) in
+    let data, _ =
+      S.create_resource (fun _ -> Js.Promise.resolve (S.get text))
+    in
     <p>(fun () -> Jsx.string (Option.value (S.read data) ~default:""))</p>
 end
 
@@ -65,12 +69,12 @@ module Save = struct
       ~(children : Jsx.content) () =
     <button
       class_=(fun () ->
-               match class_ () with Some c -> "save " ^ c | None -> "save")
+               match S.get class_ with Some c -> "save " ^ c | None -> "save")
       on_click=(fun e ->
                  saved ();
                  ignore (on_click e : unit option))
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </button>
   [@@element button]
 end
@@ -91,7 +95,7 @@ module Toggle_tag = struct
   let%component make ~(children : state Jsx.children) () =
     let on, set_on = S.create_signal false in
     <button on_click=(fun _ -> S.update set_on not)>
-      (fun () -> Jsx.draw (children ()) { is_on = on })
+      (fun () -> Jsx.draw (S.get children) { is_on = on })
     </button>
 end
 

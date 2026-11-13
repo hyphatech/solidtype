@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Kobalte = Solidtype_kobalte.Separator
 
 (* The element a part above draws its separators as, as React Aria's
@@ -11,7 +12,7 @@ end)
 (* Where a part above draws its separators, as a list box draws its own among
    its options: given the separator as it would be drawn. *)
 module Slot = Solidtype.Context.Make_optional (struct
-  type t = ((unit -> Solidtype.Jsx.element) -> Solidtype.Jsx.element[@u])
+  type t = (unit -> Solidtype.Jsx.element) -> Solidtype.Jsx.element
 end)
 
 (* Kobalte's separator as another element, as React Aria's draws one. *)
@@ -38,18 +39,18 @@ let%component make ?(orientation : [ `horizontal | `vertical ] = `horizontal)
       as_=(fun () ->
             (* An [<hr>] is a horizontal line, so React Aria draws a vertical
              one as a [<div>]. *)
-            match (element, orientation ()) with
+            match (element, S.get orientation) with
             | `hr, `horizontal -> "hr"
             | `hr, `vertical | `div, (`horizontal | `vertical) -> "div")
-      orientation=(fun () -> orientation ())
+      orientation=(fun () -> S.get orientation)
       role=`separator
       class_=(fun () ->
                Styles.Separator.classes
-                 (Styles.Separator.options ~orientation:(orientation ())
-                    ~variant:(variant ()) ?class_:(class_ ()) ()))
+                 (Styles.Separator.options ~orientation:(S.get orientation)
+                    ~variant:(S.get variant) ?class_:(S.get class_) ()))
       data_slot="separator"
       props=(Props.others props)
     />
   in
-  match Slot.use () with Some slot -> slot drawn [@u] | None -> drawn ()
+  match Slot.use () with Some slot -> slot drawn | None -> drawn ()
 [@@element div]

@@ -32,7 +32,9 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
     ~(on_remove : unit -> unit) () =
   let elsewhere () =
     Array.of_list
-      (List.filter (fun s -> not (Status.equal s (task ()).status)) Status.all)
+      (List.filter
+         (fun s -> not (Status.equal s (S.get task).status))
+         Status.all)
   in
   let act key =
     match Status.of_key key with
@@ -42,14 +44,14 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
   <li
     class_="group cursor-grab active:cursor-grabbing"
     draggable=true
-    on_drag_start=(fun e -> Drag.start e (task ()).id)>
+    on_drag_start=(fun e -> Drag.start e (S.get task).id)>
     <Card class_="gap-2 rounded-2xl p-3">
       <Card.Header class_="flex-row items-start gap-2">
         <div class_="min-w-0 flex-1">
           <Card.Title class_="truncate text-sm">
-            (fun () -> Jsx.string (task ()).title)
+            (fun () -> Jsx.string (S.get task).title)
           </Card.Title>
-          <Show.Some some=(fun () -> (task ()).note)>
+          <Show.Some some=(fun () -> (S.get task).note)>
             (fun note ->
               <Card.Description class_="truncate">
                 (fun () -> Jsx.string (S.get note))
@@ -57,7 +59,7 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
           </Show.Some>
         </div>
         <span class_="text-xs leading-5 tabular-nums text-muted">
-          (fun () -> Jsx.string ("#" ^ Js.Float.toString (task ()).id))
+          (fun () -> Jsx.string ("#" ^ Js.Float.toString (S.get task).id))
         </span>
         <Dropdown>
           <Button
@@ -67,7 +69,7 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
             class_="-my-0.5 size-6 min-w-6 opacity-0 transition-opacity \
                     group-hover:opacity-100 focus-visible:opacity-100 \
                     aria-expanded:opacity-100"
-            aria_label=(fun () -> "Actions for " ^ (task ()).title)>
+            aria_label=(fun () -> "Actions for " ^ (S.get task).title)>
             <Gravity.Ellipsis class_="size-4" />
           </Button>
           <Dropdown.Popover>
@@ -91,9 +93,9 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
           </Dropdown.Popover>
         </Dropdown>
       </Card.Header>
-      <Show when_=(fun () -> footed (task ()))>
+      <Show when_=(fun () -> footed (S.get task))>
         <Card.Footer class_="flex-wrap gap-1.5">
-          <Show.Some some=(fun () -> (task ()).link)>
+          <Show.Some some=(fun () -> (S.get task).link)>
             (fun link ->
               <Chip size=`sm variant=`secondary>
                 <Gravity.Link class_="size-3" />
@@ -108,7 +110,7 @@ let%component make ~(task : Api.task) ~(on_move : Status.t -> unit)
                 </Chip.Label>
               </Chip>)
           </Show.Some>
-          <For each=(fun () -> (task ()).labels)>
+          <For each=(fun () -> (S.get task).labels)>
             (fun label _ ->
               <Chip size=`sm variant=`secondary>
                 <Chip.Label>(fun () -> Jsx.string label)</Chip.Label>

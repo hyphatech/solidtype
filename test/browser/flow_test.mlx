@@ -27,6 +27,20 @@ module User = Solidtype.Context.Make_optional (struct
   type t = string
 end)
 
+(* A context whose value is a function, as a part hands one to the parts
+   inside it. *)
+module Shout = Solidtype.Context.Make (struct
+  type t = string -> string
+
+  let default = Fun.id
+end)
+
+module Shouts = struct
+  let%component make () =
+    let shout = Shout.use () in
+    <p>(fun () -> Jsx.string (shout "hi"))</p>
+end
+
 module Shows_theme = struct
   let%component make () =
     let theme = Theme.use () in
@@ -41,7 +55,7 @@ end
 
 module Greeting = struct
   let%component make ~(name : string) ?(greeting : string = "Hello") () =
-    <p>(fun () -> Jsx.string (greeting () ^ ", " ^ name ()))</p>
+    <p>(fun () -> Jsx.string (S.get greeting ^ ", " ^ S.get name))</p>
 end
 
 module Fails = struct
@@ -221,6 +235,13 @@ let () =
                 </Theme.Provider>
               </div>);
           E.(expect (T.page ()) |> toBe "lightdark"));
+      Jest.test "a thunk whose value is a function gives that function"
+        (fun () ->
+          T.render (fun () ->
+              <Shout.Provider value=(fun () -> fun s -> s ^ "!")>
+                <Shouts />
+              </Shout.Provider>);
+          E.(expect (T.page ()) |> toBe "hi!"));
       Jest.test "an optional context reads None with no provider" (fun () ->
           T.render (fun () ->
               <div>

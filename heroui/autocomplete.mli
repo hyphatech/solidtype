@@ -44,6 +44,9 @@
     A part is used inside an [Autocomplete]: elsewhere it raises
     [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type placement = [ `top | `bottom | `left | `right ]
 (** A side of the trigger. *)
 
@@ -53,10 +56,10 @@ type placement = [ `top | `bottom | `left | `right ]
     the search from the list by keys, which shows its ring. *)
 module Search : sig
   type t = {
-    text : unit -> string;
+    text : string S.accessor;
     set : string -> unit;
-    elsewhere : unit -> bool;
-    returned : unit -> bool;
+    elsewhere : bool S.accessor;
+    returned : bool S.accessor;
   }
 
   module Provider : sig
@@ -68,7 +71,7 @@ module Search : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 
   val use : unit -> t option
@@ -78,11 +81,11 @@ end
     and anchors the popover. *)
 module Trigger : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_focus_within : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    is_invalid : bool Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_focus_within : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
+    is_invalid : bool S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -95,16 +98,14 @@ module Trigger : sig
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The option chosen, as its list draws it, or the options chosen so drawn and
@@ -113,9 +114,9 @@ end
     [children] draws of its {!state}. *)
 module Value : sig
   type state = {
-    selected_keys : string array Solidtype.Solid.accessor;
+    selected_keys : string array S.accessor;
         (** The options chosen, by their ids. *)
-    selected_text : string Solidtype.Solid.accessor;
+    selected_text : string S.accessor;
         (** Their texts, as the reader's language lists them. *)
   }
   (** What its children are drawn of while an option is chosen, given as a
@@ -128,16 +129,14 @@ module Value : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The button that opens the list: HeroUI's chevron, or the [children] it is
@@ -149,13 +148,13 @@ module Indicator : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Svg.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Svg.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A button that clears the choice as it is pressed, calling [on_click] after,
@@ -167,13 +166,13 @@ module Clear_button : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
-      ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The list's popover: drawn in a portal at the end of the page while it is
@@ -189,13 +188,13 @@ module Popover : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What filters the list by the search: it shows the options whose text holds
@@ -212,13 +211,13 @@ module Filter : sig
       ?input_value:string Solidtype.Check.value ->
       ?on_input_change:(string -> unit) ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?props:t Solidtype.Solid.rest ->
+      ?props:t S.rest ->
       unit ->
       unit
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The autocomplete. [selection_mode] is read as it is made. Its [value] is the
@@ -228,12 +227,12 @@ end
     [disabled_keys] holds is disabled. The list opens while the search shows no
     option only by [allows_empty_collection]. *)
 type state = {
-  is_focused : bool Solidtype.Solid.accessor;
-  is_focus_visible : bool Solidtype.Solid.accessor;
-  is_disabled : bool Solidtype.Solid.accessor;
-  is_open : bool Solidtype.Solid.accessor;
-  is_invalid : bool Solidtype.Solid.accessor;
-  is_required : bool Solidtype.Solid.accessor;
+  is_focused : bool S.accessor;
+  is_focus_visible : bool S.accessor;
+  is_disabled : bool S.accessor;
+  is_open : bool S.accessor;
+  is_invalid : bool S.accessor;
+  is_required : bool S.accessor;
 }
 (** What an autocomplete's children are drawn of, given as a function, as
     HeroUI's render props are, each read where Solid tracks it. *)
@@ -263,13 +262,11 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      ( state -> Solidtype.Jsx.element,
-        [ `nodes | `render ] )
-      Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+    ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

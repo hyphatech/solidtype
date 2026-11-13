@@ -4,7 +4,7 @@
     {[
       let t = Theme.use () in
       <button on_click=(fun _ -> t.set_theme "dark")>
-        (fun () -> Solidtype.Jsx.string (S.get t.theme))
+        (fun () -> Jsx.string (S.get t.theme))
       </button>
     ]}
 
@@ -15,11 +15,13 @@
     prerendered page hydrates, and a browser's refusal of storage leaves the
     choice for as long as the page lasts, where HeroUI's throws. *)
 
+module S := Solidtype.Solid
+
 type t = {
-  theme : string Solidtype.Solid.accessor;
+  theme : string S.accessor;
       (** What was chosen: ["system"], ["light"], ["dark"] or a theme of the
           application's own. *)
-  resolved : string option Solidtype.Solid.accessor;
+  resolved : string option S.accessor;
       (** What [<html>] shows: the system's while ["system"] is chosen, and
           [None] until that is known, on the server. *)
   set_theme : string -> unit;

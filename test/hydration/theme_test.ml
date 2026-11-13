@@ -22,14 +22,16 @@ external set_item : string -> string -> unit = "setItem"
 [@@mel.scope "localStorage"]
 
 external clear : unit -> unit = "clear" [@@mel.scope "localStorage"]
-external function_of : string -> (unit -> unit[@u]) = "Function" [@@mel.new]
+
+external function_of : string -> unit Solidtype.Solid.accessor = "Function"
+[@@mel.new]
 
 let run_script tagged =
   let start = Option.map succ (String.index_opt tagged '>') in
   let stop = Js.String.indexOf ~search:"</script>" tagged in
   match start with
   | Some start when start <= stop ->
-      (function_of (String.sub tagged start (stop - start))) () [@u]
+      Solidtype.Solid.get (function_of (String.sub tagged start (stop - start)))
   | Some _ | None -> ()
 
 let attribute e name = Js.Null.toOption (get_attribute e name)

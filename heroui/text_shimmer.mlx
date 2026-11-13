@@ -44,11 +44,11 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
   let running = ref None in
   S.on_cleanup (fun () -> Option.iter cancel !running);
   <span
-    class_=(fun () -> after "text-shimmer" (class_ ()))
+    class_=(fun () -> after "text-shimmer" (S.get class_))
     data_slot="text-shimmer"
     props=(Props.others props)>
     <span class_="text-shimmer__text" data_slot="text-shimmer-text">
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
     <span
       aria_hidden=true
@@ -59,7 +59,7 @@ let%component make ?(class_ : string option) ~(children : Jsx.content) () =
             match Js.Undefined.toOption (animate_method e) with
             | Some _ -> running := Some (sweep e)
             | None -> ())>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </span>
   </span>
 [@@element span]

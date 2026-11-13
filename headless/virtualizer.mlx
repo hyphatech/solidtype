@@ -55,8 +55,8 @@ end)
 let use () = Context.use ()
 
 let%component make ~(layout : layout) ~(children : Jsx.content) () =
-  <Context.Provider value=(fun () -> layout ())>
-    (fun () -> children ())
+  <Context.Provider value=(fun () -> S.get layout)>
+    (fun () -> S.get children)
   </Context.Provider>
 
 (* What the window reads of the page: an element's box, what scrolls it, and
@@ -193,9 +193,9 @@ let to_px n = Js.Float.toString n ^ "px"
 let prerendered = 400.
 
 type 'row window = {
-  drawn : unit -> 'row array;
+  drawn : 'row array S.accessor;
   place : 'row -> string;
-  block : unit -> string;
+  block : string S.accessor;
   frame : 'row -> Dom.element -> unit;
   watch : Dom.element -> unit;
   scroll_to : 'row -> unit;
@@ -307,34 +307,35 @@ let window (l : list_layout) ~(rows : unit -> 'row array)
   in
   (* The rows in view, and those kept wherever they are, in order: found by
      their starts, which grow along the rows. *)
-  let drawn () =
-    let rows, starts, _ = S.get placed in
-    let from, length = S.get view in
-    let until = from +. length in
-    let n = Array.length rows in
-    let rec first lo hi =
-      if lo >= hi then lo
-      else
-        let mid = (lo + hi) / 2 in
-        if starts.(mid) +. size rows.(mid) <= from then first (mid + 1) hi
-        else first lo mid
-    in
-    let shown = ref [] in
-    let i = ref (first 0 n) in
-    while !i < n && starts.(!i) < until do
-      shown := !i :: !shown;
-      incr i
-    done;
-    let seen = Array.make n false in
-    List.iter (fun i -> seen.(i) <- true) !shown;
-    Array.iteri
-      (fun i row -> if (not seen.(i)) && keep row then seen.(i) <- true)
-      rows;
-    let out = ref [] in
-    for i = n - 1 downto 0 do
-      if seen.(i) then out := rows.(i) :: !out
-    done;
-    Array.of_list !out
+  let drawn =
+    S.accessor (fun () ->
+        let rows, starts, _ = S.get placed in
+        let from, length = S.get view in
+        let until = from +. length in
+        let n = Array.length rows in
+        let rec first lo hi =
+          if lo >= hi then lo
+          else
+            let mid = (lo + hi) / 2 in
+            if starts.(mid) +. size rows.(mid) <= from then first (mid + 1) hi
+            else first lo mid
+        in
+        let shown = ref [] in
+        let i = ref (first 0 n) in
+        while !i < n && starts.(!i) < until do
+          shown := !i :: !shown;
+          incr i
+        done;
+        let seen = Array.make n false in
+        List.iter (fun i -> seen.(i) <- true) !shown;
+        Array.iteri
+          (fun i row -> if (not seen.(i)) && keep row then seen.(i) <- true)
+          rows;
+        let out = ref [] in
+        for i = n - 1 downto 0 do
+          if seen.(i) then out := rows.(i) :: !out
+        done;
+        Array.of_list !out)
   in
   let place row =
     "position: absolute; " ^ a.along ^ ": "
@@ -345,10 +346,11 @@ let window (l : list_layout) ~(rows : unit -> 'row array)
     | Some n -> "; " ^ a.along_size ^ ": " ^ to_px n
     | None -> ""
   in
-  let block_style () =
-    let _, _, total = S.get placed in
-    "position: relative; " ^ a.along_size ^ ": " ^ to_px total ^ "; "
-    ^ a.across_size ^ ": 100%"
+  let block_style =
+    S.accessor (fun () ->
+        let _, _, total = S.get placed in
+        "position: relative; " ^ a.along_size ^ ": " ^ to_px total ^ "; "
+        ^ a.across_size ^ ": 100%")
   in
   let frame row e =
     match fixed row with

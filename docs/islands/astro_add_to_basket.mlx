@@ -1,7 +1,8 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Button = Solidtype_heroui.Button
 
 let%component make ~(tea : string) () =
   <Button on_click=(fun _ -> Astro_basket.add ())>
-    "Add " (fun () -> Jsx.string (tea ())) " to the basket"
+    "Add " (fun () -> Jsx.string (S.get tea)) " to the basket"
   </Button>

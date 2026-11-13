@@ -3,13 +3,7 @@ module Jsx = Solidtype.Jsx
 module Suspense = Solidtype.Suspense
 
 (* A fetch that takes most of a second, as a server's answer would. *)
-let quote n =
-  Js.Promise.make (fun ~resolve ~reject:_ ->
-      ignore
-        (Js.Global.setTimeout
-           ~f:(fun () -> (resolve ("Quote number " ^ string_of_int n) [@u]))
-           700
-          : Js.Global.timeoutId))
+let quote n = Wait.after 700 ("Quote number " ^ string_of_int n)
 
 let make () =
   let n, set_n = S.create_signal 1 in

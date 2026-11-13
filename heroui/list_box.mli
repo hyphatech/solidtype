@@ -27,6 +27,9 @@
     A part is used inside a [List_box], an indicator inside an {!Item}:
     elsewhere it raises [Invalid_argument] as it is made. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type selection_mode = [ `none | `single | `multiple ]
 (** How a list selects its options: not at all, one at most, or many. *)
 
@@ -43,12 +46,12 @@ val listed : option_ list -> string
 (** The options' {!text}s, as the reader's language lists them: one alone as it
     is, several joined, ["Florida, Texas, and Utah"]. *)
 
-val content : option_ -> Solidtype.Jsx.element
+val content : option_ -> Jsx.element
 (** Its children, drawn again outside the list, as a select's value shows the
     option chosen; an indicator inside them is drawn as not selected, as React
     Aria draws it. *)
 
-val shown : option_ list -> Solidtype.Jsx.element
+val shown : option_ list -> Jsx.element
 (** The options' {!content}s, joined as {!listed} joins their texts:
     ["Florida, Texas, and Utah"], each name as its option draws it, as a
     select's value shows the options chosen. *)
@@ -61,12 +64,12 @@ type node =
 (** How an option is focused. *)
 type focus =
   | Real  (** An option takes the focus itself. *)
-  | Virtual of (unit -> string option)
+  | Virtual of string option S.accessor
       (** The focus stays elsewhere, a combo box's input, and the option whose
           key this reads is focused. *)
 
 type listing = {
-  mode : unit -> selection_mode;
+  mode : selection_mode S.accessor;
   is_selected : string -> bool;
   is_disabled : string -> bool;
   act : string -> unit;
@@ -87,16 +90,14 @@ module Listing : sig
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 end
 
 type hosted = {
-  options : unit -> option_ list;
+  options : option_ list S.accessor;
       (** Its options, in order, whatever holds them. *)
-  draw :
-    node Solidtype_kobalte.Types.Collection.t Solidtype.Solid.accessor ->
-    Solidtype.Jsx.element;
+  draw : node Solidtype_kobalte.Types.Collection.t S.accessor -> Jsx.element;
       (** Its options, sections and separators, given Kobalte's collection, as
           the children of Kobalte's list: inside a {!Listing}; or, while it
           draws no option, its empty state. *)
@@ -106,10 +107,10 @@ type hosted = {
   scroll_to_item : string -> unit;
       (** Brings the option of a key into view of what scrolls the list, as
           Kobalte asks of a list it does not draw: its [scroll_to_item]. *)
-  empty : unit -> bool;  (** Whether it draws no option. *)
-  classes : unit -> string;  (** Its classes. *)
-  aria_label : unit -> string option;  (** Its name. *)
-  others : unit Solidtype.Solid.rest;  (** The rest of its props. *)
+  empty : bool S.accessor;  (** Whether it draws no option. *)
+  classes : string S.accessor;  (** Its classes. *)
+  aria_label : string option S.accessor;  (** Its name. *)
+  others : unit S.rest;  (** The rest of its props. *)
 }
 (** What a part that holds a list box takes of it, to draw it as its own, in
     Kobalte's list of its own. *)
@@ -120,13 +121,13 @@ module Host : sig
   module Provider : sig
     module Props : sig
       val check :
-        value:((hosted -> Solidtype.Jsx.element)[@u]) Solidtype.Check.value ->
+        value:(hosted -> Jsx.element) Solidtype.Check.value ->
         ?children:('f, [ `nodes ]) Solidtype.Check.children ->
         unit ->
         unit
     end
 
-    val component : unit Solidtype.Jsx.component
+    val component : unit Jsx.component
   end
 end
 
@@ -134,13 +135,13 @@ end
     a [<div>] with the role [option], selected while its id is. *)
 module Item : sig
   type state = {
-    is_hovered : bool Solidtype.Solid.accessor;
-    is_pressed : bool Solidtype.Solid.accessor;
-    is_selected : bool Solidtype.Solid.accessor;
-    is_focused : bool Solidtype.Solid.accessor;
-    is_focus_visible : bool Solidtype.Solid.accessor;
-    is_disabled : bool Solidtype.Solid.accessor;
-    selection_mode : [ `none | `single | `multiple ] Solidtype.Solid.accessor;
+    is_hovered : bool S.accessor;
+    is_pressed : bool S.accessor;
+    is_selected : bool S.accessor;
+    is_focused : bool S.accessor;
+    is_focus_visible : bool S.accessor;
+    is_disabled : bool S.accessor;
+    selection_mode : [ `none | `single | `multiple ] S.accessor;
   }
   (** What its children are drawn of, given as a function, as HeroUI's render
       props are, each read where Solid tracks it. *)
@@ -158,16 +159,14 @@ module Item : sig
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        ( state -> Solidtype.Jsx.element,
-          [ `nodes | `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What shows its option selected: HeroUI's check, drawn in as it is selected;
@@ -180,16 +179,14 @@ module Item_indicator : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?children:
-        ( bool Solidtype.Solid.accessor -> Solidtype.Jsx.element,
-          [ `render ] )
-        Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+        (bool S.accessor -> Jsx.element, [ `render ]) Solidtype.Check.children ->
+      ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** What loads more options, as React Aria's [ListBoxLoadMoreItem] does: a
@@ -206,13 +203,13 @@ module Load_more_item : sig
       ?on_load_more:(unit -> unit) ->
       ?scroll_offset:float Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** A group of options: a [<section>] with the role [group], named by its
@@ -224,13 +221,13 @@ module Section : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Section.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Section.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Section.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The list, named by its [aria_label]. [selection_mode] is a selection of one
@@ -250,15 +247,15 @@ module Props : sig
     ?on_selection_change:(string array -> unit) ->
     ?disabled_keys:string array Solidtype.Check.value ->
     ?on_action:(string -> unit) ->
-    ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
+    ?render_empty_state:(unit -> Jsx.element) ->
     ?variant:[ `default | `danger ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

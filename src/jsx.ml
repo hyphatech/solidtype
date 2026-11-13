@@ -38,9 +38,12 @@ let drawn_as given tag =
 
 external rest_ref : 'rest -> (('e -> unit)[@u]) option = "ref" [@@mel.get]
 
+let[@inline] call f x = match f with Some f -> f x [@u] | None -> ()
+let[@inline] act f = match f with Some f -> f () [@u] | None -> ()
+
 let ref_beside written rest e =
   written e;
-  match rest_ref rest with Some f -> f e [@u] | None -> ()
+  call (rest_ref rest) e
 
 let is_function children = String.equal (Js.typeof children) "function"
 
@@ -104,17 +107,17 @@ external c : 'props component -> prop array -> child array -> element = "c"
 external s : string -> 'a -> prop = "s"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
-external d : string -> (unit -> 'a) -> prop = "d"
+external d : string -> ((unit -> 'a)[@u]) -> prop = "d"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
-external spread : (unit -> 'props) -> prop = "spread"
+external spread : ((unit -> 'props)[@u]) -> prop = "spread"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 external text : string -> child = "%identity"
 external node : element -> child = "%identity"
 external render : 'f -> child = "%identity"
 
-external dynamic : (unit -> content) -> child = "dynamic"
+external dynamic : ((unit -> content)[@u]) -> child = "dynamic"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 external native : 'a -> 'a namespaced = "%identity"

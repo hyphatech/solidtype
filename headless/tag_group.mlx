@@ -58,8 +58,7 @@ external mouse_current : Dom.mouseEvent -> Dom.element = "currentTarget"
 [@@mel.get]
 
 (* A handler or a ref the caller gave, called beside the part's own, as
-   Kobalte's parts call theirs. *)
-let call f x = match f with Some f -> f x [@u] | None -> ()
+   Kobalte's parts Jsx.call theirs. *)
 
 (* Kobalte's state, an attribute present and empty, or none. *)
 let state on = if on then Jsx.data "" else Jsx.flag false
@@ -70,46 +69,46 @@ let tabbable =
    [tabindex]:not([tabindex=\"-1\"])"
 
 type tag = {
-  key : unit -> string;
-  is_selected : unit -> bool;
-  is_disabled : unit -> bool;
-  allows_removing : unit -> bool;
+  key : string S.accessor;
+  is_selected : bool S.accessor;
+  is_disabled : bool S.accessor;
+  allows_removing : bool S.accessor;
 }
 
 type group_state = {
-  selection_mode : unit -> [ `none | `single | `multiple ];
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
   is_selected : string -> bool;
   is_disabled : string -> bool;
-  allows_removing : unit -> bool;
-  is_empty : unit -> bool;
+  allows_removing : bool S.accessor;
+  is_empty : bool S.accessor;
 }
 
 (* A tag as the group keeps it: its key, its element, which says where it is
    on the page, and its name. *)
 type listed = {
-  key : unit -> string;
+  key : string S.accessor;
   element : Dom.htmlDivElement;
-  disabled : unit -> bool;
-  text : unit -> string;
+  disabled : bool S.accessor;
+  text : string S.accessor;
 }
 
 type group = {
   manager : Manager.t S.accessor;
   list : Selectable_list.t;
   set_list : Dom.htmlDivElement option S.setter;
-  selection_mode : unit -> [ `none | `single | `multiple ];
-  group_disabled : unit -> bool;
+  selection_mode : [ `none | `single | `multiple ] S.accessor;
+  group_disabled : bool S.accessor;
   disabled_key : string -> bool;
-  removable : unit -> bool;
+  removable : bool S.accessor;
   remove : string -> unit;
-  is_empty : unit -> bool;
+  is_empty : bool S.accessor;
   made : unit -> unit;
   add : listed -> unit;
   drop : Dom.htmlDivElement -> unit;
   list_id : string;
-  aria_label : unit -> string option;
-  labelled_by : unit -> string option;
-  described_by : unit -> string option;
+  aria_label : string option S.accessor;
+  labelled_by : string option S.accessor;
+  described_by : string option S.accessor;
   label_id : string;
   label_here : unit -> unit;
   description_id : string;
@@ -164,24 +163,24 @@ let named id =
 (* Where the keys move among the tags: in order, a disabled one passed over,
    wrapping at either end, Left and Right as the page's direction reads them,
    as React Aria's tag group moves. *)
-let delegate ~(tags : unit -> listed array) ~direction ~collator =
+let delegate ~(tags : listed array S.accessor) ~direction ~collator =
   let index k =
-    let all = tags () in
+    let all = S.get tags in
     let rec find i =
       if i >= Array.length all then None
-      else if String.equal (all.(i).key ()) k then Some i
+      else if String.equal (S.get all.(i).key) k then Some i
       else find (i + 1)
     in
     find 0
   in
   let rec usable i step =
-    let all = tags () in
+    let all = S.get tags in
     if i < 0 || i >= Array.length all then None
-    else if all.(i).disabled () then usable (i + step) step
-    else Some (all.(i).key ())
+    else if S.get all.(i).disabled then usable (i + step) step
+    else Some (S.get all.(i).key)
   in
   let first () = usable 0 1 in
-  let last () = usable (Array.length (tags ()) - 1) (-1) in
+  let last () = usable (Array.length (S.get tags) - 1) (-1) in
   let next k =
     match Option.bind (index k) (fun i -> usable (i + 1) 1) with
     | Some n -> Some n
@@ -202,7 +201,7 @@ let delegate ~(tags : unit -> listed array) ~direction ~collator =
     let matches k =
       match index k with
       | Some i ->
-          let text = (tags ()).(i).text () in
+          let text = S.get (S.get tags).(i).text in
           String.length text >= n
           && Float.equal
                (Types.Collator.compare (S.get collator)
@@ -300,14 +299,16 @@ module Root = struct
     |]
 
   let make (props : Props.t) =
-    let selection_mode () =
-      Option.value (Props.selection_mode props) ~default:`none
+    let selection_mode =
+      S.accessor (fun () ->
+          Option.value (Props.selection_mode props) ~default:`none)
     in
-    let group_disabled () =
-      Option.value (Props.is_disabled props) ~default:false
+    let group_disabled =
+      S.accessor (fun () ->
+          Option.value (Props.is_disabled props) ~default:false)
     in
     let disabled_key k =
-      group_disabled ()
+      S.get group_disabled
       ||
       match Props.disabled_keys props with
       | Some keys -> Array.exists (String.equal k) keys
@@ -326,10 +327,10 @@ module Root = struct
                (S.get listed)))
     in
     let keys =
-      S.create_memo (fun () -> Array.map (fun t -> t.key ()) (S.get tags))
+      S.create_memo (fun () -> Array.map (fun t -> S.get t.key) (S.get tags))
     in
     let find k =
-      Array.find_opt (fun t -> String.equal (t.key ()) k) (S.get tags)
+      Array.find_opt (fun t -> String.equal (S.get t.key) k) (S.get tags)
     in
     let state =
       Selection.create_list_state
@@ -337,13 +338,17 @@ module Root = struct
            ~get_key:(Either.left Fun.id)
            ~get_text_value:
              (Either.left (fun k ->
-                  match find k with Some t -> t.text () | None -> ""))
+                  match find k with Some t -> S.get t.text | None -> ""))
            ~get_disabled:
              (Either.left (fun k ->
                   disabled_key k
-                  || match find k with Some t -> t.disabled () | None -> false))
+                  ||
+                  match find k with
+                  | Some t -> S.get t.disabled
+                  | None -> false))
            ~selection_mode:
-             (Either.right (S.create_memo (fun () -> Some (selection_mode ()))))
+             (Either.right
+                (S.create_memo (fun () -> Some (S.get selection_mode))))
            ~selected_keys:
              (Either.right
                 (S.create_memo (fun () -> Props.selected_keys props)))
@@ -351,7 +356,7 @@ module Root = struct
              (Option.map Either.left
                 (S.untrack (fun () -> Props.default_selected_keys props)))
            ~on_selection_change:(fun keys ->
-             call (Props.on_selection_change props) (Js.Set.toArray keys))
+             Jsx.call (Props.on_selection_change props) (Js.Set.toArray keys))
            ())
     in
     let manager =
@@ -369,8 +374,7 @@ module Root = struct
     let keyboard =
       S.create_memo (fun () ->
           Some
-            (delegate
-               ~tags:(fun () -> S.get tags)
+            (delegate ~tags
                ~direction:(Types.I18n_UseLocale.direction locale)
                ~collator))
     in
@@ -407,7 +411,9 @@ module Root = struct
               Array.exists (String.equal o) now
               && (not (disabled_key o))
               && not
-                   (match find o with Some t -> t.disabled () | None -> false)
+                   (match find o with
+                   | Some t -> S.get t.disabled
+                   | None -> false)
             in
             let rec walk i step =
               if i < 0 || i >= Array.length was then None
@@ -451,7 +457,8 @@ module Root = struct
         selection_mode;
         group_disabled;
         disabled_key;
-        removable = (fun () -> Option.is_some (Props.on_remove props));
+        removable =
+          S.accessor (fun () -> Option.is_some (Props.on_remove props));
         remove =
           (fun k ->
             (refocus :=
@@ -459,13 +466,13 @@ module Root = struct
                | Some l, Some a -> contains l a
                | _ -> false);
             let selected = Manager.is_selected (m ()) k in
-            call (Props.on_remove props)
+            Jsx.call (Props.on_remove props)
               (if selected then
                  Js.Array.filter
                    ~f:(fun k -> not (disabled_key k))
                    (Js.Set.toArray (S.get (Manager.selected_keys (m ()))))
                else [| k |]));
-        is_empty = (fun () -> S.get count = 0);
+        is_empty = S.accessor (fun () -> S.get count = 0);
         made =
           (fun () ->
             S.update set_count succ;
@@ -474,16 +481,16 @@ module Root = struct
         drop =
           (fun e -> S.update set_listed (List.filter (fun t -> t.element != e)));
         list_id = S.create_unique_id ();
-        aria_label = (fun () -> Props.aria_label props);
+        aria_label = S.accessor (fun () -> Props.aria_label props);
         labelled_by =
-          (fun () ->
-            match (Props.aria_labelledby props, Props.aria_label props) with
-            | Some l, _ -> Some l
-            | None, Some _ -> None
-            | None, None -> labelled ());
+          S.accessor (fun () ->
+              match (Props.aria_labelledby props, Props.aria_label props) with
+              | Some l, _ -> Some l
+              | None, Some _ -> None
+              | None, None -> labelled ());
         described_by =
-          (fun () ->
-            ids [ described (); errored (); Props.aria_describedby props ]);
+          S.accessor (fun () ->
+              ids [ described (); errored (); Props.aria_describedby props ]);
         label_id;
         label_here;
         description_id;
@@ -498,7 +505,7 @@ module Root = struct
         ?as_=(fun () -> S.drawn_as props) props=(S.undrawn (S.omit props own))>
         (fun () -> Props.children props)
         (fun () ->
-          if g.removable () then
+          if S.get g.removable then
             Jsx.element
               <span id=(fun () -> g.removal_hint) style="display: none">
                 "Press Delete or Backspace to remove."
@@ -625,38 +632,40 @@ module List = struct
     let resolved = S.children (fun () -> Props.children props) in
     <div
       id=(fun () -> g.list_id)
-      role=(fun () -> if g.is_empty () then `group else `grid)
+      role=(fun () -> if S.get g.is_empty then `group else `grid)
       ref=(fun e ->
             S.set g.set_list (Some e);
-            call (Props.ref props) e)
-      ?aria_label=(fun () -> g.aria_label ())
-      ?aria_labelledby=(fun () -> g.labelled_by ())
-      ?aria_describedby=(fun () -> g.described_by ())
+            Jsx.call (Props.ref props) e)
+      ?aria_label=(fun () -> S.get g.aria_label)
+      ?aria_labelledby=(fun () -> S.get g.labelled_by)
+      ?aria_describedby=(fun () -> S.get g.described_by)
       ?aria_multiselectable=(fun () ->
-                              match g.selection_mode () with
+                              match S.get g.selection_mode with
                               | `multiple -> Some true
                               | `single | `none -> None)
       tabindex=(fun () ->
                  match S.get (Selectable_list.tab_index g.list) with
-                 | Some i when not (g.group_disabled ()) -> Js.Float.toString i
+                 | Some i when not (S.get g.group_disabled) ->
+                     Js.Float.toString i
                  | Some _ | None -> "-1")
-      ?aria_disabled=(fun () -> if g.group_disabled () then Some true else None)
+      ?aria_disabled=(fun () ->
+                       if S.get g.group_disabled then Some true else None)
       aria_atomic=false
       aria_relevant="additions"
       aria_live=(fun () -> if S.get within then `polite else `off)
-      data_empty=(fun () -> state (g.is_empty ()))
+      data_empty=(fun () -> state (S.get g.is_empty))
       on_key_down=(fun e ->
-                    call (Props.on_key_down props) e;
+                    Jsx.call (Props.on_key_down props) e;
                     Selectable_list.on_key_down g.list e)
       on_mouse_down=(fun e ->
-                      call (Props.on_mouse_down props) e;
+                      Jsx.call (Props.on_mouse_down props) e;
                       Selectable_list.on_mouse_down g.list e)
       on_focus_in=(fun e ->
-                    call (Props.on_focus_in props) e;
+                    Jsx.call (Props.on_focus_in props) e;
                     S.set set_within true;
                     Selectable_list.on_focus_in g.list e)
       on_focus_out=(fun e ->
-                     call (Props.on_focus_out props) e;
+                     Jsx.call (Props.on_focus_out props) e;
                      (match Js.Null.toOption (related e) with
                      | Some r when contains (focus_current e) r -> ()
                      | Some _ | None -> S.set set_within false);
@@ -666,7 +675,7 @@ module List = struct
       (fun () -> Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
       (fun () ->
         match Props.render_empty_state props with
-        | Some draw when g.is_empty () -> Jsx.element (draw () [@u])
+        | Some draw when S.get g.is_empty -> Jsx.element (S.get draw)
         | Some _ | None -> Jsx.string "")
     </div>
 
@@ -765,25 +774,28 @@ module Tag = struct
     let key =
       S.create_memo (fun () -> Option.value (Props.id props) ~default:given_key)
     in
-    let disabled () =
-      Option.value (Props.is_disabled props) ~default:false
-      || g.disabled_key (S.get key)
+    let disabled =
+      S.accessor (fun () ->
+          Option.value (Props.is_disabled props) ~default:false
+          || g.disabled_key (S.get key))
     in
     let m () = S.get g.manager in
     let selectable () =
-      (match g.selection_mode () with
+      (match S.get g.selection_mode with
         | `none -> false
         | `single | `multiple -> true)
-      && not (disabled ())
+      && not (S.get disabled)
     in
-    let selected () = Manager.is_selected (m ()) (S.get key) in
-    let removable () = g.removable () in
+    let selected =
+      S.accessor (fun () -> Manager.is_selected (m ()) (S.get key))
+    in
+    let removable = S.accessor (fun () -> S.get g.removable) in
     let row_id = S.create_unique_id () in
     let t =
       {
         state =
           {
-            key = (fun () -> S.get key);
+            key;
             is_selected = selected;
             is_disabled = disabled;
             allows_removing = removable;
@@ -800,11 +812,14 @@ module Tag = struct
               (fun () -> Props.children props)
             </Tag_context.Provider>)
     in
-    let text () =
-      match Props.text_value props with
-      | Some t -> t
-      | None ->
-          Option.value (first_text (S.to_array (S.get resolved))) ~default:""
+    let text =
+      S.accessor (fun () ->
+          match Props.text_value props with
+          | Some t -> t
+          | None ->
+              Option.value
+                (first_text (S.to_array (S.get resolved)))
+                ~default:"")
     in
     let element, set_element = S.create_signal None in
     let item =
@@ -812,7 +827,7 @@ module Tag = struct
         (Types.CreateSelectableItemProps.make
            ~selection_manager:(Either.right g.manager) ~key:(Either.right key)
            ~disabled:
-             (Either.right (S.create_memo (fun () -> Some (disabled ()))))
+             (Either.right (S.create_memo (fun () -> Some (S.get disabled))))
            ())
         element
     in
@@ -822,11 +837,11 @@ module Tag = struct
     S.on_mount (fun () ->
         Option.iter
           (fun e ->
-            g.add { key = (fun () -> S.get key); element = e; disabled; text };
+            g.add { key; element = e; disabled; text };
             S.on_cleanup (fun () -> g.drop e))
           (S.get element));
     let on_key_down e =
-      call (Props.on_key_down props) e;
+      Jsx.call (Props.on_key_down props) e;
       let row = current e in
       let from_row = target e == row in
       match pressed e with
@@ -843,7 +858,7 @@ module Tag = struct
               if further then stop e
           | None -> ())
       | _ when not from_row -> stop e
-      | ("Delete" | "Backspace") when removable () && not (disabled ()) ->
+      | ("Delete" | "Backspace") when S.get removable && not (S.get disabled) ->
           prevent e;
           g.remove (S.get key)
       | _ -> Selectable_item.on_key_down item e
@@ -854,48 +869,51 @@ module Tag = struct
         id=row_id
         ref=(fun e ->
               S.set set_element (Some e);
-              call (Props.ref props) e)
+              Jsx.call (Props.ref props) e)
         tabindex=(fun () ->
-                   if disabled () then "-1"
+                   if S.get disabled then "-1"
                    else
                      match S.get (Manager.focused_key (m ())) with
                      | None -> "0"
                      | Some k when String.equal k (S.get key) -> "0"
                      | Some _ -> "-1")
-        aria_label=(fun () -> text ())
+        aria_label=(fun () -> S.get text)
         ?aria_selected=(fun () ->
-                         if selectable () then Some (selected ()) else None)
-        ?aria_disabled=(fun () -> if disabled () then Some true else None)
+                         if selectable () then Some (S.get selected) else None)
+        ?aria_disabled=(fun () -> if S.get disabled then Some true else None)
         ?aria_describedby=(fun () ->
-                            if removable () then Some g.removal_hint else None)
+                            if S.get removable then Some g.removal_hint
+                            else None)
         data_key=(fun () -> Jsx.data (S.get key))
-        data_selected=(fun () -> state (selected ()))
-        data_disabled=(fun () -> state (disabled ()))
+        data_selected=(fun () -> state (S.get selected))
+        data_disabled=(fun () -> state (S.get disabled))
         on_pointer_down=(fun e ->
-                          call (Props.on_pointer_down props) e;
+                          Jsx.call (Props.on_pointer_down props) e;
                           if on_tag (pointer_target e) (pointer_current e) then
                             Selectable_item.on_pointer_down item e)
         on_pointer_up=(fun e ->
-                        call (Props.on_pointer_up props) e;
+                        Jsx.call (Props.on_pointer_up props) e;
                         if on_tag (pointer_target e) (pointer_current e) then
                           Selectable_item.on_pointer_up item e)
         on_click=(fun e ->
-                   call (Props.on_click props) e;
+                   Jsx.call (Props.on_click props) e;
                    if on_tag (mouse_target e) (mouse_current e) then
                      Selectable_item.on_click item e)
         on_key_down
         on_mouse_down=(fun e ->
-                        call (Props.on_mouse_down props) e;
+                        Jsx.call (Props.on_mouse_down props) e;
                         Selectable_item.on_mouse_down item e)
         on_focus=(fun e ->
-                   call (Props.on_focus props) e;
+                   Jsx.call (Props.on_focus props) e;
                    Selectable_item.on_focus item e)
         on_focus_in=(fun e ->
-                      call (Props.on_focus_in props) e;
+                      Jsx.call (Props.on_focus_in props) e;
                       (* The focus on what is inside a tag, its remove button,
                          is the tag's, so the keys and a removal start from
                          it. *)
-                      if focus_target e != focus_current e && not (disabled ())
+                      if
+                        focus_target e != focus_current e
+                        && not (S.get disabled)
                       then Manager.set_focused_key (m ()) ~key:(S.get key) ())
         ?as_=(fun () -> S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
@@ -934,11 +952,11 @@ module Remove_button = struct
       id
       aria_label="Remove"
       aria_labelledby=(fun () -> id ^ " " ^ t.row_id)
-      disabled=(fun () -> t.state.is_disabled ())
-      ?tabindex=(fun () -> if t.state.is_disabled () then None else Some "0")
+      disabled=(fun () -> S.get t.state.is_disabled)
+      ?tabindex=(fun () -> if S.get t.state.is_disabled then None else Some "0")
       on_click=(fun e ->
-                 call (Props.on_click props) e;
-                 g.remove (t.state.key ()))
+                 Jsx.call (Props.on_click props) e;
+                 g.remove (S.get t.state.key))
       ?as_=(fun () -> S.drawn_as props)
       props=(S.undrawn (S.omit props [| "children"; "id"; "onClick" |]))>
       (fun () -> Props.children props)

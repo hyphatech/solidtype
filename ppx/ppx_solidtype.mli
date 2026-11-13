@@ -42,18 +42,19 @@
     [let%component make ~(text : string) ?(count : int = 0) () = body] writes
     the module's [Props] -- its type, a getter per prop, [make], which builds
     props as a value, [check], and [omit], which names props by a variant of
-    their own -- and [make] and [component]. In [body] a value prop is read as a
-    thunk, [text ()], and a function prop is called, [on_pick v], an optional
-    one giving [Some] of its result or [None]: each is a live read of Solid's
-    props, so Solid tracks it. A prop may be read by a name of the body's own,
+    their own -- and [make] and [component]. In [body] a value prop is an
+    accessor, read as a signal is, [Solid.get text], and a function prop is
+    called, [on_pick v], an optional one giving [Some] of its result or [None]:
+    each is a live read of Solid's props, so Solid tracks it. A prop may be read
+    by a name of the body's own,
     [?ref:(given : (Dom.htmlDivElement -> unit) option)], so the prop [ref]
     leaves the stdlib's [ref] to the body.
 
     Children annotated [~(children : state Jsx.children)] are elements or a
     function of [state], checked as either; the body draws them with
-    [Jsx.draw (children ()) state]. A function child is typed as the check
-    expects it before it is bound, so it reads a record's fields by their names,
-    [s.is_pressed], though the record's module is not open.
+    [Jsx.draw (Solid.get children) state]. A function child is typed as the
+    check expects it before it is bound, so it reads a record's fields by their
+    names, [s.is_pressed], though the record's module is not open.
 
     Given the element it draws, [let%component make ... [@@element button]], the
     component also takes [as_], a function of [Html.Button.props] that draws in

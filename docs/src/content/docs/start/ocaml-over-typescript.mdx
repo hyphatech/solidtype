@@ -149,7 +149,7 @@ type answer = Waiting | Ready of int | Refused
 let view answer =
   <Switch>
     (fun () ->
-      match answer () with
+      match S.get answer with
       | Waiting -> <p>"waiting"</p>
       | Ready n -> <p>(fun () -> Jsx.int n)</p>)
   </Switch>
@@ -198,7 +198,7 @@ from them, so the two cannot drift:
 
 ```ocaml
 let%component make ~(name : string) ?(greeting : string = "Hello") () =
-  <p>(fun () -> Jsx.string (greeting () ^ ", " ^ name () ^ "!"))</p>
+  <p>(fun () -> Jsx.string (S.get greeting ^ ", " ^ S.get name ^ "!"))</p>
 ```
 
 ## Predictable

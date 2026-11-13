@@ -27,8 +27,11 @@
     to validate nothing, [novalidate], since a field's input may be one Kobalte
     hides. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type field = {
-  error : unit -> string option;
+  error : string option S.accessor;
       (** The server's error for the field, while it stands. *)
   changed : unit -> unit;  (** Tells the form the field was changed. *)
   left : unit -> unit;
@@ -59,10 +62,10 @@ module Props : sig
     ?on_reset:(Dom.event -> unit) ->
     ?on_invalid:(Dom.event -> unit) ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Form.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Form.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Form.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component

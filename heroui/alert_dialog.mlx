@@ -1,3 +1,4 @@
+module S = Solidtype.Solid
 module Jsx = Solidtype.Jsx
 module Show = Solidtype.Show
 
@@ -6,7 +7,7 @@ type placement = [ `auto | `center | `top | `bottom ]
 type size = [ `xs | `sm | `md | `lg | `cover ]
 
 (* What the dialog reads of its container. *)
-type container = { placement : unit -> placement; size : unit -> size }
+type container = { placement : placement S.accessor; size : size S.accessor }
 
 module Container_context = Solidtype.Context.Make_optional (struct
   type t = container
@@ -17,7 +18,11 @@ let within part = Dialog_frame.within part ~backdrop:"Alert_dialog.Backdrop"
 let container () =
   match Container_context.use () with
   | Some c -> c
-  | None -> { placement = (fun () -> `auto); size = (fun () -> `md) }
+  | None ->
+      {
+        placement = S.accessor (fun () -> `auto);
+        size = S.accessor (fun () -> `md);
+      }
 
 (* A class added after HeroUI's own, as React's className is. *)
 let after base = function Some c -> base ^ " " ^ c | None -> base
@@ -37,8 +42,10 @@ module Trigger = struct
       ~(children : Jsx.content) () =
     Dialog_frame.trigger ~slot:"alert-dialog-trigger"
       ~class_:(fun () ->
-        after (Styles.AlertDialog.trigger (slots ())) (class_ ()))
-      ~aria_label ~others:(Props.others props) children
+        after (Styles.AlertDialog.trigger (slots ())) (S.get class_))
+      ~aria_label:(fun () -> S.get aria_label)
+      ~others:(Props.others props)
+      (fun () -> S.get children)
   [@@element div]
 end
 
@@ -56,17 +63,22 @@ module Backdrop = struct
          Dialog_frame.overlay_state ->
          Solidtype.Jsx.element)
          option) () =
-    Dialog_frame.backdrop ~slot:"alert-dialog-backdrop" ~portal_container
+    Dialog_frame.backdrop ~slot:"alert-dialog-backdrop"
+      ~portal_container:(fun () -> S.get portal_container)
       ~class_:(fun () ->
         after
-          (Styles.AlertDialog.backdrop (slots ~variant:(variant ()) ()))
-          (class_ ()))
-      ~dismissable:is_dismissable
-      ~keyboard_dismissable:(fun () -> not (is_keyboard_dismiss_disabled ()))
-      ~is_open ~default_open
+          (Styles.AlertDialog.backdrop (slots ~variant:(S.get variant) ()))
+          (S.get class_))
+      ~dismissable:(fun () -> S.get is_dismissable)
+      ~keyboard_dismissable:(fun () -> not (S.get is_keyboard_dismiss_disabled))
+      ~is_open:(fun () -> S.get is_open)
+      ~default_open:(fun () -> S.get default_open)
       ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-      ~style ~ref:given_ref ~as_ ~others:(Props.others props)
-      (fun s -> Jsx.draw (children ()) s)
+      ~style:(fun () -> S.get style)
+      ~ref:given_ref
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s -> Jsx.draw (S.get children) s)
   [@@element div]
 end
 
@@ -85,14 +97,16 @@ module Container = struct
     Dialog_frame.container f ~slot:"alert-dialog-container"
       ~class_:(fun () ->
         after
-          (Styles.AlertDialog.container (slots ~size:(size ()) ()))
-          (class_ ()))
-      ~placement:(fun () -> placement_name (placement ()))
-      ~ref:given_ref ~as_ ~others:(Props.others props)
+          (Styles.AlertDialog.container (slots ~size:(S.get size) ()))
+          (S.get class_))
+      ~placement:(fun () -> placement_name (S.get placement))
+      ~ref:given_ref
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
       (fun s ->
         Jsx.element
           <Container_context.Provider value=(fun () -> c)>
-            (fun () -> Jsx.draw (children ()) s)
+            (fun () -> Jsx.draw (S.get children) s)
           </Container_context.Provider>)
   [@@element div]
 end
@@ -112,11 +126,13 @@ module Dialog = struct
     Dialog_frame.dialog f ~slot:"alert-dialog-dialog" ~role:`alertdialog
       ~class_:(fun () ->
         after
-          (Styles.AlertDialog.dialog (slots ~size:(c.size ()) ()))
-          (class_ ()))
-      ~placement:(fun () -> placement_name (c.placement ()))
-      ~ref:given_ref ~on_focus_out ~as_ ~others:(Props.others props)
-      (fun s -> Jsx.draw (children ()) s)
+          (Styles.AlertDialog.dialog (slots ~size:(S.get c.size) ()))
+          (S.get class_))
+      ~placement:(fun () -> placement_name (S.get c.placement))
+      ~ref:given_ref ~on_focus_out
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      (fun s -> Jsx.draw (S.get children) s)
   [@@element section]
 end
 
@@ -124,10 +140,10 @@ module Header = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () ->
-               after (Styles.AlertDialog.header (slots ())) (class_ ()))
+               after (Styles.AlertDialog.header (slots ())) (S.get class_))
       data_slot="alert-dialog-header"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -135,10 +151,11 @@ end
 module Body = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
-      class_=(fun () -> after (Styles.AlertDialog.body (slots ())) (class_ ()))
+      class_=(fun () ->
+               after (Styles.AlertDialog.body (slots ())) (S.get class_))
       data_slot="alert-dialog-body"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -147,10 +164,10 @@ module Footer = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     <div
       class_=(fun () ->
-               after (Styles.AlertDialog.footer (slots ())) (class_ ()))
+               after (Styles.AlertDialog.footer (slots ())) (S.get class_))
       data_slot="alert-dialog-footer"
       props=(Props.others props)>
-      (fun () -> children ())
+      (fun () -> S.get children)
     </div>
   [@@element div]
 end
@@ -161,15 +178,17 @@ module Icon = struct
     <div
       class_=(fun () ->
                after
-                 (Styles.AlertDialog.icon (slots ~status:(status ()) ()))
-                 (class_ ()))
+                 (Styles.AlertDialog.icon (slots ~status:(S.get status) ()))
+                 (S.get class_))
       data_slot="alert-dialog-icon"
       props=(Props.others props)>
       <Show
-        when_=(fun () -> Option.is_some (children ()))
+        when_=(fun () -> Option.is_some (S.get children))
         fallback=(fun () ->
-                   Status_icon.svg ~slot:"alert-dialog-default-icon" status)>
-        (fun () -> match children () with Some c -> c | None -> Jsx.string "")
+                   Status_icon.svg ~slot:"alert-dialog-default-icon" (fun () ->
+                       S.get status))>
+        (fun () ->
+          match S.get children with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
   [@@element div]
@@ -179,8 +198,9 @@ module Heading = struct
   let%component make ?(class_ : string option) ~(children : Jsx.content) () =
     Dialog_frame.heading ~slot:"alert-dialog-heading"
       ~class_:(fun () ->
-        after (Styles.AlertDialog.heading (slots ())) (class_ ()))
-      ~others:(Props.others props) children
+        after (Styles.AlertDialog.heading (slots ())) (S.get class_))
+      ~others:(Props.others props)
+      (fun () -> S.get children)
   [@@element h2]
 end
 
@@ -196,13 +216,18 @@ module Close_trigger = struct
     let f = within "Alert_dialog.Close_trigger" in
     Dialog_frame.close_trigger f ~slot:"alert-dialog-close-trigger"
       ~class_:(fun () ->
-        after (Styles.AlertDialog.close_trigger (slots ())) (class_ ()))
-      ~on_click ~as_ ~others:(Props.others props) ~children
+        after (Styles.AlertDialog.close_trigger (slots ())) (S.get class_))
+      ~on_click
+      ~as_:(fun () -> S.get as_)
+      ~others:(Props.others props)
+      ~children:(fun () -> S.get children)
   [@@element button]
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
     ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
-  Dialog_frame.root ~is_open ~default_open
+  Dialog_frame.root
+    ~is_open:(fun () -> S.get is_open)
+    ~default_open:(fun () -> S.get default_open)
     ~on_open_change:(fun o -> ignore (on_open_change o : unit option))
-    children
+    (fun () -> S.get children)

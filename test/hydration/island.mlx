@@ -12,7 +12,7 @@ module Tag = struct
 
   let%component make ~(children : state Jsx.children) () =
     let label, _ = S.create_signal "drawn" in
-    <span>(fun () -> Jsx.draw (children ()) { label })</span>
+    <span>(fun () -> Jsx.draw (S.get children) { label })</span>
 end
 
 let make () =

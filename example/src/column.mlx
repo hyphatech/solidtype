@@ -43,12 +43,12 @@ let%component make ~(status : Status.t) ~(tasks : Api.task array)
     ~(on_drop : float -> unit) ~(on_move : Api.task -> Status.t -> unit)
     ~(on_remove : Api.task -> unit) () =
   let over, set_over = S.create_signal false in
-  let label () = Status.label (status ()) in
-  let count () = Jsx.int (Array.length (tasks ())) in
+  let label () = Status.label (S.get status) in
+  let count () = Jsx.int (Array.length (S.get tasks)) in
   <section
     aria_label=(fun () -> label ())
     class_=(fun () ->
-             (if folded () then "min-w-12 grow-0 items-center "
+             (if S.get folded then "min-w-12 grow-0 items-center "
               else "min-w-64 grow ")
              ^ (if S.get over then
                   "bg-accent-soft ring-2 ring-inset ring-accent "
@@ -66,15 +66,15 @@ let%component make ~(status : Status.t) ~(tasks : Api.task array)
               S.set set_over false;
               Option.iter on_drop (Drag.dropped e))>
     <Show
-      when_=(fun () -> not (folded ()))
+      when_=(fun () -> not (S.get folded))
       fallback=(<div
                   class_="flex animate-in flex-col items-center gap-3 pt-0.5 \
                           fade-in duration-300">
                   (fun () ->
                     Jsx.element
                       (toggle ~label:(label ()) ~on_fold ~folded:true
-                         (status ())))
-                  (fun () -> Jsx.element (icon (status ())))
+                         (S.get status)))
+                  (fun () -> Jsx.element (icon (S.get status)))
                   <h2
                     class_="flex items-center gap-2 text-sm font-medium \
                             [writing-mode:vertical-rl]">
@@ -85,23 +85,23 @@ let%component make ~(status : Status.t) ~(tasks : Api.task array)
       <h2
         class_="flex animate-in items-center gap-2 whitespace-nowrap px-2 \
                 pt-1.5 text-sm font-medium fade-in duration-300">
-        (fun () -> Jsx.element (icon (status ())))
+        (fun () -> Jsx.element (icon (S.get status)))
         (fun () -> Jsx.string (label ()))
         <span class_="text-muted">(fun () -> count ())</span>
         <span class_="ms-auto -my-1">
           (fun () ->
             Jsx.element
-              (toggle ~label:(label ()) ~on_fold ~folded:false (status ())))
+              (toggle ~label:(label ()) ~on_fold ~folded:false (S.get status)))
         </span>
       </h2>
       <ul
         class_="flex min-h-24 min-w-60 flex-1 animate-in flex-col gap-2 \
                 overflow-y-auto fade-in duration-300">
         <For
-          each=(fun () -> tasks ())
+          each=(fun () -> S.get tasks)
           fallback=(<li class_="rounded-xl border border-dashed border-border">
                       <Empty_state class_="p-4 text-center text-sm">
-                        (fun () -> Jsx.string (empty ()))
+                        (fun () -> Jsx.string (S.get empty))
                       </Empty_state>
                     </li>)>
           (fun (t : Api.task) _ ->

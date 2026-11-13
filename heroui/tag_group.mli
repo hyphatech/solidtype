@@ -20,9 +20,12 @@
     Backspace remove the focused tag, or every chosen tag where it is chosen,
     and focus moves to the tag after it. *)
 
+module S := Solidtype.Solid
+module Jsx := Solidtype.Jsx
+
 type group = {
-  size : unit -> [ `sm | `md | `lg ] option;
-  variant : unit -> [ `default | `surface ] option;
+  size : [ `sm | `md | `lg ] option S.accessor;
+  variant : [ `default | `surface ] option S.accessor;
 }
 (** What a {!Tag} reads of the group it is in: the look of its tags. *)
 
@@ -37,16 +40,16 @@ module List : sig
     type t
 
     val check :
-      ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
+      ?render_empty_state:(unit -> Jsx.element) ->
       ?class_:string Solidtype.Check.value ->
       children:(_, [ `nodes ]) Solidtype.Check.children ->
-      ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-      ?props:t Solidtype.Solid.rest ->
+      ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+      ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
   end
 
-  val make : Props.t -> Solidtype.Jsx.element
-  val component : Props.t Solidtype.Jsx.component
+  val make : Props.t -> Jsx.element
+  val component : Props.t Jsx.component
 end
 
 (** The group, its tags of [size], [`md] by default, and [variant], [`default]
@@ -75,10 +78,10 @@ module Props : sig
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:(_, [ `nodes ]) Solidtype.Check.children ->
-    ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
-    ?props:t Solidtype.Solid.rest ->
+    ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
+    ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check
 end
 
-val make : Props.t -> Solidtype.Jsx.element
-val component : Props.t Solidtype.Jsx.component
+val make : Props.t -> Jsx.element
+val component : Props.t Jsx.component
