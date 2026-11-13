@@ -155,11 +155,11 @@ let%component make ?(action : string option)
   in
   <Context.Provider value=(fun () -> form)>
     <form
-      ?action
-      ?method_
-      ?aria_label
-      ?aria_labelledby
-      ?class_
+      ?action=(fun () -> S.get action)
+      ?method_=(fun () -> S.get method_)
+      ?aria_label=(fun () -> S.get aria_label)
+      ?aria_labelledby=(fun () -> S.get aria_labelledby)
+      ?class_=(fun () -> S.get class_)
       novalidate=true
       on_submit=submit
       on_reset=(fun e -> ignore (on_reset e : unit option))

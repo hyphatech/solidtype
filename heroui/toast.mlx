@@ -515,7 +515,7 @@ module Action_button = struct
                  ignore (on_click e : unit option);
                  ignore (on_press () : unit option))
       data_slot="toast-action-button"
-      ?as_
+      ?as_=(fun () -> S.get as_)
       props=(Props.others props)>
       (fun s -> Jsx.of_content (Jsx.draw (S.get children) s))
     </Button>

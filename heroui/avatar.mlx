@@ -28,16 +28,16 @@ module Image = struct
     let a = within "Avatar.Image" in
     <Kobalte.Img
       src=(fun () -> S.get src)
-      ?alt
-      ?srcset
-      ?sizes
+      ?alt=(fun () -> S.get alt)
+      ?srcset=(fun () -> S.get srcset)
+      ?sizes=(fun () -> S.get sizes)
       ?crossorigin=(fun () ->
                      Option.map
                        (function
                          | `anonymous -> "anonymous"
                          | `use_credentials -> "use-credentials")
                        (S.get crossorigin))
-      ?loading
+      ?loading=(fun () -> S.get loading)
       class_=(fun () ->
                after
                  (Styles.Avatar.image (Styles.Avatar.slots (a.options ())))
@@ -97,7 +97,7 @@ let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
   <Show when_=(fun () -> shown ())>
     <Context.Provider value=(fun () -> a)>
       <Kobalte.Root
-        ?fallback_delay
+        ?fallback_delay=(fun () -> S.get fallback_delay)
         class_=(fun () ->
                  after
                    (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))

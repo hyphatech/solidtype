@@ -89,7 +89,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
         pressed=(fun () -> S.get selected)
         on_change=set_selected
         class_=(fun () -> class_ ())
-        ?aria_label
+        ?aria_label=(fun () -> S.get aria_label)
         ref=watch
         data_slot="toggle-button"
         data_selected=(fun () -> Jsx.flag (S.get selected))
@@ -111,7 +111,7 @@ let%component make ?(variant : [ `default | `ghost ] option)
           g.join (fun () -> S.get disabled);
           <Item
             class_=(fun () -> class_ ())
-            ?aria_label
+            ?aria_label=(fun () -> S.get aria_label)
             ref=watch
             data_slot="toggle-button"
             data_selected=(fun () -> Jsx.flag (g.is_selected key))

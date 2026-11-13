@@ -358,7 +358,7 @@ module List = struct
       ~(children : Jsx.content) () =
     let t = within "Tabs.List" in
     <Kobalte.List
-      ?aria_label
+      ?aria_label=(fun () -> Solid.get aria_label)
       class_=(fun () ->
                after
                  (Styles.Tabs.tab_list (Solid.get t.slots))
@@ -429,7 +429,7 @@ let%component make ?(selected_key : string option)
         tell key
   in
   <Kobalte.Root
-    ?value=selected
+    ?value=(fun () -> Solid.get selected)
     orientation=(fun () -> Solid.get orientation)
     activation_mode=(fun () -> Solid.get keyboard_activation)
     disabled=(fun () -> Solid.get is_disabled)

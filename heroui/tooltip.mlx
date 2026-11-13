@@ -69,7 +69,7 @@ module Trigger = struct
     let t = within "Tooltip.Trigger" in
     <As_div
       as_="div"
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       class_=(fun () -> after (Styles.Tooltip.trigger t.slots) (S.get class_))
       role=`button
       tabindex="0"
@@ -137,7 +137,7 @@ module Arrow = struct
           size=12. style="visibility: hidden;" ref=(fun k -> follow k)
         />;
         <div
-          ?class_
+          ?class_=(fun () -> S.get class_)
           style=(fun () ->
                   "position: absolute; " ^ S.get position
                   ^ match S.get style with Some s -> " " ^ s | None -> "")
@@ -205,8 +205,8 @@ let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)
     }
   in
   <Kobalte.Root
-    ?open_=is_open
-    ?default_open
+    ?open_=(fun () -> S.get is_open)
+    ?default_open=(fun () -> S.get default_open)
     on_open_change=(fun o -> ignore (on_open_change o : unit option))
     disabled=(fun () -> S.get is_disabled)
     trigger_on_focus_only=(fun () ->

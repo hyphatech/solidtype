@@ -146,7 +146,7 @@ let%component make ?(id : string option) ?(text_value : string option)
   <Context.Provider value=(fun () -> t)>
     <Headless.Tag
       id=(fun () -> key)
-      ?text_value
+      ?text_value=(fun () -> S.get text_value)
       is_disabled=(fun () -> disabled ())
       ref=(fun e ->
             ignore (given_ref e : unit option);

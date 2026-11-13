@@ -351,8 +351,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       disabled=(fun () -> S.get disabled)
       read_only=(fun () -> S.get read_only)
       required=(fun () -> S.get required)
-      ?name
-      ?value
+      ?name=(fun () -> S.get name)
+      ?value=(fun () -> S.get value)
       validation_state=(fun () -> if S.get invalid then `invalid else `valid)
       class_=(fun () ->
                after (Styles.Checkbox.base (S.get c.slots)) (S.get class_))

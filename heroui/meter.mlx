@@ -167,7 +167,7 @@ let%component make ~(value : float) ?(min_value : float = 0.)
       value=(fun () -> S.get value)
       min_value=(fun () -> S.get min_value)
       max_value=(fun () -> S.get max_value)
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       get_value_label=value_label
       class_=(fun () ->
                after (Styles.Meter.base (S.get m.slots)) (S.get class_))

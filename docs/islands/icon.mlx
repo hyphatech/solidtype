@@ -21,7 +21,7 @@ struct
                  ^ string_of_int (width I.data)
                  ^ " "
                  ^ string_of_int (height I.data))
-      ?class_
+      ?class_=(fun () -> Solidtype.Solid.get class_)
       inner_html=(fun () -> body I.data)
     />
 end

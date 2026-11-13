@@ -133,8 +133,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
           Jsx.element
             <div
               role=`group
-              ?aria_labelledby=labelled_by
-              ?aria_describedby=described_by
+              ?aria_labelledby=(fun () -> S.get labelled_by)
+              ?aria_describedby=(fun () -> S.get described_by)
               ?aria_disabled=(fun () ->
                                if S.get disabled then Some true else None)
               class_=(fun () ->

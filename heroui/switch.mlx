@@ -177,8 +177,8 @@ let%component make ?(size : [ `lg | `md | `sm ] = `md)
       read_only=(fun () -> S.get is_read_only)
       required=(fun () -> S.get is_required)
       validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-      ?name
-      ?value
+      ?name=(fun () -> S.get name)
+      ?value=(fun () -> S.get value)
       class_=(fun () ->
                after (Styles.Switch.base (S.get s.slots)) (S.get class_))
       ref=(fun e ->

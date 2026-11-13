@@ -113,15 +113,15 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
   let state () = { is_disabled } in
   <Area_context.Provider value=(fun () -> a)>
     <Headless.Root
-      ?value
-      ?default_value
+      ?value=(fun () -> S.get value)
+      ?default_value=(fun () -> S.get default_value)
       on_change=(fun c -> ignore (on_change c : unit option))
       on_change_end=(fun c -> ignore (on_change_end c : unit option))
-      ?x_channel
-      ?y_channel
-      ?color_space
-      ?x_name
-      ?y_name
+      ?x_channel=(fun () -> S.get x_channel)
+      ?y_channel=(fun () -> S.get y_channel)
+      ?color_space=(fun () -> S.get color_space)
+      ?x_name=(fun () -> S.get x_name)
+      ?y_name=(fun () -> S.get y_name)
       disabled=(fun () -> S.get is_disabled)
       class_=(fun () ->
                after (Styles.ColorArea.base (S.get slots)) (S.get class_))

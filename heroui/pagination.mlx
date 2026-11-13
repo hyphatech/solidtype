@@ -140,7 +140,7 @@ module Previous_icon = struct
       () =
     <span
       aria_hidden=true
-      ?class_
+      ?class_=(fun () -> S.get class_)
       data_slot="pagination-previous-icon"
       props=(Props.others props)>
       (fun () ->
@@ -158,7 +158,7 @@ module Next_icon = struct
       () =
     <span
       aria_hidden=true
-      ?class_
+      ?class_=(fun () -> S.get class_)
       data_slot="pagination-next-icon"
       props=(Props.others props)>
       (fun () ->

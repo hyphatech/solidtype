@@ -293,13 +293,15 @@ handler an expression makes, `on_click=(remove id)`, and a spread are a
 thunk the ppx writes, since Melange evaluates an expression before the
 element it is written in, outside a branch Solid has not drawn, and never
 out of a function; an
-optional prop, `?name=`, a thunk of an option or an accessor of one by its
-name, `?title=note`, `undefined` while it is `None`, and `?name:` in the
-check, so a required prop refuses it; a
+optional prop, `?name=`, a thunk of an option, as any value that changes
+is, `undefined` while it is `None`, and `?name:` in the check, so a
+required prop refuses it -- a bare name is refused there, since it is a
+value read once wherever else it is given; a
 name is given back its JavaScript spelling, and a value wrapped in one
 of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
 argument is therefore written `(fun _ -> ...)`; a component's render
-function given by name, a slat rhp reads its layout from, is `render=f`,
+function given by name, a slat rhp reads its layout from, is `render=f`, and
+only by name -- one written in place is the child, `<C>(fun ...)</C>` --
 its only child, checked and passed as a function child is, since
 ocamlformat cannot print an attribute named `children` beside MLX's own. A string literal, however
 quoted, becomes a JavaScript string, `{js|...|js}`, its backslashes

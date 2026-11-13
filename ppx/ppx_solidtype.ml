@@ -300,6 +300,11 @@ let split args =
   in
   match (given, cs) with
   | [], cs -> Ok (props, cs)
+  | [ (_, ({ pexp_desc = Pexp_function _; _ } as f)) ], _ ->
+      Error
+        ( f.pexp_loc,
+          "a function written in place is the component's child, <C>(fun \
+           ...)</C>; render=f gives one by its name" )
   | [ (_, (f : expression)) ], [] ->
       let loc = f.pexp_loc in
       Ok
@@ -328,13 +333,13 @@ let optional ~loc label (value : expression) =
     Error (loc, Printf.sprintf "?%s is not optional: pass %s=" label label)
   else
     match value.pexp_desc with
-    | Pexp_ident _ -> Ok (thunk ~loc [%expr Solidtype.Solid.get [%e value]])
     | _ when is_thunk value -> Ok (uncurried ~loc value)
     | _ ->
         Error
           ( loc,
             Printf.sprintf
-              "an optional prop is a thunk of an option: ?%s=(fun () -> o)"
+              "an optional prop is a thunk of an option, as any value that \
+               changes is: ?%s=(fun () -> o)"
               label )
 
 let absent_or ~loc read =
@@ -683,11 +688,7 @@ let component map ~loc path args =
     | Labelled l when starts_with ~prefix:"data_" l ->
         Ok (None, None, data ~loc l (map value))
     | Optional "as_" ->
-        let+ value =
-          match value.pexp_desc with
-          | Pexp_ident _ -> optional ~loc "as_" value
-          | _ -> Ok (to_solid ~loc value)
-        in
+        let+ value = optional ~loc "as_" value in
         ( None,
           None,
           [%expr Solidtype.Jsx.d "as" [%e absent_or ~loc (map value)]] )

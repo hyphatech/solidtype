@@ -248,7 +248,7 @@ let picker ?value ?default_value ?(fixed = false) ?placement ?own_value
     <p data_testid="outside">"Outside"</p>
     <Color_picker
       ?default_value=(fun () -> Option.map parse default_value)
-      ?value=held
+      ?value=(fun () -> S.get held)
       on_change=(fun c ->
                   told := Array.append !told [| hex c |];
                   if (not fixed) && Option.is_some value then
