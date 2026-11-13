@@ -364,7 +364,7 @@ let () =
 module Direction = struct
   (* A column's direction, as a part inside it reads it. *)
   let make () =
-    let c = Table.use_column_context () in
+    let c = Table.Column.Context.use () in
     <span>
       (fun () ->
         Jsx.string

@@ -52,8 +52,6 @@ module Context = Solidtype.Context.Make_optional (struct
   type t = layout
 end)
 
-let use () = Context.use ()
-
 let%component make ~(layout : layout) ~(children : Jsx.content) () =
   <Context.Provider value=(fun () -> S.get layout)>
     (fun () -> S.get children)

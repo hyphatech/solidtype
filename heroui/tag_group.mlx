@@ -7,14 +7,18 @@ type group = {
   variant : [ `default | `surface ] option S.accessor;
 }
 
-module Context = Solidtype.Context.Make_optional (struct
+module Group_context = Solidtype.Context.Make_optional (struct
   type t = group
 end)
 
-let use_context part =
-  match Context.use () with
+let within part =
+  match Group_context.use () with
   | Some g -> g
   | None -> invalid_arg (part ^ " is used inside a Tag_group")
+
+module Context = struct
+  let use () = within "Tag_group.Context.use"
+end
 
 external listen : _ Dom.element_like -> string -> (Dom.event -> unit) -> unit
   = "addEventListener"
@@ -37,8 +41,8 @@ let slots () = Styles.TagGroup.slots (Styles.TagGroup.options ())
 module List = struct
   let%component make ?(render_empty_state : (unit -> Jsx.element) option)
       ?(class_ : string option) ~(children : Jsx.content) () =
-    ignore (use_context "Tag_group.List" : group);
-    let h = Headless.use_context () in
+    ignore (within "Tag_group.List" : group);
+    let h = Headless.Context.use () in
     let self, watch_self = self_focus () in
     <Headless.List
       class_=(fun () -> after (Styles.TagGroup.list (slots ())) (S.get class_))
@@ -94,7 +98,7 @@ let%component make ?(size : [ `sm | `md | `lg ] option)
       (fun () -> children ())
     </Headless.Error_message>
   in
-  <Context.Provider value=(fun () -> g)>
+  <Group_context.Provider value=(fun () -> g)>
     <Headless.Root
       class_=(fun () -> after (Styles.TagGroup.base (slots ())) (S.get class_))
       data_slot="tag-group"
@@ -108,5 +112,5 @@ let%component make ?(size : [ `sm | `md | `lg ] option)
         </Description.Slot.Provider>
       </Label.Slot.Provider>
     </Headless.Root>
-  </Context.Provider>
+  </Group_context.Provider>
 [@@element div]

@@ -53,15 +53,6 @@ type column_size = Solidtype_headless.Table.column_size =
   | Fraction of float
       (** A share of what the other columns leave, as CSS's [fr] is. *)
 
-val use_row_context : unit -> Solidtype_headless.Table.row
-(** The row a part is in -- its level, whether it holds rows and is expanded,
-    selected or disabled -- as HeroUI's cell's render function is given it;
-    outside a {!Row} it raises [Invalid_argument]. *)
-
-val use_cell_context : unit -> Solidtype_headless.Table.cell
-(** The cell a part is in, and whether it is in the tree column; outside a
-    {!Cell} it raises [Invalid_argument]. *)
-
 (** The [<div>] the table scrolls in, sideways, while the table and its footer
     stay as wide as their container. *)
 module Scroll_container : sig
@@ -313,6 +304,13 @@ end
     the selection lets a press run them, as {!Solidtype_headless.Table.Row}'s
     do. *)
 module Row : sig
+  module Context : sig
+    val use : unit -> Solidtype_headless.Table.row
+    (** The row a part is in -- its level, whether it holds rows and is
+        expanded, selected or disabled -- as HeroUI's cell's render function is
+        given it; outside a {!Row} it raises [Invalid_argument]. *)
+  end
+
   module Props : sig
     type t
 
@@ -343,6 +341,12 @@ end
     It declares [data-focus-visible], its row's [data-level], [data-expanded]
     and [data-has-child-items], and [data-tree-column] in a tree's column. *)
 module Cell : sig
+  module Context : sig
+    val use : unit -> Solidtype_headless.Table.cell
+    (** The cell a part is in, and whether it is in the tree column; outside a
+        {!Cell} it raises [Invalid_argument]. *)
+  end
+
   type state = {
     is_hovered : bool S.accessor;
     is_pressed : bool S.accessor;

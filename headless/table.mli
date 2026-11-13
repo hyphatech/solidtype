@@ -94,8 +94,10 @@ type context = {
 (** What a table's parts, and a style over them, read of it: how it is sorted
     and its rows are selected, and each row's state by its key. *)
 
-val use_context : unit -> context
-(** The table above; outside a {!Root} it raises [Invalid_argument]. *)
+module Context : sig
+  val use : unit -> context
+  (** The table above; outside a {!Root} it raises [Invalid_argument]. *)
+end
 
 type row = {
   key : string;
@@ -110,11 +112,6 @@ type row = {
 }
 (** What a part inside a {!Row} reads of it, and a style's attribute on it. *)
 
-val use_row_context : unit -> row
-(** The row above, read by a part inside it, or by a style's attribute on it,
-    which Solid reads inside the row; outside a {!Row} it raises
-    [Invalid_argument]. *)
-
 type cell = {
   is_tree_column : bool S.accessor;
       (** Whether it is in the table's tree column. *)
@@ -122,19 +119,12 @@ type cell = {
 }
 (** What a part inside a {!Cell} reads of it, and a style's attribute on it. *)
 
-val use_cell_context : unit -> cell
-(** The cell above, read as {!use_row_context} is; outside a {!Cell} it raises
-    [Invalid_argument]. *)
-
 type column = {
   direction : [ `ascending | `descending ] option S.accessor;
   resizing : bool S.accessor;  (** Whether it is being resized. *)
 }
 (** What a part inside a {!Column} reads of it: which way it is sorted, if it
     is, and whether it is being resized. *)
-
-val use_column_context : unit -> column
-(** The column above; outside a {!Column} it raises [Invalid_argument]. *)
 
 (** A [<div>] whose width the columns of the table inside it share, and which
     lets a {!Column_resizer} resize them, as React Aria's
@@ -239,6 +229,11 @@ end
     controlled, else [default_width] until it is resized, and [data-resizing]
     while it is. *)
 module Column : sig
+  module Context : sig
+    val use : unit -> column
+    (** The column above; outside a {!Column} it raises [Invalid_argument]. *)
+  end
+
   module Props : sig
     type t
 
@@ -295,6 +290,13 @@ end
     runs it, and a touch held half a second selects and turns the table to
     [`toggle], so a tap then selects. A disabled row runs none. *)
 module Row : sig
+  module Context : sig
+    val use : unit -> row
+    (** The row above, read by a part inside it, or by a style's attribute on
+        it, which Solid reads inside the row; outside a {!Row} it raises
+        [Invalid_argument]. *)
+  end
+
   module Props : sig
     type t
 
@@ -322,6 +324,12 @@ end
     focused by the keys, [data-column-index] its column, [data-tree-column] in a
     tree's. *)
 module Cell : sig
+  module Context : sig
+    val use : unit -> cell
+    (** The cell above, read as a row's is; outside a {!Cell} it raises
+        [Invalid_argument]. *)
+  end
+
   module Props : sig
     type t
 

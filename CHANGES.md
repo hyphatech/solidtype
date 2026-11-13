@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Every context is reached by its module's `Context.use ()`, as the ports'
+  were. Breaking: `Table.use_context ()` is `Table.Context.use ()`;
+  `use_row_context`, `use_cell_context` and `use_column_context` are
+  `Table.Row.Context.use`, `Table.Cell.Context.use` and
+  `Table.Column.Context.use`, in `solidtype-heroui`'s `Table` too;
+  `Tag_group.use_context` and `use_tag_context` are `Tag_group.Context.use`
+  and `Tag_group.Tag.Context.use`, and HeroUI's `Tag_group.use_context part`
+  is `Tag_group.Context.use ()`; `Color_swatch_picker.use_item_context` is
+  `Color_swatch_picker.Item.Context.use`; `Color_picker.use_context` is
+  `Color_picker.Context.use`; and `Virtualizer.use` is
+  `Virtualizer.Context.use`. Kobalte's hooks keep Kobalte's names.
+
 - What changes is read one way, `S.get x`, and given one way, `fun () -> e`.
   Breaking: a component's value prop is read `S.get name`, not `name ()`,
   and its children `S.get children`; a field of a part's state or context

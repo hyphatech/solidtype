@@ -57,7 +57,7 @@ column's `width` or `default_width` asks, and a `Table.Column_resizer` resizes
 its column, dragged, or reached by Tab and stepped by the keys. Given a
 `tree_column`, it is a tree grid: a `Table.Row` written among another's cells
 is drawn after it while it is expanded, and the arrows expand, collapse and
-climb it. `Table.use_row_context ()` and `Table.use_cell_context ()` are a
+climb it. `Table.Row.Context.use ()` and `Table.Cell.Context.use ()` are a
 row's and a cell's state, for a part inside one and for a style's attribute
 on one, which Solid reads inside it.
 
@@ -99,7 +99,7 @@ unless the list scrolls, then a page at a time, and typing the start of a
 colour's name reaches the option of that name. A disabled option is passed
 over. A press, Space or Enter chooses an option, and `on_change` is told its
 colour. Its value is an option's when the two are one colour, compared as a
-hex with its alpha. `Color_swatch_picker.use_item_context ()` is an option's
+hex with its alpha. `Color_swatch_picker.Item.Context.use ()` is an option's
 colour and state, for a part inside one and for a style's attribute on one.
 
 <Example code={ExPickerCode} title="headless_color_swatch_picker.mlx"><ExPicker.make client:visible /></Example>
@@ -122,8 +122,8 @@ Enter chooses a tag as `selection_mode` says, and Escape clears the choice.
 Delete and Backspace, or a tag's remove button, call `on_remove` with the keys
 to remove, every chosen one where the tag is chosen; once they are off the
 page the focus moves to the tag after, or before, or to the list.
-`Tag_group.use_context ()` reads the group by a tag's key, and
-`Tag_group.use_tag_context ()` a tag, for a part inside one.
+`Tag_group.Context.use ()` reads the group by a tag's key, and
+`Tag_group.Tag.Context.use ()` a tag, for a part inside one.
 
 <Example code={ExTagGroupCode} title="headless_tag_group.mlx"><ExTagGroup.make client:visible /></Example>
 
@@ -145,7 +145,7 @@ layout, `Virtualizer.list_layout`, React Aria's `ListLayout`, or, around a
 `Table.Root`, `Virtualizer.table_layout`, its `TableLayout`: the table's parts
 are then `<div>`s placed as React Aria places them, the header kept over the
 rows, only the rows in view drawn. A collection
-reads it by `Virtualizer.use ()` and places its entries by
+reads it by `Virtualizer.Context.use ()` and places its entries by
 `Virtualizer.window`. HeroUI's list box, select, combo box and autocomplete
 read it, as `Solidtype_heroui.Virtualizer`.
 
@@ -158,9 +158,9 @@ after the list's last entry, which calls `on_load_more` as it comes within
 ends with it still in view, never while `is_loading`. `Table.Load_more` and
 HeroUI's `List_box.Load_more_item` place one each.
 
-`Table.use_context ()` is the table a part is in: how it is sorted and its
+`Table.Context.use ()` is the table a part is in: how it is sorted and its
 rows are selected, each row's state by its key, and selecting all or none.
-`Table.use_column_context ()` is the column a part is in: which way it is
+`Table.Column.Context.use ()` is the column a part is in: which way it is
 sorted.
 
 ## Kobalte's own, fixed

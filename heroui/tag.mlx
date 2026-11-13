@@ -52,7 +52,7 @@ module Remove_button = struct
       ?(children : Jsx.content option) () =
     let t = in_tag "Tag.Remove_button" in
     t.remove_here ();
-    let tag = Headless.use_tag_context () in
+    let tag = Headless.Tag.Context.use () in
     let i = Interaction.create ~disabled:(fun () -> S.get tag.is_disabled) () in
     <Headless.Remove_button
       aria_label="Remove tag"
@@ -89,8 +89,8 @@ let%component make ?(id : string option) ?(text_value : string option)
     ~(children : state Jsx.children)
     ?(as_ : (Solidtype.Html.Div.props -> state -> Solidtype.Jsx.element) option)
     () =
-  let g = Tag_group.use_context "Tag" in
-  let h = Headless.use_context () in
+  let g = Tag_group.Context.use () in
+  let h = Headless.Context.use () in
   let key =
     match S.untrack (fun () -> S.get id) with
     | Some k -> k

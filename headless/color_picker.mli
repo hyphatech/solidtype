@@ -33,8 +33,10 @@ type t = {
 (** The picker a part is inside: its colour, read as it changes, and what moves
     it. *)
 
-val use_context : unit -> t option
-(** The picker above, if any, read as a component is made. *)
+module Context : sig
+  val use : unit -> t option
+  (** The picker above, if any, read as a component is made. *)
+end
 
 val value :
   t option ->

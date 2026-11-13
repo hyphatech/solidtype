@@ -535,7 +535,7 @@ let%component make ?(aria_label : string option)
      its element; where a virtualizer has not drawn it, by its place. *)
   (* A list is laid out by a list's layout, never a table's. *)
   let layout =
-    match Virtualizer.use () with
+    match Virtualizer.Context.use () with
     | Some (List l) -> Some l
     | Some (Table _) | None -> None
   in
