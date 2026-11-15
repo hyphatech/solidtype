@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## 0.11.0 (2026-11-15)
 
 - In JSX a value is written as in TSX, and the ppx reads it as Solid's
   compiler does: a literal or a name is given as it is, and any other
