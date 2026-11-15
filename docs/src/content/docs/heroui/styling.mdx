@@ -23,7 +23,7 @@ utility given wins over them:
 
 <Example code={tailwind} title="button_tailwind.mlx"><Tailwind.make client:visible /></Example>
 
-A part's class is reactive, as any prop: `class_=(fun () -> ...)` changes
+A part's class is reactive, as any prop: `class_=(cls (S.get on))` changes
 with what it reads. For scoped styles, CSS Modules and any other library that
 gives a class string work the same way.
 
@@ -81,7 +81,7 @@ are, `is_pressed`, `is_selected`. Each part's `.mli` lists its fields.
 
 ```ocaml
 <Button>
-  (fun s -> <span>(fun () -> Jsx.string (if S.get s.is_pressed then "Saving" else "Save"))</span>)
+  (fun s -> <span>(Jsx.string (if S.get s.is_pressed then "Saving" else "Save"))</span>)
 </Button>
 ```
 

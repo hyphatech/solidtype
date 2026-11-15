@@ -28,9 +28,9 @@ let team ?(mode = `none) ?(behavior = `toggle) ?(disabled = [||])
   H.render (fun () ->
       <Table.Root
         aria_label="Team members"
-        selection_mode=(fun () -> mode)
-        selection_behavior=(fun () -> behavior)
-        disabled_keys=(fun () -> disabled)
+        selection_mode=mode
+        selection_behavior=behavior
+        disabled_keys=disabled
         on_selection_change=(fun keys -> selected := keys)
         on_row_action=(fun key -> actions := !actions @ [ "table " ^ key ])>
         <Table.Header>
@@ -39,19 +39,17 @@ let team ?(mode = `none) ?(behavior = `toggle) ?(disabled = [||])
           <Table.Column>"Actions"</Table.Column>
         </Table.Header>
         <Table.Body>
-          <For each=(fun () -> members)>
+          <For each=members>
             (fun m _ ->
               <Table.Row
-                id=(fun () -> m.id)
-                on_action=(fun _ -> actions := !actions @ [ "row " ^ m.id ])
-                ?href=(fun () -> href m)
+                id=m.id
+                on_action=(fun () -> actions := !actions @ [ "row " ^ m.id ])
+                ?href=(href m)
                 target="_blank">
-                <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
-                <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
+                <Table.Cell>(Jsx.string m.name)</Table.Cell>
+                <Table.Cell>(Jsx.string m.role)</Table.Cell>
                 <Table.Cell>
-                  <button type_=`button>
-                    (fun () -> Jsx.string ("Edit " ^ m.name))
-                  </button>
+                  <button type_=`button>(Jsx.string ("Edit " ^ m.name))</button>
                 </Table.Cell>
               </Table.Row>)
           </For>

@@ -69,14 +69,7 @@ let type_name : type_ -> string = function
 let both ?(type_ : type_ option) ?align ?color ?weight ?truncate ?element_type
     ?class_ () =
   T.render (fun () ->
-      <Typography
-        ?type_=(fun () -> type_)
-        ?align=(fun () -> align)
-        ?color=(fun () -> color)
-        ?weight=(fun () -> weight)
-        ?truncate=(fun () -> truncate)
-        ?element_type=(fun () -> element_type)
-        ?class_=(fun () -> class_)>
+      <Typography ?type_ ?align ?color ?weight ?truncate ?element_type ?class_>
         "Text"
       </Typography>);
   let solidtype = solidtype_host () in

@@ -63,19 +63,18 @@ end
    Kobalte's, which turns on Enter going down, as a native button clicks. *)
 let of_state ?(disabled = false) () =
   T.render (fun () ->
-      <Toggle_button is_disabled=(fun () -> disabled)>
+      <Toggle_button is_disabled=disabled>
         (fun s ->
           <span>
-            (fun () ->
-              Solidtype.Jsx.string
-                (T.words
-                   [
-                     ("hovered", s.is_hovered);
-                     ("pressed", s.is_pressed);
-                     ("focused", s.is_focused);
-                     ("focus-visible", s.is_focus_visible);
-                     ("disabled", s.is_disabled);
-                   ]))
+            (Solidtype.Jsx.string
+               (T.words
+                  [
+                    ("hovered", s.is_hovered);
+                    ("pressed", s.is_pressed);
+                    ("focused", s.is_focused);
+                    ("focus-visible", s.is_focus_visible);
+                    ("disabled", s.is_disabled);
+                  ]))
           </span>)
       </Toggle_button>);
   let* solidtype =
@@ -119,11 +118,7 @@ let alone ?variant ?size ?(is_icon_only = false) ?(default_selected = false)
   in
   T.render (fun () ->
       <Toggle_button
-        ?variant=(fun () -> variant)
-        ?size=(fun () -> size)
-        is_icon_only=(fun () -> is_icon_only)
-        default_selected=(fun () -> default_selected)
-        is_disabled=(fun () -> disabled)>
+        ?variant ?size is_icon_only default_selected is_disabled=disabled>
         "Like"
       </Toggle_button>);
   let* solidtype = run (T.by_role "button") Twin.step in
@@ -206,37 +201,34 @@ let grouped ?(selection_mode = `single) ?(default_selected_keys = [||])
   in
   T.render (fun () ->
       <Toggle_button_group
-        selection_mode=(fun () -> selection_mode)
-        default_selected_keys=(fun () -> default_selected_keys)
-        disallow_empty_selection=(fun () -> disallow_empty_selection)
-        orientation=(fun () -> orientation)
-        ?size=(fun () -> size)
-        is_detached=(fun () -> is_detached)
-        full_width=(fun () -> full_width)
-        is_disabled=(fun () -> disabled)
+        selection_mode
+        default_selected_keys
+        disallow_empty_selection
+        orientation
+        ?size
+        is_detached
+        full_width
+        is_disabled=disabled
         aria_label="Alignment">
         <Toggle_button
           id="left"
-          ?is_disabled=(fun () ->
-                           if Option.equal String.equal enabled (Some "left")
-                           then Some false
-                           else None)>
+          ?is_disabled=(if Option.equal String.equal enabled (Some "left") then
+                          Some false
+                        else None)>
           "left"
         </Toggle_button>
         <Toggle_button
           id="center"
-          ?is_disabled=(fun () ->
-                         if Option.equal String.equal enabled (Some "center")
-                         then Some false
-                         else None)>
+          ?is_disabled=(if Option.equal String.equal enabled (Some "center")
+                        then Some false
+                        else None)>
           <Toggle_button_group.Separator /> "center"
         </Toggle_button>
         <Toggle_button
           id="right"
-          ?is_disabled=(fun () ->
-                         if Option.equal String.equal enabled (Some "right")
-                         then Some false
-                         else None)>
+          ?is_disabled=(if Option.equal String.equal enabled (Some "right") then
+                          Some false
+                        else None)>
           <Toggle_button_group.Separator /> "right"
         </Toggle_button>
       </Toggle_button_group>);
@@ -257,24 +249,21 @@ let grouped ?(selection_mode = `single) ?(default_selected_keys = [||])
 let group_of_state ~disabled =
   T.render (fun () ->
       <Toggle_button_group
-        aria_label="Alignment"
-        orientation=`vertical
-        is_disabled=(fun () -> disabled)>
+        aria_label="Alignment" orientation=`vertical is_disabled=disabled>
         (fun g ->
           Solidtype.Jsx.fragment
             [|
               <span data_words="group">
-                (fun () ->
-                  Solidtype.Jsx.string
-                    (T.words
-                       [
-                         ( "vertical",
-                           S.accessor (fun () ->
-                               match S.get g.orientation with
-                               | `vertical -> true
-                               | `horizontal -> false) );
-                         ("disabled", g.is_disabled);
-                       ]))
+                (Solidtype.Jsx.string
+                   (T.words
+                      [
+                        ( "vertical",
+                          S.accessor (fun () ->
+                              match S.get g.orientation with
+                              | `vertical -> true
+                              | `horizontal -> false) );
+                        ("disabled", g.is_disabled);
+                      ]))
               </span>;
               <Toggle_button id="left">"Left"</Toggle_button>;
             |])
@@ -306,8 +295,7 @@ let () =
               <Toggle_button>
                 (fun s ->
                   <span>
-                    (fun () ->
-                      Solidtype.Jsx.string (T.words [ ("on", s.is_selected) ]))
+                    (Solidtype.Jsx.string (T.words [ ("on", s.is_selected) ]))
                   </span>)
               </Toggle_button>);
           let b = T.by_role "button" in
@@ -338,8 +326,7 @@ let () =
           let told = ref [] in
           T.render (fun () ->
               <Toggle_button
-                is_selected=(fun () -> S.get on)
-                on_change=(fun v -> told := v :: !told)>
+                is_selected=(S.get on) on_change=(fun v -> told := v :: !told)>
                 "Like"
               </Toggle_button>);
           let b = T.by_role "button" in
@@ -472,7 +459,7 @@ let () =
           T.render (fun () ->
               <Toggle_button_group
                 selection_mode=`multiple
-                selected_keys=(fun () -> S.get keys)
+                selected_keys=(S.get keys)
                 on_selection_change=(fun k -> told := k :: !told)>
                 <Toggle_button id="left">"left"</Toggle_button>
                 <Toggle_button id="right">"right"</Toggle_button>

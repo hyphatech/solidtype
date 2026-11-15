@@ -9,7 +9,7 @@ let make () =
   let multiple, set_multiple = S.create_signal [| "news"; "travel" |] in
   <div class_="flex flex-col gap-8">
     <Tag_group
-      selected_keys=(fun () -> S.get single)
+      selected_keys=(S.get single)
       selection_mode=`single
       on_selection_change=(S.set set_single)>
       <Label>"Single Selection"</Label>
@@ -22,7 +22,7 @@ let make () =
       <Description>"Choose one category"</Description>
     </Tag_group>
     <Tag_group
-      selected_keys=(fun () -> S.get multiple)
+      selected_keys=(S.get multiple)
       selection_mode=`multiple
       on_selection_change=(S.set set_multiple)>
       <Label>"Multiple Selection"</Label>

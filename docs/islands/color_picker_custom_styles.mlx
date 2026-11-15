@@ -6,7 +6,7 @@ module Label = Solidtype_heroui.Label
 module Colors = Solidtype_kobalte.Colors
 
 let make () =
-  <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+  <Color_picker default_value=(Colors.parse_color "#0485F7")>
     <Color_picker.Trigger class_="rounded-xl bg-default-soft px-3 py-2">
       <Color_swatch size=`lg />
       <Label class_="font-medium text-foreground">"Theme color"</Label>

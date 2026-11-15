@@ -11,7 +11,7 @@ module Motion_button = struct
     external check :
       animate:keyframes Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Button.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -24,9 +24,8 @@ let make () =
   <Button
     as_=(fun p s ->
             <Motion_button
-              animate=(fun () ->
-                        Motion_button.keyframes
-                          ~scale:(if S.get s.is_pressed then 0.9 else 1.))
+              animate=(Motion_button.keyframes
+                         ~scale:(if S.get s.is_pressed then 0.9 else 1.))
               props=p
             />)>
     "Press me"

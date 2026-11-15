@@ -27,21 +27,19 @@ module Image = struct
       ?(loading : string option) ?(class_ : string option) () =
     let a = within "Avatar.Image" in
     <Kobalte.Img
-      src=(fun () -> S.get src)
-      ?alt=(fun () -> S.get alt)
-      ?srcset=(fun () -> S.get srcset)
-      ?sizes=(fun () -> S.get sizes)
-      ?crossorigin=(fun () ->
-                     Option.map
-                       (function
-                         | `anonymous -> "anonymous"
-                         | `use_credentials -> "use-credentials")
-                       (S.get crossorigin))
-      ?loading=(fun () -> S.get loading)
-      class_=(fun () ->
-               after
-                 (Styles.Avatar.image (Styles.Avatar.slots (a.options ())))
-                 (S.get class_))
+      src=(S.get src)
+      ?alt=(S.get alt)
+      ?srcset=(S.get srcset)
+      ?sizes=(S.get sizes)
+      ?crossorigin=(Option.map
+                      (function
+                        | `anonymous -> "anonymous"
+                        | `use_credentials -> "use-credentials")
+                      (S.get crossorigin))
+      ?loading=(S.get loading)
+      class_=(after
+                (Styles.Avatar.image (Styles.Avatar.slots (a.options ())))
+                (S.get class_))
       props=(Props.others props)
     />
   [@@element img]
@@ -49,24 +47,23 @@ end
 
 module Fallback = struct
   let%component make ?(color : color option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let a = within "Avatar.Fallback" in
     <Kobalte.Fallback
-      class_=(fun () ->
-               after
-                 (Styles.Avatar.fallback
-                    (Styles.Avatar.slots (a.options ?color:(S.get color) ())))
-                 (S.get class_))
+      class_=(after
+                (Styles.Avatar.fallback
+                   (Styles.Avatar.slots (a.options ?color:(S.get color) ())))
+                (S.get class_))
       data_slot="avatar-fallback"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </Kobalte.Fallback>
   [@@element span]
 end
 
 let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
     ?(variant : [ `default | `soft ] option) ?(fallback_delay : float option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   (* A prop the avatar sets is its own, else its group's; and in a group it is
      shown while the group shows it. *)
   let group = Avatar_group.Context.use () in
@@ -94,16 +91,15 @@ let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
             ?variant:(S.get variant) ());
     }
   in
-  <Show when_=(fun () -> shown ())>
-    <Context.Provider value=(fun () -> a)>
+  <Show when_=(shown ())>
+    <Context.Provider value=a>
       <Kobalte.Root
-        ?fallback_delay=(fun () -> S.get fallback_delay)
-        class_=(fun () ->
-                 after
-                   (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
-                   (S.get class_))
+        ?fallback_delay=(S.get fallback_delay)
+        class_=(after
+                  (Styles.Avatar.base (Styles.Avatar.slots (a.options ())))
+                  (S.get class_))
         props=(Props.others props)>
-        (fun () -> S.get children)
+        (S.get children)
       </Kobalte.Root>
     </Context.Provider>
   </Show>

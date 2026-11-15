@@ -26,7 +26,7 @@ let make () =
                   alert "Form submitted successfully!")>
     <Autocomplete
       is_required=true
-      is_invalid=(fun () -> missing ())
+      is_invalid=(missing ())
       class_="w-full"
       name="state"
       placeholder="Select one"

@@ -87,8 +87,7 @@ let users =
 
 let make () =
   <Virtualizer
-    layout=(fun () ->
-             Virtualizer.table_layout ~heading_size:42. ~row_size:42. ())>
+    layout=(Virtualizer.table_layout ~heading_size:42. ~row_size:42. ())>
     <Table>
       <Table.Scroll_container>
         <Table.Content
@@ -102,12 +101,12 @@ let make () =
             <Table.Column id="email" min_width=240.>"Email"</Table.Column>
           </Table.Header>
           <Table.Body>
-            <For each=(fun () -> users)>
+            <For each=users>
               (fun user _ ->
-                <Table.Row id=(fun () -> string_of_int user.id)>
-                  <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
-                  <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
-                  <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+                <Table.Row id=(string_of_int user.id)>
+                  <Table.Cell>(Jsx.string user.name)</Table.Cell>
+                  <Table.Cell>(Jsx.string user.role)</Table.Cell>
+                  <Table.Cell>(Jsx.string user.email)</Table.Cell>
                 </Table.Row>)
             </For>
           </Table.Body>

@@ -209,8 +209,8 @@ let both ~multiple =
         <button type_=`button>"Before"</button>
         <Select
           placeholder="Select one"
-          selection_mode=(fun () -> if multiple then `multiple else `single)
-          disabled_keys=(fun () -> [| "texas" |])
+          selection_mode=(if multiple then `multiple else `single)
+          disabled_keys=[| "texas" |]
           on_change=(fun keys ->
                       let keys = Array.copy keys in
                       Array.sort String.compare keys;
@@ -254,12 +254,12 @@ let same (solidtype, react) =
    children of their state, as words, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
-      <Select aria_label="State" is_disabled=(fun () -> disabled)>
+      <Select aria_label="State" is_disabled=disabled>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -306,16 +306,14 @@ let value_of_state ~multiple =
   T.render (fun () ->
       <Select
         aria_label="State"
-        selection_mode=(fun () -> if multiple then `multiple else `single)
-        default_value=(fun () ->
-                        if multiple then [| "florida"; "utah" |]
-                        else [| "florida" |])>
+        selection_mode=(if multiple then `multiple else `single)
+        default_value=(if multiple then [| "florida"; "utah" |]
+                       else [| "florida" |])>
         <Select.Trigger>
           <Select.Value>
             (fun s ->
               <span data_words="value">
-                (fun () ->
-                  Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
+                (Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
               </span>)
           </Select.Value>
         </Select.Trigger>
@@ -342,7 +340,7 @@ let value_of_many () =
       <Select
         aria_label="State"
         selection_mode=`multiple
-        default_value=(fun () -> [| "florida"; "texas"; "utah" |])>
+        default_value=[| "florida"; "texas"; "utah" |]>
         <Select.Trigger><Select.Value /></Select.Trigger>
         <Select.Popover>
           <List_box selection_mode=`multiple>
@@ -404,7 +402,7 @@ let () =
             T.render (fun () ->
                 match given with
                 | `value ->
-                    <Select value=(fun () -> [| "texas" |])>
+                    <Select value=[| "texas" |]>
                       <Select.Trigger>
                         <Select.Value /> <Select.Indicator />
                       </Select.Trigger>
@@ -419,24 +417,23 @@ let () =
                     let states =
                       [| ("florida", "Florida"); ("texas", "Texas") |]
                     in
-                    <Select value=(fun () -> [| "texas" |])>
+                    <Select value=[| "texas" |]>
                       <Select.Trigger>
                         <Select.Value /> <Select.Indicator />
                       </Select.Trigger>
                       <Select.Popover>
                         <List_box>
-                          <Solidtype.For each=(fun () -> states)>
+                          <Solidtype.For each=states>
                             (fun (id, name) _ ->
-                              <List_box.Item
-                                id=(fun () -> id) text_value=(fun () -> name)>
-                                (fun () -> Solidtype.Jsx.string name)
+                              <List_box.Item id text_value=name>
+                                (Solidtype.Jsx.string name)
                               </List_box.Item>)
                           </Solidtype.For>
                         </List_box>
                       </Select.Popover>
                     </Select>
                 | `default_value ->
-                    <Select default_value=(fun () -> [| "texas" |])>
+                    <Select default_value=[| "texas" |]>
                       <Select.Trigger>
                         <Select.Value /> <Select.Indicator />
                       </Select.Trigger>
@@ -464,18 +461,16 @@ let () =
         (fun () ->
           T.render (fun () ->
               <Select
-                selection_mode=`multiple
-                default_value=(fun () -> [| "florida"; "utah" |])>
+                selection_mode=`multiple default_value=[| "florida"; "utah" |]>
                 <Select.Trigger>
                   <Select.Value>
                     (fun s ->
                       <span>
-                        (fun () ->
-                          Solidtype.Jsx.string
-                            (string_of_int
-                               (Array.length
-                                  (Solidtype.Solid.get s.selected_keys))
-                            ^ " states"))
+                        (Solidtype.Jsx.string
+                           (string_of_int
+                              (Array.length
+                                 (Solidtype.Solid.get s.selected_keys))
+                           ^ " states"))
                       </span>)
                   </Select.Value>
                 </Select.Trigger>
@@ -497,7 +492,7 @@ let () =
           let refs = ref [] and told = ref [] and left = ref 0 in
           let note seen what = seen := what :: !seen in
           T.render (fun () ->
-              <Form validation_errors=(fun () -> [ ("state", "Choose again") ])>
+              <Form validation_errors=[ ("state", "Choose again") ]>
                 <Select
                   name="state"
                   title="States"

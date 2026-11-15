@@ -35,7 +35,7 @@ let make () =
     allows_empty_collection=true
     class_="w-[300px]"
     placeholder="Select a user"
-    value=(fun () -> S.get selected)
+    value=(S.get selected)
     on_change=(S.set set_selected)>
     <Label>"User"</Label>
     <Autocomplete.Trigger>
@@ -45,7 +45,7 @@ let make () =
     </Autocomplete.Trigger>
     <Autocomplete.Popover>
       <Autocomplete.Filter
-        input_value=(fun () -> S.get search) on_input_change=(S.set set_search)>
+        input_value=(S.get search) on_input_change=(S.set set_search)>
         <Search_field
           aria_label="Search users"
           class_="sticky top-0 z-10"
@@ -57,18 +57,16 @@ let make () =
             <Search_field.Clear_button />
           </Search_field.Group>
         </Search_field>
-        <Virtualizer
-          layout=(fun () -> Virtualizer.list_layout ~row_size:50. ())>
+        <Virtualizer layout=(Virtualizer.list_layout ~row_size:50. ())>
           <List_box
             render_empty_state=(fun _ ->
                                  <Empty_state>"No results found"</Empty_state>)>
-            <Solidtype.For each=(fun () -> found ())>
+            <Solidtype.For each=(found ())>
               (fun (user : Users.user) _ ->
-                <List_box.Item
-                  id=(fun () -> user.id) text_value=(fun () -> user.name)>
+                <List_box.Item id=user.id text_value=user.name>
                   <div class_="flex flex-col">
-                    <Label>(fun () -> Jsx.string user.name)</Label>
-                    <Description>(fun () -> Jsx.string user.email)</Description>
+                    <Label>(Jsx.string user.name)</Label>
+                    <Description>(Jsx.string user.email)</Description>
                   </div>
                   <List_box.Item_indicator />
                 </List_box.Item>)

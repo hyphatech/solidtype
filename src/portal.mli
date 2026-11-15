@@ -7,7 +7,7 @@ module Props : sig
     ?use_shadow:bool Check.value ->
     ?is_svg:bool Check.value ->
     ?ref:(Dom.element -> unit) ->
-    ?children:('f, [ `nodes ]) Check.children ->
+    ?children:('f, [ `elements ]) Check.children ->
     unit ->
     unit
 end

@@ -80,7 +80,7 @@ let make () =
   <Combo_box
     allows_empty_collection=true
     class_="w-[256px]"
-    input_value=(fun () -> S.get filter_text)
+    input_value=(S.get filter_text)
     on_input_change=search>
     <Label>"Pick a Character"</Label>
     <Combo_box.Input_group>
@@ -89,16 +89,15 @@ let make () =
     <Combo_box.Popover>
       <List_box render_empty_state=(fun _ -> <Empty_state />)>
         <Solidtype.For
-          each=(fun () ->
-                 let found = found () in
-                 Array.sub found 0 (min (S.get loaded) (Array.length found)))>
+          each=(let found = found () in
+                Array.sub found 0 (min (S.get loaded) (Array.length found)))>
           (fun name _ ->
-            <List_box.Item id=(fun () -> name) text_value=(fun () -> name)>
-              (fun () -> Jsx.string name) <List_box.Item_indicator />
+            <List_box.Item id=name text_value=name>
+              (Jsx.string name) <List_box.Item_indicator />
             </List_box.Item>)
         </Solidtype.For>
         <List_box.Load_more_item
-          is_loading=(fun () -> S.get loading) on_load_more=load_more>
+          is_loading=(S.get loading) on_load_more=load_more>
           <div class_="flex items-center justify-center gap-2 py-2">
             <Spinner size=`sm />
             <span class_="muted text-sm">"Loading more..."</span>

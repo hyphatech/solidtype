@@ -14,7 +14,7 @@ let island () =
       disabled=true on_click=(fun _ -> S.set set_saves (S.get saves + 1))>
       "Delete"
     </Button.Root>
-    <output>(fun () -> Jsx.int (S.get saves))</output>
+    <output>(Jsx.int (S.get saves))</output>
   </div>
 
 external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Button.tsx"]

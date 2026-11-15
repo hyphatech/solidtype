@@ -16,8 +16,7 @@ module Tag = struct
 
   let%component make ~(children : state Jsx.children) () =
     <span>
-      (fun () ->
-        Jsx.draw (S.get children) { label = S.accessor (fun () -> "drawn") })
+      (Jsx.draw (S.get children) { label = S.accessor (fun () -> "drawn") })
     </span>
 end
 
@@ -33,10 +32,7 @@ let () =
                 <div>
                   <Tag>"plain"</Tag>
                   <Tag>
-                    (fun s ->
-                      <b>
-                        (fun () -> Jsx.string (Solidtype.Solid.get s.label))
-                      </b>)
+                    (fun s -> <b>(Jsx.string (Solidtype.Solid.get s.label))</b>)
                   </Tag>
                 </div>)
           in

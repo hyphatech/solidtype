@@ -61,10 +61,9 @@ decide how solidtype is shaped.
 
 **A reactive read is a plain call.** Solid's accessor is a JavaScript
 function that takes nothing, which OCaml would call through Melange's
-`Curry` helper, an arity check on every call. solidtype types it as
-uncurried, `type 'a accessor = (unit -> 'a [@u])`, and `Solid.get` is
-inlined, so `Solid.get count` compiles to `count()`, the call Solid's JSX
-makes. An accessor of your own is `Solid.accessor (fun () -> e)`, which
+`Curry` helper, an arity check on every call. solidtype's `'a
+Solid.accessor` is that JavaScript function, and `Solid.get` is inlined, so
+`Solid.get count` compiles to `count()`, the call Solid's JSX makes. An accessor of your own is `Solid.accessor (fun () -> e)`, which
 Melange writes as a plain JavaScript function, so you never write `[@u]`.
 
 **The libraries have no private modules.** Melange keeps what it knows of a

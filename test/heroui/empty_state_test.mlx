@@ -21,9 +21,7 @@ let both said =
   T.render (fun () ->
       match said with
       | Some s ->
-          <Empty_state class_="py-6">
-            (fun () -> Solidtype.Jsx.string s)
-          </Empty_state>
+          <Empty_state class_="py-6">(Solidtype.Jsx.string s)</Empty_state>
       | None -> <Empty_state class_="py-6" />);
   let solidtype =
     match T.query "[data-slot=empty-state]" with

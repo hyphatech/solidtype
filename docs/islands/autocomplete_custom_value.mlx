@@ -20,33 +20,27 @@ let currencies =
 
 let make () =
   <Autocomplete
-    class_="w-[256px]"
-    default_value=(fun () -> [| "usd" |])
-    placeholder="Select a currency">
+    class_="w-[256px]" default_value=[| "usd" |] placeholder="Select a currency">
     <Label>"Currency"</Label>
     <Autocomplete.Trigger>
       <Autocomplete.Value>
         (fun s ->
           <span class_="contents">
-            (fun () ->
-              match S.get s.selected_keys with
-              | [| key |] -> (
-                  match
-                    Array.find_opt (fun c -> String.equal c.id key) currencies
-                  with
-                  | Some c ->
-                      Jsx.element
-                        <span class_="flex min-w-0 items-center gap-1.5">
-                          <span class_="font-medium">
-                            (fun () -> Jsx.string c.symbol)
-                          </span>
-                          <span>(fun () -> Jsx.string c.code)</span>
-                          <span class_="truncate text-muted">
-                            (fun () -> Jsx.string c.name)
-                          </span>
-                        </span>
-                  | None -> Jsx.element Jsx.nothing)
-              | _ -> Jsx.element Jsx.nothing)
+            (match S.get s.selected_keys with
+            | [| key |] -> (
+                match
+                  Array.find_opt (fun c -> String.equal c.id key) currencies
+                with
+                | Some c ->
+                    <span class_="flex min-w-0 items-center gap-1.5">
+                      <span class_="font-medium">(Jsx.string c.symbol)</span>
+                      <span>(Jsx.string c.code)</span>
+                      <span class_="truncate text-muted">
+                        (Jsx.string c.name)
+                      </span>
+                    </span>
+                | None -> Jsx.nothing)
+            | _ -> Jsx.nothing)
           </span>)
       </Autocomplete.Value>
       <Autocomplete.Indicator />
@@ -64,13 +58,12 @@ let make () =
         <List_box
           render_empty_state=(fun _ ->
                                <Empty_state>"No results found"</Empty_state>)>
-          <Solidtype.For each=(fun () -> currencies)>
+          <Solidtype.For each=currencies>
             (fun c _ ->
-              <List_box.Item
-                id=(fun () -> c.id) text_value=(fun () -> c.code ^ " " ^ c.name)>
+              <List_box.Item id=c.id text_value=(c.code ^ " " ^ c.name)>
                 <div class_="flex flex-col">
-                  <Label>(fun () -> Jsx.string c.code)</Label>
-                  <Description>(fun () -> Jsx.string c.name)</Description>
+                  <Label>(Jsx.string c.code)</Label>
+                  <Description>(Jsx.string c.name)</Description>
                 </div>
                 <List_box.Item_indicator />
               </List_box.Item>)

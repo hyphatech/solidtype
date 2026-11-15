@@ -7,5 +7,5 @@ let make () =
     class_="button button--primary"
     type_=`button
     on_click=(fun _ -> S.update set_count succ)>
-    "Clicked " (fun () -> Jsx.int (S.get count)) " times"
+    "Clicked " (Jsx.int (S.get count)) " times"
   </button>

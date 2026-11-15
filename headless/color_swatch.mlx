@@ -19,7 +19,7 @@ module Props = struct
     ?translations:Types.ColorSwatch_Root_Translations.t Solidtype.Check.value ->
     ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
     ?props:'spread Solidtype.Solid.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Div.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -34,11 +34,10 @@ let make (props : Props.t) =
   let picker = Color_picker.Context.use () in
   let color () = shown picker (Props.value props) in
   <Kobalte.Root
-    value=(fun () -> color ())
-    style=(fun () ->
-            "background-color: "
-            ^ Color.to_string (color ()) ~format:`rgba ()
-            ^ match Props.style props with Some s -> "; " ^ s | None -> "")
+    value=(color ())
+    style=("background-color: "
+          ^ Color.to_string (color ()) ~format:`rgba ()
+          ^ match Props.style props with Some s -> "; " ^ s | None -> "")
     props=(S.omit props [| "value"; "style" |])
   />
 

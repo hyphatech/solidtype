@@ -12,11 +12,11 @@
       let i = Interaction.create ~disabled:(fun () -> S.get disabled) () in
       <Kobalte.Root
         ref=(fun b -> Interaction.watch i b)
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_pressed=(Jsx.flag (Interaction.pressed i))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(Jsx.flag (Interaction.disabled i))>
     ]} *)
 
 type t

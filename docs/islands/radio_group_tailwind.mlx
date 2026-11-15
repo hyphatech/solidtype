@@ -38,22 +38,22 @@ let make () =
     variant=`secondary>
     <Label class_="font-medium text-foreground">"Billing cycle"</Label>
     <Description>"Choose how often you are charged."</Description>
-    <For each=(fun () -> options)>
+    <For each=options>
       (fun (value, label, about) _ ->
-        <Radio value=(fun () -> value)>
-          <Radio.Content class_=(fun () -> content)>
-            <Radio.Control class_=(fun () -> control)>
-              <Radio.Indicator class_=(fun () -> indicator) />
+        <Radio value>
+          <Radio.Content class_=content>
+            <Radio.Control class_=control>
+              <Radio.Indicator class_=indicator />
             </Radio.Control>
             <div class_="flex flex-col gap-0.5">
               <span
                 class_="font-medium text-foreground \
                         group-data-[selected=true]:text-success-soft-foreground">
-                (fun () -> Solidtype.Jsx.string label)
+                (Solidtype.Jsx.string label)
               </span>
               <Description
                 class_="group-data-[selected=true]:text-success-soft-foreground/80">
-                (fun () -> Solidtype.Jsx.string about)
+                (Solidtype.Jsx.string about)
               </Description>
             </div>
           </Radio.Content>

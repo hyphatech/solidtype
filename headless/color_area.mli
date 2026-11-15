@@ -12,7 +12,7 @@
       [rgb(4, 133, 247 / 0.5)].
 
     {[
-      <Color_area.Root default_value=(fun () -> Colors.parse_color "#0485F7")>
+      <Color_area.Root default_value=(Colors.parse_color "#0485F7")>
         <Color_area.Background>
           <Color_area.Thumb>
             <Color_area.HiddenInputX /> <Color_area.HiddenInputY />

@@ -8,10 +8,10 @@
 
     {[
       <Color_swatch_picker.Root
-        default_value=(fun () -> Colors.parse_color "#8B5CF6")>
-        <For each=(fun () -> colors)>
+        default_value=(Colors.parse_color "#8B5CF6")>
+        <For each=colors>
           (fun c _ ->
-            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+            <Color_swatch_picker.Item color=(Colors.parse_color c)>
               <Color_swatch_picker.Swatch />
             </Color_swatch_picker.Item>)
         </For>
@@ -61,7 +61,7 @@ module Root : sig
       ?layout:[ `grid | `stack ] Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
@@ -88,7 +88,7 @@ module Item : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 

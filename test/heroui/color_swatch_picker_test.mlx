@@ -167,27 +167,24 @@ let both ?(but = []) ?value ?default_value ?size ?variant ?layout ?disabled
   let told = ref [] in
   T.render (fun () ->
       <Picker
-        ?value=(fun () -> Option.map Colors.parse_color value)
-        ?default_value=(fun () -> Option.map Colors.parse_color default_value)
+        ?value=(Option.map Colors.parse_color value)
+        ?default_value=(Option.map Colors.parse_color default_value)
         on_change=(fun c -> told := Color.to_string c ~format:`hex () :: !told)
-        ?size=(fun () -> size)
-        ?variant=(fun () -> variant)
-        ?layout=(fun () -> layout)>
-        <For each=(fun () -> colors)>
+        ?size
+        ?variant
+        ?layout>
+        <For each=colors>
           (fun c i ->
             <Picker.Item
-              color=(fun () -> Colors.parse_color c)
-              is_disabled=(fun () ->
-                            Option.equal Int.equal disabled
-                              (Some (Solidtype.Solid.get i)))>
+              color=(Colors.parse_color c)
+              is_disabled=(Option.equal Int.equal disabled
+                             (Some (Solidtype.Solid.get i)))>
               <Picker.Swatch />
-              (fun () ->
-                if heart then
-                  Jsx.element
-                    <Picker.Indicator>
-                      <svg data_heart="" view_box="0 0 16 16" />
-                    </Picker.Indicator>
-                else Jsx.element <Picker.Indicator />)
+              (if heart then
+                 <Picker.Indicator>
+                   <svg data_heart="" view_box="0 0 16 16" />
+                 </Picker.Indicator>
+               else <Picker.Indicator />)
             </Picker.Item>)
         </For>
       </Picker>);
@@ -218,29 +215,25 @@ let both ?(but = []) ?value ?default_value ?size ?variant ?layout ?disabled
 let of_state ~disabled =
   T.render (fun () ->
       <Picker aria_label="Colour">
-        <Picker.Item
-          color=(fun () -> Colors.parse_color "#0485F7")
-          is_disabled=(fun () -> disabled)>
+        <Picker.Item color=(Colors.parse_color "#0485F7") is_disabled=disabled>
           (fun s ->
             <span data_words="item">
-              (fun () ->
-                Jsx.string
-                  (T.words
-                     [
-                       ("hovered", s.is_hovered);
-                       ("pressed", s.is_pressed);
-                       ("selected", s.is_selected);
-                       ("focused", s.is_focused);
-                       ("focus-visible", s.is_focus_visible);
-                       ("disabled", s.is_disabled);
-                     ]
-                  ^ " "
-                  ^ Color.to_string
-                      (Solidtype.Solid.get s.color)
-                      ~format:`hex ()))
+              (Jsx.string
+                 (T.words
+                    [
+                      ("hovered", s.is_hovered);
+                      ("pressed", s.is_pressed);
+                      ("selected", s.is_selected);
+                      ("focused", s.is_focused);
+                      ("focus-visible", s.is_focus_visible);
+                      ("disabled", s.is_disabled);
+                    ]
+                 ^ " "
+                 ^ Color.to_string (Solidtype.Solid.get s.color) ~format:`hex ()
+                 ))
             </span>)
         </Picker.Item>
-        <Picker.Item color=(fun () -> Colors.parse_color "#EF4444")>
+        <Picker.Item color=(Colors.parse_color "#EF4444")>
           <Picker.Swatch />
         </Picker.Item>
       </Picker>);
@@ -322,7 +315,7 @@ let () =
           T.render (fun () ->
               <Picker title="Colors" style="--x: 1">
                 <Picker.Item
-                  color=(fun () -> Colors.parse_color "#F43F5E")
+                  color=(Colors.parse_color "#F43F5E")
                   title="Rose"
                   style="--y: 2"
                   ref=(fun _ -> incr refs)>

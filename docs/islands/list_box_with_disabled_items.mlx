@@ -12,7 +12,7 @@ let make () =
     <List_box
       aria_label="File actions"
       class_="w-full p-2"
-      disabled_keys=(fun () -> [| "delete-file" |])
+      disabled_keys=[| "delete-file" |]
       selection_mode=`none
       on_action=(fun (_ : string) -> ())>
       <List_box.Section>

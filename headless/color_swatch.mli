@@ -5,7 +5,7 @@
     props and every attribute its [<div>] does, a [style] after its own.
 
     {[
-      <Color_swatch value=(fun () -> Colors.parse_color "#0485F7") />
+      <Color_swatch value=(Colors.parse_color "#0485F7") />
     ]}
 
     Given no [value], it is its {!Color_picker}'s colour, as React Aria's is,
@@ -31,7 +31,7 @@ module Props : sig
       Solidtype.Check.value ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:'spread S.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Div.check
 end
 

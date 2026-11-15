@@ -43,7 +43,7 @@ let make () =
                   alert "Form submitted successfully!")>
     <Combo_box
       is_required=true
-      is_invalid=(fun () -> Option.is_some (error ()))
+      is_invalid=(Option.is_some (error ()))
       class_="w-full"
       name="animal"
       on_change=(S.set set_animal)>
@@ -53,17 +53,16 @@ let make () =
       </Combo_box.Input_group>
       <Combo_box.Popover>
         <List_box>
-          <Solidtype.For each=(fun () -> animals)>
+          <Solidtype.For each=animals>
             (fun animal _ ->
-              <List_box.Item
-                id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
-                (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+              <List_box.Item id=animal.id text_value=animal.name>
+                (Jsx.string animal.name) <List_box.Item_indicator />
               </List_box.Item>)
           </Solidtype.For>
         </List_box>
       </Combo_box.Popover>
       <Field_error>
-        (fun () -> Jsx.string (Option.value (error ()) ~default:""))
+        (Jsx.string (Option.value (error ()) ~default:""))
       </Field_error>
     </Combo_box>
     <Button class_="w-fit" type_=`submit>"Submit"</Button>

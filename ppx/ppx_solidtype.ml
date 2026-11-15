@@ -121,15 +121,16 @@ let unmark (e : expression) =
 
 let is_function (e : expression) =
   is_named_render e
-  || match e.pexp_desc with Pexp_function _ -> not (is_thunk e) | _ -> false
+  || match e.pexp_desc with Pexp_function _ -> true | _ -> false
 
-(* What a prop is decides how Solid's compiler is handed it: a literal, an
-   element, a function and a name as they are, a thunk as the expression it
-   returns. The syntax decides, and the types hold it: an element's attribute
-   is annotated, and a component's props go through its check. A name is
-   passed as it is whatever it holds, a callback or a constant, since only
-   its type could say whether it is a thunk, and that type then refuses one
-   where a value belongs. *)
+(* What a prop is decides how Solid's compiler is handed it, as Solid's own
+   compiler decides from TSX: a literal, an element, a function and a name as
+   they are, and any other expression read again as what it reads changes,
+   in a thunk the ppx writes. The syntax decides, and the types hold it: an
+   element's attribute is annotated, and a component's props go through its
+   check. A name is passed as it is whatever it holds, since only its type
+   could say what it is, and that type then refuses a signal where its value
+   belongs. *)
 type kind = Literal | Element | Function | Thunk
 
 let kind_of ~handler (e : expression) =
@@ -216,17 +217,6 @@ let uncurried ~loc (e : expression) =
   | _ -> marked e
 
 let thunk ~loc (e : expression) = uncurried ~loc [%expr fun () -> [%e e]]
-
-(* What changes is given as a thunk the caller writes, [fun () -> e], made
-   one of no argument as it stands. Any other expression is refused where it
-   is written: a thunk made elsewhere would reach Solid only through an
-   adapter, and its laziness would not show where it is given. *)
-let to_solid ~loc (e : expression) =
-  if is_thunk e then uncurried ~loc e
-  else
-    B.pexp_extension ~loc:e.pexp_loc
-      (Location.error_extensionf ~loc:e.pexp_loc
-         "a value that changes is given as a thunk, (fun () -> ...)")
 
 let call ~loc (f : expression) =
   let apply f =
@@ -324,23 +314,16 @@ let labelled ~loc = function
       Error (loc, Printf.sprintf "?%s is not supported: pass ~%s" label label)
   | Nolabel -> Error (loc, "a JSX prop is labelled")
 
-(* An optional prop, [?name=o]: a thunk of an option, or an accessor of one
-   by its name -- a prop passed on, or a signal -- whose [None] Solid and
-   Kobalte are given as [undefined], absent. OCaml's own [?name:] in the check
-   refuses it where the prop is not optional. *)
+(* An optional prop, [?name=o], is an option read as a required prop's value
+   is, whose [None] Solid and Kobalte are given as [undefined], absent.
+   OCaml's own [?name:] in the check refuses it where the prop is not
+   optional. *)
 let optional ~loc label (value : expression) =
   if starts_with ~prefix:"data_" label || String.equal label spread then
     Error (loc, Printf.sprintf "?%s is not optional: pass %s=" label label)
   else
-    match value.pexp_desc with
-    | _ when is_thunk value -> Ok (uncurried ~loc value)
-    | _ ->
-        Error
-          ( loc,
-            Printf.sprintf
-              "an optional prop is a thunk of an option, as any value that \
-               changes is: ?%s=(fun () -> o)"
-              label )
+    let loc = value.pexp_loc in
+    Ok (thunk ~loc [%expr ([%e value] : _ option)])
 
 let absent_or ~loc read =
   thunk ~loc [%expr Js.Undefined.fromOption [%e call ~loc read]]
@@ -356,18 +339,14 @@ let child map (e : expression) =
   | _ when is_function e ->
       Error
         ( loc,
-          "a child is a string, an element or a thunk, (fun () -> ...); a \
-           function is a component's only child" )
-  | Pexp_ident _ ->
-      Error
-        ( loc,
-          "a child is a string, an element or a thunk, (fun () -> ...); a \
-           function given by its name is render=f" )
+          "an element's child is a value, written as itself, (e), never a \
+           function; a function is a component's only child" )
+  | Pexp_ident _ -> Ok [%expr Solidtype.Jsx.node [%e map e]]
   | _ ->
       Ok
         [%expr
           Solidtype.Jsx.dynamic
-            ([%e to_solid ~loc (map e)] : (unit -> Solidtype.Jsx.content[@u]))]
+            ([%e thunk ~loc (map e)] : (unit -> Solidtype.Jsx.element[@u]))]
 
 (* A namespace of Solid's is a wrapper of the value, never a part of the
    name: [on_click=(Jsx.native f)] is [on:click={f}]. The ppx reads the
@@ -472,7 +451,7 @@ let data ~loc label (value : expression) =
   | _, Thunk ->
       [%expr
         Solidtype.Jsx.d [%e name]
-          ([%e to_solid ~loc value] : (unit -> Solidtype.Jsx.data[@u]))]
+          ([%e thunk ~loc value] : (unit -> Solidtype.Jsx.data[@u]))]
   | _, (Literal | Element | Function) ->
       [%expr Solidtype.Jsx.s [%e name] ([%e value] : Solidtype.Jsx.data)]
 
@@ -499,7 +478,7 @@ let passed_on ~loc label (value : expression) =
            element's attribute" )
 
 let element map ~loc name args =
-  (* [<button ?as_=(fun () -> o)>]: the element, or what [o] draws in its place,
+  (* [<button ?as_=o>]: the element, or what [o] draws in its place,
      by Solid's [Show], one marker that defers both as any JSX is deferred. The
      element stays Solid's compiled template: [Dynamic] given a tag has none to
      fall back on while hydrating, so it throws on an element only the browser
@@ -546,9 +525,8 @@ let element map ~loc name args =
         | Thunk, Some t ->
             [%expr
               Solidtype.Jsx.d [%e js]
-                ([%e to_solid ~loc value] : (unit -> [%t t][@u]))]
-        | Thunk, None ->
-            [%expr Solidtype.Jsx.d [%e js] [%e to_solid ~loc value]]
+                ([%e thunk ~loc value] : (unit -> [%t t][@u]))]
+        | Thunk, None -> [%expr Solidtype.Jsx.d [%e js] [%e thunk ~loc value]]
         | (Literal | Element | Function), Some t ->
             [%expr Solidtype.Jsx.s [%e js] ([%e value] : [%t t])]
         | (Literal | Element | Function), None ->
@@ -634,9 +612,7 @@ let element map ~loc name args =
   match drawn_as with
   | [] -> plain args
   | (_, given) :: _ ->
-      let given =
-        map (if is_thunk given then uncurried ~loc given else given)
-      in
+      let given = map (thunk ~loc given) in
       [%expr
         Solidtype.Jsx.c Solidtype.Show.component
           [|
@@ -682,7 +658,7 @@ let component map ~loc path args =
               None,
               [%expr
                 Solidtype.Jsx.d [%e js]
-                  ([%e to_solid ~loc v] : (unit -> [%t t][@u]))] )
+                  ([%e thunk ~loc v] : (unit -> [%t t][@u]))] )
         | Literal | Element | Function ->
             (None, None, [%expr Solidtype.Jsx.s [%e js] ([%e v] : [%t t])]))
     | Labelled l when starts_with ~prefix:"data_" l ->
@@ -728,7 +704,7 @@ let component map ~loc path args =
         | Thunk ->
             ( Some
                 ( bound label,
-                  (Some [%type: (unit -> _[@u])], to_solid ~loc (map value)) ),
+                  (Some [%type: (unit -> _[@u])], thunk ~loc (map value)) ),
               Some (Labelled label, [%expr Solidtype.Check.thunk [%e x]]),
               [%expr Solidtype.Jsx.d [%e name] [%e x]] ))
   in
@@ -736,17 +712,34 @@ let component map ~loc path args =
     | [] -> Ok (None, None, [])
     | [ f ] when is_function f ->
         let x = B.evar ~loc (bound "children") in
+        (* A component that takes elements refuses the function where it is
+           written. *)
+        let check =
+          let loc = f.pexp_loc in
+          [%expr Solidtype.Check.render [%e x]]
+        in
         Ok
           ( Some (bound "children", (None, map (unmark f))),
-            Some (Labelled "children", [%expr Solidtype.Check.render [%e x]]),
+            Some (Labelled "children", check),
             [ [%expr Solidtype.Jsx.render [%e x]] ] )
-    | cs ->
+    | (first : expression) :: rest as written ->
+        (* A component that takes only a function refuses these children
+           where they are written, a function's name among them. *)
+        let loc =
+          {
+            first.pexp_loc with
+            loc_end =
+              List.fold_left
+                (fun _ (c : expression) -> c.pexp_loc.loc_end)
+                first.pexp_loc.loc_end rest;
+          }
+        in
         Result.map
           (fun cs ->
             ( None,
-              Some (Labelled "children", [%expr Solidtype.Check.nodes ()]),
+              Some (Labelled "children", [%expr Solidtype.Check.elements ()]),
               cs ))
-          (all (List.map (child map) cs))
+          (all (List.map (child map) written))
   in
   match split args with
   | Error (loc, m) -> error ~loc m
@@ -754,9 +747,14 @@ let component map ~loc path args =
       match (all (List.map prop props), children cs) with
       | Error (loc, m), _ | _, Error (loc, m) -> error ~loc m
       | Ok props, Ok (child_binding, child_check, cs) ->
+          (* OCaml evaluates arguments last first, so the props are given
+             last first, and run in the order they are written; it types
+             them first first, so a function child, which a closure makes
+             and no order of effects binds, is given last, typed once the
+             props have given its parameter's type. *)
           let bindings =
-            List.filter_map Fun.id
-              (List.map (fun (b, _, _) -> b) props @ [ child_binding ])
+            List.rev (List.filter_map (fun (b, _, _) -> b) props)
+            @ Option.to_list child_binding
           in
           let check =
             B.pexp_apply ~loc
@@ -779,10 +777,7 @@ let component map ~loc path args =
             (* A function of the bound names, applied to their values: OCaml
                types the function, the check in it, before its arguments, so
                each value is typed as the check expects it, and a record field
-               a function child reads, [s.is_pressed], is found by its type.
-               OCaml evaluates arguments last first, so they are given last
-               first, and run in the order they are written. *)
-            let bindings = List.rev bindings in
+               a function child reads, [s.is_pressed], is found by its type. *)
             B.pexp_apply ~loc
               (List.fold_right
                  (fun (name, (typ, _)) body ->
@@ -796,7 +791,7 @@ let component map ~loc path args =
                  bindings make)
               (List.map (fun (_, (_, expr)) -> (Nolabel, expr)) bindings))
 
-(* A [Switch] whose only child is a thunk of a [match]: each case becomes a
+(* A [Switch] whose only child is a [match]: each case becomes a
    [Match], a case with variables a [Match.Keyed] given them, so the case's
    body sees their values as they are. *)
 
@@ -838,21 +833,16 @@ let quiet ~loc warnings (e : expression) =
   }
 
 let switch_cases path args =
-  let thunk_of_match (e : expression) =
+  let of_match (e : expression) =
     match e.pexp_desc with
-    | Pexp_function
-        ( [ { pparam_desc = Pparam_val (Nolabel, None, p); _ } ],
-          None,
-          Pfunction_body { pexp_desc = Pexp_match (scrutinee, cases); _ } )
-      when is_unit p ->
-        Some (scrutinee, cases)
+    | Pexp_match (scrutinee, cases) -> Some (scrutinee, cases)
     | _ -> None
   in
   if not (String.equal (last path) "Switch") then None
   else
     match split args with
     | Ok (props, [ child ]) -> (
-        match thunk_of_match child with
+        match of_match child with
         | None -> None
         | Some (scrutinee, cases) ->
             let match_path = with_last path "Match" in
@@ -868,15 +858,10 @@ let switch_cases path args =
               in
               match variables c.pc_lhs with
               | [] ->
-                  let body =
-                    if is_jsx c.pc_rhs then c.pc_rhs
-                    else [%expr fun () -> Solidtype.Jsx.element [%e c.pc_rhs]]
-                  in
+                  let body = c.pc_rhs in
                   jsx ~loc match_path
                     [
-                      ( Labelled "when_",
-                        [%expr fun () -> [%e test [%expr true] [%expr false]]]
-                      );
+                      (Labelled "when_", test [%expr true] [%expr false]);
                       (Labelled "children", [%expr [ [%e body] ]]);
                     ]
               | vars ->
@@ -894,9 +879,7 @@ let switch_cases path args =
                     (Ldot (match_path, "Keyed"))
                     [
                       ( Labelled "some",
-                        [%expr
-                          fun () ->
-                            [%e test [%expr Some [%e tuple]] [%expr None]]] );
+                        test [%expr Some [%e tuple]] [%expr None] );
                       ( Labelled "children",
                         [%expr [ (fun [%p pattern] -> [%e c.pc_rhs]) ]] );
                     ]
@@ -1134,10 +1117,10 @@ let props_module ~loc ~element ~drawn props =
     | Some state ->
         [%type:
           ( [%t state] -> Solidtype.Jsx.element,
-            [ `nodes | `render ] )
+            [ `elements | `render ] )
           Solidtype.Check.children]
     | None ->
-        if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
+        if is_nodes p then [%type: (_, [ `elements ]) Solidtype.Check.children]
         else if String.equal p.label "children" then
           [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
         else if p.arity > 0 || String.equal p.label "as_" then p.typ
@@ -1453,10 +1436,13 @@ let reader ~loc p =
         (fun x body -> [%expr fun [%p B.pvar ~loc x] -> [%e body]])
         xs body
     else
-      {
-        ([%expr fun () -> [%e value_read ~loc p]]) with
-        pexp_attributes = [ attribute ~loc "u" ];
-      }
+      [%expr
+        Solidtype.Solid.of_function
+          [%e
+            {
+              ([%expr fun () -> [%e value_read ~loc p]]) with
+              pexp_attributes = [ attribute ~loc "u" ];
+            }]]
   in
   (* A component reads the props it needs; the others are still props. *)
   {
@@ -1548,9 +1534,7 @@ let draw_by_as =
             e with
             pexp_desc =
               Pexp_apply
-                ( f,
-                  (Optional "as_", [%expr fun () -> Solidtype.Solid.get as_])
-                  :: args );
+                (f, (Optional "as_", [%expr Solidtype.Solid.get as_]) :: args);
           }
       | _ -> e
   end
@@ -1659,7 +1643,8 @@ let mapper =
             let (_ : (unit -> _) -> _ Solidtype.Solid.accessor) =
               [%e accessor]
             in
-            [%e uncurried ~loc (self#expression given)]]
+            Solidtype.Solid.of_function
+              [%e uncurried ~loc (self#expression given)]]
       | _ -> super#expression e
 
     method! structure_item item =

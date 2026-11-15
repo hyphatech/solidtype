@@ -2,7 +2,7 @@ module Raw = struct
   module Props = struct
     let check
         ~fallback:(_ : Solid.thrown -> ((unit -> unit)[@u]) -> Jsx.element)
-        ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+        ?children:(_ : (_, [ `elements ]) Check.children option) () =
       ()
   end
 
@@ -11,9 +11,9 @@ module Raw = struct
 end
 
 let%component make ~(fallback : exn -> (unit -> unit) -> Jsx.element)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   <Raw
     fallback=(fun e reset ->
                fallback (Solid.exn_of_thrown e) (fun () -> (reset () [@u])))>
-    (fun () -> Solid.get children)
+    (Solid.get children)
   </Raw>

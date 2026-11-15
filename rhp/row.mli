@@ -9,9 +9,9 @@ type 'row t
 
 external data : 'row t -> 'row = "%identity"
 (** The row's data, a value of the type given to the plot's [rows]. A field of
-    it is read from rhp when it is read, so a read inside a thunk follows the
-    row as it changes, as [d.sold] does in rhp's JSX:
-    [let f = Row.data d in <Bar to_=(fun () -> f.sold) />]. *)
+    it is read from rhp when it is read, so a read in JSX follows the row as it
+    changes, as [d.sold] does in rhp's JSX:
+    [let f = Row.data d in <Bar to_=f.sold />]. *)
 
 val index : 'row t -> int
 (** The row's number among the rows, from 0. *)

@@ -52,7 +52,7 @@ module Group : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -88,7 +88,7 @@ module Increment_button : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
       ?props:t S.rest ->
@@ -107,7 +107,7 @@ module Decrement_button : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
       ?props:t S.rest ->
@@ -153,7 +153,7 @@ module Props : sig
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     ?ref:(Dom.htmlDivElement -> unit) ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

@@ -15,7 +15,7 @@ module Element = struct
     external check :
       component:string Check.value ->
       ?props:'spread Solid.rest ->
-      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Check.children -> unit -> unit)
       Html.Element.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -29,7 +29,7 @@ module Drawn = struct
     external check :
       component:Jsx.drawn Check.value ->
       ?props:'spread Solid.rest ->
-      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Check.children -> unit -> unit)
       Html.Element.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end

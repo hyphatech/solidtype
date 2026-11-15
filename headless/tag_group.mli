@@ -90,7 +90,7 @@ module Root : sig
       ?aria_describedby:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
@@ -106,7 +106,7 @@ module Label : sig
     val check :
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 
@@ -126,7 +126,7 @@ module List : sig
       ?render_empty_state:(unit -> Jsx.element) ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
@@ -156,7 +156,7 @@ module Tag : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
@@ -173,7 +173,7 @@ module Remove_button : sig
     val check :
       ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Button.check
   end
 
@@ -189,7 +189,7 @@ module Description : sig
     val check :
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 
@@ -206,7 +206,7 @@ module Error_message : sig
     val check :
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 

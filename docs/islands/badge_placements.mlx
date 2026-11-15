@@ -14,19 +14,17 @@ let placements =
 
 let make () =
   <div class_="flex items-center gap-8">
-    <Solidtype.For each=(fun () -> placements)>
+    <Solidtype.For each=placements>
       (fun (placement, name) _ ->
         <div class_="flex flex-col items-center gap-2">
           <Badge.Anchor>
             <Avatar>
-              <Avatar.Image src=(fun () -> avatar) />
+              <Avatar.Image src=avatar />
               <Avatar.Fallback>"JD"</Avatar.Fallback>
             </Avatar>
-            <Badge color=`accent placement=(fun () -> placement) size=`sm />
+            <Badge color=`accent placement size=`sm />
           </Badge.Anchor>
-          <span class_="text-xs text-muted">
-            (fun () -> Solidtype.Jsx.string name)
-          </span>
+          <span class_="text-xs text-muted">(Solidtype.Jsx.string name)</span>
         </div>)
     </Solidtype.For>
   </div>

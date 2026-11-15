@@ -8,33 +8,31 @@ let component_handler_made =
   <Remove on_click=(remove (id ())) props=(rest ()) />
 
 let component_handler_of_unit = <Remove on_remove=(fun () -> close ()) />
-let dynamic = <div class_=(fun () -> cls ()) />
+let dynamic = <div class_=(cls ()) />
 let spread = <input props=attrs />
 let text = <p>"hello"</p>
 let nested = <ul><li>"one"</li></ul>
-let thunk = <p>(fun () -> Solidtype.Jsx.string (name ()))</p>
-let component = <Label text=(fun () -> "x") count=1 />
-let part = <Switch.Root checked=(fun () -> on ())><Switch.Thumb /></Switch.Root>
+let thunk = <p>(Solidtype.Jsx.string (name ()))</p>
+let component = <Label text="x" count=1 />
+let part = <Switch.Root checked=(on ())><Switch.Thumb /></Switch.Root>
 let constructor = <Toggle pressed=true />
-let element_prop = <Show when_=(fun () -> ready ()) fallback=(<p>"wait"</p>) />
+let element_prop = <Show when_=(ready ()) fallback=(<p>"wait"</p>) />
 
 let function_child =
-  <For each=(fun () -> items ())>
-    (fun item -> <li>(fun () -> Solidtype.Jsx.string item)</li>)
-  </For>
+  <For each=(items ())>(fun item -> <li>(Solidtype.Jsx.string item)</li>)</For>
 
 let ref_callback = <div ref=(fun el -> keep el) />
 
 let%component make ~(text : string) ?(count : int = 0)
     ?(on_pick : (int -> unit) option) ?(on_close : unit -> unit = fun () -> ())
     ~(children : 'a -> Solidtype.Jsx.element) () =
-  <p>(fun () -> Solidtype.Jsx.int (S.get count))</p>
+  <p>(Solidtype.Jsx.int (S.get count))</p>
 
 module Given_its_element = struct
   let%component make ?(variant : [ `a | `b ] option) ?(class_ : string option)
       () =
     <button
-      class_=(fun () -> Option.value (S.get class_) ~default:"")
+      class_=(Option.value (S.get class_) ~default:"")
       props=(Props.others props)
     />
   [@@element button]
@@ -44,7 +42,7 @@ let names =
   <input
     read_only=true
     tab_index="0"
-    class_list=(fun () -> classes ())
+    class_list=(classes ())
     accept_charset="utf-8"
     aria_label="name"
     data_user_id="7"
@@ -52,12 +50,12 @@ let names =
 
 let svg_names = <svg view_box="0 0 1 1" stroke_width="2" />
 let run_of_capitals = <div inner_html="<b>x</b>" />
-let data_flag = <div data_selected=(fun () -> Solidtype.Jsx.flag (on ())) />
+let data_flag = <div data_selected=(Solidtype.Jsx.flag (on ())) />
 
 let data_on_component =
   <Switch.Root
     data_slot="switch"
-    data_hovered=(fun () -> Solidtype.Jsx.flag (on ()))
+    data_hovered=(Solidtype.Jsx.flag (on ()))
     data_state=state
   />
 
@@ -68,29 +66,27 @@ let namespaced =
     on_scroll=(Solidtype.Jsx.native (fun _ -> ()))
     on_click=(Solidtype.Jsx.capture handle)
     title=(Solidtype.Jsx.attr "t")
-    hidden=(Solidtype.Jsx.bool (fun () -> closed ()))
-    value=(Solidtype.Jsx.prop (fun () -> v ()))
+    hidden=(Solidtype.Jsx.bool (closed ()))
+    value=(Solidtype.Jsx.prop (v ()))
     on=(Solidtype.Jsx.listen "myEvent" (fun _ -> ()))
     attr=(Solidtype.Jsx.named "data-x" "y")
   />
 
-let namespaced_optional =
-  <div ?hidden=(Solidtype.Jsx.attr (fun () -> found ())) />
+let namespaced_optional = <div ?hidden=(Solidtype.Jsx.attr (found ())) />
 
 let namespaced_on_component =
   <Switch.Root
     title=(Solidtype.Jsx.attr "t")
-    ?hidden=(Solidtype.Jsx.attr (fun () -> found ()))
-    inert=(Solidtype.Jsx.bool (fun () -> closed ()))
+    ?hidden=(Solidtype.Jsx.attr (found ()))
+    inert=(Solidtype.Jsx.bool (closed ()))
     attr=(Solidtype.Jsx.named "aria-x" "y")
   />
 
 let switch =
   <Switch>
-    (fun () ->
-      match answer () with
-      | Waiting -> <p>"wait"</p>
-      | Ready n -> <p>(fun () -> Solidtype.Jsx.int n)</p>)
+    (match answer () with
+    | Waiting -> <p>"wait"</p>
+    | Ready n -> <p>(Solidtype.Jsx.int n)</p>)
   </Switch>
 
 let strings =
@@ -109,8 +105,8 @@ module Read = struct
   let%component make ~(title : string) ~(text : string) ?(note : string option)
       () =
     let text = S.create_memo (fun () -> S.get text ^ "!") in
-    <p title=(fun () -> S.get title) ?lang=(fun () -> S.get note)>
-      (fun () -> Solidtype.Jsx.string (S.get text))
+    <p title=(S.get title) ?lang=(S.get note)>
+      (Solidtype.Jsx.string (S.get text))
     </p>
 end
 
@@ -118,8 +114,8 @@ end
    coercion: the coercion is the body's. *)
 let coerced (open_ : [ `a ]) =
   <p
-    title=(fun () -> match (open_ :> [ `a | `b ]) with `a -> "a" | `b -> "b")
-    data_x=(fun () -> (Jsx.data "x" :> Jsx.data))
+    title=(match (open_ :> [ `a | `b ]) with `a -> "a" | `b -> "b")
+    data_x=(Jsx.data "x" :> Jsx.data)
   />
 
 module Removable = struct
@@ -139,18 +135,21 @@ module Measured = struct
     />
 end
 
-let optional_attribute = <a title=(fun () -> "x") ?href=(fun () -> link ()) />
-let optional_prop = <Label text=(fun () -> "x") ?count=(fun () -> count ()) />
-let named_render = <For each=(fun () -> items ()) render=row />
+let optional_attribute = <a title="x" ?href=(link ()) />
+let optional_prop = <Label text="x" ?count=(count ()) />
+let optional_name (count : int option) = <Label text="x" ?count />
+let named_child (mark : Solidtype.Jsx.element) = <p>mark</p>
+let named_render = <For each=(items ()) render=row />
 
 module Part = struct
   let%component make ?(class_ : string option) () =
     <button
-      class_=(fun () -> Option.value (S.get class_) ~default:"")
+      class_=(Option.value (S.get class_) ~default:"")
       ref=(fun _ -> ())
       props=(Props.others props)
     />
   [@@element button]
 end
 
-let drawn_as = <button ?as_=(fun () -> None) class_="x" />
+let drawn_as = <button ?as_=None class_="x" />
+let accessor_of_function = S.accessor (fun () -> fun s -> s ^ "!")

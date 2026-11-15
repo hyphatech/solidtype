@@ -19,8 +19,7 @@ module Twin = struct
 end
 
 let both variant =
-  T.render (fun () ->
-      <Surface variant=(fun () -> variant) class_="p-6">"Content"</Surface>);
+  T.render (fun () -> <Surface variant class_="p-6">"Content"</Surface>);
   let solidtype =
     match T.query "[data-slot=surface]" with
     | Some e -> T.attributes e
@@ -45,7 +44,7 @@ module Variant = struct
           | `transparent -> "transparent")
       | None -> "none"
     in
-    <span data_slot="read">(fun () -> Jsx.string (shown ()))</span>
+    <span data_slot="read">(Jsx.string (shown ()))</span>
 end
 
 external text : Dom.element -> string = "textContent" [@@mel.get]
@@ -73,7 +72,7 @@ let () =
       Jest.test "gives what is inside it its variant as it changes" (fun () ->
           let variant, set_variant = S.create_signal `default in
           T.render (fun () ->
-              <Surface variant=(fun () -> S.get variant)><Variant /></Surface>);
+              <Surface variant=(S.get variant)><Variant /></Surface>);
           S.set set_variant `secondary;
           E.(expect (read ()) |> toBe "secondary"));
       Jest.test "gives nothing outside it a variant" (fun () ->

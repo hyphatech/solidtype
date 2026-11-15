@@ -7,9 +7,9 @@
 
     {[
       <Form on_submit=save
-        validation_errors=(fun () -> S.get from_server)>
+        validation_errors=(S.get from_server)>
         <Text_field name="email"
-          is_invalid=(fun () -> not (is_email (S.get email)))
+          is_invalid=(not (is_email (S.get email)))
           on_change=(S.set set_email)>
           <Label>"Email"</Label> <Input />
           <Field_error>"Enter an email."</Field_error>
@@ -61,7 +61,7 @@ module Props : sig
     ?on_submit:(Dom.event -> unit) ->
     ?on_reset:(Dom.event -> unit) ->
     ?on_invalid:(Dom.event -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Form.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Form.check

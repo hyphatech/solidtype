@@ -26,16 +26,15 @@ let island () =
   let chosen, set_chosen = S.create_signal "" in
   <div>
     <Search.Root
-      options=(fun () -> S.get options)
+      options=(S.get options)
       on_input_change=(fun query -> S.set set_options (matching query))
       on_change=(fun fruit ->
                   S.set set_chosen
                     (Option.value (Js.Nullable.toOption fruit) ~default:""))
       item_component=(fun props ->
-                       <Search.Item item=(fun () -> Item_props.item props)>
+                       <Search.Item item=(Item_props.item props)>
                          <Search.ItemLabel>
-                           (fun () ->
-                             Jsx.string (Node.raw_value (Item_props.item props)))
+                           (Jsx.string (Node.raw_value (Item_props.item props)))
                          </Search.ItemLabel>
                        </Search.Item>)>
       <Search.Label>"Fruit"</Search.Label>
@@ -48,7 +47,7 @@ let island () =
         </Search.Content>
       </Search.Portal>
     </Search.Root>
-    <p>"Chosen: " (fun () -> Jsx.string (S.get chosen))</p>
+    <p>"Chosen: " (Jsx.string (S.get chosen))</p>
   </div>
 
 external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Search.tsx"]

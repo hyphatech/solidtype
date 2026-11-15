@@ -8,7 +8,7 @@ let make () =
   <Segment
     size=`sm
     aria_label="Theme"
-    selected_key=(fun () -> S.get t.theme)
+    selected_key=(S.get t.theme)
     on_selection_change=t.set_theme>
     <Segment.Item id="light" aria_label="Light"><Gravity.Sun /></Segment.Item>
     <Segment.Item id="dark" aria_label="Dark"><Gravity.Moon /></Segment.Item>

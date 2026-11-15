@@ -18,7 +18,7 @@ let make () =
   <Color_field
     class_="w-full max-w-xs gap-1.5"
     name="accent-color"
-    value=(fun () -> Js.Nullable.fromOption (S.get color))
+    value=(Js.Nullable.fromOption (S.get color))
     on_change=(S.set set_color)>
     <Label class_="font-medium text-foreground">"Accent color"</Label>
     <Description>"Applied to buttons, links, and focus rings."</Description>
@@ -27,8 +27,7 @@ let make () =
               focus-within:ring-accent/15"
       variant=`secondary>
       <Color_field.Prefix>
-        <Color_swatch
-          class_="rounded-md" color=(fun () -> shown (S.get color)) size=`xs
+        <Color_swatch class_="rounded-md" color=(shown (S.get color)) size=`xs
         />
       </Color_field.Prefix>
       <Color_field.Input

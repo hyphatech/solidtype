@@ -37,11 +37,10 @@ let make () =
     </Combo_box.Input_group>
     <Combo_box.Popover>
       <List_box>
-        <Solidtype.For each=(fun () -> animals)>
+        <Solidtype.For each=animals>
           (fun animal _ ->
-            <List_box.Item
-              id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
-              (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+            <List_box.Item id=animal.id text_value=animal.name>
+              (Jsx.string animal.name) <List_box.Item_indicator />
             </List_box.Item>)
         </Solidtype.For>
       </List_box>

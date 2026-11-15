@@ -5,36 +5,33 @@ module Toast = Solidtype_heroui.Toast
 let make () =
   let q = Toast.Queue.create () in
   <div class_="flex flex-col items-center gap-4">
-    <Toast.Provider placement=`bottom queue=(fun () -> q)>
+    <Toast.Provider placement=`bottom queue=q>
       (fun toast ->
         let variant () = Toast.toast_variant toast in
         <Toast
           class_="rounded-xl border border-border/80 bg-surface shadow-lg \
                   ring-1 ring-black/5 dark:ring-white/10"
-          toast=(fun () -> toast)
-          variant=(fun () -> variant ())>
+          toast
+          variant=(variant ())>
           <Toast.Content>
             <div class_="flex items-center gap-2.5">
               <Toast.Indicator
                 class_="text-neutral-600 dark:text-neutral-400"
-                variant=(fun () -> variant ())
+                variant=(variant ())
               />
               <div class_="flex flex-col gap-0.5">
                 <Toast.Title
                   class_="text-sm font-medium text-neutral-900 \
                           dark:text-neutral-50">
-                  (fun () -> Jsx.string (Toast.title toast))
+                  (Jsx.string (Toast.title toast))
                 </Toast.Title>
-                (fun () ->
-                  match Toast.description toast with
-                  | Some d ->
-                      Jsx.element
-                        <Toast.Description
-                          class_="text-sm text-neutral-600 \
-                                  dark:text-neutral-400">
-                          (fun () -> Jsx.string d)
-                        </Toast.Description>
-                  | None -> Jsx.string "")
+                (match Toast.description toast with
+                | Some d ->
+                    <Toast.Description
+                      class_="text-sm text-neutral-600 dark:text-neutral-400">
+                      (Jsx.string d)
+                    </Toast.Description>
+                | None -> Jsx.string "")
               </div>
             </div>
           </Toast.Content>

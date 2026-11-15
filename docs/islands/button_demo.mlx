@@ -30,40 +30,36 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Toggle
         label="full width"
-        on=(fun () -> S.get full_width)
+        on=(S.get full_width)
         on_toggle=(S.set set_full_width)
       />
       <Toggle
-        label="icon only"
-        on=(fun () -> S.get icon_only)
-        on_toggle=(S.set set_icon_only)
+        label="icon only" on=(S.get icon_only) on_toggle=(S.set set_icon_only)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       solidtype=(<Button
-                   variant=(fun () -> fst (S.get variant))
-                   size=(fun () -> fst (S.get size))
-                   full_width=(fun () -> S.get full_width)
-                   is_icon_only=(fun () -> S.get icon_only)
-                   is_disabled=(fun () -> S.get disabled)>
-                   (fun () -> Jsx.string (label ()))
+                   variant=(fst (S.get variant))
+                   size=(fst (S.get size))
+                   full_width=(S.get full_width)
+                   is_icon_only=(S.get icon_only)
+                   is_disabled=(S.get disabled)>
+                   (Jsx.string (label ()))
                  </Button>)
       react=(fun host ->
               Heroui_react.button host

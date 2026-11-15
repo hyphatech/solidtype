@@ -57,14 +57,14 @@ let make () =
     <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
     <Select.Popover>
       <List_box>
-        <Solidtype.For each=(fun () -> Array.sub pokemon 0 (S.get loaded))>
+        <Solidtype.For each=(Array.sub pokemon 0 (S.get loaded))>
           (fun name _ ->
-            <List_box.Item id=(fun () -> name) text_value=(fun () -> name)>
-              (fun () -> Jsx.string name) <List_box.Item_indicator />
+            <List_box.Item id=name text_value=name>
+              (Jsx.string name) <List_box.Item_indicator />
             </List_box.Item>)
         </Solidtype.For>
         <List_box.Load_more_item
-          is_loading=(fun () -> S.get loading) on_load_more=load_more>
+          is_loading=(S.get loading) on_load_more=load_more>
           <div class_="flex items-center justify-center gap-2 py-2">
             <Spinner size=`sm />
             <span class_="text-sm text-muted">"Loading more..."</span>

@@ -13,7 +13,7 @@ module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
 
 type slot =
-  (unit -> string) -> unit S.rest -> (unit -> Jsx.content) -> Jsx.element
+  (unit -> string) -> unit S.rest -> (unit -> Jsx.element) -> Jsx.element
 (** How a part renders a header inside it: given the header's classes, the props
     it passes on, and its children. *)
 
@@ -24,7 +24,7 @@ module Slot : sig
     module Props : sig
       val check :
         value:slot Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -40,7 +40,7 @@ module Props : sig
 
   val check :
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Header.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Header.check

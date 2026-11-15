@@ -5,7 +5,7 @@ module Select = Solidtype_heroui.Select
 let make () =
   <Select
     class_="w-[256px]"
-    disabled_keys=(fun () -> [| "cat"; "kangaroo" |])
+    disabled_keys=[| "cat"; "kangaroo" |]
     placeholder="Select an animal">
     <Label>"Animal"</Label>
     <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>

@@ -7,14 +7,12 @@ let make () =
   <section class_="flex flex-col gap-4">
     <div class_="flex flex-wrap items-end gap-4">
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=disclosure-trigger]"
-      solidtype=(<Disclosure is_disabled=(fun () -> S.get disabled)>
+      solidtype=(<Disclosure is_disabled=(S.get disabled)>
                    <Disclosure.Heading>
                      <Disclosure.Trigger
                        class_="flex w-full items-center gap-2">

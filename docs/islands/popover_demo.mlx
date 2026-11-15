@@ -15,13 +15,11 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="placement"
-        choices=(fun () -> placements)
-        picked=(fun () -> S.get placement)
+        choices=placements
+        picked=(S.get placement)
         on_pick=(Controls.choose placements set_placement)
       />
-      <Toggle
-        label="arrow" on=(fun () -> S.get arrow) on_toggle=(S.set set_arrow)
-      />
+      <Toggle label="arrow" on=(S.get arrow) on_toggle=(S.set set_arrow) />
     </div>
     <Side_by_side
       compared="[data-slot=button]"
@@ -29,10 +27,9 @@ let make () =
                    <Popover>
                      <Button>"Click me"</Button>
                      <Popover.Content
-                       class_="max-w-64"
-                       placement=(fun () -> fst (S.get placement))>
+                       class_="max-w-64" placement=(fst (S.get placement))>
                        <Popover.Dialog>
-                         <Solidtype.Show when_=(fun () -> S.get arrow)>
+                         <Solidtype.Show when_=(S.get arrow)>
                            <Popover.Arrow />
                          </Solidtype.Show>
                          <Popover.Heading>"Popover Title"</Popover.Heading>

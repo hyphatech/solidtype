@@ -8,16 +8,14 @@ module Jsx = Solidtype.Jsx
 let island () =
   <Listbox.Root
     aria_label="Fruit"
-    options=(fun () ->
-              Array.map K.Types.Either.left [| "Apple"; "Banana"; "Cherry" |])
+    options=(Array.map K.Types.Either.left [| "Apple"; "Banana"; "Cherry" |])
     render_item=(fun item ->
-                  <Listbox.Item item=(fun () -> item)>
+                  <Listbox.Item item>
                     <Listbox.ItemLabel>
-                      (fun () -> Jsx.string (Node.raw_value item))
+                      (Jsx.string (Node.raw_value item))
                     </Listbox.ItemLabel>
                     <Listbox.ItemDescription>
-                      (fun () ->
-                        Jsx.string (Node.raw_value item ^ " in season"))
+                      (Jsx.string (Node.raw_value item ^ " in season"))
                     </Listbox.ItemDescription>
                   </Listbox.Item>)
   />

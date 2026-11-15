@@ -6,13 +6,12 @@ module Button = Solidtype_heroui.Button
    HeroUI's, which its own variant function merges over its own. *)
 module Pill_button = struct
   let%component make ?(radius : [ `full | `sm ] = `full)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     <Button
-      class_=(fun () ->
-               match S.get radius with
-               | `full -> "rounded-full font-semibold shadow-md"
-               | `sm -> "rounded-sm font-semibold shadow-md")>
-      (fun () -> S.get children)
+      class_=(match S.get radius with
+             | `full -> "rounded-full font-semibold shadow-md"
+             | `sm -> "rounded-sm font-semibold shadow-md")>
+      (S.get children)
     </Button>
 end
 

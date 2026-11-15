@@ -4,7 +4,7 @@ module Jsx = Solidtype.Jsx
 type slot =
   (unit -> string) ->
   unit Solidtype.Solid.rest ->
-  (unit -> Jsx.content) ->
+  (unit -> Jsx.element) ->
   Jsx.element
 
 (* How a field's error renders, which the field gives it: Kobalte's error

@@ -3,22 +3,19 @@
     ["vite-plugin-solidtype/markers"]. Write JSX, never these. *)
 
 type element
-(** What a JSX element is: a node Solid's compiler made. *)
+(** What JSX holds, Solid's [JSX.Element]: a node Solid's compiler made, text, a
+    number, or an array of them, which Solid inserts alike. *)
 
 type prop
 type child
-
-type content
-(** What a dynamic child gives: a string, a number or an element. *)
 
 type 'props component
 (** A component taking ['props]: an OCaml one, by {!val-component}, or a
     binding's. *)
 
 external component : ('props -> element) -> 'props component = "%identity"
-external string : string -> content = "%identity"
-external int : int -> content = "%identity"
-external element : element -> content = "%identity"
+external string : string -> element = "%identity"
+external int : int -> element = "%identity"
 
 val nothing : element
 (** An element that renders nothing, for an optional one left out. *)
@@ -35,18 +32,12 @@ type 'state children
     [<Button>"Save"</Button>] or
     [<Button>(fun s -> if S.get s.is_pressed then ... else ...)</Button>]. *)
 
-external of_content : content -> element = "%identity"
-(** [of_content c] is [c] where an element is taken, as Solid takes text and a
-    number wherever it takes an element: what a function child gives of {!draw}.
-*)
-
 type drawn
 (** What a plain element given [as_] draws, the function or its own tag, as
     Solid's [Dynamic] takes either. *)
 
 val drawn_as : ('props -> element) option -> string -> drawn
-(** [drawn_as given tag], which the ppx writes for [<tag ?as_=(fun () -> o)>].
-*)
+(** [drawn_as given tag], which the ppx writes for [<tag ?as_=o>]. *)
 
 val call : (('a -> unit)[@u]) option -> 'a -> unit
 (** [call f x] calls a handler a caller gave, as Solid's props hold one, with
@@ -66,10 +57,10 @@ val is_function : 'state children -> bool
     component that shows something else in place of its elements still calls a
     function with it. *)
 
-val draw : 'state children -> 'state -> content
+val draw : 'state children -> 'state -> element
 (** [draw children state] is [children] as they are, or what their function
-    draws of [state], read where it is written: in a thunk, Solid tracks both
-    the children and what the function reads. *)
+    draws of [state], read where it is written: in JSX, Solid tracks both the
+    children and what the function reads. *)
 
 (** A value that stands in an element's place among a component's children,
     never rendered, as Solid's [Match] stands among a [Switch]'s: the component
@@ -86,7 +77,7 @@ val draw : 'state children -> 'state -> content
       Entry.element (Option o)
 
       (* in the component that holds them *)
-      let resolved = Solid.children (fun () -> children ()) in
+      let resolved = Solid.children (fun () -> Solid.get children) in
       let entries () = Entry.read (Solid.to_array (Solid.get resolved))
     ]} *)
 module Token (T : sig
@@ -116,7 +107,7 @@ external data : string -> data = "%identity"
 
 val flag : bool -> data
 (** [flag b] is ["true"] while [b] holds, and no attribute otherwise:
-    [data_selected=(fun () -> Jsx.flag (checked ()))]. *)
+    [data_selected=(Jsx.flag (Solid.get checked))]. *)
 
 external el : string -> prop array -> child array -> element = "el"
 [@@mel.module "vite-plugin-solidtype/markers"]
@@ -140,7 +131,7 @@ external render : 'f -> child = "%identity"
 (** A component's only child when it is a function the component calls, as
     [For]'s is. Its type is the component's props check's to hold. *)
 
-external dynamic : ((unit -> content)[@u]) -> child = "dynamic"
+external dynamic : ((unit -> element)[@u]) -> child = "dynamic"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 (** {1 Solid's namespaces}
@@ -150,7 +141,7 @@ external dynamic : ((unit -> content)[@u]) -> child = "dynamic"
     it is written, in an element's attribute, and writes the namespace; a
     wrapper left out is Solid's default. A component takes {!attr}, {!bool} and
     {!named} outside its props' check and passes them on to its element; each,
-    optional, is [?name=(Jsx.attr (fun () -> o))]. *)
+    optional, is [?name=(Jsx.attr o)]. *)
 
 type 'a namespaced
 

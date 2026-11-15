@@ -24,15 +24,15 @@ let store =
     (fun d ->
       let s = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string s.store)</Label>
-        <Bar to_=(fun () -> s.sales) />
-        <Label at=(fun () -> s.sales) side=`before class_="inside">
-          (fun () -> Jsx.string (Js.Float.toString s.sales))
+        <Label edge="start">(Jsx.string s.store)</Label>
+        <Bar to_=s.sales />
+        <Label at=s.sales side=`before class_="inside">
+          (Jsx.string (Js.Float.toString s.sales))
         </Label>
         <Label edge="end">"k€"</Label>
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (0., 50.)) ticks=(fun () -> Solidtype_rhp.Ticks.none)>
-    <Plot rows=(fun () -> stores) render=store />
+  <Chart scale=(0., 50.) ticks=Solidtype_rhp.Ticks.none>
+    <Plot rows=stores render=store />
   </Chart>

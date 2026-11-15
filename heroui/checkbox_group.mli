@@ -8,7 +8,7 @@
     the {!Fieldset} it is in is.
 
     {[
-      <Checkbox_group name="interests" default_value=(fun () -> [ "coding" ])>
+      <Checkbox_group name="interests" default_value=([ "coding" ])>
         <Label>"Interests"</Label>
         <Checkbox value="coding">
           <Checkbox.Content>"Coding"</Checkbox.Content>
@@ -43,7 +43,7 @@ module Context : sig
     module Props : sig
       val check :
         value:group Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -81,7 +81,7 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

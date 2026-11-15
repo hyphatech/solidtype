@@ -32,25 +32,23 @@ let number = Js.Float.toString
 
 module Track = struct
   let%component make ?(view_box : string option) ?(stroke_width : float option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let c = within "Progress_circle.Track" in
     <svg
-      class_=(fun () ->
-               after
-                 (Styles.ProgressCircle.track (S.get c.slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.ProgressCircle.track (S.get c.slots))
+                (S.get class_))
       data_slot="progress-circle-track"
       fill="none"
-      view_box=(fun () ->
-                 Option.value (S.get view_box)
-                   ~default:
-                     ("0 0 "
-                     ^ number (center *. 2.)
-                     ^ " "
-                     ^ number (center *. 2.)))
-      ?stroke_width=(fun () -> Option.map number (S.get stroke_width))
+      view_box=(Option.value (S.get view_box)
+                  ~default:
+                    ("0 0 "
+                    ^ number (center *. 2.)
+                    ^ " "
+                    ^ number (center *. 2.)))
+      ?stroke_width=(Option.map number (S.get stroke_width))
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </svg>
   [@@element svg]
 end
@@ -61,15 +59,14 @@ module Track_circle = struct
       ?(class_ : string option) () =
     let c = within "Progress_circle.Track_circle" in
     <circle
-      class_=(fun () ->
-               after
-                 (Styles.ProgressCircle.track_circle (S.get c.slots))
-                 (S.get class_))
-      cx=(fun () -> number (S.get cx))
-      cy=(fun () -> number (S.get cy))
+      class_=(after
+                (Styles.ProgressCircle.track_circle (S.get c.slots))
+                (S.get class_))
+      cx=(number (S.get cx))
+      cy=(number (S.get cy))
       data_slot="progress-circle-track-circle"
-      r=(fun () -> number (S.get r))
-      stroke_width=(fun () -> number (S.get stroke_width))
+      r=(number (S.get r))
+      stroke_width=(number (S.get stroke_width))
       props=(Props.others props)
     />
   [@@element circle]
@@ -85,28 +82,25 @@ module Fill_circle = struct
        arc. *)
     let length () = 2. *. Js.Math._PI *. S.get r in
     <circle
-      class_=(fun () ->
-               after
-                 (Styles.ProgressCircle.fill_circle (S.get c.slots))
-                 (S.get class_))
-      cx=(fun () -> number (S.get cx))
-      cy=(fun () -> number (S.get cy))
+      class_=(after
+                (Styles.ProgressCircle.fill_circle (S.get c.slots))
+                (S.get class_))
+      cx=(number (S.get cx))
+      cy=(number (S.get cy))
       data_slot="progress-circle-fill-circle"
-      r=(fun () -> number (S.get r))
-      stroke_dasharray=(fun () -> number (length ()))
-      stroke_dashoffset=(fun () ->
-                          match S.get c.percent with
-                          | Some p ->
-                              number (length () -. (p /. 100. *. length ()))
-                          | None -> number (length () *. 0.75))
+      r=(number (S.get r))
+      stroke_dasharray=(number (length ()))
+      stroke_dashoffset=(match S.get c.percent with
+                        | Some p ->
+                            number (length () -. (p /. 100. *. length ()))
+                        | None -> number (length () *. 0.75))
       stroke_linecap="round"
-      stroke_width=(fun () -> number (S.get stroke_width))
-      transform=(fun () ->
-                  "rotate(-90 "
-                  ^ number (S.get cx)
-                  ^ " "
-                  ^ number (S.get cy)
-                  ^ ")")
+      stroke_width=(number (S.get stroke_width))
+      transform=("rotate(-90 "
+                ^ number (S.get cx)
+                ^ " "
+                ^ number (S.get cy)
+                ^ ")")
       props=(Props.others props)
     />
   [@@element circle]
@@ -187,20 +181,19 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       is_indeterminate;
     }
   in
-  <Context.Provider value=(fun () -> c)>
+  <Context.Provider value=c>
     <Kobalte.Root
-      value=(fun () -> S.get value)
-      indeterminate=(fun () -> S.get is_indeterminate)
-      min_value=(fun () -> S.get min_value)
-      max_value=(fun () -> S.get max_value)
-      ?aria_label=(fun () -> S.get aria_label)
+      value=(S.get value)
+      indeterminate=(S.get is_indeterminate)
+      min_value=(S.get min_value)
+      max_value=(S.get max_value)
+      ?aria_label=(S.get aria_label)
       get_value_label=value_label
-      class_=(fun () ->
-               after (Styles.ProgressCircle.base (S.get c.slots)) (S.get class_))
+      class_=(after (Styles.ProgressCircle.base (S.get c.slots)) (S.get class_))
       data_slot="progress-circle"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Kobalte.Root>
   </Context.Provider>
 [@@element div]

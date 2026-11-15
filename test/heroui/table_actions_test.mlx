@@ -83,8 +83,8 @@ let both ~mode ?behavior () =
         <Table.Scroll_container>
           <Table.Content
             aria_label="Table with actions"
-            selection_mode=(fun () -> mode)
-            ?selection_behavior=(fun () -> behavior)
+            selection_mode=mode
+            ?selection_behavior=behavior
             on_selection_change=(fun keys ->
                                   selected :=
                                     Array.of_list
@@ -96,13 +96,13 @@ let both ~mode ?behavior () =
               <Table.Column>"Role"</Table.Column>
             </Table.Header>
             <Table.Body>
-              <For each=(fun () -> users)>
+              <For each=users>
                 (fun u _ ->
                   <Table.Row
-                    id=(fun () -> u.id)
-                    on_action=(fun _ -> ran := !ran @ [ "row " ^ u.id ])>
-                    <Table.Cell>(fun () -> Jsx.string u.name)</Table.Cell>
-                    <Table.Cell>(fun () -> Jsx.string u.role)</Table.Cell>
+                    id=u.id
+                    on_action=(fun () -> ran := !ran @ [ "row " ^ u.id ])>
+                    <Table.Cell>(Jsx.string u.name)</Table.Cell>
+                    <Table.Cell>(Jsx.string u.role)</Table.Cell>
                   </Table.Row>)
               </For>
             </Table.Body>

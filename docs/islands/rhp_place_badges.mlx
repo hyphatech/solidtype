@@ -25,16 +25,13 @@ let parcel =
     (fun d ->
       let p = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string p.route)</Label>
-        <Bar to_=(fun () -> p.kg) />
-        <Place at=(fun () -> p.kg)>
+        <Label edge="start">(Jsx.string p.route)</Label>
+        <Bar to_=p.kg />
+        <Place at=p.kg>
           <span class_="badge">
-            (fun () -> Jsx.string (Js.Float.toString p.kg ^ " kg"))
+            (Jsx.string (Js.Float.toString p.kg ^ " kg"))
           </span>
         </Place>
       </div>)
 
-let make () =
-  <Chart scale=(fun () -> (0., 60.))>
-    <Plot rows=(fun () -> parcels) render=parcel />
-  </Chart>
+let make () = <Chart scale=(0., 60.)><Plot rows=parcels render=parcel /></Chart>

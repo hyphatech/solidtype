@@ -25,24 +25,20 @@ let files =
   |]
 
 let rec row f =
-  <Table.Row id=(fun () -> f.id)>
-    <Table.Cell>(fun () -> Jsx.string f.title)</Table.Cell>
-    <For each=(fun () -> f.files)>(fun f _ -> row f)</For>
+  <Table.Row id=f.id>
+    <Table.Cell>(Jsx.string f.title)</Table.Cell>
+    <For each=f.files>(fun f _ -> row f)</For>
   </Table.Row>
 
 let page () =
   <Table>
     <Table.Scroll_container>
       <Table.Content
-        aria_label="Files"
-        tree_column="name"
-        default_expanded_keys=(fun () -> [| "1" |])>
+        aria_label="Files" tree_column="name" default_expanded_keys=[| "1" |]>
         <Table.Header>
           <Table.Column id="name" is_row_header=true>"Name"</Table.Column>
         </Table.Header>
-        <Table.Body>
-          <For each=(fun () -> files)>(fun f _ -> row f)</For>
-        </Table.Body>
+        <Table.Body><For each=files>(fun f _ -> row f)</For></Table.Body>
       </Table.Content>
     </Table.Scroll_container>
   </Table>

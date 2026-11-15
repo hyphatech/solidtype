@@ -27,17 +27,16 @@ let make () =
     <Select
       class_="w-[256px]"
       placeholder="Select a state"
-      value=(fun () -> S.get state)
+      value=(S.get state)
       on_change=(fun value -> S.set set_state value)>
       <Label>"State (controlled)"</Label>
       <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
       <Select.Popover>
         <List_box>
-          <Solidtype.For each=(fun () -> states)>
+          <Solidtype.For each=states>
             (fun (state : state) _ ->
-              <List_box.Item
-                id=(fun () -> state.id) text_value=(fun () -> state.name)>
-                (fun () -> Jsx.string state.name) <List_box.Item_indicator />
+              <List_box.Item id=state.id text_value=state.name>
+                (Jsx.string state.name) <List_box.Item_indicator />
               </List_box.Item>)
           </Solidtype.For>
         </List_box>
@@ -45,8 +44,7 @@ let make () =
     </Select>
     <p class_="text-sm text-muted">
       "Selected: "
-      (fun () ->
-        Jsx.string
-          (match selected_state () with Some s -> s.name | None -> "None"))
+      (Jsx.string
+         (match selected_state () with Some s -> s.name | None -> "None"))
     </p>
   </div>

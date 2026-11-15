@@ -33,8 +33,8 @@ let area ~is_disabled =
   H.render (fun () ->
       <Color_area.Root
         aria_label="Colour"
-        default_value=(fun () -> Colors.parse_color half)
-        disabled=(fun () -> is_disabled)>
+        default_value=(Colors.parse_color half)
+        disabled=is_disabled>
         <Color_area.Background>
           <Color_area.Thumb>
             <Color_area.HiddenInputX /> <Color_area.HiddenInputY />
@@ -58,7 +58,7 @@ let () =
       Jest.test "a swatch paints a colour less than opaque" (fun () ->
           H.render (fun () ->
               <Color_swatch
-                value=(fun () -> Colors.parse_color half)
+                value=(Colors.parse_color half)
                 aria_label="Half blue"
                 data_testid="swatch"
               />);
@@ -88,7 +88,7 @@ let () =
           area ~is_disabled:true;
           H.render (fun () ->
               <Color_swatch
-                value=(fun () -> Colors.parse_color half) aria_label="Half blue"
+                value=(Colors.parse_color half) aria_label="Half blue"
               />);
           let* found = H.accessibility_violations () in
           Js.Promise.resolve E.(expect found |> toEqual [||])))
@@ -106,10 +106,7 @@ let hue ~fixed told =
   H.render (fun () ->
       if fixed then
         <Color_slider.Root
-          aria_label="Hue"
-          channel=(fun () -> `hue)
-          default_value=(fun () -> value ())
-          on_change>
+          aria_label="Hue" channel=`hue default_value=(value ()) on_change>
           <Color_slider.Track>
             <Color_slider.Thumb style="left: 0%">
               <Color_slider.Input />
@@ -118,10 +115,7 @@ let hue ~fixed told =
         </Color_slider.Root>
       else
         <Kobalte_slider.Root
-          aria_label="Hue"
-          channel=(fun () -> `hue)
-          default_value=(fun () -> value ())
-          on_change>
+          aria_label="Hue" channel=`hue default_value=(value ()) on_change>
           <Kobalte_slider.Track>
             <Kobalte_slider.Thumb style="left: 0%">
               <Kobalte_slider.Input />
@@ -200,18 +194,12 @@ let stepped ~fixed =
   H.render (fun () ->
       if fixed then
         <Color_channel_field.Root
-          aria_label="Hue"
-          channel=(fun () -> `hue)
-          default_value=(fun () -> value ())
-          on_change>
+          aria_label="Hue" channel=`hue default_value=(value ()) on_change>
           <Color_channel_field.Input />
         </Color_channel_field.Root>
       else
         <Kobalte_channel_field.Root
-          aria_label="Hue"
-          channel=(fun () -> `hue)
-          default_value=(fun () -> value ())
-          on_change>
+          aria_label="Hue" channel=`hue default_value=(value ()) on_change>
           <Kobalte_channel_field.Input />
         </Kobalte_channel_field.Root>);
   let at_mount = !told in
@@ -237,16 +225,16 @@ let typed ~fixed =
       if fixed then
         <Color_channel_field.Root
           aria_label="Hue"
-          channel=(fun () -> `hue)
-          default_value=(fun () -> value ())
+          channel=`hue
+          default_value=(value ())
           on_change=(fun _ -> incr told)>
           <Color_channel_field.Input />
         </Color_channel_field.Root>
       else
         <Kobalte_channel_field.Root
           aria_label="Hue"
-          channel=(fun () -> `hue)
-          default_value=(fun () -> value ())
+          channel=`hue
+          default_value=(value ())
           on_change=(fun _ -> incr told)>
           <Kobalte_channel_field.Input />
         </Kobalte_channel_field.Root>);
@@ -275,18 +263,13 @@ let track_known ~fixed =
     Jsx.string ""
   in
   H.render (fun () ->
-      <Kobalte_own_slider.Root default_value=(fun () -> [| 10. |])>
-        (fun () ->
-          if fixed then
-            Jsx.element
-              <Slider.Track ref=(fun _ -> given := true)>
-                (fun () -> watch ())
-              </Slider.Track>
-          else
-            Jsx.element
-              <Kobalte_own_slider.Track ref=(fun _ -> given := true)>
-                (fun () -> watch ())
-              </Kobalte_own_slider.Track>)
+      <Kobalte_own_slider.Root default_value=[| 10. |]>
+        (if fixed then
+           <Slider.Track ref=(fun _ -> given := true)>(watch ())</Slider.Track>
+         else
+           <Kobalte_own_slider.Track ref=(fun _ -> given := true)>
+             (watch ())
+           </Kobalte_own_slider.Track>)
       </Kobalte_own_slider.Root>);
   (!known (), !given)
 
@@ -332,7 +315,7 @@ let hex_steps ~fixed =
       if fixed then
         <Color_field.Root
           aria_label="Colour"
-          default_value=(fun () -> Colors.parse_color "#0485F7")
+          default_value=(Colors.parse_color "#0485F7")
           on_change=(fun c ->
                       told :=
                         (match c with

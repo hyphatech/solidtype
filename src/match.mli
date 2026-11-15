@@ -1,11 +1,11 @@
 (** Solid's [Match]: a case of a [Switch], shown while its condition holds and
-    no case before it does. A [match] in a [Switch]'s thunk is lowered to these
+    no case before it does. A [match] as a [Switch]'s child is lowered to these
     by [ppx_solidtype]. *)
 
 module Props : sig
   val check :
     when_:bool Check.value ->
-    ?children:('f, [ `nodes ]) Check.children ->
+    ?children:('f, [ `elements ]) Check.children ->
     unit ->
     unit
 end

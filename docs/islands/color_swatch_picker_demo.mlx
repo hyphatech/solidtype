@@ -24,34 +24,33 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Select
         label="layout"
-        choices=(fun () -> layouts)
-        picked=(fun () -> S.get layout)
+        choices=layouts
+        picked=(S.get layout)
         on_pick=(Controls.choose layouts set_layout)
       />
     </div>
     <Side_by_side
       compared="[data-slot=color-swatch-picker]"
       solidtype=(<Color_swatch_picker
-                   default_value=(fun () -> Colors.parse_color "#8B5CF6")
-                   size=(fun () -> fst (S.get size))
-                   variant=(fun () -> fst (S.get variant))
-                   layout=(fun () -> fst (S.get layout))>
-                   <For each=(fun () -> colors)>
+                   default_value=(Colors.parse_color "#8B5CF6")
+                   size=(fst (S.get size))
+                   variant=(fst (S.get variant))
+                   layout=(fst (S.get layout))>
+                   <For each=colors>
                      (fun c _ ->
-                       <Color_swatch_picker.Item
-                         color=(fun () -> Colors.parse_color c)>
+                       <Color_swatch_picker.Item color=(Colors.parse_color c)>
                          <Color_swatch_picker.Swatch />
                          <Color_swatch_picker.Indicator />
                        </Color_swatch_picker.Item>)

@@ -10,8 +10,8 @@ import * as Children from "@islands/solid_children.jsx";
 import children from "@islands/solid_children.mlx?raw";
 
 A component is a function from its props to an element, as in Solid. It
-runs once; what changes afterwards is the thunks inside it, which Solid
-reruns. Every module of `solidtype` binds one part of Solid, named as Solid
+runs once; what changes afterwards is the expressions in its JSX, which
+Solid reads again. Every module of `solidtype` binds one part of Solid, named as Solid
 names it: `Solidtype.Solid` is `solid-js`, `Solidtype.Web` is
 `solid-js/web`, `Solidtype.Show` is `<Show>`.
 
@@ -48,12 +48,12 @@ writes:
   `others`, for a spread;
 - `make`, a function of that object, in which each value parameter is an
   accessor of its field: `S.get name` reads `props.name` at the moment it
-  runs, inside a thunk, where Solid tracks it;
+  runs, in JSX, where Solid tracks it;
 - `component`, `make` as the value a JSX tag names.
 
 So in the body a value prop is read as a signal is, `S.get name`, never as a
 plain value, and is handed on as any value that changes is,
-`?title=(fun () -> S.get name)`. A function prop is
+`?title=(S.get name)`. A function prop is
 called, `on_close ()`. An optional parameter with a default,
 `?(greeting : string = "Hello")`, reads its default while the prop is left
 out; one without, `?(note : string option)`, reads an `option`.
@@ -76,34 +76,35 @@ says what TSX's types would:
 ```
 1 | let make () = <Label />
                   ^^^^^^^^^
-Error: This expression has type text:string Solidtype.Check.value -> unit
+Error: This expression has type text:string -> unit
        but an expression was expected of type unit
+       because it is in the result of a conditional with no else branch
 Hint: This function application is partial, maybe some arguments are missing.
 ```
 
 ```
-1 | let make () = <Label text=(fun () -> "x") colour="red" />
-                                                     ^^^^^
+1 | let make () = <Label text="x" colour="red" />
+                                         ^^^^^
 Error: The function applied to this argument has type
-         ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
+         ?count:int -> ?props:Label.Props.t Solidtype.Solid.rest -> unit
 This argument cannot be applied with label ~colour
 ```
 
-A value prop is a `Check.value`: a literal, or a thunk that reads what
-changes. A thunk is never taken for a function prop, which a component
-would call; a function prop is the function itself, `on_close=(fun _ ->
-...)`. Two props typed by one type variable must agree, as in TSX.
+A value prop is a `Check.value`: what its expression gives. A function
+prop is the function itself, `on_close=(fun () -> ...)`, and a function
+given where a value belongs is refused. Two props typed by one type
+variable must agree, as in TSX.
 
 ## Children
 
-Children are a prop, `children`. As `Jsx.content`, they are any JSX and are
-read where they go, `(fun () -> S.get children)`:
+Children are a prop, `children`. As `Jsx.element`, they are any JSX and are
+read where they go, `(S.get children)`:
 
 <Example code={children} title="solid_children.mlx"><Children.make client:visible /></Example>
 
 A component may also take a function as its only child, which it calls, as
 `For` does: `~(children : item -> Jsx.element)`. A check names which kinds
-it takes: `[ `nodes ]` for elements, `[ `render ]` for a function, or both.
+it takes: `[ `elements ]` for elements, `[ `render ]` for a function, or both.
 
 Children of either kind, as HeroUI's render props are, are
 `~(children : state Jsx.children)`, drawn by `Jsx.draw (S.get children)
@@ -117,12 +118,12 @@ derived for them is `S.accessor (fun () -> e)`, computed at each read:
 ```ocaml
 let%component make ~(width : int) ~(children : state Jsx.children) () =
   let wide = S.accessor (fun () -> S.get width > 600) in
-  <div>(fun () -> Jsx.draw (S.get children) { wide })</div>
+  <div>(Jsx.draw (S.get children) { wide })</div>
 ```
 
-A function prop that takes nothing is written `(fun _ -> ...)`, as
-`on_close` is above, which hides the panel and shows a button in its place: `(fun () -> ...)` is a thunk, which would be read as a
-value.
+A function prop that takes nothing is written `(fun () -> ...)`, as
+`on_close` is above, which hides the panel and shows a button in its
+place.
 
 ## A component given its element
 
@@ -137,7 +138,7 @@ event.
 ```ocaml
 let%component make ?(class_ : string option) () =
   <input
-    class_=(fun () -> "field " ^ Option.value (class_ ()) ~default:"")
+    class_=("field " ^ Option.value (S.get class_) ~default:"")
     props=(Props.others props) />
 [@@element input]
 ```
@@ -171,11 +172,11 @@ where none was given.
 
 ## A component chosen at run time
 
-`Dynamic` renders whichever component a thunk gives, its props given as one
+`Dynamic` renders whichever component its expression gives, its props given as one
 value typed by that component, so a prop it needs is not left out:
 
 ```ocaml
-<Dynamic component=(fun () -> pick ()) props=(Greeting.Props.make ~name:"Ada" ()) />
+<Dynamic component=(pick ()) props=(Greeting.Props.make ~name:"Ada" ()) />
 ```
 
 `Dynamic.Element` does the same for an element whose tag is a string.

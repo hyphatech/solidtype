@@ -14,28 +14,23 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=time-field]"
       solidtype=(<Time_field
-                   is_disabled=(fun () -> S.get disabled)
-                   class_="w-56"
-                   name="time">
+                   is_disabled=(S.get disabled) class_="w-56" name="time">
                    <Label>"Time"</Label>
-                   <Time_field.Group variant=(fun () -> fst (S.get variant))>
+                   <Time_field.Group variant=(fst (S.get variant))>
                      <Time_field.Input>
                        (fun segment ->
-                         <Time_field.Segment segment=(fun () -> S.get segment)
-                         />)
+                         <Time_field.Segment segment=(S.get segment) />)
                      </Time_field.Input>
                    </Time_field.Group>
                  </Time_field>)

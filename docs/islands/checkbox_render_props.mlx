@@ -9,16 +9,13 @@ let make () =
         [|
           <Checkbox.Content>
             <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-            (fun () ->
-              Solidtype.Jsx.string
-                (if S.get s.is_selected then "Terms accepted"
-                 else "Accept terms"))
+            (Solidtype.Jsx.string
+               (if S.get s.is_selected then "Terms accepted" else "Accept terms"))
           </Checkbox.Content>;
           <Description>
-            (fun () ->
-              Solidtype.Jsx.string
-                (if S.get s.is_selected then "Thank you for accepting"
-                 else "Please read and accept the terms"))
+            (Solidtype.Jsx.string
+               (if S.get s.is_selected then "Thank you for accepting"
+                else "Please read and accept the terms"))
           </Description>;
         |])
   </Checkbox>

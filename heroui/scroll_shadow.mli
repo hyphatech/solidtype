@@ -6,7 +6,7 @@
     where content is hidden at both -- or the edges its [visibility] gives.
 
     {[
-      <Scroll_shadow class_="max-h-[300px]">(fun () -> long_text ())</Scroll_shadow>
+      <Scroll_shadow class_="max-h-[300px]">(long_text ())</Scroll_shadow>
     ]}
 
     It is measured once it is in the browser, never on the server, so a
@@ -34,7 +34,7 @@ module Props : sig
     ?offset:int Solidtype.Check.value ->
     ?variant:[ `fade ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

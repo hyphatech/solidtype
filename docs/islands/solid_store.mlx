@@ -15,7 +15,7 @@ let make () =
       type_=`button
       on_click=(fun _ ->
                  Store.set set_player { player with muted = not player.muted })>
-      (fun () -> Jsx.string (if player.muted then "Unmute" else "Mute"))
+      (Jsx.string (if player.muted then "Unmute" else "Mute"))
     </button>
     <button
       class_="button button--secondary"
@@ -24,9 +24,8 @@ let make () =
       "Louder"
     </button>
     <span class_="tabular-nums">
-      (fun () ->
-        Jsx.string
-          (if player.muted then "Muted"
-           else "Volume " ^ string_of_int player.volume))
+      (Jsx.string
+         (if player.muted then "Muted"
+          else "Volume " ^ string_of_int player.volume))
     </span>
   </div>

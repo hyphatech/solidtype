@@ -21,12 +21,11 @@ let make () =
       is_disabled=true
       class_="w-[256px]"
       name="time"
-      value=(fun () -> Js.Nullable.return time_value)>
+      value=(Js.Nullable.return time_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
-          (fun segment ->
-            <Time_field.Segment segment=(fun () -> S.get segment) />)
+          (fun segment -> <Time_field.Segment segment=(S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>"This time field is disabled"</Description>
@@ -35,8 +34,7 @@ let make () =
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
-          (fun segment ->
-            <Time_field.Segment segment=(fun () -> S.get segment) />)
+          (fun segment -> <Time_field.Segment segment=(S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Description>"This time field is disabled"</Description>

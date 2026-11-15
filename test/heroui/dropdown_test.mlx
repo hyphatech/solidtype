@@ -256,8 +256,8 @@ let items (menu : menu) tell =
       </Dropdown.Menu>
   | (`single | `multiple) as mode ->
       <Dropdown.Menu
-        selection_mode=(fun () -> (mode :> [ `none | `single | `multiple ]))
-        default_selected_keys=(fun () -> [| "bold" |])
+        selection_mode=(mode :> [ `none | `single | `multiple ])
+        default_selected_keys=[| "bold" |]
         on_selection_change=(fun keys ->
                               let keys = Array.copy keys in
                               Array.sort String.compare keys;
@@ -312,19 +312,14 @@ let both ?(custom = false) ?(long_press = false) ?placement (menu : menu) =
   T.render (fun () ->
       <div>
         <p data_testid="outside">"Outside"</p>
-        <Dropdown
-          trigger=(fun () -> if long_press then `long_press else `press)>
-          (fun () ->
-            if custom then
-              Solidtype.Jsx.element
-                <Dropdown.Trigger aria_label="Profile">
-                  <span>"Sarah"</span>
-                </Dropdown.Trigger>
-            else
-              Solidtype.Jsx.element
-                <Button aria_label="Menu" variant=`secondary>"Actions"</Button>)
-          <Dropdown.Popover ?placement=(fun () -> Option.map fst placement)>
-            (fun () -> Solidtype.Jsx.element (items menu tell))
+        <Dropdown trigger=(if long_press then `long_press else `press)>
+          (if custom then
+             <Dropdown.Trigger aria_label="Profile">
+               <span>"Sarah"</span>
+             </Dropdown.Trigger>
+           else <Button aria_label="Menu" variant=`secondary>"Actions"</Button>)
+          <Dropdown.Popover ?placement=(Option.map fst placement)>
+            (items menu tell)
           </Dropdown.Popover>
         </Dropdown>
       </div>);
@@ -364,8 +359,8 @@ let first selector =
    children of their state, as words, beside React's. *)
 let of_state () =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
@@ -450,8 +445,7 @@ let () =
                 <Button>"Fruits"</Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu
-                    selection_mode=`multiple
-                    default_selected_keys=(fun () -> [| "apple" |])>
+                    selection_mode=`multiple default_selected_keys=[| "apple" |]>
                     <Dropdown.Item id="apple" text_value="Apple">
                       <Dropdown.Item_indicator>
                         (fun selected -> mark selected)
@@ -502,7 +496,7 @@ let () =
                     title="Menu"
                     style="--x: 1"
                     selection_mode=`multiple
-                    default_selected_keys=(fun () -> [| "italic" |])>
+                    default_selected_keys=[| "italic" |]>
                     <Dropdown.Section title="Section" style="--x: 1">
                       <Dropdown.Item id="bold" text_value="Bold">
                         <Label>"Bold"</Label>
@@ -571,11 +565,11 @@ let () =
           let tell said = told := said :: !told in
           let item key =
             <Dropdown.Item
-              id=(fun () -> key)
-              text_value=(fun () -> key)
+              id=key
+              text_value=key
               on_select=(fun _ -> tell "caller's select")
               on_change=(fun _ -> tell "caller's change")>
-              <Label>(fun () -> Solidtype.Jsx.string key)</Label>
+              <Label>(Solidtype.Jsx.string key)</Label>
             </Dropdown.Item>
           in
           T.render (fun () ->
@@ -583,7 +577,7 @@ let () =
                 <Button>"Menu"</Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu on_action=(fun key -> tell ("action " ^ key))>
-                    (fun () -> Solidtype.Jsx.element (item "copy"))
+                    (item "copy")
                   </Dropdown.Menu>
                   <Dropdown.Menu
                     selection_mode=`multiple
@@ -592,7 +586,7 @@ let () =
                                             ("selected "
                                             ^ String.concat " "
                                                 (Array.to_list keys)))>
-                    (fun () -> Solidtype.Jsx.element (item "bold"))
+                    (item "bold")
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>);

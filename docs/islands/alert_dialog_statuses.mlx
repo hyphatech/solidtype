@@ -63,37 +63,34 @@ let examples =
 
 let make () =
   <div class_="flex flex-wrap gap-4">
-    <For each=(fun () -> examples)>
+    <For each=examples>
       (fun (e : example) _ ->
         <Alert_dialog>
-          <Button class_=(fun () -> e.classes)>
-            (fun () -> Jsx.string e.trigger)
-          </Button>
+          <Button class_=e.classes>(Jsx.string e.trigger)</Button>
           <Alert_dialog.Backdrop>
             <Alert_dialog.Container>
               <Alert_dialog.Dialog class_="sm:max-w-[400px]">
                 <Alert_dialog.Close_trigger />
                 <Alert_dialog.Header>
-                  <Alert_dialog.Icon status=(fun () -> e.status) />
+                  <Alert_dialog.Icon status=e.status />
                   <Alert_dialog.Heading>
-                    (fun () -> Jsx.string e.header)
+                    (Jsx.string e.header)
                   </Alert_dialog.Heading>
                 </Alert_dialog.Header>
                 <Alert_dialog.Body>
-                  <p>(fun () -> Jsx.string e.body)</p>
+                  <p>(Jsx.string e.body)</p>
                 </Alert_dialog.Body>
                 <Alert_dialog.Footer>
                   <Button slot=`close variant=`tertiary>
-                    (fun () -> Jsx.string e.cancel)
+                    (Jsx.string e.cancel)
                   </Button>
                   <Button
                     slot=`close
-                    variant=(fun () ->
-                              match e.status with
-                              | `danger -> `danger
-                              | `default | `accent | `success | `warning ->
-                                  `primary)>
-                    (fun () -> Jsx.string e.confirm)
+                    variant=(match e.status with
+                            | `danger -> `danger
+                            | `default | `accent | `success | `warning ->
+                                `primary)>
+                    (Jsx.string e.confirm)
                   </Button>
                 </Alert_dialog.Footer>
               </Alert_dialog.Dialog>

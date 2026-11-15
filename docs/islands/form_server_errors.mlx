@@ -13,7 +13,7 @@ let make () =
   let errors, set_errors = S.create_signal [] in
   <Form
     class_="flex w-96 flex-col gap-4"
-    validation_errors=(fun () -> S.get errors)
+    validation_errors=(S.get errors)
     on_submit=(fun e ->
                 prevent_default e;
                 S.set set_errors [ ("username", "This username is taken.") ])>

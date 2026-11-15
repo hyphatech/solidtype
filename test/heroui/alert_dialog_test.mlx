@@ -187,26 +187,18 @@ let both ?variant ?is_dismissable ?is_keyboard_dismiss_disabled ?placement ?size
       <div>
         <p data_testid="outside">"Outside"</p>
         <Alert_dialog>
-          (fun () ->
-            if custom then
-              Solidtype.Jsx.element
-                <Alert_dialog.Trigger aria_label="Open">
-                  <span>"Card"</span>
-                </Alert_dialog.Trigger>
-            else
-              Solidtype.Jsx.element
-                <Button variant=`danger>"Delete Project"</Button>)
+          (if custom then
+             <Alert_dialog.Trigger aria_label="Open">
+               <span>"Card"</span>
+             </Alert_dialog.Trigger>
+           else <Button variant=`danger>"Delete Project"</Button>)
           <Alert_dialog.Backdrop
-            ?variant=(fun () -> variant)
-            ?is_dismissable=(fun () -> is_dismissable)
-            ?is_keyboard_dismiss_disabled=(fun () ->
-                                            is_keyboard_dismiss_disabled)>
-            <Alert_dialog.Container
-              ?placement=(fun () -> placement) ?size=(fun () -> size)>
+            ?variant ?is_dismissable ?is_keyboard_dismiss_disabled>
+            <Alert_dialog.Container ?placement ?size>
               <Alert_dialog.Dialog>
                 <Alert_dialog.Close_trigger />
                 <Alert_dialog.Header>
-                  <Alert_dialog.Icon ?status=(fun () -> status) />
+                  <Alert_dialog.Icon ?status />
                   <Alert_dialog.Heading>
                     "Delete project permanently?"
                   </Alert_dialog.Heading>
@@ -351,8 +343,7 @@ let () =
           let host = create_div "div" in
           append T.body host;
           T.render (fun () ->
-              <Alert_dialog.Backdrop
-                is_open=true portal_container=(fun () -> host)>
+              <Alert_dialog.Backdrop is_open=true portal_container=host>
                 <Alert_dialog.Container>
                   <Alert_dialog.Dialog>
                     <Alert_dialog.Heading>"Inside"</Alert_dialog.Heading>

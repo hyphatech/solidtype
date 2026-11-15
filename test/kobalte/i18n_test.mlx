@@ -12,11 +12,10 @@ module Shows_locale = struct
   let%component make () =
     let locale = I18n.use_locale () in
     <p>
-      (fun () ->
-        Jsx.string
-          (Use_locale.locale locale ()
-          ^ " "
-          ^ direction_name (Use_locale.direction locale ())))
+      (Jsx.string
+         (Use_locale.locale locale ()
+         ^ " "
+         ^ direction_name (Use_locale.direction locale ())))
     </p>
 end
 
@@ -25,15 +24,14 @@ module Filters = struct
     let filter = I18n.create_filter () in
     let says name holds = if holds then name else "not " ^ name in
     <p>
-      (fun () ->
-        Jsx.string
-          (String.concat ", "
-             [
-               says "starts" (Filter.starts_with filter "Hello" "He");
-               says "contains" (Filter.contains filter "Hello" "ll");
-               says "ends" (Filter.ends_with filter "Hello" "lo");
-               says "starts with x" (Filter.starts_with filter "Hello" "x");
-             ]))
+      (Jsx.string
+         (String.concat ", "
+            [
+              says "starts" (Filter.starts_with filter "Hello" "He");
+              says "contains" (Filter.contains filter "Hello" "ll");
+              says "ends" (Filter.ends_with filter "Hello" "lo");
+              says "starts with x" (Filter.starts_with filter "Hello" "x");
+            ]))
     </p>
 end
 

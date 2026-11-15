@@ -21,21 +21,20 @@ let make () =
     <Time_field
       is_required=true
       class_="w-[256px]"
-      is_invalid=(fun () -> is_invalid ())
+      is_invalid=(is_invalid ())
       name="time"
-      min_value=(fun () -> min_time)
-      max_value=(fun () -> max_time)
-      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      min_value=min_time
+      max_value=max_time
+      value=(Js.Nullable.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Time"</Label>
       <Time_field.Group>
         <Time_field.Input>
-          (fun segment ->
-            <Time_field.Segment segment=(fun () -> S.get segment) />)
+          (fun segment -> <Time_field.Segment segment=(S.get segment) />)
         </Time_field.Input>
       </Time_field.Group>
       <Show
-        when_=(fun () -> is_invalid ())
+        when_=(is_invalid ())
         fallback=(<Description>
                     "Enter a time between 9:00 AM and 5:00 PM"
                   </Description>)>

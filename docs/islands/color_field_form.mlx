@@ -43,12 +43,12 @@ let make () =
       is_required=true
       class_="w-full"
       name="brand-color"
-      value=(fun () -> Js.Nullable.fromOption (S.get value))
+      value=(Js.Nullable.fromOption (S.get value))
       on_change=(S.set set_value)>
       <Label>"Brand Color"</Label>
       <Color_field.Group>
         <Color_field.Prefix>
-          <Color_swatch color=(fun () -> shown (S.get value)) size=`xs />
+          <Color_swatch color=(shown (S.get value)) size=`xs />
         </Color_field.Prefix>
         <Color_field.Input placeholder="#000000" />
       </Color_field.Group>
@@ -56,11 +56,10 @@ let make () =
     </Color_field>
     <Button
       class_="w-full"
-      is_disabled=(fun () -> Option.is_none (S.get value))
-      is_pending=(fun () -> S.get submitting)
+      is_disabled=(Option.is_none (S.get value))
+      is_pending=(S.get submitting)
       type_=`submit
       variant=`primary>
-      (fun () ->
-        Jsx.string (if S.get submitting then "Saving..." else "Save Color"))
+      (Jsx.string (if S.get submitting then "Saving..." else "Save Color"))
     </Button>
   </Form>

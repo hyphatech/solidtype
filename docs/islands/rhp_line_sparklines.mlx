@@ -36,15 +36,11 @@ let city =
     (fun d ->
       let c = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string c.city)</Label>
-        <Line points=(fun () -> points c.temps) peak=34. smooth=true fill=true
-        />
+        <Label edge="start">(Jsx.string c.city)</Label>
+        <Line points=(points c.temps) peak=34. smooth=true fill=true />
       </div>)
 
 let make () =
-  <Chart
-    scale=(fun () -> (0., 11.))
-    ticks=(fun () -> Ticks.none)
-    label="Each month's temperature">
-    <Plot rows=(fun () -> cities) render=city />
+  <Chart scale=(0., 11.) ticks=Ticks.none label="Each month's temperature">
+    <Plot rows=cities render=city />
   </Chart>

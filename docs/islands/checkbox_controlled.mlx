@@ -4,8 +4,7 @@ module S = Solidtype.Solid
 let make () =
   let selected, set_selected = S.create_signal true in
   <div class_="flex flex-col gap-3">
-    <Checkbox
-      is_selected=(fun () -> S.get selected) on_change=(S.set set_selected)>
+    <Checkbox is_selected=(S.get selected) on_change=(S.set set_selected)>
       <Checkbox.Content>
         <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
         "Email notifications"
@@ -14,9 +13,8 @@ let make () =
     <p class_="text-sm text-muted">
       "Status: "
       <span class_="font-medium">
-        (fun () ->
-          Solidtype.Jsx.string
-            (if S.get selected then "Enabled" else "Disabled"))
+        (Solidtype.Jsx.string
+           (if S.get selected then "Enabled" else "Disabled"))
       </span>
     </p>
   </div>

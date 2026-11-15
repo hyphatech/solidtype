@@ -22,7 +22,7 @@ module Progress : sig
     module Props : sig
       val check :
         value:string Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end

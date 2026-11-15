@@ -23,27 +23,19 @@ let submit e =
   alert ("Form submitted with:\n" ^ lines)
 
 let item ?(selected = false) ~name ~text () =
-  <Checkbox
-    default_selected=(fun () -> selected) name=(fun () -> name) value="on">
+  <Checkbox default_selected=selected name value="on">
     <Checkbox.Content>
       <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-      (fun () -> Solidtype.Jsx.string text)
+      (Solidtype.Jsx.string text)
     </Checkbox.Content>
   </Checkbox>
 
 let make () =
   <form class_="flex flex-col gap-4" on_submit=submit>
     <div class_="flex flex-col gap-3">
-      (fun () ->
-        Solidtype.Jsx.element
-          (item ~name:"notifications" ~text:"Enable notifications" ()))
-      (fun () ->
-        Solidtype.Jsx.element
-          (item ~selected:true ~name:"newsletter"
-             ~text:"Subscribe to newsletter" ()))
-      (fun () ->
-        Solidtype.Jsx.element
-          (item ~name:"marketing" ~text:"Receive marketing updates" ()))
+      (item ~name:"notifications" ~text:"Enable notifications" ())
+      (item ~selected:true ~name:"newsletter" ~text:"Subscribe to newsletter" ())
+      (item ~name:"marketing" ~text:"Receive marketing updates" ())
     </div>
     <Button class_="mt-4" size=`sm type_=`submit variant=`primary>
       "Submit"

@@ -31,13 +31,13 @@ let city =
     (fun d ->
       let c = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string c.city)</Label>
-        <Bar to_=(fun () -> c.hours) color=(fun () -> colors d) />
+        <Label edge="start">(Jsx.string c.city)</Label>
+        <Bar to_=c.hours color=(colors d) />
       </div>)
 
 let make () =
-  <Theme value=(fun () -> sunset)>
-    <Chart scale=(fun () -> (0., 12.)) label="Hours of sun a day in June">
-      <Plot rows=(fun () -> cities) render=city />
+  <Theme value=sunset>
+    <Chart scale=(0., 12.) label="Hours of sun a day in June">
+      <Plot rows=cities render=city />
     </Chart>
   </Theme>

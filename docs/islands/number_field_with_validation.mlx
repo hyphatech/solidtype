@@ -16,13 +16,13 @@ let make () =
   <div class_="flex w-full max-w-64 flex-col gap-4">
     <Number_field
       is_required=true
-      format_options=(fun () -> Format.make ~style:`percent ())
-      is_invalid=(fun () -> is_invalid ())
+      format_options=(Format.make ~style:`percent ())
+      is_invalid=(is_invalid ())
       max_value=1.
       min_value=0.
       name="percentage"
       step=0.1
-      value=(fun () -> S.get value)
+      value=(S.get value)
       on_change=(S.set set_value)>
       <Label>"Percentage"</Label>
       <Number_field.Group>
@@ -31,7 +31,7 @@ let make () =
         <Number_field.Increment_button />
       </Number_field.Group>
       <Show
-        when_=(fun () -> is_invalid ())
+        when_=(is_invalid ())
         fallback=(<Description>"Enter a value between 0 and 100"</Description>)>
         <Field_error>"Percentage must be between 0 and 100"</Field_error>
       </Show>

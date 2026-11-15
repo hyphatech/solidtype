@@ -52,7 +52,7 @@ let make () =
         <Table.Content
           aria_label="Table with selection"
           class_="min-w-[600px]"
-          selected_keys=(fun () -> S.get selected_keys)
+          selected_keys=(S.get selected_keys)
           selection_mode=`multiple
           on_selection_change=(S.set set_selected_keys)>
           <Table.Header>
@@ -69,12 +69,12 @@ let make () =
             <Table.Column>"Email"</Table.Column>
           </Table.Header>
           <Table.Body>
-            <For each=(fun () -> users)>
+            <For each=users>
               (fun user _ ->
-                <Table.Row id=(fun () -> string_of_int user.id)>
+                <Table.Row id=(string_of_int user.id)>
                   <Table.Cell class_="pe-0">
                     <Checkbox
-                      aria_label=(fun () -> "Select " ^ user.name)
+                      aria_label=("Select " ^ user.name)
                       slot=`selection
                       variant=`secondary>
                       <Checkbox.Content>
@@ -84,10 +84,10 @@ let make () =
                       </Checkbox.Content>
                     </Checkbox>
                   </Table.Cell>
-                  <Table.Cell>(fun () -> Jsx.string user.name)</Table.Cell>
-                  <Table.Cell>(fun () -> Jsx.string user.role)</Table.Cell>
-                  <Table.Cell>(fun () -> Jsx.string user.status)</Table.Cell>
-                  <Table.Cell>(fun () -> Jsx.string user.email)</Table.Cell>
+                  <Table.Cell>(Jsx.string user.name)</Table.Cell>
+                  <Table.Cell>(Jsx.string user.role)</Table.Cell>
+                  <Table.Cell>(Jsx.string user.status)</Table.Cell>
+                  <Table.Cell>(Jsx.string user.email)</Table.Cell>
                 </Table.Row>)
             </For>
           </Table.Body>
@@ -97,11 +97,10 @@ let make () =
     <p class_="text-sm text-muted">
       "Selected: "
       <span class_="font-medium">
-        (fun () ->
-          Jsx.string
-            (match S.get selected_keys with
-            | [||] -> "None"
-            | keys -> String.concat ", " (Array.to_list keys)))
+        (Jsx.string
+           (match S.get selected_keys with
+           | [||] -> "None"
+           | keys -> String.concat ", " (Array.to_list keys)))
       </span>
     </p>
   </div>

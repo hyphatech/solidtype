@@ -91,13 +91,7 @@ let shown host =
 let both ~value ?min_value ?max_value ?color ?size ?format_options () =
   T.render (fun () ->
       <Meter
-        value=(fun () -> value)
-        ?min_value=(fun () -> min_value)
-        ?max_value=(fun () -> max_value)
-        ?color=(fun () -> color)
-        ?size=(fun () -> size)
-        ?format_options=(fun () -> format_options)
-        class_="w-64">
+        value ?min_value ?max_value ?color ?size ?format_options class_="w-64">
         <Label>"Storage"</Label>
         <Meter.Output />
         <Meter.Track><Meter.Fill /></Meter.Track>
@@ -137,12 +131,11 @@ let of_state ~indeterminate =
       <Meter aria_label="Storage" value=40.>
         (fun s ->
           <span data_words="state">
-            (fun () ->
-              Solidtype.Jsx.string
-                (Js.Float.toString (Solidtype.Solid.get s.percentage)
-                ^ "|"
-                ^ Solidtype.Solid.get s.value_text
-                ^ "|false"))
+            (Solidtype.Jsx.string
+               (Js.Float.toString (Solidtype.Solid.get s.percentage)
+               ^ "|"
+               ^ Solidtype.Solid.get s.value_text
+               ^ "|false"))
           </span>)
       </Meter>);
   let solidtype = T.words_shown T.body in

@@ -18,20 +18,15 @@ let make () =
   let chosen, set_chosen = S.create_signal (Colors.parse_color "#8B5CF6") in
   <div class_="flex flex-col gap-3">
     <Picker.Root
-      class_="flex gap-2"
-      value=(fun () -> S.get chosen)
-      on_change=(S.set set_chosen)>
-      <For each=(fun () -> colors)>
+      class_="flex gap-2" value=(S.get chosen) on_change=(S.set set_chosen)>
+      <For each=colors>
         (fun c _ ->
-          <Picker.Item
-            class_=(fun () -> option_class)
-            color=(fun () -> Colors.parse_color c)>
+          <Picker.Item class_=option_class color=(Colors.parse_color c)>
             <Picker.Swatch class_="size-full rounded-full" />
           </Picker.Item>)
       </For>
     </Picker.Root>
     <p class_="text-sm">
-      "Chosen: "
-      (fun () -> Jsx.string (Color.to_string (S.get chosen) ~format:`hex ()))
+      "Chosen: " (Jsx.string (Color.to_string (S.get chosen) ~format:`hex ()))
     </p>
   </div>

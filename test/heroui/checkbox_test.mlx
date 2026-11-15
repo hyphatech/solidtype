@@ -104,13 +104,13 @@ let both ?(read_only = false) ?(required = false) ~variant ~selected
   in
   T.render (fun () ->
       <Checkbox
-        variant=(fun () -> variant)
-        default_selected=(fun () -> selected)
-        is_indeterminate=(fun () -> indeterminate)
-        is_disabled=(fun () -> disabled)
-        is_invalid=(fun () -> invalid)
-        is_read_only=(fun () -> read_only)
-        is_required=(fun () -> required)
+        variant
+        default_selected=selected
+        is_indeterminate=indeterminate
+        is_disabled=disabled
+        is_invalid=invalid
+        is_read_only=read_only
+        is_required=required
         name="terms">
         <Checkbox.Content>
           <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
@@ -132,16 +132,16 @@ let both ?(read_only = false) ?(required = false) ~variant ~selected
 let of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
     ?(required = false) () =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Checkbox
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun r ->
           Solidtype.Jsx.fragment
             [|

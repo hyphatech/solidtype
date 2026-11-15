@@ -27,7 +27,7 @@ let make () =
     full_width=true
     class_="flex w-sm flex-col sm:w-lg"
     name="prompt"
-    value=(fun () -> S.get value)
+    value=(S.get value)
     on_change=(S.set set_value)>
     <Input_group full_width=true class_="flex flex-col gap-2 rounded-3xl py-2">
       <Input_group.Prefix class_="px-3 py-0">
@@ -58,12 +58,10 @@ let make () =
           <Button
             is_icon_only=true
             aria_label="Send prompt"
-            is_disabled=(fun () -> empty ())
+            is_disabled=(empty ())
             on_click=submit>
-            (fun () ->
-              if S.get submitting then
-                Solidtype.Jsx.element <Spinner color=`current size=`sm />
-              else Solidtype.Jsx.element <Gravity.Arrow_up />)
+            (if S.get submitting then <Spinner color=`current size=`sm />
+             else <Gravity.Arrow_up />)
           </Button>
         </div>
       </Input_group.Suffix>

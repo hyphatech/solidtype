@@ -4,8 +4,7 @@ module Label = Solidtype_heroui.Label
 module List_box = Solidtype_heroui.List_box
 
 let make () =
-  <Combo_box
-    class_="w-[256px]" disabled_keys=(fun () -> [| "cat"; "kangaroo" |])>
+  <Combo_box class_="w-[256px]" disabled_keys=[| "cat"; "kangaroo" |]>
     <Label>"Animal"</Label>
     <Combo_box.Input_group>
       <Input placeholder="Search animals..." /> <Combo_box.Trigger />

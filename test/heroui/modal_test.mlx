@@ -179,22 +179,13 @@ let both ?variant ?is_dismissable ?placement ?size ?scroll ?(custom = false) ()
       <div>
         <p data_testid="outside">"Outside"</p>
         <Modal>
-          (fun () ->
-            if custom then
-              Solidtype.Jsx.element
-                <Modal.Trigger aria_label="Open">
-                  <span>"Card"</span>
-                </Modal.Trigger>
-            else
-              Solidtype.Jsx.element
-                <Button variant=`secondary>"Open Modal"</Button>)
-          <Modal.Backdrop
-            ?variant=(fun () -> variant)
-            ?is_dismissable=(fun () -> is_dismissable)>
-            <Modal.Container
-              ?placement=(fun () -> placement)
-              ?size=(fun () -> size)
-              ?scroll=(fun () -> scroll)>
+          (if custom then
+             <Modal.Trigger aria_label="Open">
+               <span>"Card"</span>
+             </Modal.Trigger>
+           else <Button variant=`secondary>"Open Modal"</Button>)
+          <Modal.Backdrop ?variant ?is_dismissable>
+            <Modal.Container ?placement ?size ?scroll>
               <Modal.Dialog>
                 <Modal.Close_trigger />
                 <Modal.Header>
@@ -241,8 +232,8 @@ let focused () =
    then whether its dialog's close, given its children, closed it. *)
 let of_state () =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   let look () =
@@ -335,7 +326,7 @@ let () =
           let told = ref [] in
           T.render (fun () ->
               <Modal.Backdrop
-                is_open=(fun () -> S.get open_)
+                is_open=(S.get open_)
                 on_open_change=(fun o ->
                                  told := o :: !told;
                                  S.set set_open o)>
@@ -436,7 +427,7 @@ let () =
           let host = create_div "div" in
           append T.body host;
           T.render (fun () ->
-              <Modal.Backdrop is_open=true portal_container=(fun () -> host)>
+              <Modal.Backdrop is_open=true portal_container=host>
                 <Modal.Container>
                   <Modal.Dialog>
                     <Modal.Heading>"Inside"</Modal.Heading>

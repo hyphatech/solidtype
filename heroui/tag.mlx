@@ -49,36 +49,32 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Remove_button = struct
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let t = in_tag "Tag.Remove_button" in
     t.remove_here ();
     let tag = Headless.Tag.Context.use () in
     let i = Interaction.create ~disabled:(fun () -> S.get tag.is_disabled) () in
     <Headless.Remove_button
       aria_label="Remove tag"
-      class_=(fun () ->
-               Styles.CloseButton.classes
-                 (Styles.CloseButton.options ~variant:`default
-                    ~class_:
-                      (after
-                         (Styles.Tag.remove_button (S.get t.slots))
-                         (S.get class_))
-                    ()))
+      class_=(Styles.CloseButton.classes
+                (Styles.CloseButton.options ~variant:`default
+                   ~class_:
+                     (after
+                        (Styles.Tag.remove_button (S.get t.slots))
+                        (S.get class_))
+                   ()))
       ref=(fun b ->
             ignore (given_ref b : unit option);
             Interaction.watch i b)
       slot="remove"
       data_slot="tag-remove-button"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (Interaction.disabled i))
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some c -> c
-        | None -> Jsx.element <Close_button.Icon />)
+      (match S.get children with Some c -> c | None -> <Close_button.Icon />)
     </Headless.Remove_button>
   [@@element button]
 end
@@ -143,47 +139,43 @@ let%component make ?(id : string option) ?(text_value : string option)
       allows_removing = h.allows_removing;
     }
   in
-  <Context.Provider value=(fun () -> t)>
+  <Context.Provider value=t>
     <Headless.Tag
-      id=(fun () -> key)
-      ?text_value=(fun () -> S.get text_value)
-      is_disabled=(fun () -> disabled ())
+      id=key
+      ?text_value=(S.get text_value)
+      is_disabled=(disabled ())
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e;
             watch_self e)
-      class_=(fun () -> after (Styles.Tag.base (S.get slots)) (S.get class_))
+      class_=(after (Styles.Tag.base (S.get slots)) (S.get class_))
       data_slot="tag"
-      data_selected=(fun () -> Jsx.flag (selected ()))
-      data_disabled=(fun () -> Jsx.flag (disabled ()))
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () ->
-                           Jsx.flag (Interaction.focus_visible i && self ()))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_allows_removing=(fun () -> Jsx.flag (S.get h.allows_removing))
-      data_selection_mode=(fun () ->
-                            match S.get h.selection_mode with
-                            | `none -> Jsx.flag false
-                            | `single -> Jsx.data "single"
-                            | `multiple -> Jsx.data "multiple")
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_selected=(Jsx.flag (selected ()))
+      data_disabled=(Jsx.flag (disabled ()))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i && self ()))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_allows_removing=(Jsx.flag (S.get h.allows_removing))
+      data_selection_mode=(match S.get h.selection_mode with
+                          | `none -> Jsx.flag false
+                          | `single -> Jsx.data "single"
+                          | `multiple -> Jsx.data "multiple")
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
-      (fun () ->
-        (* A tag that can be removed draws HeroUI's button, unless its
+      (Jsx.draw (S.get children) (state ()))
+      (if
+         (* A tag that can be removed draws HeroUI's button, unless its
            children draw one of their own, or are a function, which draws
            what it wants. *)
-        if
-          S.get h.allows_removing
-          && (not (Jsx.is_function (S.get children)))
-          && S.get removers = 0
-        then
-          Jsx.element
-            <Context.Provider value=(fun () -> { t with remove_here = ignore })>
-              <Remove_button />
-            </Context.Provider>
-        else Jsx.string "")
+         S.get h.allows_removing
+         && (not (Jsx.is_function (S.get children)))
+         && S.get removers = 0
+       then
+         <Context.Provider value={ t with remove_here = ignore }>
+           <Remove_button />
+         </Context.Provider>
+       else Jsx.string "")
     </Headless.Tag>
   </Context.Provider>
 [@@element div]

@@ -26,8 +26,7 @@ let fruit =
     (fun d ->
       let f = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
-        <Bar to_=(fun () -> f.sold) />
+        <Label edge="start">(Jsx.string f.name)</Label> <Bar to_=f.sold />
       </div>)
 
 external css : string = "default" [@@mel.module "./rhp_scale_axis.css?raw"]
@@ -42,22 +41,18 @@ let tick =
     (fun (d : Scale.tick Row.t) ->
       let t = Row.data d in
       <div>
-        <Tick
-          at=(fun () -> t.at) thick=(fun () -> Either.right 1.) class_="line"
-        />
-        <Label at=(fun () -> t.at) class_="num">
-          (fun () ->
-            Jsx.string (Js.Float.toString t.at ^ if t.last then " sold" else ""))
+        <Tick at=t.at thick=(Either.right 1.) class_="line" />
+        <Label at=t.at class_="num">
+          (Jsx.string (Js.Float.toString t.at ^ if t.last then " sold" else ""))
         </Label>
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (0., 20.))>
+  <Chart scale=(0., 20.)>
     <Scale
-      ticks=(fun () ->
-              Ticks.custom
-                (Solidtype_rhp.every 5. ~options:(Every.make ~ends:true ()) ()))
+      ticks=(Ticks.custom
+               (Solidtype_rhp.every 5. ~options:(Every.make ~ends:true ()) ()))
       render=tick
     />
-    <Plot rows=(fun () -> fruits) render=fruit />
+    <Plot rows=fruits render=fruit />
   </Chart>

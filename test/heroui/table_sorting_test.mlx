@@ -112,50 +112,46 @@ let () =
         (fun () ->
           let column id =
             <Table.Column
-              allows_sorting=true
-              is_row_header=(fun () -> String.equal id "name")
-              id=(fun () -> id)>
+              allows_sorting=true is_row_header=(String.equal id "name") id>
               (fun s ->
-                <span data_words=(fun () -> Jsx.data id)>
-                  (fun () ->
-                    Jsx.string
-                      (T.words
-                         [
-                           ("hovered", s.is_hovered);
-                           ("focus-visible", s.is_focus_visible);
-                           ("sorting", s.allows_sorting);
-                           ( "ascending",
-                             S.accessor (fun () ->
-                                 match S.get s.sort_direction with
-                                 | Some `ascending -> true
-                                 | Some `descending | None -> false) );
-                           ( "descending",
-                             S.accessor (fun () ->
-                                 match S.get s.sort_direction with
-                                 | Some `descending -> true
-                                 | Some `ascending | None -> false) );
-                           ("resizing", s.is_resizing);
-                         ]))
+                <span data_words=(Jsx.data id)>
+                  (Jsx.string
+                     (T.words
+                        [
+                          ("hovered", s.is_hovered);
+                          ("focus-visible", s.is_focus_visible);
+                          ("sorting", s.allows_sorting);
+                          ( "ascending",
+                            S.accessor (fun () ->
+                                match S.get s.sort_direction with
+                                | Some `ascending -> true
+                                | Some `descending | None -> false) );
+                          ( "descending",
+                            S.accessor (fun () ->
+                                match S.get s.sort_direction with
+                                | Some `descending -> true
+                                | Some `ascending | None -> false) );
+                          ("resizing", s.is_resizing);
+                        ]))
                 </span>)
             </Table.Column>
           in
           let cell name =
             <Table.Cell>
               (fun s ->
-                <span data_words=(fun () -> Jsx.data name)>
-                  (fun () ->
-                    Jsx.string
-                      (T.words
-                         [
-                           ("selected", s.is_selected);
-                           ("tree", s.is_tree_column);
-                           ("expanded", s.is_expanded);
-                           ("children", s.has_child_items);
-                         ]
-                      ^ " "
-                      ^ string_of_int (S.get s.column_index)
-                      ^ " "
-                      ^ string_of_int (S.get s.level)))
+                <span data_words=(Jsx.data name)>
+                  (Jsx.string
+                     (T.words
+                        [
+                          ("selected", s.is_selected);
+                          ("tree", s.is_tree_column);
+                          ("expanded", s.is_expanded);
+                          ("children", s.has_child_items);
+                        ]
+                     ^ " "
+                     ^ string_of_int (S.get s.column_index)
+                     ^ " "
+                     ^ string_of_int (S.get s.level)))
                 </span>)
             </Table.Cell>
           in
@@ -164,19 +160,14 @@ let () =
                 <Table.Scroll_container>
                   <Table.Content
                     aria_label="Sorted"
-                    sort_descriptor=(fun () ->
-                                      {
-                                        Table.column = "name";
-                                        direction = `ascending;
-                                      })>
-                    <Table.Header>
-                      (fun () -> Jsx.element (column "name"))
-                      (fun () -> Jsx.element (column "role"))
-                    </Table.Header>
+                    sort_descriptor={
+                                      Table.column = "name";
+                                      direction = `ascending;
+                                    }>
+                    <Table.Header>(column "name") (column "role")</Table.Header>
                     <Table.Body>
                       <Table.Row id="1">
-                        (fun () -> Jsx.element (cell "first"))
-                        (fun () -> Jsx.element (cell "second"))
+                        (cell "first") (cell "second")
                       </Table.Row>
                     </Table.Body>
                   </Table.Content>
@@ -199,7 +190,7 @@ let () =
                 <Table.Scroll_container>
                   <Table.Content
                     aria_label="Sortable table"
-                    sort_descriptor=(fun () -> S.get sort)
+                    sort_descriptor=(S.get sort)
                     on_sort_change=(fun (s : Table.sort_descriptor) ->
                                      (told :=
                                         s.column ^ ":"
@@ -223,15 +214,11 @@ let () =
                       <Table.Column>"Actions"</Table.Column>
                     </Table.Header>
                     <Table.Body>
-                      <For each=(fun () -> sorted (S.get sort))>
+                      <For each=(sorted (S.get sort))>
                         (fun u _ ->
-                          <Table.Row id=(fun () -> string_of_int u.id)>
-                            <Table.Cell>
-                              (fun () -> Jsx.string u.name)
-                            </Table.Cell>
-                            <Table.Cell>
-                              (fun () -> Jsx.string u.role)
-                            </Table.Cell>
+                          <Table.Row id=(string_of_int u.id)>
+                            <Table.Cell>(Jsx.string u.name)</Table.Cell>
+                            <Table.Cell>(Jsx.string u.role)</Table.Cell>
                             <Table.Cell>"-"</Table.Cell>
                           </Table.Row>)
                       </For>

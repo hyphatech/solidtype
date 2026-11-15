@@ -45,23 +45,22 @@ let nested =
 let thunk =
   Solidtype.Jsx.el "p" [||]
     [|(Solidtype.Jsx.dynamic (((fun () -> Solidtype.Jsx.string (name ()))
-         [@u ]) : ((unit -> Solidtype.Jsx.content)[@u ])))|]
+         [@u ]) : ((unit -> Solidtype.Jsx.element)[@u ])))|]
 let component =
-  (fun (solidtype__text : ((unit -> _)[@u ])) ->
-     if false
-     then
-       Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
-         ~count:(Solidtype.Check.literal 1) ();
-     Solidtype.Jsx.c Label.component
-       [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.s "count" 1)|]
-       [||]) ((fun () -> "x")[@u ])
+  if false
+  then
+    Label.Props.check ~text:(Solidtype.Check.literal {js|x|js})
+      ~count:(Solidtype.Check.literal 1) ();
+  Solidtype.Jsx.c Label.component
+    [|(Solidtype.Jsx.s "text" {js|x|js});(Solidtype.Jsx.s "count" 1)|] 
+    [||]
 let part =
   (fun (solidtype__checked : ((unit -> _)[@u ])) ->
      if false
      then
        Switch.Root.Props.check
          ~checked:(Solidtype.Check.thunk solidtype__checked)
-         ~children:(Solidtype.Check.nodes ()) ();
+         ~children:(Solidtype.Check.elements ()) ();
      Solidtype.Jsx.c Switch.Root.component
        [|(Solidtype.Jsx.d "checked" solidtype__checked)|]
        [|(Solidtype.Jsx.node
@@ -86,19 +85,19 @@ let element_prop =
                                                               {js|wait|js})|]))|]
        [||]) ((fun () -> ready ())[@u ])
 let function_child =
-  (fun solidtype__children (solidtype__each : ((unit -> _)[@u ])) ->
+  (fun (solidtype__each : ((unit -> _)[@u ])) solidtype__children ->
      if false
      then
        For.Props.check ~each:(Solidtype.Check.thunk solidtype__each)
          ~children:(Solidtype.Check.render solidtype__children) ();
      Solidtype.Jsx.c For.component
        [|(Solidtype.Jsx.d "each" solidtype__each)|]
-       [|(Solidtype.Jsx.render solidtype__children)|])
+       [|(Solidtype.Jsx.render solidtype__children)|]) ((fun () -> items ())
+    [@u ])
     (fun item ->
        Solidtype.Jsx.el "li" [||]
          [|(Solidtype.Jsx.dynamic (((fun () -> Solidtype.Jsx.string item)
-              [@u ]) : ((unit -> Solidtype.Jsx.content)[@u ])))|])
-    ((fun () -> items ())[@u ])
+              [@u ]) : ((unit -> Solidtype.Jsx.element)[@u ])))|])
 let ref_callback =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.s "ref" (fun el -> keep el : Solidtype.Html.Div.ref))|]
@@ -154,12 +153,14 @@ include
                 | Children -> "children") names)
       end
     let make (props : _ Props.t) =
-      let text = ((fun () -> Props.get_text props)[@u ])[@@inline ][@@ocaml.warning
-                                                                    "-26-27"]
+      let text =
+        Solidtype.Solid.of_function ((fun () -> Props.get_text props)[@u ])
+      [@@inline ][@@ocaml.warning "-26-27"]
       and count =
-        ((fun () ->
-            match Props.get_count props with | Some v -> v | None -> 0)
-        [@u ])[@@inline ][@@ocaml.warning "-26-27"]
+        Solidtype.Solid.of_function
+          ((fun () ->
+              match Props.get_count props with | Some v -> v | None -> 0)
+          [@u ])[@@inline ][@@ocaml.warning "-26-27"]
       and on_pick solidtype__0 =
         match Props.get_on_pick props with
         | Some f -> Some ((f solidtype__0)[@u ])
@@ -181,7 +182,7 @@ include
                      match Props.get_count props with
                      | Some v -> v
                      | None -> 0))
-             [@u ]) : ((unit -> Solidtype.Jsx.content)[@u ])))|]
+             [@u ]) : ((unit -> Solidtype.Jsx.element)[@u ])))|]
     let component = Solidtype.Jsx.component make
   end
 module Given_its_element =
@@ -230,12 +231,15 @@ module Given_its_element =
                     | As_ -> "as") names)
           end
         let make (props : Props.t) =
-          let variant = ((fun () -> Props.get_variant props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"]
-          and class_ = ((fun () -> Props.get_class_ props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"]
-          and as_ = ((fun () -> Props.get_as_ props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"] in
+          let variant =
+            Solidtype.Solid.of_function ((fun () -> Props.get_variant props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"]
+          and class_ =
+            Solidtype.Solid.of_function ((fun () -> Props.get_class_ props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"]
+          and as_ =
+            Solidtype.Solid.of_function ((fun () -> Props.get_as_ props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"] in
           Solidtype.Jsx.c Solidtype.Show.component
             [|(Solidtype.Jsx.d "when"
                  ((fun () ->
@@ -355,7 +359,8 @@ let namespaced =
 let namespaced_optional =
   Solidtype.Jsx.el "div"
     [|(Solidtype.Jsx.d "attr:hidden"
-         ((fun () -> Js.Undefined.fromOption (found () : string option))
+         ((fun () ->
+             Js.Undefined.fromOption ((found () : _ option) : string option))
          [@u ]))|] [||]
 let namespaced_on_component =
   if false then Switch.Root.Props.check ();
@@ -364,7 +369,9 @@ let namespaced_on_component =
                                                              "attr:hidden"
                                                              ((fun () ->
                                                                  Js.Undefined.fromOption
-                                                                   (found () : 
+                                                                   ((
+                                                                   found () : 
+                                                                   _ option) : 
                                                                    string
                                                                     option))
                                                              [@u ]));(
@@ -375,7 +382,7 @@ let switch =
   if false
   then (((match answer () with | Waiting -> () | Ready n -> ()))
     [@ocaml.warning "-26-27"]);
-  if false then Switch.Props.check ~children:(Solidtype.Check.nodes ()) ();
+  if false then Switch.Props.check ~children:(Solidtype.Check.elements ()) ();
   Solidtype.Jsx.c Switch.component [||]
     [|(Solidtype.Jsx.node
          ((fun (solidtype__when_ : ((unit -> _)[@u ])) ->
@@ -383,7 +390,7 @@ let switch =
              then
                Match.Props.check
                  ~when_:(Solidtype.Check.thunk solidtype__when_)
-                 ~children:(Solidtype.Check.nodes ()) ();
+                 ~children:(Solidtype.Check.elements ()) ();
              Solidtype.Jsx.c Match.component
                [|(Solidtype.Jsx.d "when" solidtype__when_)|]
                [|(Solidtype.Jsx.node
@@ -392,10 +399,11 @@ let switch =
             ((fun () ->
                 ((match answer () with | Waiting -> true | _ -> false)
                 [@ocaml.warning "-11"]))[@u ])));(Solidtype.Jsx.node
-                                                    ((fun solidtype__children
+                                                    ((fun
                                                         (solidtype__some :
                                                           ((unit -> _)
                                                           [@u ]))
+                                                        solidtype__children
                                                         ->
                                                         if false
                                                         then
@@ -413,6 +421,15 @@ let switch =
                                                                solidtype__some)|]
                                                           [|(Solidtype.Jsx.render
                                                                solidtype__children)|])
+                                                       ((fun () ->
+                                                           ((match answer ()
+                                                             with
+                                                             | Ready n ->
+                                                                 Some n
+                                                             | _ -> None)
+                                                           [@ocaml.warning
+                                                             "-11"]))
+                                                       [@u ])
                                                        (fun n ->
                                                           Solidtype.Jsx.el
                                                             "p" [||]
@@ -422,17 +439,8 @@ let switch =
                                                                     n)
                                                                  [@u ]) : ((
                                                                  unit ->
-                                                                   Solidtype.Jsx.content)
-                                                                 [@u ])))|])
-                                                       ((fun () ->
-                                                           ((match answer ()
-                                                             with
-                                                             | Ready n ->
-                                                                 Some n
-                                                             | _ -> None)
-                                                           [@ocaml.warning
-                                                             "-11"]))
-                                                       [@u ])))|]
+                                                                   Solidtype.Jsx.element)
+                                                                 [@u ])))|])))|]
 let strings =
   Solidtype.Jsx.el "p"
     [|(Solidtype.Jsx.s "title" ({js|né|js} : Solidtype.Html.P.title))|]
@@ -479,12 +487,15 @@ module Read =
                     | Note -> "note") names)
           end
         let make (props : Props.t) =
-          let title = ((fun () -> Props.get_title props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"]
-          and text = ((fun () -> Props.get_text props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"]
-          and note = ((fun () -> Props.get_note props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"] in
+          let title =
+            Solidtype.Solid.of_function ((fun () -> Props.get_title props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"]
+          and text =
+            Solidtype.Solid.of_function ((fun () -> Props.get_text props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"]
+          and note =
+            Solidtype.Solid.of_function ((fun () -> Props.get_note props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"] in
           let text =
             S.create_memo
               (fun () ->
@@ -499,12 +510,13 @@ module Read =
               Solidtype.Jsx.d "lang"
                 ((fun () ->
                     Js.Undefined.fromOption
-                      (let (_ : _ Solidtype.Solid.accessor -> _) = S.get in
-                       Props.get_note props : Solidtype.Html.P.lang option))
+                      ((let (_ : _ Solidtype.Solid.accessor -> _) = S.get in
+                        Props.get_note props : _ option) : Solidtype.Html.P.lang
+                                                             option))
                 [@u ]))|]
             [|(Solidtype.Jsx.dynamic
                  (((fun () -> Solidtype.Jsx.string (S.get text))
-                 [@u ]) : ((unit -> Solidtype.Jsx.content)[@u ])))|]
+                 [@u ]) : ((unit -> Solidtype.Jsx.element)[@u ])))|]
         let component = Solidtype.Jsx.component make
       end
   end
@@ -599,41 +611,50 @@ module Measured =
   end
 let optional_attribute =
   Solidtype.Jsx.el "a"
-    [|(Solidtype.Jsx.d "title" (((fun () -> "x")
-         [@u ]) : ((unit -> Solidtype.Html.A.title)[@u ])));(Solidtype.Jsx.d
-                                                               "href"
-                                                               ((fun () ->
-                                                                   Js.Undefined.fromOption
-                                                                    (link () : 
-                                                                    Solidtype.Html.A.href
-                                                                    option))
-                                                               [@u ]))|] 
+    [|(Solidtype.Jsx.s "title" ({js|x|js} : Solidtype.Html.A.title));(
+      Solidtype.Jsx.d "href"
+        ((fun () ->
+            Js.Undefined.fromOption
+              ((link () : _ option) : Solidtype.Html.A.href option))[@u ]))|]
     [||]
 let optional_prop =
-  (fun (solidtype__count : ((unit -> _ option)[@u ]))
-     (solidtype__text : ((unit -> _)[@u ])) ->
+  (fun (solidtype__count : ((unit -> _ option)[@u ])) ->
      if false
      then
-       Label.Props.check ~text:(Solidtype.Check.thunk solidtype__text)
+       Label.Props.check ~text:(Solidtype.Check.literal {js|x|js})
          ?count:(Solidtype.Check.optional solidtype__count) ();
      Solidtype.Jsx.c Label.component
-       [|(Solidtype.Jsx.d "text" solidtype__text);(Solidtype.Jsx.d "count"
-                                                     ((fun () ->
-                                                         Js.Undefined.fromOption
-                                                           ((solidtype__count
-                                                               ())[@u ]))
-                                                     [@u ]))|] [||])
-    ((fun () -> count ())[@u ]) ((fun () -> "x")[@u ])
+       [|(Solidtype.Jsx.s "text" {js|x|js});(Solidtype.Jsx.d "count"
+                                               ((fun () ->
+                                                   Js.Undefined.fromOption
+                                                     ((solidtype__count ())
+                                                     [@u ]))[@u ]))|] 
+       [||]) ((fun () -> (count () : _ option))[@u ])
+let optional_name (count : int option) =
+  (fun (solidtype__count : ((unit -> _ option)[@u ])) ->
+     if false
+     then
+       Label.Props.check ~text:(Solidtype.Check.literal {js|x|js})
+         ?count:(Solidtype.Check.optional solidtype__count) ();
+     Solidtype.Jsx.c Label.component
+       [|(Solidtype.Jsx.s "text" {js|x|js});(Solidtype.Jsx.d "count"
+                                               ((fun () ->
+                                                   Js.Undefined.fromOption
+                                                     ((solidtype__count ())
+                                                     [@u ]))[@u ]))|] 
+       [||]) ((fun () -> (count : _ option))[@u ])
+let named_child (mark : Solidtype.Jsx.element) =
+  Solidtype.Jsx.el "p" [||] [|(Solidtype.Jsx.node mark)|]
 let named_render =
-  (fun solidtype__children (solidtype__each : ((unit -> _)[@u ])) ->
+  (fun (solidtype__each : ((unit -> _)[@u ])) solidtype__children ->
      if false
      then
        For.Props.check ~each:(Solidtype.Check.thunk solidtype__each)
          ~children:(Solidtype.Check.render solidtype__children) ();
      Solidtype.Jsx.c For.component
        [|(Solidtype.Jsx.d "each" solidtype__each)|]
-       [|(Solidtype.Jsx.render solidtype__children)|]) row
-    ((fun () -> items ())[@u ])
+       [|(Solidtype.Jsx.render solidtype__children)|]) ((fun () -> items ())
+    [@u ]) row
 module Part =
   struct
     include
@@ -671,10 +692,12 @@ module Part =
                 (Array.map (function | Class_ -> "class" | As_ -> "as") names)
           end
         let make (props : Props.t) =
-          let class_ = ((fun () -> Props.get_class_ props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"]
-          and as_ = ((fun () -> Props.get_as_ props)[@u ])[@@inline ]
-          [@@ocaml.warning "-26-27"] in
+          let class_ =
+            Solidtype.Solid.of_function ((fun () -> Props.get_class_ props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"]
+          and as_ =
+            Solidtype.Solid.of_function ((fun () -> Props.get_as_ props)
+              [@u ])[@@inline ][@@ocaml.warning "-26-27"] in
           Solidtype.Jsx.c Solidtype.Show.component
             [|(Solidtype.Jsx.d "when"
                  ((fun () ->
@@ -752,3 +775,8 @@ let drawn_as =
                  ((fun () -> Solidtype.Jsx.drawn_as None "button")[@u ]));(
               Solidtype.Jsx.s "class"
                 ({js|x|js} : Solidtype.Html.Button.class_))|] [||]))|]
+let accessor_of_function =
+  let (_ : (unit -> _) -> _ Solidtype.Solid.accessor) = S.accessor in
+  Solidtype.Solid.of_function
+    ((fun () -> let solidtype__given s = s ^ "!" in solidtype__given)
+    [@u ])

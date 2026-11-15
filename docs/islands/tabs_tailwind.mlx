@@ -25,7 +25,7 @@ let list_class =
 let make () =
   <Tabs class_="w-full max-w-sm">
     <Tabs.List_container class_="rounded-none bg-transparent">
-      <Tabs.List aria_label="Billing cycle" class_=(fun () -> list_class)>
+      <Tabs.List aria_label="Billing cycle" class_=list_class>
         <Tabs.Tab id="monthly">"Monthly" <Tabs.Indicator /></Tabs.Tab>
         <Tabs.Tab id="yearly">"Yearly" <Tabs.Indicator /></Tabs.Tab>
       </Tabs.List>

@@ -36,7 +36,7 @@ let make () =
         </Dropdown.Section>
         <Separator />
         <Dropdown.Section
-          selected_keys=(fun () -> S.get text_styles)
+          selected_keys=(S.get text_styles)
           selection_mode=`multiple
           on_selection_change=(S.set set_text_styles)>
           <Header>"Text Style"</Header>
@@ -64,7 +64,7 @@ let make () =
         </Dropdown.Section>
         <Separator />
         <Dropdown.Section
-          selected_keys=(fun () -> S.get text_alignment)
+          selected_keys=(S.get text_alignment)
           selection_mode=`single
           on_selection_change=(S.set set_text_alignment)>
           <Header>"Text Alignment"</Header>

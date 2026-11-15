@@ -18,7 +18,7 @@ let island () =
       <Image.Img src="/avatar.png" alt="Ada Lovelace" />
       <Image.Fallback>"AL"</Image.Fallback>
     </Image.Root>
-    <p>"Image " (fun () -> Jsx.string (S.get status))</p>
+    <p>"Image " (Jsx.string (S.get status))</p>
   </div>
 
 external twin : unit -> Jsx.element = "make" [@@mel.module "./twins/Image.tsx"]

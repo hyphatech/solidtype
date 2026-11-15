@@ -8,7 +8,7 @@ let make () =
   <Autocomplete
     is_disabled=true
     class_="w-[256px]"
-    default_value=(fun () -> [| "california" |])
+    default_value=[| "california" |]
     placeholder="Select one">
     <Label>"State"</Label>
     <Autocomplete.Trigger>

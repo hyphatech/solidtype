@@ -175,49 +175,45 @@ let both ?selection_mode ?selected_keys ?default_selected_keys ?disabled_keys
     Jsx.fragment
       [|
         (match label with
-        | Some l -> <Label>(fun () -> Jsx.string l)</Label>
+        | Some l -> <Label>(Jsx.string l)</Label>
         | None -> Jsx.nothing);
         <Tag_group.List
           render_empty_state=(fun _ -> <Empty_state>"No tags"</Empty_state>)>
-          <For each=(fun () -> S.get shown_tags)>
+          <For each=(S.get shown_tags)>
             (fun t _ ->
               <Tag
-                id=(fun () -> t)
-                is_disabled=(fun () ->
-                              Option.equal String.equal disabled (Some t))>
-                (fun () -> Jsx.string t)
-                (fun () ->
-                  if custom_remove then
-                    Jsx.element
-                      <Tag.Remove_button>
-                        <svg data_cross="" view_box="0 0 16 16" />
-                      </Tag.Remove_button>
-                  else Jsx.string "")
+                id=t is_disabled=(Option.equal String.equal disabled (Some t))>
+                (Jsx.string t)
+                (if custom_remove then
+                   <Tag.Remove_button>
+                     <svg data_cross="" view_box="0 0 16 16" />
+                   </Tag.Remove_button>
+                 else Jsx.string "")
               </Tag>)
           </For>
         </Tag_group.List>;
         (match description with
-        | Some d -> <Description>(fun () -> Jsx.string d)</Description>
+        | Some d -> <Description>(Jsx.string d)</Description>
         | None -> Jsx.nothing);
         (match error_message with
-        | Some m -> <Error_message>(fun () -> Jsx.string m)</Error_message>
+        | Some m -> <Error_message>(Jsx.string m)</Error_message>
         | None -> Jsx.nothing);
       |]
   in
   let selected keys = told := ("selected " ^ told_of keys) :: !told in
   T.render (fun () ->
       <Tag_group
-        ?aria_label=(fun () -> aria_label)
-        ?selection_mode=(fun () -> selection_mode)
-        ?selected_keys=(fun () -> selected_keys)
-        ?default_selected_keys=(fun () -> default_selected_keys)
-        ?disabled_keys=(fun () -> disabled_keys)
-        ?is_disabled=(fun () -> is_disabled)
-        ?size=(fun () -> size)
-        ?variant=(fun () -> variant)
+        ?aria_label
+        ?selection_mode
+        ?selected_keys
+        ?default_selected_keys
+        ?disabled_keys
+        ?is_disabled
+        ?size
+        ?variant
         on_selection_change=selected
-        ?on_remove=(fun () -> if removable then Some remove else None)>
-        (fun () -> Jsx.element (content ()))
+        ?on_remove=(if removable then Some remove else None)>
+        (content ())
       </Tag_group>);
   let* solidtype = walk ~steps ~step:(fun action -> action ()) T.body told in
   T.cleanup ();
@@ -245,21 +241,20 @@ let of_state ~disabled =
       <Tag_group
         aria_label="Tags" selection_mode=`multiple on_remove=(fun _ -> ())>
         <Tag_group.List>
-          <Tag id="news" text_value="News" is_disabled=(fun () -> disabled)>
+          <Tag id="news" text_value="News" is_disabled=disabled>
             (fun s ->
               <span data_words="tag">
-                (fun () ->
-                  Jsx.string
-                    (T.words
-                       [
-                         ("hovered", s.is_hovered);
-                         ("pressed", s.is_pressed);
-                         ("selected", s.is_selected);
-                         ("focused", s.is_focused);
-                         ("focus-visible", s.is_focus_visible);
-                         ("disabled", s.is_disabled);
-                         ("removable", s.allows_removing);
-                       ]))
+                (Jsx.string
+                   (T.words
+                      [
+                        ("hovered", s.is_hovered);
+                        ("pressed", s.is_pressed);
+                        ("selected", s.is_selected);
+                        ("focused", s.is_focused);
+                        ("focus-visible", s.is_focus_visible);
+                        ("disabled", s.is_disabled);
+                        ("removable", s.allows_removing);
+                      ]))
               </span>)
           </Tag>
           <Tag id="travel">"Travel"</Tag>

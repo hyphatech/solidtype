@@ -50,8 +50,7 @@ let make () =
         ". This gives you full control over when and how to close the dialog, \
          allowing you to add custom logic before closing."
       </p>
-      <Alert_dialog
-        is_open=(fun () -> S.get is_open) on_open_change=(S.set set_open)>
+      <Alert_dialog is_open=(S.get is_open) on_open_change=(S.set set_open)>
         <Button variant=`secondary>"Open Dialog"</Button>
         <Alert_dialog.Backdrop>
           <Alert_dialog.Container>

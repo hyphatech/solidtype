@@ -1,15 +1,42 @@
 # Changes
 
-## Unreleased
+## 0.11.0 (2026-11-15)
 
-- An optional prop is given as any value that changes is, `?title=(fun ()
-  -> S.get note)`, as a required one is. Breaking: `?title=note`, which
-  0.10.0 took for an accessor of an option, is refused with a message saying
-  so, since a bare name is a value read once wherever else it is given.
+- In JSX a value is written as itself, and Solid keeps it current, as its
+  compiler does: a literal or a name is given as it is, and any other
+  expression is read again as what it reads changes, `title=(S.get note)`,
+  `class_=(cls (S.get on))`, `<p>(Jsx.int (S.get count))</p>`; a function is
+  a function, so one that takes nothing is `(fun () -> ...)`. Required and
+  optional props alike: `?title=label_opt`, `?title=(S.get note)`.
+  Breaking: the thunk in JSX,
+  `title=(fun () -> S.get note)`, is refused by its type, a function where a
+  value belongs, and is written `title=(S.get note)`; `?title=note`, which
+  0.10.0 took for an accessor of an option, is an option given as it is.
+  Outside JSX a thunk is still written, `S.accessor (fun () -> e)`.
+
+- What JSX holds is one type, `Jsx.element`, as Solid's `JSX.Element` is: a
+  node, text from `Jsx.string`, a number from `Jsx.int`. A child given by its
+  name or an expression takes any of them, `let icon = <Icon /> in <button>icon
+  "Save"</button>`, and a function's result passes on as it is. Breaking:
+  `Jsx.content` is `Jsx.element`; `Jsx.element x` and `Jsx.of_content x`,
+  which converted between the two, are `x`.
+
+- `Solid.accessor` is abstract, so an error names it, `string
+  Solidtype.Solid.accessor`, where it printed Melange's `(unit -> string
+  [@u])`; `Solid.of_function` is what the ppx writes for one. Breaking: an
+  accessor is no longer that function by its type, so one is made by
+  `S.accessor (fun () -> e)`.
 
 - A function child is given in place as the child, `<For ...>(fun item _ ->
   ...)</For>`, and by its name as `render=f`; `render=(fun ...)` is
-  refused, with a message saying so, as a second way to write the first.
+  refused, with a message saying so, as a second way to write the first. A
+  function given by its name as the child is refused at the name, with the
+  kinds the component takes, `` `render ``, against the `` `elements `` given.
+  Breaking: `Check.nodes` is `Check.elements`, and the kind `` `nodes ``
+  is `` `elements ``.
+
+- A component's function child is typed after its props, so `<Show.Some
+  some=(S.get item)>(fun i -> ...)</Show.Some>` takes `i`'s type from `some`.
 
 ## 0.10.0 (2026-11-13)
 

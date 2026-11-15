@@ -22,48 +22,44 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="selection mode"
-        choices=(fun () -> modes)
-        picked=(fun () -> S.get mode)
+        choices=modes
+        picked=(S.get mode)
         on_pick=(Controls.choose modes set_mode)
       />
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Select
         label="orientation"
-        choices=(fun () -> orientations)
-        picked=(fun () -> S.get orientation)
+        choices=orientations
+        picked=(S.get orientation)
         on_pick=(Controls.choose orientations set_orientation)
       />
       <Toggle
-        label="detached"
-        on=(fun () -> S.get detached)
-        on_toggle=(S.set set_detached)
+        label="detached" on=(S.get detached) on_toggle=(S.set set_detached)
       />
       <Toggle
         label="full width"
-        on=(fun () -> S.get full_width)
+        on=(S.get full_width)
         on_toggle=(S.set set_full_width)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=toggle-button-group]"
       solidtype=(<Toggle_button_group
-                   selection_mode=(fun () -> fst (S.get mode))
-                   default_selected_keys=(fun () -> [| "center" |])
-                   size=(fun () -> fst (S.get size))
-                   orientation=(fun () -> fst (S.get orientation))
-                   is_detached=(fun () -> S.get detached)
-                   full_width=(fun () -> S.get full_width)
-                   is_disabled=(fun () -> S.get disabled)
+                   selection_mode=(fst (S.get mode))
+                   default_selected_keys=[| "center" |]
+                   size=(fst (S.get size))
+                   orientation=(fst (S.get orientation))
+                   is_detached=(S.get detached)
+                   full_width=(S.get full_width)
+                   is_disabled=(S.get disabled)
                    aria_label="Alignment">
                    <Toggle_button id="left">"Left"</Toggle_button>
                    <Toggle_button id="center">

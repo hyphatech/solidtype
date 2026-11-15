@@ -8,8 +8,7 @@ let make () =
   let t = Theme.use () in
   <div
     id="theme"
-    data_theme=(fun () -> Solidtype.Jsx.data (S.get t.theme))
-    data_resolved=(fun () ->
-                    Solidtype.Jsx.data
-                      (Option.value ~default:"none" (S.get t.resolved)))
+    data_theme=(Solidtype.Jsx.data (S.get t.theme))
+    data_resolved=(Solidtype.Jsx.data
+                     (Option.value ~default:"none" (S.get t.resolved)))
   />

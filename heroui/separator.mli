@@ -19,7 +19,7 @@ module Element : sig
     module Props : sig
       val check :
         value:[ `hr | `div ] Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -37,7 +37,7 @@ module Slot : sig
     module Props : sig
       val check :
         value:((unit -> Jsx.element) -> Jsx.element) Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end

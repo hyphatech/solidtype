@@ -178,11 +178,11 @@ let walk ~step host ended =
 
 let resizable name ~id ~min =
   <Table.Column
-    is_row_header=(fun () -> String.equal id "name")
-    default_width=(fun () -> Table.Fraction 1.)
-    id=(fun () -> id)
-    min_width=(fun () -> min)>
-    (fun () -> Jsx.string name) <Table.Column_resizer />
+    is_row_header=(String.equal id "name")
+    default_width=(Table.Fraction 1.)
+    id
+    min_width=min>
+    (Jsx.string name) <Table.Column_resizer />
   </Table.Column>
 
 let () =
@@ -197,19 +197,18 @@ let () =
                     <Table.Header>
                       <Table.Column
                         is_row_header=true
-                        default_width=(fun () -> Table.Fraction 1.)
+                        default_width=(Table.Fraction 1.)
                         id="name">
                         "Name"
                         <Table.Column_resizer>
                           (fun s ->
                             <span data_words="resizer">
-                              (fun () ->
-                                Jsx.string
-                                  (T.words
-                                     [
-                                       ("focused", s.is_focused);
-                                       ("resizing", s.is_resizing);
-                                     ]))
+                              (Jsx.string
+                                 (T.words
+                                    [
+                                      ("focused", s.is_focused);
+                                      ("resizing", s.is_resizing);
+                                    ]))
                             </span>)
                         </Table.Column_resizer>
                       </Table.Column>
@@ -256,14 +255,11 @@ let () =
                     aria_label="Table with resizable columns"
                     class_="min-w-[700px]">
                     <Table.Header>
-                      (fun () ->
-                        Jsx.element (resizable "Name" ~id:"name" ~min:160.))
-                      (fun () ->
-                        Jsx.element (resizable "Role" ~id:"role" ~min:220.))
-                      (fun () ->
-                        Jsx.element (resizable "Status" ~id:"status" ~min:100.))
+                      (resizable "Name" ~id:"name" ~min:160.)
+                      (resizable "Role" ~id:"role" ~min:220.)
+                      (resizable "Status" ~id:"status" ~min:100.)
                       <Table.Column
-                        default_width=(fun () -> Table.Fraction 1.)
+                        default_width=(Table.Fraction 1.)
                         id="email"
                         min_width=200.>
                         "Email"

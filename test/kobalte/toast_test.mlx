@@ -9,7 +9,7 @@ let show () =
   ignore
     (Toaster.show Toast.toaster
        (fun props ->
-         <Toast.Root toast_id=(fun () -> Toast_props.toast_id props)>
+         <Toast.Root toast_id=(Toast_props.toast_id props)>
            <Toast.Title>"Saved"</Toast.Title>
            <Toast.Description>"The draft is safe."</Toast.Description>
            <Toast.CloseButton>"x"</Toast.CloseButton>

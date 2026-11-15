@@ -44,9 +44,9 @@ the chart's scale.
   slat is a function of that record's [`Row.t`](/solidtype/rhp/slat/#the-row).
   `Row.data d` is the row itself, so a slat reads only the fields its
   record has, and a misspelt one does not compile.
-- **A read is a thunk.** rhp reads a row's field when a block reads it, so
-  a change redraws only what reads it: a field is read inside a thunk,
-  `to_=(fun () -> f.sold)`, as everywhere in solidtype.
+- **A read is tracked where it is written.** rhp reads a row's field when
+  a block reads it, so a change redraws only what reads it: `to_=f.sold` is
+  read again as the row changes, as any expression in JSX is.
 - **A slat is given by name**, `render=fruit`, since rhp reads its layout
   from the slat itself; a slat written in place is a function child,
   `(fun d -> ...)`.
@@ -54,8 +54,8 @@ the chart's scale.
 ## Missing values
 
 rhp draws nothing for a missing value, which OCaml says with an option. A
-block's prop that may be missing is the optional prop, `?to_=(fun () ->
-sold)` with `sold : float option`, written as `undefined` while it is
+block's prop that may be missing is the optional prop, `?to_=sold` with
+`sold : float option`, written as `undefined` while it is
 `None`; a prop left out keeps its default, a bar's `from` its 0. A helper
 takes and gives `float option array`, and a point of a `Line` or an `Area`
 is an option of two options.

@@ -10,19 +10,17 @@ let colors = [| `accent; `default; `success; `warning; `danger |]
 let row ~name ~variant =
   <div class_="flex flex-col gap-4">
     <h3 class_="text-sm font-semibold text-muted capitalize">
-      (fun () -> Solidtype.Jsx.string name)
+      (Solidtype.Jsx.string name)
     </h3>
     <div class_="flex items-center gap-6">
-      <Solidtype.For each=(fun () -> colors)>
+      <Solidtype.For each=colors>
         (fun color _ ->
           <Badge.Anchor>
             <Avatar>
-              <Avatar.Image src=(fun () -> avatar) />
+              <Avatar.Image src=avatar />
               <Avatar.Fallback>"JD"</Avatar.Fallback>
             </Avatar>
-            <Badge color=(fun () -> color) size=`sm variant=(fun () -> variant)>
-              "5"
-            </Badge>
+            <Badge color size=`sm variant>"5"</Badge>
           </Badge.Anchor>)
       </Solidtype.For>
     </div>
@@ -30,10 +28,9 @@ let row ~name ~variant =
 
 let make () =
   <div class_="flex flex-col gap-8">
-    (fun () -> Solidtype.Jsx.element (row ~name:"primary" ~variant:`primary))
+    (row ~name:"primary" ~variant:`primary)
     <Separator />
-    (fun () ->
-      Solidtype.Jsx.element (row ~name:"secondary" ~variant:`secondary))
+    (row ~name:"secondary" ~variant:`secondary)
     <Separator />
-    (fun () -> Solidtype.Jsx.element (row ~name:"soft" ~variant:`soft))
+    (row ~name:"soft" ~variant:`soft)
   </div>

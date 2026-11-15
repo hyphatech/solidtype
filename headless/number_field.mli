@@ -7,7 +7,7 @@
     which zooms the page, where Kobalte's steps on each.
 
     {[
-      <Number_field.Root default_value=(fun () -> "4")>
+      <Number_field.Root default_value="4">
         <Number_field.Label>"Width"</Number_field.Label>
         <Number_field.Input />
       </Number_field.Root>

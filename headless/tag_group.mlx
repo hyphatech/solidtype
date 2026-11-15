@@ -248,7 +248,7 @@ module Root = struct
       ?aria_describedby:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -283,7 +283,7 @@ module Root = struct
     external aria_describedby : t -> string option = "aria-describedby"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   (* The props the group takes for itself; the rest it passes on. *)
@@ -504,17 +504,14 @@ module Root = struct
         removal_hint = S.create_unique_id ();
       }
     in
-    <Group_context.Provider value=(fun () -> g)>
-      <div
-        ?as_=(fun () -> S.drawn_as props) props=(S.undrawn (S.omit props own))>
-        (fun () -> Props.children props)
-        (fun () ->
-          if S.get g.removable then
-            Jsx.element
-              <span id=(fun () -> g.removal_hint) style="display: none">
-                "Press Delete or Backspace to remove."
-              </span>
-          else Jsx.string "")
+    <Group_context.Provider value=g>
+      <div ?as_=(S.drawn_as props) props=(S.undrawn (S.omit props own))>
+        (Props.children props)
+        (if S.get g.removable then
+           <span id=g.removal_hint style="display: none">
+             "Press Delete or Backspace to remove."
+           </span>
+         else Jsx.string "")
       </div>
     </Group_context.Provider>
 
@@ -530,11 +527,11 @@ module Named = struct
     external check :
       ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   (* Its id is the one the list names, so a caller's is left out. *)
@@ -542,9 +539,9 @@ module Named = struct
     here ();
     <span
       id
-      ?as_=(fun () -> S.drawn_as props)
+      ?as_=(S.drawn_as props)
       props=(S.undrawn (S.omit props [| "children"; "id" |]))>
-      (fun () -> Props.children props)
+      (Props.children props)
     </span>
 end
 
@@ -586,15 +583,15 @@ module List = struct
       ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external render_empty_state : t -> ((unit -> Jsx.element)[@u]) option
+    external render_empty_state : t -> Jsx.element S.accessor option
       = "renderEmptyState"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -635,29 +632,25 @@ module List = struct
        the server as in the browser. *)
     let resolved = S.children (fun () -> Props.children props) in
     <div
-      id=(fun () -> g.list_id)
-      role=(fun () -> if S.get g.is_empty then `group else `grid)
+      id=g.list_id
+      role=(if S.get g.is_empty then `group else `grid)
       ref=(fun e ->
             S.set g.set_list (Some e);
             Jsx.call (Props.ref props) e)
-      ?aria_label=(fun () -> S.get g.aria_label)
-      ?aria_labelledby=(fun () -> S.get g.labelled_by)
-      ?aria_describedby=(fun () -> S.get g.described_by)
-      ?aria_multiselectable=(fun () ->
-                              match S.get g.selection_mode with
-                              | `multiple -> Some true
-                              | `single | `none -> None)
-      tabindex=(fun () ->
-                 match S.get (Selectable_list.tab_index g.list) with
-                 | Some i when not (S.get g.group_disabled) ->
-                     Js.Float.toString i
-                 | Some _ | None -> "-1")
-      ?aria_disabled=(fun () ->
-                       if S.get g.group_disabled then Some true else None)
+      ?aria_label=(S.get g.aria_label)
+      ?aria_labelledby=(S.get g.labelled_by)
+      ?aria_describedby=(S.get g.described_by)
+      ?aria_multiselectable=(match S.get g.selection_mode with
+                            | `multiple -> Some true
+                            | `single | `none -> None)
+      tabindex=(match S.get (Selectable_list.tab_index g.list) with
+               | Some i when not (S.get g.group_disabled) -> Js.Float.toString i
+               | Some _ | None -> "-1")
+      ?aria_disabled=(if S.get g.group_disabled then Some true else None)
       aria_atomic=false
       aria_relevant="additions"
-      aria_live=(fun () -> if S.get within then `polite else `off)
-      data_empty=(fun () -> state (S.get g.is_empty))
+      aria_live=(if S.get within then `polite else `off)
+      data_empty=(state (S.get g.is_empty))
       on_key_down=(fun e ->
                     Jsx.call (Props.on_key_down props) e;
                     Selectable_list.on_key_down g.list e)
@@ -674,13 +667,12 @@ module List = struct
                      | Some r when contains (focus_current e) r -> ()
                      | Some _ | None -> S.set set_within false);
                      Selectable_list.on_focus_out g.list e)
-      ?as_=(fun () -> S.drawn_as props)
+      ?as_=(S.drawn_as props)
       props=(S.undrawn (S.omit props own))>
-      (fun () -> Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
-      (fun () ->
-        match Props.render_empty_state props with
-        | Some draw when S.get g.is_empty -> Jsx.element (S.get draw)
-        | Some _ | None -> Jsx.string "")
+      (Jsx.fragment (S.to_array (S.get resolved)))
+      (match Props.render_empty_state props with
+      | Some draw when S.get g.is_empty -> S.get draw
+      | Some _ | None -> Jsx.string "")
     </div>
 
   let component = Jsx.component make
@@ -700,14 +692,14 @@ module Tag = struct
       ?is_disabled:bool Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external id : t -> string option = "id" [@@mel.get]
     external text_value : t -> string option = "textValue" [@@mel.get]
     external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -815,10 +807,9 @@ module Tag = struct
        it is in. *)
     let resolved =
       S.children (fun () ->
-          Jsx.element
-            <Tag_context.Provider value=(fun () -> t)>
-              (fun () -> Props.children props)
-            </Tag_context.Provider>)
+          <Tag_context.Provider value=t>
+            (Props.children props)
+          </Tag_context.Provider>)
     in
     let text =
       S.accessor (fun () ->
@@ -871,30 +862,26 @@ module Tag = struct
           g.remove (S.get key)
       | _ -> Selectable_item.on_key_down item e
     in
-    <Tag_context.Provider value=(fun () -> t)>
+    <Tag_context.Provider value=t>
       <div
         role=`row
         id=row_id
         ref=(fun e ->
               S.set set_element (Some e);
               Jsx.call (Props.ref props) e)
-        tabindex=(fun () ->
-                   if S.get disabled then "-1"
-                   else
-                     match S.get (Manager.focused_key (m ())) with
-                     | None -> "0"
-                     | Some k when String.equal k (S.get key) -> "0"
-                     | Some _ -> "-1")
-        aria_label=(fun () -> S.get text)
-        ?aria_selected=(fun () ->
-                         if selectable () then Some (S.get selected) else None)
-        ?aria_disabled=(fun () -> if S.get disabled then Some true else None)
-        ?aria_describedby=(fun () ->
-                            if S.get removable then Some g.removal_hint
-                            else None)
-        data_key=(fun () -> Jsx.data (S.get key))
-        data_selected=(fun () -> state (S.get selected))
-        data_disabled=(fun () -> state (S.get disabled))
+        tabindex=(if S.get disabled then "-1"
+                  else
+                    match S.get (Manager.focused_key (m ())) with
+                    | None -> "0"
+                    | Some k when String.equal k (S.get key) -> "0"
+                    | Some _ -> "-1")
+        aria_label=(S.get text)
+        ?aria_selected=(if selectable () then Some (S.get selected) else None)
+        ?aria_disabled=(if S.get disabled then Some true else None)
+        ?aria_describedby=(if S.get removable then Some g.removal_hint else None)
+        data_key=(Jsx.data (S.get key))
+        data_selected=(state (S.get selected))
+        data_disabled=(state (S.get disabled))
         on_pointer_down=(fun e ->
                           Jsx.call (Props.on_pointer_down props) e;
                           if on_tag (pointer_target e) (pointer_current e) then
@@ -923,10 +910,10 @@ module Tag = struct
                         focus_target e != focus_current e
                         && not (S.get disabled)
                       then Manager.set_focused_key (m ()) ~key:(S.get key) ())
-        ?as_=(fun () -> S.drawn_as props)
+        ?as_=(S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
         <div role=`gridcell aria_colindex="1" style="display: contents">
-          (fun () -> Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
+          (Jsx.fragment (S.to_array (S.get resolved)))
         </div>
       </div>
     </Tag_context.Provider>
@@ -941,11 +928,11 @@ module Remove_button = struct
     external check :
       ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Button.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
     [@@mel.get]
@@ -959,15 +946,15 @@ module Remove_button = struct
       type_=`button
       id
       aria_label="Remove"
-      aria_labelledby=(fun () -> id ^ " " ^ t.row_id)
-      disabled=(fun () -> S.get t.state.is_disabled)
-      ?tabindex=(fun () -> if S.get t.state.is_disabled then None else Some "0")
+      aria_labelledby=(id ^ " " ^ t.row_id)
+      disabled=(S.get t.state.is_disabled)
+      ?tabindex=(if S.get t.state.is_disabled then None else Some "0")
       on_click=(fun e ->
                  Jsx.call (Props.on_click props) e;
                  g.remove (S.get t.state.key))
-      ?as_=(fun () -> S.drawn_as props)
+      ?as_=(S.drawn_as props)
       props=(S.undrawn (S.omit props [| "children"; "id"; "onClick" |]))>
-      (fun () -> Props.children props)
+      (Props.children props)
     </button>
 
   let component = Jsx.component make

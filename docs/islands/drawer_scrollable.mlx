@@ -17,11 +17,11 @@ let make () =
             <Drawer.Heading>"Terms & Conditions"</Drawer.Heading>
           </Drawer.Header>
           <Drawer.Body>
-            <For each=(fun () -> paragraphs)>
+            <For each=paragraphs>
               (fun n _ ->
                 <p class_="mb-3">
                   "Paragraph "
-                  (fun () -> Jsx.int n)
+                  (Jsx.int n)
                   ": Lorem ipsum dolor sit amet, consectetur adipiscing elit. \
                    Nullam pulvinar risus non risus hendrerit venenatis. \
                    Pellentesque sit amet hendrerit risus, sed porttitor quam."

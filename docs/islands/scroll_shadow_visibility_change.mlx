@@ -10,8 +10,8 @@ let lorem =
 
 let paragraphs () =
   <div class_="space-y-4">
-    <For each=(fun () -> Array.make 10 lorem)>
-      (fun text _ -> <p>(fun () -> Solidtype.Jsx.string text)</p>)
+    <For each=(Array.make 10 lorem)>
+      (fun text _ -> <p>(Solidtype.Jsx.string text)</p>)
     </For>
   </div>
 
@@ -24,7 +24,7 @@ let images =
 
 let cards () =
   <div class_="flex flex-row gap-4">
-    <For each=(fun () -> Array.init 10 (fun i -> images.(i mod 3)))>
+    <For each=(Array.init 10 (fun i -> images.(i mod 3)))>
       (fun image _ ->
         <Card
           class_="flex min-w-[200px] flex-row gap-3 p-1" variant=`transparent>
@@ -33,7 +33,7 @@ let cards () =
             class_="aspect-square h-16 w-16 shrink-0 rounded-xl object-cover \
                     select-none sm:h-20 sm:w-20"
             loading="lazy"
-            src=(fun () -> image)
+            src=image
           />
           <div class_="flex flex-1 flex-col justify-center gap-1">
             <Card.Title class_="text-sm">"Bridging the Future"</Card.Title>
@@ -60,31 +60,29 @@ let make () =
     <div class_="mb-8 flex flex-col gap-2">
       <div class_="rounded bg-default p-4">
         <p class_="text-sm font-semibold">
-          (fun () ->
-            Solidtype.Jsx.string
-              ("Vertical Shadow State: " ^ said (S.get vertical)))
+          (Solidtype.Jsx.string
+             ("Vertical Shadow State: " ^ said (S.get vertical)))
         </p>
       </div>
       <Scroll_shadow
         class_="max-h-[240px] p-4"
         orientation=`vertical
         on_visibility_change=(S.set set_vertical)>
-        (fun () -> Solidtype.Jsx.element (paragraphs ()))
+        (paragraphs ())
       </Scroll_shadow>
     </div>
     <div class_="flex flex-col gap-2">
       <div class_="rounded bg-default p-4">
         <p class_="text-sm font-semibold">
-          (fun () ->
-            Solidtype.Jsx.string
-              ("Horizontal Shadow State: " ^ said (S.get horizontal)))
+          (Solidtype.Jsx.string
+             ("Horizontal Shadow State: " ^ said (S.get horizontal)))
         </p>
       </div>
       <Scroll_shadow
         class_="p-4"
         orientation=`horizontal
         on_visibility_change=(S.set set_horizontal)>
-        (fun () -> Solidtype.Jsx.element (cards ()))
+        (cards ())
       </Scroll_shadow>
     </div>
   </div>

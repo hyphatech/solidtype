@@ -6,8 +6,8 @@ let make () =
   let indeterminate, set_indeterminate = S.create_signal true in
   let selected, set_selected = S.create_signal false in
   <Checkbox
-    is_indeterminate=(fun () -> S.get indeterminate)
-    is_selected=(fun () -> S.get selected)
+    is_indeterminate=(S.get indeterminate)
+    is_selected=(S.get selected)
     on_change=(fun v ->
                 S.set set_selected v;
                 S.set set_indeterminate false)>

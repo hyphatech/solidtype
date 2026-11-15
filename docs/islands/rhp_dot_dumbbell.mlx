@@ -24,18 +24,15 @@ let pay =
     (fun d ->
       let p = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string p.role)</Label>
+        <Label edge="start">(Jsx.string p.role)</Label>
         <Bar
-          from=(fun () -> p.before)
-          to_=(fun () -> p.after)
-          thick=(fun () -> Either.left "2px")
-          color=(fun () -> Color.muted)
+          from=p.before to_=p.after thick=(Either.left "2px") color=Color.muted
         />
-        <Dot at=(fun () -> p.before) color=(fun () -> Color.series 2) />
-        <Dot at=(fun () -> p.after) />
+        <Dot at=p.before color=(Color.series 2) />
+        <Dot at=p.after />
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (30., 70.)) label="Pay before and after, in k€">
-    <Plot rows=(fun () -> pays) render=pay />
+  <Chart scale=(30., 70.) label="Pay before and after, in k€">
+    <Plot rows=pays render=pay />
   </Chart>

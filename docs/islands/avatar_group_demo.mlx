@@ -18,32 +18,31 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Select
         label="overlap"
-        choices=(fun () -> overlaps)
-        picked=(fun () -> S.get overlap)
+        choices=overlaps
+        picked=(S.get overlap)
         on_pick=(Controls.choose overlaps set_overlap)
       />
       <Select
         label="max"
-        choices=(fun () -> maxima)
-        picked=(fun () -> S.get max)
+        choices=maxima
+        picked=(S.get max)
         on_pick=(Controls.choose maxima set_max)
       />
-      <Toggle label="grid" on=(fun () -> S.get grid) on_toggle=(S.set set_grid)
-      />
+      <Toggle label="grid" on=(S.get grid) on_toggle=(S.set set_grid) />
     </div>
     <Side_by_side
       compared="[data-slot=avatar-group]"
       solidtype=(<Avatar_group
-                   size=(fun () -> fst (S.get size))
-                   overlap=(fun () -> fst (S.get overlap))
-                   ?max=(fun () -> fst (S.get max))
-                   is_grid=(fun () -> S.get grid)>
+                   size=(fst (S.get size))
+                   overlap=(fst (S.get overlap))
+                   ?max=(fst (S.get max))
+                   is_grid=(S.get grid)>
                    <Avatar><Avatar.Fallback>"AL"</Avatar.Fallback></Avatar>
                    <Avatar><Avatar.Fallback>"GH"</Avatar.Fallback></Avatar>
                    <Avatar><Avatar.Fallback>"KJ"</Avatar.Fallback></Avatar>

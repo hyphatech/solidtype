@@ -52,30 +52,30 @@ let make () =
     <Text_field
       is_required=true
       name="email"
-      value=(fun () -> S.get email)
+      value=(S.get email)
       on_change=(S.set set_email)
       on_blur=(fun _ -> leave "email" ())
-      is_invalid=(fun () -> Option.is_some (email_error (S.get email)))>
+      is_invalid=(Option.is_some (email_error (S.get email)))>
       <Label>"Email"</Label>
       <Input placeholder="john@example.com" />
       <Field_error>
-        (fun () -> Jsx.string (Option.value (email_shown ()) ~default:""))
+        (Jsx.string (Option.value (email_shown ()) ~default:""))
       </Field_error>
     </Text_field>
     <Text_field
       is_required=true
       name="password"
-      value=(fun () -> S.get password)
+      value=(S.get password)
       on_change=(S.set set_password)
       on_blur=(fun _ -> leave "password" ())
-      is_invalid=(fun () -> Option.is_some (password_error (S.get password)))>
+      is_invalid=(Option.is_some (password_error (S.get password)))>
       <Label>"Password"</Label>
       <Input placeholder="Enter your password" type_="password" />
       <Description>
         "Must be at least 8 characters with 1 uppercase and 1 number"
       </Description>
       <Field_error>
-        (fun () -> Jsx.string (Option.value (password_shown ()) ~default:""))
+        (Jsx.string (Option.value (password_shown ()) ~default:""))
       </Field_error>
     </Text_field>
     <div class_="flex gap-2">
@@ -83,6 +83,6 @@ let make () =
       <Button type_=`reset variant=`secondary>"Reset"</Button>
     </div>
     <p class_="text-sm text-muted">
-      (fun () -> Jsx.string (if S.get sent then "Submitted." else ""))
+      (Jsx.string (if S.get sent then "Submitted." else ""))
     </p>
   </Form>

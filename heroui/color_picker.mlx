@@ -70,21 +70,20 @@ module Trigger = struct
       }
     in
     <Kobalte.Trigger
-      disabled=(fun () -> S.get is_disabled)
-      class_=(fun () ->
-               after (Styles.ColorPicker.trigger p.slots) (S.get class_))
+      disabled=(S.get is_disabled)
+      class_=(after (Styles.ColorPicker.trigger p.slots) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
       data_slot="color-picker-trigger"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (pressed ()))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (pressed ()))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (S.get is_disabled))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -96,7 +95,7 @@ module Popover = struct
       ?(should_flip : bool = true) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let p = within "Color_picker.Popover" in
     Option.iter p.set_opened (S.untrack (fun () -> S.get default_open));
     S.create_computed (fun () -> p.set_given_open (S.get is_open));
@@ -137,16 +136,14 @@ module Popover = struct
           id_of trigger)
         (S.get (Types.PopoverContextValue.trigger_ref k))
     in
-    <Surface.Context.Provider value=(fun () -> S.accessor (fun () -> `default))>
-      <Show when_=(fun () -> Overlay.present o)>
+    <Surface.Context.Provider value=(S.accessor (fun () -> `default))>
+      <Show when_=(Overlay.present o)>
         <Kobalte.Portal>
           <Kobalte.Content
-            class_=(fun () ->
-                     after (Styles.ColorPicker.popover p.slots) (S.get class_))
-            style=(fun () ->
-                    "--trigger-anchor-point: \
-                     var(--kb-popover-content-transform-origin);"
-                    ^ match S.get style with Some s -> " " ^ s | None -> "")
+            class_=(after (Styles.ColorPicker.popover p.slots) (S.get class_))
+            style=("--trigger-anchor-point: \
+                    var(--kb-popover-content-transform-origin);"
+                  ^ match S.get style with Some s -> " " ^ s | None -> "")
             ref=(fun e ->
                   ignore (given_ref e : unit option);
                   content := Some (as_element e);
@@ -154,17 +151,17 @@ module Popover = struct
                   watch_side e)
             on_open_auto_focus=focus_popover
             data_slot="color-picker-popover"
-            data_placement=(fun () -> Jsx.data (S.get side))
-            data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-            data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+            data_placement=(Jsx.data (S.get side))
+            data_entering=(Jsx.flag (Overlay.entering o))
+            data_exiting=(Jsx.flag (Overlay.exiting o))
             props=(Props.others props)
             tabindex="-1"
-            ?aria_labelledby=(fun () -> named_by ())>
-            (fun () -> Jsx.element (Overlay.dismiss close))
-            <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-              (fun () -> S.get children)
+            ?aria_labelledby=(named_by ())>
+            (Overlay.dismiss close)
+            <Button.Trigger.Provider value=Button.no_trigger>
+              (S.get children)
             </Button.Trigger.Provider>
-            (fun () -> Jsx.element (Overlay.dismiss close))
+            (Overlay.dismiss close)
           </Kobalte.Content>
         </Kobalte.Portal>
       </Show>
@@ -174,7 +171,7 @@ end
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(on_change : (Color.t -> unit) option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   (* Open as its popover says, which it is told once the part is made, else as
      it keeps, so Kobalte's root is always controlled. *)
   let opened, set_opened = S.create_signal false in
@@ -214,27 +211,26 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     }
   in
   <Headless
-    ?value=(fun () -> S.get value)
-    ?default_value=(fun () -> S.get default_value)
+    ?value=(S.get value)
+    ?default_value=(S.get default_value)
     on_change=(fun c -> ignore (on_change c : unit option))>
     <Kobalte.Root
-      open_=(fun () -> S.get p.is_open)
+      open_=(S.get p.is_open)
       on_open_change=(fun o ->
                        S.set set_opened o;
                        p.told_open o)
       modal=true
-      placement=(fun () -> S.get p.placement)
-      gutter=(fun () -> S.get offset)
-      flip=(fun () -> Types.Either.right (S.get flip))
+      placement=(S.get p.placement)
+      gutter=(S.get offset)
+      flip=(Types.Either.right (S.get flip))
       force_mount=true>
-      <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
-        <Context.Provider value=(fun () -> p)>
+      <Button.Trigger.Provider value=trigger_for_buttons>
+        <Context.Provider value=p>
           <div
-            class_=(fun () ->
-                     after (Styles.ColorPicker.base p.slots) (S.get class_))
+            class_=(after (Styles.ColorPicker.base p.slots) (S.get class_))
             data_slot="color-picker"
             props=(Props.others props)>
-            (fun () -> S.get children)
+            (S.get children)
           </div>
         </Context.Provider>
       </Button.Trigger.Provider>

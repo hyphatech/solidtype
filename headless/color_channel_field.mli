@@ -15,8 +15,8 @@
 
     {[
       <Color_channel_field.Root
-        channel=(fun () -> `hue)
-        default_value=(fun () -> Colors.parse_color "hsl(300, 100%, 25%)")>
+        channel=`hue
+        default_value=(Colors.parse_color "hsl(300, 100%, 25%)")>
         <Color_channel_field.Label>"Hue"</Color_channel_field.Label>
         <Color_channel_field.Input />
       </Color_channel_field.Root>
@@ -75,7 +75,7 @@ module Root : sig
       ?read_only:bool Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 

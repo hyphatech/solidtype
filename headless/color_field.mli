@@ -19,7 +19,7 @@
 
     {[
       <Color_field.Root
-        default_value=(fun () -> Colors.parse_color "#0485F7")
+        default_value=(Colors.parse_color "#0485F7")
         on_change=(fun c -> ...)>
         <Color_field.Label>"Colour"</Color_field.Label>
         <Color_field.Input />
@@ -51,7 +51,7 @@ module Root : sig
       ?disabled:bool Solidtype.Check.value ->
       ?read_only:bool Solidtype.Check.value ->
       ?props:t S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 

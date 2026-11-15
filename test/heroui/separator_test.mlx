@@ -29,9 +29,7 @@ let shown e =
     T.class_name e )
 
 let both orientation variant =
-  T.render (fun () ->
-      <Separator orientation=(fun () -> orientation) variant=(fun () -> variant)
-      />);
+  T.render (fun () -> <Separator orientation variant />);
   let solidtype = shown (T.by_role "separator") in
   T.cleanup ();
   let react = shown (Twin.render orientation variant) in

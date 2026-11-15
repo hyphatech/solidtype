@@ -10,7 +10,7 @@ let make () =
   let selected, set_selected = S.create_signal [||] in
   let invalid () = Array.length (S.get selected) = 0 in
   <Tag_group
-    selected_keys=(fun () -> S.get selected)
+    selected_keys=(S.get selected)
     selection_mode=`multiple
     on_selection_change=(S.set set_selected)>
     <Label>"Amenities"</Label>
@@ -22,15 +22,13 @@ let make () =
       <Tag id="breakfast">"Breakfast"</Tag>
     </Tag_group.List>
     <Description>
-      (fun () ->
-        Jsx.string
-          (if invalid () then "Select at least one category"
-           else
-             "Selected: " ^ String.concat ", " (Array.to_list (S.get selected))))
+      (Jsx.string
+         (if invalid () then "Select at least one category"
+          else
+            "Selected: " ^ String.concat ", " (Array.to_list (S.get selected))))
     </Description>
     <Error_message>
-      (fun () ->
-        Jsx.string
-          (if invalid () then "Please select at least one category" else ""))
+      (Jsx.string
+         (if invalid () then "Please select at least one category" else ""))
     </Error_message>
   </Tag_group>

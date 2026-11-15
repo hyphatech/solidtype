@@ -9,17 +9,14 @@ let make () =
   <section class_="flex flex-col gap-4">
     <div class_="flex flex-wrap items-end gap-4">
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
-      <p class_="text-sm">"on_action: " (fun () -> Jsx.string (S.get told))</p>
+      <p class_="text-sm">"on_action: " (Jsx.string (S.get told))</p>
     </div>
     <Side_by_side
       compared="[data-slot=link]"
       solidtype=(<Breadcrumbs
-                   is_disabled=(fun () -> S.get disabled)
-                   on_action=(S.set set_told)>
+                   is_disabled=(S.get disabled) on_action=(S.set set_told)>
                    <Breadcrumbs.Item id="home" href="#parity">
                      "Home"
                    </Breadcrumbs.Item>

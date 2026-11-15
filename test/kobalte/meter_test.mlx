@@ -5,7 +5,7 @@ module Params = K.Types.GetValueLabelParams
 
 let island () =
   <Meter.Root
-    value=(fun () -> 40.)
+    value=40.
     get_value_label=(fun params ->
                       Js.Float.toString (Params.value params)
                       ^ " of "

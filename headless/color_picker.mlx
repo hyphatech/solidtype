@@ -18,7 +18,7 @@ let value picker own =
 let changed picker c = match picker with Some p -> p.set_color c | None -> ()
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)
-    ?(on_change : (Color.t -> unit) option) ~(children : Jsx.content) () =
+    ?(on_change : (Color.t -> unit) option) ~(children : Jsx.element) () =
   let kept, set_kept =
     S.create_signal
       (match S.untrack (fun () -> S.get default_value) with
@@ -36,6 +36,4 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
           ignore (on_change c : unit option));
     }
   in
-  <Context.Provider value=(fun () -> picker)>
-    (fun () -> S.get children)
-  </Context.Provider>
+  <Context.Provider value=picker>(S.get children)</Context.Provider>

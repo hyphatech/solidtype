@@ -89,12 +89,12 @@ let both ?orientation ?visibility ?is_enabled ?hide_scroll_bar ?size ?offset ()
     =
   T.render (fun () ->
       <Scroll_shadow
-        ?orientation=(fun () -> orientation)
-        ?visibility=(fun () -> visibility)
-        ?is_enabled=(fun () -> is_enabled)
-        ?hide_scroll_bar=(fun () -> hide_scroll_bar)
-        ?size=(fun () -> size)
-        ?offset=(fun () -> offset)
+        ?orientation
+        ?visibility
+        ?is_enabled
+        ?hide_scroll_bar
+        ?size
+        ?offset
         class_="max-h-[100px]">
         <p>"One"</p> <p>"Two"</p> <p>"Three"</p>
       </Scroll_shadow>);

@@ -571,7 +571,7 @@ module Resizable_container = struct
       ?on_resize_end:((string * column_size) array -> unit) ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -580,7 +580,7 @@ module Resizable_container = struct
     external on_resize_start : t -> resized option = "onResizeStart" [@@mel.get]
     external on_resize : t -> resized option = "onResize" [@@mel.get]
     external on_resize_end : t -> resized option = "onResizeEnd" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -623,12 +623,12 @@ module Resizable_container = struct
           (fun sizes -> Jsx.call (Props.on_resize_end props) sizes);
       }
     in
-    <Container_context.Provider value=(fun () -> told)>
+    <Container_context.Provider value=told>
       <div
         ref=(fun e ->
               container := Some e;
               Jsx.call (Props.ref props) e)
-        ?as_=(fun () -> S.drawn_as props)
+        ?as_=(S.drawn_as props)
         props=(S.undrawn
                  (S.omit props
                     [|
@@ -638,7 +638,7 @@ module Resizable_container = struct
                       "children";
                       "ref";
                     |]))>
-        (fun () -> Props.children props)
+        (Props.children props)
       </div>
     </Container_context.Provider>
 
@@ -666,7 +666,7 @@ module Root = struct
       ?on_row_action:(string -> unit) ->
       ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -719,7 +719,7 @@ module Root = struct
     external on_row_action : t -> ((string -> unit)[@u]) option = "onRowAction"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     (* A virtualized table's element is a <div>: what it is given is an
        element, of whichever kind. *)
@@ -1317,52 +1317,45 @@ module Root = struct
       | None -> Props.children props
       | Some v ->
           let l = v.options in
-          Jsx.element
-            <div
-              role=`presentation
-              style=(fun () ->
-                      "width: "
-                      ^ px (S.get v.content_width +. (2. *. l.padding))
-                      ^ "; height: "
-                      ^ px
-                          (l.padding +. l.heading_size +. l.gap
-                         +. S.get v.body_height +. l.padding)
-                      ^ "; pointer-events: "
-                      ^ (if S.get v.scrolling then "none" else "auto")
-                      ^ "; position: relative;")>
-              (fun () -> Props.children props)
-            </div>
+          <div
+            role=`presentation
+            style=("width: "
+                  ^ px (S.get v.content_width +. (2. *. l.padding))
+                  ^ "; height: "
+                  ^ px
+                      (l.padding +. l.heading_size +. l.gap
+                     +. S.get v.body_height +. l.padding)
+                  ^ "; pointer-events: "
+                  ^ (if S.get v.scrolling then "none" else "auto")
+                  ^ "; position: relative;")>
+            (Props.children props)
+          </div>
     in
-    <Table_context.Provider value=(fun () -> t)>
+    <Table_context.Provider value=t>
       <Dynamic.Drawn
-        component=(fun () ->
-                    Solidtype.Jsx.drawn_as (S.drawn_as props)
-                      (match virtualized with
-                      | Some _ -> "div"
-                      | None -> "table"))
-        role=(fun () -> if tree () then `treegrid else `grid)
+        component=(Solidtype.Jsx.drawn_as (S.drawn_as props)
+                     (match virtualized with
+                     | Some _ -> "div"
+                     | None -> "table"))
+        role=(if tree () then `treegrid else `grid)
         ref=(fun e ->
               let e = as_element e in
               S.set set_element (Some e);
               Jsx.call (Props.ref props) e)
-        ?aria_rowcount=(fun () ->
-                         Option.map
-                           (fun v -> string_of_int (S.get v.row_count + 1))
-                           virtualized)
-        ?aria_colcount=(fun () ->
-                         Option.map
-                           (fun (v : virtualized) ->
-                             string_of_int (S.get v.column_count))
-                           virtualized)
-        ?aria_multiselectable=(fun () ->
-                                match S.get selection_mode with
-                                | `multiple -> Some true
-                                | `single | `none -> None)
-        tabindex=(fun () -> tabindex (S.get (Selectable_list.tab_index list)))
-        ?style=(fun () ->
-                 match sizing with
-                 | Some _ -> Some "table-layout: fixed; width: min-content;"
-                 | None -> None)
+        ?aria_rowcount=(Option.map
+                          (fun v -> string_of_int (S.get v.row_count + 1))
+                          virtualized)
+        ?aria_colcount=(Option.map
+                          (fun (v : virtualized) ->
+                            string_of_int (S.get v.column_count))
+                          virtualized)
+        ?aria_multiselectable=(match S.get selection_mode with
+                              | `multiple -> Some true
+                              | `single | `none -> None)
+        tabindex=(tabindex (S.get (Selectable_list.tab_index list)))
+        ?style=(match sizing with
+               | Some _ -> Some "table-layout: fixed; width: min-content;"
+               | None -> None)
         on_key_down
         on_mouse_down=(fun e ->
                         Jsx.call (Props.on_mouse_down props) e;
@@ -1401,7 +1394,7 @@ module Root = struct
                        Jsx.call (Props.on_focus_out props) e;
                        Selectable_list.on_focus_out list e)
         props=(S.undrawn (S.omit props own))>
-        (fun () -> content ())
+        (content ())
       </Dynamic.Drawn>
     </Table_context.Provider>
 
@@ -1415,11 +1408,11 @@ module Header = struct
     external check :
       ?as_:(Solidtype.Html.Thead.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Thead.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -1433,9 +1426,7 @@ module Header = struct
     let drawn () =
       Jsx.fragment
         [|
-          <For each=(fun () -> S.get columns)>
-            (fun c index -> c.draw_column ~index)
-          </For>;
+          <For each=(S.get columns)>(fun c index -> c.draw_column ~index)</For>;
           Jsx.fragment (Columns.others (all ()));
         |]
     in
@@ -1443,9 +1434,9 @@ module Header = struct
     | None ->
         <thead
           role=`rowgroup
-          ?as_=(fun () -> S.drawn_as props)
+          ?as_=(S.drawn_as props)
           props=(S.undrawn (S.omit props [| "children" |]))>
-          <tr role=`row>(fun () -> Jsx.element (drawn ()))</tr>
+          <tr role=`row>(drawn ())</tr>
         </thead>
     | Some v ->
         (* Its row stays over the rows as they scroll, as React Aria's
@@ -1453,17 +1444,14 @@ module Header = struct
         let l = v.options in
         <div
           role=`presentation
-          style=(fun () ->
-                  placed ~sticky:true ~overflow:"hidden" ~z:1 ~top:l.padding
-                    ~left:l.padding ~width:(S.get v.content_width)
-                    ~height:l.heading_size ())>
+          style=(placed ~sticky:true ~overflow:"hidden" ~z:1 ~top:l.padding
+                   ~left:l.padding ~width:(S.get v.content_width)
+                   ~height:l.heading_size ())>
           <div
             role=`rowgroup
-            ?as_=(fun () -> S.drawn_as props)
+            ?as_=(S.drawn_as props)
             props=(S.undrawn (S.omit props [| "children" |]))>
-            <div role=`row aria_rowindex="1">
-              (fun () -> Jsx.element (drawn ()))
-            </div>
+            <div role=`row aria_rowindex="1">(drawn ())</div>
           </div>
         </div>
 
@@ -1511,7 +1499,7 @@ module Column = struct
       ?max_width:float Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Th.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -1525,7 +1513,7 @@ module Column = struct
 
     external min_width : t -> float option = "minWidth" [@@mel.get]
     external max_width : t -> float option = "maxWidth" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
@@ -1606,32 +1594,28 @@ module Column = struct
           | None -> false)
     in
     let drawn =
-      <Column_context.Provider value=(fun () -> { direction; resizing })>
-        <Resized_context.Provider
-          value=(fun () -> { resized_key = key; header_id })>
+      <Column_context.Provider value={ direction; resizing }>
+        <Resized_context.Provider value={ resized_key = key; header_id }>
           <Dynamic.Drawn
-            component=(fun () ->
-                        Solidtype.Jsx.drawn_as (S.drawn_as props)
-                          (tag t.virtualized "th"))
+            component=(Solidtype.Jsx.drawn_as (S.drawn_as props)
+                         (tag t.virtualized "th"))
             role=`columnheader
-            id=(fun () -> header_id)
+            id=header_id
             tabindex="-1"
-            aria_colindex=(fun () -> string_of_int (S.get index + 1))
-            ?style=(fun () ->
-                     Option.map
-                       (fun s ->
-                         "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
-                       t.sizing)
-            data_resizing=(fun () -> state (S.get resizing))
+            aria_colindex=(string_of_int (S.get index + 1))
+            ?style=(Option.map
+                      (fun s ->
+                        "width: " ^ Js.Float.toString (s.width_of key) ^ "px;")
+                      t.sizing)
+            data_resizing=(state (S.get resizing))
             ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
-            ?aria_sort=(fun () ->
-                         if sortable () then
-                           Some
-                             (match S.get direction with
-                             | Some `ascending -> `ascending
-                             | Some `descending -> `descending
-                             | None -> `none)
-                         else None)
+            ?aria_sort=(if sortable () then
+                          Some
+                            (match S.get direction with
+                            | Some `ascending -> `ascending
+                            | Some `descending -> `descending
+                            | None -> `none)
+                        else None)
             on_click=(fun e ->
                        Jsx.call (Props.on_click props) e;
                        press ())
@@ -1647,7 +1631,7 @@ module Column = struct
                               press ()
                           | _ -> ())
             props=(S.undrawn (S.omit props own))>
-            (fun () -> Props.children props)
+            (Props.children props)
           </Dynamic.Drawn>
         </Resized_context.Provider>
       </Column_context.Provider>
@@ -1658,13 +1642,12 @@ module Column = struct
         (* Each column before the next in the stack, as React Aria's are. *)
         <div
           role=`presentation
-          style=(fun () ->
-                  let i = S.get index in
-                  let left, width = v.column_box i in
-                  placed ~overflow:"visible"
-                    ~z:(S.get v.column_count - i + 1)
-                    ~top:0. ~left ~width ~height:v.options.heading_size ())>
-          (fun () -> Jsx.element drawn)
+          style=(let i = S.get index in
+                 let left, width = v.column_box i in
+                 placed ~overflow:"visible"
+                   ~z:(S.get v.column_count - i + 1)
+                   ~top:0. ~left ~width ~height:v.options.heading_size ())>
+          drawn
         </div>
 
   let make (props : Props.t) =
@@ -1682,12 +1665,12 @@ module Body = struct
       ?empty_state:Jsx.element Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tbody.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tbody.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external empty_state : t -> Jsx.element option = "emptyState" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -1703,24 +1686,23 @@ module Body = struct
     t.set_order
       (Some (S.accessor (fun () -> Array.map (fun n -> n.row_key) (S.get rows))));
     S.on_cleanup (fun () -> t.set_order None);
-    let others () = Jsx.element (Jsx.fragment (Nested.others (all ()))) in
+    let others () = Jsx.fragment (Nested.others (all ())) in
     match t.virtualized with
     | None ->
         <tbody
           role=`rowgroup
-          ?as_=(fun () -> S.drawn_as props)
+          ?as_=(S.drawn_as props)
           props=(S.undrawn (S.omit props [| "emptyState"; "children" |]))>
-          <For each=(fun () -> S.get rows)>
+          <For each=(S.get rows)>
             (fun n position -> n.draw ~position ~size)
           </For>
-          (fun () -> others ())
-          <Show.Some some=(fun () -> empty ())>
+          (others ())
+          <Show.Some some=(empty ())>
             (fun shown ->
               <tr role=`row>
                 <td
-                  role=`rowheader
-                  colspan=(fun () -> string_of_int (S.get t.column_count))>
-                  (fun () -> Jsx.element (S.get shown))
+                  role=`rowheader colspan=(string_of_int (S.get t.column_count))>
+                  (S.get shown)
                 </td>
               </tr>)
           </Show.Some>
@@ -1742,29 +1724,27 @@ module Body = struct
         let index_of n = Js.Array.indexOf ~value:n (S.get rows) in
         <div
           role=`presentation
-          style=(fun () ->
-                  placed ~overflow:"hidden" ~z:0
-                    ~top:(l.padding +. l.heading_size +. l.gap)
-                    ~left:l.padding ~width:(S.get v.content_width)
-                    ~height:(S.get v.body_height) ())>
+          style=(placed ~overflow:"hidden" ~z:0
+                   ~top:(l.padding +. l.heading_size +. l.gap)
+                   ~left:l.padding ~width:(S.get v.content_width)
+                   ~height:(S.get v.body_height) ())>
           <div
             role=`rowgroup
-            ?as_=(fun () -> S.drawn_as props)
+            ?as_=(S.drawn_as props)
             props=(S.undrawn (S.omit props [| "emptyState"; "children" |]))>
-            <For each=(fun () -> drawn ())>
+            <For each=(drawn ())>
               (fun n _ ->
                 n.draw ~position:(S.accessor (fun () -> index_of n)) ~size)
             </For>
-            (fun () -> others ())
-            <Show.Some some=(fun () -> empty ())>
+            (others ())
+            <Show.Some some=(empty ())>
               (fun shown ->
                 <div role=`row style="display: contents">
                   <div
                     role=`rowheader
-                    aria_colspan=(fun () ->
-                                   string_of_int (S.get v.column_count))
+                    aria_colspan=(string_of_int (S.get v.column_count))
                     style="display: contents">
-                    (fun () -> Jsx.element (S.get shown))
+                    (S.get shown)
                   </div>
                 </div>)
             </Show.Some>
@@ -1794,7 +1774,7 @@ module Row = struct
       ?referrer_policy:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -1810,7 +1790,7 @@ module Row = struct
     external href_lang : t -> string option = "hrefLang" [@@mel.get]
     external ping : t -> string option = "ping" [@@mel.get]
     external referrer_policy : t -> string option = "referrerPolicy" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_key_up : t -> ((Dom.keyboardEvent -> unit)[@u]) option
@@ -2001,166 +1981,152 @@ module Row = struct
       Jsx.call given e;
       if not (in_control e) then own e
     in
-    <Row_context.Provider value=(fun () -> r)>
-      (fun () ->
-        (* Its children read inside it: its cells, which it holds, and its
+    <Row_context.Provider value=r>
+      ((* Its children read inside it: its cells, which it holds, and its
            rows, which it draws after it while it is expanded. *)
-        let resolved = S.children (fun () -> Props.children props) in
-        let all () = S.to_array (S.get resolved) in
-        let rows = S.create_memo (fun () -> Nested.read (all ())) in
-        (nested := fun () -> S.get rows);
-        let drawn =
-          <Dynamic.Drawn
-            component=(fun () ->
-                        Solidtype.Jsx.drawn_as (S.drawn_as props)
-                          (tag t.virtualized "tr"))
-            role=`row
-            ref=(fun e ->
-                  let e = as_element e in
-                  S.set set_element (Some e);
-                  Jsx.call (Props.ref props) e)
-            ?aria_rowindex=(fun () ->
-                             match t.virtualized with
-                             | Some _ when not (tree ()) ->
-                                 Some (string_of_int (S.get position + 2))
-                             | Some _ | None -> None)
-            tabindex=(fun () ->
-                       tabindex (S.get (Selectable_item.tab_index item)))
-            aria_labelledby=(fun () -> header_id)
-            ?aria_selected=(fun () ->
-                             match S.get t.context.selection_mode with
-                             | `none -> None
-                             | `single | `multiple -> Some (S.get selected))
-            ?aria_disabled=(fun () ->
-                             if S.get disabled then Some true else None)
-            ?aria_expanded=(fun () ->
-                             if tree () && S.get has_child_items then
-                               Some (S.get expanded)
-                             else None)
-            ?aria_level=(fun () ->
-                          if tree () then Some (string_of_int level) else None)
-            ?aria_posinset=(fun () ->
-                             if tree () then
-                               Some (string_of_int (S.get position + 1))
-                             else None)
-            ?aria_setsize=(fun () ->
-                            if tree () then Some (string_of_int (S.get size))
-                            else None)
-            data_key=(fun () -> Jsx.data key)
-            data_selected=(fun () -> state (S.get selected))
-            data_disabled=(fun () -> state (S.get disabled))
-            data_expanded=(fun () ->
-                            state
-                              (tree () && S.get has_child_items
-                             && S.get expanded))
-            on_pointer_down=(pressed (Props.on_pointer_down props) (fun e ->
-                                 pointer := pointer_type e;
-                                 primary_at_down := primary ();
-                                 long_pressed := false;
-                                 if
-                                   String.equal !pointer "touch"
-                                   && has_action () && allows_selection ()
-                                 then
-                                   long_press :=
-                                     Some
-                                       (Js.Global.setTimeout
-                                          ~f:(fun () ->
-                                            long_press := None;
-                                            long_pressed := true;
-                                            Manager.toggle_selection (m ()) key;
-                                            Manager.set_selection_behavior
-                                              (m ()) `toggle)
-                                          500);
-                                 (* A mouse selects as it is pressed, unless
+       let resolved = S.children (fun () -> Props.children props) in
+       let all () = S.to_array (S.get resolved) in
+       let rows = S.create_memo (fun () -> Nested.read (all ())) in
+       (nested := fun () -> S.get rows);
+       let drawn =
+         <Dynamic.Drawn
+           component=(Solidtype.Jsx.drawn_as (S.drawn_as props)
+                        (tag t.virtualized "tr"))
+           role=`row
+           ref=(fun e ->
+                 let e = as_element e in
+                 S.set set_element (Some e);
+                 Jsx.call (Props.ref props) e)
+           ?aria_rowindex=(match t.virtualized with
+                          | Some _ when not (tree ()) ->
+                              Some (string_of_int (S.get position + 2))
+                          | Some _ | None -> None)
+           tabindex=(tabindex (S.get (Selectable_item.tab_index item)))
+           aria_labelledby=header_id
+           ?aria_selected=(match S.get t.context.selection_mode with
+                          | `none -> None
+                          | `single | `multiple -> Some (S.get selected))
+           ?aria_disabled=(if S.get disabled then Some true else None)
+           ?aria_expanded=(if tree () && S.get has_child_items then
+                             Some (S.get expanded)
+                           else None)
+           ?aria_level=(if tree () then Some (string_of_int level) else None)
+           ?aria_posinset=(if tree () then
+                             Some (string_of_int (S.get position + 1))
+                           else None)
+           ?aria_setsize=(if tree () then Some (string_of_int (S.get size))
+                          else None)
+           data_key=(Jsx.data key)
+           data_selected=(state (S.get selected))
+           data_disabled=(state (S.get disabled))
+           data_expanded=(state
+                            (tree () && S.get has_child_items && S.get expanded))
+           on_pointer_down=(pressed (Props.on_pointer_down props) (fun e ->
+                                pointer := pointer_type e;
+                                primary_at_down := primary ();
+                                long_pressed := false;
+                                if
+                                  String.equal !pointer "touch"
+                                  && has_action () && allows_selection ()
+                                then
+                                  long_press :=
+                                    Some
+                                      (Js.Global.setTimeout
+                                         ~f:(fun () ->
+                                           long_press := None;
+                                           long_pressed := true;
+                                           Manager.toggle_selection (m ()) key;
+                                           Manager.set_selection_behavior (m ())
+                                             `toggle)
+                                         500);
+                                (* A mouse selects as it is pressed, unless
                                     its press runs the action as it ends. *)
-                                 if
-                                   not
-                                     (String.equal !pointer "mouse"
-                                     && !primary_at_down)
-                                 then Selectable_item.on_pointer_down item e))
-            on_pointer_up=(pressed (Props.on_pointer_up props) (fun e ->
-                               cancel_long_press ();
-                               Selectable_item.on_pointer_up item e))
-            on_pointer_cancel=(fun e ->
-                                Jsx.call (Props.on_pointer_cancel props) e;
-                                cancel_long_press ())
-            on_context_menu=(fun e ->
-                              Jsx.call (Props.on_context_menu props) e;
-                              (* A long touch's menu would cover what it
+                                if
+                                  not
+                                    (String.equal !pointer "mouse"
+                                    && !primary_at_down)
+                                then Selectable_item.on_pointer_down item e))
+           on_pointer_up=(pressed (Props.on_pointer_up props) (fun e ->
+                              cancel_long_press ();
+                              Selectable_item.on_pointer_up item e))
+           on_pointer_cancel=(fun e ->
+                               Jsx.call (Props.on_pointer_cancel props) e;
+                               cancel_long_press ())
+           on_context_menu=(fun e ->
+                             Jsx.call (Props.on_context_menu props) e;
+                             (* A long touch's menu would cover what it
                                  selects. *)
-                              if Option.is_some !long_press || !long_pressed
-                              then prevent e)
-            on_click=(pressed (Props.on_click props) (fun e ->
-                          if !long_pressed then long_pressed := false
-                          else if String.equal !pointer "mouse" then
-                            if !primary_at_down then act e
-                            else Selectable_item.on_click item e
-                          else if has_action () then act e
-                          else Selectable_item.on_click item e))
-            on_dbl_click=(pressed (Props.on_dbl_click props) (fun e ->
-                              if String.equal !pointer "mouse" && secondary ()
-                              then begin
-                                prevent e;
-                                act e
-                              end))
-            on_key_down=(pressed (Props.on_key_down props) (fun e ->
-                             (* Enter is a row's action's, though none runs
-                                while it selects; Space then selects. *)
-                             if
-                               String.equal (key_name e) "Enter"
-                               && allows_actions ()
+                             if Option.is_some !long_press || !long_pressed then
+                               prevent e)
+           on_click=(pressed (Props.on_click props) (fun e ->
+                         if !long_pressed then long_pressed := false
+                         else if String.equal !pointer "mouse" then
+                           if !primary_at_down then act e
+                           else Selectable_item.on_click item e
+                         else if has_action () then act e
+                         else Selectable_item.on_click item e))
+           on_dbl_click=(pressed (Props.on_dbl_click props) (fun e ->
+                             if String.equal !pointer "mouse" && secondary ()
                              then begin
-                               prevent_default e;
-                               enter_down := has_action ()
-                             end
-                             else Selectable_item.on_key_down item e))
-            on_key_up=(pressed (Props.on_key_up props) (fun e ->
-                           if String.equal (key_name e) "Enter" && !enter_down
-                           then begin
-                             enter_down := false;
-                             act e
-                           end))
-            on_mouse_down=(fun e ->
-                            Jsx.call (Props.on_mouse_down props) e;
-                            Selectable_item.on_mouse_down item e)
-            on_focus=(fun e ->
-                       Jsx.call (Props.on_focus props) e;
-                       Selectable_item.on_focus item e)
-            props=(S.undrawn (S.omit props own))>
-            <For each=(fun () -> Cells.read (all ()))>
-              (fun c index -> c.draw_cell ~index)
-            </For>
-          </Dynamic.Drawn>
-        in
-        let row =
-          match t.virtualized with
-          | None -> drawn
-          | Some v ->
-              let l = v.options in
-              <div
-                role=`presentation
-                style=(fun () ->
-                        placed ~overflow:"visible" ~z:0
-                          ~top:
-                            (Float.of_int (S.get position)
-                            *. (l.row_size +. l.gap))
-                          ~left:0. ~width:(S.get v.content_width)
-                          ~height:l.row_size ())>
-                (fun () -> Jsx.element drawn)
-              </div>
-        in
-        Jsx.element
-        @@ Jsx.fragment
-             [|
-               row;
-               <Show when_=(fun () -> S.get expanded)>
-                 <For each=(fun () -> !nested ())>
-                   (fun n position ->
-                     n.draw ~position
-                       ~size:(S.accessor (fun () -> Array.length (!nested ()))))
-                 </For>
-               </Show>;
-             |])
+                               prevent e;
+                               act e
+                             end))
+           on_key_down=(pressed (Props.on_key_down props) (fun e ->
+                            (* Enter is a row's action's, though none runs
+                                while it selects; Space then selects. *)
+                            if
+                              String.equal (key_name e) "Enter"
+                              && allows_actions ()
+                            then begin
+                              prevent_default e;
+                              enter_down := has_action ()
+                            end
+                            else Selectable_item.on_key_down item e))
+           on_key_up=(pressed (Props.on_key_up props) (fun e ->
+                          if String.equal (key_name e) "Enter" && !enter_down
+                          then begin
+                            enter_down := false;
+                            act e
+                          end))
+           on_mouse_down=(fun e ->
+                           Jsx.call (Props.on_mouse_down props) e;
+                           Selectable_item.on_mouse_down item e)
+           on_focus=(fun e ->
+                      Jsx.call (Props.on_focus props) e;
+                      Selectable_item.on_focus item e)
+           props=(S.undrawn (S.omit props own))>
+           <For each=(Cells.read (all ()))>
+             (fun c index -> c.draw_cell ~index)
+           </For>
+         </Dynamic.Drawn>
+       in
+       let row =
+         match t.virtualized with
+         | None -> drawn
+         | Some v ->
+             let l = v.options in
+             <div
+               role=`presentation
+               style=(placed ~overflow:"visible" ~z:0
+                        ~top:
+                          (Float.of_int (S.get position)
+                          *. (l.row_size +. l.gap))
+                        ~left:0. ~width:(S.get v.content_width)
+                        ~height:l.row_size ())>
+               drawn
+             </div>
+       in
+       Jsx.fragment
+         [|
+           row;
+           <Show when_=(S.get expanded)>
+             <For each=(!nested ())>
+               (fun n position ->
+                 n.draw ~position
+                   ~size:(S.accessor (fun () -> Array.length (!nested ()))))
+             </For>
+           </Show>;
+         |])
     </Row_context.Provider>
 
   (* A row is drawn by what holds it, with the contexts of where it was
@@ -2196,11 +2162,11 @@ module Cell = struct
     external check :
       ?as_:(Solidtype.Html.Td.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Td.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
   end
 
@@ -2213,24 +2179,21 @@ module Cell = struct
           | None -> false)
     in
     let drawn =
-      <Cell_context.Provider
-        value=(fun () -> { is_tree_column; column_index = index })>
+      <Cell_context.Provider value={ is_tree_column; column_index = index }>
         <Dynamic.Drawn
-          component=(fun () ->
-                      Solidtype.Jsx.drawn_as (S.drawn_as props)
-                        (tag t.virtualized "td"))
-          role=(fun () -> if names_row () then `rowheader else `gridcell)
-          ?id=(fun () -> if names_row () then Some r.header_id else None)
-          ?aria_colindex=(fun () ->
-                           Option.map
-                             (fun _ -> string_of_int (S.get index + 1))
-                             t.virtualized)
+          component=(Solidtype.Jsx.drawn_as (S.drawn_as props)
+                       (tag t.virtualized "td"))
+          role=(if names_row () then `rowheader else `gridcell)
+          ?id=(if names_row () then Some r.header_id else None)
+          ?aria_colindex=(Option.map
+                            (fun _ -> string_of_int (S.get index + 1))
+                            t.virtualized)
           tabindex="-1"
-          data_column_index=(fun () -> Jsx.data (string_of_int (S.get index)))
-          data_tree_column=(fun () -> state (S.get is_tree_column))
+          data_column_index=(Jsx.data (string_of_int (S.get index)))
+          data_tree_column=(state (S.get is_tree_column))
           ref=(fun e -> Jsx.call (Props.ref props) (as_element e))
           props=(S.undrawn (S.omit props [| "children"; "ref" |]))>
-          (fun () -> Props.children props)
+          (Props.children props)
         </Dynamic.Drawn>
       </Cell_context.Provider>
     in
@@ -2239,11 +2202,10 @@ module Cell = struct
     | Some v ->
         <div
           role=`presentation
-          style=(fun () ->
-                  let left, width = v.column_box (S.get index) in
-                  placed ~overflow:"visible" ~z:1 ~top:0. ~left ~width
-                    ~height:v.options.row_size ())>
-          (fun () -> Jsx.element drawn)
+          style=(let left, width = v.column_box (S.get index) in
+                 placed ~overflow:"visible" ~z:1 ~top:0. ~left ~width
+                   ~height:v.options.row_size ())>
+          drawn
         </div>
 
   let make (props : Props.t) =
@@ -2268,7 +2230,7 @@ module Load_more = struct
       ?scroll_offset:float Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -2278,7 +2240,7 @@ module Load_more = struct
     [@@mel.get]
 
     external scroll_offset : t -> float option = "scrollOffset" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -2286,9 +2248,9 @@ module Load_more = struct
     let is_loading () = Option.value (Props.is_loading props) ~default:false in
     let sentinel () =
       <Load_more_sentinel
-        is_loading=(fun () -> is_loading ())
-        on_load_more=(fun _ -> Jsx.act (Props.on_load_more props))
-        ?scroll_offset=(fun () -> Props.scroll_offset props)
+        is_loading=(is_loading ())
+        on_load_more=(fun () -> Jsx.act (Props.on_load_more props))
+        ?scroll_offset=(Props.scroll_offset props)
         style="position: relative; height: 1px; width: 1px;"
       />
     in
@@ -2303,19 +2265,13 @@ module Load_more = struct
         Jsx.fragment
           [|
             <tr style="height: 0px;" inert=true>
-              <td style="padding: 0px; border: 0px;">
-                (fun () -> Jsx.element (sentinel ()))
-              </td>
+              <td style="padding: 0px; border: 0px;">(sentinel ())</td>
             </tr>;
-            <Show when_=(fun () -> is_loading ())>
-              <tr
-                role=`row
-                ?as_=(fun () -> S.drawn_as props)
-                props=(S.undrawn (rest ()))>
+            <Show when_=(is_loading ())>
+              <tr role=`row ?as_=(S.drawn_as props) props=(S.undrawn (rest ()))>
                 <td
-                  role=`rowheader
-                  colspan=(fun () -> string_of_int (S.get t.column_count))>
-                  (fun () -> Props.children props)
+                  role=`rowheader colspan=(string_of_int (S.get t.column_count))>
+                  (Props.children props)
                 </td>
               </tr>
             </Show>;
@@ -2326,28 +2282,22 @@ module Load_more = struct
         let l = v.options in
         <div
           role=`presentation
-          style=(fun () ->
-                  placed ~overflow:"visible" ~z:0
-                    ~top:
-                      (Float.of_int (S.get v.row_count) *. (l.row_size +. l.gap))
-                    ~left:0. ~width:(S.get v.content_width)
-                    ~height:(if is_loading () then l.loader_size else 0.)
-                    ())>
+          style=(placed ~overflow:"visible" ~z:0
+                   ~top:
+                     (Float.of_int (S.get v.row_count) *. (l.row_size +. l.gap))
+                   ~left:0. ~width:(S.get v.content_width)
+                   ~height:(if is_loading () then l.loader_size else 0.)
+                   ())>
           <div style="height: 0px;" inert=true>
-            <div style="padding: 0px; border: 0px;">
-              (fun () -> Jsx.element (sentinel ()))
-            </div>
+            <div style="padding: 0px; border: 0px;">(sentinel ())</div>
           </div>
-          <Show when_=(fun () -> is_loading ())>
-            <div
-              role=`row
-              ?as_=(fun () -> S.drawn_as props)
-              props=(S.undrawn (rest ()))>
+          <Show when_=(is_loading ())>
+            <div role=`row ?as_=(S.drawn_as props) props=(S.undrawn (rest ()))>
               <div
                 role=`rowheader
-                aria_colspan=(fun () -> string_of_int (S.get v.column_count))
+                aria_colspan=(string_of_int (S.get v.column_count))
                 style="display: contents">
-                (fun () -> Props.children props)
+                (Props.children props)
               </div>
             </div>
           </Show>
@@ -2396,12 +2346,12 @@ module Column_resizer = struct
     external check :
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external aria_label : t -> string option = "aria-label" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -2528,8 +2478,8 @@ module Column_resizer = struct
             handle := Some e;
             Jsx.call (Props.ref props) e)
       style="touch-action: none;"
-      data_resizing=(fun () -> state (editing ()))
-      data_resizable_direction=(fun () -> Jsx.data (S.get direction))
+      data_resizing=(state (editing ()))
+      data_resizable_direction=(Jsx.data (S.get direction))
       on_pointer_down=(fun e ->
                         Jsx.call (Props.on_pointer_down props) e;
                         if
@@ -2575,21 +2525,20 @@ module Column_resizer = struct
                  Jsx.call (Props.on_click props) e;
                  (* A press on the resizer is never its column's. *)
                  stop_propagation e)
-      ?as_=(fun () -> S.drawn_as props)
+      ?as_=(S.drawn_as props)
       props=(S.undrawn (S.omit props own))>
-      (fun () -> Props.children props)
+      (Props.children props)
       <input
         ref=(fun e -> input := Some e)
-        id=(fun () -> input_id)
+        id=input_id
         type_="range"
-        aria_label=(fun () ->
-                     Option.value (Props.aria_label props) ~default:"Resizer")
+        aria_label=(Option.value (Props.aria_label props) ~default:"Resizer")
         aria_orientation=`horizontal
-        aria_labelledby=(fun () -> input_id ^ " " ^ c.header_id)
-        aria_valuetext=(fun () -> whole (s.width_of key) ^ " pixels")
-        min=(fun () -> whole (s.min_of key))
-        max=(fun () -> whole (s.max_of key))
-        value=(fun () -> whole (s.width_of key))
+        aria_labelledby=(input_id ^ " " ^ c.header_id)
+        aria_valuetext=(whole (s.width_of key) ^ " pixels")
+        min=(whole (s.min_of key))
+        max=(whole (s.max_of key))
+        value=(whole (s.width_of key))
         style=visually_hidden
         on_key_down=(fun e ->
                       let own () =
@@ -2621,13 +2570,12 @@ module Column_resizer = struct
                    | Some _ | None -> step (-10.))
         on_blur=(fun _ -> finish ())
       />
-      <Show.Some some=(fun () -> S.get mouse_cursor)>
+      <Show.Some some=(S.get mouse_cursor)>
         (fun shown ->
           <Solidtype.Portal>
             <div
-              style=(fun () ->
-                      "position: fixed; top: 0px; left: 0px; bottom: 0px; \
-                       right: 0px; cursor: " ^ S.get shown ^ ";")
+              style=("position: fixed; top: 0px; left: 0px; bottom: 0px; \
+                      right: 0px; cursor: " ^ S.get shown ^ ";")
               data_testid="cursor-overlay"
             />
           </Solidtype.Portal>)

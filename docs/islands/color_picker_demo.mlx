@@ -24,20 +24,18 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="placement"
-        choices=(fun () -> placements)
-        picked=(fun () -> S.get placement)
+        choices=placements
+        picked=(S.get placement)
         on_pick=(Controls.choose placements set_placement)
       />
     </div>
     <Side_by_side
       compared="[data-slot=color-picker-trigger]"
-      solidtype=(<Color_picker
-                   default_value=(fun () -> Colors.parse_color "#0485F7")>
+      solidtype=(<Color_picker default_value=(Colors.parse_color "#0485F7")>
                    <Color_picker.Trigger>
                      <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
                    </Color_picker.Trigger>
-                   <Color_picker.Popover
-                     placement=(fun () -> fst (S.get placement))>
+                   <Color_picker.Popover placement=(fst (S.get placement))>
                      <Color_area
                        aria_label="Color area"
                        class_="max-w-full"

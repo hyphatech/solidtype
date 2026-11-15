@@ -24,9 +24,9 @@ types.
 
 ## What the types hold
 
-- **A reactive read is a thunk.** A value that changes is read inside
-  `(fun () -> ...)`, where Solid tracks it; one read outside, which would
-  stop updating without a sound, does not compile.
+- **A reactive read in JSX is tracked.** An expression in JSX is read again
+  as what it reads changes, as Solid's compiler makes it, and a
+  function given where a value belongs does not compile.
 - **A component's props are checked**, as TSX checks them: a prop left
   out, a prop the component does not take, a value of the wrong type.
 - **An element's attributes are typed** from Solid's own JSX types, so an
@@ -40,7 +40,7 @@ types.
 | Page | What it covers | Modules |
 |---|---|---|
 | [Components](/solidtype/solid/components/) | a component, its props and children, `let%component` | `Jsx`, `Check` |
-| [Reactivity](/solidtype/solid/reactivity/) | signals, memos, effects, and why a read is a thunk | `Solid` |
+| [Reactivity](/solidtype/solid/reactivity/) | signals, memos, effects, and where a read is tracked | `Solid` |
 | [Control flow](/solidtype/solid/control-flow/) | `Show`, `For`, `Index`, `Switch`, `Match`, `ErrorBoundary`, `Portal` | one module each, named as Solid names them |
 | [Stores and context](/solidtype/solid/state/) | state tracked field by field, a value given to everything below | `Store`, `Context` |
 | [Async](/solidtype/solid/async/) | resources, `Suspense`, transitions | `Solid`, `Suspense` |

@@ -285,21 +285,25 @@ module.
 ## The pipeline
 
 MLX parses `.mlx` into OCaml with each element marked `[@JSX]`.
-`ppx_solidtype` lowers each one to a call of `Solidtype.Jsx`: a literal,
-an element, a handler (`on_` and its event), a function or a name static,
-anything else a thunk the caller writes, `fun () -> e`, which the ppx refuses
-any other expression for, so a read outside a thunk does not compile; a
-handler an expression makes, `on_click=(remove id)`, and a spread are a
-thunk the ppx writes, since Melange evaluates an expression before the
+`ppx_solidtype` lowers each one to a call of `Solidtype.Jsx`, reading each
+value as Solid's compiler reads JSX: a literal, an element, a handler (`on_`
+and its event), a function or a name static, and any other expression a
+thunk the ppx writes, read again as what it reads changes, so a read in JSX
+is always in Solid's tracking scope; a handler an expression makes,
+`on_click=(remove id)`, and a spread are a thunk the ppx writes too, made
+once as their element is, since Melange evaluates an expression before the
 element it is written in, outside a branch Solid has not drawn, and never
 out of a function; an
-optional prop, `?name=`, a thunk of an option, as any value that changes
-is, `undefined` while it is `None`, and `?name:` in the check, so a
-required prop refuses it -- a bare name is refused there, since it is a
-value read once wherever else it is given; a
+optional prop, `?name=`, an option read as a required prop's value is,
+`undefined` while it is `None`, and `?name:` in the check, so a required
+prop refuses it; a child, given by its name or an expression, is a
+`Jsx.element`, the one type of what JSX holds, as Solid's `JSX.Element` is:
+a node, text from `Jsx.string`, a number from `Jsx.int`; a
 name is given back its JavaScript spelling, and a value wrapped in one
-of Solid's namespaces, `Jsx.native` and the others, its namespace; a function prop that takes no
-argument is therefore written `(fun _ -> ...)`; a component's render
+of Solid's namespaces, `Jsx.native` and the others, its namespace; a
+function is a function wherever it is given, refused by its type where a
+value belongs, so a function prop that takes no argument is `(fun () ->
+...)`, as OCaml writes it; a component's render
 function given by name, a slat rhp reads its layout from, is `render=f`, and
 only by name -- one written in place is the child, `<C>(fun ...)</C>` --
 its only child, checked and passed as a function child is, since
@@ -345,9 +349,18 @@ break.
   wiring alone. Why: an application on the stack may build its pages
   with Astro, and the plugin must run under its server build as under its
   client's. Test: `vite-plugin/test/astro.test.ts`, which builds the site.
-- **A reactive value in a dynamic position is a thunk, and the types say
-  so.** Why: a read hoisted out of Solid's tracking scope stops updating
-  without a sound. Test: `test/does_not_compile.t`.
+- **In JSX a value is written as itself, and Solid keeps it current;
+  outside JSX a thunk is written.** A literal or a name is given as it is;
+  any other expression is a thunk the ppx writes, read again as what it reads
+  changes, as Solid's compiler makes an expression in JSX a getter, so
+  `title=(S.get note)` is `title={note()}`; a function is a function, never a
+  thunk. Outside JSX -- a memo, an effect, an accessor a part derives -- the
+  caller writes `fun () -> e`, as Solid's own API takes `() => e`. Why: a read
+  hoisted out of Solid's tracking scope stops updating without a sound, and a
+  value written as itself has one form in every position, evaluated as JSX's
+  form says, as `let%map`'s body is as its form says. Test:
+  `test/does_not_compile.t`, a thunk refused where a value belongs and every
+  form that compiles.
 - **A component's props are its `Props.check`**, a function with one
   labelled argument per prop, optional where the prop is, ending in
   `()`: a value prop as a `Check.value`, a function prop as the
@@ -356,9 +369,10 @@ break.
   `if false`, so it writes nothing. Why: a prop left out, a prop the
   component does not take, and two props of one type variable that
   disagree are compile errors, as in TSX, and a function given where a
-  thunk belongs cannot be called as one. A `Check.value` is the value
-  itself, a thunk read for its result, so an optional prop, a value or a
-  function alike, is given or left out by one form, `?name=(fun () -> o)`.
+  value belongs is refused. A `Check.value` is the value itself, what the
+  expression gives, and an optional prop, a value or a function alike, is
+  given as OCaml gives an optional argument: a value, `count=3`, or an
+  option, `?count=o`, left out while it is `None`.
   Test: `test/does_not_compile.t`, `test/browser/optional_test.mlx`.
 - **Only the ppx writes a marker, and the plugin reads only markers.**
   The plugin finds them by their import alone. It reads Melange's shapes
@@ -371,8 +385,10 @@ break.
 - **What changes is read one way and given one way.** What the library
   hands out -- a signal, a memo, a component's value prop, a field of a
   part's state or context -- is a `Solid.accessor`, read by `S.get`; what a
-  caller gives -- a JSX attribute or child, a function's parameter, a record
-  a part builds to give another -- is a thunk, `fun () -> e`. A part that
+  caller gives in JSX, an attribute or a child, is the expression itself,
+  which the ppx reads again as it changes, and what it gives elsewhere -- a
+  function's parameter, a record a part builds to give another -- is a
+  thunk, `fun () -> e`, as Solid's own API takes `() => e`. A part that
   hands on what it derives makes it an accessor by `S.accessor (fun () ->
   e)`, which Melange writes as a plain JavaScript function, so no code but a
   binding's writes `[@u]`. A value prop is
@@ -387,16 +403,12 @@ break.
   parameter that asks for an accessor, and `rg -n 'fun ?\[@u\] \(\)' heroui
   headless test docs example` an accessor built by hand.
 - **Every thunk the ppx hands Solid is a function of no argument.** It writes
-  the caller's `fun () -> e` uncurried, a function that thunk gives bound
-  apart, and `S.accessor (fun () -> e)` as that function itself; a thunk
-  given by any other expression is refused where it is written. Why: Solid
-  calls a thunk with no argument, and Melange writes a curried `fun () -> fun
-  h -> e` as one function of two, which that call would run at once; a thunk
-  made elsewhere would reach Solid only through Melange's adapter, a call as
-  it is made, and its laziness would not show where it is given. Test:
-  `test/browser/flow_test.mlx`, a context whose value is a function given as
-  `fun () -> fun s -> ...`; `test/does_not_compile.t`, a value given as no
-  thunk.
+  each thunk it makes uncurried, a function that thunk gives bound apart,
+  and `S.accessor (fun () -> e)` as that function itself. Why: Solid calls a
+  thunk with no argument, and Melange writes a curried `fun () -> fun h -> e`
+  as one function of two, which that call would run at once. Test:
+  `test/browser/flow_test.mlx`, an accessor whose value is a function, and
+  `test/ppx`, the function it gives bound apart.
 - **`[@u]` is a binding's alone.** Outside `src/`, which binds Solid itself,
   it is written only in an `external`, or a `type` an external names, where
   it says how JavaScript calls a function. Why: an uncurried function written
@@ -447,7 +459,7 @@ break.
   is written, in an element's attribute; each wrapper types its value. A
   component takes an attribute's, `Jsx.attr`, `Jsx.bool` and `Jsx.named`,
   outside its check, and passes it on to its element, as a `data_`
-  attribute: `?hidden=(Jsx.attr (fun () -> o))` is the one way to write
+  attribute: `?hidden=(Jsx.attr o)` is the one way to write
   `hidden="until-found"` that Solid's server keeps, where a plain `hidden`
   is a boolean. A handler's and a property's stay an element's, since a
   component's props name its own. Why: a wrapper left out is Solid's

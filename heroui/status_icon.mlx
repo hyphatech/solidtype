@@ -8,30 +8,21 @@ type status = [ `default | `accent | `success | `warning | `danger ]
 (* HeroUI's icon for each status: info for the default and accent. *)
 let svg ~slot status =
   <Switch>
-    (fun () ->
-      match status () with
-      | `default | `accent ->
-          <Gravity.Circle_info
-            aria_hidden=true
-            role=`presentation
-            data_slot=(fun () -> Jsx.data slot)
-          />
-      | `success ->
-          <Gravity.Circle_check
-            aria_hidden=true
-            role=`presentation
-            data_slot=(fun () -> Jsx.data slot)
-          />
-      | `warning ->
-          <Gravity.Triangle_exclamation
-            aria_hidden=true
-            role=`presentation
-            data_slot=(fun () -> Jsx.data slot)
-          />
-      | `danger ->
-          <Gravity.Circle_exclamation
-            aria_hidden=true
-            role=`presentation
-            data_slot=(fun () -> Jsx.data slot)
-          />)
+    (match status () with
+    | `default | `accent ->
+        <Gravity.Circle_info
+          aria_hidden=true role=`presentation data_slot=(Jsx.data slot)
+        />
+    | `success ->
+        <Gravity.Circle_check
+          aria_hidden=true role=`presentation data_slot=(Jsx.data slot)
+        />
+    | `warning ->
+        <Gravity.Triangle_exclamation
+          aria_hidden=true role=`presentation data_slot=(Jsx.data slot)
+        />
+    | `danger ->
+        <Gravity.Circle_exclamation
+          aria_hidden=true role=`presentation data_slot=(Jsx.data slot)
+        />)
   </Switch>

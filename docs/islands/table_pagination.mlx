@@ -98,22 +98,20 @@ let make () =
     <Table.Scroll_container>
       <Table.Content aria_label="Table with pagination" class_="min-w-[600px]">
         <Table.Header>
-          <For each=(fun () -> columns)>
+          <For each=columns>
             (fun column _ ->
-              <Table.Column is_row_header=(fun () -> column.row_header)>
-                (fun () -> Jsx.string column.name)
+              <Table.Column is_row_header=column.row_header>
+                (Jsx.string column.name)
               </Table.Column>)
           </For>
         </Table.Header>
         <Table.Body>
-          <For each=(fun () -> shown ())>
+          <For each=(shown ())>
             (fun user _ ->
               <Table.Row>
-                <For each=(fun () -> columns)>
+                <For each=columns>
                   (fun column _ ->
-                    <Table.Cell>
-                      (fun () -> Jsx.string (column.field user))
-                    </Table.Cell>)
+                    <Table.Cell>(Jsx.string (column.field user))</Table.Cell>)
                 </For>
               </Table.Row>)
           </For>
@@ -123,35 +121,35 @@ let make () =
     <Table.Footer>
       <Pagination size=`sm>
         <Pagination.Summary>
-          (fun () -> Jsx.int (first ()))
+          (Jsx.int (first ()))
           " to "
-          (fun () -> Jsx.int (last ()))
+          (Jsx.int (last ()))
           " of "
-          (fun () -> Jsx.int (Array.length users))
+          (Jsx.int (Array.length users))
           " results"
         </Pagination.Summary>
         <Pagination.Content>
           <Pagination.Item>
             <Pagination.Previous
-              is_disabled=(fun () -> S.get page = 1)
+              is_disabled=(S.get page = 1)
               on_press=(fun () ->
                          S.update set_page (fun p -> Int.max 1 (p - 1)))>
               <Pagination.Previous_icon /> "Prev"
             </Pagination.Previous>
           </Pagination.Item>
-          <For each=(fun () -> pages)>
+          <For each=pages>
             (fun p _ ->
               <Pagination.Item>
                 <Pagination.Link
-                  is_active=(fun () -> p = S.get page)
+                  is_active=(p = S.get page)
                   on_press=(fun () -> S.set set_page p)>
-                  (fun () -> Jsx.int p)
+                  (Jsx.int p)
                 </Pagination.Link>
               </Pagination.Item>)
           </For>
           <Pagination.Item>
             <Pagination.Next
-              is_disabled=(fun () -> S.get page = total_pages)
+              is_disabled=(S.get page = total_pages)
               on_press=(fun () ->
                          S.update set_page (fun p ->
                              Int.min total_pages (p + 1)))>

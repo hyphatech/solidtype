@@ -71,7 +71,7 @@ module Root = struct
       ?disabled:bool Solidtype.Check.value ->
       ?read_only:bool Solidtype.Check.value ->
       ?props:t Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -146,9 +146,9 @@ module Root = struct
           && S.get editable)
     in
     let field = { commit; step; go_to; editable; wheel } in
-    <Context.Provider value=(fun () -> field)>
+    <Context.Provider value=field>
       <Kobalte.Root
-        value=(fun () -> S.get text)
+        value=(S.get text)
         on_change=(S.set set_text)
         props=(S.omit props
                  [| "value"; "defaultValue"; "onChange"; "changeOnWheel" |])

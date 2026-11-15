@@ -1,6 +1,6 @@
 ---
 title: Reactivity
-description: Signals, derived values and effects, and why a reactive read is a thunk.
+description: Signals, derived values and effects, and where a reactive read is tracked.
 ---
 
 import Example from "@components/Example.astro";
@@ -22,7 +22,7 @@ Solid.update set_count succ (* 6 *)
 ```
 
 A signal is an accessor, `'a Solid.accessor`, and a setter. `Solid.get`
-reads it; inside a tracking scope -- a thunk in JSX, a memo, an effect --
+reads it; inside a tracking scope -- an expression in JSX, a memo, an effect --
 the read subscribes, so the scope reruns when the signal changes.
 `Solid.set` writes a value and `Solid.update` a function of the last one.
 
@@ -35,29 +35,21 @@ A write equal to the last value, by JavaScript's `===`, is no change.
 `~equals:(By f)` gives the equality, and `~equals:Never` makes every write
 a change.
 
-## A reactive read is a thunk
+## A reactive read in JSX
 
 Solid tracks a read by when it happens: inside a tracking scope, or not at
-all. A read taken out of a JSX position, `{count()}` written as a variable
-read once, renders once and never updates, and nothing says so. In
-solidtype a dynamic attribute, child or prop is a thunk, `(fun () -> ...)`,
-and anything else in a dynamic position does not compile:
+all. In JSX an expression is read again whenever what it reads changes, as
+Solid's compiler makes it: `(Jsx.int (Solid.get count))` becomes `{count()}`, and
+`class_=(if Solid.get count > 2 then "hot" else "cold")` updates the class.
+A read taken out of JSX into a name, `let n = Solid.get count`, is read
+once.
 
-```
-3 |   <div class_=(if Solidtype.Solid.get count > 2 then "hot" else "cold") />
-                                                       ^^^^^
-Error: This constant has type string but an expression was expected of type
-         unit -> string
-       Hint: Did you forget to wrap the expression using fun () ->?
-```
-
-The ppx writes the thunk's body where Solid's compiler sees it, so the
-thunk costs nothing at run time: `(fun () -> Jsx.int (Solid.get count))`
-becomes `{count()}`.
+Outside JSX a tracking scope is a function you write, `fun () -> e`, as
+Solid's own API takes `() => e`: a memo, an effect, or an accessor.
 
 ## Derived values
 
-A function of signals is already reactive when it is read in a thunk. A
+A function of signals is already reactive when it is read in JSX. A
 memo caches it, and notifies only when its value changes:
 
 <Example code={derived} title="solid_derived.mlx"><Derived.make client:visible /></Example>

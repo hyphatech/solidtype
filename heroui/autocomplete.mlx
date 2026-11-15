@@ -130,20 +130,19 @@ module Trigger = struct
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e)
-      class_=(fun () ->
-               after
-                 (Styles.Autocomplete.trigger (S.get a.slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.Autocomplete.trigger (S.get a.slots))
+                (S.get class_))
       on_click=(fun e ->
                  ignore (on_click e : unit option);
                  if not (S.get a.disabled) then a.toggle ())
       data_slot="autocomplete-trigger"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_focus_within=(fun () -> Jsx.flag (Interaction.focused i))
-      data_disabled=(fun () -> Jsx.flag (S.get a.disabled))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_focus_within=(Jsx.flag (Interaction.focused i))
+      data_disabled=(Jsx.flag (S.get a.disabled))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Kobalte.Control>
   [@@element div]
 end
@@ -174,24 +173,22 @@ module Value = struct
       }
     in
     <span
-      id=(fun () -> a.value_id)
-      class_=(fun () ->
-               after (Styles.Autocomplete.value (S.get a.slots)) (S.get class_))
+      id=a.value_id
+      class_=(after (Styles.Autocomplete.value (S.get a.slots)) (S.get class_))
       data_slot="autocomplete-value"
-      data_placeholder=(fun () -> Jsx.flag (S.get a.is_empty))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_placeholder=(Jsx.flag (S.get a.is_empty))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () ->
-        match (S.get children, S.get a.is_empty) with
-        | Some c, false -> Jsx.draw c (state ())
-        | (Some _ | None), true -> Jsx.string (S.get a.placeholder)
-        | None, false -> Jsx.element (List_box.shown (S.get a.selected)))
+      (match (S.get children, S.get a.is_empty) with
+      | Some c, false -> Jsx.draw c (state ())
+      | (Some _ | None), true -> Jsx.string (S.get a.placeholder)
+      | None, false -> List_box.shown (S.get a.selected))
     </span>
   [@@element span]
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let a = within "Autocomplete.Indicator" in
     let i = Interaction.create ~disabled:(fun () -> S.get a.disabled) () in
@@ -205,14 +202,12 @@ module Indicator = struct
       type_=`button
       tabindex="0"
       aria_haspopup="listbox"
-      aria_expanded=(fun () -> S.get a.is_open)
-      ?aria_controls=(fun () ->
-                       if S.get a.is_open then S.get a.listbox_id else None)
-      aria_labelledby=(fun () -> a.value_id ^ " " ^ a.label_id)
-      ?aria_describedby=(fun () ->
-                          if S.get a.described then Some a.description_id
-                          else None)
-      disabled=(fun () -> S.get a.disabled)
+      aria_expanded=(S.get a.is_open)
+      ?aria_controls=(if S.get a.is_open then S.get a.listbox_id else None)
+      aria_labelledby=(a.value_id ^ " " ^ a.label_id)
+      ?aria_describedby=(if S.get a.described then Some a.description_id
+                         else None)
+      disabled=(S.get a.disabled)
       ref=(fun e ->
             a.indicator := Some (as_element e);
             Interaction.watch i e)
@@ -222,39 +217,33 @@ module Indicator = struct
                         prevent_default e;
                         a.open_ ()
                     | _ -> ())
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () ->
-                     Jsx.flag (Interaction.pressed i || S.get a.is_open))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (S.get a.disabled))>
-      (fun () ->
-        match S.untrack (fun () -> S.get children) with
-        | Some _ ->
-            (* HeroUI gives an indicator of the user's its classes; a Solid
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i || S.get a.is_open))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (S.get a.disabled))>
+      (match S.untrack (fun () -> S.get children) with
+      | Some _ ->
+          (* HeroUI gives an indicator of the user's its classes; a Solid
                component cannot add them to an element already made, so a
                span around it takes them. *)
-            Jsx.element
-              <span
-                aria_hidden=true
-                class_=(fun () -> classes ())
-                data_slot="autocomplete-indicator"
-                data_open=(fun () -> Jsx.flag (S.get a.is_open))
-                props=(Props.others props)>
-                (fun () ->
-                  Option.value (S.get children)
-                    ~default:(Jsx.element Jsx.nothing))
-              </span>
-        | None ->
-            Jsx.element
-              <Gravity.Chevron_down
-                aria_hidden=true
-                class_=(fun () -> classes ())
-                role=`presentation
-                data_open=(fun () -> Jsx.flag (S.get a.is_open))
-                data_slot="autocomplete-default-indicator"
-                props=(Props.others props)
-              />)
+          <span
+            aria_hidden=true
+            class_=(classes ())
+            data_slot="autocomplete-indicator"
+            data_open=(Jsx.flag (S.get a.is_open))
+            props=(Props.others props)>
+            (Option.value (S.get children) ~default:Jsx.nothing)
+          </span>
+      | None ->
+          <Gravity.Chevron_down
+            aria_hidden=true
+            class_=(classes ())
+            role=`presentation
+            data_open=(Jsx.flag (S.get a.is_open))
+            data_slot="autocomplete-default-indicator"
+            props=(Props.others props)
+          />)
     </button>
   [@@element svg]
 end
@@ -267,18 +256,17 @@ module Clear_button = struct
       type_=`button
       tabindex="-1"
       aria_label="Clear selection"
-      ?aria_hidden=(fun () -> if S.get a.is_empty then Some true else None)
-      disabled=(fun () -> S.get a.disabled)
-      class_=(fun () ->
-               after
-                 (Styles.Autocomplete.clear_button (S.get a.slots))
-                 (S.get class_))
+      ?aria_hidden=(if S.get a.is_empty then Some true else None)
+      disabled=(S.get a.disabled)
+      class_=(after
+                (Styles.Autocomplete.clear_button (S.get a.slots))
+                (S.get class_))
       on_click=(fun e ->
                  (* A press on it is its own, not the trigger's around it. *)
                  stop_click e;
                  a.clear ();
                  ignore (on_click e : unit option))
-      data_empty=(fun () -> Jsx.flag (S.get a.is_empty))
+      data_empty=(Jsx.flag (S.get a.is_empty))
       data_slot="autocomplete-clear-button"
       props=(Props.others props)>
       <Gravity.Xmark
@@ -314,7 +302,7 @@ module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let a = within "Autocomplete.Popover" in
     S.create_computed (fun () ->
         a.set_placement (Option.value (S.get placement) ~default:`bottom));
@@ -331,26 +319,22 @@ module Popover = struct
         S.set set_drawn
           (Some
              (S.untrack (fun () ->
-                  <Context.Provider value=(fun () -> a)>
-                    (fun () -> S.get children)
-                  </Context.Provider>))));
-    <Show when_=(fun () -> Overlay.present o)>
+                  <Context.Provider value=a>(S.get children)</Context.Provider>))));
+    <Show when_=(Overlay.present o)>
       <Kobalte.Portal>
         <Kobalte.Content
           role=`dialog
           tabindex="-1"
-          aria_labelledby=(fun () -> a.label_id)
-          class_=(fun () ->
-                   after
-                     (Styles.Autocomplete.popover (S.get a.slots))
-                     (S.get class_))
-          style=(fun () ->
-                  styled
-                    "--trigger-width: var(--kb-popper-anchor-width); \
-                     --trigger-anchor-point: \
-                     var(--kb-combobox-content-transform-origin); max-height: \
-                     var(--kb-popper-content-available-height);"
-                    (S.get style))
+          aria_labelledby=a.label_id
+          class_=(after
+                    (Styles.Autocomplete.popover (S.get a.slots))
+                    (S.get class_))
+          style=(styled
+                   "--trigger-width: var(--kb-popper-anchor-width); \
+                    --trigger-anchor-point: \
+                    var(--kb-combobox-content-transform-origin); max-height: \
+                    var(--kb-popper-content-available-height);"
+                   (S.get style))
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Overlay.watch o e;
@@ -362,32 +346,27 @@ module Popover = struct
                                 prevent_default_event e;
                                 a.return_focus ())
           data_slot="autocomplete-popover"
-          data_placement=(fun () -> Jsx.data (S.get side))
-          data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-          data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+          data_placement=(Jsx.data (S.get side))
+          data_entering=(Jsx.flag (Overlay.entering o))
+          data_exiting=(Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
-          (fun () ->
-            match S.get drawn with
-            | Some drawn -> Jsx.element drawn
-            | None -> Jsx.element Jsx.nothing)
-          (fun () ->
-            match S.get a.hosted with
-            | Some (h : List_box.hosted) ->
-                Jsx.element
-                  <As_list
-                    as_="div"
-                    ref=(fun e -> h.list_ref e)
-                    scroll_to_item=(fun key -> h.scroll_to_item key)
-                    aria_orientation=`vertical
-                    class_=(fun () -> S.get h.classes)
-                    data_slot="list-box"
-                    data_layout="stack"
-                    data_orientation="vertical"
-                    data_empty=(fun () -> Jsx.flag (S.get h.empty))
-                    props=h.others>
-                    (fun collection -> h.draw collection)
-                  </As_list>
-            | None -> Jsx.element Jsx.nothing)
+          (match S.get drawn with Some drawn -> drawn | None -> Jsx.nothing)
+          (match S.get a.hosted with
+          | Some (h : List_box.hosted) ->
+              <As_list
+                as_="div"
+                ref=(fun e -> h.list_ref e)
+                scroll_to_item=(fun key -> h.scroll_to_item key)
+                aria_orientation=`vertical
+                class_=(S.get h.classes)
+                data_slot="list-box"
+                data_layout="stack"
+                data_orientation="vertical"
+                data_empty=(Jsx.flag (S.get h.empty))
+                props=h.others>
+                (fun collection -> h.draw collection)
+              </As_list>
+          | None -> Jsx.nothing)
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>
@@ -397,7 +376,7 @@ end
 module Filter = struct
   let%component make ?(filter : (string -> string -> bool) option)
       ?(input_value : string option)
-      ?(on_input_change : (string -> unit) option) ~(children : Jsx.content) ()
+      ?(on_input_change : (string -> unit) option) ~(children : Jsx.element) ()
       =
     let a = within "Autocomplete.Filter" in
     a.set_filtering
@@ -406,9 +385,7 @@ module Filter = struct
         given = input_value;
         tell = (fun text -> ignore (on_input_change text : unit option));
       };
-    <Search.Provider value=(fun () -> a.search)>
-      (fun () -> S.get children)
-    </Search.Provider>
+    <Search.Provider value=a.search>(S.get children)</Search.Provider>
 end
 
 (* Kobalte's label, description and error as the spans React Aria's select
@@ -751,35 +728,35 @@ let%component make ?(placeholder : string = "Select an item")
    fun classes others children ->
     <Kobalte_label
       as_="span"
-      id=(fun () -> a.label_id)
-      class_=(fun () -> classes ())
+      id=a.label_id
+      class_=(classes ())
       data_slot="label"
       props=others>
-      (fun () -> children ())
+      (children ())
     </Kobalte_label>
   in
   let description : Description.slot =
    fun classes others children ->
     <Kobalte_description
       as_="span"
-      id=(fun () -> a.description_id)
-      class_=(fun () -> classes ())
+      id=a.description_id
+      class_=(classes ())
       slot="description"
       data_slot="description"
       props=others>
-      (fun () -> children ())
+      (children ())
     </Kobalte_description>
   in
   let error : Field_error.slot =
    fun classes others children ->
     <Kobalte_error
       as_="span"
-      class_=(fun () -> classes ())
+      class_=(classes ())
       slot="errorMessage"
       data_slot="field-error"
       data_visible="true"
       props=others>
-      (fun () -> children ())
+      (children ())
     </Kobalte_error>
   in
   let state =
@@ -812,19 +789,17 @@ let%component make ?(placeholder : string = "Select an item")
           S.set set_returned (S.untrack Interaction.keyed)
         else if now then S.set set_returned false;
         had_focus := now);
-    <Context.Provider value=(fun () -> a)>
-      <List_box.Host.Provider value=(fun () -> host)>
-        <List_box.Listing.Provider value=(fun () -> listing)>
-          <Field_error.Message.Provider value=(fun () -> in_form.error)>
-            <Label.Slot.Provider value=(fun () -> label)>
-              <Description.Slot.Provider value=(fun () -> description)>
-                <Field_error.Slot.Provider value=(fun () -> error)>
-                  (fun () -> Jsx.draw (S.get children) state)
-                  <For each=(fun () -> sent_keys ())>
+    <Context.Provider value=a>
+      <List_box.Host.Provider value=host>
+        <List_box.Listing.Provider value=listing>
+          <Field_error.Message.Provider value=in_form.error>
+            <Label.Slot.Provider value=label>
+              <Description.Slot.Provider value=description>
+                <Field_error.Slot.Provider value=error>
+                  (Jsx.draw (S.get children) state)
+                  <For each=(sent_keys ())>
                     (fun key _ ->
-                      <input
-                        type_="hidden" ?name=(fun () -> S.get name) value=key
-                      />)
+                      <input type_="hidden" ?name=(S.get name) value=key />)
                   </For>
                 </Field_error.Slot.Provider>
               </Description.Slot.Provider>
@@ -859,92 +834,89 @@ let%component make ?(placeholder : string = "Select an item")
   match mode with
   | `single ->
       <Kobalte.Root
-        options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+        options=(Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_label=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () ->
-                (* [null], an empty selection Kobalte keeps: [undefined]
+        value=(* [null], an empty selection Kobalte keeps: [undefined]
                    would be no value given. *)
-                match S.get selected with
-                | o :: _ -> Js.Nullable.return o
-                | [] -> Js.Nullable.null)
+              (match S.get selected with
+              | o :: _ -> Js.Nullable.return o
+              | [] -> Js.Nullable.null)
         on_change=(fun o ->
                     change
                       (match Js.Nullable.toOption o with
                       | Some o -> [| List_box.key o |]
                       | None -> [||]))
         on_input_change=told
-        open_=(fun () -> S.get opened)
+        open_=(S.get opened)
         on_open_change=(fun o _ -> if not (open_refused o) then open_change o)
         trigger_mode=`input
-        default_filter=(fun () -> filter)
+        default_filter=filter
         allows_empty_collection=true
         no_reset_input_on_blur=true
-        placement=(fun () -> S.get a.placement)
+        placement=(S.get a.placement)
         gutter=8.
         overflow_padding=12.
         same_width=false
         virtualized=true
         force_mount=true
         modal=true
-        disabled=(fun () -> S.get is_disabled)
-        required=(fun () -> S.get is_required)
-        validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-        class_=(fun () -> root_classes ())
+        disabled=(S.get is_disabled)
+        required=(S.get is_required)
+        validation_state=(if S.get invalid then `invalid else `valid)
+        class_=(root_classes ())
         ref=root
         on_focus_out=focus_out
         data_slot="autocomplete"
-        data_open=(fun () -> Jsx.flag (S.get opened))
-        data_focused=(fun () -> Jsx.flag (focused ()))
-        data_invalid=(fun () -> Jsx.flag (S.get invalid))
-        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-        data_required=(fun () -> Jsx.flag (S.get is_required))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+        data_open=(Jsx.flag (S.get opened))
+        data_focused=(Jsx.flag (focused ()))
+        data_invalid=(Jsx.flag (S.get invalid))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (fun () -> Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root>
   | `multiple ->
       <Kobalte.Root_multiple
         multiple=true
-        options=(fun () ->
-                  Array.of_list (List.map Types.Either.left (options ())))
+        options=(Array.of_list (List.map Types.Either.left (options ())))
         option_value=(fun o -> Types.Either.left (List_box.key o))
         option_text_value=List_box.text
         option_label=List_box.text
         option_disabled=(fun o -> disabled_key (List_box.key o))
-        value=(fun () -> Array.of_list (S.get selected))
+        value=(Array.of_list (S.get selected))
         on_change=(fun os -> change (Array.map List_box.key os))
         on_input_change=told
-        open_=(fun () -> S.get opened)
+        open_=(S.get opened)
         on_open_change=(fun o _ -> if not (open_refused o) then open_change o)
         trigger_mode=`input
-        default_filter=(fun () -> filter)
+        default_filter=filter
         allows_empty_collection=true
         no_reset_input_on_blur=true
-        placement=(fun () -> S.get a.placement)
+        placement=(S.get a.placement)
         gutter=8.
         overflow_padding=12.
         same_width=false
         virtualized=true
         force_mount=true
         modal=true
-        disabled=(fun () -> S.get is_disabled)
-        required=(fun () -> S.get is_required)
-        validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-        class_=(fun () -> root_classes ())
+        disabled=(S.get is_disabled)
+        required=(S.get is_required)
+        validation_state=(if S.get invalid then `invalid else `valid)
+        class_=(root_classes ())
         ref=root
         on_focus_out=focus_out
         data_slot="autocomplete"
-        data_open=(fun () -> Jsx.flag (S.get opened))
-        data_focused=(fun () -> Jsx.flag (focused ()))
-        data_invalid=(fun () -> Jsx.flag (S.get invalid))
-        data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
-        data_required=(fun () -> Jsx.flag (S.get is_required))
-        ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+        data_open=(Jsx.flag (S.get opened))
+        data_focused=(Jsx.flag (focused ()))
+        data_invalid=(Jsx.flag (S.get invalid))
+        data_disabled=(Jsx.flag (S.get is_disabled))
+        data_required=(Jsx.flag (S.get is_required))
+        ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (fun () -> Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root_multiple>
 [@@element div]

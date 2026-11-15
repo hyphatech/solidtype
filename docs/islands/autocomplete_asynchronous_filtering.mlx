@@ -73,7 +73,7 @@ let make () =
     </Autocomplete.Trigger>
     <Autocomplete.Popover>
       <Autocomplete.Filter
-        input_value=(fun () -> S.get filter_text) on_input_change=search>
+        input_value=(S.get filter_text) on_input_change=search>
         <Search_field
           aria_label="Search characters" name="search" variant=`secondary>
           <Search_field.Group>
@@ -86,10 +86,10 @@ let make () =
           class_="max-h-[420px] overflow-y-auto"
           render_empty_state=(fun _ ->
                                <Empty_state>"No results found"</Empty_state>)>
-          <Solidtype.For each=(fun () -> S.get found)>
+          <Solidtype.For each=(S.get found)>
             (fun name _ ->
-              <List_box.Item id=(fun () -> name) text_value=(fun () -> name)>
-                (fun () -> Jsx.string name) <List_box.Item_indicator />
+              <List_box.Item id=name text_value=name>
+                (Jsx.string name) <List_box.Item_indicator />
               </List_box.Item>)
           </Solidtype.For>
         </List_box>

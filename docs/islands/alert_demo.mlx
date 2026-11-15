@@ -18,14 +18,14 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="status"
-        choices=(fun () -> statuses)
-        picked=(fun () -> S.get status)
+        choices=statuses
+        picked=(S.get status)
         on_pick=(Controls.choose statuses set_status)
       />
     </div>
     <Side_by_side
       compared="[data-slot=alert-root]"
-      solidtype=(<Alert status=(fun () -> fst (S.get status))>
+      solidtype=(<Alert status=(fst (S.get status))>
                    <Alert.Indicator />
                    <Alert.Content>
                      <Alert.Title>"Saved"</Alert.Title>

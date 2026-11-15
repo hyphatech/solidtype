@@ -15,11 +15,10 @@ let make () =
     <Select.Popover
       class_="rounded-xl border border-border bg-surface p-1 shadow-lg">
       <List_box>
-        <List_box.Item
-          class_=(fun () -> item_class) id="free" text_value="Free">
+        <List_box.Item class_=item_class id="free" text_value="Free">
           "Free" <List_box.Item_indicator />
         </List_box.Item>
-        <List_box.Item class_=(fun () -> item_class) id="pro" text_value="Pro">
+        <List_box.Item class_=item_class id="pro" text_value="Pro">
           "Pro" <List_box.Item_indicator />
         </List_box.Item>
       </List_box>

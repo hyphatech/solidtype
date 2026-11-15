@@ -26,7 +26,7 @@ module Solid = Solidtype.Solid
 let make () =
   let count, set_count = Solid.create_signal 0 in
   <button type_=`button on_click=(fun _ -> Solid.update set_count succ)>
-    "Clicked " (fun () -> Jsx.int (Solid.get count))
+    "Clicked " (Jsx.int (Solid.get count))
   </button>
 ```
 

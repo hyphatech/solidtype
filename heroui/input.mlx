@@ -11,7 +11,7 @@ module Props = struct
     ?full_width:bool Solidtype.Check.value ->
     ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
     ?props:'spread Solidtype.Solid.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Input.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -79,58 +79,55 @@ let input ~classes ~slot (props : Props.t) =
          tooltip of its own for the field's validity. *)
       <Kobalte
         props=rest
-        class_=(fun () -> classes ())
-        ?title=(fun () ->
-                 match Props.title props with
-                 | Some t -> Some t
-                 | None -> if disabled () then None else Some "")
+        class_=(classes ())
+        ?title=(match Props.title props with
+               | Some t -> Some t
+               | None -> if disabled () then None else Some "")
         ref=(fun e ->
               Jsx.call (Props.ref props) e;
               Interaction.watch i e)
-        data_slot=(fun () -> Jsx.data slot)
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (disabled ()))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
+        data_slot=(Jsx.data slot)
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(Jsx.flag (disabled ()))
+        data_invalid=(Jsx.flag (invalid ()))
       />
   | In_combo_box f ->
       <Kobalte_combo_box
         props=rest
-        class_=(fun () -> classes ())
-        ?title=(fun () ->
-                 match Props.title props with
-                 | Some t -> Some t
-                 | None -> if disabled () then None else Some "")
-        ?name=(fun () -> S.get f.name)
+        class_=(classes ())
+        ?title=(match Props.title props with
+               | Some t -> Some t
+               | None -> if disabled () then None else Some "")
+        ?name=(S.get f.name)
         ref=(fun e ->
               Jsx.call (Props.ref props) e;
               Interaction.watch i e)
-        data_slot=(fun () -> Jsx.data slot)
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_focus_visible=(fun () ->
-                             Jsx.flag
-                               (Interaction.focus_visible i
-                               || (Interaction.focused i && S.get f.returned)))
-        data_disabled=(fun () -> Jsx.flag (disabled ()))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
+        data_slot=(Jsx.data slot)
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_focus_visible=(Jsx.flag
+                              (Interaction.focus_visible i
+                              || (Interaction.focused i && S.get f.returned)))
+        data_disabled=(Jsx.flag (disabled ()))
+        data_invalid=(Jsx.flag (invalid ()))
       />
   | Alone ->
       <input
-        ?as_=(fun () -> S.drawn_as props)
+        ?as_=(S.drawn_as props)
         props=(S.undrawn rest)
-        class_=(fun () -> classes ())
-        ?title=(fun () -> Props.title props)
+        class_=(classes ())
+        ?title=(Props.title props)
         ref=(fun e ->
               Jsx.call (Props.ref props) e;
               Interaction.watch i e)
-        data_slot=(fun () -> Jsx.data slot)
-        data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-        data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-        data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-        data_disabled=(fun () -> Jsx.flag (disabled ()))
-        data_invalid=(fun () -> Jsx.flag (invalid ()))
+        data_slot=(Jsx.data slot)
+        data_hovered=(Jsx.flag (Interaction.hovered i))
+        data_focused=(Jsx.flag (Interaction.focused i))
+        data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+        data_disabled=(Jsx.flag (disabled ()))
+        data_invalid=(Jsx.flag (invalid ()))
       />
 
 let make (props : Props.t) =

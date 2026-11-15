@@ -138,9 +138,8 @@ let () =
         (fun () ->
           T.render (fun () ->
               <Virtualizer
-                layout=(fun () ->
-                         Virtualizer.table_layout ~heading_size:42.
-                           ~row_size:42. ())>
+                layout=(Virtualizer.table_layout ~heading_size:42. ~row_size:42.
+                          ())>
                 <Table>
                   <Table.Scroll_container>
                     <Table.Content
@@ -161,16 +160,12 @@ let () =
                         </Table.Column>
                       </Table.Header>
                       <Table.Body>
-                        <For each=(fun () -> users)>
+                        <For each=users>
                           (fun (id, name, email) _ ->
-                            <Table.Row id=(fun () -> id)>
-                              <Table.Cell>
-                                (fun () -> Jsx.string name)
-                              </Table.Cell>
+                            <Table.Row id>
+                              <Table.Cell>(Jsx.string name)</Table.Cell>
                               <Table.Cell>"Engineer"</Table.Cell>
-                              <Table.Cell>
-                                (fun () -> Jsx.string email)
-                              </Table.Cell>
+                              <Table.Cell>(Jsx.string email)</Table.Cell>
                             </Table.Row>)
                         </For>
                       </Table.Body>

@@ -20,17 +20,17 @@ let icon_class =
 let make () =
   <Tag_group aria_label="Topics" selection_mode=`single>
     <Tag_group.List class_="gap-2">
-      <Tag class_=(fun () -> tag_class) id="news">
-        <Gravity.Square_article class_=(fun () -> icon_class) /> "News"
+      <Tag class_=tag_class id="news">
+        <Gravity.Square_article class_=icon_class /> "News"
       </Tag>
-      <Tag class_=(fun () -> tag_class) id="travel">
-        <Gravity.Planet_earth class_=(fun () -> icon_class) /> "Travel"
+      <Tag class_=tag_class id="travel">
+        <Gravity.Planet_earth class_=icon_class /> "Travel"
       </Tag>
-      <Tag class_=(fun () -> tag_class) id="gaming">
-        <Gravity.Rocket class_=(fun () -> icon_class) /> "Gaming"
+      <Tag class_=tag_class id="gaming">
+        <Gravity.Rocket class_=icon_class /> "Gaming"
       </Tag>
-      <Tag class_=(fun () -> tag_class) id="shopping">
-        <Gravity.Shopping_bag class_=(fun () -> icon_class) /> "Shopping"
+      <Tag class_=tag_class id="shopping">
+        <Gravity.Shopping_bag class_=icon_class /> "Shopping"
       </Tag>
     </Tag_group.List>
   </Tag_group>

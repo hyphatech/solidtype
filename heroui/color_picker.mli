@@ -3,7 +3,7 @@
     HeroUI's classes from {!Styles.ColorPicker}. Kobalte has no colour picker.
 
     {[
-      <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+      <Color_picker default_value=(Colors.parse_color "#0485F7")>
         <Color_picker.Trigger>
           <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
         </Color_picker.Trigger>
@@ -67,7 +67,7 @@ module Trigger : sig
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
@@ -100,7 +100,7 @@ module Popover : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -121,7 +121,7 @@ module Props : sig
     ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

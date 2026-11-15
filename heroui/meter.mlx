@@ -35,46 +35,41 @@ end)
 (* A label in a meter is Kobalte's, a span, which names it. *)
 let label : Label.slot =
  fun classes others children ->
-  <Kobalte_label
-    as_="span" class_=(fun () -> classes ()) data_slot="label" props=others>
-    (fun () -> children ())
+  <Kobalte_label as_="span" class_=(classes ()) data_slot="label" props=others>
+    (children ())
   </Kobalte_label>
 
 module Output = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let m = within "Meter.Output" in
     let classes () =
       after (Styles.Meter.output (S.get m.slots)) (S.get class_)
     in
     <Show
-      when_=(fun () -> Option.is_some (S.get children))
+      when_=(Option.is_some (S.get children))
       fallback=(<Kobalte_value
                   as_="span"
-                  class_=(fun () -> classes ())
+                  class_=(classes ())
                   data_slot="meter-output"
                   props=(Props.others props)
                 />)>
       <span
-        class_=(fun () -> classes ())
-        data_slot="meter-output"
-        props=(Props.others props)>
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+        class_=(classes ()) data_slot="meter-output" props=(Props.others props)>
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element span]
 end
 
 module Track = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let m = within "Meter.Track" in
     <div
-      class_=(fun () ->
-               after (Styles.Meter.track (S.get m.slots)) (S.get class_))
+      class_=(after (Styles.Meter.track (S.get m.slots)) (S.get class_))
       data_slot="meter-track"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -83,13 +78,9 @@ module Fill = struct
   let%component make ?(class_ : string option) ?(style : string option) () =
     let m = within "Meter.Fill" in
     <div
-      class_=(fun () ->
-               after (Styles.Meter.fill (S.get m.slots)) (S.get class_))
-      style=(fun () ->
-              let own =
-                "width: " ^ Js.Float.toString (S.get m.percent) ^ "%;"
-              in
-              match S.get style with Some s -> own ^ " " ^ s | None -> own)
+      class_=(after (Styles.Meter.fill (S.get m.slots)) (S.get class_))
+      style=(let own = "width: " ^ Js.Float.toString (S.get m.percent) ^ "%;" in
+             match S.get style with Some s -> own ^ " " ^ s | None -> own)
       data_slot="meter-fill"
       props=(Props.others props)
     />
@@ -162,20 +153,19 @@ let%component make ~(value : float) ?(min_value : float = 0.)
               ~max:(S.get max_value));
     }
   in
-  <Context.Provider value=(fun () -> m)>
+  <Context.Provider value=m>
     <Kobalte.Root
-      value=(fun () -> S.get value)
-      min_value=(fun () -> S.get min_value)
-      max_value=(fun () -> S.get max_value)
-      ?aria_label=(fun () -> S.get aria_label)
+      value=(S.get value)
+      min_value=(S.get min_value)
+      max_value=(S.get max_value)
+      ?aria_label=(S.get aria_label)
       get_value_label=value_label
-      class_=(fun () ->
-               after (Styles.Meter.base (S.get m.slots)) (S.get class_))
+      class_=(after (Styles.Meter.base (S.get m.slots)) (S.get class_))
       data_slot="meter"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Label.Slot.Provider value=(fun () -> label)>
-        (fun () -> Jsx.draw (S.get children) (state ()))
+      <Label.Slot.Provider value=label>
+        (Jsx.draw (S.get children) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

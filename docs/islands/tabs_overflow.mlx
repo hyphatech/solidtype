@@ -18,18 +18,18 @@ let make () =
     <Tabs>
       <Tabs.List_container>
         <Tabs.List aria_label="Overflow options">
-          <Solidtype.For each=(fun () -> items)>
+          <Solidtype.For each=items>
             (fun (id, label) _ ->
-              <Tabs.Tab id=(fun () -> id)>
-                (fun () -> Solidtype.Jsx.string label) <Tabs.Indicator />
+              <Tabs.Tab id>
+                (Solidtype.Jsx.string label) <Tabs.Indicator />
               </Tabs.Tab>)
           </Solidtype.For>
         </Tabs.List>
       </Tabs.List_container>
-      <Solidtype.For each=(fun () -> items)>
+      <Solidtype.For each=items>
         (fun (id, label) _ ->
-          <Tabs.Panel class_="pt-4" id=(fun () -> id)>
-            <p>(fun () -> Solidtype.Jsx.string (label ^ " panel content."))</p>
+          <Tabs.Panel class_="pt-4" id>
+            <p>(Solidtype.Jsx.string (label ^ " panel content."))</p>
           </Tabs.Panel>)
       </Solidtype.For>
     </Tabs>

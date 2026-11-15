@@ -24,15 +24,13 @@ let make () =
       class_="rounded-xl border border-border/80 bg-surface p-1 shadow-lg \
               ring-1 ring-black/5 dark:ring-white/10">
       <List_box>
-        <List_box.Item
-          class_=(fun () -> item_class) id="react" text_value="React">
+        <List_box.Item class_=item_class id="react" text_value="React">
           "React"
         </List_box.Item>
-        <List_box.Item class_=(fun () -> item_class) id="vue" text_value="Vue">
+        <List_box.Item class_=item_class id="vue" text_value="Vue">
           "Vue"
         </List_box.Item>
-        <List_box.Item
-          class_=(fun () -> item_class) id="svelte" text_value="Svelte">
+        <List_box.Item class_=item_class id="svelte" text_value="Svelte">
           "Svelte"
         </List_box.Item>
       </List_box>

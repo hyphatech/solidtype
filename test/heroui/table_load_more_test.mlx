@@ -123,18 +123,18 @@ let () =
                       <Table.Column>"Role"</Table.Column>
                     </Table.Header>
                     <Table.Body>
-                      <For each=(fun () -> Array.sub names 0 (S.get count))>
+                      <For each=(Array.sub names 0 (S.get count))>
                         (fun name _ ->
-                          <Table.Row id=(fun () -> name)>
-                            <Table.Cell>(fun () -> Jsx.string name)</Table.Cell>
+                          <Table.Row id=name>
+                            <Table.Cell>(Jsx.string name)</Table.Cell>
                             <Table.Cell>"Engineer"</Table.Cell>
                           </Table.Row>)
                       </For>
-                      <Show when_=(fun () -> S.get count < Array.length names)>
+                      <Show when_=(S.get count < Array.length names)>
                         <Table.Load_more
-                          is_loading=(fun () -> S.get loading)
+                          is_loading=(S.get loading)
                           scroll_offset=0.
-                          on_load_more=(fun _ ->
+                          on_load_more=(fun () ->
                                          incr told;
                                          S.set set_loading true)>
                           <Table.Load_more_content>

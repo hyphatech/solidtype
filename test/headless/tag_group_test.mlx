@@ -26,7 +26,7 @@ let group ?(rtl = false) ?(selection_mode = `multiple) ?(told = ref [])
   let shown, set_shown = S.create_signal names in
   let body () =
     <Tag_group.Root
-      selection_mode=(fun () -> selection_mode)
+      selection_mode
       on_selection_change=(fun keys ->
                             told := ("chose " ^ told_of keys) :: !told)
       on_remove=(fun keys ->
@@ -40,11 +40,10 @@ let group ?(rtl = false) ?(selection_mode = `multiple) ?(told = ref [])
       <Tag_group.List
         render_empty_state=(fun _ -> <p>"None"</p>)
         ref=(fun _ -> got_ref := true)>
-        <For each=(fun () -> S.get shown)>
+        <For each=(S.get shown)>
           (fun n _ ->
-            <Tag_group.Tag
-              id=(fun () -> n) is_disabled=(fun () -> String.equal n "Gaming")>
-              (fun () -> Jsx.string n)
+            <Tag_group.Tag id=n is_disabled=(String.equal n "Gaming")>
+              (Jsx.string n)
               <Tag_group.Remove_button>"x"</Tag_group.Remove_button>
             </Tag_group.Tag>)
         </For>
@@ -54,10 +53,7 @@ let group ?(rtl = false) ?(selection_mode = `multiple) ?(told = ref [])
     </Tag_group.Root>
   in
   H.render (fun () ->
-      if rtl then
-        <I18n.I18nProvider locale="ar">
-          (fun () -> Jsx.element (body ()))
-        </I18n.I18nProvider>
+      if rtl then <I18n.I18nProvider locale="ar">(body ())</I18n.I18nProvider>
       else body ())
 
 let rows () = H.all_by_role "row"

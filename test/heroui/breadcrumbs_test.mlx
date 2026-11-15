@@ -103,15 +103,13 @@ let both ?is_disabled ?disabled () =
     | _ -> None
   in
   T.render (fun () ->
-      <Breadcrumbs
-        ?is_disabled=(fun () -> is_disabled)
-        on_action=(fun k -> told := k :: !told)>
+      <Breadcrumbs ?is_disabled on_action=(fun k -> told := k :: !told)>
         <Breadcrumbs.Item
-          id="home" href="#home" ?is_disabled=(fun () -> disabled_one "home")>
+          id="home" href="#home" ?is_disabled=(disabled_one "home")>
           "Home"
         </Breadcrumbs.Item>
         <Breadcrumbs.Item
-          id="docs" href="#docs" ?is_disabled=(fun () -> disabled_one "docs")>
+          id="docs" href="#docs" ?is_disabled=(disabled_one "docs")>
           "Docs"
         </Breadcrumbs.Item>
         <Breadcrumbs.Item id="tabs">"Tabs"</Breadcrumbs.Item>
@@ -138,23 +136,19 @@ let () =
              Aria's Breadcrumb gives it isCurrent and isDisabled, as the
              port does. *)
           let item id =
-            <Breadcrumbs.Item id=(fun () -> id)>
+            <Breadcrumbs.Item id>
               (fun s ->
-                <span data_words=(fun () -> Jsx.data id)>
-                  (fun () ->
-                    Jsx.string
-                      (T.words
-                         [
-                           ("current", s.is_current); ("disabled", s.is_disabled);
-                         ]))
+                <span data_words=(Jsx.data id)>
+                  (Jsx.string
+                     (T.words
+                        [
+                          ("current", s.is_current); ("disabled", s.is_disabled);
+                        ]))
                 </span>)
             </Breadcrumbs.Item>
           in
           T.render (fun () ->
-              <Breadcrumbs>
-                (fun () -> Jsx.element (item "home"))
-                (fun () -> Jsx.element (item "tabs"))
-              </Breadcrumbs>);
+              <Breadcrumbs>(item "home") (item "tabs")</Breadcrumbs>);
           E.(
             expect (T.words_shown T.body)
             |> toBe "home:  | tabs: current disabled"));
@@ -187,10 +181,10 @@ let () =
           let pages, set_pages = S.create_signal [| "Home"; "Docs" |] in
           T.render (fun () ->
               <Breadcrumbs>
-                <For each=(fun () -> S.get pages)>
+                <For each=(S.get pages)>
                   (fun page _ ->
-                    <Breadcrumbs.Item href=(fun () -> "#" ^ page)>
-                      (fun () -> Jsx.string page)
+                    <Breadcrumbs.Item href=("#" ^ page)>
+                      (Jsx.string page)
                     </Breadcrumbs.Item>)
                 </For>
               </Breadcrumbs>);

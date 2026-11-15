@@ -37,16 +37,15 @@ let random_colour () =
 let make () =
   let color, set_color = S.create_signal (Colors.parse_color "#325578") in
   <div class_="flex flex-col gap-4">
-    <Color_picker value=(fun () -> S.get color) on_change=(S.set set_color)>
+    <Color_picker value=(S.get color) on_change=(S.set set_color)>
       <Color_picker.Trigger>
         <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
       </Color_picker.Trigger>
       <Color_picker.Popover class_="gap-2">
         <Color_swatch_picker class_="justify-center pt-2" size=`xs>
-          <For each=(fun () -> presets)>
+          <For each=presets>
             (fun preset _ ->
-              <Color_swatch_picker.Item
-                color=(fun () -> Colors.parse_color preset)>
+              <Color_swatch_picker.Item color=(Colors.parse_color preset)>
                 <Color_swatch_picker.Swatch />
               </Color_swatch_picker.Item>)
           </For>
@@ -87,7 +86,7 @@ let make () =
     <p class_="w-60 text-sm text-muted">
       "Selected: "
       <span class_="font-medium">
-        (fun () -> Jsx.string (Color.to_string (S.get color) ~format:`hex ()))
+        (Jsx.string (Color.to_string (S.get color) ~format:`hex ()))
       </span>
     </p>
   </div>

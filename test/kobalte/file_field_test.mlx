@@ -30,13 +30,12 @@ let island () =
           <Field.ItemPreview type_="image/*">"An image"</Field.ItemPreview>
           <Field.ItemName />
           <Field.ItemSize />
-          <Field.ItemDeleteTrigger
-            aria_label=(fun () -> "Remove " ^ File.name file)>
+          <Field.ItemDeleteTrigger aria_label=("Remove " ^ File.name file)>
             "Remove"
           </Field.ItemDeleteTrigger>
         </Field.Item>)
     </Field.ItemList>
-    <Field.Description>(fun () -> Jsx.string (S.get report))</Field.Description>
+    <Field.Description>(Jsx.string (S.get report))</Field.Description>
   </Field.Root>
 
 external twin : unit -> Jsx.element = "make"

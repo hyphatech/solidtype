@@ -148,9 +148,7 @@ let drawn name tag () =
     Some
       (fun p _state ->
         <Solidtype.Dynamic.Element
-          component=(fun () -> tag)
-          data_drawn=(fun () -> Solidtype.Jsx.data name)
-          props=p
+          component=tag data_drawn=(Solidtype.Jsx.data name) props=p
         />)
   else None
 
@@ -241,7 +239,7 @@ let () =
               T.render (fun () ->
                   <div>
                     <Alert
-                      ?as_=(fun () -> drawn "Alert" "div" ())
+                      ?as_=(drawn "Alert" "div" ())
                       data_testid="Alert"
                       class_="given-class"
                       title="Alert"
@@ -249,7 +247,7 @@ let () =
                       ref=(fun e -> seen "Alert" e)
                       on_key_down=(fun e -> heard "Alert" e)>
                       <Alert.Indicator
-                        ?as_=(fun () -> drawn "Alert.Indicator" "div" ())
+                        ?as_=(drawn "Alert.Indicator" "div" ())
                         data_testid="Alert.Indicator"
                         class_="given-class"
                         title="Alert.Indicator"
@@ -258,7 +256,7 @@ let () =
                         on_key_down=(fun e -> heard "Alert.Indicator" e)
                       />
                       <Alert.Content
-                        ?as_=(fun () -> drawn "Alert.Content" "div" ())
+                        ?as_=(drawn "Alert.Content" "div" ())
                         data_testid="Alert.Content"
                         class_="given-class"
                         title="Alert.Content"
@@ -266,7 +264,7 @@ let () =
                         ref=(fun e -> seen "Alert.Content" e)
                         on_key_down=(fun e -> heard "Alert.Content" e)>
                         <Alert.Title
-                          ?as_=(fun () -> drawn "Alert.Title" "p" ())
+                          ?as_=(drawn "Alert.Title" "p" ())
                           data_testid="Alert.Title"
                           class_="given-class"
                           title="Alert.Title"
@@ -276,7 +274,7 @@ let () =
                           "Title"
                         </Alert.Title>
                         <Alert.Description
-                          ?as_=(fun () -> drawn "Alert.Description" "span" ())
+                          ?as_=(drawn "Alert.Description" "span" ())
                           data_testid="Alert.Description"
                           class_="given-class"
                           title="Alert.Description"
@@ -288,7 +286,7 @@ let () =
                       </Alert.Content>
                     </Alert>
                     <Avatar_group
-                      ?as_=(fun () -> drawn "Avatar_group" "div" ())
+                      ?as_=(drawn "Avatar_group" "div" ())
                       data_testid="Avatar_group"
                       class_="given-class"
                       title="Avatar_group"
@@ -296,7 +294,7 @@ let () =
                       ref=(fun e -> seen "Avatar_group" e)
                       on_key_down=(fun e -> heard "Avatar_group" e)>
                       <Avatar
-                        ?as_=(fun () -> drawn "Avatar" "span" ())
+                        ?as_=(drawn "Avatar" "span" ())
                         data_testid="Avatar"
                         class_="given-class"
                         title="Avatar"
@@ -304,7 +302,7 @@ let () =
                         ref=(fun e -> seen "Avatar" e)
                         on_key_down=(fun e -> heard "Avatar" e)>
                         <Avatar.Fallback
-                          ?as_=(fun () -> drawn "Avatar.Fallback" "span" ())
+                          ?as_=(drawn "Avatar.Fallback" "span" ())
                           data_testid="Avatar.Fallback"
                           class_="given-class"
                           title="Avatar.Fallback"
@@ -315,7 +313,7 @@ let () =
                         </Avatar.Fallback>
                       </Avatar>
                       <Avatar_group.Count
-                        ?as_=(fun () -> drawn "Avatar_group.Count" "span" ())
+                        ?as_=(drawn "Avatar_group.Count" "span" ())
                         data_testid="Avatar_group.Count"
                         class_="given-class"
                         title="Avatar_group.Count"
@@ -326,7 +324,7 @@ let () =
                       </Avatar_group.Count>
                     </Avatar_group>
                     <Badge.Anchor
-                      ?as_=(fun () -> drawn "Badge.Anchor" "span" ())
+                      ?as_=(drawn "Badge.Anchor" "span" ())
                       data_testid="Badge.Anchor"
                       class_="given-class"
                       title="Badge.Anchor"
@@ -334,7 +332,7 @@ let () =
                       ref=(fun e -> seen "Badge.Anchor" e)
                       on_key_down=(fun e -> heard "Badge.Anchor" e)>
                       <Badge
-                        ?as_=(fun () -> drawn "Badge" "span" ())
+                        ?as_=(drawn "Badge" "span" ())
                         data_testid="Badge"
                         class_="given-class"
                         title="Badge"
@@ -342,7 +340,7 @@ let () =
                         ref=(fun e -> seen "Badge" e)
                         on_key_down=(fun e -> heard "Badge" e)>
                         <Badge.Label
-                          ?as_=(fun () -> drawn "Badge.Label" "span" ())
+                          ?as_=(drawn "Badge.Label" "span" ())
                           data_testid="Badge.Label"
                           class_="given-class"
                           title="Badge.Label"
@@ -354,7 +352,7 @@ let () =
                       </Badge>
                     </Badge.Anchor>
                     <Breadcrumbs
-                      ?as_=(fun () -> drawn "Breadcrumbs" "ol" ())
+                      ?as_=(drawn "Breadcrumbs" "ol" ())
                       data_testid="Breadcrumbs"
                       class_="given-class"
                       title="Breadcrumbs"
@@ -362,7 +360,7 @@ let () =
                       ref=(fun e -> seen "Breadcrumbs" e)
                       on_key_down=(fun e -> heard "Breadcrumbs" e)>
                       <Breadcrumbs.Item
-                        ?as_=(fun () -> drawn "Breadcrumbs.Item" "li" ())
+                        ?as_=(drawn "Breadcrumbs.Item" "li" ())
                         data_testid="Breadcrumbs.Item"
                         class_="given-class"
                         title="Breadcrumbs.Item"
@@ -373,7 +371,7 @@ let () =
                       </Breadcrumbs.Item>
                     </Breadcrumbs>
                     <Pagination
-                      ?as_=(fun () -> drawn "Pagination" "nav" ())
+                      ?as_=(drawn "Pagination" "nav" ())
                       data_testid="Pagination"
                       class_="given-class"
                       title="Pagination"
@@ -381,7 +379,7 @@ let () =
                       ref=(fun e -> seen "Pagination" e)
                       on_key_down=(fun e -> heard "Pagination" e)>
                       <Pagination.Summary
-                        ?as_=(fun () -> drawn "Pagination.Summary" "div" ())
+                        ?as_=(drawn "Pagination.Summary" "div" ())
                         data_testid="Pagination.Summary"
                         class_="given-class"
                         title="Pagination.Summary"
@@ -391,7 +389,7 @@ let () =
                         "Page 1"
                       </Pagination.Summary>
                       <Pagination.Content
-                        ?as_=(fun () -> drawn "Pagination.Content" "ul" ())
+                        ?as_=(drawn "Pagination.Content" "ul" ())
                         data_testid="Pagination.Content"
                         class_="given-class"
                         title="Pagination.Content"
@@ -399,7 +397,7 @@ let () =
                         ref=(fun e -> seen "Pagination.Content" e)
                         on_key_down=(fun e -> heard "Pagination.Content" e)>
                         <Pagination.Item
-                          ?as_=(fun () -> drawn "Pagination.Item" "li" ())
+                          ?as_=(drawn "Pagination.Item" "li" ())
                           data_testid="Pagination.Item"
                           class_="given-class"
                           title="Pagination.Item"
@@ -407,8 +405,7 @@ let () =
                           ref=(fun e -> seen "Pagination.Item" e)
                           on_key_down=(fun e -> heard "Pagination.Item" e)>
                           <Pagination.Previous
-                            ?as_=(fun () ->
-                                   drawn "Pagination.Previous" "button" ())
+                            ?as_=(drawn "Pagination.Previous" "button" ())
                             data_testid="Pagination.Previous"
                             class_="given-class"
                             title="Pagination.Previous"
@@ -416,8 +413,7 @@ let () =
                             ref=(fun e -> seen "Pagination.Previous" e)
                             on_key_down=(fun e -> heard "Pagination.Previous" e)>
                             <Pagination.Previous_icon
-                              ?as_=(fun () ->
-                                     drawn "Pagination.Previous_icon" "span" ())
+                              ?as_=(drawn "Pagination.Previous_icon" "span" ())
                               data_testid="Pagination.Previous_icon"
                               class_="given-class"
                               title="Pagination.Previous_icon"
@@ -430,7 +426,7 @@ let () =
                         </Pagination.Item>
                         <Pagination.Item>
                           <Pagination.Link
-                            ?as_=(fun () -> drawn "Pagination.Link" "button" ())
+                            ?as_=(drawn "Pagination.Link" "button" ())
                             data_testid="Pagination.Link"
                             class_="given-class"
                             title="Pagination.Link"
@@ -442,8 +438,7 @@ let () =
                         </Pagination.Item>
                         <Pagination.Item>
                           <Pagination.Ellipsis
-                            ?as_=(fun () ->
-                                   drawn "Pagination.Ellipsis" "span" ())
+                            ?as_=(drawn "Pagination.Ellipsis" "span" ())
                             data_testid="Pagination.Ellipsis"
                             class_="given-class"
                             title="Pagination.Ellipsis"
@@ -454,7 +449,7 @@ let () =
                         </Pagination.Item>
                         <Pagination.Item>
                           <Pagination.Next
-                            ?as_=(fun () -> drawn "Pagination.Next" "button" ())
+                            ?as_=(drawn "Pagination.Next" "button" ())
                             data_testid="Pagination.Next"
                             class_="given-class"
                             title="Pagination.Next"
@@ -462,8 +457,7 @@ let () =
                             ref=(fun e -> seen "Pagination.Next" e)
                             on_key_down=(fun e -> heard "Pagination.Next" e)>
                             <Pagination.Next_icon
-                              ?as_=(fun () ->
-                                     drawn "Pagination.Next_icon" "span" ())
+                              ?as_=(drawn "Pagination.Next_icon" "span" ())
                               data_testid="Pagination.Next_icon"
                               class_="given-class"
                               title="Pagination.Next_icon"
@@ -478,7 +472,7 @@ let () =
                     </Pagination>
                     <Tooltip default_open=true>
                       <Tooltip.Trigger
-                        ?as_=(fun () -> drawn "Tooltip.Trigger" "div" ())
+                        ?as_=(drawn "Tooltip.Trigger" "div" ())
                         data_testid="Tooltip.Trigger"
                         class_="given-class"
                         title="Tooltip.Trigger"
@@ -488,7 +482,7 @@ let () =
                         "Info"
                       </Tooltip.Trigger>
                       <Tooltip.Content
-                        ?as_=(fun () -> drawn "Tooltip.Content" "div" ())
+                        ?as_=(drawn "Tooltip.Content" "div" ())
                         data_testid="Tooltip.Content"
                         class_="given-class"
                         title="Tooltip.Content"
@@ -496,7 +490,7 @@ let () =
                         ref=(fun e -> seen "Tooltip.Content" e)
                         on_key_down=(fun e -> heard "Tooltip.Content" e)>
                         <Tooltip.Arrow
-                          ?as_=(fun () -> drawn "Tooltip.Arrow" "div" ())
+                          ?as_=(drawn "Tooltip.Arrow" "div" ())
                           data_testid="Tooltip.Arrow"
                           class_="given-class"
                           title="Tooltip.Arrow"
@@ -509,7 +503,7 @@ let () =
                     </Tooltip>
                     <Popover default_open=true>
                       <Popover.Trigger
-                        ?as_=(fun () -> drawn "Popover.Trigger" "div" ())
+                        ?as_=(drawn "Popover.Trigger" "div" ())
                         data_testid="Popover.Trigger"
                         class_="given-class"
                         title="Popover.Trigger"
@@ -519,7 +513,7 @@ let () =
                         "Profile"
                       </Popover.Trigger>
                       <Popover.Content
-                        ?as_=(fun () -> drawn "Popover.Content" "div" ())
+                        ?as_=(drawn "Popover.Content" "div" ())
                         data_testid="Popover.Content"
                         class_="given-class"
                         title="Popover.Content"
@@ -527,7 +521,7 @@ let () =
                         ref=(fun e -> seen "Popover.Content" e)
                         on_key_down=(fun e -> heard "Popover.Content" e)>
                         <Popover.Dialog
-                          ?as_=(fun () -> drawn "Popover.Dialog" "section" ())
+                          ?as_=(drawn "Popover.Dialog" "section" ())
                           data_testid="Popover.Dialog"
                           class_="given-class"
                           title="Popover.Dialog"
@@ -535,7 +529,7 @@ let () =
                           ref=(fun e -> seen "Popover.Dialog" e)
                           on_key_down=(fun e -> heard "Popover.Dialog" e)>
                           <Popover.Arrow
-                            ?as_=(fun () -> drawn "Popover.Arrow" "div" ())
+                            ?as_=(drawn "Popover.Arrow" "div" ())
                             data_testid="Popover.Arrow"
                             class_="given-class"
                             title="Popover.Arrow"
@@ -544,7 +538,7 @@ let () =
                             on_key_down=(fun e -> heard "Popover.Arrow" e)
                           />
                           <Popover.Heading
-                            ?as_=(fun () -> drawn "Popover.Heading" "h2" ())
+                            ?as_=(drawn "Popover.Heading" "h2" ())
                             data_testid="Popover.Heading"
                             class_="given-class"
                             title="Popover.Heading"
@@ -558,7 +552,7 @@ let () =
                     </Popover>
                     <Alert_dialog default_open=true>
                       <Alert_dialog.Trigger
-                        ?as_=(fun () -> drawn "Alert_dialog.Trigger" "div" ())
+                        ?as_=(drawn "Alert_dialog.Trigger" "div" ())
                         data_testid="Alert_dialog.Trigger"
                         class_="given-class"
                         title="Alert_dialog.Trigger"
@@ -568,7 +562,7 @@ let () =
                         "Delete"
                       </Alert_dialog.Trigger>
                       <Alert_dialog.Backdrop
-                        ?as_=(fun () -> drawn "Alert_dialog.Backdrop" "div" ())
+                        ?as_=(drawn "Alert_dialog.Backdrop" "div" ())
                         data_testid="Alert_dialog.Backdrop"
                         class_="given-class"
                         title="Alert_dialog.Backdrop"
@@ -576,8 +570,7 @@ let () =
                         ref=(fun e -> seen "Alert_dialog.Backdrop" e)
                         on_key_down=(fun e -> heard "Alert_dialog.Backdrop" e)>
                         <Alert_dialog.Container
-                          ?as_=(fun () ->
-                                 drawn "Alert_dialog.Container" "div" ())
+                          ?as_=(drawn "Alert_dialog.Container" "div" ())
                           data_testid="Alert_dialog.Container"
                           class_="given-class"
                           title="Alert_dialog.Container"
@@ -586,8 +579,7 @@ let () =
                           on_key_down=(fun e ->
                                         heard "Alert_dialog.Container" e)>
                           <Alert_dialog.Dialog
-                            ?as_=(fun () ->
-                                   drawn "Alert_dialog.Dialog" "section" ())
+                            ?as_=(drawn "Alert_dialog.Dialog" "section" ())
                             data_testid="Alert_dialog.Dialog"
                             class_="given-class"
                             title="Alert_dialog.Dialog"
@@ -595,9 +587,8 @@ let () =
                             ref=(fun e -> seen "Alert_dialog.Dialog" e)
                             on_key_down=(fun e -> heard "Alert_dialog.Dialog" e)>
                             <Alert_dialog.Close_trigger
-                              ?as_=(fun () ->
-                                     drawn "Alert_dialog.Close_trigger" "button"
-                                       ())
+                              ?as_=(drawn "Alert_dialog.Close_trigger" "button"
+                                      ())
                               data_testid="Alert_dialog.Close_trigger"
                               class_="given-class"
                               title="Alert_dialog.Close_trigger"
@@ -607,8 +598,7 @@ let () =
                                             heard "Alert_dialog.Close_trigger" e)
                             />
                             <Alert_dialog.Header
-                              ?as_=(fun () ->
-                                     drawn "Alert_dialog.Header" "div" ())
+                              ?as_=(drawn "Alert_dialog.Header" "div" ())
                               data_testid="Alert_dialog.Header"
                               class_="given-class"
                               title="Alert_dialog.Header"
@@ -617,8 +607,7 @@ let () =
                               on_key_down=(fun e ->
                                             heard "Alert_dialog.Header" e)>
                               <Alert_dialog.Icon
-                                ?as_=(fun () ->
-                                       drawn "Alert_dialog.Icon" "div" ())
+                                ?as_=(drawn "Alert_dialog.Icon" "div" ())
                                 data_testid="Alert_dialog.Icon"
                                 class_="given-class"
                                 title="Alert_dialog.Icon"
@@ -628,8 +617,7 @@ let () =
                                               heard "Alert_dialog.Icon" e)
                               />
                               <Alert_dialog.Heading
-                                ?as_=(fun () ->
-                                       drawn "Alert_dialog.Heading" "h2" ())
+                                ?as_=(drawn "Alert_dialog.Heading" "h2" ())
                                 data_testid="Alert_dialog.Heading"
                                 class_="given-class"
                                 title="Alert_dialog.Heading"
@@ -641,8 +629,7 @@ let () =
                               </Alert_dialog.Heading>
                             </Alert_dialog.Header>
                             <Alert_dialog.Body
-                              ?as_=(fun () ->
-                                     drawn "Alert_dialog.Body" "div" ())
+                              ?as_=(drawn "Alert_dialog.Body" "div" ())
                               data_testid="Alert_dialog.Body"
                               class_="given-class"
                               title="Alert_dialog.Body"
@@ -652,8 +639,7 @@ let () =
                               "Body"
                             </Alert_dialog.Body>
                             <Alert_dialog.Footer
-                              ?as_=(fun () ->
-                                     drawn "Alert_dialog.Footer" "div" ())
+                              ?as_=(drawn "Alert_dialog.Footer" "div" ())
                               data_testid="Alert_dialog.Footer"
                               class_="given-class"
                               title="Alert_dialog.Footer"
@@ -669,7 +655,7 @@ let () =
                     </Alert_dialog>
                     <Dropdown default_open=true>
                       <Dropdown.Trigger
-                        ?as_=(fun () -> drawn "Dropdown.Trigger" "button" ())
+                        ?as_=(drawn "Dropdown.Trigger" "button" ())
                         data_testid="Dropdown.Trigger"
                         class_="given-class"
                         title="Dropdown.Trigger"
@@ -679,7 +665,7 @@ let () =
                         "Actions"
                       </Dropdown.Trigger>
                       <Dropdown.Popover
-                        ?as_=(fun () -> drawn "Dropdown.Popover" "div" ())
+                        ?as_=(drawn "Dropdown.Popover" "div" ())
                         data_testid="Dropdown.Popover"
                         class_="given-class"
                         title="Dropdown.Popover"
@@ -687,17 +673,16 @@ let () =
                         ref=(fun e -> seen "Dropdown.Popover" e)
                         on_key_down=(fun e -> heard "Dropdown.Popover" e)>
                         <Dropdown.Menu
-                          ?as_=(fun () -> drawn "Dropdown.Menu" "div" ())
+                          ?as_=(drawn "Dropdown.Menu" "div" ())
                           data_testid="Dropdown.Menu"
                           class_="given-class"
                           title="Dropdown.Menu"
                           style="--part: 1"
                           ref=(fun e -> seen "Dropdown.Menu" e)
                           on_key_down=(fun e -> heard "Dropdown.Menu" e)
-                          selection_mode=(fun () -> `single)>
+                          selection_mode=`single>
                           <Dropdown.Section
-                            ?as_=(fun () ->
-                                   drawn "Dropdown.Section" "section" ())
+                            ?as_=(drawn "Dropdown.Section" "section" ())
                             data_testid="Dropdown.Section"
                             class_="given-class"
                             title="Dropdown.Section"
@@ -705,7 +690,7 @@ let () =
                             ref=(fun e -> seen "Dropdown.Section" e)
                             on_key_down=(fun e -> heard "Dropdown.Section" e)>
                             <Header
-                              ?as_=(fun () -> drawn "Header" "header" ())
+                              ?as_=(drawn "Header" "header" ())
                               data_testid="Header"
                               class_="given-class"
                               title="Header"
@@ -716,7 +701,7 @@ let () =
                             </Header>
                             <Dropdown.Item
                               id="bold"
-                              ?as_=(fun () -> drawn "Dropdown.Item" "div" ())
+                              ?as_=(drawn "Dropdown.Item" "div" ())
                               data_testid="Dropdown.Item"
                               class_="given-class"
                               title="Dropdown.Item"
@@ -724,8 +709,7 @@ let () =
                               ref=(fun e -> seen "Dropdown.Item" e)
                               on_key_down=(fun e -> heard "Dropdown.Item" e)>
                               <Dropdown.Item_indicator
-                                ?as_=(fun () ->
-                                       drawn "Dropdown.Item_indicator" "span" ())
+                                ?as_=(drawn "Dropdown.Item_indicator" "span" ())
                                 data_testid="Dropdown.Item_indicator"
                                 class_="given-class"
                                 title="Dropdown.Item_indicator"
@@ -741,9 +725,8 @@ let () =
                             <Dropdown.Item id="share">
                               "Share"
                               <Dropdown.Submenu_indicator
-                                ?as_=(fun () ->
-                                       drawn "Dropdown.Submenu_indicator" "span"
-                                         ())
+                                ?as_=(drawn "Dropdown.Submenu_indicator" "span"
+                                        ())
                                 data_testid="Dropdown.Submenu_indicator"
                                 class_="given-class"
                                 title="Dropdown.Submenu_indicator"
@@ -768,7 +751,7 @@ let () =
                     </Dropdown>
                     <List_box
                       aria_label="Users"
-                      ?as_=(fun () -> drawn "List_box" "div" ())
+                      ?as_=(drawn "List_box" "div" ())
                       data_testid="List_box"
                       class_="given-class"
                       title="List_box"
@@ -776,7 +759,7 @@ let () =
                       ref=(fun e -> seen "List_box" e)
                       on_key_down=(fun e -> heard "List_box" e)>
                       <List_box.Section
-                        ?as_=(fun () -> drawn "List_box.Section" "section" ())
+                        ?as_=(drawn "List_box.Section" "section" ())
                         data_testid="List_box.Section"
                         class_="given-class"
                         title="List_box.Section"
@@ -785,7 +768,7 @@ let () =
                         on_key_down=(fun e -> heard "List_box.Section" e)>
                         <List_box.Item
                           id="bob"
-                          ?as_=(fun () -> drawn "List_box.Item" "div" ())
+                          ?as_=(drawn "List_box.Item" "div" ())
                           data_testid="List_box.Item"
                           class_="given-class"
                           title="List_box.Item"
@@ -794,8 +777,7 @@ let () =
                           on_key_down=(fun e -> heard "List_box.Item" e)>
                           "Bob"
                           <List_box.Item_indicator
-                            ?as_=(fun () ->
-                                   drawn "List_box.Item_indicator" "span" ())
+                            ?as_=(drawn "List_box.Item_indicator" "span" ())
                             data_testid="List_box.Item_indicator"
                             class_="given-class"
                             title="List_box.Item_indicator"
@@ -809,7 +791,7 @@ let () =
                     </List_box>
                     <Select
                       default_open=true
-                      ?as_=(fun () -> drawn "Select" "div" ())
+                      ?as_=(drawn "Select" "div" ())
                       data_testid="Select"
                       class_="given-class"
                       title="Select"
@@ -817,7 +799,7 @@ let () =
                       ref=(fun e -> seen "Select" e)
                       on_key_down=(fun e -> heard "Select" e)>
                       <Select.Trigger
-                        ?as_=(fun () -> drawn "Select.Trigger" "button" ())
+                        ?as_=(drawn "Select.Trigger" "button" ())
                         data_testid="Select.Trigger"
                         class_="given-class"
                         title="Select.Trigger"
@@ -825,7 +807,7 @@ let () =
                         ref=(fun e -> seen "Select.Trigger" e)
                         on_key_down=(fun e -> heard "Select.Trigger" e)>
                         <Select.Value
-                          ?as_=(fun () -> drawn "Select.Value" "span" ())
+                          ?as_=(drawn "Select.Value" "span" ())
                           data_testid="Select.Value"
                           class_="given-class"
                           title="Select.Value"
@@ -834,7 +816,7 @@ let () =
                           on_key_down=(fun e -> heard "Select.Value" e)
                         />
                         <Select.Clear_button
-                          ?as_=(fun () -> drawn "Select.Clear_button" "span" ())
+                          ?as_=(drawn "Select.Clear_button" "span" ())
                           data_testid="Select.Clear_button"
                           class_="given-class"
                           title="Select.Clear_button"
@@ -843,7 +825,7 @@ let () =
                           on_key_down=(fun e -> heard "Select.Clear_button" e)
                         />
                         <Select.Indicator
-                          ?as_=(fun () -> drawn "Select.Indicator" "svg" ())
+                          ?as_=(drawn "Select.Indicator" "svg" ())
                           data_testid="Select.Indicator"
                           class_="given-class"
                           style="--part: 1"
@@ -852,7 +834,7 @@ let () =
                         />
                       </Select.Trigger>
                       <Select.Popover
-                        ?as_=(fun () -> drawn "Select.Popover" "div" ())
+                        ?as_=(drawn "Select.Popover" "div" ())
                         data_testid="Select.Popover"
                         class_="given-class"
                         title="Select.Popover"
@@ -865,7 +847,7 @@ let () =
                       </Select.Popover>
                     </Select>
                     <Combo_box
-                      ?as_=(fun () -> drawn "Combo_box" "div" ())
+                      ?as_=(drawn "Combo_box" "div" ())
                       data_testid="Combo_box"
                       class_="given-class"
                       title="Combo_box"
@@ -873,7 +855,7 @@ let () =
                       ref=(fun e -> seen "Combo_box" e)
                       on_key_down=(fun e -> heard "Combo_box" e)>
                       <Combo_box.Input_group
-                        ?as_=(fun () -> drawn "Combo_box.Input_group" "div" ())
+                        ?as_=(drawn "Combo_box.Input_group" "div" ())
                         data_testid="Combo_box.Input_group"
                         class_="given-class"
                         title="Combo_box.Input_group"
@@ -882,7 +864,7 @@ let () =
                         on_key_down=(fun e -> heard "Combo_box.Input_group" e)>
                         <Input aria_label="Animal" />
                         <Combo_box.Trigger
-                          ?as_=(fun () -> drawn "Combo_box.Trigger" "button" ())
+                          ?as_=(drawn "Combo_box.Trigger" "button" ())
                           data_testid="Combo_box.Trigger"
                           class_="given-class"
                           title="Combo_box.Trigger"
@@ -892,7 +874,7 @@ let () =
                         />
                       </Combo_box.Input_group>
                       <Combo_box.Value
-                        ?as_=(fun () -> drawn "Combo_box.Value" "div" ())
+                        ?as_=(drawn "Combo_box.Value" "div" ())
                         data_testid="Combo_box.Value"
                         class_="given-class"
                         title="Combo_box.Value"
@@ -908,7 +890,7 @@ let () =
                     </Combo_box>
                     <Autocomplete
                       default_open=true
-                      ?as_=(fun () -> drawn "Autocomplete" "div" ())
+                      ?as_=(drawn "Autocomplete" "div" ())
                       data_testid="Autocomplete"
                       class_="given-class"
                       title="Autocomplete"
@@ -916,7 +898,7 @@ let () =
                       ref=(fun e -> seen "Autocomplete" e)
                       on_key_down=(fun e -> heard "Autocomplete" e)>
                       <Autocomplete.Trigger
-                        ?as_=(fun () -> drawn "Autocomplete.Trigger" "div" ())
+                        ?as_=(drawn "Autocomplete.Trigger" "div" ())
                         data_testid="Autocomplete.Trigger"
                         class_="given-class"
                         title="Autocomplete.Trigger"
@@ -924,7 +906,7 @@ let () =
                         ref=(fun e -> seen "Autocomplete.Trigger" e)
                         on_key_down=(fun e -> heard "Autocomplete.Trigger" e)>
                         <Autocomplete.Value
-                          ?as_=(fun () -> drawn "Autocomplete.Value" "span" ())
+                          ?as_=(drawn "Autocomplete.Value" "span" ())
                           data_testid="Autocomplete.Value"
                           class_="given-class"
                           title="Autocomplete.Value"
@@ -933,8 +915,7 @@ let () =
                           on_key_down=(fun e -> heard "Autocomplete.Value" e)
                         />
                         <Autocomplete.Clear_button
-                          ?as_=(fun () ->
-                                 drawn "Autocomplete.Clear_button" "button" ())
+                          ?as_=(drawn "Autocomplete.Clear_button" "button" ())
                           data_testid="Autocomplete.Clear_button"
                           class_="given-class"
                           title="Autocomplete.Clear_button"
@@ -944,8 +925,7 @@ let () =
                                         heard "Autocomplete.Clear_button" e)
                         />
                         <Autocomplete.Indicator
-                          ?as_=(fun () ->
-                                 drawn "Autocomplete.Indicator" "svg" ())
+                          ?as_=(drawn "Autocomplete.Indicator" "svg" ())
                           data_testid="Autocomplete.Indicator"
                           class_="given-class"
                           style="--part: 1"
@@ -955,7 +935,7 @@ let () =
                         />
                       </Autocomplete.Trigger>
                       <Autocomplete.Popover
-                        ?as_=(fun () -> drawn "Autocomplete.Popover" "div" ())
+                        ?as_=(drawn "Autocomplete.Popover" "div" ())
                         data_testid="Autocomplete.Popover"
                         class_="given-class"
                         title="Autocomplete.Popover"
@@ -976,7 +956,7 @@ let () =
                     </Autocomplete>
                     <Drawer default_open=true>
                       <Drawer.Trigger
-                        ?as_=(fun () -> drawn "Drawer.Trigger" "button" ())
+                        ?as_=(drawn "Drawer.Trigger" "button" ())
                         data_testid="Drawer.Trigger"
                         class_="given-class"
                         title="Drawer.Trigger"
@@ -986,7 +966,7 @@ let () =
                         "Open"
                       </Drawer.Trigger>
                       <Drawer.Backdrop
-                        ?as_=(fun () -> drawn "Drawer.Backdrop" "div" ())
+                        ?as_=(drawn "Drawer.Backdrop" "div" ())
                         data_testid="Drawer.Backdrop"
                         class_="given-class"
                         title="Drawer.Backdrop"
@@ -994,7 +974,7 @@ let () =
                         ref=(fun e -> seen "Drawer.Backdrop" e)
                         on_key_down=(fun e -> heard "Drawer.Backdrop" e)>
                         <Drawer.Content
-                          ?as_=(fun () -> drawn "Drawer.Content" "div" ())
+                          ?as_=(drawn "Drawer.Content" "div" ())
                           data_testid="Drawer.Content"
                           class_="given-class"
                           title="Drawer.Content"
@@ -1002,7 +982,7 @@ let () =
                           ref=(fun e -> seen "Drawer.Content" e)
                           on_key_down=(fun e -> heard "Drawer.Content" e)>
                           <Drawer.Dialog
-                            ?as_=(fun () -> drawn "Drawer.Dialog" "section" ())
+                            ?as_=(drawn "Drawer.Dialog" "section" ())
                             data_testid="Drawer.Dialog"
                             class_="given-class"
                             title="Drawer.Dialog"
@@ -1010,7 +990,7 @@ let () =
                             ref=(fun e -> seen "Drawer.Dialog" e)
                             on_key_down=(fun e -> heard "Drawer.Dialog" e)>
                             <Drawer.Handle
-                              ?as_=(fun () -> drawn "Drawer.Handle" "div" ())
+                              ?as_=(drawn "Drawer.Handle" "div" ())
                               data_testid="Drawer.Handle"
                               class_="given-class"
                               title="Drawer.Handle"
@@ -1019,8 +999,7 @@ let () =
                               on_key_down=(fun e -> heard "Drawer.Handle" e)
                             />
                             <Drawer.Close_trigger
-                              ?as_=(fun () ->
-                                     drawn "Drawer.Close_trigger" "button" ())
+                              ?as_=(drawn "Drawer.Close_trigger" "button" ())
                               data_testid="Drawer.Close_trigger"
                               class_="given-class"
                               title="Drawer.Close_trigger"
@@ -1030,7 +1009,7 @@ let () =
                                             heard "Drawer.Close_trigger" e)
                             />
                             <Drawer.Header
-                              ?as_=(fun () -> drawn "Drawer.Header" "div" ())
+                              ?as_=(drawn "Drawer.Header" "div" ())
                               data_testid="Drawer.Header"
                               class_="given-class"
                               title="Drawer.Header"
@@ -1038,7 +1017,7 @@ let () =
                               ref=(fun e -> seen "Drawer.Header" e)
                               on_key_down=(fun e -> heard "Drawer.Header" e)>
                               <Drawer.Heading
-                                ?as_=(fun () -> drawn "Drawer.Heading" "h2" ())
+                                ?as_=(drawn "Drawer.Heading" "h2" ())
                                 data_testid="Drawer.Heading"
                                 class_="given-class"
                                 title="Drawer.Heading"
@@ -1049,7 +1028,7 @@ let () =
                               </Drawer.Heading>
                             </Drawer.Header>
                             <Drawer.Body
-                              ?as_=(fun () -> drawn "Drawer.Body" "div" ())
+                              ?as_=(drawn "Drawer.Body" "div" ())
                               data_testid="Drawer.Body"
                               class_="given-class"
                               title="Drawer.Body"
@@ -1059,7 +1038,7 @@ let () =
                               "Body"
                             </Drawer.Body>
                             <Drawer.Footer
-                              ?as_=(fun () -> drawn "Drawer.Footer" "div" ())
+                              ?as_=(drawn "Drawer.Footer" "div" ())
                               data_testid="Drawer.Footer"
                               class_="given-class"
                               title="Drawer.Footer"
@@ -1074,7 +1053,7 @@ let () =
                     </Drawer>
                     <Modal default_open=true>
                       <Modal.Trigger
-                        ?as_=(fun () -> drawn "Modal.Trigger" "div" ())
+                        ?as_=(drawn "Modal.Trigger" "div" ())
                         data_testid="Modal.Trigger"
                         class_="given-class"
                         title="Modal.Trigger"
@@ -1084,7 +1063,7 @@ let () =
                         "Open"
                       </Modal.Trigger>
                       <Modal.Backdrop
-                        ?as_=(fun () -> drawn "Modal.Backdrop" "div" ())
+                        ?as_=(drawn "Modal.Backdrop" "div" ())
                         data_testid="Modal.Backdrop"
                         class_="given-class"
                         title="Modal.Backdrop"
@@ -1092,7 +1071,7 @@ let () =
                         ref=(fun e -> seen "Modal.Backdrop" e)
                         on_key_down=(fun e -> heard "Modal.Backdrop" e)>
                         <Modal.Container
-                          ?as_=(fun () -> drawn "Modal.Container" "div" ())
+                          ?as_=(drawn "Modal.Container" "div" ())
                           data_testid="Modal.Container"
                           class_="given-class"
                           title="Modal.Container"
@@ -1100,7 +1079,7 @@ let () =
                           ref=(fun e -> seen "Modal.Container" e)
                           on_key_down=(fun e -> heard "Modal.Container" e)>
                           <Modal.Dialog
-                            ?as_=(fun () -> drawn "Modal.Dialog" "section" ())
+                            ?as_=(drawn "Modal.Dialog" "section" ())
                             data_testid="Modal.Dialog"
                             class_="given-class"
                             title="Modal.Dialog"
@@ -1108,8 +1087,7 @@ let () =
                             ref=(fun e -> seen "Modal.Dialog" e)
                             on_key_down=(fun e -> heard "Modal.Dialog" e)>
                             <Modal.Close_trigger
-                              ?as_=(fun () ->
-                                     drawn "Modal.Close_trigger" "button" ())
+                              ?as_=(drawn "Modal.Close_trigger" "button" ())
                               data_testid="Modal.Close_trigger"
                               class_="given-class"
                               title="Modal.Close_trigger"
@@ -1119,7 +1097,7 @@ let () =
                                             heard "Modal.Close_trigger" e)
                             />
                             <Modal.Header
-                              ?as_=(fun () -> drawn "Modal.Header" "div" ())
+                              ?as_=(drawn "Modal.Header" "div" ())
                               data_testid="Modal.Header"
                               class_="given-class"
                               title="Modal.Header"
@@ -1127,7 +1105,7 @@ let () =
                               ref=(fun e -> seen "Modal.Header" e)
                               on_key_down=(fun e -> heard "Modal.Header" e)>
                               <Modal.Icon
-                                ?as_=(fun () -> drawn "Modal.Icon" "div" ())
+                                ?as_=(drawn "Modal.Icon" "div" ())
                                 data_testid="Modal.Icon"
                                 class_="given-class"
                                 title="Modal.Icon"
@@ -1137,7 +1115,7 @@ let () =
                                 "i"
                               </Modal.Icon>
                               <Modal.Heading
-                                ?as_=(fun () -> drawn "Modal.Heading" "h2" ())
+                                ?as_=(drawn "Modal.Heading" "h2" ())
                                 data_testid="Modal.Heading"
                                 class_="given-class"
                                 title="Modal.Heading"
@@ -1148,7 +1126,7 @@ let () =
                               </Modal.Heading>
                             </Modal.Header>
                             <Modal.Body
-                              ?as_=(fun () -> drawn "Modal.Body" "div" ())
+                              ?as_=(drawn "Modal.Body" "div" ())
                               data_testid="Modal.Body"
                               class_="given-class"
                               title="Modal.Body"
@@ -1158,7 +1136,7 @@ let () =
                               "Body"
                             </Modal.Body>
                             <Modal.Footer
-                              ?as_=(fun () -> drawn "Modal.Footer" "div" ())
+                              ?as_=(drawn "Modal.Footer" "div" ())
                               data_testid="Modal.Footer"
                               class_="given-class"
                               title="Modal.Footer"
@@ -1172,7 +1150,7 @@ let () =
                       </Modal.Backdrop>
                     </Modal>
                     <Button_group
-                      ?as_=(fun () -> drawn "Button_group" "div" ())
+                      ?as_=(drawn "Button_group" "div" ())
                       data_testid="Button_group"
                       class_="given-class"
                       title="Button_group"
@@ -1180,7 +1158,7 @@ let () =
                       ref=(fun e -> seen "Button_group" e)
                       on_key_down=(fun e -> heard "Button_group" e)>
                       <Button
-                        ?as_=(fun () -> drawn "Button" "button" ())
+                        ?as_=(drawn "Button" "button" ())
                         data_testid="Button"
                         class_="given-class"
                         title="Button"
@@ -1191,8 +1169,7 @@ let () =
                       </Button>
                       <Button>
                         <Button_group.Separator
-                          ?as_=(fun () ->
-                                 drawn "Button_group.Separator" "span" ())
+                          ?as_=(drawn "Button_group.Separator" "span" ())
                           data_testid="Button_group.Separator"
                           class_="given-class"
                           title="Button_group.Separator"
@@ -1205,7 +1182,7 @@ let () =
                       </Button>
                     </Button_group>
                     <Card
-                      ?as_=(fun () -> drawn "Card" "div" ())
+                      ?as_=(drawn "Card" "div" ())
                       data_testid="Card"
                       class_="given-class"
                       title="Card"
@@ -1213,7 +1190,7 @@ let () =
                       ref=(fun e -> seen "Card" e)
                       on_key_down=(fun e -> heard "Card" e)>
                       <Card.Header
-                        ?as_=(fun () -> drawn "Card.Header" "div" ())
+                        ?as_=(drawn "Card.Header" "div" ())
                         data_testid="Card.Header"
                         class_="given-class"
                         title="Card.Header"
@@ -1221,7 +1198,7 @@ let () =
                         ref=(fun e -> seen "Card.Header" e)
                         on_key_down=(fun e -> heard "Card.Header" e)>
                         <Card.Title
-                          ?as_=(fun () -> drawn "Card.Title" "h3" ())
+                          ?as_=(drawn "Card.Title" "h3" ())
                           data_testid="Card.Title"
                           class_="given-class"
                           title="Card.Title"
@@ -1231,7 +1208,7 @@ let () =
                           "Title"
                         </Card.Title>
                         <Card.Description
-                          ?as_=(fun () -> drawn "Card.Description" "p" ())
+                          ?as_=(drawn "Card.Description" "p" ())
                           data_testid="Card.Description"
                           class_="given-class"
                           title="Card.Description"
@@ -1242,7 +1219,7 @@ let () =
                         </Card.Description>
                       </Card.Header>
                       <Card.Content
-                        ?as_=(fun () -> drawn "Card.Content" "div" ())
+                        ?as_=(drawn "Card.Content" "div" ())
                         data_testid="Card.Content"
                         class_="given-class"
                         title="Card.Content"
@@ -1252,7 +1229,7 @@ let () =
                         "Content"
                       </Card.Content>
                       <Card.Footer
-                        ?as_=(fun () -> drawn "Card.Footer" "div" ())
+                        ?as_=(drawn "Card.Footer" "div" ())
                         data_testid="Card.Footer"
                         class_="given-class"
                         title="Card.Footer"
@@ -1263,7 +1240,7 @@ let () =
                       </Card.Footer>
                     </Card>
                     <Chip
-                      ?as_=(fun () -> drawn "Chip" "span" ())
+                      ?as_=(drawn "Chip" "span" ())
                       data_testid="Chip"
                       class_="given-class"
                       title="Chip"
@@ -1271,7 +1248,7 @@ let () =
                       ref=(fun e -> seen "Chip" e)
                       on_key_down=(fun e -> heard "Chip" e)>
                       <Chip.Label
-                        ?as_=(fun () -> drawn "Chip.Label" "span" ())
+                        ?as_=(drawn "Chip.Label" "span" ())
                         data_testid="Chip.Label"
                         class_="given-class"
                         title="Chip.Label"
@@ -1282,7 +1259,7 @@ let () =
                       </Chip.Label>
                     </Chip>
                     <Close_button
-                      ?as_=(fun () -> drawn "Close_button" "button" ())
+                      ?as_=(drawn "Close_button" "button" ())
                       data_testid="Close_button"
                       class_="given-class"
                       title="Close_button"
@@ -1290,7 +1267,7 @@ let () =
                       ref=(fun e -> seen "Close_button" e)
                       on_key_down=(fun e -> heard "Close_button" e)>
                       <Close_button.Icon
-                        ?as_=(fun () -> drawn "Close_button.Icon" "svg" ())
+                        ?as_=(drawn "Close_button.Icon" "svg" ())
                         data_testid="Close_button.Icon"
                         class_="given-class"
                         style="--part: 1"
@@ -1299,7 +1276,7 @@ let () =
                       />
                     </Close_button>
                     <Empty_state
-                      ?as_=(fun () -> drawn "Empty_state" "div" ())
+                      ?as_=(drawn "Empty_state" "div" ())
                       data_testid="Empty_state"
                       class_="given-class"
                       title="Empty_state"
@@ -1309,18 +1286,17 @@ let () =
                       "Empty"
                     </Empty_state>
                     <Color_area
-                      ?as_=(fun () -> drawn "Color_area" "div" ())
+                      ?as_=(drawn "Color_area" "div" ())
                       data_testid="Color_area"
                       class_="given-class"
                       title="Color_area"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_area" e)
                       on_key_down=(fun e -> heard "Color_area" e)
-                      default_value=(fun () ->
-                                      Solidtype_kobalte.Colors.parse_color
-                                        "#0485F7")>
+                      default_value=(Solidtype_kobalte.Colors.parse_color
+                                       "#0485F7")>
                       <Color_area.Thumb
-                        ?as_=(fun () -> drawn "Color_area.Thumb" "span" ())
+                        ?as_=(drawn "Color_area.Thumb" "span" ())
                         data_testid="Color_area.Thumb"
                         class_="given-class"
                         title="Color_area.Thumb"
@@ -1330,7 +1306,7 @@ let () =
                       />
                     </Color_area>
                     <Color_field
-                      ?as_=(fun () -> drawn "Color_field" "div" ())
+                      ?as_=(drawn "Color_field" "div" ())
                       data_testid="Color_field"
                       class_="given-class"
                       title="Color_field"
@@ -1338,11 +1314,10 @@ let () =
                       ref=(fun e -> seen "Color_field" e)
                       on_key_down=(fun e -> heard "Color_field" e)
                       aria_label="Colour"
-                      default_value=(fun () ->
-                                      Solidtype_kobalte.Colors.parse_color
-                                        "#0485F7")>
+                      default_value=(Solidtype_kobalte.Colors.parse_color
+                                       "#0485F7")>
                       <Color_field.Group
-                        ?as_=(fun () -> drawn "Color_field.Group" "div" ())
+                        ?as_=(drawn "Color_field.Group" "div" ())
                         data_testid="Color_field.Group"
                         class_="given-class"
                         title="Color_field.Group"
@@ -1350,7 +1325,7 @@ let () =
                         ref=(fun e -> seen "Color_field.Group" e)
                         on_key_down=(fun e -> heard "Color_field.Group" e)>
                         <Color_field.Prefix
-                          ?as_=(fun () -> drawn "Color_field.Prefix" "div" ())
+                          ?as_=(drawn "Color_field.Prefix" "div" ())
                           data_testid="Color_field.Prefix"
                           class_="given-class"
                           title="Color_field.Prefix"
@@ -1360,7 +1335,7 @@ let () =
                           "#"
                         </Color_field.Prefix>
                         <Color_field.Input
-                          ?as_=(fun () -> drawn "Color_field.Input" "input" ())
+                          ?as_=(drawn "Color_field.Input" "input" ())
                           data_testid="Color_field.Input"
                           class_="given-class"
                           title="Color_field.Input"
@@ -1369,7 +1344,7 @@ let () =
                           on_key_down=(fun e -> heard "Color_field.Input" e)
                         />
                         <Color_field.Suffix
-                          ?as_=(fun () -> drawn "Color_field.Suffix" "div" ())
+                          ?as_=(drawn "Color_field.Suffix" "div" ())
                           data_testid="Color_field.Suffix"
                           class_="given-class"
                           title="Color_field.Suffix"
@@ -1381,7 +1356,7 @@ let () =
                       </Color_field.Group>
                     </Color_field>
                     <Color_slider
-                      ?as_=(fun () -> drawn "Color_slider" "div" ())
+                      ?as_=(drawn "Color_slider" "div" ())
                       data_testid="Color_slider"
                       class_="given-class"
                       title="Color_slider"
@@ -1390,11 +1365,10 @@ let () =
                       on_key_down=(fun e -> heard "Color_slider" e)
                       aria_label="Hue"
                       channel=`hue
-                      default_value=(fun () ->
-                                      Solidtype_kobalte.Colors.parse_color
-                                        "hsl(0, 100%, 50%)")>
+                      default_value=(Solidtype_kobalte.Colors.parse_color
+                                       "hsl(0, 100%, 50%)")>
                       <Color_slider.Output
-                        ?as_=(fun () -> drawn "Color_slider.Output" "output" ())
+                        ?as_=(drawn "Color_slider.Output" "output" ())
                         data_testid="Color_slider.Output"
                         class_="given-class"
                         title="Color_slider.Output"
@@ -1403,7 +1377,7 @@ let () =
                         on_key_down=(fun e -> heard "Color_slider.Output" e)
                       />
                       <Color_slider.Track
-                        ?as_=(fun () -> drawn "Color_slider.Track" "div" ())
+                        ?as_=(drawn "Color_slider.Track" "div" ())
                         data_testid="Color_slider.Track"
                         class_="given-class"
                         title="Color_slider.Track"
@@ -1411,7 +1385,7 @@ let () =
                         ref=(fun e -> seen "Color_slider.Track" e)
                         on_key_down=(fun e -> heard "Color_slider.Track" e)>
                         <Color_slider.Thumb
-                          ?as_=(fun () -> drawn "Color_slider.Thumb" "span" ())
+                          ?as_=(drawn "Color_slider.Thumb" "span" ())
                           data_testid="Color_slider.Thumb"
                           class_="given-class"
                           title="Color_slider.Thumb"
@@ -1422,7 +1396,7 @@ let () =
                       </Color_slider.Track>
                     </Color_slider>
                     <Color_picker
-                      ?as_=(fun () -> drawn "Color_picker" "div" ())
+                      ?as_=(drawn "Color_picker" "div" ())
                       data_testid="Color_picker"
                       class_="given-class"
                       title="Color_picker"
@@ -1430,8 +1404,7 @@ let () =
                       ref=(fun e -> seen "Color_picker" e)
                       on_key_down=(fun e -> heard "Color_picker" e)>
                       <Color_picker.Trigger
-                        ?as_=(fun () ->
-                               drawn "Color_picker.Trigger" "button" ())
+                        ?as_=(drawn "Color_picker.Trigger" "button" ())
                         data_testid="Color_picker.Trigger"
                         class_="given-class"
                         title="Color_picker.Trigger"
@@ -1442,7 +1415,7 @@ let () =
                       </Color_picker.Trigger>
                       <Color_picker.Popover
                         default_open=true
-                        ?as_=(fun () -> drawn "Color_picker.Popover" "div" ())
+                        ?as_=(drawn "Color_picker.Popover" "div" ())
                         data_testid="Color_picker.Popover"
                         class_="given-class"
                         title="Color_picker.Popover"
@@ -1453,18 +1426,17 @@ let () =
                       </Color_picker.Popover>
                     </Color_picker>
                     <Color_swatch
-                      ?as_=(fun () -> drawn "Color_swatch" "div" ())
+                      ?as_=(drawn "Color_swatch" "div" ())
                       data_testid="Color_swatch"
                       class_="given-class"
                       title="Color_swatch"
                       style="--part: 1"
                       ref=(fun e -> seen "Color_swatch" e)
                       on_key_down=(fun e -> heard "Color_swatch" e)
-                      color=(fun () ->
-                              Solidtype_kobalte.Colors.parse_color "#0485F7")
+                      color=(Solidtype_kobalte.Colors.parse_color "#0485F7")
                     />
                     <Color_swatch_picker
-                      ?as_=(fun () -> drawn "Color_swatch_picker" "div" ())
+                      ?as_=(drawn "Color_swatch_picker" "div" ())
                       data_testid="Color_swatch_picker"
                       class_="given-class"
                       title="Color_swatch_picker"
@@ -1472,8 +1444,7 @@ let () =
                       ref=(fun e -> seen "Color_swatch_picker" e)
                       on_key_down=(fun e -> heard "Color_swatch_picker" e)>
                       <Color_swatch_picker.Item
-                        ?as_=(fun () ->
-                               drawn "Color_swatch_picker.Item" "div" ())
+                        ?as_=(drawn "Color_swatch_picker.Item" "div" ())
                         data_testid="Color_swatch_picker.Item"
                         class_="given-class"
                         title="Color_swatch_picker.Item"
@@ -1481,11 +1452,9 @@ let () =
                         ref=(fun e -> seen "Color_swatch_picker.Item" e)
                         on_key_down=(fun e ->
                                       heard "Color_swatch_picker.Item" e)
-                        color=(fun () ->
-                                Solidtype_kobalte.Colors.parse_color "#F43F5E")>
+                        color=(Solidtype_kobalte.Colors.parse_color "#F43F5E")>
                         <Color_swatch_picker.Swatch
-                          ?as_=(fun () ->
-                                 drawn "Color_swatch_picker.Swatch" "div" ())
+                          ?as_=(drawn "Color_swatch_picker.Swatch" "div" ())
                           data_testid="Color_swatch_picker.Swatch"
                           class_="given-class"
                           title="Color_swatch_picker.Swatch"
@@ -1495,8 +1464,7 @@ let () =
                                         heard "Color_swatch_picker.Swatch" e)
                         />
                         <Color_swatch_picker.Indicator
-                          ?as_=(fun () ->
-                                 drawn "Color_swatch_picker.Indicator" "span" ())
+                          ?as_=(drawn "Color_swatch_picker.Indicator" "span" ())
                           data_testid="Color_swatch_picker.Indicator"
                           class_="given-class"
                           title="Color_swatch_picker.Indicator"
@@ -1508,7 +1476,7 @@ let () =
                       </Color_swatch_picker.Item>
                     </Color_swatch_picker>
                     <Table
-                      ?as_=(fun () -> drawn "Table" "div" ())
+                      ?as_=(drawn "Table" "div" ())
                       data_testid="Table"
                       class_="given-class"
                       title="Table"
@@ -1516,7 +1484,7 @@ let () =
                       ref=(fun e -> seen "Table" e)
                       on_key_down=(fun e -> heard "Table" e)>
                       <Table.Scroll_container
-                        ?as_=(fun () -> drawn "Table.Scroll_container" "div" ())
+                        ?as_=(drawn "Table.Scroll_container" "div" ())
                         data_testid="Table.Scroll_container"
                         class_="given-class"
                         title="Table.Scroll_container"
@@ -1524,7 +1492,7 @@ let () =
                         ref=(fun e -> seen "Table.Scroll_container" e)
                         on_key_down=(fun e -> heard "Table.Scroll_container" e)>
                         <Table.Content
-                          ?as_=(fun () -> drawn "Table.Content" "table" ())
+                          ?as_=(drawn "Table.Content" "table" ())
                           data_testid="Table.Content"
                           class_="given-class"
                           title="Table.Content"
@@ -1533,7 +1501,7 @@ let () =
                           on_key_down=(fun e -> heard "Table.Content" e)
                           aria_label="Members">
                           <Table.Header
-                            ?as_=(fun () -> drawn "Table.Header" "thead" ())
+                            ?as_=(drawn "Table.Header" "thead" ())
                             data_testid="Table.Header"
                             class_="given-class"
                             title="Table.Header"
@@ -1541,7 +1509,7 @@ let () =
                             ref=(fun e -> seen "Table.Header" e)
                             on_key_down=(fun e -> heard "Table.Header" e)>
                             <Table.Column
-                              ?as_=(fun () -> drawn "Table.Column" "th" ())
+                              ?as_=(drawn "Table.Column" "th" ())
                               data_testid="Table.Column"
                               class_="given-class"
                               title="Table.Column"
@@ -1552,9 +1520,8 @@ let () =
                             </Table.Column>
                             <Table.Column allows_sorting=true>
                               <Table.Sortable_column_header
-                                ?as_=(fun () ->
-                                       drawn "Table.Sortable_column_header"
-                                         "span" ())
+                                ?as_=(drawn "Table.Sortable_column_header"
+                                        "span" ())
                                 data_testid="Table.Sortable_column_header"
                                 class_="given-class"
                                 title="Table.Sortable_column_header"
@@ -1569,7 +1536,7 @@ let () =
                             </Table.Column>
                           </Table.Header>
                           <Table.Body
-                            ?as_=(fun () -> drawn "Table.Body" "tbody" ())
+                            ?as_=(drawn "Table.Body" "tbody" ())
                             data_testid="Table.Body"
                             class_="given-class"
                             title="Table.Body"
@@ -1577,7 +1544,7 @@ let () =
                             ref=(fun e -> seen "Table.Body" e)
                             on_key_down=(fun e -> heard "Table.Body" e)>
                             <Table.Row
-                              ?as_=(fun () -> drawn "Table.Row" "tr" ())
+                              ?as_=(drawn "Table.Row" "tr" ())
                               data_testid="Table.Row"
                               class_="given-class"
                               title="Table.Row"
@@ -1585,7 +1552,7 @@ let () =
                               ref=(fun e -> seen "Table.Row" e)
                               on_key_down=(fun e -> heard "Table.Row" e)>
                               <Table.Cell
-                                ?as_=(fun () -> drawn "Table.Cell" "td" ())
+                                ?as_=(drawn "Table.Cell" "td" ())
                                 data_testid="Table.Cell"
                                 class_="given-class"
                                 title="Table.Cell"
@@ -1596,17 +1563,16 @@ let () =
                               </Table.Cell>
                             </Table.Row>
                             <Table.Load_more
-                              ?as_=(fun () -> drawn "Table.Load_more" "tr" ())
+                              ?as_=(drawn "Table.Load_more" "tr" ())
                               data_testid="Table.Load_more"
                               class_="given-class"
                               title="Table.Load_more"
                               style="--part: 1"
                               ref=(fun e -> seen "Table.Load_more" e)
                               on_key_down=(fun e -> heard "Table.Load_more" e)
-                              is_loading=(fun () -> true)>
+                              is_loading=true>
                               <Table.Load_more_content
-                                ?as_=(fun () ->
-                                       drawn "Table.Load_more_content" "div" ())
+                                ?as_=(drawn "Table.Load_more_content" "div" ())
                                 data_testid="Table.Load_more_content"
                                 class_="given-class"
                                 title="Table.Load_more_content"
@@ -1621,7 +1587,7 @@ let () =
                         </Table.Content>
                       </Table.Scroll_container>
                       <Table.Footer
-                        ?as_=(fun () -> drawn "Table.Footer" "div" ())
+                        ?as_=(drawn "Table.Footer" "div" ())
                         data_testid="Table.Footer"
                         class_="given-class"
                         title="Table.Footer"
@@ -1633,8 +1599,7 @@ let () =
                     </Table>
                     <Table>
                       <Table.Resizable_container
-                        ?as_=(fun () ->
-                               drawn "Table.Resizable_container" "div" ())
+                        ?as_=(drawn "Table.Resizable_container" "div" ())
                         data_testid="Table.Resizable_container"
                         class_="given-class"
                         title="Table.Resizable_container"
@@ -1647,8 +1612,7 @@ let () =
                             <Table.Column id="name" is_row_header=true>
                               "Name"
                               <Table.Column_resizer
-                                ?as_=(fun () ->
-                                       drawn "Table.Column_resizer" "div" ())
+                                ?as_=(drawn "Table.Column_resizer" "div" ())
                                 data_testid="Table.Column_resizer"
                                 class_="given-class"
                                 title="Table.Column_resizer"
@@ -1668,7 +1632,7 @@ let () =
                       </Table.Resizable_container>
                     </Table>
                     <Kbd
-                      ?as_=(fun () -> drawn "Kbd" "kbd" ())
+                      ?as_=(drawn "Kbd" "kbd" ())
                       data_testid="Kbd"
                       class_="given-class"
                       title="Kbd"
@@ -1676,7 +1640,7 @@ let () =
                       ref=(fun e -> seen "Kbd" e)
                       on_key_down=(fun e -> heard "Kbd" e)>
                       <Kbd.Abbr
-                        ?as_=(fun () -> drawn "Kbd.Abbr" "abbr" ())
+                        ?as_=(drawn "Kbd.Abbr" "abbr" ())
                         data_testid="Kbd.Abbr"
                         class_="given-class"
                         title="Kbd.Abbr"
@@ -1686,7 +1650,7 @@ let () =
                         key_value=`command
                       />
                       <Kbd.Content
-                        ?as_=(fun () -> drawn "Kbd.Content" "span" ())
+                        ?as_=(drawn "Kbd.Content" "span" ())
                         data_testid="Kbd.Content"
                         class_="given-class"
                         title="Kbd.Content"
@@ -1697,7 +1661,7 @@ let () =
                       </Kbd.Content>
                     </Kbd>
                     <Link
-                      ?as_=(fun () -> drawn "Link" "a" ())
+                      ?as_=(drawn "Link" "a" ())
                       data_testid="Link"
                       class_="given-class"
                       title="Link"
@@ -1707,7 +1671,7 @@ let () =
                       href="#">
                       "Link"
                       <Link.Icon
-                        ?as_=(fun () -> drawn "Link.Icon" "span" ())
+                        ?as_=(drawn "Link.Icon" "span" ())
                         data_testid="Link.Icon"
                         class_="given-class"
                         title="Link.Icon"
@@ -1717,7 +1681,7 @@ let () =
                       />
                     </Link>
                     <Scroll_shadow
-                      ?as_=(fun () -> drawn "Scroll_shadow" "div" ())
+                      ?as_=(drawn "Scroll_shadow" "div" ())
                       data_testid="Scroll_shadow"
                       class_="given-class"
                       title="Scroll_shadow"
@@ -1727,7 +1691,7 @@ let () =
                       "Text"
                     </Scroll_shadow>
                     <Disclosure
-                      ?as_=(fun () -> drawn "Disclosure" "div" ())
+                      ?as_=(drawn "Disclosure" "div" ())
                       data_testid="Disclosure"
                       class_="given-class"
                       title="Disclosure"
@@ -1735,7 +1699,7 @@ let () =
                       ref=(fun e -> seen "Disclosure" e)
                       on_key_down=(fun e -> heard "Disclosure" e)>
                       <Disclosure.Heading
-                        ?as_=(fun () -> drawn "Disclosure.Heading" "h3" ())
+                        ?as_=(drawn "Disclosure.Heading" "h3" ())
                         data_testid="Disclosure.Heading"
                         class_="given-class"
                         title="Disclosure.Heading"
@@ -1743,8 +1707,7 @@ let () =
                         ref=(fun e -> seen "Disclosure.Heading" e)
                         on_key_down=(fun e -> heard "Disclosure.Heading" e)>
                         <Disclosure.Trigger
-                          ?as_=(fun () ->
-                                 drawn "Disclosure.Trigger" "button" ())
+                          ?as_=(drawn "Disclosure.Trigger" "button" ())
                           data_testid="Disclosure.Trigger"
                           class_="given-class"
                           title="Disclosure.Trigger"
@@ -1753,8 +1716,7 @@ let () =
                           on_key_down=(fun e -> heard "Disclosure.Trigger" e)>
                           "Shipping"
                           <Disclosure.Indicator
-                            ?as_=(fun () ->
-                                   drawn "Disclosure.Indicator" "svg" ())
+                            ?as_=(drawn "Disclosure.Indicator" "svg" ())
                             data_testid="Disclosure.Indicator"
                             class_="given-class"
                             style="--part: 1"
@@ -1765,7 +1727,7 @@ let () =
                         </Disclosure.Trigger>
                       </Disclosure.Heading>
                       <Disclosure.Content
-                        ?as_=(fun () -> drawn "Disclosure.Content" "div" ())
+                        ?as_=(drawn "Disclosure.Content" "div" ())
                         data_testid="Disclosure.Content"
                         class_="given-class"
                         title="Disclosure.Content"
@@ -1773,7 +1735,7 @@ let () =
                         ref=(fun e -> seen "Disclosure.Content" e)
                         on_key_down=(fun e -> heard "Disclosure.Content" e)>
                         <Disclosure.Body
-                          ?as_=(fun () -> drawn "Disclosure.Body" "div" ())
+                          ?as_=(drawn "Disclosure.Body" "div" ())
                           data_testid="Disclosure.Body"
                           class_="given-class"
                           title="Disclosure.Body"
@@ -1800,7 +1762,7 @@ let () =
                       <Disclosure.Content>"Within 30 days."</Disclosure.Content>
                     </Disclosure>
                     <Disclosure_group
-                      ?as_=(fun () -> drawn "Disclosure_group" "div" ())
+                      ?as_=(drawn "Disclosure_group" "div" ())
                       data_testid="Disclosure_group"
                       class_="given-class"
                       title="Disclosure_group"
@@ -1817,7 +1779,7 @@ let () =
                       </Disclosure>
                     </Disclosure_group>
                     <Accordion
-                      ?as_=(fun () -> drawn "Accordion" "div" ())
+                      ?as_=(drawn "Accordion" "div" ())
                       data_testid="Accordion"
                       class_="given-class"
                       title="Accordion"
@@ -1825,7 +1787,7 @@ let () =
                       ref=(fun e -> seen "Accordion" e)
                       on_key_down=(fun e -> heard "Accordion" e)>
                       <Accordion.Item
-                        ?as_=(fun () -> drawn "Accordion.Item" "div" ())
+                        ?as_=(drawn "Accordion.Item" "div" ())
                         data_testid="Accordion.Item"
                         class_="given-class"
                         title="Accordion.Item"
@@ -1834,7 +1796,7 @@ let () =
                         on_key_down=(fun e -> heard "Accordion.Item" e)
                         id="faq">
                         <Accordion.Heading
-                          ?as_=(fun () -> drawn "Accordion.Heading" "h3" ())
+                          ?as_=(drawn "Accordion.Heading" "h3" ())
                           data_testid="Accordion.Heading"
                           class_="given-class"
                           title="Accordion.Heading"
@@ -1842,8 +1804,7 @@ let () =
                           ref=(fun e -> seen "Accordion.Heading" e)
                           on_key_down=(fun e -> heard "Accordion.Heading" e)>
                           <Accordion.Trigger
-                            ?as_=(fun () ->
-                                   drawn "Accordion.Trigger" "button" ())
+                            ?as_=(drawn "Accordion.Trigger" "button" ())
                             data_testid="Accordion.Trigger"
                             class_="given-class"
                             title="Accordion.Trigger"
@@ -1852,8 +1813,7 @@ let () =
                             on_key_down=(fun e -> heard "Accordion.Trigger" e)>
                             "Questions"
                             <Accordion.Indicator
-                              ?as_=(fun () ->
-                                     drawn "Accordion.Indicator" "svg" ())
+                              ?as_=(drawn "Accordion.Indicator" "svg" ())
                               data_testid="Accordion.Indicator"
                               class_="given-class"
                               style="--part: 1"
@@ -1864,7 +1824,7 @@ let () =
                           </Accordion.Trigger>
                         </Accordion.Heading>
                         <Accordion.Panel
-                          ?as_=(fun () -> drawn "Accordion.Panel" "div" ())
+                          ?as_=(drawn "Accordion.Panel" "div" ())
                           data_testid="Accordion.Panel"
                           class_="given-class"
                           title="Accordion.Panel"
@@ -1872,7 +1832,7 @@ let () =
                           ref=(fun e -> seen "Accordion.Panel" e)
                           on_key_down=(fun e -> heard "Accordion.Panel" e)>
                           <Accordion.Body
-                            ?as_=(fun () -> drawn "Accordion.Body" "div" ())
+                            ?as_=(drawn "Accordion.Body" "div" ())
                             data_testid="Accordion.Body"
                             class_="given-class"
                             title="Accordion.Body"
@@ -1901,7 +1861,7 @@ let () =
                       </Accordion.Item>
                     </Accordion>
                     <Tabs
-                      ?as_=(fun () -> drawn "Tabs" "div" ())
+                      ?as_=(drawn "Tabs" "div" ())
                       data_testid="Tabs"
                       class_="given-class"
                       title="Tabs"
@@ -1909,7 +1869,7 @@ let () =
                       ref=(fun e -> seen "Tabs" e)
                       on_key_down=(fun e -> heard "Tabs" e)>
                       <Tabs.List_container
-                        ?as_=(fun () -> drawn "Tabs.List_container" "div" ())
+                        ?as_=(drawn "Tabs.List_container" "div" ())
                         data_testid="Tabs.List_container"
                         class_="given-class"
                         title="Tabs.List_container"
@@ -1917,7 +1877,7 @@ let () =
                         ref=(fun e -> seen "Tabs.List_container" e)
                         on_key_down=(fun e -> heard "Tabs.List_container" e)>
                         <Tabs.List
-                          ?as_=(fun () -> drawn "Tabs.List" "div" ())
+                          ?as_=(drawn "Tabs.List" "div" ())
                           data_testid="Tabs.List"
                           class_="given-class"
                           title="Tabs.List"
@@ -1926,7 +1886,7 @@ let () =
                           on_key_down=(fun e -> heard "Tabs.List" e)
                           aria_label="Options">
                           <Tabs.Tab
-                            ?as_=(fun () -> drawn "Tabs.Tab" "a" ())
+                            ?as_=(drawn "Tabs.Tab" "a" ())
                             data_testid="Tabs.Tab"
                             class_="given-class"
                             title="Tabs.Tab"
@@ -1936,7 +1896,7 @@ let () =
                             id="one">
                             "One"
                             <Tabs.Indicator
-                              ?as_=(fun () -> drawn "Tabs.Indicator" "div" ())
+                              ?as_=(drawn "Tabs.Indicator" "div" ())
                               data_testid="Tabs.Indicator"
                               class_="given-class"
                               title="Tabs.Indicator"
@@ -1947,7 +1907,7 @@ let () =
                           </Tabs.Tab>
                           <Tabs.Tab id="two">
                             <Tabs.Separator
-                              ?as_=(fun () -> drawn "Tabs.Separator" "span" ())
+                              ?as_=(drawn "Tabs.Separator" "span" ())
                               data_testid="Tabs.Separator"
                               class_="given-class"
                               title="Tabs.Separator"
@@ -1960,7 +1920,7 @@ let () =
                         </Tabs.List>
                       </Tabs.List_container>
                       <Tabs.Panel
-                        ?as_=(fun () -> drawn "Tabs.Panel" "div" ())
+                        ?as_=(drawn "Tabs.Panel" "div" ())
                         data_testid="Tabs.Panel"
                         class_="given-class"
                         title="Tabs.Panel"
@@ -1973,7 +1933,7 @@ let () =
                       <Tabs.Panel id="two">"Second."</Tabs.Panel>
                     </Tabs>
                     <Segment
-                      ?as_=(fun () -> drawn "Segment" "div" ())
+                      ?as_=(drawn "Segment" "div" ())
                       data_testid="Segment"
                       class_="given-class"
                       title="Segment"
@@ -1983,7 +1943,7 @@ let () =
                       aria_label="Period"
                       default_selected_key="month">
                       <Segment.Item
-                        ?as_=(fun () -> drawn "Segment.Item" "label" ())
+                        ?as_=(drawn "Segment.Item" "label" ())
                         data_testid="Segment.Item"
                         class_="given-class"
                         title="Segment.Item"
@@ -1995,7 +1955,7 @@ let () =
                       </Segment.Item>
                       <Segment.Item id="year">
                         <Segment.Separator
-                          ?as_=(fun () -> drawn "Segment.Separator" "span" ())
+                          ?as_=(drawn "Segment.Separator" "span" ())
                           data_testid="Segment.Separator"
                           class_="given-class"
                           title="Segment.Separator"
@@ -2007,7 +1967,7 @@ let () =
                       </Segment.Item>
                     </Segment>
                     <Text_shimmer
-                      ?as_=(fun () -> drawn "Text_shimmer" "span" ())
+                      ?as_=(drawn "Text_shimmer" "span" ())
                       data_testid="Text_shimmer"
                       class_="given-class"
                       title="Text_shimmer"
@@ -2017,7 +1977,7 @@ let () =
                       "Working"
                     </Text_shimmer>
                     <Trend_chip
-                      ?as_=(fun () -> drawn "Trend_chip" "span" ())
+                      ?as_=(drawn "Trend_chip" "span" ())
                       data_testid="Trend_chip"
                       class_="given-class"
                       title="Trend_chip"
@@ -2025,7 +1985,7 @@ let () =
                       ref=(fun e -> seen "Trend_chip" e)
                       on_key_down=(fun e -> heard "Trend_chip" e)>
                       <Trend_chip.Indicator
-                        ?as_=(fun () -> drawn "Trend_chip.Indicator" "span" ())
+                        ?as_=(drawn "Trend_chip.Indicator" "span" ())
                         data_testid="Trend_chip.Indicator"
                         class_="given-class"
                         title="Trend_chip.Indicator"
@@ -2034,7 +1994,7 @@ let () =
                         on_key_down=(fun e -> heard "Trend_chip.Indicator" e)
                       />
                       <Trend_chip.Prefix
-                        ?as_=(fun () -> drawn "Trend_chip.Prefix" "span" ())
+                        ?as_=(drawn "Trend_chip.Prefix" "span" ())
                         data_testid="Trend_chip.Prefix"
                         class_="given-class"
                         title="Trend_chip.Prefix"
@@ -2045,7 +2005,7 @@ let () =
                       </Trend_chip.Prefix>
                       "3%"
                       <Trend_chip.Suffix
-                        ?as_=(fun () -> drawn "Trend_chip.Suffix" "span" ())
+                        ?as_=(drawn "Trend_chip.Suffix" "span" ())
                         data_testid="Trend_chip.Suffix"
                         class_="given-class"
                         title="Trend_chip.Suffix"
@@ -2056,7 +2016,7 @@ let () =
                       </Trend_chip.Suffix>
                     </Trend_chip>
                     <Separator
-                      ?as_=(fun () -> drawn "Separator" "div" ())
+                      ?as_=(drawn "Separator" "div" ())
                       data_testid="Separator"
                       class_="given-class"
                       title="Separator"
@@ -2065,7 +2025,7 @@ let () =
                       on_key_down=(fun e -> heard "Separator" e)
                     />
                     <Skeleton
-                      ?as_=(fun () -> drawn "Skeleton" "div" ())
+                      ?as_=(drawn "Skeleton" "div" ())
                       data_testid="Skeleton"
                       class_="given-class"
                       title="Skeleton"
@@ -2074,7 +2034,7 @@ let () =
                       on_key_down=(fun e -> heard "Skeleton" e)
                     />
                     <Spinner
-                      ?as_=(fun () -> drawn "Spinner" "span" ())
+                      ?as_=(drawn "Spinner" "span" ())
                       data_testid="Spinner"
                       class_="given-class"
                       title="Spinner"
@@ -2083,7 +2043,7 @@ let () =
                       on_key_down=(fun e -> heard "Spinner" e)
                     />
                     <Surface
-                      ?as_=(fun () -> drawn "Surface" "div" ())
+                      ?as_=(drawn "Surface" "div" ())
                       data_testid="Surface"
                       class_="given-class"
                       title="Surface"
@@ -2093,7 +2053,7 @@ let () =
                       "Surface"
                     </Surface>
                     <Toggle_button
-                      ?as_=(fun () -> drawn "Toggle_button" "button" ())
+                      ?as_=(drawn "Toggle_button" "button" ())
                       data_testid="Toggle_button"
                       class_="given-class"
                       title="Toggle_button"
@@ -2103,7 +2063,7 @@ let () =
                       "Like"
                     </Toggle_button>
                     <Toggle_button_group
-                      ?as_=(fun () -> drawn "Toggle_button_group" "div" ())
+                      ?as_=(drawn "Toggle_button_group" "div" ())
                       data_testid="Toggle_button_group"
                       class_="given-class"
                       title="Toggle_button_group"
@@ -2123,8 +2083,7 @@ let () =
                       </Toggle_button>
                       <Toggle_button id="right">
                         <Toggle_button_group.Separator
-                          ?as_=(fun () ->
-                                 drawn "Toggle_button_group.Separator" "span" ())
+                          ?as_=(drawn "Toggle_button_group.Separator" "span" ())
                           data_testid="Toggle_button_group.Separator"
                           class_="given-class"
                           title="Toggle_button_group.Separator"
@@ -2137,7 +2096,7 @@ let () =
                       </Toggle_button>
                     </Toggle_button_group>
                     <Typography
-                      ?as_=(fun () -> drawn "Typography" "p" ())
+                      ?as_=(drawn "Typography" "p" ())
                       data_testid="Typography"
                       class_="given-class"
                       title="Typography"
@@ -2147,7 +2106,7 @@ let () =
                       "Body"
                     </Typography>
                     <Typography.Heading
-                      ?as_=(fun () -> drawn "Typography.Heading" "h2" ())
+                      ?as_=(drawn "Typography.Heading" "h2" ())
                       data_testid="Typography.Heading"
                       class_="given-class"
                       title="Typography.Heading"
@@ -2158,7 +2117,7 @@ let () =
                       "Heading"
                     </Typography.Heading>
                     <Typography.Paragraph
-                      ?as_=(fun () -> drawn "Typography.Paragraph" "p" ())
+                      ?as_=(drawn "Typography.Paragraph" "p" ())
                       data_testid="Typography.Paragraph"
                       class_="given-class"
                       title="Typography.Paragraph"
@@ -2168,7 +2127,7 @@ let () =
                       "Paragraph"
                     </Typography.Paragraph>
                     <Typography.Code
-                      ?as_=(fun () -> drawn "Typography.Code" "code" ())
+                      ?as_=(drawn "Typography.Code" "code" ())
                       data_testid="Typography.Code"
                       class_="given-class"
                       title="Typography.Code"
@@ -2178,7 +2137,7 @@ let () =
                       "code"
                     </Typography.Code>
                     <Typography.Prose
-                      ?as_=(fun () -> drawn "Typography.Prose" "div" ())
+                      ?as_=(drawn "Typography.Prose" "div" ())
                       data_testid="Typography.Prose"
                       class_="given-class"
                       title="Typography.Prose"
@@ -2420,7 +2379,7 @@ let () =
           Jest.test "reaches each part of a field" (fun () ->
               T.render (fun () ->
                   <Form
-                    ?as_=(fun () -> drawn "Form" "form" ())
+                    ?as_=(drawn "Form" "form" ())
                     data_testid="Form"
                     class_="given-class"
                     title="Form"
@@ -2428,7 +2387,7 @@ let () =
                     ref=(fun e -> seen "Form" e)
                     on_key_down=(fun e -> heard "Form" e)>
                     <Fieldset
-                      ?as_=(fun () -> drawn "Fieldset" "fieldset" ())
+                      ?as_=(drawn "Fieldset" "fieldset" ())
                       data_testid="Fieldset"
                       class_="given-class"
                       title="Fieldset"
@@ -2436,7 +2395,7 @@ let () =
                       ref=(fun e -> seen "Fieldset" e)
                       on_key_down=(fun e -> heard "Fieldset" e)>
                       <Fieldset.Legend
-                        ?as_=(fun () -> drawn "Fieldset.Legend" "legend" ())
+                        ?as_=(drawn "Fieldset.Legend" "legend" ())
                         data_testid="Fieldset.Legend"
                         class_="given-class"
                         title="Fieldset.Legend"
@@ -2446,7 +2405,7 @@ let () =
                         "Legend"
                       </Fieldset.Legend>
                       <Fieldset.Group
-                        ?as_=(fun () -> drawn "Fieldset.Group" "div" ())
+                        ?as_=(drawn "Fieldset.Group" "div" ())
                         data_testid="Fieldset.Group"
                         class_="given-class"
                         title="Fieldset.Group"
@@ -2454,7 +2413,7 @@ let () =
                         ref=(fun e -> seen "Fieldset.Group" e)
                         on_key_down=(fun e -> heard "Fieldset.Group" e)>
                         <Text_field
-                          ?as_=(fun () -> drawn "Text_field" "div" ())
+                          ?as_=(drawn "Text_field" "div" ())
                           data_testid="Text_field"
                           class_="given-class"
                           title="Text_field"
@@ -2463,7 +2422,7 @@ let () =
                           on_key_down=(fun e -> heard "Text_field" e)
                           is_invalid=true>
                           <Label
-                            ?as_=(fun () -> drawn "Label" "label" ())
+                            ?as_=(drawn "Label" "label" ())
                             data_testid="Label"
                             class_="given-class"
                             title="Label"
@@ -2473,7 +2432,7 @@ let () =
                             "Name"
                           </Label>
                           <Input
-                            ?as_=(fun () -> drawn "Input" "input" ())
+                            ?as_=(drawn "Input" "input" ())
                             data_testid="Input"
                             class_="given-class"
                             title="Input"
@@ -2482,7 +2441,7 @@ let () =
                             on_key_down=(fun e -> heard "Input" e)
                           />
                           <Description
-                            ?as_=(fun () -> drawn "Description" "span" ())
+                            ?as_=(drawn "Description" "span" ())
                             data_testid="Description"
                             class_="given-class"
                             title="Description"
@@ -2492,7 +2451,7 @@ let () =
                             "Description"
                           </Description>
                           <Field_error
-                            ?as_=(fun () -> drawn "Field_error" "span" ())
+                            ?as_=(drawn "Field_error" "span" ())
                             data_testid="Field_error"
                             class_="given-class"
                             title="Field_error"
@@ -2505,7 +2464,7 @@ let () =
                         <Text_field>
                           <Label>"Bio"</Label>
                           <Text_area
-                            ?as_=(fun () -> drawn "Text_area" "textarea" ())
+                            ?as_=(drawn "Text_area" "textarea" ())
                             data_testid="Text_area"
                             class_="given-class"
                             title="Text_area"
@@ -2517,7 +2476,7 @@ let () =
                         <Text_field>
                           <Label>"Email"</Label>
                           <Input_group
-                            ?as_=(fun () -> drawn "Input_group" "div" ())
+                            ?as_=(drawn "Input_group" "div" ())
                             data_testid="Input_group"
                             class_="given-class"
                             title="Input_group"
@@ -2525,8 +2484,7 @@ let () =
                             ref=(fun e -> seen "Input_group" e)
                             on_key_down=(fun e -> heard "Input_group" e)>
                             <Input_group.Prefix
-                              ?as_=(fun () ->
-                                     drawn "Input_group.Prefix" "div" ())
+                              ?as_=(drawn "Input_group.Prefix" "div" ())
                               data_testid="Input_group.Prefix"
                               class_="given-class"
                               title="Input_group.Prefix"
@@ -2545,8 +2503,7 @@ let () =
                               on_key_down=(fun e -> heard "Input_group.Input" e)
                             />
                             <Input_group.Suffix
-                              ?as_=(fun () ->
-                                     drawn "Input_group.Suffix" "div" ())
+                              ?as_=(drawn "Input_group.Suffix" "div" ())
                               data_testid="Input_group.Suffix"
                               class_="given-class"
                               title="Input_group.Suffix"
@@ -2559,7 +2516,7 @@ let () =
                           </Input_group>
                         </Text_field>
                         <Checkbox_group
-                          ?as_=(fun () -> drawn "Checkbox_group" "div" ())
+                          ?as_=(drawn "Checkbox_group" "div" ())
                           data_testid="Checkbox_group"
                           class_="given-class"
                           title="Checkbox_group"
@@ -2568,7 +2525,7 @@ let () =
                           on_key_down=(fun e -> heard "Checkbox_group" e)>
                           <Label>"Interests"</Label>
                           <Checkbox
-                            ?as_=(fun () -> drawn "Checkbox" "div" ())
+                            ?as_=(drawn "Checkbox" "div" ())
                             data_testid="Checkbox"
                             class_="given-class"
                             title="Checkbox"
@@ -2577,8 +2534,7 @@ let () =
                             on_key_down=(fun e -> heard "Checkbox" e)
                             value="coding">
                             <Checkbox.Content
-                              ?as_=(fun () ->
-                                     drawn "Checkbox.Content" "label" ())
+                              ?as_=(drawn "Checkbox.Content" "label" ())
                               data_testid="Checkbox.Content"
                               class_="given-class"
                               title="Checkbox.Content"
@@ -2586,8 +2542,7 @@ let () =
                               ref=(fun e -> seen "Checkbox.Content" e)
                               on_key_down=(fun e -> heard "Checkbox.Content" e)>
                               <Checkbox.Control
-                                ?as_=(fun () ->
-                                       drawn "Checkbox.Control" "span" ())
+                                ?as_=(drawn "Checkbox.Control" "span" ())
                                 data_testid="Checkbox.Control"
                                 class_="given-class"
                                 title="Checkbox.Control"
@@ -2596,8 +2551,7 @@ let () =
                                 on_key_down=(fun e ->
                                               heard "Checkbox.Control" e)>
                                 <Checkbox.Indicator
-                                  ?as_=(fun () ->
-                                         drawn "Checkbox.Indicator" "span" ())
+                                  ?as_=(drawn "Checkbox.Indicator" "span" ())
                                   data_testid="Checkbox.Indicator"
                                   class_="given-class"
                                   title="Checkbox.Indicator"
@@ -2612,7 +2566,7 @@ let () =
                           </Checkbox>
                         </Checkbox_group>
                         <Radio_group
-                          ?as_=(fun () -> drawn "Radio_group" "div" ())
+                          ?as_=(drawn "Radio_group" "div" ())
                           data_testid="Radio_group"
                           class_="given-class"
                           title="Radio_group"
@@ -2621,7 +2575,7 @@ let () =
                           on_key_down=(fun e -> heard "Radio_group" e)>
                           <Label>"Plan"</Label>
                           <Radio
-                            ?as_=(fun () -> drawn "Radio" "div" ())
+                            ?as_=(drawn "Radio" "div" ())
                             data_testid="Radio"
                             class_="given-class"
                             title="Radio"
@@ -2630,7 +2584,7 @@ let () =
                             on_key_down=(fun e -> heard "Radio" e)
                             value="basic">
                             <Radio.Content
-                              ?as_=(fun () -> drawn "Radio.Content" "label" ())
+                              ?as_=(drawn "Radio.Content" "label" ())
                               data_testid="Radio.Content"
                               class_="given-class"
                               title="Radio.Content"
@@ -2638,7 +2592,7 @@ let () =
                               ref=(fun e -> seen "Radio.Content" e)
                               on_key_down=(fun e -> heard "Radio.Content" e)>
                               <Radio.Control
-                                ?as_=(fun () -> drawn "Radio.Control" "span" ())
+                                ?as_=(drawn "Radio.Control" "span" ())
                                 data_testid="Radio.Control"
                                 class_="given-class"
                                 title="Radio.Control"
@@ -2646,8 +2600,7 @@ let () =
                                 ref=(fun e -> seen "Radio.Control" e)
                                 on_key_down=(fun e -> heard "Radio.Control" e)>
                                 <Radio.Indicator
-                                  ?as_=(fun () ->
-                                         drawn "Radio.Indicator" "span" ())
+                                  ?as_=(drawn "Radio.Indicator" "span" ())
                                   data_testid="Radio.Indicator"
                                   class_="given-class"
                                   title="Radio.Indicator"
@@ -2662,7 +2615,7 @@ let () =
                           </Radio>
                         </Radio_group>
                         <Switch_group
-                          ?as_=(fun () -> drawn "Switch_group" "div" ())
+                          ?as_=(drawn "Switch_group" "div" ())
                           data_testid="Switch_group"
                           class_="given-class"
                           title="Switch_group"
@@ -2670,7 +2623,7 @@ let () =
                           ref=(fun e -> seen "Switch_group" e)
                           on_key_down=(fun e -> heard "Switch_group" e)>
                           <Switch
-                            ?as_=(fun () -> drawn "Switch" "div" ())
+                            ?as_=(drawn "Switch" "div" ())
                             data_testid="Switch"
                             class_="given-class"
                             title="Switch"
@@ -2678,7 +2631,7 @@ let () =
                             ref=(fun e -> seen "Switch" e)
                             on_key_down=(fun e -> heard "Switch" e)>
                             <Switch.Content
-                              ?as_=(fun () -> drawn "Switch.Content" "label" ())
+                              ?as_=(drawn "Switch.Content" "label" ())
                               data_testid="Switch.Content"
                               class_="given-class"
                               title="Switch.Content"
@@ -2686,8 +2639,7 @@ let () =
                               ref=(fun e -> seen "Switch.Content" e)
                               on_key_down=(fun e -> heard "Switch.Content" e)>
                               <Switch.Control
-                                ?as_=(fun () ->
-                                       drawn "Switch.Control" "span" ())
+                                ?as_=(drawn "Switch.Control" "span" ())
                                 data_testid="Switch.Control"
                                 class_="given-class"
                                 title="Switch.Control"
@@ -2695,8 +2647,7 @@ let () =
                                 ref=(fun e -> seen "Switch.Control" e)
                                 on_key_down=(fun e -> heard "Switch.Control" e)>
                                 <Switch.Thumb
-                                  ?as_=(fun () ->
-                                         drawn "Switch.Thumb" "span" ())
+                                  ?as_=(drawn "Switch.Thumb" "span" ())
                                   data_testid="Switch.Thumb"
                                   class_="given-class"
                                   title="Switch.Thumb"
@@ -2710,7 +2661,7 @@ let () =
                           </Switch>
                         </Switch_group>
                         <Number_field
-                          ?as_=(fun () -> drawn "Number_field" "div" ())
+                          ?as_=(drawn "Number_field" "div" ())
                           data_testid="Number_field"
                           class_="given-class"
                           title="Number_field"
@@ -2720,7 +2671,7 @@ let () =
                           default_value=1.>
                           <Label>"Width"</Label>
                           <Number_field.Group
-                            ?as_=(fun () -> drawn "Number_field.Group" "div" ())
+                            ?as_=(drawn "Number_field.Group" "div" ())
                             data_testid="Number_field.Group"
                             class_="given-class"
                             title="Number_field.Group"
@@ -2728,9 +2679,8 @@ let () =
                             ref=(fun e -> seen "Number_field.Group" e)
                             on_key_down=(fun e -> heard "Number_field.Group" e)>
                             <Number_field.Decrement_button
-                              ?as_=(fun () ->
-                                     drawn "Number_field.Decrement_button"
-                                       "button" ())
+                              ?as_=(drawn "Number_field.Decrement_button"
+                                      "button" ())
                               data_testid="Number_field.Decrement_button"
                               class_="given-class"
                               title="Number_field.Decrement_button"
@@ -2742,8 +2692,7 @@ let () =
                                               "Number_field.Decrement_button" e)
                             />
                             <Number_field.Input
-                              ?as_=(fun () ->
-                                     drawn "Number_field.Input" "input" ())
+                              ?as_=(drawn "Number_field.Input" "input" ())
                               data_testid="Number_field.Input"
                               class_="given-class"
                               title="Number_field.Input"
@@ -2753,9 +2702,8 @@ let () =
                                             heard "Number_field.Input" e)
                             />
                             <Number_field.Increment_button
-                              ?as_=(fun () ->
-                                     drawn "Number_field.Increment_button"
-                                       "button" ())
+                              ?as_=(drawn "Number_field.Increment_button"
+                                      "button" ())
                               data_testid="Number_field.Increment_button"
                               class_="given-class"
                               title="Number_field.Increment_button"
@@ -2769,7 +2717,7 @@ let () =
                           </Number_field.Group>
                         </Number_field>
                         <Search_field
-                          ?as_=(fun () -> drawn "Search_field" "div" ())
+                          ?as_=(drawn "Search_field" "div" ())
                           data_testid="Search_field"
                           class_="given-class"
                           title="Search_field"
@@ -2778,7 +2726,7 @@ let () =
                           on_key_down=(fun e -> heard "Search_field" e)>
                           <Label>"Search"</Label>
                           <Search_field.Group
-                            ?as_=(fun () -> drawn "Search_field.Group" "div" ())
+                            ?as_=(drawn "Search_field.Group" "div" ())
                             data_testid="Search_field.Group"
                             class_="given-class"
                             title="Search_field.Group"
@@ -2786,8 +2734,7 @@ let () =
                             ref=(fun e -> seen "Search_field.Group" e)
                             on_key_down=(fun e -> heard "Search_field.Group" e)>
                             <Search_field.Search_icon
-                              ?as_=(fun () ->
-                                     drawn "Search_field.Search_icon" "svg" ())
+                              ?as_=(drawn "Search_field.Search_icon" "svg" ())
                               data_testid="Search_field.Search_icon"
                               class_="given-class"
                               style="--part: 1"
@@ -2796,8 +2743,7 @@ let () =
                                             heard "Search_field.Search_icon" e)
                             />
                             <Search_field.Input
-                              ?as_=(fun () ->
-                                     drawn "Search_field.Input" "input" ())
+                              ?as_=(drawn "Search_field.Input" "input" ())
                               data_testid="Search_field.Input"
                               class_="given-class"
                               title="Search_field.Input"
@@ -2807,9 +2753,8 @@ let () =
                                             heard "Search_field.Input" e)
                             />
                             <Search_field.Clear_button
-                              ?as_=(fun () ->
-                                     drawn "Search_field.Clear_button" "button"
-                                       ())
+                              ?as_=(drawn "Search_field.Clear_button" "button"
+                                      ())
                               data_testid="Search_field.Clear_button"
                               class_="given-class"
                               title="Search_field.Clear_button"
@@ -2821,17 +2766,17 @@ let () =
                           </Search_field.Group>
                         </Search_field>
                         <Slider
-                          ?as_=(fun () -> drawn "Slider" "div" ())
+                          ?as_=(drawn "Slider" "div" ())
                           data_testid="Slider"
                           class_="given-class"
                           title="Slider"
                           style="--part: 1"
                           ref=(fun e -> seen "Slider" e)
                           on_key_down=(fun e -> heard "Slider" e)
-                          default_value=(fun () -> [| 30. |])>
+                          default_value=[| 30. |]>
                           <Label>"Volume"</Label>
                           <Slider.Output
-                            ?as_=(fun () -> drawn "Slider.Output" "output" ())
+                            ?as_=(drawn "Slider.Output" "output" ())
                             data_testid="Slider.Output"
                             class_="given-class"
                             title="Slider.Output"
@@ -2840,7 +2785,7 @@ let () =
                             on_key_down=(fun e -> heard "Slider.Output" e)
                           />
                           <Slider.Track
-                            ?as_=(fun () -> drawn "Slider.Track" "div" ())
+                            ?as_=(drawn "Slider.Track" "div" ())
                             data_testid="Slider.Track"
                             class_="given-class"
                             title="Slider.Track"
@@ -2848,7 +2793,7 @@ let () =
                             ref=(fun e -> seen "Slider.Track" e)
                             on_key_down=(fun e -> heard "Slider.Track" e)>
                             <Slider.Fill
-                              ?as_=(fun () -> drawn "Slider.Fill" "div" ())
+                              ?as_=(drawn "Slider.Fill" "div" ())
                               data_testid="Slider.Fill"
                               class_="given-class"
                               title="Slider.Fill"
@@ -2857,7 +2802,7 @@ let () =
                               on_key_down=(fun e -> heard "Slider.Fill" e)
                             />
                             <Slider.Thumb
-                              ?as_=(fun () -> drawn "Slider.Thumb" "span" ())
+                              ?as_=(drawn "Slider.Thumb" "span" ())
                               data_testid="Slider.Thumb"
                               class_="given-class"
                               title="Slider.Thumb"
@@ -2868,7 +2813,7 @@ let () =
                           </Slider.Track>
                         </Slider>
                         <Time_field
-                          ?as_=(fun () -> drawn "Time_field" "div" ())
+                          ?as_=(drawn "Time_field" "div" ())
                           data_testid="Time_field"
                           class_="given-class"
                           title="Time_field"
@@ -2877,7 +2822,7 @@ let () =
                           on_key_down=(fun e -> heard "Time_field" e)>
                           <Label>"Time"</Label>
                           <Time_field.Group
-                            ?as_=(fun () -> drawn "Time_field.Group" "div" ())
+                            ?as_=(drawn "Time_field.Group" "div" ())
                             data_testid="Time_field.Group"
                             class_="given-class"
                             title="Time_field.Group"
@@ -2885,8 +2830,7 @@ let () =
                             ref=(fun e -> seen "Time_field.Group" e)
                             on_key_down=(fun e -> heard "Time_field.Group" e)>
                             <Time_field.Prefix
-                              ?as_=(fun () ->
-                                     drawn "Time_field.Prefix" "div" ())
+                              ?as_=(drawn "Time_field.Prefix" "div" ())
                               data_testid="Time_field.Prefix"
                               class_="given-class"
                               title="Time_field.Prefix"
@@ -2896,7 +2840,7 @@ let () =
                               "at"
                             </Time_field.Prefix>
                             <Time_field.Input
-                              ?as_=(fun () -> drawn "Time_field.Input" "div" ())
+                              ?as_=(drawn "Time_field.Input" "div" ())
                               data_testid="Time_field.Input"
                               class_="given-class"
                               title="Time_field.Input"
@@ -2905,8 +2849,7 @@ let () =
                               on_key_down=(fun e -> heard "Time_field.Input" e)>
                               (fun segment ->
                                 <Time_field.Segment
-                                  ?as_=(fun () ->
-                                         drawn "Time_field.Segment" "div" ())
+                                  ?as_=(drawn "Time_field.Segment" "div" ())
                                   data_testid="Time_field.Segment"
                                   class_="given-class"
                                   title="Time_field.Segment"
@@ -2914,13 +2857,11 @@ let () =
                                   ref=(fun e -> seen "Time_field.Segment" e)
                                   on_key_down=(fun e ->
                                                 heard "Time_field.Segment" e)
-                                  segment=(fun () ->
-                                            Solidtype.Solid.get segment)
+                                  segment=(Solidtype.Solid.get segment)
                                 />)
                             </Time_field.Input>
                             <Time_field.Suffix
-                              ?as_=(fun () ->
-                                     drawn "Time_field.Suffix" "div" ())
+                              ?as_=(drawn "Time_field.Suffix" "div" ())
                               data_testid="Time_field.Suffix"
                               class_="given-class"
                               title="Time_field.Suffix"
@@ -2933,8 +2874,7 @@ let () =
                         </Time_field>
                         <div id="on-date">
                           <Time_field.Date_time
-                            ?as_=(fun () ->
-                                   drawn "Time_field.Date_time" "div" ())
+                            ?as_=(drawn "Time_field.Date_time" "div" ())
                             data_testid="Time_field.Date_time"
                             class_="given-class"
                             title="Time_field.Date_time"
@@ -2942,28 +2882,27 @@ let () =
                             ref=(fun e -> seen "Time_field.Date_time" e)
                             on_key_down=(fun e ->
                                           heard "Time_field.Date_time" e)
-                            placeholder_value=(fun () ->
-                                                Date.Types.CalendarDateTime.make
-                                                  2026 10 30 ())>
+                            placeholder_value=(Date.Types.CalendarDateTime.make
+                                                 2026 10 30 ())>
                             <Label>"Time"</Label>
                           </Time_field.Date_time>
                         </div>
                         <div id="in-zone">
                           <Time_field.Zoned
-                            ?as_=(fun () -> drawn "Time_field.Zoned" "div" ())
+                            ?as_=(drawn "Time_field.Zoned" "div" ())
                             data_testid="Time_field.Zoned"
                             class_="given-class"
                             title="Time_field.Zoned"
                             style="--part: 1"
                             ref=(fun e -> seen "Time_field.Zoned" e)
                             on_key_down=(fun e -> heard "Time_field.Zoned" e)
-                            placeholder_value=(fun () -> Date.now "Europe/Kyiv")>
+                            placeholder_value=(Date.now "Europe/Kyiv")>
                             <Label>"Time"</Label>
                           </Time_field.Zoned>
                         </div>
                       </Fieldset.Group>
                       <Fieldset.Actions
-                        ?as_=(fun () -> drawn "Fieldset.Actions" "div" ())
+                        ?as_=(drawn "Fieldset.Actions" "div" ())
                         data_testid="Fieldset.Actions"
                         class_="given-class"
                         title="Fieldset.Actions"
@@ -3045,7 +2984,7 @@ let () =
               T.render (fun () ->
                   <div>
                     <Meter
-                      ?as_=(fun () -> drawn "Meter" "div" ())
+                      ?as_=(drawn "Meter" "div" ())
                       data_testid="Meter"
                       class_="given-class"
                       title="Meter"
@@ -3055,7 +2994,7 @@ let () =
                       value=60.>
                       <Label>"Storage"</Label>
                       <Meter.Output
-                        ?as_=(fun () -> drawn "Meter.Output" "span" ())
+                        ?as_=(drawn "Meter.Output" "span" ())
                         data_testid="Meter.Output"
                         class_="given-class"
                         title="Meter.Output"
@@ -3064,7 +3003,7 @@ let () =
                         on_key_down=(fun e -> heard "Meter.Output" e)
                       />
                       <Meter.Track
-                        ?as_=(fun () -> drawn "Meter.Track" "div" ())
+                        ?as_=(drawn "Meter.Track" "div" ())
                         data_testid="Meter.Track"
                         class_="given-class"
                         title="Meter.Track"
@@ -3072,7 +3011,7 @@ let () =
                         ref=(fun e -> seen "Meter.Track" e)
                         on_key_down=(fun e -> heard "Meter.Track" e)>
                         <Meter.Fill
-                          ?as_=(fun () -> drawn "Meter.Fill" "div" ())
+                          ?as_=(drawn "Meter.Fill" "div" ())
                           data_testid="Meter.Fill"
                           class_="given-class"
                           title="Meter.Fill"
@@ -3083,7 +3022,7 @@ let () =
                       </Meter.Track>
                     </Meter>
                     <Progress_bar
-                      ?as_=(fun () -> drawn "Progress_bar" "div" ())
+                      ?as_=(drawn "Progress_bar" "div" ())
                       data_testid="Progress_bar"
                       class_="given-class"
                       title="Progress_bar"
@@ -3093,7 +3032,7 @@ let () =
                       value=60.>
                       <Label>"Loading"</Label>
                       <Progress_bar.Output
-                        ?as_=(fun () -> drawn "Progress_bar.Output" "span" ())
+                        ?as_=(drawn "Progress_bar.Output" "span" ())
                         data_testid="Progress_bar.Output"
                         class_="given-class"
                         title="Progress_bar.Output"
@@ -3102,7 +3041,7 @@ let () =
                         on_key_down=(fun e -> heard "Progress_bar.Output" e)
                       />
                       <Progress_bar.Track
-                        ?as_=(fun () -> drawn "Progress_bar.Track" "div" ())
+                        ?as_=(drawn "Progress_bar.Track" "div" ())
                         data_testid="Progress_bar.Track"
                         class_="given-class"
                         title="Progress_bar.Track"
@@ -3110,7 +3049,7 @@ let () =
                         ref=(fun e -> seen "Progress_bar.Track" e)
                         on_key_down=(fun e -> heard "Progress_bar.Track" e)>
                         <Progress_bar.Fill
-                          ?as_=(fun () -> drawn "Progress_bar.Fill" "div" ())
+                          ?as_=(drawn "Progress_bar.Fill" "div" ())
                           data_testid="Progress_bar.Fill"
                           class_="given-class"
                           title="Progress_bar.Fill"
@@ -3121,7 +3060,7 @@ let () =
                       </Progress_bar.Track>
                     </Progress_bar>
                     <Progress_circle
-                      ?as_=(fun () -> drawn "Progress_circle" "div" ())
+                      ?as_=(drawn "Progress_circle" "div" ())
                       data_testid="Progress_circle"
                       class_="given-class"
                       title="Progress_circle"
@@ -3131,16 +3070,14 @@ let () =
                       aria_label="Loading"
                       value=60.>
                       <Progress_circle.Track
-                        ?as_=(fun () -> drawn "Progress_circle.Track" "svg" ())
+                        ?as_=(drawn "Progress_circle.Track" "svg" ())
                         data_testid="Progress_circle.Track"
                         class_="given-class"
                         style="--part: 1"
                         ref=(fun e -> seen "Progress_circle.Track" e)
                         on_key_down=(fun e -> heard "Progress_circle.Track" e)>
                         <Progress_circle.Track_circle
-                          ?as_=(fun () ->
-                                 drawn "Progress_circle.Track_circle" "circle"
-                                   ())
+                          ?as_=(drawn "Progress_circle.Track_circle" "circle" ())
                           data_testid="Progress_circle.Track_circle"
                           class_="given-class"
                           style="--part: 1"
@@ -3149,8 +3086,7 @@ let () =
                                         heard "Progress_circle.Track_circle" e)
                         />
                         <Progress_circle.Fill_circle
-                          ?as_=(fun () ->
-                                 drawn "Progress_circle.Fill_circle" "circle" ())
+                          ?as_=(drawn "Progress_circle.Fill_circle" "circle" ())
                           data_testid="Progress_circle.Fill_circle"
                           class_="given-class"
                           style="--part: 1"
@@ -3161,7 +3097,7 @@ let () =
                       </Progress_circle.Track>
                     </Progress_circle>
                     <Toast.Provider
-                      ?as_=(fun () -> drawn "Toast.Provider" "div" ())
+                      ?as_=(drawn "Toast.Provider" "div" ())
                       data_testid="Toast.Provider"
                       class_="given-class"
                       title="Toast.Provider"
@@ -3170,16 +3106,16 @@ let () =
                       on_key_down=(fun e -> heard "Toast.Provider" e)>
                       (fun toast ->
                         <Toast
-                          ?as_=(fun () -> drawn "Toast" "li" ())
+                          ?as_=(drawn "Toast" "li" ())
                           data_testid="Toast"
                           class_="given-class"
                           title="Toast"
                           style="--part: 1"
                           ref=(fun e -> seen "Toast" e)
                           on_key_down=(fun e -> heard "Toast" e)
-                          toast=(fun () -> toast)>
+                          toast>
                           <Toast.Indicator
-                            ?as_=(fun () -> drawn "Toast.Indicator" "div" ())
+                            ?as_=(drawn "Toast.Indicator" "div" ())
                             data_testid="Toast.Indicator"
                             class_="given-class"
                             title="Toast.Indicator"
@@ -3188,7 +3124,7 @@ let () =
                             on_key_down=(fun e -> heard "Toast.Indicator" e)
                           />
                           <Toast.Content
-                            ?as_=(fun () -> drawn "Toast.Content" "div" ())
+                            ?as_=(drawn "Toast.Content" "div" ())
                             data_testid="Toast.Content"
                             class_="given-class"
                             title="Toast.Content"
@@ -3196,7 +3132,7 @@ let () =
                             ref=(fun e -> seen "Toast.Content" e)
                             on_key_down=(fun e -> heard "Toast.Content" e)>
                             <Toast.Title
-                              ?as_=(fun () -> drawn "Toast.Title" "div" ())
+                              ?as_=(drawn "Toast.Title" "div" ())
                               data_testid="Toast.Title"
                               class_="given-class"
                               title="Toast.Title"
@@ -3206,8 +3142,7 @@ let () =
                               "Title"
                             </Toast.Title>
                             <Toast.Description
-                              ?as_=(fun () ->
-                                     drawn "Toast.Description" "div" ())
+                              ?as_=(drawn "Toast.Description" "div" ())
                               data_testid="Toast.Description"
                               class_="given-class"
                               title="Toast.Description"
@@ -3218,8 +3153,7 @@ let () =
                             </Toast.Description>
                           </Toast.Content>
                           <Toast.Action_button
-                            ?as_=(fun () ->
-                                   drawn "Toast.Action_button" "button" ())
+                            ?as_=(drawn "Toast.Action_button" "button" ())
                             data_testid="Toast.Action_button"
                             class_="given-class"
                             title="Toast.Action_button"
@@ -3229,8 +3163,7 @@ let () =
                             "Undo"
                           </Toast.Action_button>
                           <Toast.Close_button
-                            ?as_=(fun () ->
-                                   drawn "Toast.Close_button" "button" ())
+                            ?as_=(drawn "Toast.Close_button" "button" ())
                             data_testid="Toast.Close_button"
                             class_="given-class"
                             title="Toast.Close_button"

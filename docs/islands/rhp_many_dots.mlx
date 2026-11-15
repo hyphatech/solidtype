@@ -102,7 +102,7 @@ let make () =
     | Some id -> Array.find_opt (fun p -> p.id = id) (S.get rows)
   in
   <div class_="manydots-demo">
-    <style>(fun () -> Jsx.string css)</style>
+    <style>(Jsx.string css)</style>
     <div class_="controls">
       <label>
         "Coloring "
@@ -131,31 +131,29 @@ let make () =
       </button>
     </div>
     <Chart
-      scale=(fun () -> (0., 100.))
-      cross=(fun () -> (0., 100.))
-      ticks=(fun () -> Ticks.values [| 0.; 25.; 50.; 75.; 100. |])
-      cross_ticks=(fun () -> Ticks.values [| 0.; 25.; 50.; 75.; 100. |])
+      scale=(0., 100.)
+      cross=(0., 100.)
+      ticks=(Ticks.values [| 0.; 25.; 50.; 75.; 100. |])
+      cross_ticks=(Ticks.values [| 0.; 25.; 50.; 75.; 100. |])
       height=290.
       label="1,200 sample measurements, each with two coordinates from 4 to 96">
       <Many_dots
-        rows=(fun () -> S.get rows)
-        at=(fun () -> Many_dots.each (fun p _ -> p.x))
-        cross=(fun () -> Many_dots.each (fun p _ -> p.y))
+        rows=(S.get rows)
+        at=(Many_dots.each (fun p _ -> p.x))
+        cross=(Many_dots.each (fun p _ -> p.y))
         key=(fun p _ -> p.id)
-        size=(fun () -> Many_dots.same (Many_dots.css "5px"))
-        class_=(fun () -> mode_class (S.get mode))
-        color=(fun () ->
-                match S.get mode with
-                | Unique -> Many_dots.each (fun p _ -> Color.css p.color)
-                | Shared | Category -> Many_dots.same (Color.series 1))
-        point_class=(fun () ->
-                      let picked = S.get selected in
-                      Many_dots.each (fun p _ ->
-                          "group-" ^ string_of_int p.group
-                          ^
-                          match picked with
-                          | Some id when id = p.id -> " selected"
-                          | Some _ | None -> ""))
+        size=(Many_dots.same (Many_dots.css "5px"))
+        class_=(mode_class (S.get mode))
+        color=(match S.get mode with
+              | Unique -> Many_dots.each (fun p _ -> Color.css p.color)
+              | Shared | Category -> Many_dots.same (Color.series 1))
+        point_class=(let picked = S.get selected in
+                     Many_dots.each (fun p _ ->
+                         "group-" ^ string_of_int p.group
+                         ^
+                         match picked with
+                         | Some id when id = p.id -> " selected"
+                         | Some _ | None -> ""))
         on_pointer_move=(fun e ->
                           if not (String.equal (pointer_type e) "touch") then
                             S.set set_hovered (row_at (pointer_target e)))
@@ -166,8 +164,6 @@ let make () =
                      (Option.map (fun p -> p.id) (row_at (click_target e))))
       />
     </Chart>
-    <p class_="readout">(fun () -> Jsx.string (hovering (S.get hovered)))</p>
-    <p class_="readout" role=`status>
-      (fun () -> Jsx.string (selection (chosen ())))
-    </p>
+    <p class_="readout">(Jsx.string (hovering (S.get hovered)))</p>
+    <p class_="readout" role=`status>(Jsx.string (selection (chosen ())))</p>
   </div>

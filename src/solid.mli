@@ -7,9 +7,9 @@
 
 (** {1 Signals} *)
 
-type 'a accessor = (unit -> 'a[@u])
-(** A reactive value, read by {!get}. A JavaScript function, so a read is a
-    plain call that Solid tracks. *)
+type 'a accessor
+(** A reactive value, read by {!get}. A JavaScript function of no argument, so a
+    read is a plain call that Solid tracks. *)
 
 type 'a setter
 (** What changes a signal, by {!set} or {!update}. *)
@@ -20,8 +20,8 @@ type 'a equals =
   | Never  (** Every write is a change, an equal value too. *)
 
 val get : 'a accessor -> 'a
-(** [get count] reads [count], and inside a tracking scope -- a thunk in a JSX
-    position, an effect, a memo -- subscribes to it. *)
+(** [get count] reads [count], and inside a tracking scope -- an expression in
+    JSX, an effect, a memo -- subscribes to it. *)
 
 external accessor : ((unit -> 'a)[@mel.uncurry]) -> 'a accessor = "valueOf"
 [@@mel.send]
@@ -29,6 +29,11 @@ external accessor : ((unit -> 'a)[@mel.uncurry]) -> 'a accessor = "valueOf"
     is, recomputed at each read where a memo would keep it: what a part hands on
     that it derives. Melange writes the function as JavaScript's own, so a read
     is a plain call. *)
+
+external of_function : ((unit -> 'a)[@u]) -> 'a accessor = "%identity"
+(** [of_function f] is [f], a JavaScript function of no argument, as the
+    accessor it already is: what [ppx_solidtype] writes for a component's props
+    and for [accessor (fun () -> e)]. Write {!val-accessor}. *)
 
 val create_signal :
   ?equals:'a equals -> ?name:string -> 'a -> 'a accessor * 'a setter
@@ -260,9 +265,9 @@ val create_unique_id : unit -> string
 type resolved
 (** Children resolved to their elements, by {!children}. *)
 
-val children : (unit -> Jsx.content) -> resolved accessor
-(** [children (fun () -> props_children ())] resolves a component's children
-    once, so it can look at them without creating them again. *)
+val children : (unit -> Jsx.element) -> resolved accessor
+(** [children (fun () -> get children)] resolves a component's children once, so
+    it can look at them without creating them again. *)
 
 val to_array : resolved -> Jsx.element array
 
@@ -286,9 +291,7 @@ external drawn_as : 'rest -> ('drawn -> Jsx.element) option = "as"
 [@@mel.get]
 (** What a rest given a part's [as_] draws in the element's place, for a plain
     element drawn apart from the part's [Props.others], in a function a part
-    calls:
-    [<div ?as_=(fun () -> Solid.drawn_as others) props=(Solid.undrawn others)>].
-*)
+    calls: [<div ?as_=(Solid.drawn_as others) props=(Solid.undrawn others)>]. *)
 
 val with_drawn : 'rest -> ('drawn -> Jsx.element) option -> 'rest
 (** [with_drawn rest given] is [rest] with [as_] [given], for what a part hands

@@ -79,26 +79,24 @@ module Content = struct
     let c = within "Checkbox.Content" in
     let state () = state_of c.field in
     <Field_content
-      field=(fun () -> c.field)
+      field=c.field
       slot="checkbox-content"
-      class_=(fun () ->
-               after (Styles.Checkbox.content (S.get c.slots)) (S.get class_))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      class_=(after (Styles.Checkbox.content (S.get c.slots)) (S.get class_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state_of c.field))
+      (Jsx.draw (S.get children) (state_of c.field))
     </Field_content>
   [@@element label]
 end
 
 module Control = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let c = within "Checkbox.Control" in
     <span
-      class_=(fun () ->
-               after (Styles.Checkbox.control (S.get c.slots)) (S.get class_))
+      class_=(after (Styles.Checkbox.control (S.get c.slots)) (S.get class_))
       data_slot="checkbox-control"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </span>
   [@@element span]
 end
@@ -114,7 +112,7 @@ module Indicator = struct
       role=`presentation
       stroke="currentColor"
       stroke_dasharray="22"
-      stroke_dashoffset=(fun () -> if S.get on then "44" else "66")
+      stroke_dashoffset=(if S.get on then "44" else "66")
       stroke_linecap="round"
       stroke_linejoin="round"
       stroke_width="2"
@@ -135,25 +133,22 @@ module Indicator = struct
       <line x1="21" x2="3" y1="12" y2="12" />
     </svg>
 
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let c = within "Checkbox.Indicator" in
     <span
       aria_hidden=true
-      class_=(fun () ->
-               after (Styles.Checkbox.indicator (S.get c.slots)) (S.get class_))
+      class_=(after (Styles.Checkbox.indicator (S.get c.slots)) (S.get class_))
       data_slot="checkbox-indicator"
       props=(Props.others props)>
-      (fun () ->
-        match S.get children with
-        | Some given -> given
-        | None ->
-            Jsx.element
-              <Show
-                when_=(fun () -> S.get c.field.indeterminate)
-                fallback=(fun () -> check c.field.selected)>
-                (fun () -> Jsx.element (dash ()))
-              </Show>)
+      (match S.get children with
+      | Some given -> given
+      | None ->
+          <Show
+            when_=(S.get c.field.indeterminate)
+            fallback=(check c.field.selected)>
+            (dash ())
+          </Show>)
     </span>
   [@@element span]
 end
@@ -168,11 +163,11 @@ let description : Description.slot =
  fun classes others children ->
   <Kobalte_description
     as_="span"
-    class_=(fun () -> classes ())
+    class_=(classes ())
     slot="description"
     data_slot="description"
     props=others>
-    (fun () -> children ())
+    (children ())
   </Kobalte_description>
 
 module Kobalte_error = Field.As_span (struct
@@ -185,12 +180,12 @@ let error : Field_error.slot =
  fun classes others children ->
   <Kobalte_error
     as_="span"
-    class_=(fun () -> classes ())
+    class_=(classes ())
     slot="errorMessage"
     data_slot="field-error"
     data_visible="true"
     props=others>
-    (fun () -> children ())
+    (children ())
   </Kobalte_error>
 
 (* What its children are drawn of: React Aria's render props for it,
@@ -343,19 +338,18 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     }
   in
   let state () = state_of c.field in
-  <Context.Provider value=(fun () -> c)>
+  <Context.Provider value=c>
     <Kobalte.Root
-      checked=(fun () -> S.get on)
+      checked=(S.get on)
       on_change=change
-      indeterminate=(fun () -> is_indeterminate ())
-      disabled=(fun () -> S.get disabled)
-      read_only=(fun () -> S.get read_only)
-      required=(fun () -> S.get required)
-      ?name=(fun () -> S.get name)
-      ?value=(fun () -> S.get value)
-      validation_state=(fun () -> if S.get invalid then `invalid else `valid)
-      class_=(fun () ->
-               after (Styles.Checkbox.base (S.get c.slots)) (S.get class_))
+      indeterminate=(is_indeterminate ())
+      disabled=(S.get disabled)
+      read_only=(S.get read_only)
+      required=(S.get required)
+      ?name=(S.get name)
+      ?value=(S.get value)
+      validation_state=(if S.get invalid then `invalid else `valid)
+      class_=(after (Styles.Checkbox.base (S.get c.slots)) (S.get class_))
       ref=(fun e ->
             ignore (given_ref e : unit option);
             in_form.root e)
@@ -367,17 +361,17 @@ let%component make ?(variant : [ `primary | `secondary ] option)
                          on_blur e)
                        e)
       data_slot="checkbox"
-      data_selected=(fun () -> Jsx.flag (S.get on))
-      data_indeterminate=(fun () -> Jsx.flag (is_indeterminate ()))
-      data_disabled=(fun () -> Jsx.flag (S.get disabled))
-      data_readonly=(fun () -> Jsx.flag (S.get read_only))
-      data_required=(fun () -> Jsx.flag (S.get required))
-      data_invalid=(fun () -> Jsx.flag (S.get invalid))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_selected=(Jsx.flag (S.get on))
+      data_indeterminate=(Jsx.flag (is_indeterminate ()))
+      data_disabled=(Jsx.flag (S.get disabled))
+      data_readonly=(Jsx.flag (S.get read_only))
+      data_required=(Jsx.flag (S.get required))
+      data_invalid=(Jsx.flag (S.get invalid))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Description.Slot.Provider value=(fun () -> description)>
-        <Field_error.Slot.Provider value=(fun () -> error)>
-          (fun () -> Jsx.draw (S.get children) (state_of c.field))
+      <Description.Slot.Provider value=description>
+        <Field_error.Slot.Provider value=error>
+          (Jsx.draw (S.get children) (state_of c.field))
         </Field_error.Slot.Provider>
       </Description.Slot.Provider>
     </Kobalte.Root>

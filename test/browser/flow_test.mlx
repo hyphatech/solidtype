@@ -38,24 +38,24 @@ end)
 module Shouts = struct
   let%component make () =
     let shout = Shout.use () in
-    <p>(fun () -> Jsx.string (shout "hi"))</p>
+    <p>(Jsx.string (shout "hi"))</p>
 end
 
 module Shows_theme = struct
   let%component make () =
     let theme = Theme.use () in
-    <p>(fun () -> Jsx.string theme)</p>
+    <p>(Jsx.string theme)</p>
 end
 
 module Shows_user = struct
   let%component make () =
     let user = User.use () in
-    <p>(fun () -> Jsx.string (Option.value user ~default:"nobody"))</p>
+    <p>(Jsx.string (Option.value user ~default:"nobody"))</p>
 end
 
 module Greeting = struct
   let%component make ~(name : string) ?(greeting : string = "Hello") () =
-    <p>(fun () -> Jsx.string (S.get greeting ^ ", " ^ S.get name))</p>
+    <p>(Jsx.string (S.get greeting ^ ", " ^ S.get name))</p>
 end
 
 module Fails = struct
@@ -65,15 +65,17 @@ end
 let () =
   Jest.describe "lists" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.test "an accessor whose value is a function gives that function"
+        (fun () ->
+          let shout = S.accessor (fun () -> fun s -> s ^ "!") in
+          E.(expect ((S.get shout) "hi") |> toEqual "hi!"));
       Jest.test "For renders each item, and an item added" (fun () ->
           let items, set_items = S.create_signal [| "a"; "b" |] in
           T.render (fun () ->
               <ul>
-                <For each=(fun () -> S.get items)>
+                <For each=(S.get items)>
                   (fun item i ->
-                    <li>
-                      (fun () -> Jsx.string (item ^ string_of_int (S.get i)))
-                    </li>)
+                    <li>(Jsx.string (item ^ string_of_int (S.get i)))</li>)
                 </For>
               </ul>);
           let before = T.page () in
@@ -81,16 +83,16 @@ let () =
           E.(expect (before, T.page ()) |> toEqual ("a0b1", "z0a1b2")));
       Jest.test "For shows its fallback for no items" (fun () ->
           T.render (fun () ->
-              <For each=(fun () -> [||]) fallback=(<p>"none"</p>)>
-                (fun item _ -> <li>(fun () -> Jsx.string item)</li>)
+              <For each=[||] fallback=(<p>"none"</p>)>
+                (fun item _ -> <li>(Jsx.string item)</li>)
               </For>);
           E.(expect (T.page ()) |> toBe "none"));
       Jest.test "Index tracks the item at each index" (fun () ->
           let items, set_items = S.create_signal [| 1; 2 |] in
           T.render (fun () ->
               <ul>
-                <Index each=(fun () -> S.get items)>
-                  (fun item _ -> <li>(fun () -> Jsx.int (S.get item))</li>)
+                <Index each=(S.get items)>
+                  (fun item _ -> <li>(Jsx.int (S.get item))</li>)
                 </Index>
               </ul>);
           S.set set_items [| 3; 4 |];
@@ -100,9 +102,7 @@ let () =
       Jest.test "Show shows its children while its condition holds" (fun () ->
           let on, set_on = S.create_signal false in
           T.render (fun () ->
-              <Show when_=(fun () -> S.get on) fallback=(<p>"off"</p>)>
-                <p>"on"</p>
-              </Show>);
+              <Show when_=(S.get on) fallback=(<p>"off"</p>)><p>"on"</p></Show>);
           let before = T.page () in
           S.set set_on true;
           E.(expect (before, T.page ()) |> toEqual ("off", "on")));
@@ -110,9 +110,8 @@ let () =
         (fun () ->
           let value, set_value = S.create_signal None in
           T.render (fun () ->
-              <Show.Some
-                some=(fun () -> S.get value) fallback=(<p>"nothing"</p>)>
-                (fun v -> <p>(fun () -> Jsx.int (S.get v))</p>)
+              <Show.Some some=(S.get value) fallback=(<p>"nothing"</p>)>
+                (fun v -> <p>(Jsx.int (S.get v))</p>)
               </Show.Some>);
           let before = T.page () in
           S.set set_value (Some 0);
@@ -123,10 +122,10 @@ let () =
           let renders = ref 0 in
           let value, set_value = S.create_signal (Some "a") in
           T.render (fun () ->
-              <Show.Keyed some=(fun () -> S.get value)>
+              <Show.Keyed some=(S.get value)>
                 (fun v ->
                   incr renders;
-                  <p>(fun () -> Jsx.string v)</p>)
+                  <p>(Jsx.string v)</p>)
               </Show.Keyed>);
           S.set set_value (Some "b");
           E.(expect (T.page (), !renders) |> toEqual ("b", 2)));
@@ -134,11 +133,10 @@ let () =
           let answer, set_answer = S.create_signal Waiting in
           T.render (fun () ->
               <Switch>
-                (fun () ->
-                  match S.get answer with
-                  | Waiting -> <p>"waiting"</p>
-                  | Ready n -> <p>(fun () -> Jsx.int n)</p>
-                  | Refused why -> <p>(fun () -> Jsx.string why)</p>)
+                (match S.get answer with
+                | Waiting -> <p>"waiting"</p>
+                | Ready n -> <p>(Jsx.int n)</p>
+                | Refused why -> <p>(Jsx.string why)</p>)
               </Switch>);
           let waiting = T.page () in
           S.set set_answer (Ready 3);
@@ -155,8 +153,8 @@ let () =
           let n, set_n = S.create_signal 0 in
           T.render (fun () ->
               <Switch fallback=(<p>"small"</p>)>
-                <Match when_=(fun () -> S.get n > 10)><p>"big"</p></Match>
-                <Match when_=(fun () -> S.get n > 5)><p>"middle"</p></Match>
+                <Match when_=(S.get n > 10)><p>"big"</p></Match>
+                <Match when_=(S.get n > 5)><p>"middle"</p></Match>
               </Switch>);
           let small = T.page () in
           S.set set_n 7;
@@ -173,11 +171,10 @@ let () =
               <ErrorBoundary
                 fallback=(fun e _ ->
                            <p>
-                             (fun () ->
-                               Jsx.string
-                                 (match e with
-                                 | Broken -> "broken"
-                                 | _ -> "another"))
+                             (Jsx.string
+                                (match e with
+                                | Broken -> "broken"
+                                | _ -> "another"))
                            </p>)>
                 <Fails />
               </ErrorBoundary>);
@@ -193,7 +190,7 @@ let () =
       Jest.test "a component's props are read live, a default where absent"
         (fun () ->
           let name, set_name = S.create_signal "Ann" in
-          T.render (fun () -> <Greeting name=(fun () -> S.get name) />);
+          T.render (fun () -> <Greeting name=(S.get name) />);
           let before = T.page () in
           S.set set_name "Bo";
           E.(expect (before, T.page ()) |> toEqual ("Hello, Ann", "Hello, Bo")));
@@ -202,8 +199,7 @@ let () =
          with it" (fun () ->
           let tag, set_tag = S.create_signal "section" in
           T.render (fun () ->
-              <Dynamic.Element
-                component=(fun () -> S.get tag) class_="box" title="t">
+              <Dynamic.Element component=(S.get tag) class_="box" title="t">
                 "inside"
               </Dynamic.Element>);
           let shown () =
@@ -219,8 +215,7 @@ let () =
                  (("SECTION", "box", "inside"), ("ARTICLE", "box", "inside"))));
       Jest.test "Dynamic renders the component chosen" (fun () ->
           let props = Greeting.Props.make ~name:"Cy" () in
-          T.render (fun () ->
-              <Dynamic component=(fun () -> Greeting.component) props />);
+          T.render (fun () -> <Dynamic component=Greeting.component props />);
           E.(expect (T.page ()) |> toBe "Hello, Cy"));
       Jest.test "Portal mounts its children elsewhere" (fun () ->
           T.render (fun () -> <div><Portal><p>"away"</p></Portal></div>);
@@ -230,15 +225,13 @@ let () =
           T.render (fun () ->
               <div>
                 <Shows_theme />
-                <Theme.Provider value=(fun () -> "dark")>
-                  <Shows_theme />
-                </Theme.Provider>
+                <Theme.Provider value="dark"><Shows_theme /></Theme.Provider>
               </div>);
           E.(expect (T.page ()) |> toBe "lightdark"));
       Jest.test "a thunk whose value is a function gives that function"
         (fun () ->
           T.render (fun () ->
-              <Shout.Provider value=(fun () -> fun s -> s ^ "!")>
+              <Shout.Provider value=(fun s -> s ^ "!")>
                 <Shouts />
               </Shout.Provider>);
           E.(expect (T.page ()) |> toBe "hi!"));
@@ -246,9 +239,7 @@ let () =
           T.render (fun () ->
               <div>
                 <Shows_user />
-                <User.Provider value=(fun () -> "Di")>
-                  <Shows_user />
-                </User.Provider>
+                <User.Provider value="Di"><Shows_user /></User.Provider>
               </div>);
           E.(expect (T.page ()) |> toBe "nobodyDi")));
   Jest.describe "suspense" (fun () ->
@@ -260,9 +251,7 @@ let () =
                 S.create_resource (fun _ -> Js.Promise.resolve "loaded")
               in
               <Suspense fallback=(<p>"loading"</p>)>
-                <p>
-                  (fun () -> Jsx.string (Option.value (S.read r) ~default:""))
-                </p>
+                <p>(Jsx.string (Option.value (S.read r) ~default:""))</p>
               </Suspense>);
           let before = T.page () in
           let* () = T.page_reads "loaded" in

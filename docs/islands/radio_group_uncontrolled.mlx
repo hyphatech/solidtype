@@ -31,6 +31,6 @@ let make () =
     </Radio_group>
     <p class_="text-sm text-muted">
       "Last chosen plan: "
-      <span class_="font-medium">(fun () -> Jsx.string (S.get selection))</span>
+      <span class_="font-medium">(Jsx.string (S.get selection))</span>
     </p>
   </div>

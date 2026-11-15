@@ -26,11 +26,7 @@ let segments hours =
 
 let segment d =
   let s = Row.data d in
-  <Bar
-    ?from=(fun () -> s.from)
-    ?to_=(fun () -> s.to_)
-    color=(fun () -> Color.series (s.part + 1))
-  />
+  <Bar ?from=s.from ?to_=s.to_ color=(Color.series (s.part + 1)) />
 
 let team =
   Slat.make ~thickness:(Slat.number 32.)
@@ -38,11 +34,11 @@ let team =
     (fun d ->
       let t = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string t.team)</Label>
-        <Plot rows=(fun () -> segments t.hours) overlap=true render=segment />
+        <Label edge="start">(Jsx.string t.team)</Label>
+        <Plot rows=(segments t.hours) overlap=true render=segment />
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (0., 30.)) label="Hours a week, by task">
-    <Plot rows=(fun () -> teams) render=team />
+  <Chart scale=(0., 30.) label="Hours a week, by task">
+    <Plot rows=teams render=team />
   </Chart>

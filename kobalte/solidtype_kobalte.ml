@@ -15,7 +15,7 @@ module Accordion = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -30,7 +30,7 @@ module Accordion = struct
       external check :
         ?as_:(Solidtype.Html.H3.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H3.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H3.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -47,7 +47,7 @@ module Accordion = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -67,7 +67,7 @@ module Accordion = struct
         ?should_focus_wrap:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -81,7 +81,7 @@ module Accordion = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -101,7 +101,7 @@ module Alert = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -117,7 +117,7 @@ module AlertDialog = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -137,7 +137,7 @@ module AlertDialog = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -151,7 +151,7 @@ module AlertDialog = struct
       external check :
         ?as_:(Solidtype.Html.P.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -165,7 +165,7 @@ module AlertDialog = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -181,7 +181,7 @@ module AlertDialog = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -202,7 +202,7 @@ module AlertDialog = struct
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -216,7 +216,7 @@ module AlertDialog = struct
       external check :
         ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -230,7 +230,7 @@ module AlertDialog = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -246,7 +246,7 @@ module Badge = struct
         ?text_value:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -263,7 +263,7 @@ module Breadcrumbs = struct
         ?current:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -279,7 +279,7 @@ module Breadcrumbs = struct
         ?translations:Types.Breadcrumbs_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Nav.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -294,7 +294,7 @@ module Breadcrumbs = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -315,7 +315,7 @@ module Button = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -331,7 +331,7 @@ module Checkbox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -346,7 +346,7 @@ module Checkbox = struct
         ?id:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -362,7 +362,7 @@ module Checkbox = struct
         ?id:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -378,7 +378,7 @@ module Checkbox = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -392,7 +392,7 @@ module Checkbox = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -406,7 +406,7 @@ module Checkbox = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -430,7 +430,7 @@ module Checkbox = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.CheckboxRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:(Types.CheckboxRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -449,7 +449,7 @@ module Collapsible = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -468,7 +468,7 @@ module Collapsible = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -482,7 +482,7 @@ module Collapsible = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -500,7 +500,7 @@ module ColorArea = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -514,7 +514,7 @@ module ColorArea = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -529,7 +529,7 @@ module ColorArea = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -541,7 +541,7 @@ module ColorArea = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -553,7 +553,7 @@ module ColorArea = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -567,7 +567,7 @@ module ColorArea = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -596,7 +596,7 @@ module ColorArea = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -609,7 +609,7 @@ module ColorArea = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -627,7 +627,7 @@ module ColorChannelField = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -641,7 +641,7 @@ module ColorChannelField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -656,7 +656,7 @@ module ColorChannelField = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -668,7 +668,7 @@ module ColorChannelField = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -681,7 +681,7 @@ module ColorChannelField = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -694,7 +694,7 @@ module ColorChannelField = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -708,7 +708,7 @@ module ColorChannelField = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -740,7 +740,7 @@ module ColorChannelField = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -756,7 +756,7 @@ module ColorField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -771,7 +771,7 @@ module ColorField = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -784,7 +784,7 @@ module ColorField = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -798,7 +798,7 @@ module ColorField = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -820,7 +820,7 @@ module ColorField = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -848,7 +848,7 @@ module ColorMode = struct
         ?disable_transition_on_change:bool Solidtype.Check.value ->
         ?storage_manager:Types.ColorModeStorageManager.t Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -864,7 +864,7 @@ module ColorMode = struct
         ?storage_key:string Solidtype.Check.value ->
         ?nonce:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -904,7 +904,7 @@ module ColorSlider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -919,7 +919,7 @@ module ColorSlider = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -933,7 +933,7 @@ module ColorSlider = struct
       external check :
         ?style:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -947,7 +947,7 @@ module ColorSlider = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -975,7 +975,7 @@ module ColorSlider = struct
         ?translations:Types.ColorSlider_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -988,7 +988,7 @@ module ColorSlider = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1001,7 +1001,7 @@ module ColorSlider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1015,7 +1015,7 @@ module ColorSlider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1036,7 +1036,7 @@ module ColorSwatch = struct
         ?translations:Types.ColorSwatch_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1052,7 +1052,7 @@ module ColorWheel = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1067,7 +1067,7 @@ module ColorWheel = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1080,7 +1080,7 @@ module ColorWheel = struct
       external check :
         ?style:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1094,7 +1094,7 @@ module ColorWheel = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1120,7 +1120,7 @@ module ColorWheel = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1133,7 +1133,7 @@ module ColorWheel = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1146,7 +1146,7 @@ module ColorWheel = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1159,7 +1159,7 @@ module ColorWheel = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1207,7 +1207,7 @@ module Combobox = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1225,7 +1225,7 @@ module Combobox = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1239,7 +1239,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1253,7 +1253,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1268,7 +1268,7 @@ module Combobox = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1280,7 +1280,7 @@ module Combobox = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1295,7 +1295,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1308,7 +1308,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1323,7 +1323,7 @@ module Combobox = struct
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1338,7 +1338,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1354,7 +1354,7 @@ module Combobox = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1369,7 +1369,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1383,7 +1383,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1415,7 +1415,7 @@ module Combobox = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1480,7 +1480,7 @@ module Combobox = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1546,7 +1546,7 @@ module Combobox = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1561,7 +1561,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1574,7 +1574,7 @@ module Combobox = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1595,7 +1595,7 @@ module ContextMenu = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1617,7 +1617,7 @@ module ContextMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1636,7 +1636,7 @@ module ContextMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1650,7 +1650,7 @@ module ContextMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1665,7 +1665,7 @@ module ContextMenu = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1680,7 +1680,7 @@ module ContextMenu = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1698,7 +1698,7 @@ module ContextMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1713,7 +1713,7 @@ module ContextMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1729,7 +1729,7 @@ module ContextMenu = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1744,7 +1744,7 @@ module ContextMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1760,7 +1760,7 @@ module ContextMenu = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1778,7 +1778,7 @@ module ContextMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1797,7 +1797,7 @@ module ContextMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1829,7 +1829,7 @@ module ContextMenu = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1844,7 +1844,7 @@ module ContextMenu = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1870,7 +1870,7 @@ module ContextMenu = struct
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1888,7 +1888,7 @@ module ContextMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1904,7 +1904,7 @@ module ContextMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1918,7 +1918,7 @@ module ContextMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1937,7 +1937,7 @@ module Dialog = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1957,7 +1957,7 @@ module Dialog = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1971,7 +1971,7 @@ module Dialog = struct
       external check :
         ?as_:(Solidtype.Html.P.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -1985,7 +1985,7 @@ module Dialog = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2001,7 +2001,7 @@ module Dialog = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2022,7 +2022,7 @@ module Dialog = struct
         ?prevent_scroll:bool Solidtype.Check.value ->
         ?force_mount:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2036,7 +2036,7 @@ module Dialog = struct
       external check :
         ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2050,7 +2050,7 @@ module Dialog = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2071,7 +2071,7 @@ module DropdownMenu = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2093,7 +2093,7 @@ module DropdownMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2113,7 +2113,7 @@ module DropdownMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2127,7 +2127,7 @@ module DropdownMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2142,7 +2142,7 @@ module DropdownMenu = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2157,7 +2157,7 @@ module DropdownMenu = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2175,7 +2175,7 @@ module DropdownMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2190,7 +2190,7 @@ module DropdownMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2206,7 +2206,7 @@ module DropdownMenu = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2221,7 +2221,7 @@ module DropdownMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2237,7 +2237,7 @@ module DropdownMenu = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2255,7 +2255,7 @@ module DropdownMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2274,7 +2274,7 @@ module DropdownMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2309,7 +2309,7 @@ module DropdownMenu = struct
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2324,7 +2324,7 @@ module DropdownMenu = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2350,7 +2350,7 @@ module DropdownMenu = struct
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2368,7 +2368,7 @@ module DropdownMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2384,7 +2384,7 @@ module DropdownMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2398,7 +2398,7 @@ module DropdownMenu = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2417,7 +2417,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2430,7 +2430,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2445,7 +2445,7 @@ module FileField = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2458,7 +2458,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2471,7 +2471,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2484,7 +2484,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2510,7 +2510,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2524,7 +2524,7 @@ module FileField = struct
         type_:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2537,7 +2537,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Img.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2551,7 +2551,7 @@ module FileField = struct
         ?precision:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2564,7 +2564,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2594,7 +2594,7 @@ module FileField = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2607,7 +2607,7 @@ module FileField = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2628,7 +2628,7 @@ module HoverCard = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2642,7 +2642,7 @@ module HoverCard = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2658,7 +2658,7 @@ module HoverCard = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2692,7 +2692,7 @@ module HoverCard = struct
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2706,7 +2706,7 @@ module HoverCard = struct
       external check :
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2725,7 +2725,7 @@ module I18n = struct
       external check :
         ?locale:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2785,7 +2785,7 @@ module Image = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2799,7 +2799,7 @@ module Image = struct
       external check :
         ?as_:(Solidtype.Html.Img.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Img.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2815,7 +2815,7 @@ module Image = struct
         ?on_loading_status_change:([ `idle | `loading | `loaded | `error ] -> unit) ->
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2835,7 +2835,7 @@ module Link = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2852,7 +2852,7 @@ module Listbox = struct
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2867,7 +2867,7 @@ module Listbox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2883,7 +2883,7 @@ module Listbox = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2898,7 +2898,7 @@ module Listbox = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2954,7 +2954,7 @@ module Listbox = struct
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2975,7 +2975,7 @@ module Menubar = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -2997,7 +2997,7 @@ module Menubar = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3016,7 +3016,7 @@ module Menubar = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3030,7 +3030,7 @@ module Menubar = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3045,7 +3045,7 @@ module Menubar = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3060,7 +3060,7 @@ module Menubar = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3078,7 +3078,7 @@ module Menubar = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3093,7 +3093,7 @@ module Menubar = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3109,7 +3109,7 @@ module Menubar = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3124,7 +3124,7 @@ module Menubar = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3159,7 +3159,7 @@ module Menubar = struct
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3175,7 +3175,7 @@ module Menubar = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3193,7 +3193,7 @@ module Menubar = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3212,7 +3212,7 @@ module Menubar = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3234,7 +3234,7 @@ module Menubar = struct
         ?on_auto_focus_menu_change:bool Solidtype.Solid.setter Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3249,7 +3249,7 @@ module Menubar = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3275,7 +3275,7 @@ module Menubar = struct
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3293,7 +3293,7 @@ module Menubar = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3309,7 +3309,7 @@ module Menubar = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3323,7 +3323,7 @@ module Menubar = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3343,7 +3343,7 @@ module Meter = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3357,7 +3357,7 @@ module Meter = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3375,7 +3375,7 @@ module Meter = struct
         ?get_value_label:(Types.GetValueLabelParams.t -> string) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3390,7 +3390,7 @@ module Meter = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3404,7 +3404,7 @@ module Meter = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3425,7 +3425,7 @@ module NavigationMenu = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3447,7 +3447,7 @@ module NavigationMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3466,7 +3466,7 @@ module NavigationMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3480,7 +3480,7 @@ module NavigationMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3495,7 +3495,7 @@ module NavigationMenu = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3510,7 +3510,7 @@ module NavigationMenu = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3528,7 +3528,7 @@ module NavigationMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.A.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.A.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3543,7 +3543,7 @@ module NavigationMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3559,7 +3559,7 @@ module NavigationMenu = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3574,7 +3574,7 @@ module NavigationMenu = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3609,7 +3609,7 @@ module NavigationMenu = struct
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3625,7 +3625,7 @@ module NavigationMenu = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3643,7 +3643,7 @@ module NavigationMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3662,7 +3662,7 @@ module NavigationMenu = struct
         ?on_select:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3700,7 +3700,7 @@ module NavigationMenu = struct
         ?overflow_padding:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Ul.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ul.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3715,7 +3715,7 @@ module NavigationMenu = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3741,7 +3741,7 @@ module NavigationMenu = struct
         ?default_open:bool Solidtype.Check.value ->
         ?on_open_change:(bool -> unit) ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3759,7 +3759,7 @@ module NavigationMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3775,7 +3775,7 @@ module NavigationMenu = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3789,7 +3789,7 @@ module NavigationMenu = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3806,7 +3806,7 @@ module NavigationMenu = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3824,7 +3824,7 @@ module NumberField = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3838,7 +3838,7 @@ module NumberField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3853,7 +3853,7 @@ module NumberField = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3865,7 +3865,7 @@ module NumberField = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3878,7 +3878,7 @@ module NumberField = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3891,7 +3891,7 @@ module NumberField = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3905,7 +3905,7 @@ module NumberField = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3940,7 +3940,7 @@ module NumberField = struct
         ?translations:Types.ColorChannelField_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3958,7 +3958,7 @@ module Pagination = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3972,7 +3972,7 @@ module Pagination = struct
         page:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3984,7 +3984,7 @@ module Pagination = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -3997,7 +3997,7 @@ module Pagination = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4010,7 +4010,7 @@ module Pagination = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4035,7 +4035,7 @@ module Pagination = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Nav.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Nav.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4055,7 +4055,7 @@ module Popover = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4071,7 +4071,7 @@ module Popover = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4085,7 +4085,7 @@ module Popover = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4105,7 +4105,7 @@ module Popover = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4119,7 +4119,7 @@ module Popover = struct
       external check :
         ?as_:(Solidtype.Html.P.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.P.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4135,7 +4135,7 @@ module Popover = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4170,7 +4170,7 @@ module Popover = struct
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4184,7 +4184,7 @@ module Popover = struct
       external check :
         ?as_:(Solidtype.Html.H2.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.H2.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4198,7 +4198,7 @@ module Popover = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4218,7 +4218,7 @@ module Progress = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4232,7 +4232,7 @@ module Progress = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4251,7 +4251,7 @@ module Progress = struct
         ?get_value_label:(Types.GetValueLabelParams.t -> string) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4266,7 +4266,7 @@ module Progress = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4280,7 +4280,7 @@ module Progress = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4299,7 +4299,7 @@ module RadioGroup = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4314,7 +4314,7 @@ module RadioGroup = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4330,7 +4330,7 @@ module RadioGroup = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4344,7 +4344,7 @@ module RadioGroup = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4358,7 +4358,7 @@ module RadioGroup = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4374,7 +4374,7 @@ module RadioGroup = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4388,7 +4388,7 @@ module RadioGroup = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4402,7 +4402,7 @@ module RadioGroup = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4416,7 +4416,7 @@ module RadioGroup = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4441,7 +4441,7 @@ module RadioGroup = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4459,7 +4459,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4473,7 +4473,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4488,7 +4488,7 @@ module Rating = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4500,7 +4500,7 @@ module Rating = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4513,7 +4513,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4526,7 +4526,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.RatingItemState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:(Types.RatingItemState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4539,7 +4539,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4552,7 +4552,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4565,7 +4565,7 @@ module Rating = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4589,7 +4589,7 @@ module Rating = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4607,7 +4607,7 @@ module Search = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4625,7 +4625,7 @@ module Search = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4639,7 +4639,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('option Types.ComboboxControlState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4653,7 +4653,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4665,7 +4665,7 @@ module Search = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4680,7 +4680,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4694,7 +4694,7 @@ module Search = struct
         ?loading_component:Solidtype.Jsx.element Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4707,7 +4707,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4722,7 +4722,7 @@ module Search = struct
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4737,7 +4737,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4752,7 +4752,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4766,7 +4766,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4796,7 +4796,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4812,7 +4812,7 @@ module Search = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4877,7 +4877,7 @@ module Search = struct
         ?debounce_options_millisecond:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4943,7 +4943,7 @@ module Search = struct
         ?debounce_options_millisecond:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4958,7 +4958,7 @@ module Search = struct
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4977,7 +4977,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -4992,7 +4992,7 @@ module SegmentedControl = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5005,7 +5005,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5020,7 +5020,7 @@ module SegmentedControl = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5034,7 +5034,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5048,7 +5048,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5064,7 +5064,7 @@ module SegmentedControl = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5077,7 +5077,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5091,7 +5091,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5105,7 +5105,7 @@ module SegmentedControl = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5129,7 +5129,7 @@ module SegmentedControl = struct
         ?ref:(Dom.htmlElement, Dom.htmlElement -> unit) Types.Either.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5150,7 +5150,7 @@ module Select = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5168,7 +5168,7 @@ module Select = struct
         ?on_interact_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5182,7 +5182,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5197,7 +5197,7 @@ module Select = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5209,7 +5209,7 @@ module Select = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Select.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5224,7 +5224,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5239,7 +5239,7 @@ module Select = struct
         item:_ Types.CollectionNode.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5254,7 +5254,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5270,7 +5270,7 @@ module Select = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5285,7 +5285,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5299,7 +5299,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5331,7 +5331,7 @@ module Select = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5389,7 +5389,7 @@ module Select = struct
         ?disallow_type_ahead:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5448,7 +5448,7 @@ module Select = struct
         ?disallow_type_ahead:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5463,7 +5463,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5476,7 +5476,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5490,7 +5490,7 @@ module Select = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('option Types.SelectValueState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('option Types.SelectValueState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5510,7 +5510,7 @@ module Separator = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Hr.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Hr.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5531,7 +5531,7 @@ module Skeleton = struct
         ?animate:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5547,7 +5547,7 @@ module Slider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5562,7 +5562,7 @@ module Slider = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5577,7 +5577,7 @@ module Slider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5591,7 +5591,7 @@ module Slider = struct
       external check :
         ?style:string Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5605,7 +5605,7 @@ module Slider = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5635,7 +5635,7 @@ module Slider = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5648,7 +5648,7 @@ module Slider = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5663,7 +5663,7 @@ module Slider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5677,7 +5677,7 @@ module Slider = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5710,7 +5710,7 @@ module SpinButton = struct
         ?on_increment_to_max:(unit -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5726,7 +5726,7 @@ module Switch = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5740,7 +5740,7 @@ module Switch = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5755,7 +5755,7 @@ module Switch = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5769,7 +5769,7 @@ module Switch = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5783,7 +5783,7 @@ module Switch = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5806,7 +5806,7 @@ module Switch = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.SwitchRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:(Types.SwitchRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5820,7 +5820,7 @@ module Switch = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5841,7 +5841,7 @@ module Tabs = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5856,7 +5856,7 @@ module Tabs = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5870,7 +5870,7 @@ module Tabs = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5891,7 +5891,7 @@ module Tabs = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5907,7 +5907,7 @@ module Tabs = struct
         ?disabled:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5926,7 +5926,7 @@ module TextField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5941,7 +5941,7 @@ module TextField = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5954,7 +5954,7 @@ module TextField = struct
       external check :
         ?as_:(Solidtype.Html.Input.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5968,7 +5968,7 @@ module TextField = struct
       external check :
         ?as_:(Solidtype.Html.Label.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Label.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -5991,7 +5991,7 @@ module TextField = struct
         ?read_only:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6007,7 +6007,7 @@ module TextField = struct
         ?submit_on_enter:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Textarea.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Textarea.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Textarea.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6026,7 +6026,7 @@ module TimeField = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6041,7 +6041,7 @@ module TimeField = struct
         ?force_mount:bool Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6053,7 +6053,7 @@ module TimeField = struct
     module Props = struct
       external check :
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Input.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6079,7 +6079,7 @@ module TimeField = struct
       external check :
         ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Span.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6108,7 +6108,7 @@ module TimeField = struct
         ?translations:Types.TimeField_Root_Translations.t Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6122,7 +6122,7 @@ module TimeField = struct
         segment:[ `hour | `minute | `second | `dayPeriod ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6138,7 +6138,7 @@ module Toast = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6152,7 +6152,7 @@ module Toast = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6167,7 +6167,7 @@ module Toast = struct
       external check :
         ?as_:(Solidtype.Html.Ol.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ol.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Ol.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6182,7 +6182,7 @@ module Toast = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6197,7 +6197,7 @@ module Toast = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6222,7 +6222,7 @@ module Toast = struct
         ?region_id:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6247,7 +6247,7 @@ module Toast = struct
         ?on_escape_key_down:(Dom.keyboardEvent -> unit) ->
         ?as_:(Solidtype.Html.Li.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Li.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6261,7 +6261,7 @@ module Toast = struct
       external check :
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6287,7 +6287,7 @@ module ToggleButton = struct
         ?on_change:(bool -> unit) ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6303,7 +6303,7 @@ module ToggleGroup = struct
         value:string Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `nodes | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:(Types.ToggleButtonRootState.t -> Solidtype.Jsx.element, [ `elements | `render ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6321,7 +6321,7 @@ module ToggleGroup = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6340,7 +6340,7 @@ module ToggleGroup = struct
         ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6361,7 +6361,7 @@ module Tooltip = struct
         ?size:float Solidtype.Check.value ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6377,7 +6377,7 @@ module Tooltip = struct
         ?on_pointer_down_outside:(Dom.customEvent -> unit) ->
         ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Div.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6393,7 +6393,7 @@ module Tooltip = struct
         ?use_shadow:bool Solidtype.Check.value ->
         ?is_svg:bool Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6432,7 +6432,7 @@ module Tooltip = struct
         ?arrow_padding:float Solidtype.Check.value ->
         ?overflow_padding:float Solidtype.Check.value ->
         ?props:'spread Solidtype.Solid.rest ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit = "check"
+        ?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 
@@ -6446,7 +6446,7 @@ module Tooltip = struct
       external check :
         ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
         ?props:'spread Solidtype.Solid.rest ->
-        (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
+        (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit) Solidtype.Html.Button.check = "check"
       [@@mel.module "vite-plugin-solidtype/markers"]
     end
 

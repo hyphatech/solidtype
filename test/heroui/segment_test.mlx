@@ -74,17 +74,17 @@ let segment ?selected_key ?default_selected_key ?(told = ref [||])
     () =
   T.render (fun () ->
       <Segment
-        ?selected_key=(fun () -> Option.map S.get selected_key)
-        ?default_selected_key=(fun () -> default_selected_key)
+        ?selected_key=(Option.map S.get selected_key)
+        ?default_selected_key
         on_selection_change=(fun key -> told := Array.append !told [| key |])
-        is_disabled=(fun () -> is_disabled)
-        ?variant=(fun () -> variant)
-        ?size=(fun () -> size)
-        ?class_=(fun () -> class_)
+        is_disabled
+        ?variant
+        ?size
+        ?class_
         name="view"
         aria_label="View">
         <Segment.Item id="dashboard">"Dashboard"</Segment.Item>
-        <Segment.Item id="analytics" is_disabled=(fun () -> analytics_disabled)>
+        <Segment.Item id="analytics" is_disabled=analytics_disabled>
           <Segment.Separator /> "Analytics"
         </Segment.Item>
         <Segment.Item id="reports">
@@ -97,9 +97,7 @@ let segment ?selected_key ?default_selected_key ?(told = ref [||])
 module Shown = struct
   let%component make () =
     let selected = Segment.Item.is_selected () in
-    <span>
-      (fun () -> Solidtype.Jsx.string (if S.get selected then "on" else "off"))
-    </span>
+    <span>(Solidtype.Jsx.string (if S.get selected then "on" else "off"))</span>
 end
 
 let () =

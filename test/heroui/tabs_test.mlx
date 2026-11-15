@@ -162,19 +162,17 @@ let render ?selected_key ?default_selected_key ?orientation ?variant ?align
     ?keyboard_activation ?is_disabled ?disabled ~container ~links tell =
   let list () =
     <Tabs.List aria_label="Options">
-      <Solidtype.For each=(fun () -> keys)>
+      <Solidtype.For each=keys>
         (fun key _ ->
           <Tabs.Tab
-            id=(fun () -> key)
-            ?href=(fun () -> if links then Some ("#" ^ key) else None)
-            ?is_disabled=(fun () ->
-                           match disabled with
-                           | Some d when String.equal d key -> Some true
-                           | _ -> None)>
-            (fun () ->
-              if String.equal key keys.(0) then Solidtype.Jsx.string ""
-              else Solidtype.Jsx.element <Tabs.Separator />)
-            (fun () -> Solidtype.Jsx.string key)
+            id=key
+            ?href=(if links then Some ("#" ^ key) else None)
+            ?is_disabled=(match disabled with
+                         | Some d when String.equal d key -> Some true
+                         | _ -> None)>
+            (if String.equal key keys.(0) then Solidtype.Jsx.string ""
+             else <Tabs.Separator />)
+            (Solidtype.Jsx.string key)
             <Tabs.Indicator />
           </Tabs.Tab>)
       </Solidtype.For>
@@ -182,25 +180,20 @@ let render ?selected_key ?default_selected_key ?orientation ?variant ?align
   in
   T.render (fun () ->
       <Tabs
-        ?selected_key=(fun () -> selected_key)
-        ?default_selected_key=(fun () -> default_selected_key)
-        ?orientation=(fun () -> orientation)
-        ?variant=(fun () -> variant)
-        ?align=(fun () -> align)
-        ?keyboard_activation=(fun () -> keyboard_activation)
-        ?is_disabled=(fun () -> is_disabled)
+        ?selected_key
+        ?default_selected_key
+        ?orientation
+        ?variant
+        ?align
+        ?keyboard_activation
+        ?is_disabled
         on_selection_change=tell>
-        (fun () ->
-          if container then
-            Solidtype.Jsx.element
-              <Tabs.List_container>
-                (fun () -> Solidtype.Jsx.element (list ()))
-              </Tabs.List_container>
-          else Solidtype.Jsx.element (list ()))
-        <Solidtype.For each=(fun () -> keys)>
+        (if container then <Tabs.List_container>(list ())</Tabs.List_container>
+         else list ())
+        <Solidtype.For each=keys>
           (fun key _ ->
-            <Tabs.Panel id=(fun () -> key)>
-              (fun () -> Solidtype.Jsx.string ("About " ^ key ^ "."))
+            <Tabs.Panel id=key>
+              (Solidtype.Jsx.string ("About " ^ key ^ "."))
             </Tabs.Panel>)
         </Solidtype.For>
       </Tabs>)
@@ -262,16 +255,15 @@ let same (solidtype, react) =
    state, as words, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   let tab key =
     <Tabs.Tab
-      id=(fun () -> key)
-      ?is_disabled=(fun () ->
-                     if String.equal key "analytics" && disabled then Some true
-                     else None)>
+      id=key
+      ?is_disabled=(if String.equal key "analytics" && disabled then Some true
+                    else None)>
       (fun s ->
         words key
           [
@@ -287,8 +279,7 @@ let of_state ~disabled =
   T.render (fun () ->
       <Tabs>
         <Tabs.List aria_label="Options">
-          (fun () -> Solidtype.Jsx.element (tab "overview"))
-          (fun () -> Solidtype.Jsx.element (tab "analytics"))
+          (tab "overview") (tab "analytics")
         </Tabs.List>
         <Tabs.Panel id="overview">"About overview."</Tabs.Panel>
         <Tabs.Panel id="analytics">"About analytics."</Tabs.Panel>

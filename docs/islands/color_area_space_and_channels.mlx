@@ -59,17 +59,17 @@ module Picker = struct
       ~(options : 'a option_ array) ~(picked : string)
       ~(on_pick : string -> unit) () =
     <Select
-      class_=(fun () -> S.get class_)
-      value=(fun () -> [| S.get picked |])
+      class_=(S.get class_)
+      value=[| S.get picked |]
       on_change=(fun ids -> Array.iter on_pick ids)>
-      <Label>(fun () -> Jsx.string (S.get label))</Label>
+      <Label>(Jsx.string (S.get label))</Label>
       <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
       <Select.Popover>
         <List_box>
-          <For each=(fun () -> S.get options)>
+          <For each=(S.get options)>
             (fun o _ ->
-              <List_box.Item id=(fun () -> o.id) text_value=(fun () -> o.name)>
-                (fun () -> Jsx.string o.name) <List_box.Item_indicator />
+              <List_box.Item id=o.id text_value=o.name>
+                (Jsx.string o.name) <List_box.Item_indicator />
               </List_box.Item>)
           </For>
         </List_box>
@@ -108,42 +108,41 @@ let make () =
       <Picker
         class_="w-32"
         label="Color Space"
-        options=(fun () -> color_spaces)
-        picked=(fun () -> space_id (S.get space))
+        options=color_spaces
+        picked=(space_id (S.get space))
         on_pick=pick_space
       />
       <Picker
         class_="w-36"
         label="X Axis"
-        options=(fun () -> other (S.get y))
-        picked=(fun () -> S.get x)
+        options=(other (S.get y))
+        picked=(S.get x)
         on_pick=(S.set set_x)
       />
       <Picker
         class_="w-36"
         label="Y Axis"
-        options=(fun () -> other (S.get x))
-        picked=(fun () -> S.get y)
+        options=(other (S.get x))
+        picked=(S.get y)
         on_pick=(S.set set_y)
       />
     </div>
     <Color_area
-      color_space=(fun () -> S.get space)
-      value=(fun () -> S.get color)
-      ?x_channel=(fun () -> channel (S.get x))
-      ?y_channel=(fun () -> channel (S.get y))
+      color_space=(S.get space)
+      value=(S.get color)
+      ?x_channel=(channel (S.get x))
+      ?y_channel=(channel (S.get y))
       on_change=(S.set set_color)>
       <Color_area.Thumb />
     </Color_area>
     <div class_="flex items-center gap-3">
       <div
         class_="size-8 rounded-md border border-default"
-        style=(fun () ->
-                  "background-color: "
-                  ^ Color.to_string (S.get color) ~format:`rgba ())
+        style=("background-color: "
+              ^ Color.to_string (S.get color) ~format:`rgba ())
       />
       <code class_="rounded bg-default/50 px-2 py-1 text-sm">
-        (fun () -> Jsx.string (written (S.get color) (S.get space)))
+        (Jsx.string (written (S.get color) (S.get space)))
       </code>
     </div>
   </div>

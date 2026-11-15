@@ -17,7 +17,7 @@ let make () =
     </Number_field>
     <Number_field
       is_invalid=true
-      format_options=(fun () -> Format.make ~style:`percent ())
+      format_options=(Format.make ~style:`percent ())
       max_value=1.
       min_value=0.
       name="percentage"

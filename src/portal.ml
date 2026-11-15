@@ -3,7 +3,7 @@ module Props = struct
       ?use_shadow:(_ : bool Check.value option)
       ?is_svg:(_ : bool Check.value option)
       ?ref:(_ : (Dom.element -> unit) option)
-      ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+      ?children:(_ : (_, [ `elements ]) Check.children option) () =
     ()
 end
 

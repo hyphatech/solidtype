@@ -21,38 +21,35 @@ let colors =
 
 let cell children =
   <div class_="flex shrink-0 items-center justify-center" style="width: 130px">
-    (fun () -> Solidtype.Jsx.element (children ()))
+    (children ())
   </div>
 
 let size_block (size, name) =
   <div class_="flex flex-col gap-4">
     <h3 class_="text-sm font-semibold text-muted capitalize">
-      (fun () -> Solidtype.Jsx.string name)
+      (Solidtype.Jsx.string name)
     </h3>
     <div class_="flex items-center gap-3">
       <div class_="w-24 shrink-0" />
-      <Solidtype.For each=(fun () -> colors)>
+      <Solidtype.For each=colors>
         (fun (_, color) _ ->
           cell (fun () ->
               <span class_="text-xs text-muted capitalize">
-                (fun () -> Solidtype.Jsx.string color)
+                (Solidtype.Jsx.string color)
               </span>))
       </Solidtype.For>
     </div>
     <div class_="flex flex-col gap-3">
-      <Solidtype.For each=(fun () -> variants)>
+      <Solidtype.For each=variants>
         (fun (variant, vname) _ ->
           <div class_="flex items-center gap-3">
             <div class_="w-24 shrink-0 text-sm text-muted capitalize">
-              (fun () -> Solidtype.Jsx.string vname)
+              (Solidtype.Jsx.string vname)
             </div>
-            <Solidtype.For each=(fun () -> colors)>
+            <Solidtype.For each=colors>
               (fun (color, _) _ ->
                 cell (fun () ->
-                    <Chip
-                      color=(fun () -> color)
-                      size=(fun () -> size)
-                      variant=(fun () -> variant)>
+                    <Chip color size variant>
                       <Gravity.Circle_dashed />
                       <Chip.Label>"Label"</Chip.Label>
                       <Gravity.Circle_dashed />
@@ -65,9 +62,9 @@ let size_block (size, name) =
 
 let make () =
   <div class_="flex flex-col gap-8 overflow-x-auto">
-    (fun () -> Solidtype.Jsx.element (size_block (`lg, "lg")))
+    (size_block (`lg, "lg"))
     <Separator />
-    (fun () -> Solidtype.Jsx.element (size_block (`md, "md")))
+    (size_block (`md, "md"))
     <Separator />
-    (fun () -> Solidtype.Jsx.element (size_block (`sm, "sm")))
+    (size_block (`sm, "sm"))
   </div>

@@ -31,11 +31,10 @@ let animals =
 
 let list () =
   <List_box>
-    <Solidtype.For each=(fun () -> animals)>
+    <Solidtype.For each=animals>
       (fun animal _ ->
-        <List_box.Item
-          id=(fun () -> animal.id) text_value=(fun () -> animal.name)>
-          (fun () -> Jsx.string animal.name) <List_box.Item_indicator />
+        <List_box.Item id=animal.id text_value=animal.name>
+          (Jsx.string animal.name) <List_box.Item_indicator />
         </List_box.Item>)
     </Solidtype.For>
   </List_box>
@@ -59,7 +58,7 @@ let make () =
       <Combo_box.Input_group>
         <Input placeholder="Select an animal..." /> <Combo_box.Trigger />
       </Combo_box.Input_group>
-      <Combo_box.Popover>(fun () -> Jsx.element (list ()))</Combo_box.Popover>
+      <Combo_box.Popover>(list ())</Combo_box.Popover>
       <Description>"Submits the selected key"</Description>
       <Field_error />
     </Combo_box>
@@ -69,15 +68,12 @@ let make () =
       <Combo_box.Input_group>
         <Input placeholder="Select an animal..." /> <Combo_box.Trigger />
       </Combo_box.Input_group>
-      <Combo_box.Popover>(fun () -> Jsx.element (list ()))</Combo_box.Popover>
+      <Combo_box.Popover>(list ())</Combo_box.Popover>
       <Description>"Submits the selected text"</Description>
       <Field_error />
     </Combo_box>
     <Button class_="w-fit" type_=`submit>"Submit"</Button>
-    (fun () ->
-      match S.get message with
-      | Some m ->
-          Jsx.element
-            <p class_="text-sm text-muted">(fun () -> Jsx.string m)</p>
-      | None -> Jsx.element Jsx.nothing)
+    (match S.get message with
+    | Some m -> <p class_="text-sm text-muted">(Jsx.string m)</p>
+    | None -> Jsx.nothing)
   </Form>

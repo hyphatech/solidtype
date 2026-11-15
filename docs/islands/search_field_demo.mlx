@@ -15,21 +15,19 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=search-field-group]"
       solidtype=(<Search_field
-                   variant=(fun () -> fst (S.get variant))
-                   is_disabled=(fun () -> S.get disabled)
+                   variant=(fst (S.get variant))
+                   is_disabled=(S.get disabled)
                    name="search">
                    <Label>"Search"</Label>
                    <Search_field.Group>

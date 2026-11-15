@@ -42,11 +42,11 @@ let make () =
   <Form class_="flex w-[280px] flex-col gap-4" on_submit=handle_submit>
     <Number_field
       is_required=true
-      is_invalid=(fun () -> is_out_of_stock ())
+      is_invalid=(is_out_of_stock ())
       max_value=5.
       min_value=1.
       name="quantity"
-      value=(fun () -> S.get value)
+      value=(S.get value)
       on_change=(S.set set_value)>
       <Label>"Order quantity"</Label>
       <Number_field.Group>
@@ -55,23 +55,22 @@ let make () =
         <Number_field.Increment_button />
       </Number_field.Group>
       <Show
-        when_=(fun () -> is_out_of_stock ())
+        when_=(is_out_of_stock ())
         fallback=(<Description>
-                    (fun () ->
-                      Jsx.string ("Only " ^ stock ^ " items available"))
+                    (Jsx.string ("Only " ^ stock ^ " items available"))
                   </Description>)>
         <Field_error>
-          (fun () -> Jsx.string ("Only " ^ stock ^ " items left in stock"))
+          (Jsx.string ("Only " ^ stock ^ " items left in stock"))
         </Field_error>
       </Show>
     </Number_field>
     <Button
       class_="w-full"
-      is_disabled=(fun () -> unavailable ())
+      is_disabled=(unavailable ())
       type_=`submit
       variant=`primary>
-      <Show when_=(fun () -> not (S.get is_submitting))>"Place Order"</Show>
-      <Show when_=(fun () -> S.get is_submitting)>
+      <Show when_=(not (S.get is_submitting))>"Place Order"</Show>
+      <Show when_=(S.get is_submitting)>
         <Spinner color=`current size=`sm /> "Processing..."
       </Show>
     </Button>

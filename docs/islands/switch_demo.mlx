@@ -14,21 +14,17 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
       />
     </div>
     <Side_by_side
       compared="[data-slot=switch-content]"
-      solidtype=(<Switch
-                   size=(fun () -> fst (S.get size))
-                   is_disabled=(fun () -> S.get disabled)>
+      solidtype=(<Switch size=(fst (S.get size)) is_disabled=(S.get disabled)>
                    <Switch.Content>
                      <Switch.Control><Switch.Thumb /></Switch.Control>
                      <Label>"Wi-Fi"</Label>

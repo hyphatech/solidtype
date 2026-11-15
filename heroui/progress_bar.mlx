@@ -35,46 +35,43 @@ end)
 (* A label in a bar is Kobalte's, a span, which names it. *)
 let label : Label.slot =
  fun classes others children ->
-  <Kobalte_label
-    as_="span" class_=(fun () -> classes ()) data_slot="label" props=others>
-    (fun () -> children ())
+  <Kobalte_label as_="span" class_=(classes ()) data_slot="label" props=others>
+    (children ())
   </Kobalte_label>
 
 module Output = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let m = within "Progress_bar.Output" in
     let classes () =
       after (Styles.ProgressBar.output (S.get m.slots)) (S.get class_)
     in
     <Show
-      when_=(fun () -> Option.is_some (S.get children))
+      when_=(Option.is_some (S.get children))
       fallback=(<Kobalte_value
                   as_="span"
-                  class_=(fun () -> classes ())
+                  class_=(classes ())
                   data_slot="progress-bar-output"
                   props=(Props.others props)
                 />)>
       <span
-        class_=(fun () -> classes ())
+        class_=(classes ())
         data_slot="progress-bar-output"
         props=(Props.others props)>
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </span>
     </Show>
   [@@element span]
 end
 
 module Track = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let m = within "Progress_bar.Track" in
     <div
-      class_=(fun () ->
-               after (Styles.ProgressBar.track (S.get m.slots)) (S.get class_))
+      class_=(after (Styles.ProgressBar.track (S.get m.slots)) (S.get class_))
       data_slot="progress-bar-track"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
@@ -83,15 +80,12 @@ module Fill = struct
   let%component make ?(class_ : string option) ?(style : string option) () =
     let m = within "Progress_bar.Fill" in
     <div
-      class_=(fun () ->
-               after (Styles.ProgressBar.fill (S.get m.slots)) (S.get class_))
-      ?style=(fun () ->
-               match (S.get m.percent, S.get style) with
-               | Some p, given ->
-                   let own = "width: " ^ Js.Float.toString p ^ "%;" in
-                   Some
-                     (match given with Some s -> own ^ " " ^ s | None -> own)
-               | None, given -> given)
+      class_=(after (Styles.ProgressBar.fill (S.get m.slots)) (S.get class_))
+      ?style=(match (S.get m.percent, S.get style) with
+             | Some p, given ->
+                 let own = "width: " ^ Js.Float.toString p ^ "%;" in
+                 Some (match given with Some s -> own ^ " " ^ s | None -> own)
+             | None, given -> given)
       data_slot="progress-bar-fill"
       props=(Props.others props)
     />
@@ -173,21 +167,20 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       is_indeterminate;
     }
   in
-  <Context.Provider value=(fun () -> m)>
+  <Context.Provider value=m>
     <Kobalte.Root
-      value=(fun () -> S.get value)
-      indeterminate=(fun () -> S.get is_indeterminate)
-      min_value=(fun () -> S.get min_value)
-      max_value=(fun () -> S.get max_value)
-      ?aria_label=(fun () -> S.get aria_label)
+      value=(S.get value)
+      indeterminate=(S.get is_indeterminate)
+      min_value=(S.get min_value)
+      max_value=(S.get max_value)
+      ?aria_label=(S.get aria_label)
       get_value_label=value_label
-      class_=(fun () ->
-               after (Styles.ProgressBar.base (S.get m.slots)) (S.get class_))
+      class_=(after (Styles.ProgressBar.base (S.get m.slots)) (S.get class_))
       data_slot="progress-bar"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      <Label.Slot.Provider value=(fun () -> label)>
-        (fun () -> Jsx.draw (S.get children) (state ()))
+      <Label.Slot.Provider value=label>
+        (Jsx.draw (S.get children) (state ()))
       </Label.Slot.Provider>
     </Kobalte.Root>
   </Context.Provider>

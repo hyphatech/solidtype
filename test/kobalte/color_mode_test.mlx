@@ -22,9 +22,7 @@ module Shows_mode = struct
   let%component make () =
     let mode = ColorMode.use_color_mode () in
     <div>
-      <p>
-        (fun () -> Jsx.string (mode_name (S.get (Context.color_mode mode))))
-      </p>
+      <p>(Jsx.string (mode_name (S.get (Context.color_mode mode))))</p>
       <button on_click=(fun _ -> Context.toggle_color_mode mode ())>
         "Toggle"
       </button>
@@ -37,7 +35,7 @@ end
 let island () =
   <ColorMode.ColorModeProvider
     initial_color_mode=`dark
-    storage_manager=(fun () -> ColorMode.create_local_storage_manager key)>
+    storage_manager=(ColorMode.create_local_storage_manager key)>
     <Shows_mode />
   </ColorMode.ColorModeProvider>
 

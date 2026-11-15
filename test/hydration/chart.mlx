@@ -23,11 +23,10 @@ let fruit =
     (fun d ->
       let f = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
-        <Bar to_=(fun () -> f.sold) />
+        <Label edge="start">(Jsx.string f.name)</Label> <Bar to_=f.sold />
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (0., 30.)) label="Fruit sold">
-    <Plot rows=(fun () -> fruits) render=fruit />
+  <Chart scale=(0., 30.) label="Fruit sold">
+    <Plot rows=fruits render=fruit />
   </Chart>

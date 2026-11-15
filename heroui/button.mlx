@@ -264,25 +264,20 @@ let%component make
           | None -> named_by ());
       now);
   <Root
-    class_=(fun () ->
-             Styles.Button.classes
-               (Styles.Button.options ~variant:(S.get variant)
-                  ~size:(S.get size) ~full_width:(S.get full_width)
-                  ~is_icon_only:(S.get is_icon_only) ?class_:(S.get class_) ()))
-    disabled=(fun () -> S.get is_disabled)
-    ?aria_label=(fun () -> S.get aria_label)
-    ?id=(fun () ->
-          match (S.get id, trigger) with
-          | Some given, _ -> Some given
-          | None, None -> Some own_id
-          | None, Some _ -> None)
-    ?aria_labelledby=(fun () -> S.get labelled_by)
-    ?aria_disabled=(fun () -> if pending () then Some true else None)
-    ?aria_controls=(fun () ->
-                     Option.bind trigger (fun (t : trigger) -> t.controls))
-    ?aria_describedby=(fun () ->
-                        Option.bind trigger (fun (t : trigger) ->
-                            t.described_by))
+    class_=(Styles.Button.classes
+              (Styles.Button.options ~variant:(S.get variant) ~size:(S.get size)
+                 ~full_width:(S.get full_width)
+                 ~is_icon_only:(S.get is_icon_only) ?class_:(S.get class_) ()))
+    disabled=(S.get is_disabled)
+    ?aria_label=(S.get aria_label)
+    ?id=(match (S.get id, trigger) with
+        | Some given, _ -> Some given
+        | None, None -> Some own_id
+        | None, Some _ -> None)
+    ?aria_labelledby=(S.get labelled_by)
+    ?aria_disabled=(if pending () then Some true else None)
+    ?aria_controls=(Option.bind trigger (fun (t : trigger) -> t.controls))
+    ?aria_describedby=(Option.bind trigger (fun (t : trigger) -> t.described_by))
     ref=(fun b ->
           Interaction.watch i b;
           (let e = as_element b in
@@ -300,14 +295,13 @@ let%component make
           | Some made -> made (as_element b)
           | None -> ());
           ignore (given_ref b : unit option))
-    ?slot=(fun () ->
-            Option.map
-              (function
-                | `trigger -> "trigger"
-                | `close -> "close"
-                | `chevron -> "chevron")
-              (S.get slot))
-    ?tabindex=(fun () -> Option.map (fun _ -> "-1") chevron)
+    ?slot=(Option.map
+             (function
+               | `trigger -> "trigger"
+               | `close -> "close"
+               | `chevron -> "chevron")
+             (S.get slot))
+    ?tabindex=(Option.map (fun _ -> "-1") chevron)
     on_focus=(fun e ->
                ignore (on_focus e : unit option);
                (* A chevron's press is its row's, which takes the focus, as
@@ -315,26 +309,24 @@ let%component make
                   the row shows no ring a key's focus would. *)
                Option.iter (fun c -> c.focus_row ()) chevron)
     data_slot="button"
-    data_hovered=(fun () -> Solidtype.Jsx.flag (Interaction.hovered i))
-    data_pressed=(fun () -> Solidtype.Jsx.flag (S.get pressed))
-    data_focused=(fun () -> Solidtype.Jsx.flag (Interaction.focused i))
-    data_focus_visible=(fun () ->
-                         Solidtype.Jsx.flag (Interaction.focus_visible i))
-    data_disabled=(fun () -> Solidtype.Jsx.flag (Interaction.disabled i))
-    data_pending=(fun () -> Solidtype.Jsx.flag (pending ()))
+    data_hovered=(Solidtype.Jsx.flag (Interaction.hovered i))
+    data_pressed=(Solidtype.Jsx.flag (S.get pressed))
+    data_focused=(Solidtype.Jsx.flag (Interaction.focused i))
+    data_focus_visible=(Solidtype.Jsx.flag (Interaction.focus_visible i))
+    data_disabled=(Solidtype.Jsx.flag (Interaction.disabled i))
+    data_pending=(Solidtype.Jsx.flag (pending ()))
                  (* A pending submit button submits nothing, Enter in a field included. *)
-    type_=(fun () ->
-            match S.get type_ with
-            | `submit when pending () -> `button
-            | (`submit | `reset | `button | `menu) as t -> t)
+    type_=(match S.get type_ with
+          | `submit when pending () -> `button
+          | (`submit | `reset | `button | `menu) as t -> t)
     on_click=(fun e ->
                ignore (on_click e : unit option);
                Option.iter (fun close -> close ()) closes;
                Option.iter (fun c -> c.toggle ()) chevron)
-    ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+    ?as_=(Option.map (fun f p -> f p state) (S.get as_))
     props=(Props.others props)>
-    <Spinner.Progress.Provider value=(fun () -> progress_id)>
-      (fun () -> Solidtype.Jsx.draw (S.get children) state)
+    <Spinner.Progress.Provider value=progress_id>
+      (Solidtype.Jsx.draw (S.get children) state)
     </Spinner.Progress.Provider>
   </Root>
 [@@element button]

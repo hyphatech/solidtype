@@ -7,7 +7,7 @@ let make () =
     <div class_="flex flex-col gap-2">
       <span class_="text-sm text-muted">"Single selection"</span>
       <Toggle_button_group
-        default_selected_keys=(fun () -> [| "center" |])
+        default_selected_keys=[| "center" |]
         selection_mode=`single
         aria_label="Alignment">
         <Toggle_button id="left">
@@ -26,7 +26,7 @@ let make () =
     <div class_="flex flex-col gap-2">
       <span class_="text-sm text-muted">"Multiple selection"</span>
       <Toggle_button_group
-        default_selected_keys=(fun () -> [| "bold"; "underline" |])
+        default_selected_keys=[| "bold"; "underline" |]
         selection_mode=`multiple
         aria_label="Text formatting">
         <Toggle_button is_icon_only=true aria_label="Bold" id="bold">

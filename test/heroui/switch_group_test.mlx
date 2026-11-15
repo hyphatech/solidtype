@@ -26,7 +26,7 @@ let shown host =
 
 let both orientation =
   T.render (fun () ->
-      <Switch_group ?orientation=(fun () -> orientation) class_="ms-1">
+      <Switch_group ?orientation class_="ms-1">
         <Switch name="notifications">
           <Switch.Content>
             <Switch.Control><Switch.Thumb /></Switch.Control> "Notifications"

@@ -157,23 +157,21 @@ module Trigger = struct
       }
     in
     <Kobalte.Trigger
-      ?aria_label=(fun () -> S.get aria_label)
-      class_=(fun () -> after (Styles.Dropdown.trigger d.slots) (S.get class_))
-      ?aria_describedby=(fun () ->
-                          Option.map (fun l -> l.description) d.long_press)
+      ?aria_label=(S.get aria_label)
+      class_=(after (Styles.Dropdown.trigger d.slots) (S.get class_))
+      ?aria_describedby=(Option.map (fun l -> l.description) d.long_press)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e;
             Option.iter (fun l -> l.listen (as_element e)) d.long_press)
       data_slot="dropdown-trigger"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () ->
-                     Jsx.flag (Interaction.pressed i || S.get d.is_open))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i || S.get d.is_open))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+      (Jsx.draw (S.get children) (state ()))
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -182,14 +180,14 @@ module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ?(on_focus : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) ()
+      ?(on_focus : (Dom.focusEvent -> unit) option) ~(children : Jsx.element) ()
       =
     let d = within "Dropdown.Popover" in
     let classes () = after (Styles.Dropdown.popover d.slots) (S.get class_) in
     let items () =
-      <Submenu.Provider value=(fun () -> None)>
-        <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-          (fun () -> S.get children)
+      <Submenu.Provider value=None>
+        <Button.Trigger.Provider value=Button.no_trigger>
+          (S.get children)
         </Button.Trigger.Provider>
       </Submenu.Provider>
     in
@@ -199,25 +197,24 @@ module Popover = struct
         let side, watch_side =
           Overlay.placed_side ~placement:(fun () -> "right") ()
         in
-        <Show when_=(fun () -> Overlay.present o)>
+        <Show when_=(Overlay.present o)>
           <Kobalte.Portal>
             <Kobalte.SubContent
-              class_=(fun () -> classes ())
-              style=(fun () ->
-                      "--trigger-anchor-point: \
-                       var(--kb-menu-content-transform-origin);"
-                      ^ match S.get style with Some s -> " " ^ s | None -> "")
+              class_=(classes ())
+              style=("--trigger-anchor-point: \
+                      var(--kb-menu-content-transform-origin);"
+                    ^ match S.get style with Some s -> " " ^ s | None -> "")
               ref=(fun e ->
                     ignore (given_ref e : unit option);
                     Overlay.watch o e;
                     watch_side e)
               on_focus=(fun e -> ignore (on_focus e : unit option))
               data_slot="dropdown-popover"
-              data_placement=(fun () -> Jsx.data (S.get side))
-              data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-              data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+              data_placement=(Jsx.data (S.get side))
+              data_entering=(Jsx.flag (Overlay.entering o))
+              data_exiting=(Jsx.flag (Overlay.exiting o))
               props=(Props.others props)>
-              (fun () -> Jsx.element (items ()))
+              (items ())
             </Kobalte.SubContent>
           </Kobalte.Portal>
         </Show>
@@ -263,14 +260,13 @@ module Popover = struct
             ~placement:(fun () -> Overlay.side_of (S.get d.placement))
             ()
         in
-        <Show when_=(fun () -> Overlay.present o)>
+        <Show when_=(Overlay.present o)>
           <Kobalte.Portal>
             <Kobalte.Content
-              class_=(fun () -> classes ())
-              style=(fun () ->
-                      "--trigger-anchor-point: \
-                       var(--kb-menu-content-transform-origin);"
-                      ^ match S.get style with Some s -> " " ^ s | None -> "")
+              class_=(classes ())
+              style=("--trigger-anchor-point: \
+                      var(--kb-menu-content-transform-origin);"
+                    ^ match S.get style with Some s -> " " ^ s | None -> "")
               ref=(fun e ->
                     ignore (given_ref e : unit option);
                     content := Some (as_element e);
@@ -281,11 +277,11 @@ module Popover = struct
                          ignore (on_focus e : unit option);
                          focus_item e)
               data_slot="dropdown-popover"
-              data_placement=(fun () -> Jsx.data (S.get side))
-              data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-              data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+              data_placement=(Jsx.data (S.get side))
+              data_entering=(Jsx.flag (Overlay.entering o))
+              data_exiting=(Jsx.flag (Overlay.exiting o))
               props=(Props.others props)>
-              (fun () -> Jsx.element (items ()))
+              (items ())
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>
@@ -342,7 +338,7 @@ module Menu = struct
       ?(on_selection_change : (string array -> unit) option)
       ?(disabled_keys : string array option)
       ?(on_action : (string -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let d = within "Dropdown.Menu" in
     let mode = S.untrack (fun () -> S.get selection_mode) in
     let s =
@@ -350,18 +346,15 @@ module Menu = struct
         ~disabled_keys ~act:(fun key -> ignore (on_action key : unit option))
     in
     <div
-      class_=(fun () -> after (Styles.Dropdown.menu d.slots) (S.get class_))
+      class_=(after (Styles.Dropdown.menu d.slots) (S.get class_))
       data_slot="dropdown-menu"
-      data_selection_mode=(fun () ->
-                            match mode with
-                            | `none -> Jsx.flag false
-                            | `single -> Jsx.data "single"
-                            | `multiple -> Jsx.data "multiple")
+      data_selection_mode=(match mode with
+                          | `none -> Jsx.flag false
+                          | `single -> Jsx.data "single"
+                          | `multiple -> Jsx.data "multiple")
       props=(Props.others props)>
-      <Separator.Element.Provider value=(fun () -> `div)>
-        <Selection.Provider value=(fun () -> Some s)>
-          (fun () -> S.get children)
-        </Selection.Provider>
+      <Separator.Element.Provider value=`div>
+        <Selection.Provider value=(Some s)>(S.get children)</Selection.Provider>
       </Separator.Element.Provider>
     </div>
   [@@element div]
@@ -373,7 +366,7 @@ module As_section = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -387,7 +380,7 @@ module As_header = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -397,9 +390,8 @@ end
 
 let header : Header.slot =
  fun classes others children ->
-  <As_header
-    as_="header" class_=(fun () -> classes ()) data_slot="header" props=others>
-    (fun () -> children ())
+  <As_header as_="header" class_=(classes ()) data_slot="header" props=others>
+    (children ())
   </As_header>
 
 module Section = struct
@@ -408,7 +400,7 @@ module Section = struct
       ?(default_selected_keys : string array option)
       ?(on_selection_change : (string array -> unit) option)
       ?(disabled_keys : string array option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let parent = Selection.use () in
     let own =
       match S.untrack (fun () -> S.get selection_mode) with
@@ -424,14 +416,11 @@ module Section = struct
     in
     <As_section
       as_="section"
-      class_=(fun () ->
-               Styles.MenuSection.classes
-                 (Styles.MenuSection.options ?class_:(S.get class_) ()))
+      class_=(Styles.MenuSection.classes
+                (Styles.MenuSection.options ?class_:(S.get class_) ()))
       props=(Props.others props)>
-      <Header.Slot.Provider value=(fun () -> header)>
-        <Selection.Provider value=(fun () -> own)>
-          (fun () -> S.get children)
-        </Selection.Provider>
+      <Header.Slot.Provider value=header>
+        <Selection.Provider value=own>(S.get children)</Selection.Provider>
       </Header.Slot.Provider>
     </As_section>
   [@@element section]
@@ -443,7 +432,7 @@ module As_span = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -455,11 +444,11 @@ let description : Description.slot =
  fun classes others children ->
   <As_span
     as_="span"
-    class_=(fun () -> classes ())
+    class_=(classes ())
     slot="description"
     data_slot="description"
     props=others>
-    (fun () -> children ())
+    (children ())
   </As_span>
 
 external key : Dom.keyboardEvent -> string = "key" [@@mel.get]
@@ -530,9 +519,9 @@ module Item = struct
     in
     let context = { item_slots; selected; has_submenu = Option.is_some sub } in
     let content () =
-      <Item_context.Provider value=(fun () -> context)>
-        <Description.Slot.Provider value=(fun () -> description)>
-          (fun () -> Jsx.draw (S.get children) state)
+      <Item_context.Provider value=context>
+        <Description.Slot.Provider value=description>
+          (Jsx.draw (S.get children) state)
         </Description.Slot.Provider>
       </Item_context.Provider>
     in
@@ -541,56 +530,55 @@ module Item = struct
     match (sub, mode) with
     | Some sub_open, (`none | `single | `multiple) ->
         <Kobalte.SubTrigger
-          id=(fun () -> unique ())
-          ?text_value=(fun () -> S.get text_value)
-          disabled=(fun () -> disabled ())
-          class_=(fun () -> classes ())
+          id=(unique ())
+          ?text_value=(S.get text_value)
+          disabled=(disabled ())
+          class_=(classes ())
           on_key_down=(fun e -> ignore (on_key_down e : unit option))
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Interaction.watch i e)
           data_slot="menu-item"
-          data_has_submenu=(fun () -> Jsx.flag true)
-          data_open=(fun () -> Jsx.flag (S.get sub_open))
-          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-          data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-          data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-          data_disabled=(fun () -> Jsx.flag (disabled ()))
-          ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+          data_has_submenu=(Jsx.flag true)
+          data_open=(Jsx.flag (S.get sub_open))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_focused=(Jsx.flag (Interaction.focused i))
+          data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(Jsx.flag (disabled ()))
+          ?as_=(Option.map (fun f p -> f p state) (S.get as_))
           props=(Props.others props)>
-          (fun () -> Jsx.element (content ()))
+          (content ())
         </Kobalte.SubTrigger>
     | None, `none ->
         <Kobalte.Item
-          id=(fun () -> unique ())
-          ?text_value=(fun () -> S.get text_value)
-          disabled=(fun () -> disabled ())
-          class_=(fun () -> classes ())
+          id=(unique ())
+          ?text_value=(S.get text_value)
+          disabled=(disabled ())
+          class_=(classes ())
           on_key_down=(fun e -> ignore (on_key_down e : unit option))
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Interaction.watch i e)
           data_slot="menu-item"
-          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-          data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-          data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-          data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-          data_disabled=(fun () -> Jsx.flag (disabled ()))
-          ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_pressed=(Jsx.flag (Interaction.pressed i))
+          data_focused=(Jsx.flag (Interaction.focused i))
+          data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(Jsx.flag (disabled ()))
+          ?as_=(Option.map (fun f p -> f p state) (S.get as_))
           props=(Props.others props)
           on_select=act>
-          (fun () -> Jsx.element (content ()))
+          (content ())
         </Kobalte.Item>
     | None, ((`single | `multiple) as mode) ->
         <Kobalte.CheckboxItem
-          id=(fun () -> unique ())
-          ?text_value=(fun () -> S.get text_value)
-          disabled=(fun () -> disabled ())
-          checked=(fun () -> S.get selected)
-          close_on_select=(fun () ->
-                            match mode with
-                            | `single -> true
-                            | `multiple -> false)
+          id=(unique ())
+          ?text_value=(S.get text_value)
+          disabled=(disabled ())
+          checked=(S.get selected)
+          close_on_select=(match mode with
+                          | `single -> true
+                          | `multiple -> false)
           on_key_down=(fun e ->
                         ignore (on_key_down e : unit option);
                         (* Enter closes a menu of many, as React Aria's does,
@@ -598,32 +586,30 @@ module Item = struct
                         match (mode, key e) with
                         | `multiple, "Enter" -> d.close ()
                         | (`single | `multiple), _ -> ())
-          role=(fun () ->
-                 match mode with
-                 | `single -> `menuitemradio
-                 | `multiple -> `menuitemcheckbox)
-          class_=(fun () -> classes ())
+          role=(match mode with
+               | `single -> `menuitemradio
+               | `multiple -> `menuitemcheckbox)
+          class_=(classes ())
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Interaction.watch i e)
           data_slot="menu-item"
-          data_selection_mode=(fun () ->
-                                Jsx.data
-                                  (match mode with
-                                  | `single -> "single"
-                                  | `multiple -> "multiple"))
-          data_selected=(fun () -> Jsx.flag (S.get selected))
-          data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-          data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-          data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-          data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-          data_disabled=(fun () -> Jsx.flag (disabled ()))
-          ?as_=(fun () -> Option.map (fun f p -> f p state) (S.get as_))
+          data_selection_mode=(Jsx.data
+                                 (match mode with
+                                 | `single -> "single"
+                                 | `multiple -> "multiple"))
+          data_selected=(Jsx.flag (S.get selected))
+          data_hovered=(Jsx.flag (Interaction.hovered i))
+          data_pressed=(Jsx.flag (Interaction.pressed i))
+          data_focused=(Jsx.flag (Interaction.focused i))
+          data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+          data_disabled=(Jsx.flag (disabled ()))
+          ?as_=(Option.map (fun f p -> f p state) (S.get as_))
           props=(Props.others props)
           on_change=(fun _ ->
                       match s with Some s -> s.toggle (S.get id) | None -> ())
           on_select=act>
-          (fun () -> Jsx.element (content ()))
+          (content ())
         </Kobalte.CheckboxItem>
   [@@element div]
 end
@@ -641,77 +627,67 @@ module Item_indicator = struct
     let selected = S.create_memo (fun () -> S.get i.selected) in
     <span
       aria_hidden=true
-      class_=(fun () ->
-               after
-                 (Styles.MenuItem.indicator (S.get i.item_slots))
-                 (S.get class_))
+      class_=(after
+                (Styles.MenuItem.indicator (S.get i.item_slots))
+                (S.get class_))
       data_slot="menu-item-indicator"
-      data_type=(fun () ->
-                  Jsx.data
-                    (match S.get type_ with
-                    | `checkmark -> "checkmark"
-                    | `dot -> "dot"))
-      data_visible=(fun () -> Jsx.flag (S.get i.selected))
+      data_type=(Jsx.data
+                   (match S.get type_ with
+                   | `checkmark -> "checkmark"
+                   | `dot -> "dot"))
+      data_visible=(Jsx.flag (S.get i.selected))
       props=(Props.others props)>
-      (fun () ->
-        match (children selected, S.get type_) with
-        | Some drawn, (`checkmark | `dot) -> Jsx.element drawn
-        | None, `dot ->
-            Jsx.element
-              <svg
-                aria_hidden=true
-                fill="currentColor"
-                fill_rule="evenodd"
-                role=`presentation
-                view_box="0 0 16 16"
-                xmlns="http://www.w3.org/2000/svg"
-                data_slot="menu-item-indicator--dot">
-                <path
-                  clip_rule="evenodd"
-                  d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14"
-                  fill_rule="evenodd"
-                />
-              </svg>
-        | None, `checkmark ->
-            Jsx.element
-              <svg
-                aria_hidden=true
-                fill="none"
-                role=`presentation
-                stroke="currentColor"
-                stroke_dasharray="22"
-                stroke_dashoffset=(fun () ->
-                                    if S.get i.selected then "44" else "66")
-                stroke_linecap="round"
-                stroke_linejoin="round"
-                stroke_width="2"
-                view_box="0 0 17 18"
-                data_slot="menu-item-indicator--checkmark">
-                <polyline points="1 9 7 14 15 4" />
-              </svg>)
+      (match (children selected, S.get type_) with
+      | Some drawn, (`checkmark | `dot) -> drawn
+      | None, `dot ->
+          <svg
+            aria_hidden=true
+            fill="currentColor"
+            fill_rule="evenodd"
+            role=`presentation
+            view_box="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+            data_slot="menu-item-indicator--dot">
+            <path
+              clip_rule="evenodd"
+              d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14"
+              fill_rule="evenodd"
+            />
+          </svg>
+      | None, `checkmark ->
+          <svg
+            aria_hidden=true
+            fill="none"
+            role=`presentation
+            stroke="currentColor"
+            stroke_dasharray="22"
+            stroke_dashoffset=(if S.get i.selected then "44" else "66")
+            stroke_linecap="round"
+            stroke_linejoin="round"
+            stroke_width="2"
+            view_box="0 0 17 18"
+            data_slot="menu-item-indicator--checkmark">
+            <polyline points="1 9 7 14 15 4" />
+          </svg>)
     </span>
   [@@element span]
 end
 
 module Submenu_indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let i = within_item "Dropdown.Submenu_indicator" in
-    <Show when_=(fun () -> i.has_submenu)>
+    <Show when_=i.has_submenu>
       <span
         aria_hidden=true
-        class_=(fun () ->
-                 after
-                   (Styles.MenuItem.submenu_indicator (S.get i.item_slots))
-                   (S.get class_))
+        class_=(after
+                  (Styles.MenuItem.submenu_indicator (S.get i.item_slots))
+                  (S.get class_))
         data_slot="submenu-indicator"
         props=(Props.others props)>
-        (fun () ->
-          match S.get children with
-          | Some c -> c
-          | None ->
-              Jsx.element
-                <Gravity.Chevron_right aria_hidden=true role=`presentation />)
+        (match S.get children with
+        | Some c -> c
+        | None -> <Gravity.Chevron_right aria_hidden=true role=`presentation />)
       </span>
     </Show>
   [@@element span]
@@ -722,21 +698,17 @@ end
 let submenu_gap = 7.
 
 module Submenu_trigger = struct
-  let%component make ~(children : Jsx.content) () =
+  let%component make ~(children : Jsx.element) () =
     let is_open, set_open = S.create_signal false in
     <Kobalte.Sub
-      open_=(fun () -> S.get is_open)
-      on_open_change=(S.set set_open)
-      gutter=(fun () -> submenu_gap)>
-      <Submenu.Provider value=(fun () -> Some is_open)>
-        (fun () -> S.get children)
-      </Submenu.Provider>
+      open_=(S.get is_open) on_open_change=(S.set set_open) gutter=submenu_gap>
+      <Submenu.Provider value=(Some is_open)>(S.get children)</Submenu.Provider>
     </Kobalte.Sub>
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
     ?(on_open_change : (bool -> unit) option)
-    ?(trigger : [ `press | `long_press ] = `press) ~(children : Jsx.content) ()
+    ?(trigger : [ `press | `long_press ] = `press) ~(children : Jsx.element) ()
     =
   let kept, set_kept = S.create_signal false in
   S.create_computed (fun () ->
@@ -791,22 +763,20 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
     }
   in
   <Kobalte.Root
-    open_=(fun () -> S.get opened)
+    open_=(S.get opened)
     on_open_change=asked
-    placement=(fun () -> S.get d.placement)
+    placement=(S.get d.placement)
     gutter=8.
     force_mount=true>
-    <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
-      <Context.Provider value=(fun () -> d)>
-        (fun () -> S.get children)
-        (fun () ->
-          match pressed with
-          | Some l ->
-              Jsx.element
-                <div id=(fun () -> l.description) style="display: none;">
-                  "Long press or press Alt + ArrowDown to open menu"
-                </div>
-          | None -> Jsx.element Jsx.nothing)
+    <Button.Trigger.Provider value=trigger_for_buttons>
+      <Context.Provider value=d>
+        (S.get children)
+        (match pressed with
+        | Some l ->
+            <div id=l.description style="display: none;">
+              "Long press or press Alt + ArrowDown to open menu"
+            </div>
+        | None -> Jsx.nothing)
       </Context.Provider>
     </Button.Trigger.Provider>
   </Kobalte.Root>

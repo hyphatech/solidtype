@@ -39,7 +39,7 @@ let placement_name = function
 
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     Dialog_frame.trigger ~slot:"alert-dialog-trigger"
       ~class_:(fun () ->
         after (Styles.AlertDialog.trigger (slots ())) (S.get class_))
@@ -104,10 +104,9 @@ module Container = struct
       ~as_:(fun () -> S.get as_)
       ~others:(Props.others props)
       (fun s ->
-        Jsx.element
-          <Container_context.Provider value=(fun () -> c)>
-            (fun () -> Jsx.draw (S.get children) s)
-          </Container_context.Provider>)
+        <Container_context.Provider value=c>
+          (Jsx.draw (S.get children) s)
+        </Container_context.Provider>)
   [@@element div]
 end
 
@@ -137,65 +136,59 @@ module Dialog = struct
 end
 
 module Header = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
-      class_=(fun () ->
-               after (Styles.AlertDialog.header (slots ())) (S.get class_))
+      class_=(after (Styles.AlertDialog.header (slots ())) (S.get class_))
       data_slot="alert-dialog-header"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
 
 module Body = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
-      class_=(fun () ->
-               after (Styles.AlertDialog.body (slots ())) (S.get class_))
+      class_=(after (Styles.AlertDialog.body (slots ())) (S.get class_))
       data_slot="alert-dialog-body"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
 
 module Footer = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
-      class_=(fun () ->
-               after (Styles.AlertDialog.footer (slots ())) (S.get class_))
+      class_=(after (Styles.AlertDialog.footer (slots ())) (S.get class_))
       data_slot="alert-dialog-footer"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end
 
 module Icon = struct
   let%component make ?(status : Status_icon.status = `danger)
-      ?(class_ : string option) ?(children : Jsx.content option) () =
+      ?(class_ : string option) ?(children : Jsx.element option) () =
     <div
-      class_=(fun () ->
-               after
-                 (Styles.AlertDialog.icon (slots ~status:(S.get status) ()))
-                 (S.get class_))
+      class_=(after
+                (Styles.AlertDialog.icon (slots ~status:(S.get status) ()))
+                (S.get class_))
       data_slot="alert-dialog-icon"
       props=(Props.others props)>
       <Show
-        when_=(fun () -> Option.is_some (S.get children))
-        fallback=(fun () ->
-                   Status_icon.svg ~slot:"alert-dialog-default-icon" (fun () ->
-                       S.get status))>
-        (fun () ->
-          match S.get children with Some c -> c | None -> Jsx.string "")
+        when_=(Option.is_some (S.get children))
+        fallback=(Status_icon.svg ~slot:"alert-dialog-default-icon" (fun () ->
+                      S.get status))>
+        (match S.get children with Some c -> c | None -> Jsx.string "")
       </Show>
     </div>
   [@@element div]
 end
 
 module Heading = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     Dialog_frame.heading ~slot:"alert-dialog-heading"
       ~class_:(fun () ->
         after (Styles.AlertDialog.heading (slots ())) (S.get class_))
@@ -225,7 +218,7 @@ module Close_trigger = struct
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
-    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.element) () =
   Dialog_frame.root
     ~is_open:(fun () -> S.get is_open)
     ~default_open:(fun () -> S.get default_open)

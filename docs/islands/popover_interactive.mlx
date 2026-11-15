@@ -43,11 +43,9 @@ let make () =
               <Button
                 class_="rounded-full"
                 size=`sm
-                variant=(fun () ->
-                          if S.get following then `tertiary else `primary)
+                variant=(if S.get following then `tertiary else `primary)
                 on_click=(fun _ -> S.update set_following not)>
-                (fun () ->
-                  Jsx.string (if S.get following then "Following" else "Follow"))
+                (Jsx.string (if S.get following then "Following" else "Follow"))
               </Button>
             </div>
           </Popover.Heading>

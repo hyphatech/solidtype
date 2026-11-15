@@ -41,11 +41,9 @@ let make () =
                                <Empty_state class_="p-1">
                                  "No categories found"
                                </Empty_state>)>
-          <For each=(fun () -> S.get tags)>
+          <For each=(S.get tags)>
             (fun (id, name) _ ->
-              <Tag id=(fun () -> id) text_value=(fun () -> name)>
-                (fun () -> Jsx.string name)
-              </Tag>)
+              <Tag id text_value=name>(Jsx.string name)</Tag>)
           </For>
         </Tag_group.List>
         <Description>"Click the X to remove tags"</Description>
@@ -61,13 +59,13 @@ let make () =
                                <Empty_state class_="p-1">
                                  "No frameworks found"
                                </Empty_state>)>
-          <For each=(fun () -> S.get frameworks)>
+          <For each=(S.get frameworks)>
             (fun (id, name) _ ->
-              <Tag id=(fun () -> id) text_value=(fun () -> name)>
+              <Tag id text_value=name>
                 (fun (s : Tag.state) ->
                   Jsx.fragment
                     [|
-                      Jsx.of_content (Jsx.string name);
+                      Jsx.string name;
                       (if S.get s.allows_removing then
                          <Tag.Remove_button>
                            <Gravity.Circle_xmark_fill />

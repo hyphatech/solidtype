@@ -25,19 +25,19 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="status"
-        choices=(fun () -> statuses)
-        picked=(fun () -> S.get status)
+        choices=statuses
+        picked=(S.get status)
         on_pick=(Controls.choose statuses set_status)
       />
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
         label="dismissable"
-        on=(fun () -> S.get dismissable)
+        on=(S.get dismissable)
         on_toggle=(S.set set_dismissable)
       />
     </div>
@@ -46,15 +46,13 @@ let make () =
       solidtype=(<Alert_dialog>
                    <Button variant=`danger>"Delete Project"</Button>
                    <Alert_dialog.Backdrop
-                     variant=(fun () -> fst (S.get variant))
-                     is_dismissable=(fun () -> S.get dismissable)>
+                     variant=(fst (S.get variant))
+                     is_dismissable=(S.get dismissable)>
                      <Alert_dialog.Container>
                        <Alert_dialog.Dialog>
                          <Alert_dialog.Close_trigger />
                          <Alert_dialog.Header>
-                           <Alert_dialog.Icon
-                             status=(fun () -> fst (S.get status))
-                           />
+                           <Alert_dialog.Icon status=(fst (S.get status)) />
                            <Alert_dialog.Heading>
                              "Delete project permanently?"
                            </Alert_dialog.Heading>

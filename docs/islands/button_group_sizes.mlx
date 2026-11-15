@@ -3,8 +3,8 @@ module Button_group = Solidtype_heroui.Button_group
 
 let group ~label ~size =
   <div class_="flex flex-col items-start gap-2">
-    <p class_="text-sm text-muted">(fun () -> Solidtype.Jsx.string label)</p>
-    <Button_group size=(fun () -> size) variant=`secondary>
+    <p class_="text-sm text-muted">(Solidtype.Jsx.string label)</p>
+    <Button_group size variant=`secondary>
       <Button>"First"</Button>
       <Button><Button_group.Separator /> "Second"</Button>
       <Button><Button_group.Separator /> "Third"</Button>
@@ -13,8 +13,7 @@ let group ~label ~size =
 
 let make () =
   <div class_="flex flex-col gap-4">
-    (fun () -> Solidtype.Jsx.element (group ~label:"Small" ~size:`sm))
-    (fun () ->
-      Solidtype.Jsx.element (group ~label:"Medium (default)" ~size:`md))
-    (fun () -> Solidtype.Jsx.element (group ~label:"Large" ~size:`lg))
+    (group ~label:"Small" ~size:`sm)
+    (group ~label:"Medium (default)" ~size:`md)
+    (group ~label:"Large" ~size:`lg)
   </div>

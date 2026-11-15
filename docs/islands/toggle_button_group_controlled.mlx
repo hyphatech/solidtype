@@ -8,7 +8,7 @@ let make () =
   let keys, set_keys = S.create_signal [| "bold" |] in
   <div class_="flex flex-col gap-4">
     <Toggle_button_group
-      selected_keys=(fun () -> S.get keys)
+      selected_keys=(S.get keys)
       selection_mode=`multiple
       on_selection_change=(S.set set_keys)
       aria_label="Text formatting">
@@ -29,11 +29,10 @@ let make () =
     <p class_="text-sm text-muted">
       "Selected: "
       <span class_="font-medium">
-        (fun () ->
-          Jsx.string
-            (match S.get keys with
-            | [||] -> "None"
-            | ks -> String.concat ", " (Array.to_list ks)))
+        (Jsx.string
+           (match S.get keys with
+           | [||] -> "None"
+           | ks -> String.concat ", " (Array.to_list ks)))
       </span>
     </p>
   </div>

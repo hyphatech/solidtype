@@ -26,30 +26,29 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="channel"
-        choices=(fun () -> channels)
-        picked=(fun () -> S.get channel)
+        choices=channels
+        picked=(S.get channel)
         on_pick=(Controls.choose channels set_channel)
       />
       <Select
         label="orientation"
-        choices=(fun () -> orientations)
-        picked=(fun () -> S.get orientation)
+        choices=orientations
+        picked=(S.get orientation)
         on_pick=(Controls.choose orientations set_orientation)
       />
       <Toggle
         label="disabled"
-        on=(fun () -> S.get is_disabled)
+        on=(S.get is_disabled)
         on_toggle=(S.set set_is_disabled)
       />
     </div>
     <Side_by_side
       solidtype=(<Color_slider
-                   channel=(fun () -> fst (S.get channel))
+                   channel=(fst (S.get channel))
                    class_="h-48 w-full max-w-xs"
-                   default_value=(fun () ->
-                                   Colors.parse_color "hsla(0, 100%, 50%, 0.5)")
-                   orientation=(fun () -> fst (S.get orientation))
-                   is_disabled=(fun () -> S.get is_disabled)>
+                   default_value=(Colors.parse_color "hsla(0, 100%, 50%, 0.5)")
+                   orientation=(fst (S.get orientation))
+                   is_disabled=(S.get is_disabled)>
                    <Label>"Color"</Label>
                    <Color_slider.Output />
                    <Color_slider.Track>

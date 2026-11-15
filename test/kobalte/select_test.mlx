@@ -10,22 +10,19 @@ module S = Solidtype.Solid
 
 let island () =
   <Select.Root
-    options=(fun () -> Array.map K.Types.Either.left [| "Apple"; "Banana" |])
+    options=(Array.map K.Types.Either.left [| "Apple"; "Banana" |])
     placeholder=(<span>"Pick a fruit"</span>)
     item_component=(fun props ->
-                     <Select.Item item=(fun () -> Item_props.item props)>
+                     <Select.Item item=(Item_props.item props)>
                        <Select.ItemLabel>
-                         (fun () ->
-                           Jsx.string (Node.raw_value (Item_props.item props)))
+                         (Jsx.string (Node.raw_value (Item_props.item props)))
                        </Select.ItemLabel>
                      </Select.Item>)>
     <Select.Label>"Fruit"</Select.Label>
     <Select.Trigger>
       <Select.Value>
         (fun state ->
-          <span>
-            (fun () -> Jsx.string (S.get (Value_state.selected_option state)))
-          </span>)
+          <span>(Jsx.string (S.get (Value_state.selected_option state)))</span>)
       </Select.Value>
     </Select.Trigger>
     <Select.Portal>

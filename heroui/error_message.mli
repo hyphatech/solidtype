@@ -4,7 +4,7 @@
 
     {[
       <Error_message>
-        (fun () -> if invalid () then "Pick at least one" else "")
+        (if invalid () then "Pick at least one" else "")
       </Error_message>
     ]} *)
 
@@ -12,7 +12,7 @@ module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
 
 type slot =
-  (unit -> string) -> unit S.rest -> (unit -> Jsx.content) -> Jsx.element
+  (unit -> string) -> unit S.rest -> (unit -> Jsx.element) -> Jsx.element
 (** How an error renders below a component: given its classes, the rest of its
     props -- its [data-] attributes -- and its children, the element it is,
     which declares [data-slot="error-message"]. *)
@@ -23,7 +23,7 @@ module Slot : sig
     module Props : sig
       val check :
         value:slot Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -39,7 +39,7 @@ module Props : sig
 
   val check :
     ?class_:string Solidtype.Check.value ->
-    ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Span.check

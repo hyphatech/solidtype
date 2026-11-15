@@ -11,19 +11,15 @@ let variants =
 
 let make () =
   <div class_="flex flex-col gap-3">
-    <For each=(fun () -> variants)>
+    <For each=variants>
       (fun (variant, name) _ ->
         <div class_="flex items-center gap-3">
           <span class_="w-20 text-xs text-muted">
-            (fun () -> Solidtype.Jsx.string name)
+            (Solidtype.Jsx.string name)
           </span>
-          <Trend_chip variant=(fun () -> variant)>"+3.3%"</Trend_chip>
-          <Trend_chip variant=(fun () -> variant) trend=`down>
-            "-2.1%"
-          </Trend_chip>
-          <Trend_chip variant=(fun () -> variant) trend=`neutral>
-            "0.0%"
-          </Trend_chip>
+          <Trend_chip variant>"+3.3%"</Trend_chip>
+          <Trend_chip variant trend=`down>"-2.1%"</Trend_chip>
+          <Trend_chip variant trend=`neutral>"0.0%"</Trend_chip>
         </div>)
     </For>
   </div>

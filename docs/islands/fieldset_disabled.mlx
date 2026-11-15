@@ -11,14 +11,13 @@ module Switch = Solidtype_heroui.Switch
 let make () =
   let disabled, set_disabled = S.create_signal true in
   <div class_="flex w-full max-w-96 flex-col gap-4">
-    <Switch
-      is_selected=(fun () -> S.get disabled) on_change=(S.set set_disabled)>
+    <Switch is_selected=(S.get disabled) on_change=(S.set set_disabled)>
       <Switch.Content>
         <Switch.Control><Switch.Thumb /></Switch.Control>
         <Label>"Disable the fieldset"</Label>
       </Switch.Content>
     </Switch>
-    <Fieldset disabled=(fun () -> S.get disabled)>
+    <Fieldset disabled=(S.get disabled)>
       <Fieldset.Legend>"Notifications"</Fieldset.Legend>
       <Fieldset.Group>
         <Text_field name="address">

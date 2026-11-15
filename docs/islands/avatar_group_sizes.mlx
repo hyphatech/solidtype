@@ -33,13 +33,11 @@ let make () =
     <div class_="flex flex-col items-center gap-2">
       <p class_="text-sm text-muted">"Small"</p>
       <Avatar_group size=`sm>
-        <For each=(fun () -> Array.sub users 0 4)>
+        <For each=(Array.sub users 0 4)>
           (fun (name, image) _ ->
             <Avatar>
-              <Avatar.Image alt=(fun () -> name) src=(fun () -> image) />
-              <Avatar.Fallback>
-                (fun () -> Jsx.string (initials name))
-              </Avatar.Fallback>
+              <Avatar.Image alt=name src=image />
+              <Avatar.Fallback>(Jsx.string (initials name))</Avatar.Fallback>
             </Avatar>)
         </For>
       </Avatar_group>
@@ -47,13 +45,11 @@ let make () =
     <div class_="flex flex-col items-center gap-2">
       <p class_="text-sm text-muted">"Medium (default)"</p>
       <Avatar_group size=`md>
-        <For each=(fun () -> Array.sub users 0 4)>
+        <For each=(Array.sub users 0 4)>
           (fun (name, image) _ ->
             <Avatar>
-              <Avatar.Image alt=(fun () -> name) src=(fun () -> image) />
-              <Avatar.Fallback>
-                (fun () -> Jsx.string (initials name))
-              </Avatar.Fallback>
+              <Avatar.Image alt=name src=image />
+              <Avatar.Fallback>(Jsx.string (initials name))</Avatar.Fallback>
             </Avatar>)
         </For>
       </Avatar_group>
@@ -61,13 +57,11 @@ let make () =
     <div class_="flex flex-col items-center gap-2">
       <p class_="text-sm text-muted">"Large"</p>
       <Avatar_group size=`lg>
-        <For each=(fun () -> Array.sub users 0 4)>
+        <For each=(Array.sub users 0 4)>
           (fun (name, image) _ ->
             <Avatar>
-              <Avatar.Image alt=(fun () -> name) src=(fun () -> image) />
-              <Avatar.Fallback>
-                (fun () -> Jsx.string (initials name))
-              </Avatar.Fallback>
+              <Avatar.Image alt=name src=image />
+              <Avatar.Fallback>(Jsx.string (initials name))</Avatar.Fallback>
             </Avatar>)
         </For>
       </Avatar_group>

@@ -6,7 +6,7 @@ module Label = Solidtype_heroui.Label
 module Colors = Solidtype_kobalte.Colors
 
 let make () =
-  <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+  <Color_picker default_value=(Colors.parse_color "#0485F7")>
     <Color_picker.Trigger>
       <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
     </Color_picker.Trigger>

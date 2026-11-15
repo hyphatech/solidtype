@@ -5,9 +5,8 @@ let make () =
   <Button
     as_=(fun p s ->
             <button
-              data_custom=(fun () ->
-                            Solidtype.Jsx.data
-                              (if S.get s.is_pressed then "pressed" else "bar"))
+              data_custom=(Solidtype.Jsx.data
+                             (if S.get s.is_pressed then "pressed" else "bar"))
               props=p
             />)>
     "Press me"

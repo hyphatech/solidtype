@@ -55,7 +55,7 @@ module As_div = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -65,17 +65,17 @@ end
 
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let t = within "Tooltip.Trigger" in
     <As_div
       as_="div"
-      ?aria_label=(fun () -> S.get aria_label)
-      class_=(fun () -> after (Styles.Tooltip.trigger t.slots) (S.get class_))
+      ?aria_label=(S.get aria_label)
+      class_=(after (Styles.Tooltip.trigger t.slots) (S.get class_))
       role=`button
       tabindex="0"
       data_slot="tooltip-trigger"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </As_div>
   [@@element div]
 end
@@ -85,7 +85,7 @@ module Content = struct
       ?(show_arrow : bool = false) ?(should_flip : bool = true)
       ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let t = within "Tooltip.Content" in
     S.create_computed (fun () ->
         t.set_placement (Option.value (S.get placement) ~default:`top));
@@ -100,23 +100,22 @@ module Content = struct
       Types.TooltipContextValue.is_open (Kobalte.use_tooltip_context ())
     in
     let o = Overlay.create ~is_open:(fun () -> S.get open_) () in
-    <Show when_=(fun () -> Overlay.present o)>
+    <Show when_=(Overlay.present o)>
       <Kobalte.Portal>
         <Kobalte.Content
-          class_=(fun () -> after (Styles.Tooltip.base t.slots) (S.get class_))
-          style=(fun () ->
-                  "--trigger-anchor-point: \
-                   var(--kb-tooltip-content-transform-origin);"
-                  ^ match S.get style with Some s -> " " ^ s | None -> "")
+          class_=(after (Styles.Tooltip.base t.slots) (S.get class_))
+          style=("--trigger-anchor-point: \
+                  var(--kb-tooltip-content-transform-origin);"
+                ^ match S.get style with Some s -> " " ^ s | None -> "")
           ref=(fun e ->
                 ignore (given_ref e : unit option);
                 Overlay.watch o e)
-          data_placement=(fun () -> Jsx.data (S.get t.side))
-          data_entering=(fun () -> Jsx.flag (Overlay.entering o))
-          data_exiting=(fun () -> Jsx.flag (Overlay.exiting o))
+          data_placement=(Jsx.data (S.get t.side))
+          data_entering=(Jsx.flag (Overlay.entering o))
+          data_exiting=(Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
-          <Button.Trigger.Provider value=(fun () -> Button.no_trigger)>
-            (fun () -> S.get children)
+          <Button.Trigger.Provider value=Button.no_trigger>
+            (S.get children)
           </Button.Trigger.Provider>
         </Kobalte.Content>
       </Kobalte.Portal>
@@ -126,7 +125,7 @@ end
 
 module Arrow = struct
   let%component make ?(class_ : string option) ?(style : string option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let t = within "Tooltip.Arrow" in
     t.set_arrow true;
     S.on_cleanup (fun () -> t.set_arrow false);
@@ -137,27 +136,24 @@ module Arrow = struct
           size=12. style="visibility: hidden;" ref=(fun k -> follow k)
         />;
         <div
-          ?class_=(fun () -> S.get class_)
-          style=(fun () ->
-                  "position: absolute; " ^ S.get position
-                  ^ match S.get style with Some s -> " " ^ s | None -> "")
-          data_placement=(fun () -> Jsx.data (S.get t.side))
+          ?class_=(S.get class_)
+          style=("position: absolute; " ^ S.get position
+                ^ match S.get style with Some s -> " " ^ s | None -> "")
+          data_placement=(Jsx.data (S.get t.side))
           data_slot="tooltip-arrow"
           props=(Props.others props)>
-          (fun () ->
-            match S.get children with
-            | Some c -> c
-            | None ->
-                Jsx.element
-                  <svg
-                    fill="none"
-                    height="12"
-                    view_box="0 0 12 12"
-                    width="12"
-                    xmlns="http://www.w3.org/2000/svg"
-                    data_slot="overlay-arrow">
-                    <path d="M0 0C5.48483 8 6.5 8 12 0Z" />
-                  </svg>)
+          (match S.get children with
+          | Some c -> c
+          | None ->
+              <svg
+                fill="none"
+                height="12"
+                view_box="0 0 12 12"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+                data_slot="overlay-arrow">
+                <path d="M0 0C5.48483 8 6.5 8 12 0Z" />
+              </svg>)
         </div>;
       |]
   [@@element div]
@@ -166,7 +162,7 @@ end
 let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)
     ?(trigger : [ `hover | `focus ] = `hover) ?(is_disabled : bool = false)
     ?(is_open : bool option) ?(default_open : bool option)
-    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.element) () =
   let placement, set_placement = S.create_signal `top in
   let offset, set_offset = S.create_signal 3. in
   let flip, set_flip = S.create_signal true in
@@ -205,32 +201,30 @@ let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)
     }
   in
   <Kobalte.Root
-    ?open_=(fun () -> S.get is_open)
-    ?default_open=(fun () -> S.get default_open)
+    ?open_=(S.get is_open)
+    ?default_open=(S.get default_open)
     on_open_change=(fun o -> ignore (on_open_change o : unit option))
-    disabled=(fun () -> S.get is_disabled)
-    trigger_on_focus_only=(fun () ->
-                            match S.get trigger with
-                            | `focus -> true
-                            | `hover -> false)
-    open_delay=(fun () -> delay delay_ms "--tooltip-delay" 1500. ())
-    close_delay=(fun () -> delay close_delay_ms "--tooltip-close-delay" 500. ())
-    placement=(fun () ->
-                match S.get placement with
-                | `top -> "top"
-                | `bottom -> "bottom"
-                | `left -> "left"
-                | `right -> "right")
-    gutter=(fun () ->
-             (* Kobalte puts half its arrow's height more between them, where
+    disabled=(S.get is_disabled)
+    trigger_on_focus_only=(match S.get trigger with
+                          | `focus -> true
+                          | `hover -> false)
+    open_delay=(delay delay_ms "--tooltip-delay" 1500. ())
+    close_delay=(delay close_delay_ms "--tooltip-close-delay" 500. ())
+    placement=(match S.get placement with
+              | `top -> "top"
+              | `bottom -> "bottom"
+              | `left -> "left"
+              | `right -> "right")
+    gutter=(if
+              (* Kobalte puts half its arrow's height more between them, where
                 HeroUI's offset is the whole gap. *)
-             if S.get arrow then S.get offset -. 6. else S.get offset)
-    flip=(fun () -> Types.Either.right (S.get flip))
+              S.get arrow
+            then S.get offset -. 6.
+            else S.get offset)
+    flip=(Types.Either.right (S.get flip))
     force_mount=true
     on_current_placement_change=(S.set set_placed)>
-    <Button.Trigger.Provider value=(fun () -> trigger_for_buttons)>
-      <Context.Provider value=(fun () -> t)>
-        (fun () -> S.get children)
-      </Context.Provider>
+    <Button.Trigger.Provider value=trigger_for_buttons>
+      <Context.Provider value=t>(S.get children)</Context.Provider>
     </Button.Trigger.Provider>
   </Kobalte.Root>

@@ -24,16 +24,12 @@ let metric =
     (fun d ->
       let m = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string m.metric)</Label>
-        <Bar to_=(fun () -> m.value) thick=(fun () -> Either.right 0.4) />
-        <Tick
-          at=(fun () -> m.goal)
-          thick=(fun () -> Either.right 0.8)
-          color=(fun () -> Color.ink)
-        />
+        <Label edge="start">(Jsx.string m.metric)</Label>
+        <Bar to_=m.value thick=(Either.right 0.4) />
+        <Tick at=m.goal thick=(Either.right 0.8) color=Color.ink />
       </div>)
 
 let make () =
-  <Chart scale=(fun () -> (0., 100.)) label="Each metric against its goal">
-    <Plot rows=(fun () -> metrics) render=metric />
+  <Chart scale=(0., 100.) label="Each metric against its goal">
+    <Plot rows=metrics render=metric />
   </Chart>

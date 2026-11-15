@@ -26,18 +26,17 @@ let column =
     (fun d ->
       let m = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string m.month)</Label>
-        <Bar to_=(fun () -> m.rain) color=(fun () -> Color.series 2) />
+        <Label edge="start">(Jsx.string m.month)</Label>
+        <Bar to_=m.rain color=(Color.series 2) />
       </div>)
 
 let make () =
   <Chart
     orientation=`vertical
     height=200.
-    scale=(fun () -> (0., 80.))
-    ticks=(fun () -> Ticks.custom (Solidtype_rhp.every 20. ()))
-    format=(fun mm ->
-             <span>(fun () -> Jsx.string (Js.Float.toString mm ^ " mm"))</span>)
+    scale=(0., 80.)
+    ticks=(Ticks.custom (Solidtype_rhp.every 20. ()))
+    format=(fun mm -> <span>(Jsx.string (Js.Float.toString mm ^ " mm"))</span>)
     label="Rain each month">
-    <Plot rows=(fun () -> months) render=column />
+    <Plot rows=months render=column />
   </Chart>

@@ -56,7 +56,7 @@ wrapper left out is Solid's default, never another namespace.
 
 A component takes an attribute's namespace -- `Jsx.attr`, `Jsx.bool`,
 `Jsx.named` -- and passes it on to its element unchecked, as it does a data
-attribute; optional, it is `?hidden=(Jsx.attr (fun () -> o))`. Solid's
+attribute; optional, it is `?hidden=(Jsx.attr o)`. Solid's
 server writes a plain `hidden` as present or absent, so `hidden="until-found"`
 reaches a prerendered page only as `attr:hidden`. A handler's and a
 property's namespaces are an element's alone.
@@ -75,30 +75,43 @@ does not name, on its element, after its own attributes:
 | TSX | OCaml |
 |---|---|
 | `data-slot="badge"` | `data_slot="badge"` |
-| `data-selected={on() ? "true" : undefined}` | `data_selected=(fun () -> Jsx.flag (S.get on))` |
-| `data-id={id()}` | `data_id=(fun () -> Jsx.data (id ()))` |
+| `data-selected={on() ? "true" : undefined}` | `data_selected=(Jsx.flag (S.get on))` |
+| `data-id={id()}` | `data_id=(Jsx.data (S.get id))` |
 
-## Values given to a component
+## Values in JSX
 
-A literal is given as it is, and anything that may change as a thunk,
-`(fun () -> ...)`. A name is passed as it is, read once: a constant may be,
-`class_=item`, but a signal's accessor is refused where its value belongs,
-`text=count`, since it changes and is read by `(fun () -> S.get count)`.
-
-An optional prop, one a component may leave out, is passed on as it is
-with OCaml's own `?`: present while its option is `Some`, absent while it
-is `None`, as TSX passes `undefined`. Given as any value that changes is,
-`(fun () -> ...)`, it is written the same whether the prop is required or
-optional; a bare name is a value, read once.
+A value is written as itself, and Solid keeps it current. A literal or a
+name is given as it is; any other expression is read again whenever what it
+reads changes, as Solid's compiler makes an expression in JSX a getter. A
+function is a function. Solid's own TSX beside it:
 
 | TSX | OCaml |
 |---|---|
-| `title={note()}` | `?title=(fun () -> S.get note)` |
-| `name={props.name}` | `?name=(fun () -> S.get name)` |
-| `onRemove={editable ? remove : undefined}` | `?on_remove=(fun () -> if editable then Some remove else None)` |
+| `title="Save"` | `title="Save"` |
+| `class={item}` | `class_=item` |
+| `title={note()}` | `title=(S.get note)` |
+| `name={props.name}` | `name=(S.get name)` |
+| `class={cls(on())}` | `class_=(cls (S.get on))` |
+| `{count()}` | `(Jsx.int (S.get count))` |
+| `{icon}`, `icon` an element | `icon` |
+| `onClose={() => hide()}` | `on_close=(fun () -> hide ())` |
 
-A function prop is given or left out so too. The compiler refuses `?` on a
-prop that is not optional.
+A signal given by its name, `text=count`, is refused where its value
+belongs: it is read with `S.get`. So is a function, `title=(fun () -> ...)`.
+Outside JSX -- a memo, an effect, an accessor -- a value that changes is
+written `fun () -> e`, as Solid's own API takes `() => e`.
+
+An optional prop, one a component may leave out, is passed on with OCaml's
+own `?`: present while its option is `Some`, absent while it is `None`, as
+TSX passes `undefined`. It is written as a required prop is.
+
+| TSX | OCaml |
+|---|---|
+| `title={note()}` | `?title=(S.get note)` |
+| `name={props.name}` | `?name=(S.get name)` |
+| `onRemove={editable ? remove : undefined}` | `?on_remove=(if editable then Some remove else None)` |
+
+The compiler refuses `?` on a prop that is not optional.
 
 ## Spreads
 
@@ -107,5 +120,5 @@ named `props`:
 
 ```ocaml
 let make (props : Props.t) = <input class_="field" props />
-<Dynamic component=(fun () -> Greeting.component) props />
+<Dynamic component=Greeting.component props />
 ```

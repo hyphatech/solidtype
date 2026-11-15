@@ -4,10 +4,10 @@
     list is made of Kobalte's list hooks, as Kobalte makes its own.
 
     {[
-      <Color_swatch_picker default_value=(fun () -> Colors.parse_color "#8B5CF6")>
-        <For each=(fun () -> colors)>
+      <Color_swatch_picker default_value=(Colors.parse_color "#8B5CF6")>
+        <For each=colors>
           (fun c _ ->
-            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+            <Color_swatch_picker.Item color=(Colors.parse_color c)>
               <Color_swatch_picker.Swatch />
               <Color_swatch_picker.Indicator />
             </Color_swatch_picker.Item>)
@@ -58,7 +58,7 @@ module Item : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -95,7 +95,7 @@ module Indicator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
@@ -125,7 +125,7 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

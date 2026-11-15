@@ -6,7 +6,7 @@ module Select = Solidtype_heroui.Select
 module List_box = Solidtype_heroui.List_box
 
 let make () =
-  <Select name="state" value=(fun () -> [| "texas" |])>
+  <Select name="state" value=[| "texas" |]>
     <Select.Trigger><Select.Value /> <Select.Indicator /></Select.Trigger>
     <Select.Popover>
       <List_box>

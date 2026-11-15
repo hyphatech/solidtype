@@ -7,7 +7,7 @@
         let default = light
       end)
 
-      <Theme.Provider value=(fun () -> dark)>...</Theme.Provider>
+      <Theme.Provider value=dark>...</Theme.Provider>
       let theme = Theme.use ()
     ]}
 
@@ -25,7 +25,7 @@ module Make (V : Value) : sig
     module Props : sig
       val check :
         value:V.t Check.value ->
-        ?children:('f, [ `nodes ]) Check.children ->
+        ?children:('f, [ `elements ]) Check.children ->
         unit ->
         unit
     end
@@ -45,7 +45,7 @@ end) : sig
     module Props : sig
       val check :
         value:V.t Check.value ->
-        ?children:('f, [ `nodes ]) Check.children ->
+        ?children:('f, [ `elements ]) Check.children ->
         unit ->
         unit
     end

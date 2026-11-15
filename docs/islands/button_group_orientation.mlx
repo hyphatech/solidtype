@@ -4,10 +4,8 @@ module Gravity = Solidtype_gravity_icons
 
 let group ~label ~orientation =
   <div class_="flex flex-col gap-2">
-    <span class_="text-sm text-muted">
-      (fun () -> Solidtype.Jsx.string label)
-    </span>
-    <Button_group orientation=(fun () -> orientation) variant=`tertiary>
+    <span class_="text-sm text-muted">(Solidtype.Jsx.string label)</span>
+    <Button_group orientation variant=`tertiary>
       <Button is_icon_only=true aria_label="Align left">
         <Gravity.Text_align_left />
       </Button>
@@ -25,8 +23,6 @@ let group ~label ~orientation =
 
 let make () =
   <div class_="flex items-start gap-8">
-    (fun () ->
-      Solidtype.Jsx.element (group ~label:"Horizontal" ~orientation:`horizontal))
-    (fun () ->
-      Solidtype.Jsx.element (group ~label:"Vertical" ~orientation:`vertical))
+    (group ~label:"Horizontal" ~orientation:`horizontal)
+    (group ~label:"Vertical" ~orientation:`vertical)
   </div>

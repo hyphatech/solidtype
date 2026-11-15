@@ -11,9 +11,8 @@ let island () =
     aria_label="Pages"
     count=10.
     item_component=(fun props ->
-                     <Pagination.Item page=(fun () -> Item_props.page props)>
-                       (fun () ->
-                         Jsx.int (Float.to_int (Item_props.page props)))
+                     <Pagination.Item page=(Item_props.page props)>
+                       (Jsx.int (Float.to_int (Item_props.page props)))
                      </Pagination.Item>)
     ellipsis_component=(fun _ ->
                          <Pagination.Ellipsis>{js|…|js}</Pagination.Ellipsis>)>

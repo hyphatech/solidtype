@@ -62,61 +62,54 @@ module Item = struct
           }
         in
         <li
-          class_=(fun () ->
-                   after (Styles.Breadcrumbs.item (slots ())) (Solid.get class_))
+          class_=(after (Styles.Breadcrumbs.item (slots ())) (Solid.get class_))
           data_slot="breadcrumbs-item"
-          data_current=(fun () -> Jsx.flag (current ()))
-          data_disabled=(fun () ->
-                          Jsx.flag (Solid.get t.disabled || current ()))
-          ?as_=(fun () -> Option.map (fun f p -> f p state) (Solid.get as_))
+          data_current=(Jsx.flag (current ()))
+          data_disabled=(Jsx.flag (Solid.get t.disabled || current ()))
+          ?as_=(Option.map (fun f p -> f p state) (Solid.get as_))
           props=others>
           (* Kobalte's breadcrumb link takes no disabled of its own, so the
              port marks the page on Kobalte's link, as that one does. *)
           <Link.Root
-            ?href=(fun () -> Solid.get href)
-            disabled=(fun () -> disabled ())
-            ?aria_current=(fun () -> if current () then Some "page" else None)
-            class_=(fun () ->
-                     Styles.Link.base
-                       (Styles.Link.slots (Styles.Link.options ()))
-                     ^ " "
-                     ^ Styles.Breadcrumbs.link (slots ()))
+            ?href=(Solid.get href)
+            disabled=(disabled ())
+            ?aria_current=(if current () then Some "page" else None)
+            class_=(Styles.Link.base
+                      (Styles.Link.slots (Styles.Link.options ()))
+                   ^ " "
+                   ^ Styles.Breadcrumbs.link (slots ()))
             on_click=(fun _ ->
                        if not (disabled ()) then
                          Option.iter t.act (Solid.get id))
             ref=(fun a -> Interaction.watch i a)
             data_slot="link"
-            data_current=(fun () -> Jsx.flag (current ()))
-            data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-            data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-            data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-            data_focus_visible=(fun () ->
-                                 Jsx.flag (Interaction.focus_visible i))
-            data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))>
-            (fun () -> Jsx.draw (Solid.get children) state)
+            data_current=(Jsx.flag (current ()))
+            data_hovered=(Jsx.flag (Interaction.hovered i))
+            data_pressed=(Jsx.flag (Interaction.pressed i))
+            data_focused=(Jsx.flag (Interaction.focused i))
+            data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+            data_disabled=(Jsx.flag (Interaction.disabled i))>
+            (Jsx.draw (Solid.get children) state)
           </Link.Root>
-          <Show when_=(fun () -> not (current ()))>
-            (fun () ->
-              match Solid.get t.separator with
-              (* HeroUI gives a separator of the user's its classes; a Solid
+          <Show when_=(not (current ()))>
+            (match Solid.get t.separator with
+            (* HeroUI gives a separator of the user's its classes; a Solid
                  component cannot add them to an element already made, so the
                  span around it takes them. *)
-              | Some s ->
-                  Jsx.element
-                    <span
-                      aria_hidden=true
-                      class_=(fun () -> Styles.Breadcrumbs.separator (slots ()))
-                      data_slot="breadcrumbs-separator">
-                      (fun () -> Jsx.element s)
-                    </span>
-              | None ->
-                  Jsx.element
-                    <Gravity.Chevron_right
-                      aria_hidden=true
-                      class_=(fun () -> Styles.Breadcrumbs.separator (slots ()))
-                      role=`presentation
-                      data_slot="breadcrumbs-separator"
-                    />)
+            | Some s ->
+                <span
+                  aria_hidden=true
+                  class_=(Styles.Breadcrumbs.separator (slots ()))
+                  data_slot="breadcrumbs-separator">
+                  s
+                </span>
+            | None ->
+                <Gravity.Chevron_right
+                  aria_hidden=true
+                  class_=(Styles.Breadcrumbs.separator (slots ()))
+                  role=`presentation
+                  data_slot="breadcrumbs-separator"
+                />)
           </Show>
         </li>);
     Jsx.nothing
@@ -125,7 +118,7 @@ end
 
 let%component make ?(separator : Jsx.element option)
     ?(on_action : (string -> unit) option) ?(is_disabled : bool = false)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   (* React Aria knows the last item as it renders, from its collection; Solid
      makes an item before those after it, so each joins the trail as it is
      made, and the trail draws them once all have, on the server too. *)
@@ -148,14 +141,11 @@ let%component make ?(separator : Jsx.element option)
   in
   <Kobalte.Root>
     <ol
-      class_=(fun () ->
-               after (Styles.Breadcrumbs.base (slots ())) (Solid.get class_))
+      class_=(after (Styles.Breadcrumbs.base (slots ())) (Solid.get class_))
       data_slot="breadcrumbs"
       props=(Props.others props)>
-      <Context.Provider value=(fun () -> t)>
-        (fun () -> Solid.get children)
-      </Context.Provider>
-      <For each=(fun () -> Array.of_list (Solid.get items))>
+      <Context.Provider value=t>(Solid.get children)</Context.Provider>
+      <For each=(Array.of_list (Solid.get items))>
         (fun (i : item) at ->
           i.draw ~current:(fun () ->
               Solid.get at = List.length (Solid.get items) - 1))

@@ -26,19 +26,18 @@ let picker ?value ?default_value ?(layout = `grid) ?(disabled = false)
     ?(got_ref = ref false) () =
   H.render (fun () ->
       <Picker.Root
-        ?value=(fun () -> Option.map Colors.parse_color value)
-        ?default_value=(fun () -> Option.map Colors.parse_color default_value)
+        ?value=(Option.map Colors.parse_color value)
+        ?default_value=(Option.map Colors.parse_color default_value)
         on_change=(fun c -> told := Array.append !told [| hex c |])
-        layout=(fun () -> layout)
+        layout
         class_="swatches"
         data_testid="picker"
         ref=(fun _ -> got_ref := true)
         on_key_down>
-        <For each=(fun () -> colors)>
+        <For each=colors>
           (fun c i ->
             <Picker.Item
-              color=(fun () -> Colors.parse_color c)
-              is_disabled=(fun () -> disabled && S.get i = 3)>
+              color=(Colors.parse_color c) is_disabled=(disabled && S.get i = 3)>
               <Picker.Swatch />
             </Picker.Item>)
         </For>
@@ -240,9 +239,9 @@ let () =
           H.render (fun () ->
               <I18n.I18nProvider locale="ar">
                 <Picker.Root>
-                  <For each=(fun () -> colors)>
+                  <For each=colors>
                     (fun c _ ->
-                      <Picker.Item color=(fun () -> Colors.parse_color c)>
+                      <Picker.Item color=(Colors.parse_color c)>
                         <Picker.Swatch />
                       </Picker.Item>)
                   </For>

@@ -17,13 +17,13 @@ let cars =
 
 let car d =
   let c = Row.data d in
-  <Dot at=(fun () -> c.power) cross=(fun () -> c.price) />
+  <Dot at=c.power cross=c.price />
 
 let make () =
   <Chart
-    scale=(fun () -> (50., 250.))
-    cross=(fun () -> (0., 60.))
+    scale=(50., 250.)
+    cross=(0., 60.)
     height=220.
     label="Price, in k€, by power, in hp">
-    <Plot rows=(fun () -> cars) overlap=true render=car />
+    <Plot rows=cars overlap=true render=car />
   </Chart>

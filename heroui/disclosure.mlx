@@ -26,7 +26,7 @@ let within part =
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Heading = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let d = within "Disclosure.Heading" in
     (* A button with the trigger's slot is Kobalte's trigger, as React Aria's
        disclosure gives its ButtonContext's trigger slot. *)
@@ -42,12 +42,11 @@ module Heading = struct
       }
     in
     <h3
-      class_=(fun () ->
-               after (Styles.Disclosure.heading d.slots) (Solid.get class_))
+      class_=(after (Styles.Disclosure.heading d.slots) (Solid.get class_))
       data_slot="disclosure-heading"
       props=(Props.others props)>
-      <Button.Trigger.Provider value=(fun () -> trigger)>
-        (fun () -> Solid.get children)
+      <Button.Trigger.Provider value=trigger>
+        (Solid.get children)
       </Button.Trigger.Provider>
     </h3>
   [@@element h3]
@@ -89,22 +88,21 @@ module Trigger = struct
       }
     in
     <Collapsible_trigger
-      class_=(fun () ->
-               after (Styles.Disclosure.trigger d.slots) (Solid.get class_))
-      aria_controls=(fun () -> d.content_id)
+      class_=(after (Styles.Disclosure.trigger d.slots) (Solid.get class_))
+      aria_controls=d.content_id
       slot="trigger"
       ref=(fun b ->
             ignore (given_ref b : unit option);
             Interaction.watch i b)
       data_slot="disclosure-trigger"
-      data_hovered=(fun () -> Jsx.flag (Interaction.hovered i))
-      data_pressed=(fun () -> Jsx.flag (Interaction.pressed i))
-      data_focused=(fun () -> Jsx.flag (Interaction.focused i))
-      data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
-      data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+      data_hovered=(Jsx.flag (Interaction.hovered i))
+      data_pressed=(Jsx.flag (Interaction.pressed i))
+      data_focused=(Jsx.flag (Interaction.focused i))
+      data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
+      data_disabled=(Jsx.flag (Interaction.disabled i))
+      ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)>
-      (fun () -> Jsx.draw (Solid.get children) (state ()))
+      (Jsx.draw (Solid.get children) (state ()))
     </Collapsible_trigger>
   [@@element button]
 end
@@ -115,10 +113,9 @@ module Indicator = struct
     (* HeroUI's own chevron, which its styles turn over. *)
     <Gravity.Chevron_down
       aria_hidden=true
-      class_=(fun () ->
-               after (Styles.Disclosure.indicator d.slots) (Solid.get class_))
+      class_=(after (Styles.Disclosure.indicator d.slots) (Solid.get class_))
       role=`presentation
-      data_expanded=(fun () -> Jsx.flag (Solid.get d.expanded))
+      data_expanded=(Jsx.flag (Solid.get d.expanded))
       data_slot="disclosure-indicator"
       props=(Props.others props)
     />
@@ -150,41 +147,38 @@ module Content = struct
       }
     in
     <Collapsible.Content
-      class_=(fun () ->
-               after (Styles.Disclosure.content d.slots) (Solid.get class_))
-      style=(fun () ->
-              match Solid.get style with
-              | Some s -> Panel.style panel ^ "; " ^ s
-              | None -> Panel.style panel)
+      class_=(after (Styles.Disclosure.content d.slots) (Solid.get class_))
+      style=(match Solid.get style with
+            | Some s -> Panel.style panel ^ "; " ^ s
+            | None -> Panel.style panel)
       ref=(fun e ->
             ignore (given_ref e : unit option);
             Interaction.watch i e;
             Panel.watch panel e)
-      data_expanded=(fun () -> Jsx.flag (Solid.get d.expanded))
+      data_expanded=(Jsx.flag (Solid.get d.expanded))
       data_slot="disclosure-content"
-      ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+      ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
       props=(Props.others props)
             (* What the trigger names it by, and whether it is shown, are the
          disclosure's, which an attribute in the rest must not replace. *)
-      id=(fun () -> d.content_id)
-      aria_hidden=(fun () -> not (Solid.get d.expanded))
-      ?hidden=(Jsx.attr (fun () -> Panel.hidden panel))>
-      (fun () -> Jsx.draw (Solid.get children) (state ()))
+      id=d.content_id
+      aria_hidden=(not (Solid.get d.expanded))
+      ?hidden=(Jsx.attr (Panel.hidden panel))>
+      (Jsx.draw (Solid.get children) (state ()))
     </Collapsible.Content>
   [@@element div]
 end
 
 module Body = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let d = within "Disclosure.Body" in
     <div
-      class_=(fun () -> Styles.Disclosure.body d.slots)
+      class_=(Styles.Disclosure.body d.slots)
       data_slot="disclosure-body"
       props=(Props.others props)>
       <div
-        class_=(fun () ->
-                 after (Styles.Disclosure.body_inner d.slots) (Solid.get class_))>
-        (fun () -> Solid.get children)
+        class_=(after (Styles.Disclosure.body_inner d.slots) (Solid.get class_))>
+        (Solid.get children)
       </div>
     </div>
   [@@element div]
@@ -254,21 +248,21 @@ let%component make ?(id : string option) ?(is_expanded : bool option)
     }
   in
   <Collapsible.Root
-    open_=(fun () -> Solid.get expanded)
+    open_=(Solid.get expanded)
     on_open_change=expand
-    disabled=(fun () -> is_disabled ())
+    disabled=(is_disabled ())
     force_mount=true
-    class_=(fun () -> after (Styles.Disclosure.base d.slots) (Solid.get class_))
-    data_expanded=(fun () -> Jsx.flag (Solid.get expanded))
-    data_disabled=(fun () -> Jsx.flag (is_disabled ()))
+    class_=(after (Styles.Disclosure.base d.slots) (Solid.get class_))
+    data_expanded=(Jsx.flag (Solid.get expanded))
+    data_disabled=(Jsx.flag (is_disabled ()))
     data_slot="disclosure"
     ref=(fun e ->
           ignore (given_ref e : unit option);
           Interaction.watch focus e)
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (Solid.get as_))
+    ?as_=(Option.map (fun f p -> f p (state ())) (Solid.get as_))
     props=(Props.others props)>
-    <Context.Provider value=(fun () -> d)>
-      (fun () -> Jsx.draw (Solid.get children) (state ()))
+    <Context.Provider value=d>
+      (Jsx.draw (Solid.get children) (state ()))
     </Context.Provider>
   </Collapsible.Root>
 [@@element div]

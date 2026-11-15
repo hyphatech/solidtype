@@ -24,22 +24,19 @@ let fruit =
     (fun d ->
       let f = Row.data d in
       <div>
-        <Label edge="start">(fun () -> Jsx.string f.name)</Label>
-        <Bar to_=(fun () -> f.sold) />
+        <Label edge="start">(Jsx.string f.name)</Label> <Bar to_=f.sold />
       </div>)
 
 let make () =
   let ranked, set_ranked = S.create_signal false in
   <div>
-    <Chart scale=(fun () -> (0., 20.)) label="Crates sold">
+    <Chart scale=(0., 20.) label="Crates sold">
       <Plot
-        rows=(fun () -> fruits)
-        ?order=(fun () ->
-                 if S.get ranked then
-                   Some
-                     (Order.sort_by ~direction:`desc (fun d ->
-                          (Row.data d).sold))
-                 else None)
+        rows=fruits
+        ?order=(if S.get ranked then
+                  Some
+                    (Order.sort_by ~direction:`desc (fun d -> (Row.data d).sold))
+                else None)
         render=fruit
       />
     </Chart>

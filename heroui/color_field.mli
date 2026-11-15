@@ -9,11 +9,11 @@
     {!Field_error} shows while it is invalid.
 
     {[
-      <Color_field name="color" default_value=(fun () -> Colors.parse_color "#0485F7")>
+      <Color_field name="color" default_value=(Colors.parse_color "#0485F7")>
         <Label>"Color"</Label>
         <Color_field.Group>
           <Color_field.Prefix>
-            <Color_swatch color=(fun () -> c) size=`xs />
+            <Color_swatch color=c size=`xs />
           </Color_field.Prefix>
           <Color_field.Input />
         </Color_field.Group>
@@ -60,7 +60,7 @@ module Group : sig
       ?class_:string Solidtype.Check.value ->
       ?on_click:(Dom.mouseEvent -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -97,7 +97,7 @@ module Prefix : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -114,7 +114,7 @@ module Suffix : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -166,7 +166,7 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?class_:string Solidtype.Check.value ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

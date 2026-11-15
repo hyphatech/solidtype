@@ -25,7 +25,7 @@ let make () =
       follow ();
       add_listener "hashchange" on_hash_change;
       S.on_cleanup (fun () -> remove_listener "hashchange" on_hash_change));
-  <Tabs class_="w-full max-w-md" selected_key=(fun () -> S.get current)>
+  <Tabs class_="w-full max-w-md" selected_key=(S.get current)>
     <Tabs.List_container>
       <Tabs.List aria_label="Options">
         <Tabs.Tab href="#getting-started" id="getting-started">

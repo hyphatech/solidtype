@@ -8,19 +8,17 @@ module Label = struct
   let%component make ~(text : string) () =
     let selected = Segment.Item.is_selected () in
     <span
-      class_=(fun () ->
-               "grid transition-[grid-template-columns,opacity] duration-200 \
-                ease-out motion-reduce:transition-none "
-               ^
-               if S.get selected then "grid-cols-[1fr] opacity-100"
-               else "grid-cols-[0fr] opacity-0")>
+      class_=("grid transition-[grid-template-columns,opacity] duration-200 \
+               ease-out motion-reduce:transition-none "
+             ^
+             if S.get selected then "grid-cols-[1fr] opacity-100"
+             else "grid-cols-[0fr] opacity-0")>
       <span
-        class_=(fun () ->
-                 "min-w-0 overflow-hidden whitespace-nowrap \
-                  transition-[padding] duration-200 ease-out \
-                  motion-reduce:transition-none "
-                 ^ if S.get selected then "ps-1.5" else "ps-0")>
-        (fun () -> Solidtype.Jsx.string (S.get text))
+        class_=("min-w-0 overflow-hidden whitespace-nowrap \
+                 transition-[padding] duration-200 ease-out \
+                 motion-reduce:transition-none "
+               ^ if S.get selected then "ps-1.5" else "ps-0")>
+        (Solidtype.Jsx.string (S.get text))
       </span>
     </span>
 end

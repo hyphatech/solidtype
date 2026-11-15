@@ -225,8 +225,8 @@ let both ~multiple =
       <div>
         <button type_=`button>"Before"</button>
         <Combo_box
-          selection_mode=(fun () -> if multiple then `multiple else `single)
-          disabled_keys=(fun () -> [| "dog" |])
+          selection_mode=(if multiple then `multiple else `single)
+          disabled_keys=[| "dog" |]
           name="animal"
           on_change=(fun keys ->
                       let keys = Array.copy keys in
@@ -241,15 +241,12 @@ let both ~multiple =
           <Combo_box.Input_group>
             <Input placeholder="Search animals..." /> <Combo_box.Trigger />
           </Combo_box.Input_group>
-          (fun () ->
-            if multiple then
-              Solidtype.Jsx.element
-                <Combo_box.Value placeholder="No animals selected" />
-            else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+          (if multiple then <Combo_box.Value placeholder="No animals selected"
+             />
+           else Solidtype.Jsx.nothing)
           <Description>"Pick the one you like"</Description>
           <Combo_box.Popover>
-            <List_box
-              selection_mode=(fun () -> if multiple then `multiple else `single)>
+            <List_box selection_mode=(if multiple then `multiple else `single)>
               <List_box.Item id="cat" text_value="Cat">
                 "Cat" <List_box.Item_indicator />
               </List_box.Item>
@@ -284,17 +281,15 @@ let value_of_state ~multiple =
   T.render (fun () ->
       <Combo_box
         aria_label="Animal"
-        selection_mode=(fun () -> if multiple then `multiple else `single)
-        default_value=(fun () ->
-                        if multiple then [| "cat"; "panda" |] else [| "cat" |])>
+        selection_mode=(if multiple then `multiple else `single)
+        default_value=(if multiple then [| "cat"; "panda" |] else [| "cat" |])>
         <Combo_box.Input_group>
           <Input /> <Combo_box.Trigger />
         </Combo_box.Input_group>
         <Combo_box.Value>
           (fun s ->
             <span data_words="value">
-              (fun () ->
-                Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
+              (Solidtype.Jsx.string (Solidtype.Solid.get s.selected_text))
             </span>)
         </Combo_box.Value>
         <Combo_box.Popover>
@@ -316,17 +311,17 @@ let value_of_state ~multiple =
 let root_of_state ?(disabled = false) ?(read_only = false) ?(invalid = false)
     ?(required = false) () =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Combo_box
         aria_label="Animal"
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -414,14 +409,12 @@ let () =
           let told = ref [] in
           T.render (fun () ->
               <Combo_box
-                input_value=(fun () -> S.get given)
+                input_value=(S.get given)
                 on_input_change=(fun t -> told := t :: !told)>
                 <Combo_box.Input_group>
                   <Input aria_label="Animal" />
                 </Combo_box.Input_group>
-                <Combo_box.Popover>
-                  (fun () -> Solidtype.Jsx.element (animals ()))
-                </Combo_box.Popover>
+                <Combo_box.Popover>(animals ())</Combo_box.Popover>
               </Combo_box>);
           let user = T.setup () in
           let* () = settle () in
@@ -444,9 +437,7 @@ let () =
                   <Combo_box.Input_group>
                     <Input aria_label="Animal" />
                   </Combo_box.Input_group>
-                  <Combo_box.Popover>
-                    (fun () -> Solidtype.Jsx.element (animals ()))
-                  </Combo_box.Popover>
+                  <Combo_box.Popover>(animals ())</Combo_box.Popover>
                 </Combo_box>
                 <button type_=`button>"After"</button>
               </form>);
@@ -467,14 +458,12 @@ let () =
                 <form>
                   <Combo_box
                     name="animal"
-                    form_value=(fun () -> if by_text then `text else `key)
-                    default_value=(fun () -> [| "panda" |])>
+                    form_value=(if by_text then `text else `key)
+                    default_value=[| "panda" |]>
                     <Combo_box.Input_group>
                       <Input aria_label="Animal" />
                     </Combo_box.Input_group>
-                    <Combo_box.Popover>
-                      (fun () -> Solidtype.Jsx.element (animals ()))
-                    </Combo_box.Popover>
+                    <Combo_box.Popover>(animals ())</Combo_box.Popover>
                   </Combo_box>
                 </form>);
             let* () = settle () in
@@ -495,9 +484,7 @@ let () =
                 <Combo_box.Input_group>
                   <Input aria_label="Animal" />
                 </Combo_box.Input_group>
-                <Combo_box.Popover>
-                  (fun () -> Solidtype.Jsx.element (animals ()))
-                </Combo_box.Popover>
+                <Combo_box.Popover>(animals ())</Combo_box.Popover>
               </Combo_box>);
           let user = T.setup () in
           let* () = T.click user (input ()) in
@@ -511,9 +498,7 @@ let () =
                 <Combo_box.Input_group>
                   <Input aria_label="Animal" /> <Combo_box.Trigger />
                 </Combo_box.Input_group>
-                <Combo_box.Popover>
-                  (fun () -> Solidtype.Jsx.element (animals ()))
-                </Combo_box.Popover>
+                <Combo_box.Popover>(animals ())</Combo_box.Popover>
               </Combo_box>);
           let user = T.setup () in
           let* () = T.click user (input ()) in
@@ -627,7 +612,7 @@ let () =
                     title="Options"
                     style="--y: 2"
                     ref=(fun _ -> note refs "popover")>
-                    (fun () -> Solidtype.Jsx.element (animals ()))
+                    (animals ())
                   </Combo_box.Popover>
                 </Combo_box>
                 <button type_=`button>"After"</button>

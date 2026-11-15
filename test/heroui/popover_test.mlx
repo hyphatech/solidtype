@@ -155,18 +155,14 @@ let both ?placement ?(arrow = false) ?(custom = false) () =
       <div>
         <p data_testid="outside">"Outside"</p>
         <Popover>
-          (fun () ->
-            if custom then
-              Solidtype.Jsx.element
-                <Popover.Trigger aria_label="Profile">
-                  <span>"Sarah"</span>
-                </Popover.Trigger>
-            else Solidtype.Jsx.element <Button>"Click me"</Button>)
-          <Popover.Content ?placement=(fun () -> placement) should_flip=false>
+          (if custom then
+             <Popover.Trigger aria_label="Profile">
+               <span>"Sarah"</span>
+             </Popover.Trigger>
+           else <Button>"Click me"</Button>)
+          <Popover.Content ?placement should_flip=false>
             <Popover.Dialog>
-              (fun () ->
-                if arrow then Solidtype.Jsx.element <Popover.Arrow />
-                else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+              (if arrow then <Popover.Arrow /> else Solidtype.Jsx.nothing)
               <Popover.Heading>"Popover Title"</Popover.Heading>
               <p>"This is the popover content."</p>
               <Button size=`sm>"Follow"</Button>

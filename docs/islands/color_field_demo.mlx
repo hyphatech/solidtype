@@ -16,30 +16,28 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
         label="disabled"
-        on=(fun () -> S.get is_disabled)
+        on=(S.get is_disabled)
         on_toggle=(S.set set_is_disabled)
       />
       <Toggle
-        label="invalid"
-        on=(fun () -> S.get is_invalid)
-        on_toggle=(S.set set_is_invalid)
+        label="invalid" on=(S.get is_invalid) on_toggle=(S.set set_is_invalid)
       />
     </div>
     <Side_by_side
       solidtype=(<Color_field
                    class_="w-[280px]"
-                   default_value=(fun () -> Colors.parse_color "#0485F7")
+                   default_value=(Colors.parse_color "#0485F7")
                    name="color"
-                   is_disabled=(fun () -> S.get is_disabled)
-                   is_invalid=(fun () -> S.get is_invalid)>
+                   is_disabled=(S.get is_disabled)
+                   is_invalid=(S.get is_invalid)>
                    <Label>"Color"</Label>
-                   <Color_field.Group variant=(fun () -> fst (S.get variant))>
+                   <Color_field.Group variant=(fst (S.get variant))>
                      <Color_field.Input />
                    </Color_field.Group>
                  </Color_field>)

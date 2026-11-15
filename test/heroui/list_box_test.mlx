@@ -116,13 +116,12 @@ let users () = Array.init 1000 (fun i -> "User " ^ string_of_int (i + 1))
 let virtualized () =
   T.render (fun () ->
       <div data_testid="scroller" style="overflow-y: auto">
-        <Virtualizer
-          layout=(fun () -> Virtualizer.list_layout ~row_size:50. ())>
+        <Virtualizer layout=(Virtualizer.list_layout ~row_size:50. ())>
           <List_box aria_label="Users">
-            <Solidtype.For each=(fun () -> users ())>
+            <Solidtype.For each=(users ())>
               (fun name _ ->
-                <List_box.Item id=(fun () -> name)>
-                  (fun () -> Solidtype.Jsx.string name)
+                <List_box.Item id=name>
+                  (Solidtype.Jsx.string name)
                 </List_box.Item>)
             </Solidtype.For>
           </List_box>
@@ -206,9 +205,9 @@ let items (list : list) tell =
   | (`single | `multiple) as mode ->
       <List_box
         aria_label="Users"
-        selection_mode=(fun () -> (mode :> [ `none | `single | `multiple ]))
-        default_selected_keys=(fun () -> [| "bob" |])
-        disabled_keys=(fun () -> [| "martha" |])
+        selection_mode=(mode :> [ `none | `single | `multiple ])
+        default_selected_keys=[| "bob" |]
+        disabled_keys=[| "martha" |]
         on_selection_change=(fun keys ->
                               let keys = Array.copy keys in
                               Array.sort String.compare keys;
@@ -257,10 +256,7 @@ let both (list : list) =
   let told = ref [] in
   let tell said = told := said :: !told in
   T.render (fun () ->
-      <div>
-        <button type_=`button>"Before"</button>
-        (fun () -> Solidtype.Jsx.element (items list tell))
-      </div>);
+      <div><button type_=`button>"Before"</button> (items list tell)</div>);
   let* solidtype = walk ~step:(fun action -> action ()) ~told list in
   T.cleanup ();
   told := [];
@@ -276,15 +272,15 @@ let same (solidtype, react) =
    children are drawn of its state, as words, beside React's. *)
 let of_state ~disabled =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <List_box
         aria_label="Fruits"
         selection_mode=`single
-        disabled_keys=(fun () -> if disabled then [| "apple" |] else [||])>
+        disabled_keys=(if disabled then [| "apple" |] else [||])>
         <List_box.Item id="apple" text_value="Apple">
           (fun s ->
             words "apple"
@@ -340,7 +336,7 @@ let () =
               <List_box aria_label="Pokemon">
                 <List_box.Item id="bulbasaur">"bulbasaur"</List_box.Item>
                 <List_box.Load_more_item
-                  is_loading=(fun () -> Solidtype.Solid.get loading)>
+                  is_loading=(Solidtype.Solid.get loading)>
                   <span>"Loading more..."</span>
                 </List_box.Load_more_item>
               </List_box>);
@@ -364,10 +360,10 @@ let () =
           in
           T.render (fun () ->
               <List_box aria_label="Pokemon">
-                <Solidtype.For each=(fun () -> Solidtype.Solid.get names)>
+                <Solidtype.For each=(Solidtype.Solid.get names)>
                   (fun name _ ->
-                    <List_box.Item id=(fun () -> name)>
-                      (fun () -> Solidtype.Jsx.string name)
+                    <List_box.Item id=name>
+                      (Solidtype.Jsx.string name)
                     </List_box.Item>)
                 </Solidtype.For>
               </List_box>);

@@ -10,9 +10,7 @@ module T = Testing
 
 module Quoted = struct
   let%component make ~(text : string) () =
-    <span title=(fun () -> S.get text)>
-      (fun () -> Jsx.string (S.get text))
-    </span>
+    <span title=(S.get text)>(Jsx.string (S.get text))</span>
 end
 
 let () =

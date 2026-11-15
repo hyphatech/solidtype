@@ -11,11 +11,11 @@ let make () =
   <Color_swatch_picker
     class_="rounded-2xl border border-border/80 bg-surface p-4 shadow-sm \
             ring-1 ring-accent/5"
-    default_value=(fun () -> Colors.parse_color "#8B5CF6")
+    default_value=(Colors.parse_color "#8B5CF6")
     variant=`square>
-    <For each=(fun () -> colors)>
+    <For each=colors>
       (fun c _ ->
-        <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+        <Color_swatch_picker.Item color=(Colors.parse_color c)>
           <Color_swatch_picker.Swatch /> <Color_swatch_picker.Indicator />
         </Color_swatch_picker.Item>)
     </For>

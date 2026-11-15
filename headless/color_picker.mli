@@ -7,7 +7,7 @@
     own [on_change] is called after the picker is told.
 
     {[
-      <Color_picker default_value=(fun () -> Colors.parse_color "#0485F7")>
+      <Color_picker default_value=(Colors.parse_color "#0485F7")>
         <Color_swatch />
         <Color_area.Root>
           <Color_area.Background>
@@ -55,7 +55,7 @@ module Props : sig
     ?value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?props:t S.rest ->
     unit ->
     unit

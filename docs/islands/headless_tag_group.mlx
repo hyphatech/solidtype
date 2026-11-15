@@ -13,13 +13,13 @@ let make () =
                        not (Array.exists (String.equal t) keys))))>
     <Tag_group.Label class_="text-sm font-medium">"Categories"</Tag_group.Label>
     <Tag_group.List class_="flex flex-wrap gap-2">
-      <For each=(fun () -> S.get tags)>
+      <For each=(S.get tags)>
         (fun t _ ->
           <Tag_group.Tag
-            id=(fun () -> t)
+            id=t
             class_="flex items-center gap-1 rounded-full border px-3 py-1 \
                     data-[selected]:bg-black data-[selected]:text-white">
-            (fun () -> Solidtype.Jsx.string t)
+            (Solidtype.Jsx.string t)
             <Tag_group.Remove_button>"×"</Tag_group.Remove_button>
           </Tag_group.Tag>)
       </For>

@@ -107,7 +107,7 @@ let%component make ?(action : string option)
     ?(validation_errors : (string * string) list option)
     ?(on_submit : (Dom.event -> unit) option)
     ?(on_reset : (Dom.event -> unit) option)
-    ?(on_invalid : (Dom.event -> unit) option) ~(children : Jsx.content) () =
+    ?(on_invalid : (Dom.event -> unit) option) ~(children : Jsx.element) () =
   let entries = ref [] in
   (* The names whose server error a change has cleared, with the errors they
      were cleared from: errors given again are another list, shown whole.
@@ -153,20 +153,20 @@ let%component make ?(action : string option)
           |> first_in_page
           |> Option.iter (fun root -> Option.iter focus (control root))
   in
-  <Context.Provider value=(fun () -> form)>
+  <Context.Provider value=form>
     <form
-      ?action=(fun () -> S.get action)
-      ?method_=(fun () -> S.get method_)
-      ?aria_label=(fun () -> S.get aria_label)
-      ?aria_labelledby=(fun () -> S.get aria_labelledby)
-      ?class_=(fun () -> S.get class_)
+      ?action=(S.get action)
+      ?method_=(S.get method_)
+      ?aria_label=(S.get aria_label)
+      ?aria_labelledby=(S.get aria_labelledby)
+      ?class_=(S.get class_)
       novalidate=true
       on_submit=submit
       on_reset=(fun e -> ignore (on_reset e : unit option))
       on_invalid=(fun e -> ignore (on_invalid e : unit option))
       data_slot="form"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </form>
   </Context.Provider>
 [@@element form]

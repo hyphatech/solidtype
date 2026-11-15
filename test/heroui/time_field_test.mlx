@@ -178,19 +178,17 @@ let in_kyiv ~hour ~minute =
 
 let inside ?variant () =
   Solidtype.Jsx.(
-    element
-      (fragment
-         [|
-           <Label>"Time"</Label>;
-           <Time_field.Group ?variant=(fun () -> variant)>
-             <Time_field.Input>
-               (fun segment ->
-                 <Time_field.Segment segment=(fun () -> S.get segment) />)
-             </Time_field.Input>
-           </Time_field.Group>;
-           <Description>"When it starts."</Description>;
-           <Field_error>"Pick a time."</Field_error>;
-         |]))
+    fragment
+      [|
+        <Label>"Time"</Label>;
+        <Time_field.Group ?variant>
+          <Time_field.Input>
+            (fun segment -> <Time_field.Segment segment=(S.get segment) />)
+          </Time_field.Input>
+        </Time_field.Group>;
+        <Description>"When it starts."</Description>;
+        <Field_error>"Pick a time."</Field_error>;
+      |])
 
 let both ?(kind = Of_day) ?default_value ?granularity ?hour_cycle
     ?hide_time_zone ?is_disabled ?is_invalid ?is_required ?is_read_only ?variant
@@ -200,63 +198,59 @@ let both ?(kind = Of_day) ?default_value ?granularity ?hour_cycle
       match kind with
       | Of_day ->
           <Time_field
-            ?default_value=(fun () ->
-                             Option.map
-                               (fun (hour, minute) ->
-                                 Time.make ~hour ~minute ())
-                               default_value)
-            ?granularity=(fun () -> granularity)
-            ?hour_cycle=(fun () -> hour_cycle)
-            ?is_disabled=(fun () -> is_disabled)
-            ?is_invalid=(fun () -> is_invalid)
-            ?is_required=(fun () -> is_required)
-            ?is_read_only=(fun () -> is_read_only)
+            ?default_value=(Option.map
+                              (fun (hour, minute) -> Time.make ~hour ~minute ())
+                              default_value)
+            ?granularity
+            ?hour_cycle
+            ?is_disabled
+            ?is_invalid
+            ?is_required
+            ?is_read_only
             name="time"
             class_="w-64"
             on_change=(Option.iter (fun t ->
                            told := told_time t (Time.to_string t ())))>
-            (fun () -> inside ?variant ())
+            (inside ?variant ())
           </Time_field>
       | On_date ->
           <Time_field.Date_time
-            ?default_value=(fun () ->
-                             Option.map
-                               (fun (hour, minute) -> on_date ~hour ~minute ())
-                               default_value)
-            placeholder_value=(fun () -> on_date ())
-            ?granularity=(fun () -> granularity)
-            ?hour_cycle=(fun () -> hour_cycle)
-            ?is_disabled=(fun () -> is_disabled)
-            ?is_invalid=(fun () -> is_invalid)
-            ?is_required=(fun () -> is_required)
-            ?is_read_only=(fun () -> is_read_only)
+            ?default_value=(Option.map
+                              (fun (hour, minute) -> on_date ~hour ~minute ())
+                              default_value)
+            placeholder_value=(on_date ())
+            ?granularity
+            ?hour_cycle
+            ?is_disabled
+            ?is_invalid
+            ?is_required
+            ?is_read_only
             name="time"
             class_="w-64"
             on_change=(Option.iter (fun v ->
                            told :=
                              told_time (D.to_time v) (Date_time.to_string v ())))>
-            (fun () -> inside ?variant ())
+            (inside ?variant ())
           </Time_field.Date_time>
       | In_kyiv ->
           <Time_field.Zoned
-            ?default_value=(fun () ->
-                             Option.map
-                               (fun (hour, minute) -> in_kyiv ~hour ~minute)
-                               default_value)
-            placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)
-            ?hide_time_zone=(fun () -> hide_time_zone)
-            ?granularity=(fun () -> granularity)
-            ?hour_cycle=(fun () -> hour_cycle)
-            ?is_disabled=(fun () -> is_disabled)
-            ?is_invalid=(fun () -> is_invalid)
-            ?is_required=(fun () -> is_required)
-            ?is_read_only=(fun () -> is_read_only)
+            ?default_value=(Option.map
+                              (fun (hour, minute) -> in_kyiv ~hour ~minute)
+                              default_value)
+            placeholder_value=(in_kyiv ~hour:0 ~minute:0)
+            ?hide_time_zone
+            ?granularity
+            ?hour_cycle
+            ?is_disabled
+            ?is_invalid
+            ?is_required
+            ?is_read_only
             name="time"
             class_="w-64"
             on_change=(Option.iter (fun v ->
                            told :=
                              told_time (D.to_time v) (Zoned.to_string v ())))>
-            (fun () -> inside ?variant ())
+            (inside ?variant ())
           </Time_field.Zoned>);
   let host =
     match T.query "[data-slot=time-field]" with
@@ -304,17 +298,17 @@ let same (solidtype, react) =
    words. *)
 let draw_of_state ~disabled ~read_only ~invalid ~required =
   let words name flags =
-    <span data_words=(fun () -> Solidtype.Jsx.data name)>
-      (fun () -> Solidtype.Jsx.string (T.words flags))
+    <span data_words=(Solidtype.Jsx.data name)>
+      (Solidtype.Jsx.string (T.words flags))
     </span>
   in
   T.render (fun () ->
       <Time_field
         aria_label="Field"
-        is_disabled=(fun () -> disabled)
-        is_read_only=(fun () -> read_only)
-        is_invalid=(fun () -> invalid)
-        is_required=(fun () -> required)>
+        is_disabled=disabled
+        is_read_only=read_only
+        is_invalid=invalid
+        is_required=required>
         (fun r ->
           Solidtype.Jsx.fragment
             [|
@@ -339,8 +333,7 @@ let draw_of_state ~disabled ~read_only ~invalid ~required =
                         ];
                       <Time_field.Input>
                         (fun segment ->
-                          <Time_field.Segment segment=(fun () -> S.get segment)
-                          />)
+                          <Time_field.Segment segment=(S.get segment) />)
                       </Time_field.Input>;
                     |])
               </Time_field.Group>;
@@ -423,7 +416,7 @@ let () =
           let solidtype =
             T.blurs ~root:"[data-slot=time-field]" (fun on_blur ->
                 T.render (fun () ->
-                    <Time_field on_blur>(fun () -> inside ())</Time_field>))
+                    <Time_field on_blur>(inside ())</Time_field>))
           in
           (* React's TimeField tells its onBlur more than once on the way
              through its segments and out; a form reads a field left once, as
@@ -450,32 +443,30 @@ let () =
           let of_day =
             sent_of (fun () ->
                 <Time_field
-                  name="time"
-                  default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())>
-                  (fun () -> inside ())
+                  name="time" default_value=(Time.make ~hour:9 ~minute:30 ())>
+                  (inside ())
                 </Time_field>)
           in
           let on_date =
             sent_of (fun () ->
                 <Time_field.Date_time
                   name="time"
-                  default_value=(fun () -> on_date ~hour:9 ~minute:30 ())
-                  placeholder_value=(fun () -> on_date ())>
-                  (fun () -> inside ())
+                  default_value=(on_date ~hour:9 ~minute:30 ())
+                  placeholder_value=(on_date ())>
+                  (inside ())
                 </Time_field.Date_time>)
           in
           let in_kyiv =
             sent_of (fun () ->
                 <Time_field.Zoned
                   name="time"
-                  default_value=(fun () -> in_kyiv ~hour:9 ~minute:30)
-                  placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)>
-                  (fun () -> inside ())
+                  default_value=(in_kyiv ~hour:9 ~minute:30)
+                  placeholder_value=(in_kyiv ~hour:0 ~minute:0)>
+                  (inside ())
                 </Time_field.Zoned>)
           in
           let empty =
-            sent_of (fun () ->
-                <Time_field name="time">(fun () -> inside ())</Time_field>)
+            sent_of (fun () -> <Time_field name="time">(inside ())</Time_field>)
           in
           E.(
             expect (of_day, on_date, in_kyiv, empty)
@@ -490,15 +481,15 @@ let () =
           let value, set_value = S.create_signal Js.Nullable.null in
           T.render (fun () ->
               <Time_field.Zoned
-                value=(fun () -> S.get value)
-                placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)
+                value=(S.get value)
+                placeholder_value=(in_kyiv ~hour:0 ~minute:0)
                 hour_cycle=`h24
                 on_change=(fun v ->
                             S.set set_value (Js.Nullable.fromOption v);
                             Option.iter
                               (fun v -> told := Zoned.to_string v ())
                               v)>
-                (fun () -> inside ())
+                (inside ())
               </Time_field.Zoned>);
           let user = T.setup () in
           let* () = T.click user (segment T.body "hour") in
@@ -510,10 +501,10 @@ let () =
           let told = ref "" in
           T.render (fun () ->
               <Time_field.Zoned
-                placeholder_value=(fun () -> in_kyiv ~hour:0 ~minute:0)
+                placeholder_value=(in_kyiv ~hour:0 ~minute:0)
                 hour_cycle=`h24
                 on_change=(Option.iter (fun v -> told := Zoned.to_string v ()))>
-                (fun () -> inside ())
+                (inside ())
               </Time_field.Zoned>);
           let user = T.setup () in
           let* () = T.click user (segment T.body "hour") in
@@ -528,14 +519,14 @@ let () =
 let field ~default_value ~told () =
   T.render (fun () ->
       <Time_field
-        default_value=(fun () -> default_value)
+        default_value
         hour_cycle=`h24
         on_change=(fun t ->
                     told :=
                       match t with
                       | Some t -> told_time t (Time.to_string t ())
                       | None -> "none")>
-        (fun () -> inside ())
+        (inside ())
       </Time_field>)
 
 let placeholder kind = T.attribute (segment T.body kind) "data-placeholder"
@@ -548,10 +539,10 @@ let () =
           let time, set_time = S.create_signal Js.Nullable.null in
           T.render (fun () ->
               <Time_field
-                value=(fun () -> S.get time)
+                value=(S.get time)
                 hour_cycle=`h24
                 on_change=(fun t -> S.set set_time (Js.Nullable.fromOption t))>
-                (fun () -> inside ())
+                (inside ())
               </Time_field>);
           let user = T.setup () in
           let* () = T.click user (segment T.body "hour") in
@@ -591,20 +582,20 @@ let () =
       Jest.test "draws one between each part, as React's does" (fun () ->
           T.render (fun () ->
               <Time_field
-                default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+                default_value=(Time.make ~hour:9 ~minute:30 ())
                 granularity=`second
                 hour_cycle=`h24>
-                (fun () -> inside ())
+                (inside ())
               </Time_field>);
           E.(expect (colons ()) |> toEqual 2));
       Jest.test "draws one when it comes to show fewer parts" (fun () ->
           let granularity, set_granularity = S.create_signal `second in
           T.render (fun () ->
               <Time_field
-                default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
-                granularity=(fun () -> S.get granularity)
+                default_value=(Time.make ~hour:9 ~minute:30 ())
+                granularity=(S.get granularity)
                 hour_cycle=`h24>
-                (fun () -> inside ())
+                (inside ())
               </Time_field>);
           S.set set_granularity `minute;
           E.(expect (colons ()) |> toEqual 1)))
@@ -631,7 +622,7 @@ let () =
                     title="Time" ref=(fun _ -> tell "input ref")>
                     (fun segment ->
                       <Time_field.Segment
-                        segment=(fun () -> S.get segment)
+                        segment=(S.get segment)
                         title="Part"
                         ref=(fun _ -> tell "segment ref")
                       />)
@@ -677,7 +668,7 @@ let () =
       Jest.test "stays uneditable in a disabled field" (fun () ->
           T.render (fun () ->
               <Time_field
-                default_value=(fun () -> Time.make ~hour:9 ~minute:30 ())
+                default_value=(Time.make ~hour:9 ~minute:30 ())
                 hour_cycle=`h24
                 is_disabled=true>
                 <Label>"Start"</Label>
@@ -685,8 +676,7 @@ let () =
                   <Time_field.Input>
                     (fun segment ->
                       <Time_field.Segment
-                        segment=(fun () -> S.get segment)
-                        content_editable="true"
+                        segment=(S.get segment) content_editable="true"
                       />)
                   </Time_field.Input>
                 </Time_field.Group>

@@ -11,28 +11,20 @@ let community ~image ~alt ~fallback ~title ~members ~avatar ~by =
   <Card class_="col-span-12 gap-2 sm:col-span-6">
     <Card.Header>
       <Avatar class_="size-[56px] rounded-xl">
-        <Avatar.Image alt=(fun () -> alt) src=(fun () -> assets ^ image) />
-        <Avatar.Fallback>
-          (fun () -> Solidtype.Jsx.string fallback)
-        </Avatar.Fallback>
+        <Avatar.Image alt src=(assets ^ image) />
+        <Avatar.Fallback>(Solidtype.Jsx.string fallback)</Avatar.Fallback>
       </Avatar>
     </Card.Header>
     <Card.Content class_="mt-1">
-      <p class_="text-sm leading-4 font-medium">
-        (fun () -> Solidtype.Jsx.string title)
-      </p>
-      <p class_="text-xs text-muted">
-        (fun () -> Solidtype.Jsx.string members)
-      </p>
+      <p class_="text-sm leading-4 font-medium">(Solidtype.Jsx.string title)</p>
+      <p class_="text-xs text-muted">(Solidtype.Jsx.string members)</p>
     </Card.Content>
     <Card.Footer class_="flex items-center gap-2">
       <Avatar class_="size-4">
-        <Avatar.Image alt="John" src=(fun () -> assets ^ avatar) />
-        <Avatar.Fallback>
-          (fun () -> Solidtype.Jsx.string fallback)
-        </Avatar.Fallback>
+        <Avatar.Image alt="John" src=(assets ^ avatar) />
+        <Avatar.Fallback>(Solidtype.Jsx.string fallback)</Avatar.Fallback>
       </Avatar>
-      <p class_="text-xs text-muted">(fun () -> Solidtype.Jsx.string by)</p>
+      <p class_="text-xs text-muted">(Solidtype.Jsx.string by)</p>
     </Card.Footer>
   </Card>
 
@@ -48,7 +40,7 @@ let make () =
             class_="pointer-events-none absolute inset-0 h-full w-full \
                     scale-125 object-cover select-none"
             loading="lazy"
-            src=(fun () -> assets ^ "docs/cherries.jpeg")
+            src=(assets ^ "docs/cherries.jpeg")
           />
         </div>
         <div class_="flex flex-1 flex-col gap-3">
@@ -103,16 +95,12 @@ let make () =
             </Card.Footer>
           </Card>
           <div class_="col-span-12 grid grid-cols-12 gap-4">
-            (fun () ->
-              Solidtype.Jsx.element
-                (community ~image:"docs/demo1.jpg" ~alt:"Demo 1" ~fallback:"JK"
-                   ~title:"Indie Hackers" ~members:"148 members"
-                   ~avatar:"avatars/red.jpg" ~by:"By John"))
-            (fun () ->
-              Solidtype.Jsx.element
-                (community ~image:"docs/demo2.jpg" ~alt:"Demo 2" ~fallback:"AB"
-                   ~title:"AI Builders" ~members:"362 members"
-                   ~avatar:"avatars/blue.jpg" ~by:"By Martha"))
+            (community ~image:"docs/demo1.jpg" ~alt:"Demo 1" ~fallback:"JK"
+               ~title:"Indie Hackers" ~members:"148 members"
+               ~avatar:"avatars/red.jpg" ~by:"By John")
+            (community ~image:"docs/demo2.jpg" ~alt:"Demo 2" ~fallback:"AB"
+               ~title:"AI Builders" ~members:"362 members"
+               ~avatar:"avatars/blue.jpg" ~by:"By Martha")
           </div>
         </div>
         <Card
@@ -122,7 +110,7 @@ let make () =
             alt="NEO Home Robot"
             aria_hidden=true
             class_="absolute inset-0 h-full w-full object-cover"
-            src=(fun () -> assets ^ "docs/neo2.jpeg")
+            src=(assets ^ "docs/neo2.jpeg")
           />
           <Card.Header class_="z-10 text-white">
             <Card.Title

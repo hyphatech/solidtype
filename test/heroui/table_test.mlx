@@ -140,7 +140,7 @@ let walk ~step host =
 
 let both ?variant ?(members = members) () =
   T.render (fun () ->
-      <Table ?variant=(fun () -> variant)>
+      <Table ?variant>
         <Table.Scroll_container>
           <Table.Content aria_label="Team members" class_="min-w-[600px]">
             <Table.Header>
@@ -150,13 +150,13 @@ let both ?variant ?(members = members) () =
               <Table.Column>"Email"</Table.Column>
             </Table.Header>
             <Table.Body render_empty_state=(fun _ -> <span>"No members"</span>)>
-              <For each=(fun () -> members)>
+              <For each=members>
                 (fun m _ ->
-                  <Table.Row id=(fun () -> m.id)>
-                    <Table.Cell>(fun () -> Jsx.string m.name)</Table.Cell>
-                    <Table.Cell>(fun () -> Jsx.string m.role)</Table.Cell>
-                    <Table.Cell>(fun () -> Jsx.string m.status)</Table.Cell>
-                    <Table.Cell>(fun () -> Jsx.string m.email)</Table.Cell>
+                  <Table.Row id=m.id>
+                    <Table.Cell>(Jsx.string m.name)</Table.Cell>
+                    <Table.Cell>(Jsx.string m.role)</Table.Cell>
+                    <Table.Cell>(Jsx.string m.status)</Table.Cell>
+                    <Table.Cell>(Jsx.string m.email)</Table.Cell>
                   </Table.Row>)
               </For>
             </Table.Body>

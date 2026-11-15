@@ -73,7 +73,7 @@ let make () =
   <div class_="flex flex-col gap-4">
     <div ref=(fun d -> around := Some d)>
       <Search_field
-        name="search" value=(fun () -> S.get value) on_change=(S.set set_value)>
+        name="search" value=(S.get value) on_change=(S.set set_value)>
         <Label>"Search"</Label>
         <Search_field.Group>
           <Search_field.Search_icon />

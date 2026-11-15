@@ -36,31 +36,29 @@ let name : type_ -> string = function
 let text ~others ~type_ ~align ~color ~weight ~truncate ~element_type ~class_
     children =
   <Dynamic.Drawn
-    component=(fun () ->
-                Jsx.drawn_as (S.drawn_as others)
-                  (match S.get element_type with
-                  | Some tag -> tag
-                  | None -> element (S.get type_)))
-    class_=(fun () ->
-             let base =
-               Styles.Typography.base
-                 (Styles.Typography.slots
-                    (Styles.Typography.options ~type_:(S.get type_)
-                       ~align:(Option.value (S.get align) ~default:`start)
-                       ~color:(Option.value (S.get color) ~default:`default)
-                       ?weight:(S.get weight) ?truncate:(S.get truncate) ()))
-             in
-             match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
+    component=(Jsx.drawn_as (S.drawn_as others)
+                 (match S.get element_type with
+                 | Some tag -> tag
+                 | None -> element (S.get type_)))
+    class_=(let base =
+              Styles.Typography.base
+                (Styles.Typography.slots
+                   (Styles.Typography.options ~type_:(S.get type_)
+                      ~align:(Option.value (S.get align) ~default:`start)
+                      ~color:(Option.value (S.get color) ~default:`default)
+                      ?weight:(S.get weight) ?truncate:(S.get truncate) ()))
+            in
+            match S.get class_ with Some c -> base ^ " " ^ c | None -> base)
     data_slot="typography"
-    data_type=(fun () -> Jsx.data (name (S.get type_)))
+    data_type=(Jsx.data (name (S.get type_)))
     props=(S.undrawn others)>
-    (fun () -> S.get children)
+    (S.get children)
   </Dynamic.Drawn>
 
 let%component make ?(type_ : type_ = `body) ?(align : align option)
     ?(color : color option) ?(weight : weight option) ?(truncate : bool option)
     ?(element_type : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
     ~element_type ~class_ children
 [@@element element]
@@ -69,7 +67,7 @@ module Heading = struct
   let%component make ?(level : int = 1) ?(align : align option)
       ?(color : color option) ?(weight : weight option)
       ?(truncate : bool option) ?(element_type : string option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let type_ =
       S.accessor (fun () ->
           match S.get level with
@@ -92,7 +90,7 @@ module Paragraph = struct
   let%component make ?(size : [ `base | `sm | `xs ] = `base)
       ?(align : align option) ?(color : color option) ?(weight : weight option)
       ?(truncate : bool option) ?(element_type : string option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let type_ =
       S.accessor (fun () ->
           match S.get size with
@@ -109,7 +107,7 @@ module Code = struct
   let%component make ?(align : align option) ?(color : color option)
       ?(weight : weight option) ?(truncate : bool option)
       ?(element_type : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     text ~others:(Props.others props)
       ~type_:(S.accessor (fun () -> `code))
       ~align ~color ~weight ~truncate ~element_type ~class_ children
@@ -117,19 +115,18 @@ module Code = struct
 end
 
 module Prose = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
-      class_=(fun () ->
-               let prose =
-                 Styles.Typography.prose
-                   (Styles.Typography.slots (Styles.Typography.options ()))
-               in
-               match S.get class_ with
-               | Some c -> prose ^ " " ^ c
-               | None -> prose)
+      class_=(let prose =
+                Styles.Typography.prose
+                  (Styles.Typography.slots (Styles.Typography.options ()))
+              in
+              match S.get class_ with
+              | Some c -> prose ^ " " ^ c
+              | None -> prose)
       data_slot="prose"
       props=(Props.others props)>
-      (fun () -> S.get children)
+      (S.get children)
     </div>
   [@@element div]
 end

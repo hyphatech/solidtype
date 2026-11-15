@@ -106,13 +106,13 @@ let%component make ?(expanded_keys : string array option)
   in
   let state () = { is_disabled } in
   <div
-    class_=(fun () -> classes ())
-    data_disabled=(fun () -> Jsx.flag (S.get is_disabled))
+    class_=(classes ())
+    data_disabled=(Jsx.flag (S.get is_disabled))
     data_slot="disclosure-group"
-    ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
+    ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
     props=(Props.others props)>
-    <Context.Provider value=(fun () -> group)>
-      (fun () -> Jsx.draw (S.get children) (state ()))
+    <Context.Provider value=group>
+      (Jsx.draw (S.get children) (state ()))
     </Context.Provider>
   </div>
 [@@element div]

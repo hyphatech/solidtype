@@ -161,8 +161,8 @@ let make () =
   in
   <div class_="flex h-screen overflow-hidden">
     <Sidebar
-      projects=(fun () -> all_projects ())
-      view=(fun () -> view ())
+      projects=(all_projects ())
+      view=(view ())
       on_view=(fun v -> S.set set_chosen (Some v))
       on_added=(fun (p : Api.project) ->
                  S.set set_chosen (Some (View.Project p.id));
@@ -172,29 +172,28 @@ let make () =
     <main class_="flex min-w-0 flex-1 flex-col gap-4 p-4">
       <header class_="flex flex-wrap items-center gap-3">
         <h1 class_="text-xl font-semibold">
-          (fun () -> Jsx.string (heading (shown ())))
+          (Jsx.string (heading (shown ())))
         </h1>
         <span class_="text-sm text-muted">
-          (fun () -> Jsx.string (counted (open_tasks ())))
+          (Jsx.string (counted (open_tasks ())))
         </span>
-        <Show.Some some=(fun () -> Option.bind (shown ()) (fun p -> p.repo))>
+        <Show.Some some=(Option.bind (shown ()) (fun p -> p.repo))>
           (fun repo ->
             <Chip size=`sm variant=`secondary>
               <Gravity.Logo_github class_="size-3.5" />
               <Chip.Label>
                 <a
                   class_="hover:underline"
-                  href=(fun () -> "https://github.com/" ^ S.get repo)
+                  href=("https://github.com/" ^ S.get repo)
                   target="_blank"
                   rel="noreferrer">
-                  (fun () -> Jsx.string (S.get repo))
+                  (Jsx.string (S.get repo))
                 </a>
               </Chip.Label>
             </Chip>)
         </Show.Some>
         <div class_="ms-auto flex items-center gap-2">
-          <Search_field
-            value=(fun () -> S.get filter) on_change=(S.set set_filter)>
+          <Search_field value=(S.get filter) on_change=(S.set set_filter)>
             <Search_field.Group>
               <Search_field.Search_icon />
               <Search_field.Input
@@ -206,30 +205,28 @@ let make () =
             </Search_field.Group>
           </Search_field>
           <Add_task
-            projects=(fun () -> all_projects ())
-            project=(fun () ->
-                      Option.map (fun (p : Api.project) -> p.id) (shown ()))
+            projects=(all_projects ())
+            project=(Option.map (fun (p : Api.project) -> p.id) (shown ()))
             on_added=(fun title -> changed (title ^ " is on the board"))
           />
         </div>
       </header>
       <Show
-        when_=(fun () -> Array.length (all_projects ()) > 0)
+        when_=(Array.length (all_projects ()) > 0)
         fallback=(<Empty_state
                     class_="flex flex-1 items-center justify-center \
                             rounded-2xl border border-dashed border-border">
                     "No projects yet. Start one to put tasks on it."
                   </Empty_state>)>
         <div class_="flex min-h-0 flex-1 gap-3 overflow-x-auto">
-          <For each=(fun () -> Array.of_list Status.all)>
+          <For each=(Array.of_list Status.all)>
             (fun status _ ->
               <Column
-                status=(fun () -> status)
-                tasks=(fun () -> in_column status)
-                folded=(fun () ->
-                         List.exists (Status.equal status) (S.get folded))
-                empty=(fun () -> empty status)
-                on_fold=(fun _ -> fold status)
+                status
+                tasks=(in_column status)
+                folded=(List.exists (Status.equal status) (S.get folded))
+                empty=(empty status)
+                on_fold=(fun () -> fold status)
                 on_drop=(dropped status)
                 on_move=move
                 on_remove=remove

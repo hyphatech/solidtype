@@ -30,20 +30,19 @@ end
    writes the state as words: what each side's function was given. *)
 let of_state ?(pending = false) ~disabled () =
   T.render (fun () ->
-      <Button is_disabled=(fun () -> disabled) is_pending=(fun () -> pending)>
+      <Button is_disabled=disabled is_pending=pending>
         (fun s ->
           <span>
-            (fun () ->
-              Solidtype.Jsx.string
-                (T.words
-                   [
-                     ("hovered", s.is_hovered);
-                     ("pressed", s.is_pressed);
-                     ("focused", s.is_focused);
-                     ("focus-visible", s.is_focus_visible);
-                     ("disabled", s.is_disabled);
-                     ("pending", s.is_pending);
-                   ]))
+            (Solidtype.Jsx.string
+               (T.words
+                  [
+                    ("hovered", s.is_hovered);
+                    ("pressed", s.is_pressed);
+                    ("focused", s.is_focused);
+                    ("focus-visible", s.is_focus_visible);
+                    ("disabled", s.is_disabled);
+                    ("pending", s.is_pending);
+                  ]))
           </span>)
       </Button>);
   let read = T.text_content in
@@ -59,9 +58,7 @@ let of_state ?(pending = false) ~disabled () =
    the page, so Tab reaches it. *)
 let both ?(pending = false) ~disabled () =
   T.render (fun () ->
-      <Button is_disabled=(fun () -> disabled) is_pending=(fun () -> pending)>
-        "Save"
-      </Button>);
+      <Button is_disabled=disabled is_pending=pending>"Save"</Button>);
   let* solidtype = T.walk ~step:Twin.step (T.by_role "button") in
   T.cleanup ();
   let* react = T.walk ~step:Twin.step (Twin.render disabled pending) in
@@ -101,8 +98,7 @@ let () =
             |> toEqual (Some "Delete")));
       Jest.test "changes its classes as its variant changes" (fun () ->
           let variant, set_variant = S.create_signal `primary in
-          T.render (fun () ->
-              <Button variant=(fun () -> S.get variant)>"Save"</Button>);
+          T.render (fun () -> <Button variant=(S.get variant)>"Save"</Button>);
           S.set set_variant `ghost;
           E.(
             expect (T.class_name (T.by_role "button"))
@@ -112,8 +108,7 @@ let () =
           let disabled, set_disabled = S.create_signal false in
           T.render (fun () ->
               <Button
-                is_disabled=(fun () -> S.get disabled)
-                on_click=(fun _ -> incr clicks)>
+                is_disabled=(S.get disabled) on_click=(fun _ -> incr clicks)>
                 "Save"
               </Button>);
           let user = T.setup () in
@@ -175,10 +170,9 @@ let () =
               <Button
                 as_=(fun p s ->
                         <button
-                          data_custom=(fun () ->
-                                        Solidtype.Jsx.data
-                                          (if S.get s.is_pressed then "pressed"
-                                           else "bar"))
+                          data_custom=(Solidtype.Jsx.data
+                                         (if S.get s.is_pressed then "pressed"
+                                          else "bar"))
                           props=p
                         />)>
                 "Press me"
@@ -208,7 +202,7 @@ let () =
           T.render (fun () ->
               <Button
                 type_=`submit
-                is_pending=(fun () -> S.get pending)
+                is_pending=(S.get pending)
                 on_click=(fun _ -> incr clicks)>
                 "Save"
               </Button>);
@@ -236,10 +230,7 @@ let () =
         "is named with its spinner while pending, where its aria-label names it"
         (fun () ->
           T.render (fun () ->
-              <Button
-                is_icon_only=true
-                aria_label="Delete"
-                is_pending=(fun () -> true)>
+              <Button is_icon_only=true aria_label="Delete" is_pending=true>
                 <Spinner size=`sm />
               </Button>);
           let b = T.by_role "button" in
@@ -259,7 +250,7 @@ let () =
         (fun () ->
           let pending, set_pending = S.create_signal false in
           T.render (fun () ->
-              <Button is_pending=(fun () -> S.get pending)>"Save"</Button>);
+              <Button is_pending=(S.get pending)>"Save"</Button>);
           let b = T.by_role "button" in
           T.focus b;
           S.set set_pending true;

@@ -54,7 +54,7 @@ val root :
   is_open:(unit -> bool option) ->
   default_open:(unit -> bool option) ->
   on_open_change:(bool -> unit) ->
-  (unit -> Jsx.content) ->
+  (unit -> Jsx.element) ->
   Jsx.element
 
 val trigger :
@@ -62,7 +62,7 @@ val trigger :
   class_:(unit -> string) ->
   aria_label:(unit -> string option) ->
   others:_ S.rest ->
-  (unit -> Jsx.content) ->
+  (unit -> Jsx.element) ->
   Jsx.element
 (** Kobalte's trigger as the [<div role="button">] HeroUI's is, reached by Tab,
     so a button inside it is not a button inside a button. *)
@@ -81,7 +81,7 @@ val backdrop :
   as_:
     (unit -> (Solidtype.Html.Div.props -> overlay_state -> Jsx.element) option) ->
   others:_ S.rest ->
-  (overlay_state -> Jsx.content) ->
+  (overlay_state -> Jsx.element) ->
   Jsx.element
 (** A press on it closes the dialog while [dismissable], and Escape while
     [keyboard_dismissable]; [is_open], [default_open] and [on_open_change] are
@@ -97,7 +97,7 @@ val container :
   as_:
     (unit -> (Solidtype.Html.Div.props -> overlay_state -> Jsx.element) option) ->
   others:_ S.rest ->
-  (overlay_state -> Jsx.content) ->
+  (overlay_state -> Jsx.element) ->
   Jsx.element
 (** A [<div>] that enters and exits with the backdrop. *)
 
@@ -114,7 +114,7 @@ val dialog :
     (unit ->
     (Solidtype.Html.Section.props -> dialog_state -> Jsx.element) option) ->
   others:_ S.rest ->
-  (dialog_state -> Jsx.content) ->
+  (dialog_state -> Jsx.element) ->
   Jsx.element
 (** [on_element] is given the dialog's element as it is made, for a part that
     does more with it, as a drawer is dragged. *)
@@ -123,7 +123,7 @@ val heading :
   slot:string ->
   class_:(unit -> string) ->
   others:_ S.rest ->
-  (unit -> Jsx.content) ->
+  (unit -> Jsx.element) ->
   Jsx.element
 (** Kobalte's title, an [<h2>], which names the dialog. *)
 

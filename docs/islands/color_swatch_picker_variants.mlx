@@ -12,9 +12,9 @@ let make () =
     <div class_="flex flex-col gap-2">
       <span class_="text-sm text-muted">"Circle (default)"</span>
       <Color_swatch_picker variant=`circle>
-        <For each=(fun () -> colors)>
+        <For each=colors>
           (fun c _ ->
-            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+            <Color_swatch_picker.Item color=(Colors.parse_color c)>
               <Color_swatch_picker.Swatch /> <Color_swatch_picker.Indicator />
             </Color_swatch_picker.Item>)
         </For>
@@ -23,9 +23,9 @@ let make () =
     <div class_="flex flex-col gap-2">
       <span class_="text-sm text-muted">"Square"</span>
       <Color_swatch_picker variant=`square>
-        <For each=(fun () -> colors)>
+        <For each=colors>
           (fun c _ ->
-            <Color_swatch_picker.Item color=(fun () -> Colors.parse_color c)>
+            <Color_swatch_picker.Item color=(Colors.parse_color c)>
               <Color_swatch_picker.Swatch /> <Color_swatch_picker.Indicator />
             </Color_swatch_picker.Item>)
         </For>

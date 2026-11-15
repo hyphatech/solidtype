@@ -23,8 +23,7 @@ let make () =
           <p class_="text-xs text-muted">
             "Status: "
             <span class_="font-mono font-medium text-foreground">
-              (fun () ->
-                Jsx.string (if S.get is_open then "open" else "closed"))
+              (Jsx.string (if S.get is_open then "open" else "closed"))
             </span>
           </p>
         </div>
@@ -39,8 +38,7 @@ let make () =
           </Button>
         </div>
       </div>
-      <Drawer.Backdrop
-        is_open=(fun () -> S.get is_open) on_open_change=(S.set set_open)>
+      <Drawer.Backdrop is_open=(S.get is_open) on_open_change=(S.set set_open)>
         <Drawer.Content placement=`right>
           <Drawer.Dialog>
             <Drawer.Close_trigger />
@@ -87,8 +85,7 @@ let make () =
           <p class_="text-xs text-muted">
             "Status: "
             <span class_="font-mono font-medium text-foreground">
-              (fun () ->
-                Jsx.string (if S.get state_open then "open" else "closed"))
+              (Jsx.string (if S.get state_open then "open" else "closed"))
             </span>
           </p>
         </div>
@@ -108,8 +105,7 @@ let make () =
         </div>
       </div>
       <Drawer.Backdrop
-        is_open=(fun () -> S.get state_open)
-        on_open_change=(S.set set_state_open)>
+        is_open=(S.get state_open) on_open_change=(S.set set_state_open)>
         <Drawer.Content placement=`right>
           <Drawer.Dialog>
             <Drawer.Close_trigger />

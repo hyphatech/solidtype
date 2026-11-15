@@ -13,37 +13,26 @@ let make () =
     <ToggleGroup.Root
       class_="flex gap-1"
       aria_label="Alignment"
-      value=(fun () -> S.get align)
+      value=(S.get align)
       on_change=(S.set set_align)>
-      <ToggleGroup.Item class_=(fun () -> item) value="left">
-        "Left"
-      </ToggleGroup.Item>
-      <ToggleGroup.Item class_=(fun () -> item) value="center">
-        "Center"
-      </ToggleGroup.Item>
-      <ToggleGroup.Item class_=(fun () -> item) value="right">
-        "Right"
-      </ToggleGroup.Item>
+      <ToggleGroup.Item class_=item value="left">"Left"</ToggleGroup.Item>
+      <ToggleGroup.Item class_=item value="center">"Center"</ToggleGroup.Item>
+      <ToggleGroup.Item class_=item value="right">"Right"</ToggleGroup.Item>
     </ToggleGroup.Root>
     <ToggleGroup.Root_multiple
       class_="flex gap-1"
       aria_label="Style"
       multiple=true
-      value=(fun () -> S.get styles)
+      value=(S.get styles)
       on_change=(S.set set_styles)>
-      <ToggleGroup.Item class_=(fun () -> item) value="bold">
-        "Bold"
-      </ToggleGroup.Item>
-      <ToggleGroup.Item class_=(fun () -> item) value="italic">
-        "Italic"
-      </ToggleGroup.Item>
+      <ToggleGroup.Item class_=item value="bold">"Bold"</ToggleGroup.Item>
+      <ToggleGroup.Item class_=item value="italic">"Italic"</ToggleGroup.Item>
     </ToggleGroup.Root_multiple>
     <p class_="text-sm text-muted">
-      (fun () ->
-        let align =
-          Option.value (Js.Nullable.toOption (S.get align)) ~default:"none"
-        in
-        Jsx.string
-          (align ^ "; " ^ String.concat ", " (Array.to_list (S.get styles))))
+      (let align =
+         Option.value (Js.Nullable.toOption (S.get align)) ~default:"none"
+       in
+       Jsx.string
+         (align ^ "; " ^ String.concat ", " (Array.to_list (S.get styles))))
     </p>
   </div>

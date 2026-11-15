@@ -20,39 +20,30 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="variant"
-        choices=(fun () -> variants)
-        picked=(fun () -> S.get variant)
+        choices=variants
+        picked=(S.get variant)
         on_pick=(Controls.choose variants set_variant)
       />
       <Toggle
-        label="required"
-        on=(fun () -> S.get required)
-        on_toggle=(S.set set_required)
+        label="required" on=(S.get required) on_toggle=(S.set set_required)
       />
       <Toggle
-        label="disabled"
-        on=(fun () -> S.get disabled)
-        on_toggle=(S.set set_disabled)
+        label="disabled" on=(S.get disabled) on_toggle=(S.set set_disabled)
+      />
+      <Toggle label="invalid" on=(S.get invalid) on_toggle=(S.set set_invalid)
       />
       <Toggle
-        label="invalid"
-        on=(fun () -> S.get invalid)
-        on_toggle=(S.set set_invalid)
-      />
-      <Toggle
-        label="read-only"
-        on=(fun () -> S.get read_only)
-        on_toggle=(S.set set_read_only)
+        label="read-only" on=(S.get read_only) on_toggle=(S.set set_read_only)
       />
     </div>
     <Side_by_side
       compared="[data-slot=input]"
       solidtype=(<Text_field
-                   variant=(fun () -> fst (S.get variant))
-                   is_required=(fun () -> S.get required)
-                   is_disabled=(fun () -> S.get disabled)
-                   is_invalid=(fun () -> S.get invalid)
-                   is_read_only=(fun () -> S.get read_only)
+                   variant=(fst (S.get variant))
+                   is_required=(S.get required)
+                   is_disabled=(S.get disabled)
+                   is_invalid=(S.get invalid)
+                   is_read_only=(S.get read_only)
                    name="email"
                    class_="w-64">
                    <Label>"Email"</Label>

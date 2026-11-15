@@ -8,27 +8,26 @@ let variants =
 
 let make () =
   <div class_="flex flex-wrap gap-4">
-    <For each=(fun () -> variants)>
+    <For each=variants>
       (fun (variant, name) _ ->
         <Drawer>
           <Button variant=`secondary>
-            (fun () -> Jsx.string (String.capitalize_ascii name))
+            (Jsx.string (String.capitalize_ascii name))
           </Button>
-          <Drawer.Backdrop variant=(fun () -> variant)>
+          <Drawer.Backdrop variant>
             <Drawer.Content>
               <Drawer.Dialog>
                 <Drawer.Handle />
                 <Drawer.Close_trigger />
                 <Drawer.Header>
                   <Drawer.Heading>
-                    "Backdrop: "
-                    (fun () -> Jsx.string (String.capitalize_ascii name))
+                    "Backdrop: " (Jsx.string (String.capitalize_ascii name))
                   </Drawer.Heading>
                 </Drawer.Header>
                 <Drawer.Body>
                   <p>
                     "This drawer uses the "
-                    <code>(fun () -> Jsx.string name)</code>
+                    <code>(Jsx.string name)</code>
                     " backdrop variant."
                   </p>
                 </Drawer.Body>

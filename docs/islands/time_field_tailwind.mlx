@@ -13,8 +13,7 @@ let make () =
               focus-within:ring-2 focus-within:ring-accent/15">
       <Time_field.Input>
         (fun segment ->
-          <Time_field.Segment
-            class_="text-foreground" segment=(fun () -> S.get segment)
+          <Time_field.Segment class_="text-foreground" segment=(S.get segment)
           />)
       </Time_field.Input>
     </Time_field.Group>

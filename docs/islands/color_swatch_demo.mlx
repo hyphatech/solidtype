@@ -16,23 +16,23 @@ let make () =
     <div class_="flex flex-wrap items-end gap-4">
       <Select
         label="shape"
-        choices=(fun () -> shapes)
-        picked=(fun () -> S.get shape)
+        choices=shapes
+        picked=(S.get shape)
         on_pick=(Controls.choose shapes set_shape)
       />
       <Select
         label="size"
-        choices=(fun () -> sizes)
-        picked=(fun () -> S.get size)
+        choices=sizes
+        picked=(S.get size)
         on_pick=(Controls.choose sizes set_size)
       />
     </div>
     <Side_by_side
       solidtype=(<Color_swatch
                    aria_label="Blue"
-                   color=(fun () -> Colors.parse_color "#0485F7")
-                   shape=(fun () -> fst (S.get shape))
-                   size=(fun () -> fst (S.get size))
+                   color=(Colors.parse_color "#0485F7")
+                   shape=(fst (S.get shape))
+                   size=(fst (S.get size))
                  />)
       react=(fun host ->
               Heroui_react.color_swatch host

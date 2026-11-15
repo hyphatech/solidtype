@@ -7,7 +7,7 @@ let make () =
     class_="w-64"
     max_value=1000.
     value=750.
-    format_options=(fun () -> Format.make ~style:`unit ~unit:"mile" ())>
+    format_options=(Format.make ~style:`unit ~unit:"mile" ())>
     <Label>"Distance"</Label>
     <Progress_bar.Output />
     <Progress_bar.Track><Progress_bar.Fill /></Progress_bar.Track>

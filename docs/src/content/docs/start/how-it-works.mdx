@@ -30,8 +30,8 @@ Every listing is what the tool wrote, unedited.
 
 <Code code={counterSource} lang="ocaml" title="solid_counter.mlx" />
 
-An attribute is an OCaml label, in snake case; a child is a string, an
-element or a thunk, `(fun () -> ...)`. MLX's parser reads the file into
+An attribute is an OCaml label, in snake case; a value or a child is
+written as itself. MLX's parser reads the file into
 OCaml's own syntax tree, where each element is a function application
 marked `[@JSX]`. Nothing in it yet knows about Solid.
 
@@ -44,15 +44,18 @@ attribute, `dynamic` a child that changes:
 
 ```ocaml
 Solidtype.Jsx.el "button"
-  [| Solidtype.Jsx.s "class"
-       ({js|button button--primary|js} : Solidtype.Html.Button.class_);
-     Solidtype.Jsx.s "type" (`button : Solidtype.Html.Button.type_);
-     Solidtype.Jsx.s "onClick"
-       (fun _ -> S.update set_count succ : Solidtype.Html.Button.on_click) |]
-  [| Solidtype.Jsx.text {js|Clicked |js};
-     Solidtype.Jsx.dynamic
-       (fun () -> Jsx.int (S.get count) : unit -> Solidtype.Jsx.content);
-     Solidtype.Jsx.text {js| times|js} |]
+  [|(Solidtype.Jsx.s "class"
+       ({js|button button--primary|js} : Solidtype.Html.Button.class_));(
+    Solidtype.Jsx.s "type" (`button : Solidtype.Html.Button.type_));(
+    Solidtype.Jsx.s "onClick"
+      (fun _ -> S.update set_count succ : Solidtype.Html.Button.on_click))|]
+  [|(Solidtype.Jsx.text {js|Clicked |js});(Solidtype.Jsx.dynamic
+                                             (((fun () ->
+                                                  Jsx.int (S.get count))
+                                             [@u ]) : ((unit ->
+                                                          Solidtype.Jsx.element)
+                                             [@u ])));(Solidtype.Jsx.text
+                                                         {js| times|js})|]
 ```
 
 This is where the types come in:
@@ -64,15 +67,14 @@ This is where the types come in:
   and a misspelt tag is refused.
 - **A static value is `s`, a dynamic one `d`**, and a child is `text`, a
   `node` or a `dynamic` thunk. A literal, a handler, a function or a name is
-  static; anything else must be a thunk, so a read outside one does not
-  compile:
+  static; any other expression is dynamic, in a thunk the ppx writes, as
+  Solid's compiler makes an expression in JSX a getter. A function given where
+  a value belongs is refused by its type:
 
   ```
-  3 |   <p>(Solidtype.Jsx.int (Solidtype.Solid.get count))</p>
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Error: This expression has type Solidtype.Jsx.content
-         but an expression was expected of type unit -> Solidtype.Jsx.content
-         Hint: Did you forget to wrap the expression using fun () ->?
+  3 |   <p title=(fun () -> Solidtype.Solid.get name) />
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Error: This expression should not be a function, the expected type is string
   ```
 
   A handler an expression makes, `on_click=(remove id)`, and a spread are

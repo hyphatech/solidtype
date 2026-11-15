@@ -7,7 +7,7 @@ module Search_field = Solidtype_heroui.Search_field
 let make () =
   <Autocomplete
     class_="w-[256px]"
-    disabled_keys=(fun () -> [| "cat"; "kangaroo" |])
+    disabled_keys=[| "cat"; "kangaroo" |]
     placeholder="Select an animal">
     <Label>"Animal"</Label>
     <Autocomplete.Trigger>
