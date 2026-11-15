@@ -262,6 +262,9 @@ test/kobalte/        each Kobalte component in OCaml beside its TSX twin in
 test/headless/       each headless component as a caller meets it: its roles,
                      keys and state, and an axe scan; each of Kobalte's
                      fixed, failing on Kobalte's own
+test/rhp/            rhp's charts as a caller meets them: rows plotted by
+                     their slat, a scale's range and ticks, a changed row
+                     redrawn in place on the next frame
 test/heroui/         each HeroUI port's classes and behaviour, in OCaml, run
                      by vitest, and its state beside the same component in
                      React, its twin in twins/; and the variant functions,

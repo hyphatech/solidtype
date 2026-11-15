@@ -1,5 +1,12 @@
 # Changes
 
+## 0.11.1 (2026-11-15)
+
+- rhp's charts are tested as a caller meets them, in OCaml: each row plotted
+  by its slat, the chart scaled to its range with a tick at each step, and a
+  row whose field changes redrawn in place on the next frame, the others
+  untouched. The libraries are 0.11.0's.
+
 ## 0.11.0 (2026-11-15)
 
 - In JSX a value is written as itself, and Solid keeps it current, as its
