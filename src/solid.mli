@@ -7,9 +7,9 @@
 
 (** {1 Signals} *)
 
-type 'a accessor = (unit -> 'a[@u])
-(** A reactive value, read by {!get}. A JavaScript function, so a read is a
-    plain call that Solid tracks. *)
+type 'a accessor
+(** A reactive value, read by {!get}. A JavaScript function of no argument, so a
+    read is a plain call that Solid tracks. *)
 
 type 'a setter
 (** What changes a signal, by {!set} or {!update}. *)
@@ -29,6 +29,11 @@ external accessor : ((unit -> 'a)[@mel.uncurry]) -> 'a accessor = "valueOf"
     is, recomputed at each read where a memo would keep it: what a part hands on
     that it derives. Melange writes the function as JavaScript's own, so a read
     is a plain call. *)
+
+external of_function : ((unit -> 'a)[@u]) -> 'a accessor = "%identity"
+(** [of_function f] is [f], a JavaScript function of no argument, as the
+    accessor it already is: what [ppx_solidtype] writes for a component's props
+    and for [accessor (fun () -> e)]. Write {!val-accessor}. *)
 
 val create_signal :
   ?equals:'a equals -> ?name:string -> 'a -> 'a accessor * 'a setter
@@ -260,9 +265,9 @@ val create_unique_id : unit -> string
 type resolved
 (** Children resolved to their elements, by {!children}. *)
 
-val children : (unit -> Jsx.content) -> resolved accessor
-(** [children (fun () -> props_children ())] resolves a component's children
-    once, so it can look at them without creating them again. *)
+val children : (unit -> Jsx.element) -> resolved accessor
+(** [children (fun () -> get children)] resolves a component's children once, so
+    it can look at them without creating them again. *)
 
 val to_array : resolved -> Jsx.element array
 

@@ -182,13 +182,13 @@ module Value = struct
       (match (S.get children, S.get a.is_empty) with
       | Some c, false -> Jsx.draw c (state ())
       | (Some _ | None), true -> Jsx.string (S.get a.placeholder)
-      | None, false -> Jsx.element (List_box.shown (S.get a.selected)))
+      | None, false -> List_box.shown (S.get a.selected))
     </span>
   [@@element span]
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let a = within "Autocomplete.Indicator" in
     let i = Interaction.create ~disabled:(fun () -> S.get a.disabled) () in
@@ -227,25 +227,23 @@ module Indicator = struct
           (* HeroUI gives an indicator of the user's its classes; a Solid
                component cannot add them to an element already made, so a
                span around it takes them. *)
-          Jsx.element
-            <span
-              aria_hidden=true
-              class_=(classes ())
-              data_slot="autocomplete-indicator"
-              data_open=(Jsx.flag (S.get a.is_open))
-              props=(Props.others props)>
-              (Option.value (S.get children) ~default:(Jsx.element Jsx.nothing))
-            </span>
+          <span
+            aria_hidden=true
+            class_=(classes ())
+            data_slot="autocomplete-indicator"
+            data_open=(Jsx.flag (S.get a.is_open))
+            props=(Props.others props)>
+            (Option.value (S.get children) ~default:Jsx.nothing)
+          </span>
       | None ->
-          Jsx.element
-            <Gravity.Chevron_down
-              aria_hidden=true
-              class_=(classes ())
-              role=`presentation
-              data_open=(Jsx.flag (S.get a.is_open))
-              data_slot="autocomplete-default-indicator"
-              props=(Props.others props)
-            />)
+          <Gravity.Chevron_down
+            aria_hidden=true
+            class_=(classes ())
+            role=`presentation
+            data_open=(Jsx.flag (S.get a.is_open))
+            data_slot="autocomplete-default-indicator"
+            props=(Props.others props)
+          />)
     </button>
   [@@element svg]
 end
@@ -304,7 +302,7 @@ module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let a = within "Autocomplete.Popover" in
     S.create_computed (fun () ->
         a.set_placement (Option.value (S.get placement) ~default:`bottom));
@@ -352,26 +350,23 @@ module Popover = struct
           data_entering=(Jsx.flag (Overlay.entering o))
           data_exiting=(Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
-          (match S.get drawn with
-          | Some drawn -> Jsx.element drawn
-          | None -> Jsx.element Jsx.nothing)
+          (match S.get drawn with Some drawn -> drawn | None -> Jsx.nothing)
           (match S.get a.hosted with
           | Some (h : List_box.hosted) ->
-              Jsx.element
-                <As_list
-                  as_="div"
-                  ref=(fun e -> h.list_ref e)
-                  scroll_to_item=(fun key -> h.scroll_to_item key)
-                  aria_orientation=`vertical
-                  class_=(S.get h.classes)
-                  data_slot="list-box"
-                  data_layout="stack"
-                  data_orientation="vertical"
-                  data_empty=(Jsx.flag (S.get h.empty))
-                  props=h.others>
-                  (fun collection -> h.draw collection)
-                </As_list>
-          | None -> Jsx.element Jsx.nothing)
+              <As_list
+                as_="div"
+                ref=(fun e -> h.list_ref e)
+                scroll_to_item=(fun key -> h.scroll_to_item key)
+                aria_orientation=`vertical
+                class_=(S.get h.classes)
+                data_slot="list-box"
+                data_layout="stack"
+                data_orientation="vertical"
+                data_empty=(Jsx.flag (S.get h.empty))
+                props=h.others>
+                (fun collection -> h.draw collection)
+              </As_list>
+          | None -> Jsx.nothing)
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>
@@ -381,7 +376,7 @@ end
 module Filter = struct
   let%component make ?(filter : (string -> string -> bool) option)
       ?(input_value : string option)
-      ?(on_input_change : (string -> unit) option) ~(children : Jsx.content) ()
+      ?(on_input_change : (string -> unit) option) ~(children : Jsx.element) ()
       =
     let a = within "Autocomplete.Filter" in
     a.set_filtering
@@ -882,7 +877,7 @@ let%component make ?(placeholder : string = "Select an item")
         data_required=(Jsx.flag (S.get is_required))
         ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root>
   | `multiple ->
       <Kobalte.Root_multiple
@@ -922,6 +917,6 @@ let%component make ?(placeholder : string = "Select an item")
         data_required=(Jsx.flag (S.get is_required))
         ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root_multiple>
 [@@element div]

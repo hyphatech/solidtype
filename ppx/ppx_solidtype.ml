@@ -339,15 +339,14 @@ let child map (e : expression) =
   | _ when is_function e ->
       Error
         ( loc,
-          "a function is a component's only child, and one given by its name \
-           is render=f" )
-  | Pexp_ident _ ->
-      Ok [%expr Solidtype.Jsx.node (Solidtype.Jsx.of_content [%e map e])]
+          "an element's child is a value, written as itself, (e), never a \
+           function; a function is a component's only child" )
+  | Pexp_ident _ -> Ok [%expr Solidtype.Jsx.node [%e map e]]
   | _ ->
       Ok
         [%expr
           Solidtype.Jsx.dynamic
-            ([%e thunk ~loc (map e)] : (unit -> Solidtype.Jsx.content[@u]))]
+            ([%e thunk ~loc (map e)] : (unit -> Solidtype.Jsx.element[@u]))]
 
 (* A namespace of Solid's is a wrapper of the value, never a part of the
    name: [on_click=(Jsx.native f)] is [on:click={f}]. The ppx reads the
@@ -713,9 +712,15 @@ let component map ~loc path args =
     | [] -> Ok (None, None, [])
     | [ f ] when is_function f ->
         let x = B.evar ~loc (bound "children") in
+        (* A component that takes elements refuses the function where it is
+           written. *)
+        let check =
+          let loc = f.pexp_loc in
+          [%expr Solidtype.Check.render [%e x]]
+        in
         Ok
           ( Some (bound "children", (None, map (unmark f))),
-            Some (Labelled "children", [%expr Solidtype.Check.render [%e x]]),
+            Some (Labelled "children", check),
             [ [%expr Solidtype.Jsx.render [%e x]] ] )
     | (first : expression) :: rest as written ->
         (* A component that takes only a function refuses these children
@@ -732,7 +737,7 @@ let component map ~loc path args =
         Result.map
           (fun cs ->
             ( None,
-              Some (Labelled "children", [%expr Solidtype.Check.nodes ()]),
+              Some (Labelled "children", [%expr Solidtype.Check.elements ()]),
               cs ))
           (all (List.map (child map) written))
   in
@@ -742,9 +747,14 @@ let component map ~loc path args =
       match (all (List.map prop props), children cs) with
       | Error (loc, m), _ | _, Error (loc, m) -> error ~loc m
       | Ok props, Ok (child_binding, child_check, cs) ->
+          (* OCaml evaluates arguments last first, so the props are given
+             last first, and run in the order they are written; it types
+             them first first, so a function child, which a closure makes
+             and no order of effects binds, is given last, typed once the
+             props have given its parameter's type. *)
           let bindings =
-            List.filter_map Fun.id
-              (List.map (fun (b, _, _) -> b) props @ [ child_binding ])
+            List.rev (List.filter_map (fun (b, _, _) -> b) props)
+            @ Option.to_list child_binding
           in
           let check =
             B.pexp_apply ~loc
@@ -767,10 +777,7 @@ let component map ~loc path args =
             (* A function of the bound names, applied to their values: OCaml
                types the function, the check in it, before its arguments, so
                each value is typed as the check expects it, and a record field
-               a function child reads, [s.is_pressed], is found by its type.
-               OCaml evaluates arguments last first, so they are given last
-               first, and run in the order they are written. *)
-            let bindings = List.rev bindings in
+               a function child reads, [s.is_pressed], is found by its type. *)
             B.pexp_apply ~loc
               (List.fold_right
                  (fun (name, (typ, _)) body ->
@@ -851,10 +858,7 @@ let switch_cases path args =
               in
               match variables c.pc_lhs with
               | [] ->
-                  let body =
-                    if is_jsx c.pc_rhs then c.pc_rhs
-                    else [%expr Solidtype.Jsx.element [%e c.pc_rhs]]
-                  in
+                  let body = c.pc_rhs in
                   jsx ~loc match_path
                     [
                       (Labelled "when_", test [%expr true] [%expr false]);
@@ -1113,10 +1117,10 @@ let props_module ~loc ~element ~drawn props =
     | Some state ->
         [%type:
           ( [%t state] -> Solidtype.Jsx.element,
-            [ `nodes | `render ] )
+            [ `elements | `render ] )
           Solidtype.Check.children]
     | None ->
-        if is_nodes p then [%type: (_, [ `nodes ]) Solidtype.Check.children]
+        if is_nodes p then [%type: (_, [ `elements ]) Solidtype.Check.children]
         else if String.equal p.label "children" then
           [%type: ([%t p.typ], [ `render ]) Solidtype.Check.children]
         else if p.arity > 0 || String.equal p.label "as_" then p.typ
@@ -1432,10 +1436,13 @@ let reader ~loc p =
         (fun x body -> [%expr fun [%p B.pvar ~loc x] -> [%e body]])
         xs body
     else
-      {
-        ([%expr fun () -> [%e value_read ~loc p]]) with
-        pexp_attributes = [ attribute ~loc "u" ];
-      }
+      [%expr
+        Solidtype.Solid.of_function
+          [%e
+            {
+              ([%expr fun () -> [%e value_read ~loc p]]) with
+              pexp_attributes = [ attribute ~loc "u" ];
+            }]]
   in
   (* A component reads the props it needs; the others are still props. *)
   {
@@ -1636,7 +1643,8 @@ let mapper =
             let (_ : (unit -> _) -> _ Solidtype.Solid.accessor) =
               [%e accessor]
             in
-            [%e uncurried ~loc (self#expression given)]]
+            Solidtype.Solid.of_function
+              [%e uncurried ~loc (self#expression given)]]
       | _ -> super#expression e
 
     method! structure_item item =

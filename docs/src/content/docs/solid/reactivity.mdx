@@ -38,14 +38,14 @@ a change.
 ## A reactive read in JSX
 
 Solid tracks a read by when it happens: inside a tracking scope, or not at
-all. In JSX, as in TSX, an expression is read again whenever what it reads
-changes: `(Jsx.int (Solid.get count))` becomes `{count()}`, and
+all. In JSX an expression is read again whenever what it reads changes, as
+Solid's compiler makes it: `(Jsx.int (Solid.get count))` becomes `{count()}`, and
 `class_=(if Solid.get count > 2 then "hot" else "cold")` updates the class.
 A read taken out of JSX into a name, `let n = Solid.get count`, is read
-once, as in TSX.
+once.
 
-Outside JSX a tracking scope is a function you write, `fun () -> e`, as TSX
-writes `() => e`: a memo, an effect, or an accessor.
+Outside JSX a tracking scope is a function you write, `fun () -> e`, as
+Solid's own API takes `() => e`: a memo, an effect, or an accessor.
 
 ## Derived values
 

@@ -16,6 +16,6 @@ let paragraphs () =
 let make () =
   <div class_="w-full p-0 sm:max-w-sm">
     <Scroll_shadow hide_scroll_bar=true class_="max-h-[240px] p-4">
-      (Solidtype.Jsx.element (paragraphs ()))
+      (paragraphs ())
     </Scroll_shadow>
   </div>

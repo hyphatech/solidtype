@@ -241,10 +241,9 @@ let both ~multiple =
           <Combo_box.Input_group>
             <Input placeholder="Search animals..." /> <Combo_box.Trigger />
           </Combo_box.Input_group>
-          (if multiple then
-             Solidtype.Jsx.element
-               <Combo_box.Value placeholder="No animals selected" />
-           else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+          (if multiple then <Combo_box.Value placeholder="No animals selected"
+             />
+           else Solidtype.Jsx.nothing)
           <Description>"Pick the one you like"</Description>
           <Combo_box.Popover>
             <List_box selection_mode=(if multiple then `multiple else `single)>
@@ -415,9 +414,7 @@ let () =
                 <Combo_box.Input_group>
                   <Input aria_label="Animal" />
                 </Combo_box.Input_group>
-                <Combo_box.Popover>
-                  (Solidtype.Jsx.element (animals ()))
-                </Combo_box.Popover>
+                <Combo_box.Popover>(animals ())</Combo_box.Popover>
               </Combo_box>);
           let user = T.setup () in
           let* () = settle () in
@@ -440,9 +437,7 @@ let () =
                   <Combo_box.Input_group>
                     <Input aria_label="Animal" />
                   </Combo_box.Input_group>
-                  <Combo_box.Popover>
-                    (Solidtype.Jsx.element (animals ()))
-                  </Combo_box.Popover>
+                  <Combo_box.Popover>(animals ())</Combo_box.Popover>
                 </Combo_box>
                 <button type_=`button>"After"</button>
               </form>);
@@ -468,9 +463,7 @@ let () =
                     <Combo_box.Input_group>
                       <Input aria_label="Animal" />
                     </Combo_box.Input_group>
-                    <Combo_box.Popover>
-                      (Solidtype.Jsx.element (animals ()))
-                    </Combo_box.Popover>
+                    <Combo_box.Popover>(animals ())</Combo_box.Popover>
                   </Combo_box>
                 </form>);
             let* () = settle () in
@@ -491,9 +484,7 @@ let () =
                 <Combo_box.Input_group>
                   <Input aria_label="Animal" />
                 </Combo_box.Input_group>
-                <Combo_box.Popover>
-                  (Solidtype.Jsx.element (animals ()))
-                </Combo_box.Popover>
+                <Combo_box.Popover>(animals ())</Combo_box.Popover>
               </Combo_box>);
           let user = T.setup () in
           let* () = T.click user (input ()) in
@@ -507,9 +498,7 @@ let () =
                 <Combo_box.Input_group>
                   <Input aria_label="Animal" /> <Combo_box.Trigger />
                 </Combo_box.Input_group>
-                <Combo_box.Popover>
-                  (Solidtype.Jsx.element (animals ()))
-                </Combo_box.Popover>
+                <Combo_box.Popover>(animals ())</Combo_box.Popover>
               </Combo_box>);
           let user = T.setup () in
           let* () = T.click user (input ()) in
@@ -623,7 +612,7 @@ let () =
                     title="Options"
                     style="--y: 2"
                     ref=(fun _ -> note refs "popover")>
-                    (Solidtype.Jsx.element (animals ()))
+                    (animals ())
                   </Combo_box.Popover>
                 </Combo_box>
                 <button type_=`button>"After"</button>

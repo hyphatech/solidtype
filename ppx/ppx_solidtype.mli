@@ -4,7 +4,7 @@
 
     An element [<div class_="x" />] becomes [Jsx.el "div"], and a component
     [<Counter initial=1 />] becomes [Jsx.c Counter.component]. A value is read
-    as Solid's compiler reads TSX: a literal, a JSX element, a handler ([on_]
+    as Solid's compiler reads JSX: a literal, a JSX element, a handler ([on_]
     and its event, [on_click]), a function and a name, [<Row changed />], are
     static, and any other expression is a thunk the ppx writes, read again as
     what it reads changes, [title=(Solid.get note)]. A function given where a
@@ -33,7 +33,7 @@
     [if false], so a prop left out or not taken is a compile error, and Melange
     writes none of it. [props=p] spreads [p] without copying it, TSX's [{...p}],
     so no prop is named [props]. A child is a string literal, an element, or a
-    [Solidtype.Jsx.content], given by its name or an expression; a component's
+    [Solidtype.Jsx.element], given by its name or an expression; a component's
     only child may be a function the component calls. An optional prop,
     [?title=o], is an option, read as a required prop's value is. A [Switch]
     whose only child is a [match] gets a [Match] per case, a [Match.Keyed] where

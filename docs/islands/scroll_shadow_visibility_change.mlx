@@ -68,7 +68,7 @@ let make () =
         class_="max-h-[240px] p-4"
         orientation=`vertical
         on_visibility_change=(S.set set_vertical)>
-        (Solidtype.Jsx.element (paragraphs ()))
+        (paragraphs ())
       </Scroll_shadow>
     </div>
     <div class_="flex flex-col gap-2">
@@ -82,7 +82,7 @@ let make () =
         class_="p-4"
         orientation=`horizontal
         on_visibility_change=(S.set set_horizontal)>
-        (Solidtype.Jsx.element (cards ()))
+        (cards ())
       </Scroll_shadow>
     </div>
   </div>

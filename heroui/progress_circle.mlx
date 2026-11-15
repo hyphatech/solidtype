@@ -32,7 +32,7 @@ let number = Js.Float.toString
 
 module Track = struct
   let%component make ?(view_box : string option) ?(stroke_width : float option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let c = within "Progress_circle.Track" in
     <svg
       class_=(after

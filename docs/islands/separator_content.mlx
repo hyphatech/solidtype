@@ -31,7 +31,7 @@ let make () =
             </div>
           </div>
           (if Solidtype.Solid.get index < Array.length items - 1 then
-             Solidtype.Jsx.element <Separator class_="my-4" />
+             <Separator class_="my-4" />
            else Solidtype.Jsx.string "")
         </div>)
     </Solidtype.For>

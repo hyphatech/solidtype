@@ -78,7 +78,7 @@ module Channel_parts = Field.Slots (struct
 end)
 
 module Prefix = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_group "Color_field.Prefix" in
     <div
       class_=(after
@@ -92,7 +92,7 @@ module Prefix = struct
 end
 
 module Suffix = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_group "Color_field.Suffix" in
     <div
       class_=(after
@@ -284,70 +284,68 @@ let%component make ?(value : Color.t Js.Nullable.t option)
   <Context.Provider value=f>
     (match S.untrack (fun () -> S.get channel) with
     | Some ch ->
-        Jsx.element
-          <Channel.Root
-            channel=ch
-            ?color_space=(S.get color_space)
-            ?value=(S.get value)
-            ?default_value=(S.get default_value)
-            on_change=changed
-            change_on_wheel=(not (S.get is_wheel_disabled))
-            validation_state=(if S.get invalid then `invalid else `valid)
-            required=(S.get is_required)
-            disabled=(S.get disabled)
-            read_only=(S.get is_read_only)
-            ?name=(S.get name)
-            class_=(classes ())
-            ref=root
-            on_focus_out=leave
-            data_slot="color-field"
-            data_channel=(Jsx.data (channel_name ch))
-            data_required=(Jsx.flag (S.get is_required))
-            data_invalid=(Jsx.flag (S.get invalid))
-            data_disabled=(Jsx.flag (S.get disabled))
-            data_readonly=(Jsx.flag (S.get is_read_only))
-            ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
-            props=(Props.others props)>
-            <Field_error.Message.Provider value=in_form.error>
-              <Channel_parts>
-                (Jsx.draw (S.get children) (state ()))
-              </Channel_parts>
-            </Field_error.Message.Provider>
-          </Channel.Root>
+        <Channel.Root
+          channel=ch
+          ?color_space=(S.get color_space)
+          ?value=(S.get value)
+          ?default_value=(S.get default_value)
+          on_change=changed
+          change_on_wheel=(not (S.get is_wheel_disabled))
+          validation_state=(if S.get invalid then `invalid else `valid)
+          required=(S.get is_required)
+          disabled=(S.get disabled)
+          read_only=(S.get is_read_only)
+          ?name=(S.get name)
+          class_=(classes ())
+          ref=root
+          on_focus_out=leave
+          data_slot="color-field"
+          data_channel=(Jsx.data (channel_name ch))
+          data_required=(Jsx.flag (S.get is_required))
+          data_invalid=(Jsx.flag (S.get invalid))
+          data_disabled=(Jsx.flag (S.get disabled))
+          data_readonly=(Jsx.flag (S.get is_read_only))
+          ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
+          props=(Props.others props)>
+          <Field_error.Message.Provider value=in_form.error>
+            <Channel_parts>
+              (Jsx.draw (S.get children) (state ()))
+            </Channel_parts>
+          </Field_error.Message.Provider>
+        </Channel.Root>
     | None ->
-        Jsx.element
-          <Hex.Root
-            ?value=(S.get value)
-            ?default_value=(S.get default_value)
-            on_change=changed
-            change_on_wheel=(not (S.get is_wheel_disabled))
-            validation_state=(if S.get invalid then `invalid else `valid)
-            required=(S.get is_required)
-            disabled=(S.get disabled)
-            read_only=(S.get is_read_only)
-            ?name=(S.get name)
-            class_=(classes ())
-            ref=root
-            on_focus_out=leave
-            data_slot="color-field"
-            data_channel="hex"
-            data_required=(Jsx.flag (S.get is_required))
-            data_invalid=(Jsx.flag (S.get invalid))
-            data_disabled=(Jsx.flag (S.get disabled))
-            data_readonly=(Jsx.flag (S.get is_read_only))
-            ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
-            props=(Props.others props)>
-            <Field_error.Message.Provider value=in_form.error>
-              <Hex_parts>
-                (Jsx.draw (S.get children)
-                   {
-                     is_disabled = disabled;
-                     is_invalid = invalid;
-                     is_read_only;
-                     is_required;
-                   })
-              </Hex_parts>
-            </Field_error.Message.Provider>
-          </Hex.Root>)
+        <Hex.Root
+          ?value=(S.get value)
+          ?default_value=(S.get default_value)
+          on_change=changed
+          change_on_wheel=(not (S.get is_wheel_disabled))
+          validation_state=(if S.get invalid then `invalid else `valid)
+          required=(S.get is_required)
+          disabled=(S.get disabled)
+          read_only=(S.get is_read_only)
+          ?name=(S.get name)
+          class_=(classes ())
+          ref=root
+          on_focus_out=leave
+          data_slot="color-field"
+          data_channel="hex"
+          data_required=(Jsx.flag (S.get is_required))
+          data_invalid=(Jsx.flag (S.get invalid))
+          data_disabled=(Jsx.flag (S.get disabled))
+          data_readonly=(Jsx.flag (S.get is_read_only))
+          ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
+          props=(Props.others props)>
+          <Field_error.Message.Provider value=in_form.error>
+            <Hex_parts>
+              (Jsx.draw (S.get children)
+                 {
+                   is_disabled = disabled;
+                   is_invalid = invalid;
+                   is_read_only;
+                   is_required;
+                 })
+            </Hex_parts>
+          </Field_error.Message.Provider>
+        </Hex.Root>)
   </Context.Provider>
 [@@element div]

@@ -49,7 +49,7 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
 module Remove_button = struct
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let t = in_tag "Tag.Remove_button" in
     t.remove_here ();
     let tag = Headless.Tag.Context.use () in
@@ -74,9 +74,7 @@ module Remove_button = struct
       data_focus_visible=(Jsx.flag (Interaction.focus_visible i))
       data_disabled=(Jsx.flag (Interaction.disabled i))
       props=(Props.others props)>
-      (match S.get children with
-      | Some c -> c
-      | None -> Jsx.element <Close_button.Icon />)
+      (match S.get children with Some c -> c | None -> <Close_button.Icon />)
     </Headless.Remove_button>
   [@@element button]
 end
@@ -174,10 +172,9 @@ let%component make ?(id : string option) ?(text_value : string option)
          && (not (Jsx.is_function (S.get children)))
          && S.get removers = 0
        then
-         Jsx.element
-           <Context.Provider value={ t with remove_here = ignore }>
-             <Remove_button />
-           </Context.Provider>
+         <Context.Provider value={ t with remove_here = ignore }>
+           <Remove_button />
+         </Context.Provider>
        else Jsx.string "")
     </Headless.Tag>
   </Context.Provider>

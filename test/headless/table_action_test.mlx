@@ -43,7 +43,7 @@ let team ?(mode = `none) ?(behavior = `toggle) ?(disabled = [||])
             (fun m _ ->
               <Table.Row
                 id=m.id
-                on_action=(fun _ -> actions := !actions @ [ "row " ^ m.id ])
+                on_action=(fun () -> actions := !actions @ [ "row " ^ m.id ])
                 ?href=(href m)
                 target="_blank">
                 <Table.Cell>(Jsx.string m.name)</Table.Cell>

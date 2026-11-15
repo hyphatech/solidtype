@@ -70,7 +70,7 @@ module Content = struct
 end
 
 module Control = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let r = within "Radio.Control" in
     <span
       class_=(after (Styles.Radio.control (S.get r.slots)) (S.get class_))

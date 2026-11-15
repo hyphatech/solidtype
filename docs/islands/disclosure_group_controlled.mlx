@@ -38,15 +38,13 @@ let make () =
       </div>
       <Disclosure_group
         expanded_keys=(S.get expanded) on_expanded_change=(S.set set_expanded)>
-        (Solidtype.Jsx.element
-        @@ Usage.item ~expanded ~id:"preview"
-             ~icon:(fun () -> <Gravity.Qr_code />)
-             ~title:"Preview HeroUI Native" ~body:Usage.preview)
+        (Usage.item ~expanded ~id:"preview"
+           ~icon:(fun () -> <Gravity.Qr_code />)
+           ~title:"Preview HeroUI Native" ~body:Usage.preview)
         <Separator class_="my-2" />
-        (Solidtype.Jsx.element
-        @@ Usage.item ~expanded ~id:"download"
-             ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
-             ~title:"Download App" ~body:Usage.download)
+        (Usage.item ~expanded ~id:"download"
+           ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
+           ~title:"Download App" ~body:Usage.download)
       </Disclosure_group>
     </div>
   </div>

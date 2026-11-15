@@ -59,7 +59,7 @@ end) : sig
     val check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check
   end
 
@@ -82,7 +82,7 @@ end) : sig
 
     val check :
       ?label_id:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?props:t S.rest ->
       unit ->
       unit
@@ -106,7 +106,7 @@ module Content (_ : Kobalte) : sig
       class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlLabelElement -> unit) ->
       ?on_click:(Dom.mouseEvent -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Label.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Label.check

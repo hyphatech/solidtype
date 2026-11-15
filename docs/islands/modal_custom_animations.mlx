@@ -89,11 +89,9 @@ let make () =
                 <Modal.Header>
                   <Modal.Icon class_="bg-default text-foreground">
                     (match a.icon with
-                    | `sparkles ->
-                        Jsx.element <Gravity.Sparkles class_="size-5" />
+                    | `sparkles -> <Gravity.Sparkles class_="size-5" />
                     | `arrow_up_from_line ->
-                        Jsx.element
-                          <Gravity.Arrow_up_from_line class_="size-5" />)
+                        <Gravity.Arrow_up_from_line class_="size-5" />)
                   </Modal.Icon>
                   <Modal.Heading>
                     (Jsx.string a.name) " Animation"

@@ -73,17 +73,16 @@ let make () =
                     users
                 with
                 | Some user ->
-                    Jsx.element
-                      <div class_="flex items-center gap-2">
-                        <Avatar class_="size-4" size=`sm>
-                          <Avatar.Image src=user.avatar_url />
-                          <Avatar.Fallback>
-                            (Jsx.string user.fallback)
-                          </Avatar.Fallback>
-                        </Avatar>
-                        <span>(Jsx.string user.name)</span>
-                      </div>
-                | None -> Jsx.element Jsx.nothing)
+                    <div class_="flex items-center gap-2">
+                      <Avatar class_="size-4" size=`sm>
+                        <Avatar.Image src=user.avatar_url />
+                        <Avatar.Fallback>
+                          (Jsx.string user.fallback)
+                        </Avatar.Fallback>
+                      </Avatar>
+                      <span>(Jsx.string user.name)</span>
+                    </div>
+                | None -> Jsx.nothing)
             | keys ->
                 Jsx.string
                   (string_of_int (Array.length keys) ^ " users selected"))

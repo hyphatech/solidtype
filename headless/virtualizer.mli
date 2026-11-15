@@ -132,7 +132,7 @@ module Props : sig
 
   val check :
     layout:layout Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?props:t S.rest ->
     unit ->
     unit

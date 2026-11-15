@@ -137,7 +137,7 @@ module Item = struct
 end
 
 module Heading = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let a, i = within_item "Accordion.Heading" in
     (* A button with the trigger's slot is Kobalte's trigger, as React Aria's
        disclosure gives its ButtonContext's trigger slot. *)
@@ -251,7 +251,7 @@ module Trigger = struct
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let a, i = within_item "Accordion.Indicator" in
     let classes () =
@@ -328,7 +328,7 @@ module Panel = struct
 end
 
 module Body = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let a, (_ : item) = within_item "Accordion.Body" in
     <div
       class_=(Styles.Accordion.body (Solid.get a.slots))
@@ -429,7 +429,7 @@ let%component make ?(expanded_keys : string array option)
     when_=(match Solid.get variant with `surface -> true | `default -> false)
     fallback=(accordion ())>
     <Surface.Context.Provider value=surface>
-      (Jsx.element (accordion ()))
+      (accordion ())
     </Surface.Context.Provider>
   </Show>
 [@@element div]

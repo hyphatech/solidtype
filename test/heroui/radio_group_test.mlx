@@ -395,9 +395,9 @@ let () =
                         on_click=(fun _ -> incr clicks)
                         on_key_down=(fun _ -> incr keys)>
                         <Label>"Plan"</Label>
-                        (Solidtype.Jsx.element (radio "starter"))
-                        (Solidtype.Jsx.element (radio "pro"))
-                        (Solidtype.Jsx.element (radio "teams"))
+                        (radio "starter")
+                        (radio "pro")
+                        (radio "teams")
                       </Radio_group>
                       <button data_slot="button" type_=`submit>"Save"</button>
                     </Form>))

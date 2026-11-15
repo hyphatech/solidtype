@@ -54,7 +54,7 @@ module Thumb : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlSpanElement -> unit) ->
       ?children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Span.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
@@ -85,7 +85,7 @@ module Props : sig
     ?show_dots:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

@@ -5,7 +5,7 @@ module Props : sig
   val check :
     reveal_order:[ `forwards | `backwards | `together ] Check.value ->
     ?tail:[ `collapsed | `hidden ] Check.value ->
-    ?children:('f, [ `nodes ]) Check.children ->
+    ?children:('f, [ `elements ]) Check.children ->
     unit ->
     unit
 end

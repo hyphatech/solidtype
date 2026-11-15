@@ -60,9 +60,8 @@ let make () =
             aria_label="Send prompt"
             is_disabled=(empty ())
             on_click=submit>
-            (if S.get submitting then
-               Solidtype.Jsx.element <Spinner color=`current size=`sm />
-             else Solidtype.Jsx.element <Gravity.Arrow_up />)
+            (if S.get submitting then <Spinner color=`current size=`sm />
+             else <Gravity.Arrow_up />)
           </Button>
         </div>
       </Input_group.Suffix>

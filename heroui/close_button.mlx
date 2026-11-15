@@ -64,6 +64,6 @@ let%component make ?(variant : [ `default ] = `default)
     props=(Props.others props)>
     (match S.get children with
     | Some c -> Jsx.draw c (state ())
-    | None -> Jsx.element <Icon />)
+    | None -> <Icon />)
   </Kobalte.Root>
 [@@element button]

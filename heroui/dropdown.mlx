@@ -180,7 +180,7 @@ module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ?(on_focus : (Dom.focusEvent -> unit) option) ~(children : Jsx.content) ()
+      ?(on_focus : (Dom.focusEvent -> unit) option) ~(children : Jsx.element) ()
       =
     let d = within "Dropdown.Popover" in
     let classes () = after (Styles.Dropdown.popover d.slots) (S.get class_) in
@@ -214,7 +214,7 @@ module Popover = struct
               data_entering=(Jsx.flag (Overlay.entering o))
               data_exiting=(Jsx.flag (Overlay.exiting o))
               props=(Props.others props)>
-              (Jsx.element (items ()))
+              (items ())
             </Kobalte.SubContent>
           </Kobalte.Portal>
         </Show>
@@ -281,7 +281,7 @@ module Popover = struct
               data_entering=(Jsx.flag (Overlay.entering o))
               data_exiting=(Jsx.flag (Overlay.exiting o))
               props=(Props.others props)>
-              (Jsx.element (items ()))
+              (items ())
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>
@@ -338,7 +338,7 @@ module Menu = struct
       ?(on_selection_change : (string array -> unit) option)
       ?(disabled_keys : string array option)
       ?(on_action : (string -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let d = within "Dropdown.Menu" in
     let mode = S.untrack (fun () -> S.get selection_mode) in
     let s =
@@ -366,7 +366,7 @@ module As_section = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -380,7 +380,7 @@ module As_header = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -400,7 +400,7 @@ module Section = struct
       ?(default_selected_keys : string array option)
       ?(on_selection_change : (string array -> unit) option)
       ?(disabled_keys : string array option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let parent = Selection.use () in
     let own =
       match S.untrack (fun () -> S.get selection_mode) with
@@ -432,7 +432,7 @@ module As_span = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -547,7 +547,7 @@ module Item = struct
           data_disabled=(Jsx.flag (disabled ()))
           ?as_=(Option.map (fun f p -> f p state) (S.get as_))
           props=(Props.others props)>
-          (Jsx.element (content ()))
+          (content ())
         </Kobalte.SubTrigger>
     | None, `none ->
         <Kobalte.Item
@@ -568,7 +568,7 @@ module Item = struct
           ?as_=(Option.map (fun f p -> f p state) (S.get as_))
           props=(Props.others props)
           on_select=act>
-          (Jsx.element (content ()))
+          (content ())
         </Kobalte.Item>
     | None, ((`single | `multiple) as mode) ->
         <Kobalte.CheckboxItem
@@ -609,7 +609,7 @@ module Item = struct
           on_change=(fun _ ->
                       match s with Some s -> s.toggle (S.get id) | None -> ())
           on_select=act>
-          (Jsx.element (content ()))
+          (content ())
         </Kobalte.CheckboxItem>
   [@@element div]
 end
@@ -638,45 +638,43 @@ module Item_indicator = struct
       data_visible=(Jsx.flag (S.get i.selected))
       props=(Props.others props)>
       (match (children selected, S.get type_) with
-      | Some drawn, (`checkmark | `dot) -> Jsx.element drawn
+      | Some drawn, (`checkmark | `dot) -> drawn
       | None, `dot ->
-          Jsx.element
-            <svg
-              aria_hidden=true
-              fill="currentColor"
+          <svg
+            aria_hidden=true
+            fill="currentColor"
+            fill_rule="evenodd"
+            role=`presentation
+            view_box="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+            data_slot="menu-item-indicator--dot">
+            <path
+              clip_rule="evenodd"
+              d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14"
               fill_rule="evenodd"
-              role=`presentation
-              view_box="0 0 16 16"
-              xmlns="http://www.w3.org/2000/svg"
-              data_slot="menu-item-indicator--dot">
-              <path
-                clip_rule="evenodd"
-                d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14"
-                fill_rule="evenodd"
-              />
-            </svg>
+            />
+          </svg>
       | None, `checkmark ->
-          Jsx.element
-            <svg
-              aria_hidden=true
-              fill="none"
-              role=`presentation
-              stroke="currentColor"
-              stroke_dasharray="22"
-              stroke_dashoffset=(if S.get i.selected then "44" else "66")
-              stroke_linecap="round"
-              stroke_linejoin="round"
-              stroke_width="2"
-              view_box="0 0 17 18"
-              data_slot="menu-item-indicator--checkmark">
-              <polyline points="1 9 7 14 15 4" />
-            </svg>)
+          <svg
+            aria_hidden=true
+            fill="none"
+            role=`presentation
+            stroke="currentColor"
+            stroke_dasharray="22"
+            stroke_dashoffset=(if S.get i.selected then "44" else "66")
+            stroke_linecap="round"
+            stroke_linejoin="round"
+            stroke_width="2"
+            view_box="0 0 17 18"
+            data_slot="menu-item-indicator--checkmark">
+            <polyline points="1 9 7 14 15 4" />
+          </svg>)
     </span>
   [@@element span]
 end
 
 module Submenu_indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let i = within_item "Dropdown.Submenu_indicator" in
     <Show when_=i.has_submenu>
@@ -689,9 +687,7 @@ module Submenu_indicator = struct
         props=(Props.others props)>
         (match S.get children with
         | Some c -> c
-        | None ->
-            Jsx.element
-              <Gravity.Chevron_right aria_hidden=true role=`presentation />)
+        | None -> <Gravity.Chevron_right aria_hidden=true role=`presentation />)
       </span>
     </Show>
   [@@element span]
@@ -702,7 +698,7 @@ end
 let submenu_gap = 7.
 
 module Submenu_trigger = struct
-  let%component make ~(children : Jsx.content) () =
+  let%component make ~(children : Jsx.element) () =
     let is_open, set_open = S.create_signal false in
     <Kobalte.Sub
       open_=(S.get is_open) on_open_change=(S.set set_open) gutter=submenu_gap>
@@ -712,7 +708,7 @@ end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
     ?(on_open_change : (bool -> unit) option)
-    ?(trigger : [ `press | `long_press ] = `press) ~(children : Jsx.content) ()
+    ?(trigger : [ `press | `long_press ] = `press) ~(children : Jsx.element) ()
     =
   let kept, set_kept = S.create_signal false in
   S.create_computed (fun () ->
@@ -777,11 +773,10 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
         (S.get children)
         (match pressed with
         | Some l ->
-            Jsx.element
-              <div id=l.description style="display: none;">
-                "Long press or press Alt + ArrowDown to open menu"
-              </div>
-        | None -> Jsx.element Jsx.nothing)
+            <div id=l.description style="display: none;">
+              "Long press or press Alt + ArrowDown to open menu"
+            </div>
+        | None -> Jsx.nothing)
       </Context.Provider>
     </Button.Trigger.Provider>
   </Kobalte.Root>

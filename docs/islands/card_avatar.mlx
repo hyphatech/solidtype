@@ -29,13 +29,10 @@ let community ~image ~alt ~title ~members ~avatar ~avatar_alt ~fallback ~by =
 
 let make () =
   <div class_="flex flex-wrap gap-4">
-    (Solidtype.Jsx.element
-       (community ~image:"docs/demo1.jpg" ~alt:"Indie Hackers community"
-          ~title:"Indie Hackers" ~members:"148 members"
-          ~avatar:"avatars/red.jpg" ~avatar_alt:"Martha's avatar" ~fallback:"IH"
-          ~by:"By Martha"))
-    (Solidtype.Jsx.element
-       (community ~image:"docs/demo2.jpg" ~alt:"AI Builders community"
-          ~title:"AI Builders" ~members:"362 members" ~avatar:"avatars/blue.jpg"
-          ~avatar_alt:"John's avatar - blue themed" ~fallback:"B" ~by:"By John"))
+    (community ~image:"docs/demo1.jpg" ~alt:"Indie Hackers community"
+       ~title:"Indie Hackers" ~members:"148 members" ~avatar:"avatars/red.jpg"
+       ~avatar_alt:"Martha's avatar" ~fallback:"IH" ~by:"By Martha")
+    (community ~image:"docs/demo2.jpg" ~alt:"AI Builders community"
+       ~title:"AI Builders" ~members:"362 members" ~avatar:"avatars/blue.jpg"
+       ~avatar_alt:"John's avatar - blue themed" ~fallback:"B" ~by:"By John")
   </div>

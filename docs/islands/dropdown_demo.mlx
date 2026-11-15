@@ -21,8 +21,7 @@ let triggers = [| (`press, "press"); (`long_press, "longPress") |]
 
 let item ~indicator id text variant =
   <Dropdown.Item id text_value=text variant>
-    (if indicator then Solidtype.Jsx.element <Dropdown.Item_indicator />
-     else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+    (if indicator then <Dropdown.Item_indicator /> else Solidtype.Jsx.nothing)
     <Label>(Solidtype.Jsx.string text)</Label>
   </Dropdown.Item>
 
@@ -63,24 +62,19 @@ let make () =
                       | `none -> false
                       | `single | `multiple -> true
                     in
-                    Solidtype.Jsx.element
-                      <Dropdown trigger>
-                        <Button aria_label="Menu" variant=`secondary>
-                          "Actions"
-                        </Button>
-                        <Dropdown.Popover placement=(fst (S.get placement))>
-                          <Dropdown.Menu
-                            selection_mode=mode
-                            default_selected_keys=[| "copy" |]>
-                            (Solidtype.Jsx.element
-                               (item ~indicator "new" "New file" `default))
-                            (Solidtype.Jsx.element
-                               (item ~indicator "copy" "Copy link" `default))
-                            (Solidtype.Jsx.element
-                               (item ~indicator "delete" "Delete file" `danger))
-                          </Dropdown.Menu>
-                        </Dropdown.Popover>
-                      </Dropdown>)
+                    <Dropdown trigger>
+                      <Button aria_label="Menu" variant=`secondary>
+                        "Actions"
+                      </Button>
+                      <Dropdown.Popover placement=(fst (S.get placement))>
+                        <Dropdown.Menu
+                          selection_mode=mode default_selected_keys=[| "copy" |]>
+                          (item ~indicator "new" "New file" `default)
+                          (item ~indicator "copy" "Copy link" `default)
+                          (item ~indicator "delete" "Delete file" `danger)
+                        </Dropdown.Menu>
+                      </Dropdown.Popover>
+                    </Dropdown>)
                  </div>)
       react=(fun host ->
               Heroui_react.dropdown host

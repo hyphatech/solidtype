@@ -218,13 +218,10 @@ let both ?variant ?is_dismissable ?placement ?(custom = false) () =
         <p data_testid="outside">"Outside"</p>
         <Drawer>
           (if custom then
-             Solidtype.Jsx.element
-               <Drawer.Trigger aria_label="Open">
-                 <span>"Card"</span>
-               </Drawer.Trigger>
-           else
-             Solidtype.Jsx.element
-               <Button variant=`secondary>"Open Drawer"</Button>)
+             <Drawer.Trigger aria_label="Open">
+               <span>"Card"</span>
+             </Drawer.Trigger>
+           else <Button variant=`secondary>"Open Drawer"</Button>)
           <Drawer.Backdrop ?variant ?is_dismissable>
             <Drawer.Content ?placement>
               <Drawer.Dialog>

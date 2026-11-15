@@ -3,7 +3,7 @@ type ('f, 'kind) children
 
 external literal : 'a -> 'a value = "%identity"
 external thunk : ((unit -> 'a)[@u]) -> 'a value = "%identity"
-external nodes : unit -> ('f, [> `nodes ]) children = "%identity"
+external elements : unit -> ('f, [> `elements ]) children = "%identity"
 external render : 'f -> ('f, [> `render ]) children = "%identity"
 external element : unit -> Jsx.element value = "%identity"
 external optional : ((unit -> 'a option)[@u]) -> 'a value option = "%identity"

@@ -178,18 +178,17 @@ let in_kyiv ~hour ~minute =
 
 let inside ?variant () =
   Solidtype.Jsx.(
-    element
-      (fragment
-         [|
-           <Label>"Time"</Label>;
-           <Time_field.Group ?variant>
-             <Time_field.Input>
-               (fun segment -> <Time_field.Segment segment=(S.get segment) />)
-             </Time_field.Input>
-           </Time_field.Group>;
-           <Description>"When it starts."</Description>;
-           <Field_error>"Pick a time."</Field_error>;
-         |]))
+    fragment
+      [|
+        <Label>"Time"</Label>;
+        <Time_field.Group ?variant>
+          <Time_field.Input>
+            (fun segment -> <Time_field.Segment segment=(S.get segment) />)
+          </Time_field.Input>
+        </Time_field.Group>;
+        <Description>"When it starts."</Description>;
+        <Field_error>"Pick a time."</Field_error>;
+      |])
 
 let both ?(kind = Of_day) ?default_value ?granularity ?hour_cycle
     ?hide_time_zone ?is_disabled ?is_invalid ?is_required ?is_read_only ?variant

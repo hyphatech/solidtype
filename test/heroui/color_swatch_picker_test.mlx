@@ -181,11 +181,10 @@ let both ?(but = []) ?value ?default_value ?size ?variant ?layout ?disabled
                              (Some (Solidtype.Solid.get i)))>
               <Picker.Swatch />
               (if heart then
-                 Jsx.element
-                   <Picker.Indicator>
-                     <svg data_heart="" view_box="0 0 16 16" />
-                   </Picker.Indicator>
-               else Jsx.element <Picker.Indicator />)
+                 <Picker.Indicator>
+                   <svg data_heart="" view_box="0 0 16 16" />
+                 </Picker.Indicator>
+               else <Picker.Indicator />)
             </Picker.Item>)
         </For>
       </Picker>);

@@ -571,7 +571,7 @@ module Resizable_container = struct
       ?on_resize_end:((string * column_size) array -> unit) ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -580,7 +580,7 @@ module Resizable_container = struct
     external on_resize_start : t -> resized option = "onResizeStart" [@@mel.get]
     external on_resize : t -> resized option = "onResize" [@@mel.get]
     external on_resize_end : t -> resized option = "onResizeEnd" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -666,7 +666,7 @@ module Root = struct
       ?on_row_action:(string -> unit) ->
       ?as_:(Solidtype.Html.Table.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -719,7 +719,7 @@ module Root = struct
     external on_row_action : t -> ((string -> unit)[@u]) option = "onRowAction"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     (* A virtualized table's element is a <div>: what it is given is an
        element, of whichever kind. *)
@@ -1317,20 +1317,19 @@ module Root = struct
       | None -> Props.children props
       | Some v ->
           let l = v.options in
-          Jsx.element
-            <div
-              role=`presentation
-              style=("width: "
-                    ^ px (S.get v.content_width +. (2. *. l.padding))
-                    ^ "; height: "
-                    ^ px
-                        (l.padding +. l.heading_size +. l.gap
-                       +. S.get v.body_height +. l.padding)
-                    ^ "; pointer-events: "
-                    ^ (if S.get v.scrolling then "none" else "auto")
-                    ^ "; position: relative;")>
-              (Props.children props)
-            </div>
+          <div
+            role=`presentation
+            style=("width: "
+                  ^ px (S.get v.content_width +. (2. *. l.padding))
+                  ^ "; height: "
+                  ^ px
+                      (l.padding +. l.heading_size +. l.gap
+                     +. S.get v.body_height +. l.padding)
+                  ^ "; pointer-events: "
+                  ^ (if S.get v.scrolling then "none" else "auto")
+                  ^ "; position: relative;")>
+            (Props.children props)
+          </div>
     in
     <Table_context.Provider value=t>
       <Dynamic.Drawn
@@ -1409,11 +1408,11 @@ module Header = struct
     external check :
       ?as_:(Solidtype.Html.Thead.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Thead.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -1437,7 +1436,7 @@ module Header = struct
           role=`rowgroup
           ?as_=(S.drawn_as props)
           props=(S.undrawn (S.omit props [| "children" |]))>
-          <tr role=`row>(Jsx.element (drawn ()))</tr>
+          <tr role=`row>(drawn ())</tr>
         </thead>
     | Some v ->
         (* Its row stays over the rows as they scroll, as React Aria's
@@ -1452,7 +1451,7 @@ module Header = struct
             role=`rowgroup
             ?as_=(S.drawn_as props)
             props=(S.undrawn (S.omit props [| "children" |]))>
-            <div role=`row aria_rowindex="1">(Jsx.element (drawn ()))</div>
+            <div role=`row aria_rowindex="1">(drawn ())</div>
           </div>
         </div>
 
@@ -1500,7 +1499,7 @@ module Column = struct
       ?max_width:float Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Th.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -1514,7 +1513,7 @@ module Column = struct
 
     external min_width : t -> float option = "minWidth" [@@mel.get]
     external max_width : t -> float option = "maxWidth" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
@@ -1648,7 +1647,7 @@ module Column = struct
                  placed ~overflow:"visible"
                    ~z:(S.get v.column_count - i + 1)
                    ~top:0. ~left ~width ~height:v.options.heading_size ())>
-          (Jsx.element drawn)
+          drawn
         </div>
 
   let make (props : Props.t) =
@@ -1666,12 +1665,12 @@ module Body = struct
       ?empty_state:Jsx.element Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tbody.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tbody.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external empty_state : t -> Jsx.element option = "emptyState" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -1687,7 +1686,7 @@ module Body = struct
     t.set_order
       (Some (S.accessor (fun () -> Array.map (fun n -> n.row_key) (S.get rows))));
     S.on_cleanup (fun () -> t.set_order None);
-    let others () = Jsx.element (Jsx.fragment (Nested.others (all ()))) in
+    let others () = Jsx.fragment (Nested.others (all ())) in
     match t.virtualized with
     | None ->
         <tbody
@@ -1703,7 +1702,7 @@ module Body = struct
               <tr role=`row>
                 <td
                   role=`rowheader colspan=(string_of_int (S.get t.column_count))>
-                  (Jsx.element (S.get shown))
+                  (S.get shown)
                 </td>
               </tr>)
           </Show.Some>
@@ -1745,7 +1744,7 @@ module Body = struct
                     role=`rowheader
                     aria_colspan=(string_of_int (S.get v.column_count))
                     style="display: contents">
-                    (Jsx.element (S.get shown))
+                    (S.get shown)
                   </div>
                 </div>)
             </Show.Some>
@@ -1775,7 +1774,7 @@ module Row = struct
       ?referrer_policy:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -1791,7 +1790,7 @@ module Row = struct
     external href_lang : t -> string option = "hrefLang" [@@mel.get]
     external ping : t -> string option = "ping" [@@mel.get]
     external referrer_policy : t -> string option = "referrerPolicy" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
 
     external on_key_up : t -> ((Dom.keyboardEvent -> unit)[@u]) option
@@ -2114,21 +2113,20 @@ module Row = struct
                           *. (l.row_size +. l.gap))
                         ~left:0. ~width:(S.get v.content_width)
                         ~height:l.row_size ())>
-               (Jsx.element drawn)
+               drawn
              </div>
        in
-       Jsx.element
-       @@ Jsx.fragment
-            [|
-              row;
-              <Show when_=(S.get expanded)>
-                <For each=(!nested ())>
-                  (fun n position ->
-                    n.draw ~position
-                      ~size:(S.accessor (fun () -> Array.length (!nested ()))))
-                </For>
-              </Show>;
-            |])
+       Jsx.fragment
+         [|
+           row;
+           <Show when_=(S.get expanded)>
+             <For each=(!nested ())>
+               (fun n position ->
+                 n.draw ~position
+                   ~size:(S.accessor (fun () -> Array.length (!nested ()))))
+             </For>
+           </Show>;
+         |])
     </Row_context.Provider>
 
   (* A row is drawn by what holds it, with the contexts of where it was
@@ -2164,11 +2162,11 @@ module Cell = struct
     external check :
       ?as_:(Solidtype.Html.Td.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Td.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
     external ref : t -> ((Dom.element -> unit)[@u]) option = "ref" [@@mel.get]
   end
 
@@ -2207,7 +2205,7 @@ module Cell = struct
           style=(let left, width = v.column_box (S.get index) in
                  placed ~overflow:"visible" ~z:1 ~top:0. ~left ~width
                    ~height:v.options.row_size ())>
-          (Jsx.element drawn)
+          drawn
         </div>
 
   let make (props : Props.t) =
@@ -2232,7 +2230,7 @@ module Load_more = struct
       ?scroll_offset:float Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -2242,7 +2240,7 @@ module Load_more = struct
     [@@mel.get]
 
     external scroll_offset : t -> float option = "scrollOffset" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   let make (props : Props.t) =
@@ -2251,7 +2249,7 @@ module Load_more = struct
     let sentinel () =
       <Load_more_sentinel
         is_loading=(is_loading ())
-        on_load_more=(fun _ -> Jsx.act (Props.on_load_more props))
+        on_load_more=(fun () -> Jsx.act (Props.on_load_more props))
         ?scroll_offset=(Props.scroll_offset props)
         style="position: relative; height: 1px; width: 1px;"
       />
@@ -2267,9 +2265,7 @@ module Load_more = struct
         Jsx.fragment
           [|
             <tr style="height: 0px;" inert=true>
-              <td style="padding: 0px; border: 0px;">
-                (Jsx.element (sentinel ()))
-              </td>
+              <td style="padding: 0px; border: 0px;">(sentinel ())</td>
             </tr>;
             <Show when_=(is_loading ())>
               <tr role=`row ?as_=(S.drawn_as props) props=(S.undrawn (rest ()))>
@@ -2293,9 +2289,7 @@ module Load_more = struct
                    ~height:(if is_loading () then l.loader_size else 0.)
                    ())>
           <div style="height: 0px;" inert=true>
-            <div style="padding: 0px; border: 0px;">
-              (Jsx.element (sentinel ()))
-            </div>
+            <div style="padding: 0px; border: 0px;">(sentinel ())</div>
           </div>
           <Show when_=(is_loading ())>
             <div role=`row ?as_=(S.drawn_as props) props=(S.undrawn (rest ()))>
@@ -2352,12 +2346,12 @@ module Column_resizer = struct
     external check :
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external aria_label : t -> string option = "aria-label" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]

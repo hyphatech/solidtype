@@ -42,10 +42,8 @@ let both ?(color = `default) ?(placement = `top_right) ?(size = `md)
   T.render (fun () ->
       <Badge.Anchor>
         <span>"Inbox"</span>
-        (if dot then
-           Solidtype.Jsx.element <Badge color placement size variant />
-         else
-           Solidtype.Jsx.element <Badge color placement size variant>"5"</Badge>)
+        (if dot then <Badge color placement size variant />
+         else <Badge color placement size variant>"5"</Badge>)
       </Badge.Anchor>);
   let solidtype = shown () in
   T.cleanup ();

@@ -138,17 +138,13 @@ let both ?variant ?full_width ~in_field ~multiline () =
     <Input_group ?variant ?full_width>
       <Input_group.Prefix>"https://"</Input_group.Prefix>
       (if multiline then
-         Solidtype.Jsx.element
-           <Input_group.Text_area
-             ?aria_label=(if in_field then None else Some "Note")
-             placeholder="note"
-           />
+         <Input_group.Text_area
+           ?aria_label=(if in_field then None else Some "Note")
+           placeholder="note" />
        else
-         Solidtype.Jsx.element
-           <Input_group.Input
-             ?aria_label=(if in_field then None else Some "Site")
-             placeholder="heroui"
-           />)
+         <Input_group.Input
+           ?aria_label=(if in_field then None else Some "Site")
+           placeholder="heroui" />)
       <Input_group.Suffix>".com"</Input_group.Suffix>
     </Input_group>
   in
@@ -156,7 +152,7 @@ let both ?variant ?full_width ~in_field ~multiline () =
       if in_field then
         <Text_field name="site">
           <Label>"Site"</Label>
-          (Solidtype.Jsx.element (group ()))
+          (group ())
           <Description>"Your site."</Description>
         </Text_field>
       else group ());

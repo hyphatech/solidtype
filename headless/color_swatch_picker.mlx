@@ -241,7 +241,7 @@ module Root = struct
       ?layout:[ `grid | `stack ] Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -257,7 +257,7 @@ module Root = struct
     external aria_labelledby : t -> string option = "aria-labelledby"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -444,13 +444,13 @@ module Item = struct
       ?is_disabled:bool Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external color : t -> Color.t = "color" [@@mel.get]
     external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]

@@ -13,7 +13,7 @@ let group ~label ~size =
 
 let make () =
   <div class_="flex flex-col gap-4">
-    (Solidtype.Jsx.element (group ~label:"Small" ~size:`sm))
-    (Solidtype.Jsx.element (group ~label:"Medium (default)" ~size:`md))
-    (Solidtype.Jsx.element (group ~label:"Large" ~size:`lg))
+    (group ~label:"Small" ~size:`sm)
+    (group ~label:"Medium (default)" ~size:`md)
+    (group ~label:"Large" ~size:`lg)
   </div>

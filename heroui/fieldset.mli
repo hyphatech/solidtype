@@ -29,7 +29,7 @@ module Context : sig
     module Props : sig
       val check :
         value:bool S.accessor Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -51,7 +51,7 @@ module Legend : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Legend.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Legend.check
@@ -68,7 +68,7 @@ module Group : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -85,7 +85,7 @@ module Actions : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -102,7 +102,7 @@ module Props : sig
     ?disabled:bool Solidtype.Check.value ->
     ?name:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Fieldset.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Fieldset.check

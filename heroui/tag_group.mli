@@ -43,7 +43,7 @@ module List : sig
     val check :
       ?render_empty_state:(unit -> Jsx.element) ->
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -78,7 +78,7 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

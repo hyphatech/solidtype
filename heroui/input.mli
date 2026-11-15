@@ -22,7 +22,7 @@ module Props : sig
     ?full_width:bool Solidtype.Check.value ->
     ?as_:(Solidtype.Html.Input.props -> Jsx.element) ->
     ?props:'spread S.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Input.check
 
   val class_ : t -> string option

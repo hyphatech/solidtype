@@ -23,7 +23,7 @@ let make () =
     </Card.Header>
     <Card.Content class_="p-0">
       <Scroll_shadow class_="h-[300px] px-4" size=80>
-        (Solidtype.Jsx.element (paragraphs ()))
+        (paragraphs ())
       </Scroll_shadow>
     </Card.Content>
     <Card.Footer class_="mt-4 flex flex-row gap-2">

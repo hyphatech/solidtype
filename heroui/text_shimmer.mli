@@ -17,7 +17,7 @@ module Props : sig
 
   val check :
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Span.check

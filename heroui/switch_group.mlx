@@ -1,7 +1,7 @@
 module S = Solidtype.Solid
 
 let%component make ?(orientation : [ `horizontal | `vertical ] option)
-    ?(class_ : string option) ~(children : Solidtype.Jsx.content) () =
+    ?(class_ : string option) ~(children : Solidtype.Jsx.element) () =
   let slots () =
     Styles.SwitchGroup.slots
       (Styles.SwitchGroup.options ?orientation:(S.get orientation) ())

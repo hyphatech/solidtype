@@ -33,7 +33,7 @@ let make () =
                             text-sm text-foreground transition-colors \
                             hover:bg-default"
                     type_=`button>
-                    (Jsx.element (icon ())) (Jsx.string label)
+                    (icon ()) (Jsx.string label)
                   </button>)
               </For>
             </nav>

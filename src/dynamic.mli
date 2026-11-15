@@ -21,7 +21,7 @@ module Element : sig
     val check :
       component:string Check.value ->
       ?props:'spread Solid.rest ->
-      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Check.children -> unit -> unit)
       Html.Element.check
   end
 
@@ -35,7 +35,7 @@ module Drawn : sig
     val check :
       component:Jsx.drawn Check.value ->
       ?props:'spread Solid.rest ->
-      (?children:('f, [ `nodes ]) Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Check.children -> unit -> unit)
       Html.Element.check
   end
 

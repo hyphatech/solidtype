@@ -185,9 +185,8 @@ let both_field ?variant ?full_width ?is_required ?is_disabled ?is_invalid
         name="email"
         class_="max-w-64">
         <Label>"Email"</Label>
-        (if multiline then
-           Solidtype.Jsx.element <Text_area placeholder="Your message" />
-         else Solidtype.Jsx.element <Input placeholder="Enter your email" />)
+        (if multiline then <Text_area placeholder="Your message" />
+         else <Input placeholder="Enter your email" />)
         <Description>"We'll never share it."</Description>
         <Field_error>"Enter a valid email."</Field_error>
       </Text_field>);

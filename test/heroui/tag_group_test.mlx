@@ -185,10 +185,9 @@ let both ?selection_mode ?selected_keys ?default_selected_keys ?disabled_keys
                 id=t is_disabled=(Option.equal String.equal disabled (Some t))>
                 (Jsx.string t)
                 (if custom_remove then
-                   Jsx.element
-                     <Tag.Remove_button>
-                       <svg data_cross="" view_box="0 0 16 16" />
-                     </Tag.Remove_button>
+                   <Tag.Remove_button>
+                     <svg data_cross="" view_box="0 0 16 16" />
+                   </Tag.Remove_button>
                  else Jsx.string "")
               </Tag>)
           </For>
@@ -214,7 +213,7 @@ let both ?selection_mode ?selected_keys ?default_selected_keys ?disabled_keys
         ?variant
         on_selection_change=selected
         ?on_remove=(if removable then Some remove else None)>
-        (Jsx.element (content ()))
+        (content ())
       </Tag_group>);
   let* solidtype = walk ~steps ~step:(fun action -> action ()) T.body told in
   T.cleanup ();

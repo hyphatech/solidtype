@@ -1,14 +1,12 @@
 type element
 type prop
 type child
-type content
 type 'a namespaced = 'a
 type 'props component
 
 external component : ('props -> element) -> 'props component = "%identity"
-external string : string -> content = "%identity"
-external int : int -> content = "%identity"
-external element : element -> content = "%identity"
+external string : string -> element = "%identity"
+external int : int -> element = "%identity"
 external of_undefined : unit Js.undefined -> element = "%identity"
 
 (* Solid renders an undefined child as nothing. *)
@@ -20,13 +18,10 @@ external fragment : element array -> element = "%identity"
 (* Solid hands a component its function child as the function, and its
    elements as they are, so a function is told by its type, as Kobalte tells
    its own children of state. *)
-(* Solid renders text and a number wherever it renders an element. *)
-external of_content : content -> element = "%identity"
-
 type 'state children
 
 external as_function : 'state children -> ('state -> element[@u]) = "%identity"
-external as_content : 'state children -> content = "%identity"
+external as_element : 'state children -> element = "%identity"
 
 type drawn
 
@@ -48,8 +43,8 @@ let ref_beside written rest e =
 let is_function children = String.equal (Js.typeof children) "function"
 
 let draw children state =
-  if is_function children then element ((as_function children) state [@u])
-  else as_content children
+  if is_function children then (as_function children) state [@u]
+  else as_element children
 
 (* A token is an object of its own, told from any other child -- a node, a
    string, another module's token -- by its mark, an object made once per
@@ -117,7 +112,7 @@ external text : string -> child = "%identity"
 external node : element -> child = "%identity"
 external render : 'f -> child = "%identity"
 
-external dynamic : ((unit -> content)[@u]) -> child = "dynamic"
+external dynamic : ((unit -> element)[@u]) -> child = "dynamic"
 [@@mel.module "vite-plugin-solidtype/markers"]
 
 external native : 'a -> 'a namespaced = "%identity"

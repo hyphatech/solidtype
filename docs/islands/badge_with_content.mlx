@@ -10,20 +10,16 @@ let anchored badge =
     <Avatar>
       <Avatar.Image src=avatar /> <Avatar.Fallback>"JD"</Avatar.Fallback>
     </Avatar>
-    (Solidtype.Jsx.element (badge ()))
+    (badge ())
   </Badge.Anchor>
 
 let make () =
   <div class_="flex items-center gap-6">
-    (Solidtype.Jsx.element
-       (anchored (fun () -> <Badge color=`danger size=`sm>"5"</Badge>)))
-    (Solidtype.Jsx.element
-       (anchored (fun () -> <Badge color=`danger size=`sm>"New"</Badge>)))
-    (Solidtype.Jsx.element
-       (anchored (fun () -> <Badge color=`danger size=`sm>"99+"</Badge>)))
-    (Solidtype.Jsx.element
-       (anchored (fun () ->
-            <Badge color=`accent size=`sm>
-              <Gravity.Bell class_="size-2.5" />
-            </Badge>)))
+    (anchored (fun () -> <Badge color=`danger size=`sm>"5"</Badge>))
+    (anchored (fun () -> <Badge color=`danger size=`sm>"New"</Badge>))
+    (anchored (fun () -> <Badge color=`danger size=`sm>"99+"</Badge>))
+    (anchored (fun () ->
+         <Badge color=`accent size=`sm>
+           <Gravity.Bell class_="size-2.5" />
+         </Badge>))
   </div>

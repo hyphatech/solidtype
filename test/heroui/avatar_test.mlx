@@ -59,8 +59,7 @@ let both ?size ?color ?variant ?fallback_color ?src () =
   T.render (fun () ->
       <Avatar ?size ?color ?variant class_="ms-1">
         (match src with
-        | Some src ->
-            Solidtype.Jsx.element <Avatar.Image alt="Ada Lovelace" src />
+        | Some src -> <Avatar.Image alt="Ada Lovelace" src />
         | None -> Solidtype.Jsx.string "")
         <Avatar.Fallback ?color=fallback_color>"AL"</Avatar.Fallback>
       </Avatar>);

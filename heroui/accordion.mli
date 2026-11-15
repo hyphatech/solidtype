@@ -66,7 +66,7 @@ module Item : sig
       ?on_focus_in:(Dom.focusEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -83,7 +83,7 @@ module Heading : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.H3.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.H3.check
@@ -120,7 +120,7 @@ module Trigger : sig
       ?on_key_up:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
@@ -139,7 +139,7 @@ module Indicator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Svg.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Svg.check
@@ -166,7 +166,7 @@ module Panel : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -183,7 +183,7 @@ module Body : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -210,7 +210,7 @@ module Props : sig
     ?hide_separator:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

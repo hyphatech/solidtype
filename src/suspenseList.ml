@@ -4,7 +4,7 @@ module Props = struct
   let check
       ~reveal_order:(_ : [ `forwards | `backwards | `together ] Check.value)
       ?tail:(_ : [ `collapsed | `hidden ] Check.value option)
-      ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+      ?children:(_ : (_, [ `elements ]) Check.children option) () =
     ()
 end
 

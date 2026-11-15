@@ -51,7 +51,7 @@ module Root : sig
       ?disabled:bool Solidtype.Check.value ->
       ?read_only:bool Solidtype.Check.value ->
       ?props:t S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 

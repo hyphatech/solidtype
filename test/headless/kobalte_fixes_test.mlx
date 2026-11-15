@@ -265,15 +265,11 @@ let track_known ~fixed =
   H.render (fun () ->
       <Kobalte_own_slider.Root default_value=[| 10. |]>
         (if fixed then
-           Jsx.element
-             <Slider.Track ref=(fun _ -> given := true)>
-               (watch ())
-             </Slider.Track>
+           <Slider.Track ref=(fun _ -> given := true)>(watch ())</Slider.Track>
          else
-           Jsx.element
-             <Kobalte_own_slider.Track ref=(fun _ -> given := true)>
-               (watch ())
-             </Kobalte_own_slider.Track>)
+           <Kobalte_own_slider.Track ref=(fun _ -> given := true)>
+             (watch ())
+           </Kobalte_own_slider.Track>)
       </Kobalte_own_slider.Root>);
   (!known (), !given)
 

@@ -43,7 +43,7 @@ module Trigger : sig
     val check :
       ?aria_label:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -76,7 +76,7 @@ module Backdrop : sig
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
         ( Dialog_frame.overlay_state -> Jsx.element,
-          [ `nodes | `render ] )
+          [ `elements | `render ] )
         Solidtype.Check.children ->
       ?as_:
         (Solidtype.Html.Div.props -> Dialog_frame.overlay_state -> Jsx.element) ->
@@ -102,7 +102,7 @@ module Container : sig
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
         ( Dialog_frame.overlay_state -> Jsx.element,
-          [ `nodes | `render ] )
+          [ `elements | `render ] )
         Solidtype.Check.children ->
       ?as_:
         (Solidtype.Html.Div.props -> Dialog_frame.overlay_state -> Jsx.element) ->
@@ -127,7 +127,7 @@ module Dialog : sig
       ?on_focus_out:(Dom.focusEvent -> unit) ->
       children:
         ( Dialog_frame.dialog_state -> Jsx.element,
-          [ `nodes | `render ] )
+          [ `elements | `render ] )
         Solidtype.Check.children ->
       ?as_:
         (Solidtype.Html.Section.props ->
@@ -148,7 +148,7 @@ module Header : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -165,7 +165,7 @@ module Body : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -182,7 +182,7 @@ module Footer : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -204,7 +204,7 @@ module Icon : sig
         [ `default | `accent | `success | `warning | `danger ]
         Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -221,7 +221,7 @@ module Heading : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.H2.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.H2.check
@@ -241,7 +241,7 @@ module Close_trigger : sig
       ?on_click:(Dom.mouseEvent -> unit) ->
       ?children:
         ( Close_button.state -> Jsx.element,
-          [ `nodes | `render ] )
+          [ `elements | `render ] )
         Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Button.props -> Close_button.state -> Jsx.element) ->
       ?props:t S.rest ->
@@ -259,7 +259,7 @@ module Props : sig
     ?is_open:bool Solidtype.Check.value ->
     ?default_open:bool Solidtype.Check.value ->
     ?on_open_change:(bool -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?props:t S.rest ->
     unit ->
     unit

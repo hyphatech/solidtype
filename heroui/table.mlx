@@ -38,7 +38,7 @@ let in_table part =
   | None -> invalid_arg (part ^ " is used inside a Table")
 
 module Scroll_container = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Scroll_container" in
     <div
       class_=(after
@@ -58,7 +58,7 @@ module Resizable_container = struct
       ?(on_resize_start : ((string * column_size) array -> unit) option)
       ?(on_resize : ((string * column_size) array -> unit) option)
       ?(on_resize_end : ((string * column_size) array -> unit) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Resizable_container" in
     <Headless.Resizable_container
       on_resize_start=(fun sizes ->
@@ -91,7 +91,7 @@ module Content = struct
       ?(default_expanded_keys : string array option)
       ?(on_expanded_change : (string array -> unit) option)
       ?(on_row_action : (string -> unit) option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let slots = in_table "Table.Content" in
     <Headless.Root
       ?aria_label=(S.get aria_label)
@@ -126,7 +126,7 @@ module Content = struct
 end
 
 module Header = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Header" in
     let t = Headless.Context.use () in
     (* A checkbox of slot=`selection in the header stands for every row. *)
@@ -285,7 +285,7 @@ end
 module Sortable_column_header = struct
   let%component make ?(sort_direction : [ `ascending | `descending ] option)
       ?(show_indicator : bool = true) ?(indicator : Jsx.element option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Sortable_column_header" in
     let column = Headless.Column.Context.use () in
     let direction () =
@@ -315,7 +315,7 @@ module Sortable_column_header = struct
                 class_=(Styles.Table.sortable_column_indicator (S.get slots))
                 data_direction=(named ())
                 data_slot="table-sortable-column-indicator">
-                (Jsx.element own)
+                own
               </span>
           | None ->
               <Gravity.Chevron_up
@@ -332,7 +332,7 @@ end
 
 module Body = struct
   let%component make ?(render_empty_state : (unit -> Jsx.element) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Body" in
     <Headless.Body
       ?empty_state=(render_empty_state ())
@@ -353,7 +353,7 @@ module Row = struct
       ?(ping : string option) ?(referrer_policy : string option)
       ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlTableRowElement -> unit) option)
-      ?(style : string option) ~(children : Jsx.content) () =
+      ?(style : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Row" in
     let t = Headless.Context.use () in
     let key =
@@ -480,15 +480,14 @@ module Cell = struct
       ?as_=(Option.map (fun f p -> f p (state ())) (S.get as_))
       props=(Props.others props)>
       (let r = row () in
-       Jsx.element
-         <Button.Chevron.Provider
-           value={
-                   Button.toggle = r.toggle_expanded;
-                   focus_row = r.focus;
-                   labelled_by = r.header_id;
-                 }>
-           (Jsx.draw (S.get children) (state ()))
-         </Button.Chevron.Provider>)
+       <Button.Chevron.Provider
+         value={
+                 Button.toggle = r.toggle_expanded;
+                 focus_row = r.focus;
+                 labelled_by = r.header_id;
+               }>
+         (Jsx.draw (S.get children) (state ()))
+       </Button.Chevron.Provider>)
     </Headless.Cell>
   [@@element td]
 end
@@ -499,11 +498,11 @@ module Load_more = struct
   let%component make ?(is_loading : bool option)
       ?(on_load_more : (unit -> unit) option) ?(scroll_offset : float option)
       ?(class_ : string option) ?(style : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let slots = in_table "Table.Load_more" in
     <Headless.Load_more
       ?is_loading=(S.get is_loading)
-      on_load_more=(fun _ -> ignore (on_load_more () : unit option))
+      on_load_more=(fun () -> ignore (on_load_more () : unit option))
       ?scroll_offset=(S.get scroll_offset)
       style=(styled "--table-row-level: 1" (S.get style))
       class_=(after (Styles.Table.load_more (S.get slots)) (S.get class_))
@@ -516,7 +515,7 @@ module Load_more = struct
 end
 
 module Load_more_content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Load_more_content" in
     <div
       class_=(after
@@ -530,7 +529,7 @@ module Load_more_content = struct
 end
 
 module Footer = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_table "Table.Footer" in
     <div
       class_=(after (Styles.Table.footer (S.get slots)) (S.get class_))
@@ -542,7 +541,7 @@ module Footer = struct
 end
 
 let%component make ?(variant : [ `primary | `secondary ] option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   let slots =
     S.accessor (fun () ->
         Styles.Table.slots (Styles.Table.options ?variant:(S.get variant) ()))

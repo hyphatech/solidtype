@@ -21,7 +21,7 @@ let colors =
 
 let cell children =
   <div class_="flex shrink-0 items-center justify-center" style="width: 130px">
-    (Solidtype.Jsx.element (children ()))
+    (children ())
   </div>
 
 let size_block (size, name) =
@@ -62,9 +62,9 @@ let size_block (size, name) =
 
 let make () =
   <div class_="flex flex-col gap-8 overflow-x-auto">
-    (Solidtype.Jsx.element (size_block (`lg, "lg")))
+    (size_block (`lg, "lg"))
     <Separator />
-    (Solidtype.Jsx.element (size_block (`md, "md")))
+    (size_block (`md, "md"))
     <Separator />
-    (Solidtype.Jsx.element (size_block (`sm, "sm")))
+    (size_block (`sm, "sm"))
   </div>

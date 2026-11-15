@@ -17,7 +17,7 @@ let item ~expanded ~id ~icon ~title ~body =
         class_=(if open_ () then "w-full border-none"
                 else "w-full border-none bg-transparent")>
         <div class_="flex w-full items-center justify-start gap-2">
-          (Solidtype.Jsx.element (icon ())) (Solidtype.Jsx.string title)
+          (icon ()) (Solidtype.Jsx.string title)
         </div>
         <Disclosure.Indicator class_="text-muted" />
       </Button>
@@ -25,7 +25,7 @@ let item ~expanded ~id ~icon ~title ~body =
     <Disclosure.Content>
       <Disclosure.Body
         class_="mx-2 flex flex-col items-center gap-2 p-4 text-center">
-        (Solidtype.Jsx.element (body ()))
+        (body ())
       </Disclosure.Body>
     </Disclosure.Content>
   </Disclosure>
@@ -78,15 +78,13 @@ let make () =
     <div class_="flex flex-col gap-4 bg-transparent p-4">
       <Disclosure_group
         expanded_keys=(S.get expanded) on_expanded_change=(S.set set_expanded)>
-        (Solidtype.Jsx.element
-        @@ item ~expanded ~id:"preview"
-             ~icon:(fun () -> <Gravity.Qr_code />)
-             ~title:"Preview HeroUI Native" ~body:preview)
+        (item ~expanded ~id:"preview"
+           ~icon:(fun () -> <Gravity.Qr_code />)
+           ~title:"Preview HeroUI Native" ~body:preview)
         <Separator class_="my-2" />
-        (Solidtype.Jsx.element
-        @@ item ~expanded ~id:"download"
-             ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
-             ~title:"Download App" ~body:download)
+        (item ~expanded ~id:"download"
+           ~icon:(fun () -> <Iconify.Tabler_brand_apple_filled />)
+           ~title:"Download App" ~body:download)
       </Disclosure_group>
     </div>
   </div>

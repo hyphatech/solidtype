@@ -20,7 +20,7 @@ module Make (V : Value) = struct
   module Provider = struct
     module Props = struct
       let check ~value:(_ : V.t Check.value)
-          ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+          ?children:(_ : (_, [ `elements ]) Check.children option) () =
         ()
     end
 
@@ -39,7 +39,7 @@ struct
   module Provider = struct
     module Props = struct
       let check ~value:(_ : V.t Check.value)
-          ?children:(_ : (_, [ `nodes ]) Check.children option) () =
+          ?children:(_ : (_, [ `elements ]) Check.children option) () =
         ()
     end
 

@@ -71,7 +71,7 @@ let indicator s =
 module Item = struct
   let%component make ~(id : string) ?(is_disabled : bool = false)
       ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let s = within "Segment.Item" in
     let selected =
       S.accessor (fun () ->
@@ -110,8 +110,7 @@ module Item = struct
                     (item_classes (S.get s.variant) (S.get s.size))
                     (S.get class_))
           props=(Props.others props)>
-          <Show when_=(S.get selected)>(Jsx.element (indicator s))</Show>
-          (S.get children)
+          <Show when_=(S.get selected)>(indicator s)</Show> (S.get children)
         </Field_content>
       </Kobalte.Item>
     </Item_context.Provider>
@@ -141,7 +140,7 @@ let%component make ?(variant : variant = `default) ?(size : size = `md)
     ?(on_selection_change : (string -> unit) option)
     ?(is_disabled : bool = false) ?(name : string option)
     ?(aria_label : string option) ?(aria_labelledby : string option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   let chosen, choose =
     Field.controlled
       ~value:(fun () -> Option.map Option.some (S.get selected_key))

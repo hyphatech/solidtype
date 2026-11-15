@@ -48,7 +48,7 @@ module As_div = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -58,7 +58,7 @@ end
 
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let p = within "Popover.Trigger" in
     <As_div
       as_="div"
@@ -78,7 +78,7 @@ module Content = struct
       ?(should_flip : bool = true) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let p = within "Popover.Content" in
     S.create_computed (fun () ->
         p.set_placement (Option.value (S.get placement) ~default:`bottom));
@@ -140,11 +140,11 @@ module Content = struct
           data_entering=(Jsx.flag (Overlay.entering o))
           data_exiting=(Jsx.flag (Overlay.exiting o))
           props=(Props.others props)>
-          (Jsx.element (Overlay.dismiss close))
+          (Overlay.dismiss close)
           <Button.Trigger.Provider value=Button.no_trigger>
             (S.get children)
           </Button.Trigger.Provider>
-          (Jsx.element (Overlay.dismiss close))
+          (Overlay.dismiss close)
         </Kobalte.Content>
       </Kobalte.Portal>
     </Show>
@@ -152,7 +152,7 @@ module Content = struct
 end
 
 module Dialog = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let p = within "Popover.Dialog" in
     <section
       class_=(after (Styles.Popover.dialog p.slots) (S.get class_))
@@ -168,7 +168,7 @@ module Dialog = struct
 end
 
 module Heading = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let p = within "Popover.Heading" in
     <Kobalte.Title
       class_=(after (Styles.Popover.heading p.slots) (S.get class_))
@@ -180,7 +180,7 @@ end
 
 module Arrow = struct
   let%component make ?(class_ : string option) ?(style : string option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let p = within "Popover.Arrow" in
     p.set_arrow true;
     S.on_cleanup (fun () -> p.set_arrow false);
@@ -200,23 +200,22 @@ module Arrow = struct
           (match S.get children with
           | Some c -> c
           | None ->
-              Jsx.element
-                <svg
-                  fill="none"
-                  height="12"
-                  view_box="0 0 12 12"
-                  width="12"
-                  xmlns="http://www.w3.org/2000/svg"
-                  data_slot="popover-overlay-arrow">
-                  <path d="M0 0C5.48483 8 6.5 8 12 0Z" />
-                </svg>)
+              <svg
+                fill="none"
+                height="12"
+                view_box="0 0 12 12"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+                data_slot="popover-overlay-arrow">
+                <path d="M0 0C5.48483 8 6.5 8 12 0Z" />
+              </svg>)
         </div>;
       |]
   [@@element div]
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
-    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.element) () =
   let kept, set_kept = S.create_signal false in
   S.create_computed (fun () ->
       S.set set_kept

@@ -212,25 +212,23 @@ let both ?channel ?default_value ?placeholder ?variant ?(is_disabled = false)
                       (function "secondary" -> `secondary | _ -> `primary)
                       variant)>
           (if swatch then
-             Jsx.element
-               <Color_field.Prefix>
-                 <Color_swatch color=(Colors.parse_color "#0485F7") size=`xs />
-               </Color_field.Prefix>
+             <Color_field.Prefix>
+               <Color_swatch color=(Colors.parse_color "#0485F7") size=`xs />
+             </Color_field.Prefix>
            else Jsx.string "")
           <Color_field.Input ?placeholder />
           (match suffix with
           | Some s ->
-              Jsx.element
-                <Color_field.Suffix>
-                  <span class_="text-sm text-muted">(Jsx.string s)</span>
-                </Color_field.Suffix>
+              <Color_field.Suffix>
+                <span class_="text-sm text-muted">(Jsx.string s)</span>
+              </Color_field.Suffix>
           | None -> Jsx.string "")
         </Color_field.Group>
         (match description with
-        | Some d -> Jsx.element <Description>(Jsx.string d)</Description>
+        | Some d -> <Description>(Jsx.string d)</Description>
         | None -> Jsx.string "")
         (match error with
-        | Some m -> Jsx.element <Field_error>(Jsx.string m)</Field_error>
+        | Some m -> <Field_error>(Jsx.string m)</Field_error>
         | None -> Jsx.string "")
       </Color_field>);
   let* solidtype = walk ~keys ~step:(fun action -> action ()) T.body told in

@@ -140,13 +140,13 @@ module Value = struct
       props=(Props.others props)>
       (match S.get children with
       | Some c -> Jsx.draw c (state ())
-      | None -> Jsx.element (List_box.shown (S.get s.selected)))
+      | None -> List_box.shown (S.get s.selected))
     </Kobalte.Value>
   [@@element span]
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let s = within "Select.Indicator" in
     let classes () =
@@ -163,7 +163,7 @@ module Indicator = struct
           data_slot="select-indicator"
           data_open=(Jsx.flag (S.get s.is_open))
           props=(Props.others props)>
-          (Option.value (S.get children) ~default:(Jsx.element Jsx.nothing))
+          (Option.value (S.get children) ~default:Jsx.nothing)
         </span>
     | None ->
         <Gravity.Chevron_down
@@ -178,7 +178,7 @@ module Indicator = struct
 end
 
 module Clear_button = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?(on_pointer_down : (Dom.pointerEvent -> unit) option) () =
     let s = within "Select.Clear_button" in
@@ -204,12 +204,11 @@ module Clear_button = struct
       (match S.get children with
       | Some c -> c
       | None ->
-          Jsx.element
-            <Gravity.Xmark
-              aria_hidden=true
-              role=`presentation
-              data_slot="select-clear-button-icon"
-            />)
+          <Gravity.Xmark
+            aria_hidden=true
+            role=`presentation
+            data_slot="select-clear-button-icon"
+          />)
     </span>
   [@@element span]
 end
@@ -238,7 +237,7 @@ module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let s = within "Select.Popover" in
     S.create_computed (fun () ->
         s.set_placement (Option.value (S.get placement) ~default:`bottom));
@@ -273,22 +272,21 @@ module Popover = struct
               props=(Props.others props)>
               (match S.get s.hosted with
               | Some (h : List_box.hosted) ->
-                  Jsx.element
-                    <As_list
-                      as_="div"
-                      ref=(fun e -> h.list_ref e)
-                      scroll_to_item=(fun key -> h.scroll_to_item key)
-                      ?aria_label=(S.get h.aria_label)
-                      aria_orientation=`vertical
-                      class_=(S.get h.classes)
-                      data_slot="list-box"
-                      data_layout="stack"
-                      data_orientation="vertical"
-                      data_empty=(Jsx.flag (S.get h.empty))
-                      props=h.others>
-                      (fun collection -> h.draw collection)
-                    </As_list>
-              | None -> Jsx.element Jsx.nothing)
+                  <As_list
+                    as_="div"
+                    ref=(fun e -> h.list_ref e)
+                    scroll_to_item=(fun key -> h.scroll_to_item key)
+                    ?aria_label=(S.get h.aria_label)
+                    aria_orientation=`vertical
+                    class_=(S.get h.classes)
+                    data_slot="list-box"
+                    data_layout="stack"
+                    data_orientation="vertical"
+                    data_empty=(Jsx.flag (S.get h.empty))
+                    props=h.others>
+                    (fun collection -> h.draw collection)
+                  </As_list>
+              | None -> Jsx.nothing)
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>;
@@ -517,7 +515,7 @@ let%component make ?(placeholder : string = "Select an item")
         data_required=(Jsx.flag (S.get is_required))
         ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root>
   | `multiple ->
       <Kobalte.Root_multiple
@@ -553,6 +551,6 @@ let%component make ?(placeholder : string = "Select an item")
         data_required=(Jsx.flag (S.get is_required))
         ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root_multiple>
 [@@element div]

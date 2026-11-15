@@ -56,7 +56,7 @@ let make () =
                            <Tabs.Tab id=key>
                              (if String.equal key keys.(0) then
                                 Solidtype.Jsx.string ""
-                              else Solidtype.Jsx.element <Tabs.Separator />)
+                              else <Tabs.Separator />)
                              (Solidtype.Jsx.string key)
                              <Tabs.Indicator />
                            </Tabs.Tab>)

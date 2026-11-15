@@ -58,7 +58,7 @@ module Item : sig
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -95,7 +95,7 @@ module Indicator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
@@ -125,7 +125,7 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?aria_labelledby:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

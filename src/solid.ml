@@ -1,4 +1,9 @@
 type 'a accessor = (unit -> 'a[@u])
+
+(* An accessor is the function it hides, so a function of no argument is
+   one as it stands. *)
+external of_function : ((unit -> 'a)[@u]) -> 'a accessor = "%identity"
+
 type 'a setter
 type 'a equals = By of ('a -> 'a -> bool) | Never
 
@@ -441,7 +446,7 @@ external create_unique_id : unit -> string = "createUniqueId"
 
 type resolved
 
-external children : ((unit -> Jsx.content)[@mel.uncurry]) -> resolved accessor
+external children : ((unit -> Jsx.element)[@mel.uncurry]) -> resolved accessor
   = "children"
 [@@mel.module "solid-js"]
 

@@ -61,7 +61,7 @@ module Field : sig
     module Props : sig
       val check :
         value:field Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -80,7 +80,7 @@ module Input_group : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -100,7 +100,7 @@ module Trigger : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       ?ref:(Dom.htmlButtonElement -> unit) ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Button.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Button.check
@@ -131,7 +131,7 @@ module Value : sig
       ?placeholder:string Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       ?children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -153,7 +153,7 @@ module Popover : sig
       ?class_:string Solidtype.Check.value ->
       ?style:string Solidtype.Check.value ->
       ?ref:(Dom.htmlDivElement -> unit) ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -225,7 +225,7 @@ module Props : sig
     ?on_key_down:(Dom.keyboardEvent -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

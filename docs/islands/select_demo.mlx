@@ -37,31 +37,30 @@ let make () =
                    ((* A select's mode is read as it is made, so another
                         makes another select, as React's key does. *)
                     let mode = fst (S.get mode) in
-                    Solidtype.Jsx.element
-                      <Select
-                        class_="w-[256px]"
-                        placeholder="Select one"
-                        selection_mode=mode
-                        variant=(fst (S.get variant))
-                        is_disabled=(S.get disabled)>
-                        <Label>"State"</Label>
-                        <Select.Trigger>
-                          <Select.Value /> <Select.Indicator />
-                        </Select.Trigger>
-                        <Select.Popover>
-                          <List_box>
-                            <List_box.Item id="florida" text_value="Florida">
-                              "Florida" <List_box.Item_indicator />
-                            </List_box.Item>
-                            <List_box.Item id="texas" text_value="Texas">
-                              "Texas" <List_box.Item_indicator />
-                            </List_box.Item>
-                            <List_box.Item id="utah" text_value="Utah">
-                              "Utah" <List_box.Item_indicator />
-                            </List_box.Item>
-                          </List_box>
-                        </Select.Popover>
-                      </Select>)
+                    <Select
+                      class_="w-[256px]"
+                      placeholder="Select one"
+                      selection_mode=mode
+                      variant=(fst (S.get variant))
+                      is_disabled=(S.get disabled)>
+                      <Label>"State"</Label>
+                      <Select.Trigger>
+                        <Select.Value /> <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <List_box>
+                          <List_box.Item id="florida" text_value="Florida">
+                            "Florida" <List_box.Item_indicator />
+                          </List_box.Item>
+                          <List_box.Item id="texas" text_value="Texas">
+                            "Texas" <List_box.Item_indicator />
+                          </List_box.Item>
+                          <List_box.Item id="utah" text_value="Utah">
+                            "Utah" <List_box.Item_indicator />
+                          </List_box.Item>
+                        </List_box>
+                      </Select.Popover>
+                    </Select>)
                  </div>)
       react=(fun host ->
               Heroui_react.select host

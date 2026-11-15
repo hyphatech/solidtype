@@ -50,7 +50,7 @@ let%component make
        option) ?(size : [ `sm | `md | `lg ] option)
     ?(orientation : [ `horizontal | `vertical ] = `horizontal)
     ?(full_width : bool option) ?(is_disabled : bool option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   let g = { variant; size; is_disabled; full_width } in
   let disabled () = Option.value (S.get is_disabled) ~default:false in
   <Context.Provider value=g>

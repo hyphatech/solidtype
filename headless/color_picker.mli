@@ -55,7 +55,7 @@ module Props : sig
     ?value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?default_value:Solidtype_kobalte.Types.Color.t Solidtype.Check.value ->
     ?on_change:(Solidtype_kobalte.Types.Color.t -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?props:t S.rest ->
     unit ->
     unit

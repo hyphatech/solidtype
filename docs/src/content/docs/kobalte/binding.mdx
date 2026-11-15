@@ -59,7 +59,7 @@ module Switch : sig
         ?disabled:bool Solidtype.Check.value ->
         ?read_only:bool Solidtype.Check.value ->
         (?children:(Types.SwitchRootState.t -> Solidtype.Jsx.element,
-                    [ `nodes | `render ]) Solidtype.Check.children ->
+                    [ `elements | `render ]) Solidtype.Check.children ->
          unit -> unit) Solidtype.Html.Div.check = "check"
     end
 

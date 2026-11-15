@@ -164,14 +164,10 @@ let () =
                                       Table.column = "name";
                                       direction = `ascending;
                                     }>
-                    <Table.Header>
-                      (Jsx.element (column "name"))
-                      (Jsx.element (column "role"))
-                    </Table.Header>
+                    <Table.Header>(column "name") (column "role")</Table.Header>
                     <Table.Body>
                       <Table.Row id="1">
-                        (Jsx.element (cell "first"))
-                        (Jsx.element (cell "second"))
+                        (cell "first") (cell "second")
                       </Table.Row>
                     </Table.Body>
                   </Table.Content>

@@ -8,7 +8,7 @@ module Context = Solidtype.Context.Make_optional (struct
 end)
 
 let%component make ?(variant : variant = `default) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   <Context.Provider value=variant>
     <div
       class_=(Styles.Surface.classes

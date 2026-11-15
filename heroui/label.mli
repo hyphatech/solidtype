@@ -13,7 +13,7 @@ module S := Solidtype.Solid
 module Jsx := Solidtype.Jsx
 
 type slot =
-  (unit -> string) -> unit S.rest -> (unit -> Jsx.content) -> Jsx.element
+  (unit -> string) -> unit S.rest -> (unit -> Jsx.element) -> Jsx.element
 (** How a label renders below a part: given its classes, the rest of its props
     -- its [data-] attributes -- and its children, the element it is, which
     declares [data-slot="label"]. *)
@@ -24,7 +24,7 @@ module Slot : sig
     module Props : sig
       val check :
         value:slot Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -44,7 +44,7 @@ module Props : sig
     ?is_invalid:bool Solidtype.Check.value ->
     ?for_:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Label.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Label.check

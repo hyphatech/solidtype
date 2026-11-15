@@ -107,21 +107,20 @@ let rec row f =
     <Table.Cell>
       (let r = Table.Row.Context.use () in
        let c = Table.Cell.Context.use () in
-       Jsx.element
-         <span class_="flex items-center gap-1">
-           <Show when_=(S.get r.has_child_items && S.get c.is_tree_column)>
-             <Button
-               is_icon_only=true
-               aria_label="Toggle row"
-               is_disabled=(S.get r.is_disabled)
-               size=`sm
-               slot=`chevron
-               variant=`ghost>
-               <svg aria_hidden=true />
-             </Button>
-           </Show>
-           <span>(Jsx.string f.title)</span>
-         </span>)
+       <span class_="flex items-center gap-1">
+         <Show when_=(S.get r.has_child_items && S.get c.is_tree_column)>
+           <Button
+             is_icon_only=true
+             aria_label="Toggle row"
+             is_disabled=(S.get r.is_disabled)
+             size=`sm
+             slot=`chevron
+             variant=`ghost>
+             <svg aria_hidden=true />
+           </Button>
+         </Show>
+         <span>(Jsx.string f.title)</span>
+       </span>)
     </Table.Cell>
     <Table.Cell>(Jsx.string f.kind)</Table.Cell>
     <Table.Cell>(Jsx.string f.date)</Table.Cell>

@@ -58,7 +58,7 @@ let text ~others ~type_ ~align ~color ~weight ~truncate ~element_type ~class_
 let%component make ?(type_ : type_ = `body) ?(align : align option)
     ?(color : color option) ?(weight : weight option) ?(truncate : bool option)
     ?(element_type : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   text ~others:(Props.others props) ~type_ ~align ~color ~weight ~truncate
     ~element_type ~class_ children
 [@@element element]
@@ -67,7 +67,7 @@ module Heading = struct
   let%component make ?(level : int = 1) ?(align : align option)
       ?(color : color option) ?(weight : weight option)
       ?(truncate : bool option) ?(element_type : string option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let type_ =
       S.accessor (fun () ->
           match S.get level with
@@ -90,7 +90,7 @@ module Paragraph = struct
   let%component make ?(size : [ `base | `sm | `xs ] = `base)
       ?(align : align option) ?(color : color option) ?(weight : weight option)
       ?(truncate : bool option) ?(element_type : string option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let type_ =
       S.accessor (fun () ->
           match S.get size with
@@ -107,7 +107,7 @@ module Code = struct
   let%component make ?(align : align option) ?(color : color option)
       ?(weight : weight option) ?(truncate : bool option)
       ?(element_type : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     text ~others:(Props.others props)
       ~type_:(S.accessor (fun () -> `code))
       ~align ~color ~weight ~truncate ~element_type ~class_ children
@@ -115,7 +115,7 @@ module Code = struct
 end
 
 module Prose = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(let prose =
                 Styles.Typography.prose

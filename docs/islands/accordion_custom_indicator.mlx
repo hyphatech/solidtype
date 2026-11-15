@@ -15,8 +15,8 @@ let make () =
           "Using Plus/Minus Icon"
           <Accordion.Indicator>
             (if Array.exists (String.equal "1") (S.get expanded) then
-               Solidtype.Jsx.element <Gravity.Minus />
-             else Solidtype.Jsx.element <Gravity.Plus />)
+               <Gravity.Minus />
+             else <Gravity.Plus />)
           </Accordion.Indicator>
         </Accordion.Trigger>
       </Accordion.Heading>

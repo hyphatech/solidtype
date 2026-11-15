@@ -128,34 +128,33 @@ let%component make ?(variant : [ `primary | `secondary ] option)
          let resolved =
            S.children (fun () -> Jsx.draw (S.get children) state)
          in
-         Jsx.element
-           <div
-             role=`group
-             ?aria_labelledby=(S.get labelled_by)
-             ?aria_describedby=(S.get described_by)
-             ?aria_disabled=(if S.get disabled then Some true else None)
-             class_=(Styles.CheckboxGroup.classes
-                       (Styles.CheckboxGroup.options ?variant:(S.get variant)
-                          ?class_:(S.get class_) ()))
-             ref=(fun e ->
-                   ignore (given_ref e : unit option);
-                   in_form.root e)
-             on_focus_out=(fun e ->
-                            ignore (on_focus_out e : unit option);
-                            Field.on_leave
-                              (fun e ->
-                                in_form.left ();
-                                on_blur e)
-                              e)
-             data_slot="checkbox-group"
-             data_disabled=(Jsx.flag (S.get disabled))
-             data_invalid=(Jsx.flag (S.get invalid))
-             data_readonly=(Jsx.flag (S.get is_read_only))
-             data_required=(Jsx.flag (S.get is_required))
-             ?as_=(Option.map (fun f p -> f p state) (S.get as_))
-             props=(Props.others props)>
-             (Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
-           </div>)
+         <div
+           role=`group
+           ?aria_labelledby=(S.get labelled_by)
+           ?aria_describedby=(S.get described_by)
+           ?aria_disabled=(if S.get disabled then Some true else None)
+           class_=(Styles.CheckboxGroup.classes
+                     (Styles.CheckboxGroup.options ?variant:(S.get variant)
+                        ?class_:(S.get class_) ()))
+           ref=(fun e ->
+                 ignore (given_ref e : unit option);
+                 in_form.root e)
+           on_focus_out=(fun e ->
+                          ignore (on_focus_out e : unit option);
+                          Field.on_leave
+                            (fun e ->
+                              in_form.left ();
+                              on_blur e)
+                            e)
+           data_slot="checkbox-group"
+           data_disabled=(Jsx.flag (S.get disabled))
+           data_invalid=(Jsx.flag (S.get invalid))
+           data_readonly=(Jsx.flag (S.get is_read_only))
+           data_required=(Jsx.flag (S.get is_required))
+           ?as_=(Option.map (fun f p -> f p state) (S.get as_))
+           props=(Props.others props)>
+           (Jsx.fragment (S.to_array (S.get resolved)))
+         </div>)
       </Description.Slot.Provider>
     </Label.Slot.Provider>
   </Context.Provider>

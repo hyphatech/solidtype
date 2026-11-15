@@ -171,7 +171,7 @@ let render ?selected_key ?default_selected_key ?orientation ?variant ?align
                          | Some d when String.equal d key -> Some true
                          | _ -> None)>
             (if String.equal key keys.(0) then Solidtype.Jsx.string ""
-             else Solidtype.Jsx.element <Tabs.Separator />)
+             else <Tabs.Separator />)
             (Solidtype.Jsx.string key)
             <Tabs.Indicator />
           </Tabs.Tab>)
@@ -188,12 +188,8 @@ let render ?selected_key ?default_selected_key ?orientation ?variant ?align
         ?keyboard_activation
         ?is_disabled
         on_selection_change=tell>
-        (if container then
-           Solidtype.Jsx.element
-             <Tabs.List_container>
-               (Solidtype.Jsx.element (list ()))
-             </Tabs.List_container>
-         else Solidtype.Jsx.element (list ()))
+        (if container then <Tabs.List_container>(list ())</Tabs.List_container>
+         else list ())
         <Solidtype.For each=keys>
           (fun key _ ->
             <Tabs.Panel id=key>
@@ -283,8 +279,7 @@ let of_state ~disabled =
   T.render (fun () ->
       <Tabs>
         <Tabs.List aria_label="Options">
-          (Solidtype.Jsx.element (tab "overview"))
-          (Solidtype.Jsx.element (tab "analytics"))
+          (tab "overview") (tab "analytics")
         </Tabs.List>
         <Tabs.Panel id="overview">"About overview."</Tabs.Panel>
         <Tabs.Panel id="analytics">"About analytics."</Tabs.Panel>

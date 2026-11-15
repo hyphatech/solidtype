@@ -21,8 +21,7 @@ let make () =
                 </Toast.Title>
                 (match Toast.description toast with
                 | Some d ->
-                    Jsx.element
-                      <Toast.Description>(Jsx.string d)</Toast.Description>
+                    <Toast.Description>(Jsx.string d)</Toast.Description>
                 | None -> Jsx.string "")
               </div>
             </div>

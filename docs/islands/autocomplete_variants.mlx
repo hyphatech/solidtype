@@ -61,20 +61,15 @@ let make () =
     <div class_="flex flex-col gap-4">
       <h3 class_="text-lg font-semibold">"Single Select Variants"</h3>
       <div class_="flex flex-col gap-4">
-        (Jsx.element
-           (variant ~label:"Primary variant" ~variant:`primary ~mode:`single))
-        (Jsx.element
-           (variant ~label:"Secondary variant" ~variant:`secondary ~mode:`single))
+        (variant ~label:"Primary variant" ~variant:`primary ~mode:`single)
+        (variant ~label:"Secondary variant" ~variant:`secondary ~mode:`single)
       </div>
     </div>
     <div class_="flex flex-col gap-4">
       <h3 class_="text-lg font-semibold">"Multiple Select Variants"</h3>
       <div class_="flex flex-col gap-4">
-        (Jsx.element
-           (variant ~label:"Primary variant" ~variant:`primary ~mode:`multiple))
-        (Jsx.element
-           (variant ~label:"Secondary variant" ~variant:`secondary
-              ~mode:`multiple))
+        (variant ~label:"Primary variant" ~variant:`primary ~mode:`multiple)
+        (variant ~label:"Secondary variant" ~variant:`secondary ~mode:`multiple)
       </div>
     </div>
   </div>

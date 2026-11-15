@@ -59,7 +59,7 @@ let () =
             |> toEqual [| None; Some "/"; None |]));
       Jest.test "a name is a value, given as it is, a child's too" (fun () ->
           let fixed = Some "fixed" and absent = None in
-          let mark = Solidtype.Jsx.element <b>"marked"</b> in
+          let mark = <b>"marked"</b> in
           T.render (fun () ->
               <div>
                 <span ?title=fixed>"a"</span> <i ?title=absent>"b"</i> mark

@@ -48,7 +48,7 @@ module Item : sig
       ?is_disabled:bool Solidtype.Check.value ->
       ?class_:string Solidtype.Check.value ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Li.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Li.check
@@ -70,7 +70,7 @@ module Props : sig
     ?on_action:(string -> unit) ->
     ?is_disabled:bool Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Ol.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Ol.check

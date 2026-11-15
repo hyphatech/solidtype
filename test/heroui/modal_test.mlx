@@ -180,13 +180,10 @@ let both ?variant ?is_dismissable ?placement ?size ?scroll ?(custom = false) ()
         <p data_testid="outside">"Outside"</p>
         <Modal>
           (if custom then
-             Solidtype.Jsx.element
-               <Modal.Trigger aria_label="Open">
-                 <span>"Card"</span>
-               </Modal.Trigger>
-           else
-             Solidtype.Jsx.element
-               <Button variant=`secondary>"Open Modal"</Button>)
+             <Modal.Trigger aria_label="Open">
+               <span>"Card"</span>
+             </Modal.Trigger>
+           else <Button variant=`secondary>"Open Modal"</Button>)
           <Modal.Backdrop ?variant ?is_dismissable>
             <Modal.Container ?placement ?size ?scroll>
               <Modal.Dialog>

@@ -10,7 +10,7 @@ let slots () = Styles.Card.slots (Styles.Card.options ())
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Header = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(after (Styles.Card.header (slots ())) (S.get class_))
       data_slot="card-header"
@@ -22,7 +22,7 @@ end
 
 module Title = struct
   let%component make ?(id : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     <h3
       ?id=(S.get id)
       class_=(after (Styles.Card.title (slots ())) (S.get class_))
@@ -34,7 +34,7 @@ module Title = struct
 end
 
 module Description = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <p
       class_=(after (Styles.Card.description (slots ())) (S.get class_))
       data_slot="card-description"
@@ -45,7 +45,7 @@ module Description = struct
 end
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(after (Styles.Card.content (slots ())) (S.get class_))
       data_slot="card-content"
@@ -56,7 +56,7 @@ module Content = struct
 end
 
 module Footer = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(after (Styles.Card.footer (slots ())) (S.get class_))
       data_slot="card-footer"
@@ -68,7 +68,7 @@ end
 
 let%component make ?(variant : Surface.variant = `default)
     ?(role : Solidtype.Html.Div.role option) ?(aria_labelledby : string option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   (* Made where it is shown, so it reads the surface given there: a context is
      read as an element is made. *)
   let card () =
@@ -91,8 +91,6 @@ let%component make ?(variant : Surface.variant = `default)
           | `transparent -> false
           | `default | `secondary | `tertiary -> true)
     fallback=(card ())>
-    <Surface.Context.Provider value=variant>
-      (Jsx.element (card ()))
-    </Surface.Context.Provider>
+    <Surface.Context.Provider value=variant>(card ())</Surface.Context.Provider>
   </Show>
 [@@element div]

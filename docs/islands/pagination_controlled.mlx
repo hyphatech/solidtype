@@ -46,14 +46,13 @@ let make () =
         (fun shown _ ->
           <Pagination.Item>
             (match S.get shown with
-            | Ellipsis -> Jsx.element <Pagination.Ellipsis />
+            | Ellipsis -> <Pagination.Ellipsis />
             | Page p ->
-                Jsx.element
-                  <Pagination.Link
-                    is_active=(p = S.get page)
-                    on_press=(fun () -> S.set set_page p)>
-                    (Jsx.int p)
-                  </Pagination.Link>)
+                <Pagination.Link
+                  is_active=(p = S.get page)
+                  on_press=(fun () -> S.set set_page p)>
+                  (Jsx.int p)
+                </Pagination.Link>)
           </Pagination.Item>)
       </Index>
       <Pagination.Item>

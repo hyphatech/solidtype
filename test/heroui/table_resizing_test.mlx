@@ -255,9 +255,9 @@ let () =
                     aria_label="Table with resizable columns"
                     class_="min-w-[700px]">
                     <Table.Header>
-                      (Jsx.element (resizable "Name" ~id:"name" ~min:160.))
-                      (Jsx.element (resizable "Role" ~id:"role" ~min:220.))
-                      (Jsx.element (resizable "Status" ~id:"status" ~min:100.))
+                      (resizable "Name" ~id:"name" ~min:160.)
+                      (resizable "Role" ~id:"role" ~min:220.)
+                      (resizable "Status" ~id:"status" ~min:100.)
                       <Table.Column
                         default_width=(Table.Fraction 1.)
                         id="email"

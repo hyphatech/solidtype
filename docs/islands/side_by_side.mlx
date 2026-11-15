@@ -214,7 +214,7 @@ let%component make ?(compared : string = ":scope > *")
           class_="heroui-ground flex min-h-24 items-center justify-center \
                   rounded-xl border border-separator p-6"
           ref=(fun el -> solidtype_host := Some el)>
-          (Jsx.element (S.get solidtype))
+          (S.get solidtype)
         </div>
       </figure>
       <figure class_="flex flex-col gap-2">

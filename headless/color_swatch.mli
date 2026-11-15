@@ -31,7 +31,7 @@ module Props : sig
       Solidtype.Check.value ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:'spread S.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Div.check
 end
 

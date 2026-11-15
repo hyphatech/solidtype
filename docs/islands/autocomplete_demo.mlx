@@ -38,45 +38,44 @@ let make () =
                    ((* An autocomplete's mode is read as it is made, so
                         another makes another, as React's key does. *)
                     let mode = fst (S.get mode) in
-                    Solidtype.Jsx.element
-                      <Autocomplete
-                        class_="w-[256px]"
-                        placeholder="Select one"
-                        selection_mode=mode
-                        variant=(fst (S.get variant))
-                        is_disabled=(S.get disabled)>
-                        <Label>"State"</Label>
-                        <Autocomplete.Trigger>
-                          <Autocomplete.Value />
-                          <Autocomplete.Clear_button />
-                          <Autocomplete.Indicator />
-                        </Autocomplete.Trigger>
-                        <Autocomplete.Popover>
-                          <Autocomplete.Filter>
-                            <Search_field
-                              aria_label="Search options"
-                              name="search"
-                              variant=`secondary>
-                              <Search_field.Group>
-                                <Search_field.Search_icon />
-                                <Search_field.Input placeholder="Search..." />
-                              </Search_field.Group>
-                            </Search_field>
-                            <List_box
-                              selection_mode=(mode :> List_box.selection_mode)>
-                              <List_box.Item id="florida" text_value="Florida">
-                                "Florida" <List_box.Item_indicator />
-                              </List_box.Item>
-                              <List_box.Item id="texas" text_value="Texas">
-                                "Texas" <List_box.Item_indicator />
-                              </List_box.Item>
-                              <List_box.Item id="utah" text_value="Utah">
-                                "Utah" <List_box.Item_indicator />
-                              </List_box.Item>
-                            </List_box>
-                          </Autocomplete.Filter>
-                        </Autocomplete.Popover>
-                      </Autocomplete>)
+                    <Autocomplete
+                      class_="w-[256px]"
+                      placeholder="Select one"
+                      selection_mode=mode
+                      variant=(fst (S.get variant))
+                      is_disabled=(S.get disabled)>
+                      <Label>"State"</Label>
+                      <Autocomplete.Trigger>
+                        <Autocomplete.Value />
+                        <Autocomplete.Clear_button />
+                        <Autocomplete.Indicator />
+                      </Autocomplete.Trigger>
+                      <Autocomplete.Popover>
+                        <Autocomplete.Filter>
+                          <Search_field
+                            aria_label="Search options"
+                            name="search"
+                            variant=`secondary>
+                            <Search_field.Group>
+                              <Search_field.Search_icon />
+                              <Search_field.Input placeholder="Search..." />
+                            </Search_field.Group>
+                          </Search_field>
+                          <List_box
+                            selection_mode=(mode :> List_box.selection_mode)>
+                            <List_box.Item id="florida" text_value="Florida">
+                              "Florida" <List_box.Item_indicator />
+                            </List_box.Item>
+                            <List_box.Item id="texas" text_value="Texas">
+                              "Texas" <List_box.Item_indicator />
+                            </List_box.Item>
+                            <List_box.Item id="utah" text_value="Utah">
+                              "Utah" <List_box.Item_indicator />
+                            </List_box.Item>
+                          </List_box>
+                        </Autocomplete.Filter>
+                      </Autocomplete.Popover>
+                    </Autocomplete>)
                  </div>)
       react=(fun host ->
               Heroui_react.autocomplete host

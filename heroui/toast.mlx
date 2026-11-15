@@ -441,7 +441,7 @@ external disconnect : observer -> unit = "disconnect" [@@mel.send]
 
 module Indicator = struct
   let%component make ?(variant : variant = `default) ?(class_ : string option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let slots = slots_of "Toast.Indicator" in
     <div
       class_=(after (Styles.Toast.indicator (S.get slots)) (S.get class_))
@@ -458,7 +458,7 @@ module Indicator = struct
 end
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = slots_of "Toast.Content" in
     <div
       class_=(after (Styles.Toast.content (S.get slots)) (S.get class_))
@@ -470,7 +470,7 @@ module Content = struct
 end
 
 module Title = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = slots_of "Toast.Title" in
     <Kobalte.Title
       class_=(after (Styles.Toast.title (S.get slots)) (S.get class_))
@@ -482,7 +482,7 @@ module Title = struct
 end
 
 module Description = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = slots_of "Toast.Description" in
     <Kobalte.Description
       class_=(after (Styles.Toast.description (S.get slots)) (S.get class_))
@@ -511,7 +511,7 @@ module Action_button = struct
       data_slot="toast-action-button"
       ?as_=(S.get as_)
       props=(Props.others props)>
-      (fun s -> Jsx.of_content (Jsx.draw (S.get children) s))
+      (fun s -> Jsx.draw (S.get children) s)
     </Button>
   [@@element button]
 end
@@ -570,7 +570,7 @@ module Close_button = struct
       props=(Props.others props)>
       (match S.get children with
       | Some c -> Jsx.draw c (state ())
-      | None -> Jsx.element <Close_button.Icon />)
+      | None -> <Close_button.Icon />)
     </Solidtype_kobalte.Button.Root>
   [@@element button]
 end
@@ -796,27 +796,24 @@ let default_toast e =
   in
   let action_in inside () =
     match action () with
-    | Some a when Bool.equal (S.get phone) inside -> Jsx.element (button a)
+    | Some a when Bool.equal (S.get phone) inside -> button a
     | Some _ | None -> Jsx.string ""
   in
   <Item toast=e variant=(c ()).variant>
     (match ((c ()).indicator, (c ()).loading) with
     | _, true ->
-        Jsx.element
-          <Indicator variant=(c ()).variant>
-            <Spinner color=`current size=`sm />
-          </Indicator>
+        <Indicator variant=(c ()).variant>
+          <Spinner color=`current size=`sm />
+        </Indicator>
     | No_icon, false -> Jsx.string ""
-    | Icon icon, false ->
-        Jsx.element
-          <Indicator variant=(c ()).variant>(Jsx.element icon)</Indicator>
-    | Variant_icon, false -> Jsx.element <Indicator variant=(c ()).variant />)
+    | Icon icon, false -> <Indicator variant=(c ()).variant>icon</Indicator>
+    | Variant_icon, false -> <Indicator variant=(c ()).variant />)
     <Content>
       (if String.length (c ()).title > 0 then
-         Jsx.element <Title>(Jsx.string (c ()).title)</Title>
+         <Title>(Jsx.string (c ()).title)</Title>
        else Jsx.string "")
       (match (c ()).description with
-      | Some d -> Jsx.element <Description>(Jsx.string d)</Description>
+      | Some d -> <Description>(Jsx.string d)</Description>
       | None -> Jsx.string "")
       (action_in true ())
     </Content>
@@ -998,10 +995,7 @@ module Provider = struct
       (Some
          (fun e ->
            <Stack.Provider value=s>
-             (Jsx.element
-                (match children e with
-                | Some el -> el
-                | None -> default_toast e))
+             (match children e with Some el -> el | None -> default_toast e)
            </Stack.Provider>));
     <Kobalte.Region
       ?region_id=q.region

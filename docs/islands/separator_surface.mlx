@@ -15,23 +15,18 @@ let surface ~title ~variant ~separator ?(border = "") () =
 let make () =
   <div class_="flex flex-col gap-8">
     <div class_="flex flex-col gap-2">
-      (Solidtype.Jsx.element
-         (surface ~title:"Default Surface" ~variant:`default ~separator:`default
-            ()))
+      (surface ~title:"Default Surface" ~variant:`default ~separator:`default ())
     </div>
     <div class_="flex flex-col gap-2">
-      (Solidtype.Jsx.element
-         (surface ~title:"Secondary Surface" ~variant:`secondary
-            ~separator:`secondary ()))
+      (surface ~title:"Secondary Surface" ~variant:`secondary
+         ~separator:`secondary ())
     </div>
     <div class_="flex flex-col gap-2">
-      (Solidtype.Jsx.element
-         (surface ~title:"Tertiary Surface" ~variant:`tertiary
-            ~separator:`tertiary ()))
+      (surface ~title:"Tertiary Surface" ~variant:`tertiary ~separator:`tertiary
+         ())
     </div>
     <div class_="flex flex-col gap-2">
-      (Solidtype.Jsx.element
-         (surface ~title:"Transparent Surface" ~variant:`transparent
-            ~separator:`default ~border:"border " ()))
+      (surface ~title:"Transparent Surface" ~variant:`transparent
+         ~separator:`default ~border:"border " ())
     </div>
   </div>

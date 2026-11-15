@@ -60,7 +60,7 @@ end
 module Label_props = struct
   external check :
     ?props:'spread Solidtype.Solid.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Label.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]
 end
@@ -68,7 +68,7 @@ end
 module Input_props = struct
   external check :
     ?props:'spread Solidtype.Solid.rest ->
-    (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+    (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
     Solidtype.Html.Input.check = "check"
   [@@mel.module "vite-plugin-solidtype/markers"]
 end
@@ -81,7 +81,7 @@ struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -109,7 +109,7 @@ struct
     let component = K.error
   end)
 
-  let%component make ?(label_id : string option) ~(children : Jsx.content) () =
+  let%component make ?(label_id : string option) ~(children : Jsx.element) () =
     let label : Label.slot =
      fun classes others children ->
       <Kobalte_label
@@ -164,7 +164,7 @@ module Content (K : Kobalte) = struct
 
   let%component make ~(field : state) ~(slot : string) ~(class_ : string)
       ?ref:(given_ref : (Dom.htmlLabelElement -> unit) option)
-      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.content) ()
+      ?(on_click : (Dom.mouseEvent -> unit) option) ~(children : Jsx.element) ()
       =
     let f = S.get field in
     let i = f.interaction in

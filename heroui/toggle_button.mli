@@ -43,7 +43,7 @@ module Props : sig
     ?aria_label:string Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Button.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Button.check

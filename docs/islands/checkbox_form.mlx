@@ -33,13 +33,9 @@ let item ?(selected = false) ~name ~text () =
 let make () =
   <form class_="flex flex-col gap-4" on_submit=submit>
     <div class_="flex flex-col gap-3">
-      (Solidtype.Jsx.element
-         (item ~name:"notifications" ~text:"Enable notifications" ()))
-      (Solidtype.Jsx.element
-         (item ~selected:true ~name:"newsletter" ~text:"Subscribe to newsletter"
-            ()))
-      (Solidtype.Jsx.element
-         (item ~name:"marketing" ~text:"Receive marketing updates" ()))
+      (item ~name:"notifications" ~text:"Enable notifications" ())
+      (item ~selected:true ~name:"newsletter" ~text:"Subscribe to newsletter" ())
+      (item ~name:"marketing" ~text:"Receive marketing updates" ())
     </div>
     <Button class_="mt-4" size=`sm type_=`submit variant=`primary>
       "Submit"

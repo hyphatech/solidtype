@@ -90,7 +90,7 @@ module Content = struct
 end
 
 module Control = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let c = within "Checkbox.Control" in
     <span
       class_=(after (Styles.Checkbox.control (S.get c.slots)) (S.get class_))
@@ -133,7 +133,7 @@ module Indicator = struct
       <line x1="21" x2="3" y1="12" y2="12" />
     </svg>
 
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let c = within "Checkbox.Indicator" in
     <span
@@ -144,12 +144,11 @@ module Indicator = struct
       (match S.get children with
       | Some given -> given
       | None ->
-          Jsx.element
-            <Show
-              when_=(S.get c.field.indeterminate)
-              fallback=(check c.field.selected)>
-              (Jsx.element (dash ()))
-            </Show>)
+          <Show
+            when_=(S.get c.field.indeterminate)
+            fallback=(check c.field.selected)>
+            (dash ())
+          </Show>)
     </span>
   [@@element span]
 end

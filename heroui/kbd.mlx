@@ -93,7 +93,7 @@ module Abbr = struct
 end
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <span
       class_=(after (Styles.Kbd.content (slots ())) (S.get class_))
       props=(Props.others props)>
@@ -103,7 +103,7 @@ module Content = struct
 end
 
 let%component make ?(variant : [ `default | `light ] option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   <kbd
     class_=(after
               (Styles.Kbd.base

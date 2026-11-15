@@ -61,7 +61,7 @@ module Props : sig
     ?on_submit:(Dom.event -> unit) ->
     ?on_reset:(Dom.event -> unit) ->
     ?on_invalid:(Dom.event -> unit) ->
-    children:(_, [ `nodes ]) Solidtype.Check.children ->
+    children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Form.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Form.check

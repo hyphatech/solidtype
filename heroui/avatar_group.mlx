@@ -48,7 +48,7 @@ let counted ~others ~size ~color ~variant ~class_ children =
 module Count = struct
   let%component make ?(size : size option) ?(color : color option)
       ?(variant : variant option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let g = Context.use () in
     Option.iter (fun (g : group) -> g.count ()) g;
     let own field of_group =
@@ -76,7 +76,7 @@ let%component make ?(size : size = `md) ?(color : color option)
     ?(overlap : [ `clip | `ring ] = `clip)
     ?(role : Solidtype.Html.Div.role option) ?(aria_label : string option)
     ?(aria_labelledby : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   (* Each avatar in the order it joined, by the number it was given. *)
   let avatars, set_avatars = S.create_signal [] in
   let counts, set_counts = S.create_signal 0 in
@@ -122,13 +122,12 @@ let%component make ?(size : size = `md) ?(color : color option)
       (S.get children)
       <Show when_=(remaining () > 0)>
         ((* The group's own count, given no attributes but its own. *)
-         Jsx.element
-        @@ counted
-             ~others:(S.others (Js.Obj.empty ()) [||])
-             ~size ~color ~variant
-             ~class_:(S.accessor (fun () -> None))
-             (S.accessor (fun () ->
-                  Jsx.string ("+" ^ string_of_int (remaining ())))))
+         counted
+           ~others:(S.others (Js.Obj.empty ()) [||])
+           ~size ~color ~variant
+           ~class_:(S.accessor (fun () -> None))
+           (S.accessor (fun () ->
+                Jsx.string ("+" ^ string_of_int (remaining ())))))
       </Show>
     </div>
   </Context.Provider>

@@ -506,7 +506,7 @@ let states filter =
       <Autocomplete.Value /> <Autocomplete.Indicator />
     </Autocomplete.Trigger>
     <Autocomplete.Popover data_testid="Autocomplete.Popover">
-      (Solidtype.Jsx.element (filter ()))
+      (filter ())
     </Autocomplete.Popover>
   </Autocomplete>
 
@@ -542,11 +542,10 @@ let () =
          the focus back as it closes" (fun () ->
           T.render (fun () ->
               <form>
-                (Solidtype.Jsx.element
-                   (states (fun () ->
-                        <Autocomplete.Filter>
-                          (Solidtype.Jsx.element (search_and_list ()))
-                        </Autocomplete.Filter>)))
+                (states (fun () ->
+                     <Autocomplete.Filter>
+                       (search_and_list ())
+                     </Autocomplete.Filter>))
               </form>);
           let user = T.setup () in
           T.focus (first "[data-slot=autocomplete-trigger] button");
@@ -584,7 +583,7 @@ let () =
                              && Char.equal
                                   (Char.lowercase_ascii text.[0])
                                   (Char.lowercase_ascii typed.[0]))>
-                    (Solidtype.Jsx.element (search_and_list ()))
+                    (search_and_list ())
                   </Autocomplete.Filter>));
           let user = T.setup () in
           let* () = T.click user (first "[data-slot=autocomplete-trigger]") in
@@ -618,7 +617,7 @@ let () =
                   <Autocomplete.Filter
                     input_value=(S.get given)
                     on_input_change=(fun t -> told := t :: !told)>
-                    (Solidtype.Jsx.element (search_and_list ()))
+                    (search_and_list ())
                   </Autocomplete.Filter>));
           let user = T.setup () in
           let* () = T.click user (first "[data-slot=autocomplete-trigger]") in
@@ -663,7 +662,7 @@ let () =
                   <Autocomplete.Popover
                     title="Options" style="--y: 2" ref=(fun _ -> note "popover")>
                     <Autocomplete.Filter>
-                      (Solidtype.Jsx.element (search_and_list ()))
+                      (search_and_list ())
                     </Autocomplete.Filter>
                   </Autocomplete.Popover>
                 </Autocomplete>

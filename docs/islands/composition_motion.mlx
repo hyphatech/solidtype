@@ -11,7 +11,7 @@ module Motion_button = struct
     external check :
       animate:keyframes Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Button.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end

@@ -158,7 +158,7 @@ module Input = struct
 end
 
 module Increment_button = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
     let f = within "Number_field.Increment_button" in
     let disabled = S.accessor (fun () -> not (S.get f.can_increment)) in
@@ -198,7 +198,7 @@ module Increment_button = struct
 end
 
 module Decrement_button = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option) () =
     let f = within "Number_field.Decrement_button" in
     let disabled = S.accessor (fun () -> not (S.get f.can_decrement)) in

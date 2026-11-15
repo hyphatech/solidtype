@@ -81,26 +81,25 @@ let rec expandable_row item =
     <Table.Cell>
       (let row = Table.Row.Context.use () in
        let cell = Table.Cell.Context.use () in
-       Jsx.element
-         <span class_="flex items-center gap-1">
-           <Show when_=(S.get row.has_child_items && S.get cell.is_tree_column)>
-             <Button
-               is_icon_only=true
-               aria_label="Toggle row"
-               is_disabled=(S.get row.is_disabled)
-               size=`sm
-               slot=`chevron
-               variant=`ghost>
-               <Gravity.Chevron_right
-                 class_=("size-4 text-muted transition-transform duration-150 "
-                        ^
-                        if S.get row.is_expanded then "rotate-90"
-                        else "rtl:rotate-180")
-               />
-             </Button>
-           </Show>
-           <span>(Jsx.string item.title)</span>
-         </span>)
+       <span class_="flex items-center gap-1">
+         <Show when_=(S.get row.has_child_items && S.get cell.is_tree_column)>
+           <Button
+             is_icon_only=true
+             aria_label="Toggle row"
+             is_disabled=(S.get row.is_disabled)
+             size=`sm
+             slot=`chevron
+             variant=`ghost>
+             <Gravity.Chevron_right
+               class_=("size-4 text-muted transition-transform duration-150 "
+                      ^
+                      if S.get row.is_expanded then "rotate-90"
+                      else "rtl:rotate-180")
+             />
+           </Button>
+         </Show>
+         <span>(Jsx.string item.title)</span>
+       </span>)
     </Table.Cell>
     <Table.Cell>(Jsx.string item.kind)</Table.Cell>
     <Table.Cell>(Jsx.string item.date)</Table.Cell>

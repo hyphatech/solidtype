@@ -44,7 +44,7 @@ let own_arrow ?class_ ?(others = S.others (Js.Obj.empty ()) [||]) trend =
   | `neutral -> Jsx.nothing
 
 module Prefix = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     Part.element
       (Prefix
          (fun () ->
@@ -58,7 +58,7 @@ module Prefix = struct
 end
 
 module Suffix = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     Part.element
       (Suffix
          (fun () ->
@@ -72,7 +72,7 @@ module Suffix = struct
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     Part.element
       (Indicator
@@ -96,13 +96,11 @@ end
 
 let%component make ?(trend : trend = `up) ?(size : size = `sm)
     ?(variant : variant = `soft) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   let resolved = S.children (fun () -> S.get children) in
   let all () = S.to_array (S.get resolved) in
   let parts () = Array.to_list (Part.read (all ())) in
-  let drawn f =
-    Jsx.element (Jsx.fragment (Array.of_list (List.filter_map f (parts ()))))
-  in
+  let drawn f = Jsx.fragment (Array.of_list (List.filter_map f (parts ()))) in
   let indicator () =
     match
       List.find_map
@@ -131,14 +129,14 @@ let%component make ?(trend : trend = `up) ?(size : size = `sm)
                   | `down -> "down"
                   | `neutral -> "neutral"))
     props=(Props.others props)>
-    (Jsx.element (indicator ()))
+    (indicator ())
     <Chip.Label>
       (drawn (function
         | Prefix p -> Some (p ())
         | Suffix _ | Indicator _ -> None))
       " "
       <span class_="trend-chip__value" data_slot="trend-chip-value">
-        (Jsx.element (Jsx.fragment (Part.others (all ()))))
+        (Jsx.fragment (Part.others (all ())))
       </span>
       " "
       (drawn (function

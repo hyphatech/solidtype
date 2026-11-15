@@ -55,7 +55,7 @@ module As_div = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -65,7 +65,7 @@ end
 
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let t = within "Tooltip.Trigger" in
     <As_div
       as_="div"
@@ -85,7 +85,7 @@ module Content = struct
       ?(show_arrow : bool = false) ?(should_flip : bool = true)
       ?(class_ : string option) ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let t = within "Tooltip.Content" in
     S.create_computed (fun () ->
         t.set_placement (Option.value (S.get placement) ~default:`top));
@@ -125,7 +125,7 @@ end
 
 module Arrow = struct
   let%component make ?(class_ : string option) ?(style : string option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let t = within "Tooltip.Arrow" in
     t.set_arrow true;
     S.on_cleanup (fun () -> t.set_arrow false);
@@ -145,16 +145,15 @@ module Arrow = struct
           (match S.get children with
           | Some c -> c
           | None ->
-              Jsx.element
-                <svg
-                  fill="none"
-                  height="12"
-                  view_box="0 0 12 12"
-                  width="12"
-                  xmlns="http://www.w3.org/2000/svg"
-                  data_slot="overlay-arrow">
-                  <path d="M0 0C5.48483 8 6.5 8 12 0Z" />
-                </svg>)
+              <svg
+                fill="none"
+                height="12"
+                view_box="0 0 12 12"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+                data_slot="overlay-arrow">
+                <path d="M0 0C5.48483 8 6.5 8 12 0Z" />
+              </svg>)
         </div>;
       |]
   [@@element div]
@@ -163,7 +162,7 @@ end
 let%component make ?(delay_ms : float option) ?(close_delay_ms : float option)
     ?(trigger : [ `hover | `focus ] = `hover) ?(is_disabled : bool = false)
     ?(is_open : bool option) ?(default_open : bool option)
-    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.element) () =
   let placement, set_placement = S.create_signal `top in
   let offset, set_offset = S.create_signal 3. in
   let flip, set_flip = S.create_signal true in

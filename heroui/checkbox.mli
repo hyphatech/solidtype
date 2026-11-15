@@ -30,7 +30,7 @@ module Context : sig
     module Props : sig
       val check :
         value:checkbox Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -67,7 +67,7 @@ module Content : sig
     val check :
       ?class_:string Solidtype.Check.value ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Label.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Label.check
@@ -86,7 +86,7 @@ module Control : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
@@ -106,7 +106,7 @@ module Indicator : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+      ?children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Span.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Span.check
@@ -133,7 +133,7 @@ module Selection : sig
     module Props : sig
       val check :
         value:selection Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -177,7 +177,7 @@ module Props : sig
     ?ref:(Dom.htmlDivElement -> unit) ->
     ?on_focus_out:(Dom.focusEvent -> unit) ->
     children:
-      (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+      (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

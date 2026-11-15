@@ -107,7 +107,7 @@ let%component make ?(action : string option)
     ?(validation_errors : (string * string) list option)
     ?(on_submit : (Dom.event -> unit) option)
     ?(on_reset : (Dom.event -> unit) option)
-    ?(on_invalid : (Dom.event -> unit) option) ~(children : Jsx.content) () =
+    ?(on_invalid : (Dom.event -> unit) option) ~(children : Jsx.element) () =
   let entries = ref [] in
   (* The names whose server error a change has cleared, with the errors they
      were cleared from: errors given again are another list, shown whole.

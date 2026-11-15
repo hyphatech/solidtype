@@ -50,7 +50,7 @@ let make () =
       <h4 class_="mb-2 text-sm font-semibold">"Vertical"</h4>
       <Card class_="w-full p-0">
         <Scroll_shadow class_="max-h-[240px] p-4" orientation=`vertical>
-          (Solidtype.Jsx.element (paragraphs ()))
+          (paragraphs ())
         </Scroll_shadow>
       </Card>
     </div>
@@ -58,7 +58,7 @@ let make () =
       <h4 class_="mb-2 text-sm font-semibold">"Horizontal"</h4>
       <Card class_="w-full p-0">
         <Scroll_shadow class_="p-4" orientation=`horizontal>
-          (Solidtype.Jsx.element (cards ()))
+          (cards ())
         </Scroll_shadow>
       </Card>
     </div>

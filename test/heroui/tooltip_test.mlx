@@ -154,15 +154,12 @@ let both ?placement ?(show_arrow = false) ?(is_disabled = false)
   T.render (fun () ->
       <Tooltip delay_ms=0. close_delay_ms=0. is_disabled>
         (if custom then
-           Solidtype.Jsx.element
-             <Tooltip.Trigger aria_label="Status">
-               <span>"Active"</span>
-             </Tooltip.Trigger>
-         else
-           Solidtype.Jsx.element <Button variant=`secondary>"Hover me"</Button>)
+           <Tooltip.Trigger aria_label="Status">
+             <span>"Active"</span>
+           </Tooltip.Trigger>
+         else <Button variant=`secondary>"Hover me"</Button>)
         <Tooltip.Content ?placement show_arrow should_flip=false>
-          (if show_arrow then Solidtype.Jsx.element <Tooltip.Arrow />
-           else Solidtype.Jsx.element Solidtype.Jsx.nothing)
+          (if show_arrow then <Tooltip.Arrow /> else Solidtype.Jsx.nothing)
           <p>"This is a tooltip"</p>
         </Tooltip.Content>
       </Tooltip>);

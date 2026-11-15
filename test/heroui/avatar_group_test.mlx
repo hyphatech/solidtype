@@ -51,8 +51,7 @@ let both ?size ?color ?variant ?max ?is_grid ?overlap ?count () =
         <Avatar><Avatar.Fallback>"A4"</Avatar.Fallback></Avatar>
         (match count with
         | Some c ->
-            Solidtype.Jsx.element
-              <Avatar_group.Count>(Solidtype.Jsx.string c)</Avatar_group.Count>
+            <Avatar_group.Count>(Solidtype.Jsx.string c)</Avatar_group.Count>
         | None -> Solidtype.Jsx.string "")
       </Avatar_group>);
   let solidtype = shown T.body in

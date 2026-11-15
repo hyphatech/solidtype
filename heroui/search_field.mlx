@@ -114,7 +114,7 @@ module Group = struct
 end
 
 module Search_icon = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let f = within "Search_field.Search_icon" in
     let classes () =
@@ -273,7 +273,7 @@ module Clear_button = struct
       disabled=(S.get disabled)>
       (match S.get children with
       | Some c -> Jsx.draw c (state ())
-      | None -> Jsx.element <Close_button.Icon />)
+      | None -> <Close_button.Icon />)
     </Kobalte_button.Root>
   [@@element button]
 end

@@ -5,7 +5,7 @@
 module Props : sig
   val check :
     when_:bool Check.value ->
-    ?children:('f, [ `nodes ]) Check.children ->
+    ?children:('f, [ `elements ]) Check.children ->
     unit ->
     unit
 end

@@ -43,7 +43,7 @@ let placement_name = function
 
 module Trigger = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     Dialog_frame.trigger ~slot:"modal-trigger"
       ~class_:(fun () -> after (Styles.Modal.trigger (slots ())) (S.get class_))
       ~aria_label:(fun () -> S.get aria_label)
@@ -109,10 +109,9 @@ module Container = struct
       ~as_:(fun () -> S.get as_)
       ~others:(Props.others props)
       (fun s ->
-        Jsx.element
-          <Container_context.Provider value=c>
-            (Jsx.draw (S.get children) s)
-          </Container_context.Provider>)
+        <Container_context.Provider value=c>
+          (Jsx.draw (S.get children) s)
+        </Container_context.Provider>)
   [@@element div]
 end
 
@@ -143,7 +142,7 @@ module Dialog = struct
 end
 
 module Header = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(after (Styles.Modal.header (slots ())) (S.get class_))
       data_slot="modal-header"
@@ -154,7 +153,7 @@ module Header = struct
 end
 
 module Body = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let c = container () in
     <div
       class_=(after
@@ -168,7 +167,7 @@ module Body = struct
 end
 
 module Footer = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(after (Styles.Modal.footer (slots ())) (S.get class_))
       data_slot="modal-footer"
@@ -179,7 +178,7 @@ module Footer = struct
 end
 
 module Icon = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     <div
       class_=(after (Styles.Modal.icon (slots ())) (S.get class_))
       data_slot="modal-icon"
@@ -190,7 +189,7 @@ module Icon = struct
 end
 
 module Heading = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     Dialog_frame.heading ~slot:"modal-heading"
       ~class_:(fun () -> after (Styles.Modal.heading (slots ())) (S.get class_))
       ~others:(Props.others props)
@@ -219,7 +218,7 @@ module Close_trigger = struct
 end
 
 let%component make ?(is_open : bool option) ?(default_open : bool option)
-    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.content) () =
+    ?(on_open_change : (bool -> unit) option) ~(children : Jsx.element) () =
   Dialog_frame.root
     ~is_open:(fun () -> S.get is_open)
     ~default_open:(fun () -> S.get default_open)

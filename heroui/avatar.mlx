@@ -47,7 +47,7 @@ end
 
 module Fallback = struct
   let%component make ?(color : color option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let a = within "Avatar.Fallback" in
     <Kobalte.Fallback
       class_=(after
@@ -63,7 +63,7 @@ end
 
 let%component make ?(size : [ `sm | `md | `lg ] option) ?(color : color option)
     ?(variant : [ `default | `soft ] option) ?(fallback_delay : float option)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   (* A prop the avatar sets is its own, else its group's; and in a group it is
      shown while the group shows it. *)
   let group = Avatar_group.Context.use () in

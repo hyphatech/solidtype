@@ -4,7 +4,7 @@ module Show = Solidtype.Show
 
 module Panel = struct
   let%component make ~(title : string) ~(on_close : unit -> unit)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     <section
       class_="flex w-72 flex-col gap-2 rounded-xl border border-border p-4">
       <header class_="flex items-center justify-between">
@@ -30,7 +30,7 @@ let make () =
                 on_click=(fun _ -> S.set set_open true)>
                 "Open the notes"
               </button>)>
-    <Panel title="Notes" on_close=(fun _ -> S.set set_open false)>
+    <Panel title="Notes" on_close=(fun () -> S.set set_open false)>
       <p>"A panel's children are any JSX: these two paragraphs."</p>
       <p class_="text-sm text-muted">
         "Close it, and a button takes its place."

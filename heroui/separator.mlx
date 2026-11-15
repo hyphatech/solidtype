@@ -22,7 +22,7 @@ module As = struct
       ?as_:string Solidtype.Check.value ->
       ?orientation:[ `horizontal | `vertical ] Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Hr.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end

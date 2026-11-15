@@ -92,7 +92,7 @@ let shown options =
       when String.equal (part_type part) "element" ->
         content :: join parts contents
     | part :: parts, contents ->
-        Jsx.of_content (Jsx.string (part_value part)) :: join parts contents
+        Jsx.string (part_value part) :: join parts contents
   in
   let parts =
     format_to_parts (list_format ()) (Array.of_list (List.map text options))
@@ -133,7 +133,7 @@ let after base = function Some c -> base ^ " " ^ c | None -> base
    contexts its parts read, resolved once, so the server and the browser see
    them alike as the page is made, before Kobalte's list is. *)
 let resolving made =
-  let resolved = S.children (fun () -> Jsx.element (made ())) in
+  let resolved = S.children (fun () -> made ()) in
   fun () -> Array.to_list (Entry.read (S.to_array (S.get resolved)))
 
 let within part =
@@ -147,7 +147,7 @@ module As_span = struct
     external check :
       ?as_:string Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -173,7 +173,7 @@ module As_option = struct
       ?as_:Jsx.drawn Solidtype.Check.value ->
       item:node Solidtype.Check.value ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -344,23 +344,22 @@ module Item_indicator = struct
       data_visible=(Jsx.flag (S.get i.selected))
       props=(Props.others props)>
       (match children selected with
-      | Some drawn -> Jsx.element drawn
+      | Some drawn -> drawn
       | None ->
-          Jsx.element
-            <svg
-              aria_hidden=true
-              fill="none"
-              role=`presentation
-              stroke="currentColor"
-              stroke_dasharray="22"
-              stroke_dashoffset=(if S.get i.selected then "44" else "66")
-              stroke_linecap="round"
-              stroke_linejoin="round"
-              stroke_width="2"
-              view_box="0 0 17 18"
-              data_slot="list-box-item-indicator--checkmark">
-              <polyline points="1 9 7 14 15 4" />
-            </svg>)
+          <svg
+            aria_hidden=true
+            fill="none"
+            role=`presentation
+            stroke="currentColor"
+            stroke_dasharray="22"
+            stroke_dashoffset=(if S.get i.selected then "44" else "66")
+            stroke_linecap="round"
+            stroke_linejoin="round"
+            stroke_width="2"
+            view_box="0 0 17 18"
+            data_slot="list-box-item-indicator--checkmark">
+            <polyline points="1 9 7 14 15 4" />
+          </svg>)
     </span>
   [@@element span]
 end
@@ -379,7 +378,7 @@ external css_escape : string -> string = "escape" [@@mel.scope "CSS"]
 module Load_more_item = struct
   let%component make ?(is_loading : bool = false)
       ?(on_load_more : (unit -> unit) option) ?(scroll_offset : float = 1.)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     within "List_box.Load_more_item";
     let others = Props.others props in
     let draw () =
@@ -388,7 +387,7 @@ module Load_more_item = struct
           <div style="position: relative; width: 0px; height: 0px;" inert=true>
             <Solidtype_headless.Load_more_sentinel
               is_loading=(S.get is_loading)
-              on_load_more=(fun _ -> ignore (on_load_more () : unit option))
+              on_load_more=(fun () -> ignore (on_load_more () : unit option))
               scroll_offset=(S.get scroll_offset)
               style="position: absolute; height: 1px; width: 1px;"
               data_testid="loadMoreSentinel"
@@ -404,7 +403,7 @@ module Load_more_item = struct
 end
 
 module Section = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     within "List_box.Section";
     let header, set_header = S.create_signal None in
     (* A section's header names it, as React Aria's does. *)
@@ -449,8 +448,8 @@ module Section = struct
         ?as_=(S.drawn_as others)
         props=(S.undrawn others)>
         (match S.get header with
-        | Some drawn -> Jsx.element (drawn header_id)
-        | None -> Jsx.element Jsx.nothing)
+        | Some drawn -> drawn header_id
+        | None -> Jsx.nothing)
         <For each=(Array.of_list (S.get options))>
           (fun o _ -> draw_option o)
         </For>
@@ -503,13 +502,13 @@ let%component make ?(aria_label : string option)
     ?(render_empty_state : (unit -> Jsx.element) option)
     ?(variant : [ `default | `danger ] = `default) ?(class_ : string option)
     ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-    ?(children : Jsx.content option) () =
+    ?(children : Jsx.element option) () =
   let entries =
     resolving (fun () ->
         <Within.Provider value=true>
           <Separator.Slot.Provider value=separator>
             <Separator.Element.Provider value=`div>
-              (Option.value (S.get children) ~default:(Jsx.element Jsx.nothing))
+              (Option.value (S.get children) ~default:Jsx.nothing)
             </Separator.Element.Provider>
           </Separator.Slot.Provider>
         </Within.Provider>)
@@ -599,9 +598,7 @@ let%component make ?(aria_label : string option)
               | Option o -> option_ o
               | Separator drawn | Loader drawn -> drawn ()
               | Section s ->
-                  <Show when_=(shows s.options ())>
-                    (Jsx.element (s.draw option_))
-                  </Show>)
+                  <Show when_=(shows s.options ())>(s.draw option_)</Show>)
           </For>
       | Some l ->
           let shown = function
@@ -686,9 +683,9 @@ let%component make ?(aria_label : string option)
                   ref=(fun e -> w.frame entry (as_element e))
                   style=(w.place entry)>
                   (match entry with
-                  | Option o -> Jsx.element (option_ o)
-                  | Separator drawn | Loader drawn -> Jsx.element (drawn ())
-                  | Section s -> Jsx.element (s.draw option_))
+                  | Option o -> option_ o
+                  | Separator drawn | Loader drawn -> drawn ()
+                  | Section s -> s.draw option_)
                 </div>)
             </For>
           </div>
@@ -700,11 +697,8 @@ let%component make ?(aria_label : string option)
         <Show when_=(S.get empty)>
           (match render_empty_state () with
           | Some drawn ->
-              Jsx.element
-                <div role=`option style="display: contents;">
-                  (Jsx.element drawn)
-                </div>
-          | None -> Jsx.element Jsx.nothing)
+              <div role=`option style="display: contents;">drawn</div>
+          | None -> Jsx.nothing)
         </Show>;
       |]
   in
@@ -752,8 +746,6 @@ let%component make ?(aria_label : string option)
                     S.set set_kept keys;
                     ignore (on_selection_change keys : unit option))>
         (fun collection ->
-          <Listing.Provider value=l>
-            (Jsx.element (draw collection))
-          </Listing.Provider>)
+          <Listing.Provider value=l>(draw collection)</Listing.Provider>)
       </As_list>
 [@@element div]

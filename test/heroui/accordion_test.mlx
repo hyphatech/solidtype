@@ -171,40 +171,36 @@ let render ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded
         ?variant
         ?hide_separator
         on_expanded_change=(fun k -> tell (Js.Array.join ~sep:"," k))>
-        (Solidtype.Jsx.element
-           <Solidtype.For each=keys>
-             (fun key _ ->
-               <Accordion.Item
-                 id=key
-                 ?is_disabled=(match disabled with
-                              | Some d when String.equal d key -> Some true
-                              | _ -> None)
-                 on_expanded_change=(fun v ->
-                                      tell (key ^ ":" ^ string_of_bool v))>
-                 <Accordion.Heading>
-                   (Solidtype.Jsx.element
-                      (if button then
-                         <Button slot=`trigger variant=`secondary>
-                           (Solidtype.Jsx.string key) <Accordion.Indicator />
-                         </Button>
-                       else
-                         <Accordion.Trigger
-                           ?is_disabled=(match trigger_disabled with
-                                        | Some d when String.equal d key ->
-                                            Some true
-                                        | _ -> None)
-                           on_press=(fun () ->
-                                      if presses then tell (key ^ ":pressed"))>
-                           (Solidtype.Jsx.string key) <Accordion.Indicator />
-                         </Accordion.Trigger>))
-                 </Accordion.Heading>
-                 <Accordion.Panel>
-                   <Accordion.Body>
-                     (Solidtype.Jsx.string ("About " ^ key ^ "."))
-                   </Accordion.Body>
-                 </Accordion.Panel>
-               </Accordion.Item>)
-           </Solidtype.For>)
+        <Solidtype.For each=keys>
+          (fun key _ ->
+            <Accordion.Item
+              id=key
+              ?is_disabled=(match disabled with
+                           | Some d when String.equal d key -> Some true
+                           | _ -> None)
+              on_expanded_change=(fun v -> tell (key ^ ":" ^ string_of_bool v))>
+              <Accordion.Heading>
+                (if button then
+                   <Button slot=`trigger variant=`secondary>
+                     (Solidtype.Jsx.string key) <Accordion.Indicator />
+                   </Button>
+                 else
+                   <Accordion.Trigger
+                     ?is_disabled=(match trigger_disabled with
+                                  | Some d when String.equal d key -> Some true
+                                  | _ -> None)
+                     on_press=(fun () ->
+                                if presses then tell (key ^ ":pressed"))>
+                     (Solidtype.Jsx.string key) <Accordion.Indicator />
+                   </Accordion.Trigger>)
+              </Accordion.Heading>
+              <Accordion.Panel>
+                <Accordion.Body>
+                  (Solidtype.Jsx.string ("About " ^ key ^ "."))
+                </Accordion.Body>
+              </Accordion.Panel>
+            </Accordion.Item>)
+        </Solidtype.For>
       </Accordion>)
 
 let both ?expanded_keys ?default_expanded_keys ?allows_multiple_expanded

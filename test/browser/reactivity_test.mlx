@@ -17,7 +17,7 @@ let rooted f =
       dispose)
 
 module Counted = struct
-  let%component make ~(children : Jsx.content) () =
+  let%component make ~(children : Jsx.element) () =
     let resolved = S.children (fun () -> S.get children) in
     <p>(Jsx.int (Array.length (S.to_array (S.get resolved))))</p>
 end
@@ -41,7 +41,7 @@ module Count = struct
 end
 
 module Sentence = struct
-  let%component make ~(children : Jsx.content) () =
+  let%component make ~(children : Jsx.element) () =
     let resolved = S.children (fun () -> S.get children) in
     <p>
       (Jsx.string

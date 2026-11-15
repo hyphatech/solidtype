@@ -24,13 +24,9 @@ let make () =
   <Radio_group default_value="premium" name="plan-custom-indicator">
     <Label>"Plan selection"</Label>
     <Description>"Choose the plan that suits you best"</Description>
-    (Solidtype.Jsx.element
-       (plan ~value:"basic" ~name:"Basic Plan"
-          ~messages:"Includes 100 messages per month"))
-    (Solidtype.Jsx.element
-       (plan ~value:"premium" ~name:"Premium Plan"
-          ~messages:"Includes 200 messages per month"))
-    (Solidtype.Jsx.element
-       (plan ~value:"business" ~name:"Business Plan"
-          ~messages:"Unlimited messages"))
+    (plan ~value:"basic" ~name:"Basic Plan"
+       ~messages:"Includes 100 messages per month")
+    (plan ~value:"premium" ~name:"Premium Plan"
+       ~messages:"Includes 200 messages per month")
+    (plan ~value:"business" ~name:"Business Plan" ~messages:"Unlimited messages")
   </Radio_group>

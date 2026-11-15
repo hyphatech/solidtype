@@ -26,7 +26,7 @@ let within part =
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Heading = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let d = within "Disclosure.Heading" in
     (* A button with the trigger's slot is Kobalte's trigger, as React Aria's
        disclosure gives its ButtonContext's trigger slot. *)
@@ -170,7 +170,7 @@ module Content = struct
 end
 
 module Body = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let d = within "Disclosure.Body" in
     <div
       class_=(Styles.Disclosure.body d.slots)

@@ -75,7 +75,7 @@ external scroll_to : Dom.element -> scroll_options -> unit = "scrollTo"
 [@@mel.send]
 
 module List_container = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let t = within "Tabs.List_container" in
     let container = ref None in
     let vertical () =
@@ -140,11 +140,8 @@ module List_container = struct
         type_=`button
         on_click=(fun _ -> scroll_by (-1.))>
         (if vertical () then
-           Jsx.element
-             <Gravity.Chevron_up aria_hidden=true role=`presentation />
-         else
-           Jsx.element
-             <Gravity.Chevron_left aria_hidden=true role=`presentation />)
+           <Gravity.Chevron_up aria_hidden=true role=`presentation />
+         else <Gravity.Chevron_left aria_hidden=true role=`presentation />)
       </button>
       <button
         aria_label=(if vertical () then "Scroll tabs down"
@@ -154,11 +151,8 @@ module List_container = struct
         type_=`button
         on_click=(fun _ -> scroll_by 1.)>
         (if vertical () then
-           Jsx.element
-             <Gravity.Chevron_down aria_hidden=true role=`presentation />
-         else
-           Jsx.element
-             <Gravity.Chevron_right aria_hidden=true role=`presentation />)
+           <Gravity.Chevron_down aria_hidden=true role=`presentation />
+         else <Gravity.Chevron_right aria_hidden=true role=`presentation />)
       </button>
     </div>
   [@@element div]
@@ -173,7 +167,7 @@ module As_tab = struct
       ?disabled:bool Solidtype.Check.value ->
       ?as_:Jsx.drawn Solidtype.Check.value ->
       ?props:'spread Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.A.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
   end
@@ -286,7 +280,7 @@ module Indicator = struct
         props=(Props.others props)
       />
     in
-    <Show when_=(Solid.get tab.selected)>(Jsx.element (indicator ()))</Show>
+    <Show when_=(Solid.get tab.selected)>(indicator ())</Show>
   [@@element div]
 end
 
@@ -306,7 +300,7 @@ end
 
 module Panel = struct
   let%component make ~(id : string) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let t = within "Tabs.Panel" in
     let k = Kobalte.use_tabs_context () in
     (* On the page while its tab is selected, as React Aria's panel is:
@@ -340,7 +334,7 @@ end
 (* Last, since it takes the name of the stdlib's lists. *)
 module List = struct
   let%component make ?(aria_label : string option) ?(class_ : string option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let t = within "Tabs.List" in
     <Kobalte.List
       ?aria_label=(Solid.get aria_label)
@@ -362,7 +356,7 @@ let%component make ?(selected_key : string option)
     ?(align : [ `start | `center | `end_ ] = `center)
     ?(keyboard_activation : [ `automatic | `manual ] = `automatic)
     ?(is_disabled : bool = false) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   let t =
     {
       slots =

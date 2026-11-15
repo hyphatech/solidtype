@@ -4,7 +4,7 @@ module Jsx = Solidtype.Jsx
 type slot =
   (unit -> string) ->
   unit Solidtype.Solid.rest ->
-  (unit -> Jsx.content) ->
+  (unit -> Jsx.element) ->
   Jsx.element
 
 (* How a header renders where a part above gives it its element, as React
@@ -13,7 +13,7 @@ module Slot = Solidtype.Context.Make_optional (struct
   type t = slot
 end)
 
-let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+let%component make ?(class_ : string option) ~(children : Jsx.element) () =
   let classes () =
     Styles.Header.classes (Styles.Header.options ?class_:(S.get class_) ())
   in

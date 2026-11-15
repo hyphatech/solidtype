@@ -32,16 +32,15 @@ let make () =
                   Array.find_opt (fun c -> String.equal c.id key) currencies
                 with
                 | Some c ->
-                    Jsx.element
-                      <span class_="flex min-w-0 items-center gap-1.5">
-                        <span class_="font-medium">(Jsx.string c.symbol)</span>
-                        <span>(Jsx.string c.code)</span>
-                        <span class_="truncate text-muted">
-                          (Jsx.string c.name)
-                        </span>
+                    <span class_="flex min-w-0 items-center gap-1.5">
+                      <span class_="font-medium">(Jsx.string c.symbol)</span>
+                      <span>(Jsx.string c.code)</span>
+                      <span class_="truncate text-muted">
+                        (Jsx.string c.name)
                       </span>
-                | None -> Jsx.element Jsx.nothing)
-            | _ -> Jsx.element Jsx.nothing)
+                    </span>
+                | None -> Jsx.nothing)
+            | _ -> Jsx.nothing)
           </span>)
       </Autocomplete.Value>
       <Autocomplete.Indicator />

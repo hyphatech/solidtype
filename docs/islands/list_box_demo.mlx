@@ -31,24 +31,23 @@ let make () =
                    ((* A list's selection is read as it is made, so another
                       makes another list, as React's key does. *)
                     let mode = fst (S.get mode) in
-                    Solidtype.Jsx.element
-                      <List_box
-                        aria_label="Users"
-                        class_="w-[220px]"
-                        selection_mode=mode
-                        variant=(fst (S.get variant))
-                        default_selected_keys=[| "bob" |]
-                        disabled_keys=[| "martha" |]>
-                        <List_box.Item id="bob" text_value="Bob">
-                          <Label>"Bob"</Label> <List_box.Item_indicator />
-                        </List_box.Item>
-                        <List_box.Item id="fred" text_value="Fred">
-                          <Label>"Fred"</Label> <List_box.Item_indicator />
-                        </List_box.Item>
-                        <List_box.Item id="martha" text_value="Martha">
-                          <Label>"Martha"</Label> <List_box.Item_indicator />
-                        </List_box.Item>
-                      </List_box>)
+                    <List_box
+                      aria_label="Users"
+                      class_="w-[220px]"
+                      selection_mode=mode
+                      variant=(fst (S.get variant))
+                      default_selected_keys=[| "bob" |]
+                      disabled_keys=[| "martha" |]>
+                      <List_box.Item id="bob" text_value="Bob">
+                        <Label>"Bob"</Label> <List_box.Item_indicator />
+                      </List_box.Item>
+                      <List_box.Item id="fred" text_value="Fred">
+                        <Label>"Fred"</Label> <List_box.Item_indicator />
+                      </List_box.Item>
+                      <List_box.Item id="martha" text_value="Martha">
+                        <Label>"Martha"</Label> <List_box.Item_indicator />
+                      </List_box.Item>
+                    </List_box>)
                  </div>)
       react=(fun host ->
               Heroui_react.list_box host

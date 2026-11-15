@@ -76,8 +76,9 @@ says what TSX's types would:
 ```
 1 | let make () = <Label />
                   ^^^^^^^^^
-Error: This expression has type text:string Solidtype.Check.value -> unit
+Error: This expression has type text:string -> unit
        but an expression was expected of type unit
+       because it is in the result of a conditional with no else branch
 Hint: This function application is partial, maybe some arguments are missing.
 ```
 
@@ -85,7 +86,7 @@ Hint: This function application is partial, maybe some arguments are missing.
 1 | let make () = <Label text="x" colour="red" />
                                          ^^^^^
 Error: The function applied to this argument has type
-         ?count:int Solidtype.Check.value -> ?props:Label.Props.t -> unit
+         ?count:int -> ?props:Label.Props.t Solidtype.Solid.rest -> unit
 This argument cannot be applied with label ~colour
 ```
 
@@ -96,14 +97,14 @@ variable must agree, as in TSX.
 
 ## Children
 
-Children are a prop, `children`. As `Jsx.content`, they are any JSX and are
+Children are a prop, `children`. As `Jsx.element`, they are any JSX and are
 read where they go, `(S.get children)`:
 
 <Example code={children} title="solid_children.mlx"><Children.make client:visible /></Example>
 
 A component may also take a function as its only child, which it calls, as
 `For` does: `~(children : item -> Jsx.element)`. A check names which kinds
-it takes: `[ `nodes ]` for elements, `[ `render ]` for a function, or both.
+it takes: `[ `elements ]` for elements, `[ `render ]` for a function, or both.
 
 Children of either kind, as HeroUI's render props are, are
 `~(children : state Jsx.children)`, drawn by `Jsx.draw (S.get children)
@@ -137,7 +138,7 @@ event.
 ```ocaml
 let%component make ?(class_ : string option) () =
   <input
-    class_=("field " ^ Option.value (class_ ()) ~default:"")
+    class_=("field " ^ Option.value (S.get class_) ~default:"")
     props=(Props.others props) />
 [@@element input]
 ```

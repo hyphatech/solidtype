@@ -99,7 +99,8 @@ let both ~mode ?behavior () =
               <For each=users>
                 (fun u _ ->
                   <Table.Row
-                    id=u.id on_action=(fun _ -> ran := !ran @ [ "row " ^ u.id ])>
+                    id=u.id
+                    on_action=(fun () -> ran := !ran @ [ "row " ^ u.id ])>
                     <Table.Cell>(Jsx.string u.name)</Table.Cell>
                     <Table.Cell>(Jsx.string u.role)</Table.Cell>
                   </Table.Row>)

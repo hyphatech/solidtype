@@ -1,7 +1,7 @@
 module S = Solidtype.Solid
 
 let%component make ?(class_ : string option)
-    ?(children : Solidtype.Jsx.content option) () =
+    ?(children : Solidtype.Jsx.element option) () =
   <div
     class_=(Styles.EmptyState.classes
               (Styles.EmptyState.options ?class_:(S.get class_) ()))

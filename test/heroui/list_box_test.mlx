@@ -256,10 +256,7 @@ let both (list : list) =
   let told = ref [] in
   let tell said = told := said :: !told in
   T.render (fun () ->
-      <div>
-        <button type_=`button>"Before"</button>
-        (Solidtype.Jsx.element (items list tell))
-      </div>);
+      <div><button type_=`button>"Before"</button> (items list tell)</div>);
   let* solidtype = walk ~step:(fun action -> action ()) ~told list in
   T.cleanup ();
   told := [];

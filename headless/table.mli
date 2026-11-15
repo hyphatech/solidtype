@@ -145,7 +145,7 @@ module Resizable_container : sig
       ?on_resize_end:((string * column_size) array -> unit) ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 
@@ -196,7 +196,7 @@ module Root : sig
       ?on_row_action:(string -> unit) ->
       ?as_:(Solidtype.Html.Table.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Table.check
   end
 
@@ -213,7 +213,7 @@ module Header : sig
     val check :
       ?as_:(Solidtype.Html.Thead.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Thead.check
   end
 
@@ -247,7 +247,7 @@ module Column : sig
       ?max_width:float Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Th.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Th.check
   end
 
@@ -265,7 +265,7 @@ module Body : sig
       ?empty_state:Jsx.element Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tbody.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tbody.check
   end
 
@@ -312,7 +312,7 @@ module Row : sig
       ?referrer_policy:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check
   end
 
@@ -336,7 +336,7 @@ module Cell : sig
     val check :
       ?as_:(Solidtype.Html.Td.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Td.check
   end
 
@@ -361,7 +361,7 @@ module Load_more : sig
       ?scroll_offset:float Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Tr.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Tr.check
   end
 
@@ -388,7 +388,7 @@ module Column_resizer : sig
     val check :
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:'spread S.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check
   end
 

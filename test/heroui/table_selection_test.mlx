@@ -129,8 +129,7 @@ let both ~mode ?behavior ?disabled_keys () =
                                          (Array.to_list keys)))>
             <Table.Header>
               <Table.Column class_="pe-0">
-                (Jsx.element
-                   (checkbox ~aria_label:"Select all" ~variant:`primary))
+                (checkbox ~aria_label:"Select all" ~variant:`primary)
               </Table.Column>
               <Table.Column is_row_header=true>"Name"</Table.Column>
             </Table.Header>
@@ -139,9 +138,8 @@ let both ~mode ?behavior ?disabled_keys () =
                 (fun u _ ->
                   <Table.Row id=u.id>
                     <Table.Cell class_="pe-0">
-                      (Jsx.element
-                         (checkbox ~aria_label:("Select " ^ u.name)
-                            ~variant:`secondary))
+                      (checkbox ~aria_label:("Select " ^ u.name)
+                         ~variant:`secondary)
                     </Table.Cell>
                     <Table.Cell>(Jsx.string u.name)</Table.Cell>
                   </Table.Row>)

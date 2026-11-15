@@ -2,7 +2,7 @@
     rendered on the server. *)
 
 module Props : sig
-  val check : ?children:('f, [ `nodes ]) Check.children -> unit -> unit
+  val check : ?children:('f, [ `elements ]) Check.children -> unit -> unit
 end
 
 val component : unit Jsx.component

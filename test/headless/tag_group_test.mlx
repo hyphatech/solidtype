@@ -53,10 +53,7 @@ let group ?(rtl = false) ?(selection_mode = `multiple) ?(told = ref [])
     </Tag_group.Root>
   in
   H.render (fun () ->
-      if rtl then
-        <I18n.I18nProvider locale="ar">
-          (Jsx.element (body ()))
-        </I18n.I18nProvider>
+      if rtl then <I18n.I18nProvider locale="ar">(body ())</I18n.I18nProvider>
       else body ())
 
 let rows () = H.all_by_role "row"

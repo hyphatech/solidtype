@@ -95,7 +95,7 @@ module Popover = struct
       ?(should_flip : bool = true) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let p = within "Color_picker.Popover" in
     Option.iter p.set_opened (S.untrack (fun () -> S.get default_open));
     S.create_computed (fun () -> p.set_given_open (S.get is_open));
@@ -157,11 +157,11 @@ module Popover = struct
             props=(Props.others props)
             tabindex="-1"
             ?aria_labelledby=(named_by ())>
-            (Jsx.element (Overlay.dismiss close))
+            (Overlay.dismiss close)
             <Button.Trigger.Provider value=Button.no_trigger>
               (S.get children)
             </Button.Trigger.Provider>
-            (Jsx.element (Overlay.dismiss close))
+            (Overlay.dismiss close)
           </Kobalte.Content>
         </Kobalte.Portal>
       </Show>
@@ -171,7 +171,7 @@ end
 
 let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(on_change : (Color.t -> unit) option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   (* Open as its popover says, which it is told once the part is made, else as
      it keeps, so Kobalte's root is always controlled. *)
   let opened, set_opened = S.create_signal false in

@@ -42,7 +42,7 @@ let button ~slot ~classes ~is_active ~is_disabled ~on_press ~on_click ~given_ref
   </Kobalte.Root>
 
 module Summary = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = within "Pagination.Summary" in
     (* Its direction from its own text, so "1 to 5 of 10" keeps its order
        under a right-to-left page, as HeroUI's does. *)
@@ -57,7 +57,7 @@ module Summary = struct
 end
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = within "Pagination.Content" in
     <ul
       class_=(after (Styles.Pagination.content (S.get slots)) (S.get class_))
@@ -69,7 +69,7 @@ module Content = struct
 end
 
 module Item = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = within "Pagination.Item" in
     <li
       class_=(after (Styles.Pagination.item (S.get slots)) (S.get class_))
@@ -85,7 +85,7 @@ module Link = struct
       ?(on_press : (unit -> unit) option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = within "Pagination.Link" in
     button ~slot:"pagination-link"
       ~classes:(fun () ->
@@ -101,7 +101,7 @@ module Previous = struct
       ?(on_press : (unit -> unit) option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = within "Pagination.Previous" in
     button ~slot:"pagination-previous"
       ~classes:(fun () ->
@@ -119,7 +119,7 @@ module Next = struct
       ?(on_press : (unit -> unit) option)
       ?(on_click : (Dom.mouseEvent -> unit) option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = within "Pagination.Next" in
     button ~slot:"pagination-next"
       ~classes:(fun () ->
@@ -133,7 +133,7 @@ module Next = struct
 end
 
 module Previous_icon = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     <span
       aria_hidden=true
@@ -142,15 +142,13 @@ module Previous_icon = struct
       props=(Props.others props)>
       (match S.get children with
       | Some c -> c
-      | None ->
-          Jsx.element
-            <Gravity.Chevron_left aria_hidden=true role=`presentation />)
+      | None -> <Gravity.Chevron_left aria_hidden=true role=`presentation />)
     </span>
   [@@element span]
 end
 
 module Next_icon = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     <span
       aria_hidden=true
@@ -159,9 +157,7 @@ module Next_icon = struct
       props=(Props.others props)>
       (match S.get children with
       | Some c -> c
-      | None ->
-          Jsx.element
-            <Gravity.Chevron_right aria_hidden=true role=`presentation />)
+      | None -> <Gravity.Chevron_right aria_hidden=true role=`presentation />)
     </span>
   [@@element span]
 end
@@ -180,7 +176,7 @@ module Ellipsis = struct
 end
 
 let%component make ?(size : [ `sm | `md | `lg ] = `md) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   let slots =
     S.accessor (fun () ->
         Styles.Pagination.slots

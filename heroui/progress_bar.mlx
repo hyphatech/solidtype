@@ -40,7 +40,7 @@ let label : Label.slot =
   </Kobalte_label>
 
 module Output = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let m = within "Progress_bar.Output" in
     let classes () =
@@ -65,7 +65,7 @@ module Output = struct
 end
 
 module Track = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let m = within "Progress_bar.Track" in
     <div
       class_=(after (Styles.ProgressBar.track (S.get m.slots)) (S.get class_))

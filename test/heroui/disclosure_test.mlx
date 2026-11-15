@@ -146,15 +146,14 @@ let render ?is_expanded ?default_expanded ?is_disabled ~button tell =
       <Disclosure
         ?is_expanded ?default_expanded ?is_disabled on_expanded_change=tell>
         <Disclosure.Heading>
-          (Solidtype.Jsx.element
-             (if button then
-                <Button slot=`trigger variant=`secondary>
-                  "Shipping" <Disclosure.Indicator />
-                </Button>
-              else
-                <Disclosure.Trigger>
-                  "Shipping" <Disclosure.Indicator />
-                </Disclosure.Trigger>))
+          (if button then
+             <Button slot=`trigger variant=`secondary>
+               "Shipping" <Disclosure.Indicator />
+             </Button>
+           else
+             <Disclosure.Trigger>
+               "Shipping" <Disclosure.Indicator />
+             </Disclosure.Trigger>)
         </Disclosure.Heading>
         <Disclosure.Content>
           <Disclosure.Body>

@@ -148,9 +148,7 @@ let () =
             </Breadcrumbs.Item>
           in
           T.render (fun () ->
-              <Breadcrumbs>
-                (Jsx.element (item "home")) (Jsx.element (item "tabs"))
-              </Breadcrumbs>);
+              <Breadcrumbs>(item "home") (item "tabs")</Breadcrumbs>);
           E.(
             expect (T.words_shown T.body)
             |> toBe "home:  | tabs: current disabled"));

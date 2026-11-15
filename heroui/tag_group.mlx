@@ -40,7 +40,7 @@ let slots () = Styles.TagGroup.slots (Styles.TagGroup.options ())
 
 module List = struct
   let%component make ?(render_empty_state : (unit -> Jsx.element) option)
-      ?(class_ : string option) ~(children : Jsx.content) () =
+      ?(class_ : string option) ~(children : Jsx.element) () =
     ignore (within "Tag_group.List" : group);
     let h = Headless.Context.use () in
     let self, watch_self = self_focus () in
@@ -66,7 +66,7 @@ let%component make ?(size : [ `sm | `md | `lg ] option)
     ?(disabled_keys : string array option) ?(is_disabled : bool option)
     ?(on_remove : (string array -> unit) option) ?(aria_label : string option)
     ?(aria_labelledby : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   let g = { size; variant } in
   (* Its label names its list and is a span, its description and error
      describe the list, as React Aria's tag group gives them their

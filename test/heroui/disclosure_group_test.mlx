@@ -154,26 +154,25 @@ let both ?default_expanded_keys ?allows_multiple_expanded ?is_disabled ?disabled
         ?allows_multiple_expanded
         ?is_disabled
         on_expanded_change=(fun k -> told := Js.Array.join ~sep:"," k :: !told)>
-        (Solidtype.Jsx.element
-           <Solidtype.For each=keys>
-             (fun key _ ->
-               <Disclosure
-                 id=key
-                 ?is_disabled=(match disabled with
-                              | Some d when String.equal d key -> Some true
-                              | _ -> None)>
-                 <Disclosure.Heading>
-                   <Disclosure.Trigger>
-                     (Solidtype.Jsx.string key) <Disclosure.Indicator />
-                   </Disclosure.Trigger>
-                 </Disclosure.Heading>
-                 <Disclosure.Content>
-                   <Disclosure.Body>
-                     (Solidtype.Jsx.string ("About " ^ key ^ "."))
-                   </Disclosure.Body>
-                 </Disclosure.Content>
-               </Disclosure>)
-           </Solidtype.For>)
+        <Solidtype.For each=keys>
+          (fun key _ ->
+            <Disclosure
+              id=key
+              ?is_disabled=(match disabled with
+                           | Some d when String.equal d key -> Some true
+                           | _ -> None)>
+              <Disclosure.Heading>
+                <Disclosure.Trigger>
+                  (Solidtype.Jsx.string key) <Disclosure.Indicator />
+                </Disclosure.Trigger>
+              </Disclosure.Heading>
+              <Disclosure.Content>
+                <Disclosure.Body>
+                  (Solidtype.Jsx.string ("About " ^ key ^ "."))
+                </Disclosure.Body>
+              </Disclosure.Content>
+            </Disclosure>)
+        </Solidtype.For>
       </Disclosure_group>);
   let* solidtype = walk ~step:(fun action -> action ()) T.body told in
   T.cleanup ();

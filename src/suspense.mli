@@ -4,7 +4,7 @@
 module Props : sig
   val check :
     ?fallback:Jsx.element Check.value ->
-    ?children:('f, [ `nodes ]) Check.children ->
+    ?children:('f, [ `elements ]) Check.children ->
     unit ->
     unit
 end

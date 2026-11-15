@@ -24,10 +24,9 @@ let make () =
       <Color_field.Group>
         <Color_field.Input class_="min-w-0" />
         (if suffix then
-           Jsx.element
-             <Color_field.Suffix>
-               <span class_="text-sm text-muted">"%"</span>
-             </Color_field.Suffix>
+           <Color_field.Suffix>
+             <span class_="text-sm text-muted">"%"</span>
+           </Color_field.Suffix>
          else Jsx.string "")
       </Color_field.Group>
     </Color_field>
@@ -35,14 +34,11 @@ let make () =
   <div class_="flex flex-col gap-4">
     <p class_="text-sm text-muted">"Edit individual HSL channels:"</p>
     <div class_="flex gap-4">
-      (Jsx.element
-         (channel ~channel:`hue ~name:"hue" ~label:"Hue" ~suffix:false))
-      (Jsx.element
-         (channel ~channel:`saturation ~name:"saturation" ~label:"Saturation"
-            ~suffix:true))
-      (Jsx.element
-         (channel ~channel:`lightness ~name:"lightness" ~label:"Lightness"
-            ~suffix:true))
+      (channel ~channel:`hue ~name:"hue" ~label:"Hue" ~suffix:false)
+      (channel ~channel:`saturation ~name:"saturation" ~label:"Saturation"
+         ~suffix:true)
+      (channel ~channel:`lightness ~name:"lightness" ~label:"Lightness"
+         ~suffix:true)
     </div>
     <div class_="flex items-center gap-2">
       <Color_swatch

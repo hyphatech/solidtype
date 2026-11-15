@@ -188,9 +188,8 @@ let both ~channel ~value ?label ?(is_disabled = false) ?orientation () =
         on_change=(fun c -> told := Color.to_string c ~format:`css ())>
         (match label with
         | Some l ->
-            Jsx.element
-              (Jsx.fragment
-                 [| <Label>(Jsx.string l)</Label>; <Color_slider.Output /> |])
+            Jsx.fragment
+              [| <Label>(Jsx.string l)</Label>; <Color_slider.Output /> |]
         | None -> Jsx.string "")
         <Color_slider.Track><Color_slider.Thumb /></Color_slider.Track>
       </Color_slider>);

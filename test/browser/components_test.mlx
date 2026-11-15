@@ -64,7 +64,7 @@ end
 module Save = struct
   let%component make ?(class_ : string option)
       ?(on_click : (Dom.mouseEvent -> unit) option) ~(saved : unit -> unit)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     <button
       class_=(match S.get class_ with Some c -> "save " ^ c | None -> "save")
       on_click=(fun e ->
@@ -82,7 +82,7 @@ module Badge = struct
   type state = { count : int; label : string }
 
   let%component make ~(children : state -> Jsx.element) () =
-    <span>(Jsx.element (children { count = 3; label = "new" }))</span>
+    <span>(children { count = 3; label = "new" })</span>
 end
 
 (* A toggle whose children are elements, or a function of its state. *)
@@ -183,7 +183,7 @@ let () =
       Jest.test "a callback prop that takes nothing is called" (fun () ->
           let removed = ref 0 in
           T.render (fun () ->
-              <Removable title="card" on_remove=(fun _ -> incr removed) />);
+              <Removable title="card" on_remove=(fun () -> incr removed) />);
           T.click (button_by_text "card");
           E.(expect !removed |> toBe 1));
       Jest.test "a handler made in a branch is made as the branch is drawn"

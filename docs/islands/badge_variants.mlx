@@ -28,9 +28,9 @@ let row ~name ~variant =
 
 let make () =
   <div class_="flex flex-col gap-8">
-    (Solidtype.Jsx.element (row ~name:"primary" ~variant:`primary))
+    (row ~name:"primary" ~variant:`primary)
     <Separator />
-    (Solidtype.Jsx.element (row ~name:"secondary" ~variant:`secondary))
+    (row ~name:"secondary" ~variant:`secondary)
     <Separator />
-    (Solidtype.Jsx.element (row ~name:"soft" ~variant:`soft))
+    (row ~name:"soft" ~variant:`soft)
   </div>

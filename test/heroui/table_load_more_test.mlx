@@ -134,7 +134,7 @@ let () =
                         <Table.Load_more
                           is_loading=(S.get loading)
                           scroll_offset=0.
-                          on_load_more=(fun _ ->
+                          on_load_more=(fun () ->
                                          incr told;
                                          S.set set_loading true)>
                           <Table.Load_more_content>

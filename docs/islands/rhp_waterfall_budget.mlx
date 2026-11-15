@@ -107,12 +107,10 @@ let make () =
           on_click=(fun _ -> if is_expense s.kind then toggle s.line)>
           <Label edge="start" class_="item">
             (if is_expense s.kind then
-               Jsx.element
-                 <button
-                   type_=`button
-                   aria_pressed=(if s.cut then "true" else "false")>
-                   (Jsx.string s.item)
-                 </button>
+               <button
+                 type_=`button aria_pressed=(if s.cut then "true" else "false")>
+                 (Jsx.string s.item)
+               </button>
              else Jsx.string s.item)
           </Label>
           <Show when_=(is_expense s.kind)>

@@ -389,10 +389,10 @@ let () =
                 <Table.Header>
                   <Table.Column
                     id="name" allows_sorting=true is_row_header=true>
-                    "Name " (Jsx.element (Direction.make ()))
+                    "Name " (Direction.make ())
                   </Table.Column>
                   <Table.Column id="role" allows_sorting=true>
-                    "Role " (Jsx.element (Direction.make ()))
+                    "Role " (Direction.make ())
                   </Table.Column>
                   <Table.Column>"Actions"</Table.Column>
                 </Table.Header>
@@ -478,7 +478,7 @@ let () =
                   </For>
                   <Table.Load_more
                     is_loading=(S.get loading)
-                    on_load_more=(fun _ -> incr asked)
+                    on_load_more=(fun () -> incr asked)
                     class_="loader">
                     <span>"Loading more"</span>
                   </Table.Load_more>
@@ -584,9 +584,9 @@ let () =
                                        sizes))>
                 <Table.Root aria_label="Resizable">
                   <Table.Header>
-                    (Jsx.element (column ~id:"name" ~min:160. "Name"))
-                    (Jsx.element (column ~id:"role" ~min:220. "Role"))
-                    (Jsx.element (column ~id:"status" ~min:100. "Status"))
+                    (column ~id:"name" ~min:160. "Name")
+                    (column ~id:"role" ~min:220. "Role")
+                    (column ~id:"status" ~min:100. "Status")
                     <Table.Column id="email" min_width=200.>
                       "Email"
                     </Table.Column>

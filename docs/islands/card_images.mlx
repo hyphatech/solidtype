@@ -95,14 +95,12 @@ let make () =
             </Card.Footer>
           </Card>
           <div class_="col-span-12 grid grid-cols-12 gap-4">
-            (Solidtype.Jsx.element
-               (community ~image:"docs/demo1.jpg" ~alt:"Demo 1" ~fallback:"JK"
-                  ~title:"Indie Hackers" ~members:"148 members"
-                  ~avatar:"avatars/red.jpg" ~by:"By John"))
-            (Solidtype.Jsx.element
-               (community ~image:"docs/demo2.jpg" ~alt:"Demo 2" ~fallback:"AB"
-                  ~title:"AI Builders" ~members:"362 members"
-                  ~avatar:"avatars/blue.jpg" ~by:"By Martha"))
+            (community ~image:"docs/demo1.jpg" ~alt:"Demo 1" ~fallback:"JK"
+               ~title:"Indie Hackers" ~members:"148 members"
+               ~avatar:"avatars/red.jpg" ~by:"By John")
+            (community ~image:"docs/demo2.jpg" ~alt:"Demo 2" ~fallback:"AB"
+               ~title:"AI Builders" ~members:"362 members"
+               ~avatar:"avatars/blue.jpg" ~by:"By Martha")
           </div>
         </div>
         <Card

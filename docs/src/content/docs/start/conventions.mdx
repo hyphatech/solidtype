@@ -80,9 +80,10 @@ does not name, on its element, after its own attributes:
 
 ## Values in JSX
 
-A value is written as in TSX. A literal or a name is given as it is; any
-other expression is read again whenever what it reads changes, as Solid's
-compiler makes a TSX expression a getter. A function is a function.
+A value is written as itself, and Solid keeps it current. A literal or a
+name is given as it is; any other expression is read again whenever what it
+reads changes, as Solid's compiler makes an expression in JSX a getter. A
+function is a function. Solid's own TSX beside it:
 
 | TSX | OCaml |
 |---|---|
@@ -92,12 +93,13 @@ compiler makes a TSX expression a getter. A function is a function.
 | `name={props.name}` | `name=(S.get name)` |
 | `class={cls(on())}` | `class_=(cls (S.get on))` |
 | `{count()}` | `(Jsx.int (S.get count))` |
+| `{icon}`, `icon` an element | `icon` |
 | `onClose={() => hide()}` | `on_close=(fun () -> hide ())` |
 
 A signal given by its name, `text=count`, is refused where its value
 belongs: it is read with `S.get`. So is a function, `title=(fun () -> ...)`.
 Outside JSX -- a memo, an effect, an accessor -- a value that changes is
-written `fun () -> e`, as TSX writes `() => e`.
+written `fun () -> e`, as Solid's own API takes `() => e`.
 
 An optional prop, one a component may leave out, is passed on with OCaml's
 own `?`: present while its option is `Some`, absent while it is `None`, as

@@ -119,7 +119,7 @@ let%component make ?(orientation : [ `vertical | `horizontal ] = `vertical)
       `auto) ?(on_visibility_change : (edge -> unit) option)
     ?(is_enabled : bool = true) ?(hide_scroll_bar : bool = false)
     ?(size : int = 40) ?(offset : int = 0) ?(variant : [ `fade ] = `fade)
-    ?(class_ : string option) ~(children : Jsx.content) () =
+    ?(class_ : string option) ~(children : Jsx.element) () =
   let element = ref None in
   (* What was measured, once it is: content hidden before and after. *)
   let measured, set_measured = S.create_signal None in

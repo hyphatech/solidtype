@@ -111,7 +111,7 @@ module Group = struct
 end
 
 module Prefix = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_group "Time_field.Prefix" in
     <div
       class_=(after (Styles.DateInputGroup.prefix (S.get slots)) (S.get class_))
@@ -123,7 +123,7 @@ module Prefix = struct
 end
 
 module Suffix = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let slots = in_group "Time_field.Suffix" in
     <div
       class_=(after (Styles.DateInputGroup.suffix (S.get slots)) (S.get class_))
@@ -259,7 +259,7 @@ module Segment = struct
        literals: the element is drawn, and the colon inside a hidden span,
        on the server as in the browser, which looks for it there as it
        hydrates. *)
-    let resolved = S.children (fun () -> Jsx.element (drawn ())) in
+    let resolved = S.children (fun () -> drawn ()) in
     let parts () = S.to_array (S.get resolved) in
     let rest () =
       let all = parts () in
@@ -269,10 +269,7 @@ module Segment = struct
     | [||] -> Jsx.nothing
     | all ->
         Jsx.fragment
-          [|
-            all.(0);
-            <span hidden="">(Jsx.element (Jsx.fragment (rest ())))</span>;
-          |]
+          [| all.(0); <span hidden="">(Jsx.fragment (rest ()))</span> |]
   [@@element div]
 end
 

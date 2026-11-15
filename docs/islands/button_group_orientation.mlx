@@ -23,6 +23,6 @@ let group ~label ~orientation =
 
 let make () =
   <div class_="flex items-start gap-8">
-    (Solidtype.Jsx.element (group ~label:"Horizontal" ~orientation:`horizontal))
-    (Solidtype.Jsx.element (group ~label:"Vertical" ~orientation:`vertical))
+    (group ~label:"Horizontal" ~orientation:`horizontal)
+    (group ~label:"Vertical" ~orientation:`vertical)
   </div>

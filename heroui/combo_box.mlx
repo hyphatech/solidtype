@@ -54,7 +54,7 @@ let styled own = function Some s -> own ^ " " ^ s | None -> own
 module Input_group = struct
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let c = within "Combo_box.Input_group" in
     (* Hovered, focused within and focus-visible as React Aria's group is. *)
     let i = Interaction.create ~disabled:(fun () -> S.get c.disabled) () in
@@ -81,7 +81,7 @@ end
 module Trigger = struct
   let%component make ?(class_ : string option)
       ?ref:(given_ref : (Dom.htmlButtonElement -> unit) option)
-      ?(children : Jsx.content option) () =
+      ?(children : Jsx.element option) () =
     let c = within "Combo_box.Trigger" in
     let i = Interaction.create ~disabled:(fun () -> S.get c.disabled) () in
     <Kobalte.Trigger
@@ -99,12 +99,11 @@ module Trigger = struct
       (match S.get children with
       | Some drawn -> drawn
       | None ->
-          Jsx.element
-            <Gravity.Chevron_down
-              aria_hidden=true
-              role=`presentation
-              data_slot="combo-box-trigger-default-icon"
-            />)
+          <Gravity.Chevron_down
+            aria_hidden=true
+            role=`presentation
+            data_slot="combo-box-trigger-default-icon"
+          />)
     </Kobalte.Trigger>
   [@@element button]
 end
@@ -177,7 +176,7 @@ module Popover = struct
   let%component make ?(placement : placement option) ?(class_ : string option)
       ?(style : string option)
       ?ref:(given_ref : (Dom.htmlDivElement -> unit) option)
-      ~(children : Jsx.content) () =
+      ~(children : Jsx.element) () =
     let c = within "Combo_box.Popover" in
     S.create_computed (fun () ->
         c.set_placement (Option.value (S.get placement) ~default:`bottom));
@@ -213,21 +212,20 @@ module Popover = struct
               props=(Props.others props)>
               (match S.get c.hosted with
               | Some (h : List_box.hosted) ->
-                  Jsx.element
-                    <As_list
-                      as_="div"
-                      ref=(fun e -> h.list_ref e)
-                      scroll_to_item=(fun key -> h.scroll_to_item key)
-                      aria_orientation=`vertical
-                      class_=(S.get h.classes)
-                      data_slot="list-box"
-                      data_layout="stack"
-                      data_orientation="vertical"
-                      data_empty=(Jsx.flag (S.get h.empty))
-                      props=h.others>
-                      (fun collection -> h.draw collection)
-                    </As_list>
-              | None -> Jsx.element Jsx.nothing)
+                  <As_list
+                    as_="div"
+                    ref=(fun e -> h.list_ref e)
+                    scroll_to_item=(fun key -> h.scroll_to_item key)
+                    aria_orientation=`vertical
+                    class_=(S.get h.classes)
+                    data_slot="list-box"
+                    data_layout="stack"
+                    data_orientation="vertical"
+                    data_empty=(Jsx.flag (S.get h.empty))
+                    props=h.others>
+                    (fun collection -> h.draw collection)
+                  </As_list>
+              | None -> Jsx.nothing)
             </Kobalte.Content>
           </Kobalte.Portal>
         </Show>;
@@ -652,7 +650,7 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         data_required=(Jsx.flag (S.get is_required))
         ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root>
   | `multiple ->
       <Kobalte.Root_multiple
@@ -710,6 +708,6 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
         data_required=(Jsx.flag (S.get is_required))
         ?as_=(Option.map (fun f p -> f p state) (S.get as_))
         props=others>
-        (Jsx.element (parts ()))
+        (parts ())
       </Kobalte.Root_multiple>
 [@@element div]

@@ -577,7 +577,7 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
     ? given.own
     : [...(options ? checker.getPropertiesOfType(options) : (fixed?.own ?? (polymorphic ? [] : declaredProps()))), ...commons];
   const args: string[] = [];
-  let children = "?children:('f, [ `nodes ]) Solidtype.Check.children ->";
+  let children = "?children:('f, [ `elements ]) Solidtype.Check.children ->";
   for (const p of own) {
     if (!named(p.name)) continue;
     const pt = checker.getTypeOfSymbol(p);
@@ -595,10 +595,10 @@ export function part(src: Source, jsModule: string, where: string, decl: ts.Sign
       const render = t.kind === "ref" && t.module === "Either" && showOut(t.args[0]!) === showOut(jsxElement) ? t.args[1] : undefined;
       const q = optional ? "?" : "";
       children = render
-        ? `${q}children:(${showOut(render)}, [ \`nodes | \`render ]) Solidtype.Check.children ->`
+        ? `${q}children:(${showOut(render)}, [ \`elements | \`render ]) Solidtype.Check.children ->`
         : isArrow(t)
           ? `${q}children:(${showOut(t)}, [ \`render ]) Solidtype.Check.children ->`
-          : `${q}children:('f, [ \`nodes ]) Solidtype.Check.children ->`;
+          : `${q}children:('f, [ \`elements ]) Solidtype.Check.children ->`;
       continue;
     }
     const name = record(names, p.name);

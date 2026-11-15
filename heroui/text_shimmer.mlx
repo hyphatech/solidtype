@@ -40,7 +40,7 @@ let sweep e =
     |]
     (options ~duration:2500. ~easing:"ease" ~iterations:infinity ())
 
-let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+let%component make ?(class_ : string option) ~(children : Jsx.element) () =
   let running = ref None in
   S.on_cleanup (fun () -> Option.iter cancel !running);
   <span

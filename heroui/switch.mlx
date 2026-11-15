@@ -70,7 +70,7 @@ module Content = struct
 end
 
 module Control = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let s = within "Switch.Control" in
     <span
       class_=(after (Styles.Switch.control (S.get s.slots)) (S.get class_))

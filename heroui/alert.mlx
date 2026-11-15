@@ -23,7 +23,7 @@ let within part =
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let a = within "Alert.Indicator" in
     <div
@@ -41,7 +41,7 @@ module Indicator = struct
 end
 
 module Content = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let a = within "Alert.Content" in
     <div
       class_=(after (Styles.Alert.content (S.get a.slots)) (S.get class_))
@@ -53,7 +53,7 @@ module Content = struct
 end
 
 module Title = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let a = within "Alert.Title" in
     <p
       class_=(after (Styles.Alert.title (S.get a.slots)) (S.get class_))
@@ -65,7 +65,7 @@ module Title = struct
 end
 
 module Description = struct
-  let%component make ?(class_ : string option) ~(children : Jsx.content) () =
+  let%component make ?(class_ : string option) ~(children : Jsx.element) () =
     let a = within "Alert.Description" in
     <span
       class_=(after (Styles.Alert.description (S.get a.slots)) (S.get class_))
@@ -78,7 +78,7 @@ end
 
 let%component make ?(status : status = `default)
     ?(role : Solidtype.Html.Div.role option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   let a =
     {
       slots =

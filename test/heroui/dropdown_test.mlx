@@ -314,15 +314,12 @@ let both ?(custom = false) ?(long_press = false) ?placement (menu : menu) =
         <p data_testid="outside">"Outside"</p>
         <Dropdown trigger=(if long_press then `long_press else `press)>
           (if custom then
-             Solidtype.Jsx.element
-               <Dropdown.Trigger aria_label="Profile">
-                 <span>"Sarah"</span>
-               </Dropdown.Trigger>
-           else
-             Solidtype.Jsx.element
-               <Button aria_label="Menu" variant=`secondary>"Actions"</Button>)
+             <Dropdown.Trigger aria_label="Profile">
+               <span>"Sarah"</span>
+             </Dropdown.Trigger>
+           else <Button aria_label="Menu" variant=`secondary>"Actions"</Button>)
           <Dropdown.Popover ?placement=(Option.map fst placement)>
-            (Solidtype.Jsx.element (items menu tell))
+            (items menu tell)
           </Dropdown.Popover>
         </Dropdown>
       </div>);
@@ -580,7 +577,7 @@ let () =
                 <Button>"Menu"</Button>
                 <Dropdown.Popover>
                   <Dropdown.Menu on_action=(fun key -> tell ("action " ^ key))>
-                    (Solidtype.Jsx.element (item "copy"))
+                    (item "copy")
                   </Dropdown.Menu>
                   <Dropdown.Menu
                     selection_mode=`multiple
@@ -589,7 +586,7 @@ let () =
                                             ("selected "
                                             ^ String.concat " "
                                                 (Array.to_list keys)))>
-                    (Solidtype.Jsx.element (item "bold"))
+                    (item "bold")
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>);

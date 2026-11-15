@@ -188,13 +188,10 @@ let both ?variant ?is_dismissable ?is_keyboard_dismiss_disabled ?placement ?size
         <p data_testid="outside">"Outside"</p>
         <Alert_dialog>
           (if custom then
-             Solidtype.Jsx.element
-               <Alert_dialog.Trigger aria_label="Open">
-                 <span>"Card"</span>
-               </Alert_dialog.Trigger>
-           else
-             Solidtype.Jsx.element
-               <Button variant=`danger>"Delete Project"</Button>)
+             <Alert_dialog.Trigger aria_label="Open">
+               <span>"Card"</span>
+             </Alert_dialog.Trigger>
+           else <Button variant=`danger>"Delete Project"</Button>)
           <Alert_dialog.Backdrop
             ?variant ?is_dismissable ?is_keyboard_dismiss_disabled>
             <Alert_dialog.Container ?placement ?size>

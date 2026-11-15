@@ -38,38 +38,35 @@ let make () =
                    ((* A combo box's mode is read as it is made, so another
                         makes another combo box, as React's key does. *)
                     let mode = fst (S.get mode) in
-                    Solidtype.Jsx.element
-                      <Combo_box
-                        class_="w-[256px]"
-                        selection_mode=mode
-                        variant=(fst (S.get variant))
-                        is_disabled=(S.get disabled)>
-                        <Label>"Favorite Animal"</Label>
-                        <Combo_box.Input_group>
-                          <Input placeholder="Search animals..." />
-                          <Combo_box.Trigger />
-                        </Combo_box.Input_group>
-                        (match mode with
-                        | `multiple ->
-                            Solidtype.Jsx.element
-                              <Combo_box.Value placeholder="No animals selected"
-                              />
-                        | `single -> Solidtype.Jsx.element Solidtype.Jsx.nothing)
-                        <Combo_box.Popover>
-                          <List_box
-                            selection_mode=(mode :> List_box.selection_mode)>
-                            <List_box.Item id="cat" text_value="Cat">
-                              "Cat" <List_box.Item_indicator />
-                            </List_box.Item>
-                            <List_box.Item id="dog" text_value="Dog">
-                              "Dog" <List_box.Item_indicator />
-                            </List_box.Item>
-                            <List_box.Item id="panda" text_value="Panda">
-                              "Panda" <List_box.Item_indicator />
-                            </List_box.Item>
-                          </List_box>
-                        </Combo_box.Popover>
-                      </Combo_box>)
+                    <Combo_box
+                      class_="w-[256px]"
+                      selection_mode=mode
+                      variant=(fst (S.get variant))
+                      is_disabled=(S.get disabled)>
+                      <Label>"Favorite Animal"</Label>
+                      <Combo_box.Input_group>
+                        <Input placeholder="Search animals..." />
+                        <Combo_box.Trigger />
+                      </Combo_box.Input_group>
+                      (match mode with
+                      | `multiple ->
+                          <Combo_box.Value placeholder="No animals selected" />
+                      | `single -> Solidtype.Jsx.nothing)
+                      <Combo_box.Popover>
+                        <List_box
+                          selection_mode=(mode :> List_box.selection_mode)>
+                          <List_box.Item id="cat" text_value="Cat">
+                            "Cat" <List_box.Item_indicator />
+                          </List_box.Item>
+                          <List_box.Item id="dog" text_value="Dog">
+                            "Dog" <List_box.Item_indicator />
+                          </List_box.Item>
+                          <List_box.Item id="panda" text_value="Panda">
+                            "Panda" <List_box.Item_indicator />
+                          </List_box.Item>
+                        </List_box>
+                      </Combo_box.Popover>
+                    </Combo_box>)
                  </div>)
       react=(fun host ->
               Heroui_react.combo_box host

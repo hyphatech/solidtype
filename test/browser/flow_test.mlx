@@ -65,6 +65,10 @@ end
 let () =
   Jest.describe "lists" (fun () ->
       Jest.afterEach T.cleanup;
+      Jest.test "an accessor whose value is a function gives that function"
+        (fun () ->
+          let shout = S.accessor (fun () -> fun s -> s ^ "!") in
+          E.(expect ((S.get shout) "hi") |> toEqual "hi!"));
       Jest.test "For renders each item, and an item added" (fun () ->
           let items, set_items = S.create_signal [| "a"; "b" |] in
           T.render (fun () ->

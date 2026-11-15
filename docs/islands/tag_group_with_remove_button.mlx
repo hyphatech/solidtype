@@ -65,7 +65,7 @@ let make () =
                 (fun (s : Tag.state) ->
                   Jsx.fragment
                     [|
-                      Jsx.of_content (Jsx.string name);
+                      Jsx.string name;
                       (if S.get s.allows_removing then
                          <Tag.Remove_button>
                            <Gravity.Circle_xmark_fill />

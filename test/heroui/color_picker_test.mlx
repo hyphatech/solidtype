@@ -253,12 +253,11 @@ let picker ?value ?default_value ?(fixed = false) ?placement ?own_value
                   told := Array.append !told [| hex c |];
                   if (not fixed) && Option.is_some value then
                     S.set set_held (Some c))>
-      (if button then Solidtype.Jsx.element <Button>"Pick"</Button>
+      (if button then <Button>"Pick"</Button>
        else
-         Solidtype.Jsx.element
-           <Color_picker.Trigger>
-             <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
-           </Color_picker.Trigger>)
+         <Color_picker.Trigger>
+           <Color_swatch size=`lg /> <Label>"Pick a color"</Label>
+         </Color_picker.Trigger>)
       <Color_picker.Popover ?placement should_flip=false>
         <Color_area
           aria_label="Color area"

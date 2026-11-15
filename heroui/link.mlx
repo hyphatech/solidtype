@@ -11,7 +11,7 @@ let slots () = Styles.Link.slots (Styles.Link.options ())
 let after base = function Some c -> base ^ " " ^ c | None -> base
 
 module Icon = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let icon () = after (Styles.Link.icon (slots ())) (S.get class_) in
     <Show

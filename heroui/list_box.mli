@@ -85,7 +85,7 @@ module Listing : sig
     module Props : sig
       val check :
         value:listing Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -122,7 +122,7 @@ module Host : sig
     module Props : sig
       val check :
         value:(hosted -> Jsx.element) Solidtype.Check.value ->
-        ?children:('f, [ `nodes ]) Solidtype.Check.children ->
+        ?children:('f, [ `elements ]) Solidtype.Check.children ->
         unit ->
         unit
     end
@@ -159,7 +159,7 @@ module Item : sig
       ?on_key_down:(Dom.keyboardEvent -> unit) ->
       ?ref:(Dom.htmlDivElement -> unit) ->
       children:
-        (state -> Jsx.element, [ `nodes | `render ]) Solidtype.Check.children ->
+        (state -> Jsx.element, [ `elements | `render ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> state -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -202,7 +202,7 @@ module Load_more_item : sig
       ?is_loading:bool Solidtype.Check.value ->
       ?on_load_more:(unit -> unit) ->
       ?scroll_offset:float Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Div.check
@@ -220,7 +220,7 @@ module Section : sig
 
     val check :
       ?class_:string Solidtype.Check.value ->
-      children:(_, [ `nodes ]) Solidtype.Check.children ->
+      children:(_, [ `elements ]) Solidtype.Check.children ->
       ?as_:(Solidtype.Html.Section.props -> Jsx.element) ->
       ?props:t S.rest ->
       (unit -> unit) Solidtype.Html.Section.check
@@ -251,7 +251,7 @@ module Props : sig
     ?variant:[ `default | `danger ] Solidtype.Check.value ->
     ?class_:string Solidtype.Check.value ->
     ?ref:(Dom.htmlDivElement -> unit) ->
-    ?children:(_, [ `nodes ]) Solidtype.Check.children ->
+    ?children:(_, [ `elements ]) Solidtype.Check.children ->
     ?as_:(Solidtype.Html.Div.props -> Jsx.element) ->
     ?props:t S.rest ->
     (unit -> unit) Solidtype.Html.Div.check

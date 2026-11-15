@@ -25,9 +25,7 @@ let make () =
         <Accordion.Item>
           <Accordion.Heading>
             <Accordion.Trigger>
-              <span class_="me-3 size-4 shrink-0 text-muted">
-                (Solidtype.Jsx.element (icon ()))
-              </span>
+              <span class_="me-3 size-4 shrink-0 text-muted">(icon ())</span>
               (Solidtype.Jsx.string title)
               <Accordion.Indicator>
                 <Gravity.Chevron_down />

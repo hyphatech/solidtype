@@ -108,7 +108,7 @@ module Swatch = struct
 end
 
 module Indicator = struct
-  let%component make ?(class_ : string option) ?(children : Jsx.content option)
+  let%component make ?(class_ : string option) ?(children : Jsx.element option)
       () =
     let slots = within "Color_swatch_picker.Indicator" in
     let item = Headless.Item.Context.use () in
@@ -123,19 +123,18 @@ module Indicator = struct
       (match S.get children with
       | Some given -> given
       | None ->
-          Jsx.element
-            <svg
-              aria_hidden=true
-              data_slot="color-swatch-picker-checkmark"
-              fill="none"
-              role=`presentation
-              stroke="currentColor"
-              stroke_linecap="round"
-              stroke_linejoin="round"
-              stroke_width="1.5"
-              view_box="0 0 12 12">
-              <polyline points="2.5 6 5 8.5 9.5 3" />
-            </svg>)
+          <svg
+            aria_hidden=true
+            data_slot="color-swatch-picker-checkmark"
+            fill="none"
+            role=`presentation
+            stroke="currentColor"
+            stroke_linecap="round"
+            stroke_linejoin="round"
+            stroke_width="1.5"
+            view_box="0 0 12 12">
+            <polyline points="2.5 6 5 8.5 9.5 3" />
+          </svg>)
     </span>
   [@@element span]
 end
@@ -146,7 +145,7 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
     ?(variant : [ `circle | `square ] option)
     ?(layout : [ `grid | `stack ] option) ?(aria_label : string option)
     ?(aria_labelledby : string option) ?(class_ : string option)
-    ~(children : Jsx.content) () =
+    ~(children : Jsx.element) () =
   let slots =
     S.accessor (fun () ->
         Styles.ColorSwatchPicker.slots

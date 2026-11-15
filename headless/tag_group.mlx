@@ -248,7 +248,7 @@ module Root = struct
       ?aria_describedby:string Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
@@ -283,7 +283,7 @@ module Root = struct
     external aria_describedby : t -> string option = "aria-describedby"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   (* The props the group takes for itself; the rest it passes on. *)
@@ -508,10 +508,9 @@ module Root = struct
       <div ?as_=(S.drawn_as props) props=(S.undrawn (S.omit props own))>
         (Props.children props)
         (if S.get g.removable then
-           Jsx.element
-             <span id=g.removal_hint style="display: none">
-               "Press Delete or Backspace to remove."
-             </span>
+           <span id=g.removal_hint style="display: none">
+             "Press Delete or Backspace to remove."
+           </span>
          else Jsx.string "")
       </div>
     </Group_context.Provider>
@@ -528,11 +527,11 @@ module Named = struct
     external check :
       ?as_:(Solidtype.Html.Span.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Span.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
   end
 
   (* Its id is the one the list names, so a caller's is left out. *)
@@ -584,15 +583,15 @@ module List = struct
       ?render_empty_state:(unit -> Solidtype.Jsx.element) ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external render_empty_state : t -> ((unit -> Jsx.element)[@u]) option
+    external render_empty_state : t -> Jsx.element S.accessor option
       = "renderEmptyState"
     [@@mel.get]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -670,9 +669,9 @@ module List = struct
                      Selectable_list.on_focus_out g.list e)
       ?as_=(S.drawn_as props)
       props=(S.undrawn (S.omit props own))>
-      (Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
+      (Jsx.fragment (S.to_array (S.get resolved)))
       (match Props.render_empty_state props with
-      | Some draw when S.get g.is_empty -> Jsx.element (S.get draw)
+      | Some draw when S.get g.is_empty -> S.get draw
       | Some _ | None -> Jsx.string "")
     </div>
 
@@ -693,14 +692,14 @@ module Tag = struct
       ?is_disabled:bool Solidtype.Check.value ->
       ?as_:(Solidtype.Html.Div.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Div.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
     external id : t -> string option = "id" [@@mel.get]
     external text_value : t -> string option = "textValue" [@@mel.get]
     external is_disabled : t -> bool option = "isDisabled" [@@mel.get]
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external ref : t -> ((Dom.htmlDivElement -> unit)[@u]) option = "ref"
     [@@mel.get]
@@ -808,10 +807,9 @@ module Tag = struct
        it is in. *)
     let resolved =
       S.children (fun () ->
-          Jsx.element
-            <Tag_context.Provider value=t>
-              (Props.children props)
-            </Tag_context.Provider>)
+          <Tag_context.Provider value=t>
+            (Props.children props)
+          </Tag_context.Provider>)
     in
     let text =
       S.accessor (fun () ->
@@ -915,7 +913,7 @@ module Tag = struct
         ?as_=(S.drawn_as props)
         props=(S.undrawn (S.omit props own))>
         <div role=`gridcell aria_colindex="1" style="display: contents">
-          (Jsx.element (Jsx.fragment (S.to_array (S.get resolved))))
+          (Jsx.fragment (S.to_array (S.get resolved)))
         </div>
       </div>
     </Tag_context.Provider>
@@ -930,11 +928,11 @@ module Remove_button = struct
     external check :
       ?as_:(Solidtype.Html.Button.props -> Solidtype.Jsx.element) ->
       ?props:'spread Solidtype.Solid.rest ->
-      (?children:('f, [ `nodes ]) Solidtype.Check.children -> unit -> unit)
+      (?children:('f, [ `elements ]) Solidtype.Check.children -> unit -> unit)
       Solidtype.Html.Button.check = "check"
     [@@mel.module "vite-plugin-solidtype/markers"]
 
-    external children : t -> Jsx.content = "children" [@@mel.get]
+    external children : t -> Jsx.element = "children" [@@mel.get]
 
     external on_click : t -> ((Dom.mouseEvent -> unit)[@u]) option = "onClick"
     [@@mel.get]
