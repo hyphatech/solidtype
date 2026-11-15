@@ -359,8 +359,8 @@ let%component make ?(value : float array option)
       step=(fun () -> S.get step)
       orientation=(fun () -> S.get orientation)
       disabled=(fun () -> S.get disabled)
-      ?name
-      ?aria_label
+      ?name=(fun () -> S.get name)
+      ?aria_label=(fun () -> S.get aria_label)
       aria_labelledby=(fun () -> label_id)
       class_=(fun () ->
                after (Styles.Slider.base (S.get s.slots)) (S.get class_))

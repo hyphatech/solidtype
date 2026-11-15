@@ -1,5 +1,16 @@
 # Changes
 
+## Unreleased
+
+- An optional prop is given as any value that changes is, `?title=(fun ()
+  -> S.get note)`, as a required one is. Breaking: `?title=note`, which
+  0.10.0 took for an accessor of an option, is refused with a message saying
+  so, since a bare name is a value read once wherever else it is given.
+
+- A function child is given in place as the child, `<For ...>(fun item _ ->
+  ...)</For>`, and by its name as `render=f`; `render=(fun ...)` is
+  refused, with a message saying so, as a second way to write the first.
+
 ## 0.10.0 (2026-11-13)
 
 - Every context is reached by its module's `Context.use ()`, as the ports'

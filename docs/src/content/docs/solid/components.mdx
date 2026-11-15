@@ -52,7 +52,8 @@ writes:
 - `component`, `make` as the value a JSX tag names.
 
 So in the body a value prop is read as a signal is, `S.get name`, never as a
-plain value, and is handed on as it is, `?title=name`. A function prop is
+plain value, and is handed on as any value that changes is,
+`?title=(fun () -> S.get name)`. A function prop is
 called, `on_close ()`. An optional parameter with a default,
 `?(greeting : string = "Hello")`, reads its default while the prop is left
 out; one without, `?(note : string option)`, reads an `option`.

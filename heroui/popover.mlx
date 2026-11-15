@@ -62,7 +62,7 @@ module Trigger = struct
     let p = within "Popover.Trigger" in
     <As_div
       as_="div"
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       class_=(fun () -> after (Styles.Popover.trigger p.slots) (S.get class_))
       role=`button
       tabindex="0"
@@ -192,7 +192,7 @@ module Arrow = struct
           size=12. style="visibility: hidden;" ref=(fun k -> follow k)
         />;
         <div
-          ?class_
+          ?class_=(fun () -> S.get class_)
           style=(fun () ->
                   "position: absolute; " ^ S.get position
                   ^ match S.get style with Some s -> " " ^ s | None -> "")
@@ -262,8 +262,8 @@ let%component make ?(is_open : bool option) ?(default_open : bool option)
     }
   in
   <Kobalte.Root
-    ?open_=is_open
-    ?default_open
+    ?open_=(fun () -> S.get is_open)
+    ?default_open=(fun () -> S.get default_open)
     on_open_change=(fun o ->
                      S.set set_kept o;
                      ignore (on_open_change o : unit option))

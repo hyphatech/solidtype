@@ -115,7 +115,7 @@ struct
     let label : Label.slot =
      fun classes others children ->
       <Kobalte_label
-        ?id=label_id
+        ?id=(fun () -> S.get label_id)
         class_=(fun () -> classes ())
         data_slot="label"
         props=others>

@@ -73,7 +73,7 @@ module Item = struct
           (* Kobalte's breadcrumb link takes no disabled of its own, so the
              port marks the page on Kobalte's link, as that one does. *)
           <Link.Root
-            ?href
+            ?href=(fun () -> Solid.get href)
             disabled=(fun () -> disabled ())
             ?aria_current=(fun () -> if current () then Some "page" else None)
             class_=(fun () ->

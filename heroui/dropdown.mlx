@@ -157,7 +157,7 @@ module Trigger = struct
       }
     in
     <Kobalte.Trigger
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       class_=(fun () -> after (Styles.Dropdown.trigger d.slots) (S.get class_))
       ?aria_describedby=(fun () ->
                           Option.map (fun l -> l.description) d.long_press)
@@ -542,7 +542,7 @@ module Item = struct
     | Some sub_open, (`none | `single | `multiple) ->
         <Kobalte.SubTrigger
           id=(fun () -> unique ())
-          ?text_value
+          ?text_value=(fun () -> S.get text_value)
           disabled=(fun () -> disabled ())
           class_=(fun () -> classes ())
           on_key_down=(fun e -> ignore (on_key_down e : unit option))
@@ -563,7 +563,7 @@ module Item = struct
     | None, `none ->
         <Kobalte.Item
           id=(fun () -> unique ())
-          ?text_value
+          ?text_value=(fun () -> S.get text_value)
           disabled=(fun () -> disabled ())
           class_=(fun () -> classes ())
           on_key_down=(fun e -> ignore (on_key_down e : unit option))
@@ -584,7 +584,7 @@ module Item = struct
     | None, ((`single | `multiple) as mode) ->
         <Kobalte.CheckboxItem
           id=(fun () -> unique ())
-          ?text_value
+          ?text_value=(fun () -> S.get text_value)
           disabled=(fun () -> disabled ())
           checked=(fun () -> S.get selected)
           close_on_select=(fun () ->

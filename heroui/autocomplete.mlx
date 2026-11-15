@@ -821,7 +821,10 @@ let%component make ?(placeholder : string = "Select an item")
                 <Field_error.Slot.Provider value=(fun () -> error)>
                   (fun () -> Jsx.draw (S.get children) state)
                   <For each=(fun () -> sent_keys ())>
-                    (fun key _ -> <input type_="hidden" ?name value=key />)
+                    (fun key _ ->
+                      <input
+                        type_="hidden" ?name=(fun () -> S.get name) value=key
+                      />)
                   </For>
                 </Field_error.Slot.Provider>
               </Description.Slot.Provider>

@@ -63,8 +63,8 @@ let%component make ?(variant : [ `primary | `secondary ] option)
   in
   <Context.Provider value=(fun () -> f)>
     <Kobalte.Root
-      ?value
-      ?default_value
+      ?value=(fun () -> S.get value)
+      ?default_value=(fun () -> S.get default_value)
       on_change=(fun v ->
                   in_form.changed ();
                   ignore (on_change v : unit option))
@@ -72,7 +72,7 @@ let%component make ?(variant : [ `primary | `secondary ] option)
       required=(fun () -> S.get is_required)
       disabled=(fun () -> S.get is_disabled)
       read_only=(fun () -> S.get is_read_only)
-      ?name
+      ?name=(fun () -> S.get name)
       class_=(fun () ->
                Styles.TextField.classes
                  (Styles.TextField.options ?full_width:(S.get full_width)

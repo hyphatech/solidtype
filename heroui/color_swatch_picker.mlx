@@ -100,7 +100,7 @@ module Swatch = struct
       =
     let slots = within "Color_swatch_picker.Swatch" in
     <Headless.Swatch
-      ?color_name
+      ?color_name=(fun () -> S.get color_name)
       class_=(fun () ->
                after
                  (Styles.ColorSwatchPicker.swatch (S.get slots))
@@ -161,12 +161,12 @@ let%component make ?(value : Color.t option) ?(default_value : Color.t option)
   in
   <Context.Provider value=(fun () -> slots)>
     <Headless.Root
-      ?value
-      ?default_value
+      ?value=(fun () -> S.get value)
+      ?default_value=(fun () -> S.get default_value)
       on_change=(fun c -> ignore (on_change c : unit option))
-      ?layout
-      ?aria_label
-      ?aria_labelledby
+      ?layout=(fun () -> S.get layout)
+      ?aria_label=(fun () -> S.get aria_label)
+      ?aria_labelledby=(fun () -> S.get aria_labelledby)
       class_=(fun () ->
                after
                  (Styles.ColorSwatchPicker.base (S.get slots))

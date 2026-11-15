@@ -675,6 +675,35 @@ An optional prop given a thunk of a value that is no option.
            int option
   [1]
 
+An optional prop given a bare name, which elsewhere is a value read once:
+a signal is given as any value that changes is.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () =
+  >   let count, _ = Solidtype.Solid.create_signal (Some 3) in
+  >   <Label text=(fun () -> "x") ?count />
+  > EOF
+  $ build
+  File "case.mlx", line 3, characters 31-36:
+  3 |   <Label text=(fun () -> "x") ?count />
+                                     ^^^^^
+  Error: an optional prop is a thunk of an option, as any value that changes
+         is: ?count=(fun () -> o)
+  [1]
+
+A function child written in place given as render=, which names one.
+
+  $ cat > case.mlx <<'EOF'
+  > let make () = <Each each=(fun () -> [| "a" |]) render=(fun s -> <b>s</b>) />
+  > EOF
+  $ build
+  File "case.mlx", line 1, characters 54-73:
+  1 | let make () = <Each each=(fun () -> [| "a" |]) render=(fun s -> <b>s</b>) />
+                                                            ^^^^^^^^^^^^^^^^^^^
+  Error: a function written in place is the component's child, <C>(fun
+         ...)</C>; render=f gives one by its name
+  [1]
+
 An optional prop given a value, not a thunk of an option.
 
   $ cat > case.mlx <<'EOF'
@@ -684,7 +713,8 @@ An optional prop given a value, not a thunk of an option.
   File "case.mlx", line 1, characters 49-57:
   1 | let make () = <Label text=(fun () -> "x") ?count=(Some 3) />
                                                        ^^^^^^^^
-  Error: an optional prop is a thunk of an option: ?count=(fun () -> o)
+  Error: an optional prop is a thunk of an option, as any value that changes
+         is: ?count=(fun () -> o)
   [1]
 
 An optional handler, which an element's handler cannot be.

@@ -208,7 +208,7 @@ module Trigger = struct
       }
     in
     <Solidtype_kobalte.Dialog.Trigger
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       class_=(fun () -> after (Styles.Drawer.trigger (slots ())) (S.get class_))
       ref=(fun b ->
             ignore (given_ref b : unit option);

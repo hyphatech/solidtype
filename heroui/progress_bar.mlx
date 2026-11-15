@@ -179,7 +179,7 @@ let%component make ?(value : float = 0.) ?(is_indeterminate : bool = false)
       indeterminate=(fun () -> S.get is_indeterminate)
       min_value=(fun () -> S.get min_value)
       max_value=(fun () -> S.get max_value)
-      ?aria_label
+      ?aria_label=(fun () -> S.get aria_label)
       get_value_label=value_label
       class_=(fun () ->
                after (Styles.ProgressBar.base (S.get m.slots)) (S.get class_))

@@ -560,7 +560,9 @@ let%component make ?(selection_mode : [ `single | `multiple ] = `single)
               <Parts>
                 (fun () -> Jsx.draw (S.get children) state)
                 <For each=(fun () -> sent_keys ())>
-                  (fun key _ -> <input type_="hidden" ?name value=key />)
+                  (fun key _ ->
+                    <input type_="hidden" ?name=(fun () -> S.get name) value=key
+                    />)
                 </For>
               </Parts>
             </Field_error.Message.Provider>

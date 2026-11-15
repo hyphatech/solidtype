@@ -162,7 +162,7 @@ module Input = struct
         (* An autocomplete's search: Kobalte's combo box input, whose keys
            move through the list and choose, and Escape closes it. *)
         <Kobalte_combo_box.Input
-          ?placeholder
+          ?placeholder=(fun () -> S.get placeholder)
           ?name=(fun () -> S.get f.name)
           ?aria_label=(fun () -> S.get f.aria_label)
           enterkeyhint="go"
@@ -200,7 +200,7 @@ module Input = struct
           | _ -> ()
         in
         <Kobalte.Input
-          ?placeholder
+          ?placeholder=(fun () -> S.get placeholder)
           type_="search"
           class_=(fun () -> classes ())
           ref=watched

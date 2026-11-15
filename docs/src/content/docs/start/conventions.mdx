@@ -87,13 +87,14 @@ A literal is given as it is, and anything that may change as a thunk,
 
 An optional prop, one a component may leave out, is passed on as it is
 with OCaml's own `?`: present while its option is `Some`, absent while it
-is `None`, as TSX passes `undefined`. An accessor of an option, a signal's
-or a component's optional parameter, passes on by its name.
+is `None`, as TSX passes `undefined`. Given as any value that changes is,
+`(fun () -> ...)`, it is written the same whether the prop is required or
+optional; a bare name is a value, read once.
 
 | TSX | OCaml |
 |---|---|
-| `title={note()}` | `?title=note` |
-| `name={props.name}` | `?name` |
+| `title={note()}` | `?title=(fun () -> S.get note)` |
+| `name={props.name}` | `?name=(fun () -> S.get name)` |
 | `onRemove={editable ? remove : undefined}` | `?on_remove=(fun () -> if editable then Some remove else None)` |
 
 A function prop is given or left out so too. The compiler refuses `?` on a

@@ -103,7 +103,7 @@ let%component make ~(href : string) ?(is_disabled : bool option)
     data_focus_visible=(fun () -> Jsx.flag (Interaction.focus_visible i))
     data_disabled=(fun () -> Jsx.flag (Interaction.disabled i))
     data_current=(fun () -> Jsx.flag (current ()))
-    ?aria_current
+    ?aria_current=(fun () -> S.get aria_current)
     ?as_=(fun () -> Option.map (fun f p -> f p (state ())) (S.get as_))
     props=(Props.others props)>
     (fun () -> Jsx.draw (S.get children) (state ()))

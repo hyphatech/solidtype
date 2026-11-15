@@ -6,8 +6,8 @@
     where the prop is, and ends in [unit]: a value prop as a {!value}, a
     function prop as the function, a JSX element as {!element}, and its children
     as {!children} of the kinds it takes. An optional prop, a value or a
-    function alike, is given or left out by one option, [?name=(fun () -> o)],
-    or an accessor of one by its name, [?name=o]. *)
+    function alike, is given or left out by one option, [?name=(fun () -> o)].
+*)
 
 type 'a value = 'a
 (** A value prop, as the check reads it: a literal, or what a thunk returns, so
@@ -26,6 +26,5 @@ external render : 'f -> ('f, [> `render ]) children = "%identity"
 external element : unit -> Jsx.element value = "%identity"
 
 external optional : ((unit -> 'a option)[@u]) -> 'a value option = "%identity"
-(** An optional prop given as [?name=(fun () -> o)], or [?name=o] for an
-    accessor [o], passed to the check as [?name:]: refused where the prop is not
-    optional. *)
+(** An optional prop given as [?name=(fun () -> o)], passed to the check as
+    [?name:]: refused where the prop is not optional. *)

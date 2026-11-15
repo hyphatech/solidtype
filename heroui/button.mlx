@@ -270,13 +270,13 @@ let%component make
                   ~size:(S.get size) ~full_width:(S.get full_width)
                   ~is_icon_only:(S.get is_icon_only) ?class_:(S.get class_) ()))
     disabled=(fun () -> S.get is_disabled)
-    ?aria_label
+    ?aria_label=(fun () -> S.get aria_label)
     ?id=(fun () ->
           match (S.get id, trigger) with
           | Some given, _ -> Some given
           | None, None -> Some own_id
           | None, Some _ -> None)
-    ?aria_labelledby=labelled_by
+    ?aria_labelledby=(fun () -> S.get labelled_by)
     ?aria_disabled=(fun () -> if pending () then Some true else None)
     ?aria_controls=(fun () ->
                      Option.bind trigger (fun (t : trigger) -> t.controls))

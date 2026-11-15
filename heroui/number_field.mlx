@@ -139,7 +139,7 @@ module Input = struct
     (* Kobalte's input tells its value now as the text it shows once the value
        changes, a "51%"; React Aria's tells the number. *)
     <Kobalte.Input
-      ?placeholder
+      ?placeholder=(fun () -> S.get placeholder)
       class_=(fun () ->
                after (Styles.NumberField.input (S.get f.slots)) (S.get class_))
       ref=(fun e ->
@@ -369,18 +369,18 @@ let%component make ?(variant : [ `primary | `secondary ] option)
     <Kobalte.Root
       raw_value=(fun () -> S.get current)
       on_raw_value_change=change
-      ?min_value
-      ?max_value
+      ?min_value=(fun () -> S.get min_value)
+      ?max_value=(fun () -> S.get max_value)
       step=(fun () -> by ())
       validation_state=(fun () -> if S.get invalid then `invalid else `valid)
       required=(fun () -> S.get is_required)
       disabled=(fun () -> S.get disabled)
       read_only=(fun () -> S.get is_read_only)
       change_on_wheel=(fun () -> not (S.get is_wheel_disabled))
-      ?name
-      ?aria_label
-      ?format_options
-      ?text_value
+      ?name=(fun () -> S.get name)
+      ?aria_label=(fun () -> S.get aria_label)
+      ?format_options=(fun () -> S.get format_options)
+      ?text_value=(fun () -> S.get text_value)
       class_=(fun () ->
                after (Styles.NumberField.base (S.get f.slots)) (S.get class_))
       ref=(fun e ->

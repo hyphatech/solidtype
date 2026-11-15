@@ -58,7 +58,7 @@ let%component make ?(disabled : bool = false) ?(name : string option)
   let is_disabled = S.accessor (fun () -> S.get disabled) in
   <fieldset
     disabled=(fun () -> S.get disabled)
-    ?name
+    ?name=(fun () -> S.get name)
     class_=(fun () -> after (Styles.Fieldset.base (slots ())) (S.get class_))
     data_disabled=(fun () -> Jsx.flag (S.get disabled))
     data_slot="fieldset"
