@@ -13,7 +13,7 @@ solidtype is [Solid](https://www.solidjs.com) for OCaml. A component is
 written in OCaml's JSX, compiled by [Melange](https://melange.re), and
 reaches the browser as the code Solid's own compiler emits for the same
 JSX: the same templates, the same runtime calls, in the same order. What
-OCaml adds is its types. A reactive read in the wrong place does not
+OCaml adds is its types. A signal given where its value belongs does not
 compile, and neither does a prop left out, an attribute an element does not
 take, or a `match` in a `Switch` that misses a case.
 
